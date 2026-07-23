@@ -123,21 +123,24 @@ export interface LKGTracker<T = unknown> {
  * read.
  */
 export type LKGObservation =
-  | { readonly outcome: 'valid'; readonly fingerprint: LKGFingerprint }
-  | { readonly outcome: 'promoted'; readonly fingerprint: LKGFingerprint }
+  | { readonly outcome: "valid"; readonly fingerprint: LKGFingerprint }
+  | { readonly outcome: "promoted"; readonly fingerprint: LKGFingerprint }
   | {
-      readonly outcome: 'recovered';
+      readonly outcome: "recovered";
       readonly reason: string;
       readonly clobberedPath: string;
       readonly restoredFrom: LKGFingerprint;
     }
   | {
-      readonly outcome: 'skipped';
-      readonly reason: 'plugin-local-invalidity' | 'no-lkg-available' | 'tracker-shouldRecover-false';
+      readonly outcome: "skipped";
+      readonly reason:
+        | "plugin-local-invalidity"
+        | "no-lkg-available"
+        | "tracker-shouldRecover-false";
       readonly issues: readonly ValidationIssue[];
     }
   | {
-      readonly outcome: 'failed';
+      readonly outcome: "failed";
       readonly reason: string;
       readonly issues: readonly ValidationIssue[];
     };
@@ -147,11 +150,11 @@ export type LKGObservation =
  * `code`; `message` is human-readable and MUST NOT be parsed.
  */
 export type LKGErrorCode =
-  | 'LKG_TRACKER_PATH_COLLISION'
-  | 'LKG_TRACKER_PATH_INVALID'
-  | 'LKG_STORE_UNAVAILABLE'
-  | 'LKG_VALIDATOR_THREW'
-  | 'LKG_INTERNAL';
+  | "LKG_TRACKER_PATH_COLLISION"
+  | "LKG_TRACKER_PATH_INVALID"
+  | "LKG_STORE_UNAVAILABLE"
+  | "LKG_VALIDATOR_THREW"
+  | "LKG_INTERNAL";
 
 export interface LKGError {
   readonly code: LKGErrorCode;
@@ -167,7 +170,7 @@ export class LKGErrorImpl extends Error implements LKGError {
   override readonly cause?: unknown;
   constructor(code: LKGErrorCode, message: string, cause?: unknown) {
     super(message);
-    this.name = 'LKGError';
+    this.name = "LKGError";
     this.code = code;
     if (cause !== undefined) this.cause = cause;
   }

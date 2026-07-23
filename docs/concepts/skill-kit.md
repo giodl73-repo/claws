@@ -18,13 +18,15 @@ No compiler needed. No claws.json needed. Standalone library.
 Every governed skill starts with `skill()`:
 
 ```typescript
-import { skill } from '@bic/claws-skill-kit';
+import { skill } from "@bic/claws-skill-kit";
 
 export default skill({
-  name: 'weather-lookup',
-  risk: 'R2', obo: 'none', data: 'PUBLIC',
+  name: "weather-lookup",
+  risk: "R2",
+  obo: "none",
+  data: "PUBLIC",
   handler: async (ctx) => {
-    const city = ctx.input.get('city');
+    const city = ctx.input.get("city");
     return { forecast: await fetchWeather(city) };
   },
 });
@@ -37,26 +39,26 @@ context -- no raw `args` parsing.
 
 Six metadata annotations. claws reads them at build time and generates wrappers.
 
-| Decorator | What it declares |
-|-----------|-----------------|
-| `@obo` | Handler acts on behalf of the user |
-| `@audit` | Action must be logged to the audit chain |
+| Decorator   | What it declares                                      |
+| ----------- | ----------------------------------------------------- |
+| `@obo`      | Handler acts on behalf of the user                    |
+| `@audit`    | Action must be logged to the audit chain              |
 | `@classify` | Override risk classification for a specific tool call |
-| `@validate` | Input must pass validation before execution |
-| `@budget` | Action costs tokens or money -- enforce limits |
-| `@timeout` | Maximum execution time before auto-cancel |
+| `@validate` | Input must pass validation before execution           |
+| `@budget`   | Action costs tokens or money -- enforce limits        |
+| `@timeout`  | Maximum execution time before auto-cancel             |
 
 ## Example: OBO skill (sends email)
 
 R5 territory -- the skill acts AS the user:
 
 ```typescript
-import { skill, obo, audit, budget } from '@bic/claws-skill-kit';
+import { skill, obo, audit, budget } from "@bic/claws-skill-kit";
 
 class SendEmailHandler {
-  @obo('email')    // acts as the user
-  @audit('send')   // log this action
-  @budget(500)     // max 500 tokens per call
+  @obo("email") // acts as the user
+  @audit("send") // log this action
+  @budget(500) // max 500 tokens per call
   async handle(ctx) {
     const { to, subject, body } = ctx.input.all();
     const result = await ctx.tools.sendEmail({ to, subject, body });
@@ -65,8 +67,10 @@ class SendEmailHandler {
 }
 
 export default skill({
-  name: 'send-email',
-  risk: 'R5', obo: 'email', data: 'CONFIDENTIAL',
+  name: "send-email",
+  risk: "R5",
+  obo: "email",
+  data: "CONFIDENTIAL",
   handler: SendEmailHandler,
 });
 ```
@@ -80,17 +84,19 @@ audit logging, and budget enforcement. You just write the send logic.
 Different tools, different risk levels. `@classify` overrides per call:
 
 ```typescript
-import { skill, classify, audit, timeout } from '@bic/claws-skill-kit';
+import { skill, classify, audit, timeout } from "@bic/claws-skill-kit";
 
 class DataTransformHandler {
-  @classify('R2')  // read is lower risk
+  @classify("R2") // read is lower risk
   async readSource(ctx) {
-    return await ctx.tools.readData(ctx.input.get('source'));
+    return await ctx.tools.readData(ctx.input.get("source"));
   }
 
-  @classify('R4') @audit('write') @timeout(30_000)
+  @classify("R4")
+  @audit("write")
+  @timeout(30_000)
   async writeTarget(ctx, data) {
-    await ctx.tools.writeData(ctx.input.get('target'), data);
+    await ctx.tools.writeData(ctx.input.get("target"), data);
   }
 
   async handle(ctx) {
@@ -102,8 +108,10 @@ class DataTransformHandler {
 }
 
 export default skill({
-  name: 'data-transform',
-  risk: 'R4', obo: 'none', data: 'CONFIDENTIAL',
+  name: "data-transform",
+  risk: "R4",
+  obo: "none",
+  data: "CONFIDENTIAL",
   handler: DataTransformHandler,
 });
 ```
@@ -113,16 +121,18 @@ export default skill({
 Test skills without the OC Gateway running:
 
 ```typescript
-import { MockGateway } from '@bic/claws-skill-kit/testing';
-import sendEmail from './send-email';
+import { MockGateway } from "@bic/claws-skill-kit/testing";
+import sendEmail from "./send-email";
 
 const gw = new MockGateway();
-gw.mock('sendEmail', { id: 'msg-123' });
+gw.mock("sendEmail", { id: "msg-123" });
 
 const result = await gw.run(sendEmail, {
-  to: 'alice@example.com', subject: 'Hello', body: 'Test',
+  to: "alice@example.com",
+  subject: "Hello",
+  body: "Test",
 });
-expect(result.messageId).toBe('msg-123');
+expect(result.messageId).toBe("msg-123");
 expect(gw.auditLog).toHaveLength(1);
 ```
 
@@ -139,6 +149,7 @@ annotations -- same checks as the real Gateway, zero network.
 ## Scenario-Driven Additions
 
 ### From skill-lifecycle scenarios (37 findings applied)
+
 - Scaffold generates default risk level derived from workspace trust tier, preventing immediate G-CLASS violations
 - Dependency auto-install or guided install for @bic/claws-skill-kit during scaffold; version alignment between claws and skill-kit enforced
 - OBO auto-suggestion from skill name heuristics (e.g., "send-email" suggests obo: email)

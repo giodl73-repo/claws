@@ -66,11 +66,11 @@ How governance skills are built, how workspaces adopt governance tiers, and how 
 
 The three tiers correspond to progressive command disclosure:
 
-| Tier | Commands Available | Total |
-|------|-------------------|-------|
-| 1 | init, check, status, uninstall | 4 |
-| 2 | + build, doctor, test, publish, assess | 9 (+5) |
-| 3 | + verify, comply, audit, snap, bypass, lsp | 15 (+6) |
+| Tier | Commands Available                         | Total   |
+| ---- | ------------------------------------------ | ------- |
+| 1    | init, check, status, uninstall             | 4       |
+| 2    | + build, doctor, test, publish, assess     | 9 (+5)  |
+| 3    | + verify, comply, audit, snap, bypass, lsp | 15 (+6) |
 
 ---
 

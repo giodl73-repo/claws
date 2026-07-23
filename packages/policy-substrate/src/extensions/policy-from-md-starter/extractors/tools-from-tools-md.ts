@@ -16,23 +16,19 @@
  * @module @openclaw/policy/extractors/tools-from-tools-md
  */
 
-import { parseOcPath, resolveOcPath } from '@openclaw/oc-path';
-import type {
-  RiskLevel,
-  Sensitivity,
-  ToolSpec,
-} from '../../../plugin-sdk/policy/types.js';
-import type { PolicyExtractorSpec } from '../../../plugin-sdk/policy/api.js';
+import { parseOcPath, resolveOcPath } from "@openclaw/oc-path";
+import type { RiskLevel, Sensitivity, ToolSpec } from "../../../plugin-sdk/policy/types.js";
+import type { PolicyExtractorSpec } from "../../../plugin-sdk/policy/api.js";
 
-const TOOLS_PATH = parseOcPath('oc://TOOLS.md/Tools');
+const TOOLS_PATH = parseOcPath("oc://TOOLS.md/Tools");
 
 const KNOWN_CAPABILITIES = new Set([
-  'READ',
-  'WRITE',
-  'COMMUNICATE',
-  'IRREVERSIBLE_EXTERNAL',
-  'FLEET_PRIVILEGED',
-  'IDENTITY',
+  "READ",
+  "WRITE",
+  "COMMUNICATE",
+  "IRREVERSIBLE_EXTERNAL",
+  "FLEET_PRIVILEGED",
+  "IDENTITY",
 ]);
 
 /**
@@ -42,10 +38,10 @@ const KNOWN_CAPABILITIES = new Set([
 function riskLevelFor(meta: string): RiskLevel {
   const m = /R([0-5])/.exec(meta);
   const n = m && m[1] ? Number(m[1]) : 1;
-  if (n >= 5) return 'critical';
-  if (n >= 4) return 'high';
-  if (n >= 2) return 'medium';
-  return 'low';
+  if (n >= 5) return "critical";
+  if (n >= 4) return "high";
+  if (n >= 2) return "medium";
+  return "low";
 }
 
 function capabilitiesFrom(meta: string): readonly string[] {
@@ -54,10 +50,10 @@ function capabilitiesFrom(meta: string): readonly string[] {
 }
 
 const KNOWN_SENSITIVITIES: ReadonlySet<Sensitivity> = new Set([
-  'public',
-  'internal',
-  'confidential',
-  'restricted',
+  "public",
+  "internal",
+  "confidential",
+  "restricted",
 ]);
 
 /**
@@ -92,25 +88,28 @@ function sensitivityFor(meta: string, capabilities: readonly string[]): Sensitiv
   }
   // 2. Legacy bare-word token — match as a standalone token, not
   // a substring, so `### t # public-api` doesn't accidentally hit.
-  const tokens = meta.toLowerCase().split(/[,\s]+/).map((t) => t.trim());
+  const tokens = meta
+    .toLowerCase()
+    .split(/[,\s]+/)
+    .map((t) => t.trim());
   for (const t of tokens) {
     if (KNOWN_SENSITIVITIES.has(t as Sensitivity)) return t as Sensitivity;
   }
   // 3. Capability-derived defaults.
-  if (capabilities.includes('IRREVERSIBLE_EXTERNAL')) return 'restricted';
-  if (capabilities.includes('FLEET_PRIVILEGED')) return 'confidential';
-  if (capabilities.includes('IDENTITY')) return 'confidential';
-  return 'internal';
+  if (capabilities.includes("IRREVERSIBLE_EXTERNAL")) return "restricted";
+  if (capabilities.includes("FLEET_PRIVILEGED")) return "confidential";
+  if (capabilities.includes("IDENTITY")) return "confidential";
+  return "internal";
 }
 
 export const toolsFromToolsMd: PolicyExtractorSpec<ToolSpec> = {
-  id: 'starter-v0/tools/from-tools-md',
+  id: "starter-v0/tools/from-tools-md",
   description:
-    'Extract ToolSpec entries from each `### name # R<n>, ...` sub-heading under TOOLS.md ## Tools',
-  appliesTo: 'TOOLS.md',
-  requires: { sdkVersion: '0.1.0' },
+    "Extract ToolSpec entries from each `### name # R<n>, ...` sub-heading under TOOLS.md ## Tools",
+  appliesTo: "TOOLS.md",
+  requires: { sdkVersion: "0.1.0" },
   extract(ctx) {
-    if (ctx.file.ast.kind !== 'md') return [];
+    if (ctx.file.ast.kind !== "md") return [];
     const match = resolveOcPath(ctx.file.ast, TOOLS_PATH);
     if (match === null) return [];
     const block = ctx.file.ast.blocks.find((b) => b.line === match.line);
@@ -120,9 +119,9 @@ export const toolsFromToolsMd: PolicyExtractorSpec<ToolSpec> = {
     // sub-headings. The substrate's MdAst doesn't (yet) split
     // sub-headings into typed nodes inside a block, so we scan the
     // raw text. Each `###` line declares one tool.
-    const bodyLines = block.bodyText.split('\n');
+    const bodyLines = block.bodyText.split("\n");
     for (const line of bodyLines) {
-      if (!line.startsWith('### ')) continue;
+      if (!line.startsWith("### ")) continue;
       const tool = parseToolHeader(line);
       if (tool !== null) tools.push(tool);
     }
@@ -149,9 +148,9 @@ function parseToolHeader(line: string): ToolSpec | null {
   }
   const name = tail.slice(0, i);
   if (name.length === 0) return null;
-  let meta = '';
-  while (i < tail.length && (tail[i] === ' ' || tail[i] === '\t')) i++;
-  if (tail[i] === '#') {
+  let meta = "";
+  while (i < tail.length && (tail[i] === " " || tail[i] === "\t")) i++;
+  if (tail[i] === "#") {
     meta = tail.slice(i + 1).trim();
   }
   const capabilities = capabilitiesFrom(meta);

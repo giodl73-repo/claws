@@ -12,9 +12,9 @@ claws never modifies original workspace files. This is the foundational architec
 
 The EMIT phase enforces a write-allow-list. Only files on the allow list can be written during compilation:
 
-| Path | What is written | Why allowed |
-|------|----------------|-------------|
-| `.claws/` | All pipeline artifacts | Compiler-owned output directory |
+| Path                  | What is written          | Why allowed                                   |
+| --------------------- | ------------------------ | --------------------------------------------- |
+| `.claws/`             | All pipeline artifacts   | Compiler-owned output directory               |
 | Platform config files | Governance sections only | Delimited injection (CLAUDE.md, .cursorrules) |
 
 **Source files are read-only**: the compiler opens source files (SOUL.md, AGENTS.md, TOOLS.md, etc.) with read-only file handles. No write handle is acquired for any source file at any pipeline stage.
@@ -29,9 +29,9 @@ The EMIT phase enforces a write-allow-list. Only files on the allow list can be 
 
 claws uses two distinct hash types to support both lossless verification and incremental compilation:
 
-| Hash type | Input | Purpose |
-|-----------|-------|---------|
-| Raw-byte SHA-256 | Unmodified file bytes | Lossless verification -- proves the file was not changed |
+| Hash type          | Input                                           | Purpose                                                    |
+| ------------------ | ----------------------------------------------- | ---------------------------------------------------------- |
+| Raw-byte SHA-256   | Unmodified file bytes                           | Lossless verification -- proves the file was not changed   |
 | Normalized IR hash | LF-normalized, BOM-stripped, sorted-key content | Incremental compilation -- determines if re-emit is needed |
 
 **Why two hashes?** A single hash cannot serve both purposes. The raw hash must include BOM and CRLF to prove the file is untouched. The normalized hash must exclude BOM and CRLF to allow cross-platform cache sharing (P-233: CRLF vs LF hash divergence breaks cache sharing).
@@ -85,12 +85,12 @@ claws's PARSE phase detects compiled workflows by checking for the ownership com
 
 When compilation fails, the lossless guarantee extends to error handling:
 
-| Failure mode | Behavior |
-|-------------|----------|
-| Parse error in one file | Other files still compile; per-file error collection |
-| EMIT phase crash | Last-known-good artifacts preserved (P-235) |
-| Zero successfully-parsed files | Graceful exit with diagnostic; no artifact deletion |
-| Unhandled exception | Atomic staging ensures partial writes do not corrupt `.claws/` |
+| Failure mode                   | Behavior                                                       |
+| ------------------------------ | -------------------------------------------------------------- |
+| Parse error in one file        | Other files still compile; per-file error collection           |
+| EMIT phase crash               | Last-known-good artifacts preserved (P-235)                    |
+| Zero successfully-parsed files | Graceful exit with diagnostic; no artifact deletion            |
+| Unhandled exception            | Atomic staging ensures partial writes do not corrupt `.claws/` |
 
 The last-known-good preservation is critical. A failed build must never delete previously-emitted artifacts. The developer's last working governance enforcement remains active while they fix the error.
 

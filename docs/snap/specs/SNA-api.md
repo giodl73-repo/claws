@@ -57,14 +57,14 @@ Returns the currently-active snapshot metadata:
 
 Server-Sent Events stream. Event types:
 
-| Event | Payload |
-|-------|---------|
-| `state-change` | `{ from, to, timestamp }` |
-| `promote-start` | `{ snapshotId, fromSnapshotId, timestamp }` |
-| `promote-success` | `{ snapshotId, timestamp, durationMs }` |
-| `promote-fail` | `{ snapshotId, reason, timestamp }` |
-| `rollback-start` | `{ fromSnapshotId, toSnapshotId, timestamp }` |
-| `drain-window` | `{ startMs, endMs, inflightCount }` — see [SNP](./SNP-promote.md) |
+| Event             | Payload                                                           |
+| ----------------- | ----------------------------------------------------------------- |
+| `state-change`    | `{ from, to, timestamp }`                                         |
+| `promote-start`   | `{ snapshotId, fromSnapshotId, timestamp }`                       |
+| `promote-success` | `{ snapshotId, timestamp, durationMs }`                           |
+| `promote-fail`    | `{ snapshotId, reason, timestamp }`                               |
+| `rollback-start`  | `{ fromSnapshotId, toSnapshotId, timestamp }`                     |
+| `drain-window`    | `{ startMs, endMs, inflightCount }` — see [SNP](./SNP-promote.md) |
 
 ## Session lifecycle
 

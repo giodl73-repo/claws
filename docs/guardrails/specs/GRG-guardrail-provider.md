@@ -32,10 +32,10 @@ interface HostContext {
 
 ```ts
 type HookResult =
-  | { kind: 'allow'; requiresExternalApproval?: boolean }
-  | { kind: 'deny'; reason: string }
-  | { kind: 'review'; handle: ApprovalHandle; descriptor: ApprovalDescriptor }
-  | { kind: 'modify'; args?: unknown; redirectPath?: string };
+  | { kind: "allow"; requiresExternalApproval?: boolean }
+  | { kind: "deny"; reason: string }
+  | { kind: "review"; handle: ApprovalHandle; descriptor: ApprovalDescriptor }
+  | { kind: "modify"; args?: unknown; redirectPath?: string };
 ```
 
 - **allow** — proceed as-is. Optional `requiresExternalApproval: true`

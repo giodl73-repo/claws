@@ -25,6 +25,7 @@ count(skills where timeout == 0) == 0
 ## Relationship to RELAX
 
 Sift is not a fork of RELAX -- it is a restricted subset. Sift supports:
+
 - Comparison operators (`==`, `!=`, `>`, `>=`, `<`, `<=`)
 - Logical operators (`and`, `or`, `not`)
 - Set operators (`contains`, `in`)

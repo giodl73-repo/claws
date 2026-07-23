@@ -8,9 +8,9 @@ GA on the internal GPR.
 
 ## Version support today
 
-| Version range | Status | Notes |
-|---|---|---|
-| `0.x` | Active (pre-GA) | No LTS designation; breaking changes possible on minor bumps |
+| Version range | Status          | Notes                                                        |
+| ------------- | --------------- | ------------------------------------------------------------ |
+| `0.x`         | Active (pre-GA) | No LTS designation; breaking changes possible on minor bumps |
 
 Once the first GA version ships (target: `1.0.0`), the LTS window
 defined below applies.
@@ -18,15 +18,16 @@ defined below applies.
 ## LTS window (target — TBD by leadership)
 
 **TBD:** leadership to confirm:
+
 - Exact LTS duration (proposed: 18 months from major release)
 - How many majors simultaneously LTS'd (proposed: current + prior)
 - Whether LTS branches get security-only fixes or full patches
 
 Placeholder until decided:
 
-| Major version | GA date | LTS through | Status |
-|---|---|---|---|
-| `1.x` | TBD | TBD + 18mo | Pending GA |
+| Major version | GA date | LTS through | Status     |
+| ------------- | ------- | ----------- | ---------- |
+| `1.x`         | TBD     | TBD + 18mo  | Pending GA |
 
 ## Requesting LTS for a non-current version
 
@@ -42,12 +43,14 @@ Approval is at the owner's discretion based on severity × user count.
 ## What changes with LTS
 
 When a version is in LTS:
+
 - Security patches get cherry-picked to the LTS branch
 - No new features, no breaking changes
 - `npm deprecate` warnings don't apply to LTS versions
 - CI continues running on the LTS branch for the duration
 
 When a version falls OUT of LTS:
+
 - No more commits to that branch
 - `npm deprecate @bic/claws-cli@X.Y "EOL: migrate to vZ"` applied
 - Version stays on GPR (not unpublished) so existing consumers don't

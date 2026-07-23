@@ -34,11 +34,11 @@ disclose deeper operations (see
 
 ## Sub-spec index
 
-| Code | File | Authority over |
-|------|------|----------------|
-| **CXS** | [CXS-command-surface.md](./CXS-command-surface.md) | Command tree, progressive disclosure, `--help` rules |
-| **CXJ** | [CXJ-claws-json.md](./CXJ-claws-json.md) | `claws.json` schema + three-layer merge |
-| **CXP** | [CXP-platform-detection.md](./CXP-platform-detection.md) | Platform detection, the 7-platform matrix |
+| Code    | File                                                     | Authority over                                       |
+| ------- | -------------------------------------------------------- | ---------------------------------------------------- |
+| **CXS** | [CXS-command-surface.md](./CXS-command-surface.md)       | Command tree, progressive disclosure, `--help` rules |
+| **CXJ** | [CXJ-claws-json.md](./CXJ-claws-json.md)                 | `claws.json` schema + three-layer merge              |
+| **CXP** | [CXP-platform-detection.md](./CXP-platform-detection.md) | Platform detection, the 7-platform matrix            |
 
 ## Stability contract
 

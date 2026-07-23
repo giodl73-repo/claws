@@ -8,12 +8,13 @@
  * substrate doesn't cross-reference AGENTS.md mentions vs gateway.jsonc
  * declarations. Captures this as a behavior + future-rule opportunity.
  */
-export const slug = 'upgrade-plugin-uninstalled-refs';
-export const description = 'AGENTS.md mentions removed plugin\'s tools; pinch silent (rule opportunity)';
+export const slug = "upgrade-plugin-uninstalled-refs";
+export const description =
+  "AGENTS.md mentions removed plugin's tools; pinch silent (rule opportunity)";
 
 export const setup = {
   files: {
-    'AGENTS.md': `# Agent
+    "AGENTS.md": `# Agent
 
 ## Boundaries
 
@@ -24,7 +25,7 @@ export const setup = {
 
 The removed-plugin tools are deprecated; will be removed in v2.
 `,
-    'gateway.jsonc': `{
+    "gateway.jsonc": `{
   "version": "0.1.0",
   "plugins": { "entries": {} }
 }
@@ -34,17 +35,17 @@ The removed-plugin tools are deprecated; will be removed in v2.
 
 export const steps = [
   {
-    name: 'pinch run on workspace with stale tool refs in AGENTS.md',
-    run: ['pinch', 'run', '.'],
+    name: "pinch run on workspace with stale tool refs in AGENTS.md",
+    run: ["pinch", "run", "."],
     expect: {
       // No rule cross-references AGENTS.md mentions vs gateway.jsonc
       // entries. Pinch passes cleanly.
       exitCode: 0,
-      parsed: { 'rulesRun': { atLeast: 20 } },
+      parsed: { rulesRun: { atLeast: 20 } },
     },
   },
   {
-    name: 'AGENTS.md still mentions the removed plugin (no auto-fix)',
-    file: { 'AGENTS.md': { contains: 'removed-plugin/dangerous-thing' } },
+    name: "AGENTS.md still mentions the removed plugin (no auto-fix)",
+    file: { "AGENTS.md": { contains: "removed-plugin/dangerous-thing" } },
   },
 ];

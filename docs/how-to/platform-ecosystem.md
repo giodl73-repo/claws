@@ -6,11 +6,11 @@ Work with the three-tier package model, pinch optimization, sift expressions, an
 
 claws organizes packages into three tiers:
 
-| Tier | Package prefix | Audience | Examples |
-|------|---------------|----------|----------|
-| @openclaw/* | Community | OC developers | @openclaw/core, @openclaw/gateway |
-| @claws/* | Shared libraries | claws users | @bic/claws-skill-kit, @claws/sift, @bic/claws-test |
-| @craftworks/* | Internal | Craftworks team | @craftworks/compiler-sdk |
+| Tier          | Package prefix   | Audience        | Examples                                           |
+| ------------- | ---------------- | --------------- | -------------------------------------------------- |
+| @openclaw/*   | Community        | OC developers   | @openclaw/core, @openclaw/gateway                  |
+| @claws/*      | Shared libraries | claws users     | @bic/claws-skill-kit, @claws/sift, @bic/claws-test |
+| @craftworks/* | Internal         | Craftworks team | @craftworks/compiler-sdk                           |
 
 Adoption flows upward: start with @openclaw packages (free, community), add @claws packages (governance compiler), integrate @craftworks packages (enterprise).
 
@@ -23,15 +23,15 @@ npm install @bic/claws-skill-kit
 ```
 
 ```typescript
-import { skill } from '@bic/claws-skill-kit';
+import { skill } from "@bic/claws-skill-kit";
 
 export default skill({
-  name: 'review-expense',
-  risk: 'R2',
-  obo: 'none',
-  data: 'INTERNAL',
+  name: "review-expense",
+  risk: "R2",
+  obo: "none",
+  data: "INTERNAL",
   handler: async (ctx) => {
-    const report = ctx.input.get('report');
+    const report = ctx.input.get("report");
     return { approved: checkPolicy(report) };
   },
 });
@@ -42,12 +42,12 @@ export default skill({
 sift is the typed expression engine for governance queries:
 
 ```typescript
-import { sift } from '@claws/sift';
+import { sift } from "@claws/sift";
 
 const violations = sift(workspace)
   .skills()
-  .where(s => s.risk >= 'R3' && s.obo !== 'none')
-  .select('name', 'risk', 'obo');
+  .where((s) => s.risk >= "R3" && s.obo !== "none")
+  .select("name", "risk", "obo");
 ```
 
 sift builds on RELAX expressions but provides a TypeScript-native API with full type inference.

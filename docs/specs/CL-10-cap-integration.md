@@ -11,11 +11,11 @@
 Three UX surfaces need governance data from claws. Each serves a different audience
 with a different interaction model, but all read/write the same 9 OC workspace files:
 
-| Surface | Audience | Interaction Model | What They Need from claws |
-|---------|----------|-------------------|--------------------------|
-| **CAP Agent Settings** | Admin/manager | Form-based configuration (6 tabs) | Chunks: self-contained JSON blobs per tab section |
-| **Lobster Collaboration** | End user | Collaborative editing (Loop, Teams, Calendar, To Do) | Sync: OC files ↔ M365 surfaces, governance context |
-| **Companion App** | Power user/IT | Skills store + trust controls + activity log | Full API: governance summary, audit trail, trust escalation |
+| Surface                   | Audience      | Interaction Model                                    | What They Need from claws                                   |
+| ------------------------- | ------------- | ---------------------------------------------------- | ----------------------------------------------------------- |
+| **CAP Agent Settings**    | Admin/manager | Form-based configuration (6 tabs)                    | Chunks: self-contained JSON blobs per tab section           |
+| **Lobster Collaboration** | End user      | Collaborative editing (Loop, Teams, Calendar, To Do) | Sync: OC files ↔ M365 surfaces, governance context          |
+| **Companion App**         | Power user/IT | Skills store + trust controls + activity log         | Full API: governance summary, audit trail, trust escalation |
 
 All three share one API: `claws serve`. It parses workspace files, serves compiled
 governance data, accepts edits, and pushes live updates.
@@ -77,60 +77,61 @@ validation.
 
 ### 1. General (slide 39)
 
-| UI Element | OC File | Field / Section | claws Governance Role |
-|-----------|---------|-----------------|----------------------|
-| Avatar (picture, video, generated) | **--** | *No OC file* | None — visual identity is outside governance scope |
-| Agent name | **IDENTITY.md** | `name` | G-A2A-IDENTITY: agent name in delegation chains |
-| Agent description | **IDENTITY.md** | `description` | G-CLASS: description fed to capability extraction heuristics |
-| Agent language | **--** | *No OC file* | None — locale is a platform concern |
-| Managed by (person + role) | **AGENTS.md** | `delegation.owner` | G-A2A-DELEGATE: owner trust chain, who can modify governance |
-| Delete agent | **--** | *Lifecycle operation* | Out of scope — claws compiles, doesn't manage lifecycle |
+| UI Element                         | OC File         | Field / Section       | claws Governance Role                                        |
+| ---------------------------------- | --------------- | --------------------- | ------------------------------------------------------------ |
+| Avatar (picture, video, generated) | **--**          | _No OC file_          | None — visual identity is outside governance scope           |
+| Agent name                         | **IDENTITY.md** | `name`                | G-A2A-IDENTITY: agent name in delegation chains              |
+| Agent description                  | **IDENTITY.md** | `description`         | G-CLASS: description fed to capability extraction heuristics |
+| Agent language                     | **--**          | _No OC file_          | None — locale is a platform concern                          |
+| Managed by (person + role)         | **AGENTS.md**   | `delegation.owner`    | G-A2A-DELEGATE: owner trust chain, who can modify governance |
+| Delete agent                       | **--**          | _Lifecycle operation_ | Out of scope — claws compiles, doesn't manage lifecycle      |
 
 **Gaps in OC files**: No `avatar` or `language` field. IDENTITY.md covers name/description but not visual identity or locale.
 
 ### 2. Preferences (slide 40)
 
-| UI Element | OC File | Field / Section | claws Governance Role |
-|-----------|---------|-----------------|----------------------|
-| Custom prompt ("Write a status report for...") | **SOUL.md** | `## Instructions` / `## Behavior` | G-INPUT: boundary extraction, deny rule source |
-| Add reviewers (Alice Johnson) | **USER.md** | `pre_authorizations` / `reviewers` | G-ELICIT: standing approvals, who can approve R3+ tool calls |
-| Start date / End date | **HEARTBEAT.md** | `schedule.start` / `schedule.end` | G-BOUND: scheduling constraints |
-| Time (3:00 PM) | **HEARTBEAT.md** | `schedule.time` | G-BOUND: execution window |
-| Frequency (Weekly) | **HEARTBEAT.md** | `schedule.frequency` | G-BOUND: recurrence pattern |
+| UI Element                                     | OC File          | Field / Section                    | claws Governance Role                                        |
+| ---------------------------------------------- | ---------------- | ---------------------------------- | ------------------------------------------------------------ |
+| Custom prompt ("Write a status report for...") | **SOUL.md**      | `## Instructions` / `## Behavior`  | G-INPUT: boundary extraction, deny rule source               |
+| Add reviewers (Alice Johnson)                  | **USER.md**      | `pre_authorizations` / `reviewers` | G-ELICIT: standing approvals, who can approve R3+ tool calls |
+| Start date / End date                          | **HEARTBEAT.md** | `schedule.start` / `schedule.end`  | G-BOUND: scheduling constraints                              |
+| Time (3:00 PM)                                 | **HEARTBEAT.md** | `schedule.time`                    | G-BOUND: execution window                                    |
+| Frequency (Weekly)                             | **HEARTBEAT.md** | `schedule.frequency`               | G-BOUND: recurrence pattern                                  |
 
 **Gaps in OC files**: None — full coverage. SOUL.md, USER.md, and HEARTBEAT.md together cover everything in the Preferences tab.
 
 ### 3. Connections (slides 41-42)
 
-| UI Element | OC File | Field / Section | claws Governance Role |
-|-----------|---------|-----------------|----------------------|
-| Connection list (Planner, Outlook, Asana) | **TOOLS.md** | Tool declarations | G-CLASS: per-tool risk classification (R1-R5) |
-| Per-connection skill count ("2 skills enabled") | **skills/** | Skill directory | Compiled skill manifest |
-| Drill-in: per-skill toggle (Tool integration ON/OFF) | **TOOLS.md** | Per-tool `requires_approval` | G-ELICIT: maps to `host-approval-policies.json` |
-| "Allow all" button | **USER.md** | `pre_authorizations: all` | G-ELICIT: blanket standing approval |
-| "Add a connection" | **TOOLS.md** + **skills/** | New tool/skill registration | New tool enters G-CLASS pipeline |
+| UI Element                                           | OC File                    | Field / Section              | claws Governance Role                           |
+| ---------------------------------------------------- | -------------------------- | ---------------------------- | ----------------------------------------------- |
+| Connection list (Planner, Outlook, Asana)            | **TOOLS.md**               | Tool declarations            | G-CLASS: per-tool risk classification (R1-R5)   |
+| Per-connection skill count ("2 skills enabled")      | **skills/**                | Skill directory              | Compiled skill manifest                         |
+| Drill-in: per-skill toggle (Tool integration ON/OFF) | **TOOLS.md**               | Per-tool `requires_approval` | G-ELICIT: maps to `host-approval-policies.json` |
+| "Allow all" button                                   | **USER.md**                | `pre_authorizations: all`    | G-ELICIT: blanket standing approval             |
+| "Add a connection"                                   | **TOOLS.md** + **skills/** | New tool/skill registration  | New tool enters G-CLASS pipeline                |
 
 **Gaps in OC files**: None structurally. But the UX shows connections as app-level (Planner, Outlook) while OC models them as MCP servers + individual tools. The UX aggregates tools by server — claws classifies per-tool. The mapping needs a `server → tool[]` grouping layer.
 
 **Gaps in UX**: The toggle is binary (ON/OFF) but claws classifies tools at R1-R5 with nuanced approval policies. The UX doesn't show:
+
 - Risk level per tool (R1-R5)
 - Why a tool is gated (governance reason)
 - Fleet policy overrides vs. local toggles
 
 ### 4. Memory & Knowledge (slides 43-44)
 
-| UI Element | OC File | Field / Section | claws Governance Role |
-|-----------|---------|-----------------|----------------------|
-| Personal memories (about the user) | **MEMORY.md** | `personal` section | G-DATA: sensitivity labels on personal data |
-| Shared memories (about the group) | **MEMORY.md** | `shared` section | G-DATA: sensitivity labels on shared data |
-| Knowledge sources: Email | **MEMORY.md** + **TOOLS.md** | Data access declaration | G-DATA: data source classification |
-| Knowledge sources: Files | **MEMORY.md** + **TOOLS.md** | Data access declaration | G-DATA: file access sensitivity |
-| Knowledge sources: Channels | **MEMORY.md** + **TOOLS.md** | Data access declaration | G-DATA: channel data classification |
-| Knowledge sources: SharePoint sites | **MEMORY.md** + **TOOLS.md** | Data access declaration | G-DATA: SharePoint sensitivity |
-| Knowledge sources: Tables | **MEMORY.md** + **TOOLS.md** | Data access declaration | G-DATA: structured data classification |
-| Knowledge sources: Files (file list) | **MEMORY.md** | `knowledge.files` | G-DATA: per-file sensitivity |
-| Knowledge sources: Websites with access review | **MEMORY.md** | `knowledge.urls` | G-DATA: external URL allowlist |
-| "Delete all memories" | **--** | *Lifecycle operation* | Out of scope for compilation |
+| UI Element                                     | OC File                      | Field / Section         | claws Governance Role                       |
+| ---------------------------------------------- | ---------------------------- | ----------------------- | ------------------------------------------- |
+| Personal memories (about the user)             | **MEMORY.md**                | `personal` section      | G-DATA: sensitivity labels on personal data |
+| Shared memories (about the group)              | **MEMORY.md**                | `shared` section        | G-DATA: sensitivity labels on shared data   |
+| Knowledge sources: Email                       | **MEMORY.md** + **TOOLS.md** | Data access declaration | G-DATA: data source classification          |
+| Knowledge sources: Files                       | **MEMORY.md** + **TOOLS.md** | Data access declaration | G-DATA: file access sensitivity             |
+| Knowledge sources: Channels                    | **MEMORY.md** + **TOOLS.md** | Data access declaration | G-DATA: channel data classification         |
+| Knowledge sources: SharePoint sites            | **MEMORY.md** + **TOOLS.md** | Data access declaration | G-DATA: SharePoint sensitivity              |
+| Knowledge sources: Tables                      | **MEMORY.md** + **TOOLS.md** | Data access declaration | G-DATA: structured data classification      |
+| Knowledge sources: Files (file list)           | **MEMORY.md**                | `knowledge.files`       | G-DATA: per-file sensitivity                |
+| Knowledge sources: Websites with access review | **MEMORY.md**                | `knowledge.urls`        | G-DATA: external URL allowlist              |
+| "Delete all memories"                          | **--**                       | _Lifecycle operation_   | Out of scope for compilation                |
 
 **Gaps in OC files**: MEMORY.md has a flat structure today. The CAP UI distinguishes 7 knowledge source types (email, files, channels, SharePoint, tables, files, websites) each with individual access review. MEMORY.md would need a structured `knowledge_sources` section with per-source type and access configuration.
 
@@ -138,14 +139,15 @@ validation.
 
 ### 5. Groups (slide 45)
 
-| UI Element | OC File | Field / Section | claws Governance Role |
-|-----------|---------|-----------------|----------------------|
-| M365 Groups (distribution lists, channels) | **--** | *No direct OC file* | G-A2A: group membership defines delegation scope |
-| Security Groups | **IDENTITY.md** | `groups` (partial) | G-A2A-IDENTITY: security group → trust tier mapping |
-| On-Premise Groups | **--** | *No direct OC file* | None — on-premise groups are AD-specific |
-| Remove group membership | **--** | *Lifecycle operation* | Out of scope |
+| UI Element                                 | OC File         | Field / Section       | claws Governance Role                               |
+| ------------------------------------------ | --------------- | --------------------- | --------------------------------------------------- |
+| M365 Groups (distribution lists, channels) | **--**          | _No direct OC file_   | G-A2A: group membership defines delegation scope    |
+| Security Groups                            | **IDENTITY.md** | `groups` (partial)    | G-A2A-IDENTITY: security group → trust tier mapping |
+| On-Premise Groups                          | **--**          | _No direct OC file_   | None — on-premise groups are AD-specific            |
+| Remove group membership                    | **--**          | _Lifecycle operation_ | Out of scope                                        |
 
 **Gaps in OC files**: Significant. OC has no concept of organizational group membership. IDENTITY.md covers the agent's own identity, and AGENTS.md covers delegation, but neither models "this agent is a member of these M365 groups." This is an M365-specific concept that maps to:
+
 - Who can interact with the agent (audience)
 - What data the agent can access (scope)
 - Trust tier assignment (via `@openclaw/identity-bridge` role mapping)
@@ -154,12 +156,12 @@ A new OC file or IDENTITY.md extension would be needed.
 
 ### 6. Entitlements (slide 46)
 
-| UI Element | OC File | Field / Section | claws Governance Role |
-|-----------|---------|-----------------|----------------------|
-| Core Identity (Azure RBAC roles) | **IDENTITY.md** | `entitlements` / `roles` | G-A2A-IDENTITY: what the agent can do in Azure |
-| Corp Identity Governance (M365 Pulse roles) | **IDENTITY.md** | `governance_roles` | G-A2A-IDENTITY: governance role assignments |
-| Expiry dates (Expires 06/25/2026) | **--** | *No OC field* | G-BOUND: time-limited entitlements (not modeled today) |
-| Link to management portal | **--** | *UX navigation* | Out of scope |
+| UI Element                                  | OC File         | Field / Section          | claws Governance Role                                  |
+| ------------------------------------------- | --------------- | ------------------------ | ------------------------------------------------------ |
+| Core Identity (Azure RBAC roles)            | **IDENTITY.md** | `entitlements` / `roles` | G-A2A-IDENTITY: what the agent can do in Azure         |
+| Corp Identity Governance (M365 Pulse roles) | **IDENTITY.md** | `governance_roles`       | G-A2A-IDENTITY: governance role assignments            |
+| Expiry dates (Expires 06/25/2026)           | **--**          | _No OC field_            | G-BOUND: time-limited entitlements (not modeled today) |
+| Link to management portal                   | **--**          | _UX navigation_          | Out of scope                                           |
 
 **Gaps in OC files**: IDENTITY.md doesn't model entitlement expiry or the distinction between "Core Identity" (Azure infra roles) and "Corp Identity Governance" (M365 governance roles). These are M365-specific concepts. The `@openclaw/identity-bridge` package handles role mapping but doesn't model expiry.
 
@@ -176,18 +178,18 @@ This creates a second set of API requirements beyond CAP settings:
 
 ### Collaboration Surface → OC File Mapping
 
-| M365 Surface | User Interaction | OC File | claws serve API |
-|-------------|-----------------|---------|-----------------|
-| **Teams DM** | Chat with agent | *(interaction — not config)* | N/A — runtime, not governance |
-| **Teams voice/video** | Onboarding call, briefings | Generates initial SOUL.md + MEMORY.md | `POST /api/onboard` — seed files from conversation |
-| **Teams presence** | See agent status (Available/Busy/Away) | *(runtime status)* | `GET /api/status` — includes agent state |
-| **Teams meetings** | Agent joins, takes notes, tracks actions | *(interaction)* | N/A — runtime |
-| **Teams screen share** | Watch agent work on Cloud PC | *(observation)* | N/A — runtime |
-| **Outlook mailbox** | Agent has own email, delegation, Send As/OBO | IDENTITY.md + TOOLS.md | `GET /api/chunks/identity` — email config |
-| **Calendar** | Cron jobs visible as calendar events | HEARTBEAT.md | `GET /api/schedule` — returns calendar-renderable events |
-| **To Do / Planner** | Shared work queue — visible task list | *(new — see below)* | `GET /api/workqueue` — agent's active tasks |
-| **OneDrive** | Agent's file storage, shared deliverables | *(file system)* | `GET /api/files` — list of deliverables with governance labels |
-| **Loop workspace** | Edit agent's memory + soul as collaborative pages | SOUL.md + MEMORY.md | `GET/PATCH /api/loop/soul`, `/api/loop/memory` |
+| M365 Surface           | User Interaction                                  | OC File                               | claws serve API                                                |
+| ---------------------- | ------------------------------------------------- | ------------------------------------- | -------------------------------------------------------------- |
+| **Teams DM**           | Chat with agent                                   | _(interaction — not config)_          | N/A — runtime, not governance                                  |
+| **Teams voice/video**  | Onboarding call, briefings                        | Generates initial SOUL.md + MEMORY.md | `POST /api/onboard` — seed files from conversation             |
+| **Teams presence**     | See agent status (Available/Busy/Away)            | _(runtime status)_                    | `GET /api/status` — includes agent state                       |
+| **Teams meetings**     | Agent joins, takes notes, tracks actions          | _(interaction)_                       | N/A — runtime                                                  |
+| **Teams screen share** | Watch agent work on Cloud PC                      | _(observation)_                       | N/A — runtime                                                  |
+| **Outlook mailbox**    | Agent has own email, delegation, Send As/OBO      | IDENTITY.md + TOOLS.md                | `GET /api/chunks/identity` — email config                      |
+| **Calendar**           | Cron jobs visible as calendar events              | HEARTBEAT.md                          | `GET /api/schedule` — returns calendar-renderable events       |
+| **To Do / Planner**    | Shared work queue — visible task list             | _(new — see below)_                   | `GET /api/workqueue` — agent's active tasks                    |
+| **OneDrive**           | Agent's file storage, shared deliverables         | _(file system)_                       | `GET /api/files` — list of deliverables with governance labels |
+| **Loop workspace**     | Edit agent's memory + soul as collaborative pages | SOUL.md + MEMORY.md                   | `GET/PATCH /api/loop/soul`, `/api/loop/memory`                 |
 
 ### New Concepts from Lobster (No OC File Today)
 
@@ -280,6 +282,7 @@ Loop page "Memory" ←→ MEMORY.md ←→ claws build → governance artifacts
 ```
 
 The sync must be:
+
 - **Lossless**: Loop edits preserve all OC file structure (frontmatter, sections)
 - **Governance-aware**: If a Loop edit removes a deny rule from SOUL.md, claws
   recompiles and surfaces a governance warning
@@ -340,12 +343,12 @@ tool set. ClawPilot knows this. Our API must too.
 Sessions are created by the **OC runtime** (Gateway), not by claws. claws serve
 discovers and enriches them with governance context:
 
-| Session Type | Who Creates It | How claws Knows |
-|-------------|---------------|-----------------|
-| `main` | User opens Teams chat / ClawPilot DM | OC Gateway event |
-| `cron` | HEARTBEAT.md schedule fires | claws-serve reads HEARTBEAT.md + OC runtime |
-| `channel` | Agent added to a Teams channel | OC Gateway event |
-| `agent` | Main agent delegates via AGENTS.md | OC Gateway event |
+| Session Type | Who Creates It                       | How claws Knows                             |
+| ------------ | ------------------------------------ | ------------------------------------------- |
+| `main`       | User opens Teams chat / ClawPilot DM | OC Gateway event                            |
+| `cron`       | HEARTBEAT.md schedule fires          | claws-serve reads HEARTBEAT.md + OC runtime |
+| `channel`    | Agent added to a Teams channel       | OC Gateway event                            |
+| `agent`      | Main agent delegates via AGENTS.md   | OC Gateway event                            |
 
 #### Sessions and the 9 Files
 
@@ -365,10 +368,10 @@ The files are shared. The **session tool resolver** computes a scoped view per s
 
 #### Two Kinds of Edits
 
-| Edit Type | Scope | API | What Changes | Who Sees It |
-|-----------|-------|-----|-------------|-------------|
-| **Workspace edit** | All sessions | `PATCH /api/chunks/*` | Shared OC files (TOOLS.md, SOUL.md, etc.) | Every session (live) |
-| **Session config** | One session | `PATCH /api/sessions/:id/config` | Per-session settings | Only this session |
+| Edit Type          | Scope        | API                              | What Changes                              | Who Sees It          |
+| ------------------ | ------------ | -------------------------------- | ----------------------------------------- | -------------------- |
+| **Workspace edit** | All sessions | `PATCH /api/chunks/*`            | Shared OC files (TOOLS.md, SOUL.md, etc.) | Every session (live) |
+| **Session config** | One session  | `PATCH /api/sessions/:id/config` | Per-session settings                      | Only this session    |
 
 Workspace edits are the chunk PATCH path — write-time validation, incremental
 recompile, all sessions see the change because tool permissions are computed live.
@@ -382,6 +385,7 @@ every session -- your chat, your cron jobs, your delegated agents. Session-scope
 changes only apply to one session."
 
 Session config edits modify per-session settings stored in:
+
 - **HEARTBEAT.md** for cron sessions (tool subset, schedule, parameters)
 - **AGENTS.md** for delegated agent sessions (tool allowlist, trust tier)
 - **Runtime state** for channel sessions (channel-scoped config)
@@ -476,14 +480,15 @@ groups section).
 
 **Session types**:
 
-| Type | What it is | Example |
-|------|-----------|---------|
-| `main` | Primary user chat | The DM thread in Teams |
-| `cron` | Scheduled heartbeat jobs | Daily inbox triage, weekly report |
-| `channel` | Channel-scoped sessions | design-team, engineering |
-| `agent` | Delegated agent sessions | scout, buddy |
+| Type      | What it is               | Example                           |
+| --------- | ------------------------ | --------------------------------- |
+| `main`    | Primary user chat        | The DM thread in Teams            |
+| `cron`    | Scheduled heartbeat jobs | Daily inbox triage, weekly report |
+| `channel` | Channel-scoped sessions  | design-team, engineering          |
+| `agent`   | Delegated agent sessions | scout, buddy                      |
 
 **Each session has**:
+
 - **Status**: `running` / `idle` / `scheduled` / `errored` / `suspended`
 - **Tool permissions**: which tools are authorized for THIS session (a cron session
   may have different tool access than the main chat)
@@ -593,16 +598,16 @@ appropriateness.
 The Companion App (evolution of ClawPilot) is the management/control plane.
 APIs it needs beyond what CAP settings and Lobster collaboration cover:
 
-| Companion Feature | API Endpoint | Source |
-|-------------------|-------------|--------|
-| Session overview | `GET /api/sessions` | OC runtime state |
-| Session detail + run history | `GET /api/sessions/:id`, `/runs`, `/tools` | OC runtime + governance |
-| Skills store (browse, install) | `GET /api/skills`, `POST /api/skills/install` | skills/ directory |
-| Trust controls (authority levels) | `GET /api/trust`, `PATCH /api/trust/escalate` | AGENTS.md trust tier |
-| Activity log (full audit timeline) | `GET /api/audit?limit=100&cursor=...&category=...` | @openclaw/audit-chain |
-| Governance dashboard | `GET /api/governance` | Compiled artifacts |
-| Multi-claw management | `GET /api/fleet/claws` | Fleet config |
-| Rate limits, escalation rules | `GET /api/chunks/config` | claws.json |
+| Companion Feature                  | API Endpoint                                       | Source                  |
+| ---------------------------------- | -------------------------------------------------- | ----------------------- |
+| Session overview                   | `GET /api/sessions`                                | OC runtime state        |
+| Session detail + run history       | `GET /api/sessions/:id`, `/runs`, `/tools`         | OC runtime + governance |
+| Skills store (browse, install)     | `GET /api/skills`, `POST /api/skills/install`      | skills/ directory       |
+| Trust controls (authority levels)  | `GET /api/trust`, `PATCH /api/trust/escalate`      | AGENTS.md trust tier    |
+| Activity log (full audit timeline) | `GET /api/audit?limit=100&cursor=...&category=...` | @openclaw/audit-chain   |
+| Governance dashboard               | `GET /api/governance`                              | Compiled artifacts      |
+| Multi-claw management              | `GET /api/fleet/claws`                             | Fleet config            |
+| Rate limits, escalation rules      | `GET /api/chunks/config`                           | claws.json              |
 
 ---
 
@@ -610,38 +615,38 @@ APIs it needs beyond what CAP settings and Lobster collaboration cover:
 
 ### Things in the CAP UX that OC files DON'T cover
 
-| Priority | CAP Feature | Missing From | Proposed Addition |
-|----------|------------|-------------|-------------------|
-| **P1** | Per-knowledge-source type classification | MEMORY.md | Structured `knowledge_sources` with `type: email\|files\|channels\|sharepoint\|tables\|urls` |
-| **P1** | Knowledge source access review | MEMORY.md | `knowledge_sources[].accessReview: true\|false` |
-| **P2** | M365 Group membership | All files | `IDENTITY.md` `groups` section or new `GROUPS.md` file |
-| **P2** | Entitlement expiry dates | IDENTITY.md | `entitlements[].expiresAt` field |
-| **P2** | Core vs. Corp governance role distinction | IDENTITY.md | `entitlements.core[]` vs `entitlements.governance[]` |
-| **P3** | Agent language / locale | All files | `IDENTITY.md` `locale` field |
-| **P3** | On-Premise Group membership | All files | Same as M365 groups |
-| **P4** | Agent avatar / visual identity | All files | Out of scope — visual identity isn't governance |
+| Priority | CAP Feature                               | Missing From | Proposed Addition                                                                            |
+| -------- | ----------------------------------------- | ------------ | -------------------------------------------------------------------------------------------- |
+| **P1**   | Per-knowledge-source type classification  | MEMORY.md    | Structured `knowledge_sources` with `type: email\|files\|channels\|sharepoint\|tables\|urls` |
+| **P1**   | Knowledge source access review            | MEMORY.md    | `knowledge_sources[].accessReview: true\|false`                                              |
+| **P2**   | M365 Group membership                     | All files    | `IDENTITY.md` `groups` section or new `GROUPS.md` file                                       |
+| **P2**   | Entitlement expiry dates                  | IDENTITY.md  | `entitlements[].expiresAt` field                                                             |
+| **P2**   | Core vs. Corp governance role distinction | IDENTITY.md  | `entitlements.core[]` vs `entitlements.governance[]`                                         |
+| **P3**   | Agent language / locale                   | All files    | `IDENTITY.md` `locale` field                                                                 |
+| **P3**   | On-Premise Group membership               | All files    | Same as M365 groups                                                                          |
+| **P4**   | Agent avatar / visual identity            | All files    | Out of scope — visual identity isn't governance                                              |
 
 Priority: P1 = blocks Phase 1 API, P2 = needed for Phase 2-3, P3 = nice to have, P4 = out of scope.
 
 ### Things in OC files / governance that NO UX surfaces today
 
-| Priority | Concept | File | What's Missing | Who Needs It |
-|----------|---------|------|---------------|-------------|
-| **P1** | Tool risk classification (R1-R5) | TOOLS.md | ON/OFF toggles but no risk context. | CAP + Companion |
-| **P1** | Governance compilation status | `.claws/compiled/` | Can't see if governance is compiled, stale, or errors. | Companion + CAP |
-| **P1** | Fleet policy overrides | claws.json | Can't see which settings are local vs. fleet-enforced. | CAP + Companion |
-| **P2** | Deny rules | SOUL.md | No deny rule editor anywhere. | CAP + Companion |
-| **P2** | OBO declarations | TOOLS.md | Can't see which tools act as the user. | CAP + Companion |
-| **P2** | Trust tiers (T0-T4) | AGENTS.md | Not surfaced. No way to see or set trust tier. | Companion |
-| **P2** | Audit trail | `.claws/audit/` | No visibility into governance decisions. | Companion |
-| **P2** | Data sensitivity labels | MEMORY.md | Sources shown but not classified. | CAP + Loop |
-| **P3** | Trust escalation over time | AGENTS.md | Static tiers only. No dynamic "earn trust" model. | Companion + Lobster |
-| **P3** | Budget / token ceiling | config | No budget visibility or controls. | Companion |
-| **P3** | Work queue (active tasks) | *(none)* | No OC file for agent's runtime task list. | Lobster (To Do) |
-| **P3** | Loop ↔ OC file sync | SOUL.md, MEMORY.md | No bidirectional sync. | Lobster |
-| **P3** | Calendar-renderable schedule | HEARTBEAT.md | Schedule exists but not as calendar events. | Lobster (Calendar) |
-| **P4** | Workflow DAG | lobster.yaml | Multi-step workflows not visible. | Companion |
-| **P4** | Agent presence | *(runtime)* | No status concept in OC files. | Lobster (Teams) |
+| Priority | Concept                          | File               | What's Missing                                         | Who Needs It        |
+| -------- | -------------------------------- | ------------------ | ------------------------------------------------------ | ------------------- |
+| **P1**   | Tool risk classification (R1-R5) | TOOLS.md           | ON/OFF toggles but no risk context.                    | CAP + Companion     |
+| **P1**   | Governance compilation status    | `.claws/compiled/` | Can't see if governance is compiled, stale, or errors. | Companion + CAP     |
+| **P1**   | Fleet policy overrides           | claws.json         | Can't see which settings are local vs. fleet-enforced. | CAP + Companion     |
+| **P2**   | Deny rules                       | SOUL.md            | No deny rule editor anywhere.                          | CAP + Companion     |
+| **P2**   | OBO declarations                 | TOOLS.md           | Can't see which tools act as the user.                 | CAP + Companion     |
+| **P2**   | Trust tiers (T0-T4)              | AGENTS.md          | Not surfaced. No way to see or set trust tier.         | Companion           |
+| **P2**   | Audit trail                      | `.claws/audit/`    | No visibility into governance decisions.               | Companion           |
+| **P2**   | Data sensitivity labels          | MEMORY.md          | Sources shown but not classified.                      | CAP + Loop          |
+| **P3**   | Trust escalation over time       | AGENTS.md          | Static tiers only. No dynamic "earn trust" model.      | Companion + Lobster |
+| **P3**   | Budget / token ceiling           | config             | No budget visibility or controls.                      | Companion           |
+| **P3**   | Work queue (active tasks)        | _(none)_           | No OC file for agent's runtime task list.              | Lobster (To Do)     |
+| **P3**   | Loop ↔ OC file sync              | SOUL.md, MEMORY.md | No bidirectional sync.                                 | Lobster             |
+| **P3**   | Calendar-renderable schedule     | HEARTBEAT.md       | Schedule exists but not as calendar events.            | Lobster (Calendar)  |
+| **P4**   | Workflow DAG                     | lobster.yaml       | Multi-step workflows not visible.                      | Companion           |
+| **P4**   | Agent presence                   | _(runtime)_        | No status concept in OC files.                         | Lobster (Teams)     |
 
 Priority: P1 = blocks Phase 1 API (partners need this to render chunks), P2 = Phase 2 write path,
 P3 = Phase 3 Lobster surfaces, P4 = future.
@@ -678,16 +683,16 @@ A live HTTP/SSE service with 3 layers.
 
 **Layer 1 — Generic OC API** (universal file access via oc:// paths):
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/oc/` | GET | Workspace schema: all files, sections, sessions, editability |
-| `/api/oc/{file}` | GET | Full file with parsed sections + governance context |
-| `/api/oc/{file}/{section}` | GET | Specific section with items |
-| `/api/oc/{file}/{section}/{item}` | GET | Specific item with fields |
-| `/api/oc/{file}/{section}/{item}` | PATCH | Edit an item (routes through validation layer) |
-| `/api/oc/{path}?session={id}` | GET | Session-scoped view of any path |
-| `/api/oc/{path}?at={version}` | GET | Historical state (version, date, or snapshot) |
-| `/api/diff?from={v}&to={v}` | GET | Diff between two versions/snapshots |
+| Endpoint                          | Method | Purpose                                                      |
+| --------------------------------- | ------ | ------------------------------------------------------------ |
+| `/api/oc/`                        | GET    | Workspace schema: all files, sections, sessions, editability |
+| `/api/oc/{file}`                  | GET    | Full file with parsed sections + governance context          |
+| `/api/oc/{file}/{section}`        | GET    | Specific section with items                                  |
+| `/api/oc/{file}/{section}/{item}` | GET    | Specific item with fields                                    |
+| `/api/oc/{file}/{section}/{item}` | PATCH  | Edit an item (routes through validation layer)               |
+| `/api/oc/{path}?session={id}`     | GET    | Session-scoped view of any path                              |
+| `/api/oc/{path}?at={version}`     | GET    | Historical state (version, date, or snapshot)                |
+| `/api/diff?from={v}&to={v}`       | GET    | Diff between two versions/snapshots                          |
 
 > **Note on `?session=` (Architect F-07)**: The `?session=` parameter is a query
 > filter, not a dependency. Layer 1 resolves sessions from the OC runtime state
@@ -710,10 +715,10 @@ builder.
 
 **Layer 2 — Chunk API** (partner convenience, built on Layer 1):
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/chunks/{tab}/{section}` | GET | Self-contained JSON blob assembling multiple oc:// reads + governance |
-| `/api/chunks/{tab}/{section}` | PATCH | Validated edit — resolves to one or more Layer 1 PATCHes |
+| Endpoint                      | Method | Purpose                                                               |
+| ----------------------------- | ------ | --------------------------------------------------------------------- |
+| `/api/chunks/{tab}/{section}` | GET    | Self-contained JSON blob assembling multiple oc:// reads + governance |
+| `/api/chunks/{tab}/{section}` | PATCH  | Validated edit — resolves to one or more Layer 1 PATCHes              |
 
 Chunks join data from multiple files (e.g., General chunk reads IDENTITY.md +
 AGENTS.md), add the `editable` schema, `lock` indicators, `governance` context,
@@ -728,24 +733,24 @@ directly.
 
 **Layer 3 — Runtime + Governance** (not file-backed):
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/governance` | GET | Compiled governance summary (risk distribution, gated tools, budget) |
-| `/api/sessions` | GET | All sessions with type, status, last activity |
-| `/api/sessions/:id` | GET | Session detail: tools, run history, errors |
-| `/api/sessions/:id/runs` | GET | Cron run history |
-| `/api/sessions/:id/tools` | GET | Session-scoped tool permissions |
-| `/api/sessions/:id/config` | PATCH | Per-session config (tool subset, schedule) |
-| `/api/trust` | GET | Trust tier + escalation history + progress |
-| `/api/trust/escalate` | PATCH | Manager-approved trust promotion |
-| `/api/audit` | GET | Audit trail query (cursor-paginated, SARIF export) |
-| `/api/skills` | GET | Available + installed skills |
-| `/api/skills/install` | POST | Install a skill (triggers recompile) |
-| `/api/workqueue` | GET | Runtime task list |
-| `/api/onboard` | POST | Seed SOUL.md + MEMORY.md from transcript |
-| `/api/batch` | POST | Atomic multi-operation transaction |
-| `/api/status` | GET | Server health + compilation status |
-| `/api/events` | SSE | Live updates (file changes, recompilation, session state) |
+| Endpoint                   | Method | Purpose                                                              |
+| -------------------------- | ------ | -------------------------------------------------------------------- |
+| `/api/governance`          | GET    | Compiled governance summary (risk distribution, gated tools, budget) |
+| `/api/sessions`            | GET    | All sessions with type, status, last activity                        |
+| `/api/sessions/:id`        | GET    | Session detail: tools, run history, errors                           |
+| `/api/sessions/:id/runs`   | GET    | Cron run history                                                     |
+| `/api/sessions/:id/tools`  | GET    | Session-scoped tool permissions                                      |
+| `/api/sessions/:id/config` | PATCH  | Per-session config (tool subset, schedule)                           |
+| `/api/trust`               | GET    | Trust tier + escalation history + progress                           |
+| `/api/trust/escalate`      | PATCH  | Manager-approved trust promotion                                     |
+| `/api/audit`               | GET    | Audit trail query (cursor-paginated, SARIF export)                   |
+| `/api/skills`              | GET    | Available + installed skills                                         |
+| `/api/skills/install`      | POST   | Install a skill (triggers recompile)                                 |
+| `/api/workqueue`           | GET    | Runtime task list                                                    |
+| `/api/onboard`             | POST   | Seed SOUL.md + MEMORY.md from transcript                             |
+| `/api/batch`               | POST   | Atomic multi-operation transaction                                   |
+| `/api/status`              | GET    | Server health + compilation status                                   |
+| `/api/events`              | SSE    | Live updates (file changes, recompilation, session state)            |
 
 **Cross-cutting**: `?dryRun=true` on any PATCH. ETag/If-Match on all GET/PATCH.
 All paths in errors, warnings, and audit events use `oc://` syntax.
@@ -846,6 +851,7 @@ governance context the UX can display alongside the toggles.
 ```
 
 The UX can now show:
+
 - The existing ON/OFF toggle (maps to `enabled`)
 - A risk badge next to each tool (R1-R5 with color coding)
 - A lock icon for R5 tools (non-negotiable, toggle is disabled)
@@ -863,7 +869,11 @@ governance health dashboard.
   "lastCompiled": "2026-04-15T10:30:00Z",
   "toolCount": 12,
   "riskDistribution": {
-    "R1": 3, "R2": 2, "R3": 4, "R4": 2, "R5": 1
+    "R1": 3,
+    "R2": 2,
+    "R3": 4,
+    "R4": 2,
+    "R5": 1
   },
   "gatedTools": 7,
   "oboTools": 1,
@@ -876,7 +886,11 @@ governance health dashboard.
   "fleetPolicyApplied": true,
   "fleetOverrides": ["planner:create-task"],
   "warnings": [
-    { "rule": "G-ELICIT", "tool": "send-email", "message": "R5 tool with no standing approval — will gate every call" }
+    {
+      "rule": "G-ELICIT",
+      "tool": "send-email",
+      "message": "R5 tool with no standing approval — will gate every call"
+    }
   ]
 }
 ```
@@ -893,11 +907,41 @@ Memory & Knowledge tab needs for governance-aware display.
     "shared": { "count": 5, "dataLabel": "INTERNAL" }
   },
   "knowledgeSources": [
-    { "type": "email", "name": "Mailbox", "enabled": true, "dataLabel": "CONFIDENTIAL", "accessReview": false },
-    { "type": "files", "name": "OneDrive files", "enabled": true, "dataLabel": "INTERNAL", "accessReview": false },
-    { "type": "channels", "name": "Teams channels", "enabled": true, "dataLabel": "INTERNAL", "accessReview": false },
-    { "type": "sharepoint", "name": "SharePoint sites", "enabled": true, "dataLabel": "CONFIDENTIAL", "accessReview": true },
-    { "type": "urls", "name": "External websites", "enabled": true, "dataLabel": "PUBLIC", "accessReview": true }
+    {
+      "type": "email",
+      "name": "Mailbox",
+      "enabled": true,
+      "dataLabel": "CONFIDENTIAL",
+      "accessReview": false
+    },
+    {
+      "type": "files",
+      "name": "OneDrive files",
+      "enabled": true,
+      "dataLabel": "INTERNAL",
+      "accessReview": false
+    },
+    {
+      "type": "channels",
+      "name": "Teams channels",
+      "enabled": true,
+      "dataLabel": "INTERNAL",
+      "accessReview": false
+    },
+    {
+      "type": "sharepoint",
+      "name": "SharePoint sites",
+      "enabled": true,
+      "dataLabel": "CONFIDENTIAL",
+      "accessReview": true
+    },
+    {
+      "type": "urls",
+      "name": "External websites",
+      "enabled": true,
+      "dataLabel": "PUBLIC",
+      "accessReview": true
+    }
   ]
 }
 ```
@@ -920,9 +964,7 @@ Entitlements tabs need.
     "onPremise": ["Moondust channel", "All-IsM-Users-Marketing"]
   },
   "entitlements": {
-    "core": [
-      { "role": "ZURE-ALL-PSV-EO14117", "type": "Azure RBAC", "expiresAt": "2026-06-25" }
-    ],
+    "core": [{ "role": "ZURE-ALL-PSV-EO14117", "type": "Azure RBAC", "expiresAt": "2026-06-25" }],
     "governance": [
       { "role": "PassiveMonUser", "type": "M365 Pulse", "expiresAt": "2026-06-25" },
       { "role": "Teams_Kusto_Reader", "type": "M365 Pulse", "expiresAt": "2026-05-07" }
@@ -979,19 +1021,25 @@ violations that another validator would catch.
 
 ```typescript
 type PatchResult =
-  | { status: 'ok'; updatedChunk: Chunk; governance: GovernanceResult; dryRun?: boolean; retroactivelyLocked?: string[] }
-  | { status: 'rejected'; error: PatchError; field?: string; message: string; dryRun?: boolean };
+  | {
+      status: "ok";
+      updatedChunk: Chunk;
+      governance: GovernanceResult;
+      dryRun?: boolean;
+      retroactivelyLocked?: string[];
+    }
+  | { status: "rejected"; error: PatchError; field?: string; message: string; dryRun?: boolean };
 
 type PatchError =
-  | 'R5_NON_NEGOTIABLE'          // Cannot disable R5 approval
-  | 'FLEET_LOCK_VIOLATION'       // Field is locked by fleet policy
-  | 'R5_EXCLUDED_FROM_ALLOW_ALL' // "Allow all" cannot include R5 tools
-  | 'GOVERNANCE_VIOLATION'       // Edit would create a governance error
-  | 'INVALID_STRUCTURE'          // Edit payload doesn't match file schema
-  | 'COMPILATION_FAILED'         // Recompile produced errors (rolled back)
-  | 'TRUST_REQUIRES_APPROVAL'    // Trust escalation needs manager sign-off
-  | 'AUTHORIZATION_REQUIRED'     // Caller lacks permission for this edit
-  | 'VERSION_CONFLICT';          // ETag mismatch — workspace modified since last read
+  | "R5_NON_NEGOTIABLE" // Cannot disable R5 approval
+  | "FLEET_LOCK_VIOLATION" // Field is locked by fleet policy
+  | "R5_EXCLUDED_FROM_ALLOW_ALL" // "Allow all" cannot include R5 tools
+  | "GOVERNANCE_VIOLATION" // Edit would create a governance error
+  | "INVALID_STRUCTURE" // Edit payload doesn't match file schema
+  | "COMPILATION_FAILED" // Recompile produced errors (rolled back)
+  | "TRUST_REQUIRES_APPROVAL" // Trust escalation needs manager sign-off
+  | "AUTHORIZATION_REQUIRED" // Caller lacks permission for this edit
+  | "VERSION_CONFLICT"; // ETag mismatch — workspace modified since last read
 
 // HTTP status codes for PATCH responses (F-01):
 // - 200 OK: successful PATCH (status: 'ok')
@@ -1020,7 +1068,7 @@ Every editable field in a chunk carries a `lock` descriptor:
 // Lock Enforcement uses the authoritative ItemLock type (see Chunk Format section).
 // Derived: locked = source !== 'none'. No explicit locked boolean.
 interface FieldEditability {
-  type: 'string' | 'boolean' | 'number' | 'enum' | 'date' | 'text' | 'object';
+  type: "string" | "boolean" | "number" | "enum" | "date" | "text" | "object";
   options?: string[];
   required?: boolean;
   lock?: ItemLock;
@@ -1028,6 +1076,7 @@ interface FieldEditability {
 ```
 
 `lock.source` tells the UX WHY a field is locked:
+
 - `r5`: R5 non-negotiable — never unlockable
 - `fleet`: Fleet policy — contact fleet admin to change
 - `governance`: Governance rule requires this value — editing triggers a warning
@@ -1100,6 +1149,7 @@ tenant.tools.policy.set  →  PATCH /api/chunks/connections/{server} (claws serv
 Write-time validation ensures Steven's admin API inherits R5 enforcement,
 fleet lock checking, and audit trail automatically. The GuardrailProvider
 composition means:
+
 - `claws serve` owns the compiled baseline (what claws thinks)
 - Steven's admin API owns the fleet overrides (what the admin changed)
 - The ProviderRegistry composes both at runtime
@@ -1126,13 +1176,21 @@ changed mid-assembly, the assembler retries (max 3 times, then returns with a
 ### Chunk Format
 
 ```typescript
-import type { RiskClassification } from '@openclaw/approval-events'; // from CL-12
+import type { RiskClassification } from "@openclaw/approval-events"; // from CL-12
 
-type ChunkTab = 'general' | 'preferences' | 'connections' | 'memory'
-              | 'groups' | 'entitlements' | 'trust' | 'schedule' | 'workqueue';
+type ChunkTab =
+  | "general"
+  | "preferences"
+  | "connections"
+  | "memory"
+  | "groups"
+  | "entitlements"
+  | "trust"
+  | "schedule"
+  | "workqueue";
 
-type TrustTier = 'T0' | 'T1' | 'T2' | 'T3' | 'T4';
-type DataLabel = 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';
+type TrustTier = "T0" | "T1" | "T2" | "T3" | "T4";
+type DataLabel = "PUBLIC" | "INTERNAL" | "CONFIDENTIAL" | "RESTRICTED";
 
 // === Per-Tab Data Shapes =====================================================
 
@@ -1151,18 +1209,18 @@ interface ChunkDataMap {
 
 /** Locks on array items (tools, knowledge sources). Derived: locked = source !== 'none'. */
 interface ItemLock {
-  source: 'r5' | 'fleet' | 'governance' | 'violation' | 'unclassified' | 'none';
+  source: "r5" | "fleet" | "governance" | "violation" | "unclassified" | "none";
   reason?: string;
 }
 
 /** A pending governance violation surfaced in degraded states (DEGRADED_R5, etc.). */
 interface PendingViolation {
-  path: string;                          // oc:// path to the violating element
-  severity: string;                      // e.g. 'r5', 'warn', 'structural', 'fleet'
-  rule: string;                          // governance rule that triggered the violation
-  message: string;                       // human-readable description
-  fixGuidance: string;                   // remediation instructions (see fix guidance templates)
-  scope: 'isolated' | 'structural';      // whether the fix is local or cross-file
+  path: string; // oc:// path to the violating element
+  severity: string; // e.g. 'r5', 'warn', 'structural', 'fleet'
+  rule: string; // governance rule that triggered the violation
+  message: string; // human-readable description
+  fixGuidance: string; // remediation instructions (see fix guidance templates)
+  scope: "isolated" | "structural"; // whether the fix is local or cross-file
 }
 
 interface GeneralData {
@@ -1188,7 +1246,7 @@ interface ConnectionsData {
     risk: RiskClassification;
     obo: boolean;
     approvalRequired: boolean;
-    approvalSource: 'compiled' | 'fleet-override' | 'admin';
+    approvalSource: "compiled" | "fleet-override" | "admin";
     lock: ItemLock;
   }>;
   summary: { total: number; enabled: number; gated: number; r5Count: number };
@@ -1197,7 +1255,7 @@ interface ConnectionsData {
 interface MemoryData {
   memories: { personal: { count: number }; shared: { count: number } };
   knowledgeSources: Array<{
-    type: 'email' | 'files' | 'channels' | 'sharepoint' | 'tables' | 'urls';
+    type: "email" | "files" | "channels" | "sharepoint" | "tables" | "urls";
     name: string;
     enabled: boolean;
     dataLabel: DataLabel;
@@ -1231,13 +1289,19 @@ interface ScheduleData {
 }
 
 interface WorkqueueData {
-  tasks: Array<{ id: string; title: string; status: string; dueAt?: string; plannerTaskId?: string }>;
+  tasks: Array<{
+    id: string;
+    title: string;
+    status: string;
+    dueAt?: string;
+    plannerTaskId?: string;
+  }>;
 }
 
 // === Field Editability =======================================================
 
 interface FieldEditability {
-  type: 'string' | 'boolean' | 'number' | 'enum' | 'date' | 'text' | 'object';
+  type: "string" | "boolean" | "number" | "enum" | "date" | "text" | "object";
   options?: string[];
   required?: boolean;
   lock?: ItemLock;
@@ -1276,7 +1340,7 @@ interface Chunk<K extends ChunkTab = ChunkTab> {
   };
 
   /** Write-back. Omitted for read-only chunks (entitlements). */
-  writeBack?: { method: 'PATCH'; url: string };
+  writeBack?: { method: "PATCH"; url: string };
 }
 ```
 
@@ -1378,6 +1442,7 @@ no JSONPath syntax. Partners iterate the array and check each item's lock.
 ```
 
 The dev building the Connections tab:
+
 - Iterates `data.tools`, renders a toggle per tool
 - Checks `tool.lock.source` — if not `'none'`, disables the toggle and shows the reason
 - Shows `tool.risk` as a badge (color-coded R1-R5)
@@ -1395,11 +1460,44 @@ The dev building the Connections tab:
       "shared": { "count": 5 }
     },
     "knowledgeSources": [
-      { "type": "email", "name": "Mailbox", "enabled": true, "dataLabel": "CONFIDENTIAL", "lock": { "source": "none" } },
-      { "type": "files", "name": "OneDrive files", "enabled": true, "dataLabel": "INTERNAL", "lock": { "source": "none" } },
-      { "type": "channels", "name": "Teams channels", "enabled": true, "dataLabel": "INTERNAL", "lock": { "source": "none" } },
-      { "type": "sharepoint", "name": "SharePoint sites", "enabled": true, "dataLabel": "CONFIDENTIAL", "lock": { "source": "governance", "reason": "Contains CONFIDENTIAL data — disabling requires admin approval" } },
-      { "type": "urls", "name": "External websites", "enabled": true, "dataLabel": "PUBLIC", "lock": { "source": "none" } }
+      {
+        "type": "email",
+        "name": "Mailbox",
+        "enabled": true,
+        "dataLabel": "CONFIDENTIAL",
+        "lock": { "source": "none" }
+      },
+      {
+        "type": "files",
+        "name": "OneDrive files",
+        "enabled": true,
+        "dataLabel": "INTERNAL",
+        "lock": { "source": "none" }
+      },
+      {
+        "type": "channels",
+        "name": "Teams channels",
+        "enabled": true,
+        "dataLabel": "INTERNAL",
+        "lock": { "source": "none" }
+      },
+      {
+        "type": "sharepoint",
+        "name": "SharePoint sites",
+        "enabled": true,
+        "dataLabel": "CONFIDENTIAL",
+        "lock": {
+          "source": "governance",
+          "reason": "Contains CONFIDENTIAL data — disabling requires admin approval"
+        }
+      },
+      {
+        "type": "urls",
+        "name": "External websites",
+        "enabled": true,
+        "dataLabel": "PUBLIC",
+        "lock": { "source": "none" }
+      }
     ]
   },
   "editable": {},
@@ -1425,6 +1523,7 @@ The dev sends the edited chunk data back:
 ```
 
 `claws serve` handles:
+
 1. Validates the edit (rejects disabling R5 approval)
 2. Maps to the correct OC file (TOOLS.md)
 3. Writes the edit (lossless — preserves other content)
@@ -1441,15 +1540,15 @@ The dev sends the edited chunk data back:
 
 ### Why Chunks Work for Partners
 
-| Concern | Without chunks | With chunks |
-|---------|---------------|-------------|
-| What file do I edit? | Dev must know TOOLS.md vs SOUL.md vs MEMORY.md | Dev posts to `/api/chunks/{tab}/{section}` |
-| What fields exist? | Dev parses markdown | Dev reads `data` object |
-| What's editable? | Dev guesses | Dev reads `editable` schema |
-| What's locked? | Dev doesn't know about R5 or fleet policy | `lock.source: 'r5' \| 'fleet'` with reason |
-| What's the governance context? | Dev doesn't know about risk levels | `governance.riskLevel`, `governance.warnings` |
-| How do I save? | Dev writes OC markdown files | Dev POSTs JSON to `writeBack.url` |
-| Did my edit break anything? | Dev has no visibility | Response includes recompilation result |
+| Concern                        | Without chunks                                 | With chunks                                   |
+| ------------------------------ | ---------------------------------------------- | --------------------------------------------- |
+| What file do I edit?           | Dev must know TOOLS.md vs SOUL.md vs MEMORY.md | Dev posts to `/api/chunks/{tab}/{section}`    |
+| What fields exist?             | Dev parses markdown                            | Dev reads `data` object                       |
+| What's editable?               | Dev guesses                                    | Dev reads `editable` schema                   |
+| What's locked?                 | Dev doesn't know about R5 or fleet policy      | `lock.source: 'r5' \| 'fleet'` with reason    |
+| What's the governance context? | Dev doesn't know about risk levels             | `governance.riskLevel`, `governance.warnings` |
+| How do I save?                 | Dev writes OC markdown files                   | Dev POSTs JSON to `writeBack.url`             |
+| Did my edit break anything?    | Dev has no visibility                          | Response includes recompilation result        |
 
 Partners build UI components. `claws serve` handles the governance plumbing.
 
@@ -1494,6 +1593,7 @@ Sessions:
 ```
 
 Used in:
+
 - **PatchError messages**: `"R5_NON_NEGOTIABLE at oc://TOOLS.md/Tools/send-email"`
 - **Audit events**: `{ path: "oc://TOOLS.md/Tools/create-task", action: "enabled" }`
 - **Governance warnings**: `{ rule: "G-ELICIT", path: "oc://TOOLS.md/Tools/send-email" }`
@@ -1502,11 +1602,11 @@ Used in:
 ```typescript
 /** Parse an oc:// path into components. */
 interface OcPath {
-  file: string;           // "TOOLS.md"
-  section?: string;       // "Tools"
-  item?: string;          // "send-email"
-  field?: string;         // "risk"
-  sessionScope?: string;  // "cron:daily-triage" (if session-scoped)
+  file: string; // "TOOLS.md"
+  section?: string; // "Tools"
+  item?: string; // "send-email"
+  field?: string; // "risk"
+  sessionScope?: string; // "cron:daily-triage" (if session-scoped)
 }
 
 function parseOcPath(uri: string): OcPath;
@@ -1515,6 +1615,7 @@ function formatOcPath(path: OcPath): string;
 
 > **Single canonical form**: oc:// uses `/` throughout — one form for URIs and HTTP.
 > `parseOcPath()` parses this single form. No conversion functions needed. Example:
+>
 > - `oc://TOOLS.md/Tools/send-email` (oc:// URI)
 > - `/api/oc/TOOLS.md/Tools/send-email` (HTTP path — same segments)
 
@@ -1685,20 +1786,20 @@ workspace has advanced past v38.
 
 **Backed by three existing systems**:
 
-| Source | What it stores | Addressing |
-|--------|---------------|------------|
-| Compilation forest per-phase cache | GovernanceIR + parsed AST per version | `?at=v{N}` |
-| `claws snap save/restore` | Named workspace snapshots | `?at=snap:{name}` |
-| Workspace versioning | Version counter + file hashes per version | `?at={ISO date}` (nearest version) |
+| Source                             | What it stores                            | Addressing                         |
+| ---------------------------------- | ----------------------------------------- | ---------------------------------- |
+| Compilation forest per-phase cache | GovernanceIR + parsed AST per version     | `?at=v{N}`                         |
+| `claws snap save/restore`          | Named workspace snapshots                 | `?at=snap:{name}`                  |
+| Workspace versioning               | Version counter + file hashes per version | `?at={ISO date}` (nearest version) |
 
 **`changedBy` structured type (F-03)**: All `changedBy` fields in diff responses
 and SSE events use a structured object, not a free-form string:
 
 ```typescript
 type ChangedBy = {
-  source: 'patch' | 'external' | 'oc_runtime' | 'recompilation';
-  endpoint?: string;   // present when source is 'patch'
-  sessionId?: string;  // present when source is 'patch' or 'oc_runtime'
+  source: "patch" | "external" | "oc_runtime" | "recompilation";
+  endpoint?: string; // present when source is 'patch'
+  sessionId?: string; // present when source is 'patch' or 'oc_runtime'
 };
 ```
 
@@ -1742,13 +1843,13 @@ GET /api/diff?from=v38&to=v43
 
 **Use cases**:
 
-| Use Case | API Call |
-|----------|---------|
-| "When did send-email become R5?" | `GET /api/diff?from=v1&to=current` filtered to that tool |
-| "What changed in the last upgrade?" | `GET /api/diff?from=snap:pre-upgrade&to=current` |
-| "Show me governance state when this cron job failed" | `GET /api/oc/TOOLS.md?at=v38` (version from audit event) |
-| "Roll back this one tool change" | Diff shows before value → PATCH to restore it |
-| "Audit correlation" | Audit event says `version: 42` → `GET /api/oc/?at=v42` shows exact state |
+| Use Case                                             | API Call                                                                 |
+| ---------------------------------------------------- | ------------------------------------------------------------------------ |
+| "When did send-email become R5?"                     | `GET /api/diff?from=v1&to=current` filtered to that tool                 |
+| "What changed in the last upgrade?"                  | `GET /api/diff?from=snap:pre-upgrade&to=current`                         |
+| "Show me governance state when this cron job failed" | `GET /api/oc/TOOLS.md?at=v38` (version from audit event)                 |
+| "Roll back this one tool change"                     | Diff shows before value → PATCH to restore it                            |
+| "Audit correlation"                                  | Audit event says `version: 42` → `GET /api/oc/?at=v42` shows exact state |
 
 **Retention**: Version history is bounded by the compilation forest cache size
 (configurable, default: last 100 versions). Named snapshots are unbounded (user
@@ -1815,11 +1916,11 @@ interface PhaseCache {
 
   /** Per-phase output hashes — skip a phase if its inputs haven't changed. */
   phaseOutputs: {
-    parse: Record<string, string>;   // per-file parse results
-    extract: string;                  // manifest hash
-    analyze: string;                  // GovernanceIR hash
-    optimize: string;                 // optimized IR hash
-    emit: Record<string, string>;     // per-artifact hashes
+    parse: Record<string, string>; // per-file parse results
+    extract: string; // manifest hash
+    analyze: string; // GovernanceIR hash
+    optimize: string; // optimized IR hash
+    emit: Record<string, string>; // per-artifact hashes
   };
 }
 ```
@@ -1904,6 +2005,7 @@ changed files. Queue depth is bounded (max 100 pending edits; 101st returns 429)
 ### Startup Health Check (P-274)
 
 On startup, `claws serve` runs a health check:
+
 1. Check if `.claws/cache/` exists and is consistent
 2. Compare OC file hashes against last-compiled hashes in `phase-cache.json`
 3. If any file hash differs (write-without-compile state from a crash), force
@@ -1917,14 +2019,14 @@ On startup, `claws serve` runs a health check:
 
 The OC runtime writes to workspace files directly — these bypass the claws serve API:
 
-| OC Runtime Event | File Modified | Governance Impact |
-|-----------------|--------------|-------------------|
-| Agent learns a preference | MEMORY.md | Data label may change (INTERNAL → CONFIDENTIAL) |
-| User approves tool in OC UI | exec-approvals.json | Pre-authorization added |
-| Agent delegates | AGENTS.md | Trust chain changes, new session created |
-| Skill installed via marketplace | skills/ directory | New tools enter risk classification |
-| Workflow step completes | lobster.yaml | Workflow governance state changes |
-| Session state saved | Various | Session config may drift from compiled state |
+| OC Runtime Event                | File Modified       | Governance Impact                               |
+| ------------------------------- | ------------------- | ----------------------------------------------- |
+| Agent learns a preference       | MEMORY.md           | Data label may change (INTERNAL → CONFIDENTIAL) |
+| User approves tool in OC UI     | exec-approvals.json | Pre-authorization added                         |
+| Agent delegates                 | AGENTS.md           | Trust chain changes, new session created        |
+| Skill installed via marketplace | skills/ directory   | New tools enter risk classification             |
+| Workflow step completes         | lobster.yaml        | Workflow governance state changes               |
+| Session state saved             | Various             | Session config may drift from compiled state    |
 
 ### Detection and Response
 
@@ -1990,24 +2092,25 @@ the workspace is already in a violating state when we discover it. The API write
 
 **Transitions**:
 
-| From | To | Trigger | Guard |
-|------|----|---------|-------|
-| CLEAN | DEGRADED_WARN | Recompile finds R3-R4 violation | Scope = isolated |
-| CLEAN | DEGRADED_R5 | Recompile finds R5 violation | Scope = isolated |
-| CLEAN | DEGRADED_STRUCTURAL | Recompile finds trust/delegation violation | Scope = structural |
-| CLEAN | DEGRADED_FLEET | Recompile finds fleet policy conflict | Fleet policy present |
-| CLEAN | ERROR | Recompile fails (parse error, corrupt file) | — |
-| DEGRADED_WARN | CLEAN | Fix applied → recompile succeeds | Zero violations |
-| DEGRADED_R5 | CLEAN | Fix applied → recompile succeeds | Zero violations |
-| DEGRADED_STRUCTURAL | CLEAN | Fix applied → recompile succeeds | Zero violations |
-| DEGRADED_FLEET | CLEAN | Fleet policy fixed → recompile succeeds | Zero violations |
-| ERROR | CLEAN | Fix applied → recompile succeeds | Zero violations |
-| ERROR | DEGRADED_* | Fix applied → recompile succeeds but finds new violation | Violations remain |
-| DEGRADED_* | ERROR | Concurrent violation causes parse failure | — |
-| DEGRADED_WARN | DEGRADED_R5 | New R5 violation while WARN active | Worst wins |
-| DEGRADED_R5 | DEGRADED_STRUCTURAL | Violation scope escalates to structural | Scope = structural |
+| From                | To                  | Trigger                                                  | Guard                |
+| ------------------- | ------------------- | -------------------------------------------------------- | -------------------- |
+| CLEAN               | DEGRADED_WARN       | Recompile finds R3-R4 violation                          | Scope = isolated     |
+| CLEAN               | DEGRADED_R5         | Recompile finds R5 violation                             | Scope = isolated     |
+| CLEAN               | DEGRADED_STRUCTURAL | Recompile finds trust/delegation violation               | Scope = structural   |
+| CLEAN               | DEGRADED_FLEET      | Recompile finds fleet policy conflict                    | Fleet policy present |
+| CLEAN               | ERROR               | Recompile fails (parse error, corrupt file)              | —                    |
+| DEGRADED_WARN       | CLEAN               | Fix applied → recompile succeeds                         | Zero violations      |
+| DEGRADED_R5         | CLEAN               | Fix applied → recompile succeeds                         | Zero violations      |
+| DEGRADED_STRUCTURAL | CLEAN               | Fix applied → recompile succeeds                         | Zero violations      |
+| DEGRADED_FLEET      | CLEAN               | Fleet policy fixed → recompile succeeds                  | Zero violations      |
+| ERROR               | CLEAN               | Fix applied → recompile succeeds                         | Zero violations      |
+| ERROR               | DEGRADED_*          | Fix applied → recompile succeeds but finds new violation | Violations remain    |
+| DEGRADED_*          | ERROR               | Concurrent violation causes parse failure                | —                    |
+| DEGRADED_WARN       | DEGRADED_R5         | New R5 violation while WARN active                       | Worst wins           |
+| DEGRADED_R5         | DEGRADED_STRUCTURAL | Violation scope escalates to structural                  | Scope = structural   |
 
 **Invariants**:
+
 - **Violations are a set, not a single state**: The system tracks ALL active violations independently. The top-level state is the worst severity in the set. DEGRADED_STRUCTURAL + DEGRADED_FLEET = both enforcement behaviors apply simultaneously (chain blocking AND most-restrictive fleet interpretation). When one violation is fixed, the state may drop to the next-worst remaining violation (e.g., ERROR → DEGRADED_R5 if an R5 violation remains after the structural error is fixed).
 - **Worst wins for top-level state**: ERROR > DEGRADED_STRUCTURAL > DEGRADED_R5 > DEGRADED_FLEET > DEGRADED_WARN > CLEAN. But all active violations enforce their behavior regardless of which is "worst."
 - **Last successful IR pinned in forest cache**: The most recent SUCCESSFUL compilation's GovernanceIR is pinned — not subject to LRU eviction. This may be a CLEAN or DEGRADED IR (degraded compilations DO produce valid IRs). The pin is released only when a newer successful compile runs. In ERROR state, this pinned IR serves. This prevents compilation failures from evicting the safety baseline.
@@ -2017,29 +2120,30 @@ the workspace is already in a violating state when we discover it. The API write
 
 **PATCH behavior per state**:
 
-| State | PATCH targeting violation file | PATCH targeting other file |
-|-------|------------------------------|--------------------------|
-| CLEAN | Normal (validate → write → compile) | Normal |
-| DEGRADED_WARN | Normal + warnings in response | Normal + warnings in response |
-| DEGRADED_R5 | Normal (repair attempt) | Normal + warnings |
-| DEGRADED_STRUCTURAL | Normal (repair attempt) | Blocked for affected chain tools, normal for others |
-| DEGRADED_FLEET | Normal (but fleet lock still applies) | Normal (fleet lock still applies) |
-| ERROR | Allowed (repair PATCH) | 503 Rejected |
+| State               | PATCH targeting violation file        | PATCH targeting other file                          |
+| ------------------- | ------------------------------------- | --------------------------------------------------- |
+| CLEAN               | Normal (validate → write → compile)   | Normal                                              |
+| DEGRADED_WARN       | Normal + warnings in response         | Normal + warnings in response                       |
+| DEGRADED_R5         | Normal (repair attempt)               | Normal + warnings                                   |
+| DEGRADED_STRUCTURAL | Normal (repair attempt)               | Blocked for affected chain tools, normal for others |
+| DEGRADED_FLEET      | Normal (but fleet lock still applies) | Normal (fleet lock still applies)                   |
+| ERROR               | Allowed (repair PATCH)                | 503 Rejected                                        |
 
 ### Severity-Based States
 
-| Violation Severity | System State | Enforcement | User Experience |
-|-------------------|-------------|-------------|-----------------|
-| **R5 violation** (missing elicitation on OBO tool) | `DEGRADED_R5` | That tool is **blocked** (fail-closed). All other tools operate normally. | Governance dashboard shows red alert. Chunks show the tool as `lock.source: 'violation'`. SSE emits `governance_violation` event. GET /api/governance includes `degradedState: 'DEGRADED_R5'`, `blockedTools: ['oc://TOOLS.md/Tools/send-email']`, `violations: [{ path, severity, rule, message, fixGuidance, scope }]`. |
-| **R3-R4 violation** (missing deny rule, policy gap) | `DEGRADED_WARN` | Agent operates with warnings. Violations visible but not blocking. | Yellow warnings in governance dashboard + chunks. Audit trail records the violation. |
-| **Structural error** (invalid YAML, corrupt file) | `ERROR` | **Serve the last good GovernanceIR** from the compilation forest. Agent operates under previous governance. | Status endpoint returns `{ status: 'error', lastGoodVersion: 42, errorDetails: '...' }`. Repair PATCHes targeting files in `pendingViolations` are allowed; other PATCHes return 503. |
-| **Fleet policy conflict** | `DEGRADED_FLEET` | Most restrictive interpretation applied. | Fleet admin notified via SSE. Conflicting fields shown with both policy sources. |
+| Violation Severity                                  | System State     | Enforcement                                                                                                 | User Experience                                                                                                                                                                                                                                                                                                           |
+| --------------------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **R5 violation** (missing elicitation on OBO tool)  | `DEGRADED_R5`    | That tool is **blocked** (fail-closed). All other tools operate normally.                                   | Governance dashboard shows red alert. Chunks show the tool as `lock.source: 'violation'`. SSE emits `governance_violation` event. GET /api/governance includes `degradedState: 'DEGRADED_R5'`, `blockedTools: ['oc://TOOLS.md/Tools/send-email']`, `violations: [{ path, severity, rule, message, fixGuidance, scope }]`. |
+| **R3-R4 violation** (missing deny rule, policy gap) | `DEGRADED_WARN`  | Agent operates with warnings. Violations visible but not blocking.                                          | Yellow warnings in governance dashboard + chunks. Audit trail records the violation.                                                                                                                                                                                                                                      |
+| **Structural error** (invalid YAML, corrupt file)   | `ERROR`          | **Serve the last good GovernanceIR** from the compilation forest. Agent operates under previous governance. | Status endpoint returns `{ status: 'error', lastGoodVersion: 42, errorDetails: '...' }`. Repair PATCHes targeting files in `pendingViolations` are allowed; other PATCHes return 503.                                                                                                                                     |
+| **Fleet policy conflict**                           | `DEGRADED_FLEET` | Most restrictive interpretation applied.                                                                    | Fleet admin notified via SSE. Conflicting fields shown with both policy sources.                                                                                                                                                                                                                                          |
 
 **Unclassified tool handling**: Tools that exist in the current workspace files but are ABSENT from the serving (last-good) GovernanceIR are treated as R5 fail-closed. They cannot execute. This is the same principle as the fail-mode table's 'Unknown = R5' row. The last-good IR is the governance floor — anything not in it gets maximum restriction until a clean compilation classifies it.
 
 **Violation scope**: Each violation has a scope: `isolated` (one tool missing a gate → block that tool only) or `structural` (trust chain broken, delegation cycle, fleet policy corrupt → block ALL tools in the affected dependency chain). The state machine carries a `scope` field per violation. Structural violations escalate from DEGRADED_R5 to DEGRADED_STRUCTURAL which blocks the entire affected chain, not just one tool.
 
 **Fix guidance templates**: Each violation includes a `fixGuidance` string with concrete instructions:
+
 - R5 missing elicitation: `'Add elicitation gate: edit oc://TOOLS.md/Tools/{tool} or run claws check --fix'`
 - Structural error: `'Fix syntax error in {file} at line {line}: {detail}. Or restore: claws snap restore auto:previous'`
 - Fleet policy conflict: `'Contact fleet admin. Conflicting policies: {policy1} vs {policy2}'`
@@ -2052,12 +2156,14 @@ the workspace is already in a violating state when we discover it. The API write
 Two cases:
 
 **DEGRADED** (compilation SUCCEEDED but found policy violations):
+
 - The NEW GovernanceIR (e.g., v44) serves. It is valid — it classifies all tools.
 - The violating tool is explicitly blocked via `lock.source: 'violation'`.
 - Other new tools from the same edit ARE classified and available.
 - The pinned IR is this v44 (the most recent successful compile, even though it's degraded).
 
 **ERROR** (compilation FAILED — parse error, corrupt file):
+
 - No new GovernanceIR was produced.
 - The LAST SUCCESSFUL GovernanceIR serves (e.g., v44 from the degraded state, or v43 if it was clean).
 - The pinned IR is the most recent successful compile — which may itself have been degraded.
@@ -2066,6 +2172,7 @@ Two cases:
 This means: DEGRADED is better than ERROR. In DEGRADED, new tools get classified. In ERROR, they don't.
 
 If recompilation produces violations or fails:
+
 1. The appropriate IR serves (new IR for DEGRADED, pinned IR for ERROR)
 2. The violating file state is recorded as `pending_violations` in the workspace status
 3. Chunks include `governance.violations` array with oc:// paths + severity + fix guidance
@@ -2136,6 +2243,7 @@ POST  /api/skills/install          ─┘
 ```
 
 The validation layer:
+
 1. **R5 enforcement**: Rejects any edit that disables R5 approval
 2. **Fleet lock check**: Rejects edits to fleet-locked fields. **Fleet policy load must fail-closed (P-272)**: if the fleet policy file is missing, corrupt, or unreachable, ALL fleet-lockable fields are treated as locked. No silent fallback to unlocked.
 3. **Governance validation**: Checks edit against compiled GovernanceIR. **Deny rule detection uses GovernanceIR registry (P-276)**, not regex patterns. A "deny rule" is text that maps to a compiled G-INPUT deny intent in the GovernanceIR. This avoids false positives from regex matching ("Never" in prose that isn't a governance boundary).
@@ -2159,6 +2267,7 @@ interface TrustEscalationRequest {
 ```
 
 The flow:
+
 1. Companion App calls `GET /api/trust` — sees `nextEscalation.requirements`
 2. If `managerApproved: false`, Companion App triggers an approval request
    (ApprovalRequestEvent from CL-12) to the manager
@@ -2170,6 +2279,7 @@ No trust escalation without manager approval. No tier skipping.
 
 **JWT verification (P-279)**: The `managerApprovalToken` is a JWT that must be
 verified with:
+
 1. **Signature**: Verified against the server's signing key (not just structure check)
 2. **Audience**: Must match this agent's identity (prevents token reuse across agents)
 3. **Subject**: The `sub` claim must map to a user with manager authority over this
@@ -2196,6 +2306,7 @@ interface OnboardRequest {
 ```
 
 Validation before writing:
+
 1. **Content scan**: `@openclaw/secret-scanner` checks transcript for credentials
 2. **Size limit**: Transcript capped at 50KB
 3. **Injection defense**: No executable content, no frontmatter injection
@@ -2207,12 +2318,12 @@ Validation before writing:
 
 ### When Evals Run
 
-| Tier | What | Trigger | Cost |
-|------|------|---------|------|
-| **G0** Schema | Files parse, frontmatter valid | Every compile (~40ms recompile) | Free |
-| **G1** Cross-file | Conflicts, referential integrity, sift expressions | Every compile | Free |
-| **G2** Semantic | Boundary specificity, tool coverage (LLM-as-judge) | On demand or CI | LLM call |
-| **G3** Runtime | Mock Gateway fires tool calls, verifies block/allow | On demand or CD | Mock setup |
+| Tier              | What                                                | Trigger                         | Cost       |
+| ----------------- | --------------------------------------------------- | ------------------------------- | ---------- |
+| **G0** Schema     | Files parse, frontmatter valid                      | Every compile (~40ms recompile) | Free       |
+| **G1** Cross-file | Conflicts, referential integrity, sift expressions  | Every compile                   | Free       |
+| **G2** Semantic   | Boundary specificity, tool coverage (LLM-as-judge)  | On demand or CI                 | LLM call   |
+| **G3** Runtime    | Mock Gateway fires tool calls, verifies block/allow | On demand or CD                 | Mock setup |
 
 G0+G1 run automatically on every edit (they're in the compile pipeline). G2+G3
 are available via the eval API — triggered by the admin, CI, or the TUI.
@@ -2234,19 +2345,37 @@ Response:
   "version": "v44",
   "tiers": {
     "G0": { "status": "pass", "checks": 12, "failures": 0, "durationMs": 8 },
-    "G1": { "status": "pass", "checks": 29, "failures": 0, "durationMs": 45,
-            "siftResults": { "expressions": 14, "matches": 8 } },
-    "G2": { "status": "warn", "checks": 3, "failures": 1, "durationMs": 4200,
-            "findings": [
-              { "rule": "boundary-specificity", "score": 0.6,
-                "message": "SOUL.md boundaries are too vague — 'be careful' is not enforceable",
-                "path": "oc://SOUL.md/Boundaries" }
-            ] },
-    "G3": { "status": "pass", "checks": 8, "failures": 0, "durationMs": 12000,
-            "toolCalls": [
-              { "tool": "send-email", "decision": "blocked", "reason": "R5 elicitation gate" },
-              { "tool": "read-email", "decision": "allowed" }
-            ] }
+    "G1": {
+      "status": "pass",
+      "checks": 29,
+      "failures": 0,
+      "durationMs": 45,
+      "siftResults": { "expressions": 14, "matches": 8 }
+    },
+    "G2": {
+      "status": "warn",
+      "checks": 3,
+      "failures": 1,
+      "durationMs": 4200,
+      "findings": [
+        {
+          "rule": "boundary-specificity",
+          "score": 0.6,
+          "message": "SOUL.md boundaries are too vague — 'be careful' is not enforceable",
+          "path": "oc://SOUL.md/Boundaries"
+        }
+      ]
+    },
+    "G3": {
+      "status": "pass",
+      "checks": 8,
+      "failures": 0,
+      "durationMs": 12000,
+      "toolCalls": [
+        { "tool": "send-email", "decision": "blocked", "reason": "R5 elicitation gate" },
+        { "tool": "read-email", "decision": "allowed" }
+      ]
+    }
   },
   "summary": { "pass": 3, "warn": 1, "fail": 0 }
 }
@@ -2290,12 +2419,12 @@ used in governance policies (`.claws/policies/*.yaml`).
 
 ### When to Eval After Edits
 
-| Edit Type | G0+G1 | G2 | G3 |
-|-----------|-------|----|----|
-| PATCH via API | Auto (in recompile) | Not auto — run `POST /api/eval?tier=G2` | Not auto |
-| External edit (VS Code, OC) | Auto (in recompile) | Not auto | Not auto |
-| CI pipeline | Auto | Auto (CI gate) | Auto (CD gate) |
-| TUI "Run Eval" button | Shows cached G0+G1 | Triggers G2 on demand | Triggers G3 on demand |
+| Edit Type                   | G0+G1               | G2                                      | G3                    |
+| --------------------------- | ------------------- | --------------------------------------- | --------------------- |
+| PATCH via API               | Auto (in recompile) | Not auto — run `POST /api/eval?tier=G2` | Not auto              |
+| External edit (VS Code, OC) | Auto (in recompile) | Not auto                                | Not auto              |
+| CI pipeline                 | Auto                | Auto (CI gate)                          | Auto (CD gate)        |
+| TUI "Run Eval" button       | Shows cached G0+G1  | Triggers G2 on demand                   | Triggers G3 on demand |
 
 G2+G3 are never automatic on edit — they're expensive (LLM calls, mock setup).
 They run on demand via the API or automatically in CI/CD. The TUI and Companion
@@ -2367,11 +2496,11 @@ Only the compile pipeline (G0+G1) triggers violation state transitions.
 
 ### Partner Handoff Points
 
-| Phase | What Partners Can Build | API They Use |
-|-------|------------------------|-------------|
-| 1 | CAP settings tabs (read-only) | Chunk GET |
-| 2 | CAP settings tabs (editable) | Chunk GET + PATCH |
-| 3 | Calendar integration, To Do integration | /api/schedule, /api/workqueue |
-| 3 | Loop page sync | /api/loop/* |
-| 4 | Companion App management UX | /api/governance, /api/trust, /api/audit |
-| 5 | Teams onboarding bot | /api/onboard |
+| Phase | What Partners Can Build                 | API They Use                            |
+| ----- | --------------------------------------- | --------------------------------------- |
+| 1     | CAP settings tabs (read-only)           | Chunk GET                               |
+| 2     | CAP settings tabs (editable)            | Chunk GET + PATCH                       |
+| 3     | Calendar integration, To Do integration | /api/schedule, /api/workqueue           |
+| 3     | Loop page sync                          | /api/loop/*                             |
+| 4     | Companion App management UX             | /api/governance, /api/trust, /api/audit |
+| 5     | Teams onboarding bot                    | /api/onboard                            |

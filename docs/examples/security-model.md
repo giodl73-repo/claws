@@ -31,7 +31,6 @@ risk: R1
 obo: none
 data: INTERNAL
 ---
-
 # SKILL.md frontmatter for an AS-user skill (acts as user)
 ---
 name: send-response

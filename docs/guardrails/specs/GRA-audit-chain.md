@@ -4,18 +4,18 @@
 
 ## Entry types (10)
 
-| Type | Purpose |
-|------|---------|
-| `ProducerEntry` | Records which policy artifact + snapshot is active |
-| `DecisionEntry` | A `preAuthorize` or `beforeIngest` outcome |
-| `ApprovalEntry` | A supervisor/companion response to a `review` decision |
-| `ExecutionEntry` | The actual tool call or file ingest that executed |
-| `RollbackEntry` | A snap rollback from one snapshot to a prior one |
-| `TrustReloadEntry` | A trust-set reload (success or failure) |
-| `TimeoutEntry` | An approval that expired without a response |
-| `DrainEntry` | A snap promote drain window boundary |
-| `ReplayEntry` | A detected nonce replay attempt |
-| `InvalidEntry` | A chain-integrity violation (synthetic, written by verifier) |
+| Type               | Purpose                                                      |
+| ------------------ | ------------------------------------------------------------ |
+| `ProducerEntry`    | Records which policy artifact + snapshot is active           |
+| `DecisionEntry`    | A `preAuthorize` or `beforeIngest` outcome                   |
+| `ApprovalEntry`    | A supervisor/companion response to a `review` decision       |
+| `ExecutionEntry`   | The actual tool call or file ingest that executed            |
+| `RollbackEntry`    | A snap rollback from one snapshot to a prior one             |
+| `TrustReloadEntry` | A trust-set reload (success or failure)                      |
+| `TimeoutEntry`     | An approval that expired without a response                  |
+| `DrainEntry`       | A snap promote drain window boundary                         |
+| `ReplayEntry`      | A detected nonce replay attempt                              |
+| `InvalidEntry`     | A chain-integrity violation (synthetic, written by verifier) |
 
 Every entry carries: `sequenceNumber` (per-chain monotonic),
 `correlationId` (cross-entry cluster), `policyArtifactSha256` (which

@@ -6,12 +6,12 @@
 
 Five tiers, from least-risky to most-risky:
 
-| Tier | Class | Example | Fail-mode |
-|------|-------|---------|-----------|
-| **R1** | Public read | fetch public docs | open |
-| **R2** | Tenant read | read own inbox | open |
-| **R3** | Tenant write | create draft email | configurable |
-| **R4** | External write (reversible) | post to internal Slack | configurable |
+| Tier   | Class                                       | Example                               | Fail-mode      |
+| ------ | ------------------------------------------- | ------------------------------------- | -------------- |
+| **R1** | Public read                                 | fetch public docs                     | open           |
+| **R2** | Tenant read                                 | read own inbox                        | open           |
+| **R3** | Tenant write                                | create draft email                    | configurable   |
+| **R4** | External write (reversible)                 | post to internal Slack                | configurable   |
 | **R5** | External write (irreversible) or restricted | send email, pay money, access secrets | closed (fixed) |
 
 Tier is a property of the TOOL, modified at compile time by

@@ -7,41 +7,42 @@ tools.
 
 ## Start Here
 
-| Need | File |
-| --- | --- |
-| Workspace map | `WORKSPACE.md` |
-| Active project areas | `projects/README.md` |
-| Policy work | `projects/policy/README.md` |
-| Doctor work | `projects/doctor/README.md` |
-| Feeds work | `projects/feeds/README.md` |
-| Catalog work | `projects/catalog/README.md` |
-| Lobster work | `projects/lobster/README.md` |
-| UX state work | `projects/ux-state/README.md` |
-| Admin work | `projects/admin/README.md` |
-| Config admin UX | `projects/config-admin/README.md` |
-| Staffing analysis | `projects/staffing/README.md` |
-| Context-budget work | `projects/context-budget/README.md` |
-| Snapshot work | `projects/snapshot/README.md` |
-| OpenClaw hosting profiles | `projects/hosting-profiles/README.md` |
-| Lobster/OpenClaw layering contracts | `projects/layering-contracts/README.md` |
-| Managed Configuration | `projects/managed-config/README.md` |
-| Hosted Integration | `projects/hosted-integration/README.md` |
-| Runtime State Continuity | `projects/state-continuity/README.md` |
-| PromoteClaw | `projects/promoteclaw/README.md` |
-| TypeClaw | `projects/typeclaw/README.md` |
-| Memory work | `projects/memory/README.md` |
-| Mail work | `projects/mail/README.md` |
-| Claws work | `projects/claws/README.md` |
-| Claws Review Bot | `projects/claws-review-bot/README.md` |
-| Localization work | `projects/localization/README.md` |
-| oc-path work | `projects/oc-path/README.md` |
-| ClawPilot issue loop | `projects/clawpilot/README.md` |
-| Bugfix work | `projects/bugs/README.md` |
-| PR loop | `projects/pr-loop/README.md` |
-| PR queues and Gitcrawl | `projects/prs/README.md`, `projects/prs/gitcrawl.md` |
-| WSL operation | `projects/wsl/README.md`, `tools/wsl/README.md` |
-| Local tools | `tools/README.md` |
-| Worktree setup and audit | `tools/worktrees/README.md` |
+| Need                                | File                                                 |
+| ----------------------------------- | ---------------------------------------------------- |
+| Workspace map                       | `WORKSPACE.md`                                       |
+| Active project areas                | `projects/README.md`                                 |
+| Policy work                         | `projects/policy/README.md`                          |
+| Doctor work                         | `projects/doctor/README.md`                          |
+| Feeds work                          | `projects/feeds/README.md`                           |
+| Catalog work                        | `projects/catalog/README.md`                         |
+| Lobster work                        | `projects/lobster/README.md`                         |
+| UX state work                       | `projects/ux-state/README.md`                        |
+| Admin work                          | `projects/admin/README.md`                           |
+| Config admin UX                     | `projects/config-admin/README.md`                    |
+| Staffing analysis                   | `projects/staffing/README.md`                        |
+| Context-budget work                 | `projects/context-budget/README.md`                  |
+| Snapshot work                       | `projects/snapshot/README.md`                        |
+| OpenClaw hosting profiles           | `projects/hosting-profiles/README.md`                |
+| Lobster/OpenClaw layering contracts | `projects/layering-contracts/README.md`              |
+| Managed Configuration               | `projects/managed-config/README.md`                  |
+| Hosted Integration                  | `projects/hosted-integration/README.md`              |
+| Runtime State Continuity            | `projects/state-continuity/README.md`                |
+| PromoteClaw                         | `projects/promoteclaw/README.md`                     |
+| TypeClaw                            | `projects/typeclaw/README.md`                        |
+| Memory work                         | `projects/memory/README.md`                          |
+| Mail work                           | `projects/mail/README.md`                            |
+| Claws work                          | `projects/claws/README.md`                           |
+| Claws Review Bot                    | `projects/claws-review-bot/README.md`                |
+| Localization work                   | `projects/localization/README.md`                    |
+| oc-path work                        | `projects/oc-path/README.md`                         |
+| ClawPilot issue loop                | `projects/clawpilot/README.md`                       |
+| M5 Rendezvous commitments           | `projects/rendezvous/README.md`                      |
+| Bugfix work                         | `projects/bugs/README.md`                            |
+| PR loop                             | `projects/pr-loop/README.md`                         |
+| PR queues and Gitcrawl              | `projects/prs/README.md`, `projects/prs/gitcrawl.md` |
+| WSL operation                       | `projects/wsl/README.md`, `tools/wsl/README.md`      |
+| Local tools                         | `tools/README.md`                                    |
+| Worktree setup and audit            | `tools/worktrees/README.md`                          |
 
 ## Starting A Project Session
 
@@ -69,6 +70,7 @@ Common session files:
 - `projects/claws-review-bot/SESSION.md`
 - `projects/oc-path/SESSION.md`
 - `projects/clawpilot/SESSION.md`
+- `projects/rendezvous/SESSION.md`
 - `projects/bugs/SESSION.md`
 - `projects/pr-loop/SESSION.md`
 - `projects/prs/SESSION.md`

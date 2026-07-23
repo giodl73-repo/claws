@@ -8,17 +8,17 @@ claws is a compiler. Not a linter, not a validator, not a config generator -- a 
 
 9 workspace files. These are the source language:
 
-| File | What claws extracts |
-|------|---------------------|
-| SOUL.md | Deny, require, limit, elicit intents (keyword-anchored, confidence-scored) |
-| AGENTS.md | Delegation graph, trust escalation, circular dependency detection |
-| TOOLS.md | Tool manifest with risk classification (R1-R5), OBO detection, capabilities |
-| IDENTITY.md | Auth method, attestation level (L0-L3) |
-| USER.md | Authority scope, OBO permissions, data access grants |
-| MEMORY.md | Data labels, sensitivity levels, retention policies |
-| HEARTBEAT.md | Scheduled actions, risk derived from tools used |
-| skills/ | Skill intents, supply chain metadata, unsigned skill warnings |
-| lobster.yaml | Workflow DAG, data flow, governance injection points |
+| File         | What claws extracts                                                         |
+| ------------ | --------------------------------------------------------------------------- |
+| SOUL.md      | Deny, require, limit, elicit intents (keyword-anchored, confidence-scored)  |
+| AGENTS.md    | Delegation graph, trust escalation, circular dependency detection           |
+| TOOLS.md     | Tool manifest with risk classification (R1-R5), OBO detection, capabilities |
+| IDENTITY.md  | Auth method, attestation level (L0-L3)                                      |
+| USER.md      | Authority scope, OBO permissions, data access grants                        |
+| MEMORY.md    | Data labels, sensitivity levels, retention policies                         |
+| HEARTBEAT.md | Scheduled actions, risk derived from tools used                             |
+| skills/      | Skill intents, supply chain metadata, unsigned skill warnings               |
+| lobster.yaml | Workflow DAG, data flow, governance injection points                        |
 
 These files already exist in every OC workspace. claws does not invent a new config format. It reads what you already have.
 
@@ -51,13 +51,13 @@ PARSE         EXTRACT          ANALYZE           OPTIMIZE         EMIT
                                                                eliminated)     JSON, YAML)
 ```
 
-| Phase | Command | Input | Output | Latency budget |
-|-------|---------|-------|--------|----------------|
-| 1. PARSE | `claws compile` | 9 workspace files | GovernanceAST (~200 node types) | <100ms |
-| 2. EXTRACT | `claws compile` | GovernanceAST | CapabilityManifest (flat, queryable) | <50ms |
-| 3. ANALYZE | `claws compile` | Manifest + claws.json | GovAnalysis (violations, warnings, plan) | <200ms |
-| 4. OPTIMIZE | `claws build` | GovAnalysis | OptimizedPlan (dead rules removed, merged) | <50ms |
-| 5. EMIT | `claws build` | OptimizedPlan | 4 artifacts | <100ms |
+| Phase       | Command         | Input                 | Output                                     | Latency budget |
+| ----------- | --------------- | --------------------- | ------------------------------------------ | -------------- |
+| 1. PARSE    | `claws compile` | 9 workspace files     | GovernanceAST (~200 node types)            | <100ms         |
+| 2. EXTRACT  | `claws compile` | GovernanceAST         | CapabilityManifest (flat, queryable)       | <50ms          |
+| 3. ANALYZE  | `claws compile` | Manifest + claws.json | GovAnalysis (violations, warnings, plan)   | <200ms         |
+| 4. OPTIMIZE | `claws build`   | GovAnalysis           | OptimizedPlan (dead rules removed, merged) | <50ms          |
+| 5. EMIT     | `claws build`   | OptimizedPlan         | 4 artifacts                                | <100ms         |
 
 Total: <500ms for `claws build`. <350ms for `claws pinch`.
 
@@ -68,9 +68,9 @@ Phases 1-3 are `claws compile`. Phases 4-5 are `claws build`. The split matters 
 ```typescript
 interface GovernanceIR {
   readonly version: 1;
-  readonly manifest: CapabilityManifest;  // what the agent CAN do
-  readonly analysis: GovAnalysis;         // what the rules SAY about it
-  readonly hash: string;                  // for incremental recompilation
+  readonly manifest: CapabilityManifest; // what the agent CAN do
+  readonly analysis: GovAnalysis; // what the rules SAY about it
+  readonly hash: string; // for incremental recompilation
 }
 ```
 
@@ -82,15 +82,15 @@ The IR is the compilation contract. If you can read the IR, you can understand e
 
 The ANALYZE phase checks 7 conflict categories across files:
 
-| Conflict | Files involved | Severity |
-|----------|---------------|----------|
-| DENY vs TOOL | SOUL.md vs TOOLS.md | Error |
-| TRUST ESCALATION | AGENTS.md vs parent tier | Error |
-| OBO WITHOUT ELICIT | TOOLS.md vs SOUL.md/USER.md | Error |
-| DATA LABEL MISMATCH | MEMORY.md vs AGENTS.md | Error |
-| CIRCULAR DELEGATION | AGENTS.md internal | Error |
-| SKILL-TOOL GHOST | skills/ vs TOOLS.md | Warning |
-| SCHEDULE NO APPROVAL | HEARTBEAT.md vs TOOLS.md | Error |
+| Conflict             | Files involved              | Severity |
+| -------------------- | --------------------------- | -------- |
+| DENY vs TOOL         | SOUL.md vs TOOLS.md         | Error    |
+| TRUST ESCALATION     | AGENTS.md vs parent tier    | Error    |
+| OBO WITHOUT ELICIT   | TOOLS.md vs SOUL.md/USER.md | Error    |
+| DATA LABEL MISMATCH  | MEMORY.md vs AGENTS.md      | Error    |
+| CIRCULAR DELEGATION  | AGENTS.md internal          | Error    |
+| SKILL-TOOL GHOST     | skills/ vs TOOLS.md         | Warning  |
+| SCHEDULE NO APPROVAL | HEARTBEAT.md vs TOOLS.md    | Error    |
 
 OBO WITHOUT ELICIT was originally classified as Warning but was elevated to Error after scenario analysis determined that an R5/OBO tool without an elicitation policy contradicts the R5 fail-closed invariant. If R5 must always fail-closed, deploying an R5 tool without a governance gate means it can never execute -- a deterministic failure that warrants error severity.
 
@@ -139,6 +139,7 @@ craftworks  claws-sdk       -- SIBLINGS, never cross-import
 ```
 
 **Dependency rules**:
+
 1. `claws-sdk` imports from `compiler-sdk` and `agent-sdk` ONLY.
 2. `claws-sdk` does NOT import from `craftworks-sdk`. Ever.
 3. `claws-cli` imports from `claws-sdk` ONLY (thin UI adapter).
@@ -151,14 +152,14 @@ Governing spec: CL-04 Compilation Pipeline, CB-10 Authoritative Diagram.
 Eight invariants govern all claws compilation. Every guide in this directory
 upholds these; they are the non-negotiable constraints.
 
-1. **R5 fail-closed**: The compiler refuses to emit R5 fail-open. `FailMode<5>` resolves to `"fail-closed"` only in the type system. Non-negotiable, non-configurable. Enforced at three levels: (a) claws.json schema rejects at input, (b) compiler type system prevents it, (c) runtime handler enforces independently. *(Source: fail-mode S01-F01, S01-F06)*
+1. **R5 fail-closed**: The compiler refuses to emit R5 fail-open. `FailMode<5>` resolves to `"fail-closed"` only in the type system. Non-negotiable, non-configurable. Enforced at three levels: (a) claws.json schema rejects at input, (b) compiler type system prevents it, (c) runtime handler enforces independently. _(Source: fail-mode S01-F01, S01-F06)_
 2. **Lossless roundtrip**: claws never modifies the 9 workspace source files it reads. Add-only architecture -- governance is a layer beside your work, not on top of it.
-3. **No @craftworks/ in output**: Generated code (SKILL.md, plugin TypeScript, exec-approvals.json) contains zero `@craftworks/*` imports. All output passes the OC developer test. Import scanning checks TS source, not compiled JS. Error strings are audited for internal references. SKILL.md does not mention PRESS or Craftworks. Transitive runtime deps are audited. *(Source: emit-artifacts S08)*
+3. **No @craftworks/ in output**: Generated code (SKILL.md, plugin TypeScript, exec-approvals.json) contains zero `@craftworks/*` imports. All output passes the OC developer test. Import scanning checks TS source, not compiled JS. Error strings are audited for internal references. SKILL.md does not mention PRESS or Craftworks. Transitive runtime deps are audited. _(Source: emit-artifacts S08)_
 4. **Add-only architecture**: `claws init` adds files and modifies 3 config files with backups. `claws uninstall` removes everything and restores originals. No permanent workspace modification.
 5. **OC developer test**: Every line of generated code must look like something an OC developer would write themselves.
-6. **Atomic emit**: All 4 artifacts are emitted atomically via staging directory. Partial emit (SKILL.md without plugin) is prevented. *(Source: emit-artifacts S01-F01, P-071)*
-7. **Cross-artifact consistency**: Tool classifications must be identical across SKILL.md, exec-approvals.json, and plugin rule tables. Post-emit consistency check validates this. *(Source: emit-artifacts S04-F04, P-080)*
-8. **PRESS preserves safety-critical keywords**: Governance compression never removes never, always, must, prohibited, required, blocked. *(Source: emit-artifacts S04-F02, P-075)*
+6. **Atomic emit**: All 4 artifacts are emitted atomically via staging directory. Partial emit (SKILL.md without plugin) is prevented. _(Source: emit-artifacts S01-F01, P-071)_
+7. **Cross-artifact consistency**: Tool classifications must be identical across SKILL.md, exec-approvals.json, and plugin rule tables. Post-emit consistency check validates this. _(Source: emit-artifacts S04-F04, P-080)_
+8. **PRESS preserves safety-critical keywords**: Governance compression never removes never, always, must, prohibited, required, blocked. _(Source: emit-artifacts S04-F02, P-075)_
 
 ## For the gateway-eng
 
@@ -167,6 +168,7 @@ Every artifact the compiler emits must pass the Gateway performance bar: 50ms pe
 ## Scenario-Driven Additions
 
 ### From lossless-roundtrip scenarios (32 findings applied)
+
 - Write-allow-list enforcement in EMIT phase restricts which files the compiler can create or modify
 - Raw-byte SHA-256 verification hash (distinct from the normalized IR hash) enables lossless round-trip proof
 - BOM stripping occurs before keyword anchor extraction in PARSE; UTF-16 BOM detection triggers transcoding without write-back
@@ -176,6 +178,7 @@ Every artifact the compiler emits must pass the Gateway performance bar: 50ms pe
 - Last-known-good artifact preservation on compilation error prevents build failures from deleting working governance artifacts
 
 ### From platform-detection scenarios (47 findings applied)
+
 - Structural validation of marker file content (not just filename) prevents false-positive platform detection
 - Multi-platform detection with highest-enforcement-wins resolution when multiple platforms are present
 - Multi-language code generation architecture (TypeScript, Python, JSON, YAML) for platform-specific EMIT targets

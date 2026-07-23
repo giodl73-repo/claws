@@ -124,10 +124,10 @@ The kill switch is L5's emergency halt -- it terminates all agent execution when
 
 ## Kill Switch vs Bypass
 
-| Mechanism | Direction | Who triggers | What happens |
-|-----------|-----------|-------------|-------------|
-| Kill switch | Stop everything | Sidecar (automatic) or operator | All tool calls blocked, agents terminated |
-| Bypass | Allow everything | Operator only (env var) | Governance disabled, all tool calls allowed |
+| Mechanism   | Direction        | Who triggers                    | What happens                                |
+| ----------- | ---------------- | ------------------------------- | ------------------------------------------- |
+| Kill switch | Stop everything  | Sidecar (automatic) or operator | All tool calls blocked, agents terminated   |
+| Bypass      | Allow everything | Operator only (env var)         | Governance disabled, all tool calls allowed |
 
 Kill switch is a safety mechanism — it fires when governance itself is compromised. Bypass is an operator escape — it fires when governance is blocking critical work. They are opposites but both leave audit trails.
 

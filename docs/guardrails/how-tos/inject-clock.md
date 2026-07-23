@@ -28,10 +28,10 @@ Providers that read wall-clock time directly are:
 
 ```ts
 class MyProvider implements GuardrailProvider {
-  readonly id = 'my-provider';
+  readonly id = "my-provider";
 
   async preAuthorize(ctx: AuthorizationContext): Promise<HookResult> {
-    const now = ctx.host.now();           // ✓ correct
+    const now = ctx.host.now(); // ✓ correct
     if (now > this.cacheExpiry) {
       await this.refreshCache(now);
     }
@@ -45,7 +45,7 @@ class MyProvider implements GuardrailProvider {
 ```ts
 class MyProvider implements GuardrailProvider {
   async preAuthorize(ctx: AuthorizationContext): Promise<HookResult> {
-    const now = Date.now();               // ✗ breaks replay
+    const now = Date.now(); // ✗ breaks replay
     // ...
   }
 }
@@ -60,7 +60,7 @@ Lint rule at `test/e2e/harness/lint-rules/no-direct-clock.ts` catches
 The test harness exposes `ctx.host.now()` backed by `ClockMock`:
 
 ```ts
-import { ClockMock } from '#harness/clock-mock.js';
+import { ClockMock } from "#harness/clock-mock.js";
 
 const clock = new ClockMock(1_700_000_000_000);
 const ctx = makeContext({ host: { now: () => clock.now() } });

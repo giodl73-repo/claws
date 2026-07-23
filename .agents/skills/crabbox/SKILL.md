@@ -78,10 +78,11 @@ fi
 crabbox --version
 ```
 
-  Do not edit or clean the peer Crabbox repo while bootstrapping the binary;
-  it may have unrelated operator changes. Prefer copying an existing release
-  binary from `C:\src\crabbox\bin\linux-amd64\crabbox`, visible in WSL at
-  `/mnt/c/src/crabbox/bin/linux-amd64/crabbox`.
+Do not edit or clean the peer Crabbox repo while bootstrapping the binary;
+it may have unrelated operator changes. Prefer copying an existing release
+binary from `C:\src\crabbox\bin\linux-amd64\crabbox`, visible in WSL at
+`/mnt/c/src/crabbox/bin/linux-amd64/crabbox`.
+
 - Check the wrapper and providers before remote work:
 
 ```sh

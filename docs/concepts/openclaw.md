@@ -35,12 +35,12 @@ Zero-config mode ensures that any governed OpenClaw workspace can produce a vali
 
 OpenClaw enforcement is full, not advisory. Guard code emitted by `claws build` is executed by the OC Gateway before every tool invocation. The enforcement chain:
 
-| Stage | What happens |
-|-------|--------------|
-| Compile-time | claws validates all 9 workspace files, emits guard skills |
-| Gateway load | OC Gateway loads compiled guard skills into the skill registry |
-| Invocation | Guard runs before the governed tool. Pass = proceed. Fail = block. |
-| Audit | Every pass/fail decision is recorded with signed timestamps |
+| Stage        | What happens                                                       |
+| ------------ | ------------------------------------------------------------------ |
+| Compile-time | claws validates all 9 workspace files, emits guard skills          |
+| Gateway load | OC Gateway loads compiled guard skills into the skill registry     |
+| Invocation   | Guard runs before the governed tool. Pass = proceed. Fail = block. |
+| Audit        | Every pass/fail decision is recorded with signed timestamps        |
 
 R5 tools are fail-closed unconditionally. If the guard skill crashes, the tool invocation is blocked. This is non-configurable on OpenClaw -- the compiler refuses to emit R5 fail-open. Advisory enforcement (as used on Cursor and Copilot) is never applied to OpenClaw targets.
 

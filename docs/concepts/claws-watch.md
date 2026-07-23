@@ -81,10 +81,10 @@ longer than an ungoverned one.
 
 The inner ring is two layers:
 
-| Layer | Trigger | Catches | Latency |
-|-------|---------|---------|---------|
-| `claws watch` | File save | Issues during editing | <1s |
-| `claws check --staged` | Git commit | Issues that slipped past watch | <0.3s |
+| Layer                  | Trigger    | Catches                        | Latency |
+| ---------------------- | ---------- | ------------------------------ | ------- |
+| `claws watch`          | File save  | Issues during editing          | <1s     |
+| `claws check --staged` | Git commit | Issues that slipped past watch | <0.3s   |
 
 Watch is continuous feedback. The pre-commit hook is the safety net. Together
 they catch 70% of all governance issues before code leaves the workspace.
@@ -98,12 +98,12 @@ restarts are instant -- only changed files recompile.
 
 ## When to use watch vs manual check
 
-| Situation | Use |
-|-----------|-----|
-| Active development session | `claws watch` |
-| Quick one-off check | `claws check` |
-| Before committing | `claws check --staged` (hook) |
-| CI pipeline | `claws check --diff $BASE` |
+| Situation                  | Use                           |
+| -------------------------- | ----------------------------- |
+| Active development session | `claws watch`                 |
+| Quick one-off check        | `claws check`                 |
+| Before committing          | `claws check --staged` (hook) |
+| CI pipeline                | `claws check --diff $BASE`    |
 
 Watch is for humans editing files. Check is for automation and spot checks.
 Both run the same governance rules at the same speed.
@@ -111,6 +111,7 @@ Both run the same governance rules at the same speed.
 ## Scenario-Driven Additions
 
 ### From three-rings scenarios (50 findings applied)
+
 - File-save trigger mode distinct from --staged: watch fires on filesystem save events, not git stage events; both are inner ring but have different detection characteristics
 - Rapid file-save batch window (300ms): multiple saves within 300ms are coalesced into a single recompile to prevent wasted builds during fast edits
 - Windows file watcher event deduplication: Windows FSEvents may fire duplicate events for a single save; the watcher deduplicates before triggering a build

@@ -1,5 +1,5 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
-import type { InvalidReason } from '../types.js';
+import { createHmac, timingSafeEqual } from "node:crypto";
+import type { InvalidReason } from "../types.js";
 
 export interface SignatureInput {
   readonly payload: Uint8Array;
@@ -8,7 +8,7 @@ export interface SignatureInput {
   readonly keyLookup: (keyId: string) => Buffer | undefined;
 }
 
-const SIG_SEP = '.';
+const SIG_SEP = ".";
 
 /**
  * HMAC-SHA256 signature pre-check. Runs before any field evaluation and
@@ -22,21 +22,21 @@ const SIG_SEP = '.';
 export function checkSignature(input: SignatureInput): InvalidReason | null {
   const sep = input.signature.indexOf(SIG_SEP);
   if (sep <= 0 || sep === input.signature.length - 1) {
-    return 'signature-mismatch';
+    return "signature-mismatch";
   }
   const keyId = input.signature.slice(0, sep);
   const macHex = input.signature.slice(sep + 1);
   if (!input.trustSet.has(keyId)) {
-    return 'unknown-keyId';
+    return "unknown-keyId";
   }
   const trusted = input.keyLookup(keyId);
   if (trusted === undefined) {
-    return 'unknown-keyId';
+    return "unknown-keyId";
   }
-  const expected = createHmac('sha256', trusted).update(input.payload).digest();
-  const candidate = Buffer.from(macHex, 'hex');
+  const expected = createHmac("sha256", trusted).update(input.payload).digest();
+  const candidate = Buffer.from(macHex, "hex");
   if (candidate.length !== expected.length) {
-    return 'signature-mismatch';
+    return "signature-mismatch";
   }
-  return timingSafeEqual(candidate, expected) ? null : 'signature-mismatch';
+  return timingSafeEqual(candidate, expected) ? null : "signature-mismatch";
 }

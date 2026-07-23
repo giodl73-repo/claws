@@ -11,7 +11,7 @@ covers: [atom:WSC]
 A JSON value exercising number edge cases:
 
 ```json
-{"n1": 0.1, "n2": 1e20, "n3": -0, "s": "café"}
+{ "n1": 0.1, "n2": 1e20, "n3": -0, "s": "café" }
 ```
 
 ## Run

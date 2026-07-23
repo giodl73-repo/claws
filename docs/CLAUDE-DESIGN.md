@@ -17,46 +17,46 @@ claws is the governance compiler for OpenClaw agents. It reads 9 workspace files
 
 ## Current Status
 
-| Area | Status |
-|------|--------|
-| Research | Complete — 18 questions (Q01-Q18), all Proposed |
-| Specs | Complete — 13 specs (CL-01 through CL-13), all Draft |
-| Deck | Complete — why-claws.md + .pptx |
-| Roles | Complete — 8 roles + openclaw domain lens |
-| Pitfalls | Complete — 50 pitfalls + HITL map |
-| Command Map | Complete — 40 commands, 8 groups |
-| Scenarios | Complete — 331 scenarios across 30 series |
+| Area           | Status                                                                               |
+| -------------- | ------------------------------------------------------------------------------------ |
+| Research       | Complete — 18 questions (Q01-Q18), all Proposed                                      |
+| Specs          | Complete — 13 specs (CL-01 through CL-13), all Draft                                 |
+| Deck           | Complete — why-claws.md + .pptx                                                      |
+| Roles          | Complete — 8 roles + openclaw domain lens                                            |
+| Pitfalls       | Complete — 50 pitfalls + HITL map                                                    |
+| Command Map    | Complete — 40 commands, 8 groups                                                     |
+| Scenarios      | Complete — 331 scenarios across 30 series                                            |
 | Implementation | Complete — 3 waves: Ptah (foundation), Anubis (ops), Thoth (ecosystem) — 4,571 tests |
 
 ## Phase Map
 
-| Phase | Focus | Status |
-|-------|-------|--------|
-| 0 | Research (Q01-Q18) | Complete — 18 questions |
-| 1 | Specs (CL-01 through CL-13) | Complete — 13 specs |
-| 2 | Scenario accumulation | Complete — 331 scenarios, 30 series |
-| 3 | Role-based reviews | Complete — per-checkpoint reviews |
-| 4 | Implementation (Ptah) | Complete — foundation wave XC (453 tests) |
-| 5 | Implementation (Anubis) | Complete — operations wave XCIV |
-| 6 | Implementation (Thoth) | Complete — ecosystem wave XCV (4,571 tests) |
+| Phase | Focus                       | Status                                      |
+| ----- | --------------------------- | ------------------------------------------- |
+| 0     | Research (Q01-Q18)          | Complete — 18 questions                     |
+| 1     | Specs (CL-01 through CL-13) | Complete — 13 specs                         |
+| 2     | Scenario accumulation       | Complete — 331 scenarios, 30 series         |
+| 3     | Role-based reviews          | Complete — per-checkpoint reviews           |
+| 4     | Implementation (Ptah)       | Complete — foundation wave XC (453 tests)   |
+| 5     | Implementation (Anubis)     | Complete — operations wave XCIV             |
+| 6     | Implementation (Thoth)      | Complete — ecosystem wave XCV (4,571 tests) |
 
 ## Spec Index (Quick Reference)
 
-| Spec | Focus | Source | Status |
-|------|-------|--------|--------|
-| CL-01 | CLI Surface & Schema | Q12a-d, Q12g | Draft |
-| CL-02 | Security Model | Q12h | Draft |
-| CL-03 | Runtime Enforcement | Q12i, Q12r | Draft |
-| CL-04 | Compilation Pipeline | Q12j, Q12m | Draft |
-| CL-05 | Developer Experience | Q12e-f, Q12o, Q12q | Draft |
-| CL-06 | Platform Ecosystem | Q12k-l, Q12n | Draft |
-| CL-07 | Deep Integration | Q12p, Q12b | Draft |
-| CL-08 | Freemium Boundary | Q12s | Draft |
-| CL-09 | OC Workspace Format | Q12t | Draft |
-| CL-10 | CAP Integration & Serve API | CAP Product Day | Draft |
-| CL-11 | Upstream Governance | Q12b, Thoth | Draft |
-| CL-12 | Approval Event Schema | Q12b, Thoth | Draft |
-| CL-13 | Repo Boundary | Horus / claws-repo-migration | Draft |
+| Spec  | Focus                       | Source                       | Status |
+| ----- | --------------------------- | ---------------------------- | ------ |
+| CL-01 | CLI Surface & Schema        | Q12a-d, Q12g                 | Draft  |
+| CL-02 | Security Model              | Q12h                         | Draft  |
+| CL-03 | Runtime Enforcement         | Q12i, Q12r                   | Draft  |
+| CL-04 | Compilation Pipeline        | Q12j, Q12m                   | Draft  |
+| CL-05 | Developer Experience        | Q12e-f, Q12o, Q12q           | Draft  |
+| CL-06 | Platform Ecosystem          | Q12k-l, Q12n                 | Draft  |
+| CL-07 | Deep Integration            | Q12p, Q12b                   | Draft  |
+| CL-08 | Freemium Boundary           | Q12s                         | Draft  |
+| CL-09 | OC Workspace Format         | Q12t                         | Draft  |
+| CL-10 | CAP Integration & Serve API | CAP Product Day              | Draft  |
+| CL-11 | Upstream Governance         | Q12b, Thoth                  | Draft  |
+| CL-12 | Approval Event Schema       | Q12b, Thoth                  | Draft  |
+| CL-13 | Repo Boundary               | Horus / claws-repo-migration | Draft  |
 
 ## Key Design Decisions (from research)
 
@@ -80,13 +80,13 @@ claws is the governance compiler for OpenClaw agents. It reads 9 workspace files
 
 ## Key References
 
-| Document | Purpose |
-|----------|---------|
-| `SPECS.md` | Spec index |
-| `DCR.md` | Design change records |
-| `design/claws/COMMAND-MAP.md` | Command surface (40 commands) |
-| `design/claws/PITFALLS.md` | 50 pitfalls + HITL map |
-| `design/claws/focus/Q01-Q18` | 18 research questions |
-| `.craft/roles/claws/` | 8 stakeholder roles |
-| `docs/claws/presentations/why-claws.md` | Product pitch deck |
-| `design/agent/focus/Q12m/data/atoms-audit.md` | 163 atoms classified |
+| Document                                      | Purpose                       |
+| --------------------------------------------- | ----------------------------- |
+| `SPECS.md`                                    | Spec index                    |
+| `DCR.md`                                      | Design change records         |
+| `design/claws/COMMAND-MAP.md`                 | Command surface (40 commands) |
+| `design/claws/PITFALLS.md`                    | 50 pitfalls + HITL map        |
+| `design/claws/focus/Q01-Q18`                  | 18 research questions         |
+| `.craft/roles/claws/`                         | 8 stakeholder roles           |
+| `docs/claws/presentations/why-claws.md`       | Product pitch deck            |
+| `design/agent/focus/Q12m/data/atoms-audit.md` | 163 atoms classified          |

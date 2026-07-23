@@ -71,13 +71,13 @@ verified on rehydration.
 
 ## Failure Modes
 
-| Scenario | Behavior |
-|----------|----------|
-| Missing integrity block | Reject artifact (fail-closed) |
-| Unknown algorithm | Reject artifact (fail-closed) |
-| Signature mismatch | Reject artifact, emit tamper alert |
+| Scenario                  | Behavior                               |
+| ------------------------- | -------------------------------------- |
+| Missing integrity block   | Reject artifact (fail-closed)          |
+| Unknown algorithm         | Reject artifact (fail-closed)          |
+| Signature mismatch        | Reject artifact, emit tamper alert     |
 | Expired signature (> 24h) | Warn, but accept (stale, not tampered) |
-| Valid signature | Accept artifact |
+| Valid signature           | Accept artifact                        |
 
 ---
 

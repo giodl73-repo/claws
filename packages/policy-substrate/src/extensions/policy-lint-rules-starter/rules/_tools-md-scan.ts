@@ -6,7 +6,7 @@
  *
  * NOT exported from the lint pack's index — internal helper only.
  */
-import type { OcAst } from '@openclaw/oc-path';
+import type { OcAst } from "@openclaw/oc-path";
 
 export interface ToolHeaderHit {
   /** Tool name as authored, e.g., `post-channel`. Empty if malformed. */
@@ -18,19 +18,19 @@ export interface ToolHeaderHit {
 }
 
 export function scanToolHeaders(ast: OcAst): readonly ToolHeaderHit[] {
-  if (ast.kind !== 'md') return [];
-  const block = ast.blocks.find((b) => b.slug === 'tools');
+  if (ast.kind !== "md") return [];
+  const block = ast.blocks.find((b) => b.slug === "tools");
   if (block === undefined) return [];
-  const bodyLines = block.bodyText.split('\n');
+  const bodyLines = block.bodyText.split("\n");
   const hits: ToolHeaderHit[] = [];
   for (let i = 0; i < bodyLines.length; i++) {
     const line = bodyLines[i]!;
-    if (!line.startsWith('### ')) continue;
+    if (!line.startsWith("### ")) continue;
     const tail = line.slice(4);
     const nameMatch = tail.match(/^[\w-]+/);
-    const name = nameMatch ? nameMatch[0] : '';
-    const hashIdx = tail.indexOf('#');
-    const meta = hashIdx === -1 ? '' : tail.slice(hashIdx + 1).trim();
+    const name = nameMatch ? nameMatch[0] : "";
+    const hashIdx = tail.indexOf("#");
+    const meta = hashIdx === -1 ? "" : tail.slice(hashIdx + 1).trim();
     hits.push({ name, meta, line: block.line + 1 + i });
   }
   return hits;

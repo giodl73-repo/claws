@@ -13,4 +13,3 @@ Use active directories instead:
 When a wave artifact becomes active work, promote a summary or the runnable
 artifact into the appropriate active directory and leave the original wave in
 place as provenance.
-

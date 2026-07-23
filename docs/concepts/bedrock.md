@@ -43,13 +43,13 @@ AWS updates the Bedrock CreateGuardrail API over time. If claws hardcodes a sing
 
 Not all governance rules translate directly to Bedrock Guardrail concepts. claws maps governance model constructs to Bedrock equivalents:
 
-| claws concept | Bedrock equivalent | Coverage |
-|---------------|-------------------|----------|
-| Tool deny list | Content filter (topic policy) | Full |
-| OBO boundary | No direct equivalent | Partial -- advisory annotation |
-| Risk classification | Guardrail strength levels | Full |
-| Trust tier | N/A | Metadata only |
-| Elicitation gate | N/A | Not expressible in guardrail JSON |
+| claws concept       | Bedrock equivalent            | Coverage                          |
+| ------------------- | ----------------------------- | --------------------------------- |
+| Tool deny list      | Content filter (topic policy) | Full                              |
+| OBO boundary        | No direct equivalent          | Partial -- advisory annotation    |
+| Risk classification | Guardrail strength levels     | Full                              |
+| Trust tier          | N/A                           | Metadata only                     |
+| Elicitation gate    | N/A                           | Not expressible in guardrail JSON |
 
 When a governance rule has no Bedrock equivalent, claws emits a diagnostic noting the translation gap. The developer must implement the missing enforcement in application code. Governance model translation coverage is tracked per Bedrock API version.
 

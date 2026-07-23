@@ -10,13 +10,13 @@ When agents communicate with each other (delegation, handoff, shared data access
 
 A2A governance implements FE6 in the fence model (FE1-FE6):
 
-| Fence | Boundary |
-|-------|----------|
-| FE1 | Tool call boundaries |
-| FE2 | Delegation limits |
-| FE3 | Escalation rules |
-| FE4 | MCP trust gates |
-| FE5 | External API boundaries |
+| Fence   | Boundary                         |
+| ------- | -------------------------------- |
+| FE1     | Tool call boundaries             |
+| FE2     | Delegation limits                |
+| FE3     | Escalation rules                 |
+| FE4     | MCP trust gates                  |
+| FE5     | External API boundaries          |
 | **FE6** | **Agent-to-agent communication** |
 
 ## Enforcement Rules

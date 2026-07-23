@@ -28,15 +28,15 @@ We assume the adversary CANNOT:
 
 ## What each layer protects
 
-| Layer | Protects against |
-|-------|------------------|
-| R1-R5 tier classification | tool misuse at the wrong authority level |
-| OBO boundary | agent self-escalation to R4+ without user delegation |
-| 16 injection defences | prompt injection, args tampering, return-value smuggling |
-| Handle-binding 7-tuple | replay of approval-handle + args substitution |
-| Audit chain cross-linking | silent policy substitution, chain tampering |
-| Drain-window semantics | in-flight decision reclassification during promote |
-| Kill switch | emergency stop without redeploying policy |
+| Layer                     | Protects against                                         |
+| ------------------------- | -------------------------------------------------------- |
+| R1-R5 tier classification | tool misuse at the wrong authority level                 |
+| OBO boundary              | agent self-escalation to R4+ without user delegation     |
+| 16 injection defences     | prompt injection, args tampering, return-value smuggling |
+| Handle-binding 7-tuple    | replay of approval-handle + args substitution            |
+| Audit chain cross-linking | silent policy substitution, chain tampering              |
+| Drain-window semantics    | in-flight decision reclassification during promote       |
+| Kill switch               | emergency stop without redeploying policy                |
 
 ## Chain of custody
 

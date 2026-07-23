@@ -16,9 +16,9 @@
  * @module @bic/openclaw-lkg/lkg-store
  */
 
-import * as crypto from 'node:crypto';
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
+import * as crypto from "node:crypto";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import type {
   LKGEntry,
   LKGFingerprint,
@@ -26,18 +26,18 @@ import type {
   LKGStore,
   LKGTracker,
   ValidationIssue,
-} from '@bic/v2-prototype';
-import { LKGErrorImpl } from '@bic/v2-prototype';
+} from "@bic/v2-prototype";
+import { LKGErrorImpl } from "@bic/v2-prototype";
 
-import { makeFingerprint, hashRaw } from './fingerprint.js';
-import { clobberedPathFor, lkgPathFor } from './paths.js';
+import { makeFingerprint, hashRaw } from "./fingerprint.js";
+import { clobberedPathFor, lkgPathFor } from "./paths.js";
 
 export interface AuditRecord {
   readonly ts: string;
-  readonly source: 'lkg';
-  readonly event: 'observe';
+  readonly source: "lkg";
+  readonly event: "observe";
   readonly trackerPath: string;
-  readonly outcome: LKGObservation['outcome'];
+  readonly outcome: LKGObservation["outcome"];
   readonly current: LKGFingerprint | null;
   readonly lastKnownGood: LKGFingerprint | null;
   readonly clobberedPath: string | null;
@@ -91,26 +91,31 @@ async function writeAtomic(
     await fs.rename(tmp, target);
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
-    if (code === 'ENOENT' || code === 'EEXIST' || code === 'EPERM') {
-      try { await fs.unlink(tmp); } catch { /* ignore */ }
-      try { await fs.access(target); return; } catch { /* fall through */ }
+    if (code === "ENOENT" || code === "EEXIST" || code === "EPERM") {
+      try {
+        await fs.unlink(tmp);
+      } catch {
+        /* ignore */
+      }
+      try {
+        await fs.access(target);
+        return;
+      } catch {
+        /* fall through */
+      }
     }
     throw err;
   }
 }
 
-function makeSuspiciousSignature(
-  current: LKGFingerprint,
-  reasons: readonly string[],
-): string {
-  return `${current.hash}:${[...reasons].sort().join(',')}`;
+function makeSuspiciousSignature(current: LKGFingerprint, reasons: readonly string[]): string {
+  return `${current.hash}:${[...reasons].sort().join(",")}`;
 }
 
 export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
   const trackers = new Map<string, RegisteredTracker>();
   const now = opts.now ?? (() => new Date());
-  const randomSuffix =
-    opts.randomSuffix ?? (() => crypto.randomBytes(8).toString('hex'));
+  const randomSuffix = opts.randomSuffix ?? (() => crypto.randomBytes(8).toString("hex"));
   const onAudit = opts.onAudit;
   const onRecoveryNotice = opts.onRecoveryNotice;
 
@@ -119,7 +124,7 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
     const reg = trackers.get(normalized);
     if (reg === undefined) {
       throw new LKGErrorImpl(
-        'LKG_TRACKER_PATH_INVALID',
+        "LKG_TRACKER_PATH_INVALID",
         `No tracker registered for path: ${normalized}`,
       );
     }
@@ -182,7 +187,7 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
     const lkgPath = lkgPathFor(reg.tracker.path);
     let lkgRaw: string;
     try {
-      lkgRaw = await fs.readFile(lkgPath, 'utf-8');
+      lkgRaw = await fs.readFile(lkgPath, "utf-8");
     } catch {
       return null;
     }
@@ -207,13 +212,13 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
       const normalized = path.normalize(tracker.path);
       if (!path.isAbsolute(normalized)) {
         throw new LKGErrorImpl(
-          'LKG_TRACKER_PATH_INVALID',
+          "LKG_TRACKER_PATH_INVALID",
           `Tracker path must be absolute: ${tracker.path}`,
         );
       }
       if (trackers.has(normalized)) {
         throw new LKGErrorImpl(
-          'LKG_TRACKER_PATH_COLLISION',
+          "LKG_TRACKER_PATH_COLLISION",
           `Tracker already registered for path: ${normalized}`,
         );
       }
@@ -226,24 +231,24 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
 
       let raw: string;
       try {
-        raw = await fs.readFile(reg.tracker.path, 'utf-8');
+        raw = await fs.readFile(reg.tracker.path, "utf-8");
       } catch (err) {
         const issues: ValidationIssue[] = [
-          { path: '', message: `read failed: ${(err as Error).message}`, code: 'read-failed' },
+          { path: "", message: `read failed: ${(err as Error).message}`, code: "read-failed" },
         ];
         await emitAudit({
           ts: observedAt,
-          source: 'lkg',
-          event: 'observe',
+          source: "lkg",
+          event: "observe",
           trackerPath: reg.tracker.path,
-          outcome: 'failed',
+          outcome: "failed",
           current: null,
           lastKnownGood: reg.entry.lastKnownGood ?? null,
           clobberedPath: null,
           suspicious: [],
           issues,
         });
-        return { outcome: 'failed', reason: 'read-failed', issues };
+        return { outcome: "failed", reason: "read-failed", issues };
       }
 
       const stat = await statOrNull(reg.tracker.path);
@@ -259,7 +264,7 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
         // Treat parse failure as invalid; let the validator surface
         // the issue if it can, otherwise synthesize one.
         const issues: ValidationIssue[] = [
-          { path: '', message: `parse failed: ${(err as Error).message}`, code: 'unparseable' },
+          { path: "", message: `parse failed: ${(err as Error).message}`, code: "unparseable" },
         ];
         const validation = { valid: false, issues };
         const skip =
@@ -268,10 +273,10 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
         if (skip) {
           await emitAudit({
             ts: observedAt,
-            source: 'lkg',
-            event: 'observe',
+            source: "lkg",
+            event: "observe",
             trackerPath: reg.tracker.path,
-            outcome: 'skipped',
+            outcome: "skipped",
             current: fingerprint,
             lastKnownGood: reg.entry.lastKnownGood ?? null,
             clobberedPath: null,
@@ -279,49 +284,49 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
             issues,
           });
           return {
-            outcome: 'skipped',
-            reason: 'tracker-shouldRecover-false',
+            outcome: "skipped",
+            reason: "tracker-shouldRecover-false",
             issues,
           };
         }
-        const recovery = await recover(reg, raw, fingerprint, 'unparseable');
+        const recovery = await recover(reg, raw, fingerprint, "unparseable");
         if (recovery === null) {
           await emitAudit({
             ts: observedAt,
-            source: 'lkg',
-            event: 'observe',
+            source: "lkg",
+            event: "observe",
             trackerPath: reg.tracker.path,
-            outcome: 'skipped',
+            outcome: "skipped",
             current: fingerprint,
             lastKnownGood: reg.entry.lastKnownGood ?? null,
             clobberedPath: null,
             suspicious: [],
             issues,
           });
-          return { outcome: 'skipped', reason: 'no-lkg-available', issues };
+          return { outcome: "skipped", reason: "no-lkg-available", issues };
         }
         await emitAudit({
           ts: observedAt,
-          source: 'lkg',
-          event: 'observe',
+          source: "lkg",
+          event: "observe",
           trackerPath: reg.tracker.path,
-          outcome: 'recovered',
+          outcome: "recovered",
           current: fingerprint,
           lastKnownGood: reg.entry.lastKnownGood ?? null,
           clobberedPath: recovery.clobberedPath,
-          suspicious: ['unparseable'],
+          suspicious: ["unparseable"],
           issues,
         });
         await emitRecoveryNotice({
           ts: observedAt,
           trackerPath: reg.tracker.path,
-          reason: 'unparseable',
+          reason: "unparseable",
           clobberedPath: recovery.clobberedPath,
           restoredFrom: recovery.restoredFrom,
         });
         return {
-          outcome: 'recovered',
-          reason: 'unparseable',
+          outcome: "recovered",
+          reason: "unparseable",
           clobberedPath: recovery.clobberedPath,
           restoredFrom: recovery.restoredFrom,
         };
@@ -333,7 +338,7 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
         validation = (reg.tracker as LKGTracker<unknown>).validate(parsed);
       } catch (err) {
         throw new LKGErrorImpl(
-          'LKG_VALIDATOR_THREW',
+          "LKG_VALIDATOR_THREW",
           `Validator threw for ${reg.tracker.path}: ${(err as Error).message}`,
           err,
         );
@@ -364,31 +369,31 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
           await promote(reg, raw, fingerprint);
           await emitAudit({
             ts: observedAt,
-            source: 'lkg',
-            event: 'observe',
+            source: "lkg",
+            event: "observe",
             trackerPath: reg.tracker.path,
-            outcome: 'promoted',
+            outcome: "promoted",
             current: fingerprint,
             lastKnownGood: fingerprint,
             clobberedPath: null,
             suspicious: [],
             issues: [],
           });
-          return { outcome: 'promoted', fingerprint };
+          return { outcome: "promoted", fingerprint };
         }
         await emitAudit({
           ts: observedAt,
-          source: 'lkg',
-          event: 'observe',
+          source: "lkg",
+          event: "observe",
           trackerPath: reg.tracker.path,
-          outcome: 'valid',
+          outcome: "valid",
           current: fingerprint,
           lastKnownGood: lkgFingerprint ?? fingerprint,
           clobberedPath: null,
           suspicious: [],
           issues: [],
         });
-        return { outcome: 'valid', fingerprint };
+        return { outcome: "valid", fingerprint };
       }
 
       // Suspicious-vs-LKG: dedup by signature.
@@ -397,42 +402,42 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
         if (reg.entry.lastObservedSuspiciousSignature === sig) {
           await emitAudit({
             ts: observedAt,
-            source: 'lkg',
-            event: 'observe',
+            source: "lkg",
+            event: "observe",
             trackerPath: reg.tracker.path,
-            outcome: 'valid',
+            outcome: "valid",
             current: fingerprint,
             lastKnownGood: lkgFingerprint ?? null,
             clobberedPath: null,
             suspicious,
             issues: [],
           });
-          return { outcome: 'valid', fingerprint };
+          return { outcome: "valid", fingerprint };
         }
         // First time we see this suspicious signature: try to recover.
         reg.entry = { ...reg.entry, lastObservedSuspiciousSignature: sig };
-        const recovery = await recover(reg, raw, fingerprint, 'suspicious-vs-lkg');
+        const recovery = await recover(reg, raw, fingerprint, "suspicious-vs-lkg");
         if (recovery === null) {
           await emitAudit({
             ts: observedAt,
-            source: 'lkg',
-            event: 'observe',
+            source: "lkg",
+            event: "observe",
             trackerPath: reg.tracker.path,
-            outcome: 'skipped',
+            outcome: "skipped",
             current: fingerprint,
             lastKnownGood: lkgFingerprint ?? null,
             clobberedPath: null,
             suspicious,
             issues: [],
           });
-          return { outcome: 'skipped', reason: 'no-lkg-available', issues: [] };
+          return { outcome: "skipped", reason: "no-lkg-available", issues: [] };
         }
         await emitAudit({
           ts: observedAt,
-          source: 'lkg',
-          event: 'observe',
+          source: "lkg",
+          event: "observe",
           trackerPath: reg.tracker.path,
-          outcome: 'recovered',
+          outcome: "recovered",
           current: fingerprint,
           lastKnownGood: lkgFingerprint ?? null,
           clobberedPath: recovery.clobberedPath,
@@ -442,13 +447,13 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
         await emitRecoveryNotice({
           ts: observedAt,
           trackerPath: reg.tracker.path,
-          reason: `suspicious:${suspicious.join(',')}`,
+          reason: `suspicious:${suspicious.join(",")}`,
           clobberedPath: recovery.clobberedPath,
           restoredFrom: recovery.restoredFrom,
         });
         return {
-          outcome: 'recovered',
-          reason: `suspicious:${suspicious.join(',')}`,
+          outcome: "recovered",
+          reason: `suspicious:${suspicious.join(",")}`,
           clobberedPath: recovery.clobberedPath,
           restoredFrom: recovery.restoredFrom,
         };
@@ -464,10 +469,10 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
       if (skip) {
         await emitAudit({
           ts: observedAt,
-          source: 'lkg',
-          event: 'observe',
+          source: "lkg",
+          event: "observe",
           trackerPath: reg.tracker.path,
-          outcome: 'skipped',
+          outcome: "skipped",
           current: fingerprint,
           lastKnownGood: lkgFingerprint ?? null,
           clobberedPath: null,
@@ -475,20 +480,20 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
           issues: validation.issues,
         });
         return {
-          outcome: 'skipped',
-          reason: 'plugin-local-invalidity',
+          outcome: "skipped",
+          reason: "plugin-local-invalidity",
           issues: validation.issues,
         };
       }
 
-      const recovery = await recover(reg, raw, fingerprint, 'invalid');
+      const recovery = await recover(reg, raw, fingerprint, "invalid");
       if (recovery === null) {
         await emitAudit({
           ts: observedAt,
-          source: 'lkg',
-          event: 'observe',
+          source: "lkg",
+          event: "observe",
           trackerPath: reg.tracker.path,
-          outcome: 'skipped',
+          outcome: "skipped",
           current: fingerprint,
           lastKnownGood: lkgFingerprint ?? null,
           clobberedPath: null,
@@ -496,17 +501,17 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
           issues: validation.issues,
         });
         return {
-          outcome: 'skipped',
-          reason: 'no-lkg-available',
+          outcome: "skipped",
+          reason: "no-lkg-available",
           issues: validation.issues,
         };
       }
       await emitAudit({
         ts: observedAt,
-        source: 'lkg',
-        event: 'observe',
+        source: "lkg",
+        event: "observe",
         trackerPath: reg.tracker.path,
-        outcome: 'recovered',
+        outcome: "recovered",
         current: fingerprint,
         lastKnownGood: lkgFingerprint ?? null,
         clobberedPath: recovery.clobberedPath,
@@ -516,13 +521,13 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
       await emitRecoveryNotice({
         ts: observedAt,
         trackerPath: reg.tracker.path,
-        reason: 'invalid',
+        reason: "invalid",
         clobberedPath: recovery.clobberedPath,
         restoredFrom: recovery.restoredFrom,
       });
       return {
-        outcome: 'recovered',
-        reason: 'invalid',
+        outcome: "recovered",
+        reason: "invalid",
         clobberedPath: recovery.clobberedPath,
         restoredFrom: recovery.restoredFrom,
       };
@@ -536,7 +541,7 @@ export function lkgStore(opts: LKGStoreOptions = {}): LKGStore {
         return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
       } catch (err) {
         throw new LKGErrorImpl(
-          'LKG_STORE_UNAVAILABLE',
+          "LKG_STORE_UNAVAILABLE",
           `LKG not yet established for ${reg.tracker.path}`,
           err,
         );

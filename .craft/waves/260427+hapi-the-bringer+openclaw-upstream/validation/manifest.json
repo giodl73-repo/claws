@@ -4,14 +4,7 @@
     {
       "slug": "kitchen-sink",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "SOUL.md",
-        "IDENTITY.md",
-        "MEMORY.md",
-        "sessions/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "SOUL.md", "IDENTITY.md", "MEMORY.md", "sessions/"],
       "notes": "Golden path. Every OpenClaw-shape file present and valid; the toolchain baseline."
     },
     {
@@ -23,25 +16,19 @@
     {
       "slug": "only-claude-md",
       "kind": "synthetic",
-      "shapeFiles": [
-        "CLAUDE.md"
-      ],
+      "shapeFiles": ["CLAUDE.md"],
       "notes": "Realistic minimum: many public repos ship CLAUDE.md and nothing else."
     },
     {
       "slug": "lobster-shell-collision",
       "kind": "synthetic",
-      "shapeFiles": [
-        "lobster.yaml"
-      ],
+      "shapeFiles": ["lobster.yaml"],
       "notes": "Triggers oclint-rules-lobster-yaml-starter/step/shell-tool-collision. Two of three steps reference in-process tool names via `command:`."
     },
     {
       "slug": "policy-jsonc-rich-syntax",
       "kind": "synthetic",
-      "shapeFiles": [
-        "policy.jsonc"
-      ],
+      "shapeFiles": ["policy.jsonc"],
       "notes": "Exercises JSONC parser fidelity through the policy stack: line + block comments, trailing commas, structured comment positions."
     },
     {
@@ -56,12 +43,7 @@
       "domain": "web/AI-app",
       "lang": "TS",
       "stars": 20243,
-      "shapeFiles": [
-        "AGENTS.md",
-        "CLAUDE.md(symlink)",
-        ".agents/",
-        ".claude/"
-      ],
+      "shapeFiles": ["AGENTS.md", "CLAUDE.md(symlink)", ".agents/", ".claude/"],
       "notes": "CLAUDE.md is a symlink â€” real path-resolver edge case"
     },
     {
@@ -76,13 +58,7 @@
       "domain": "web/registry",
       "lang": "TS",
       "stars": 410,
-      "shapeFiles": [
-        "AGENTS.md",
-        "CLAUDE.md(stub)",
-        ".agents/",
-        ".claude/",
-        ".claude-plugin/"
-      ],
+      "shapeFiles": ["AGENTS.md", "CLAUDE.md(stub)", ".agents/", ".claude/", ".claude-plugin/"],
       "notes": "19.5KB AGENTS.md + .claude-plugin/ packaging"
     },
     {
@@ -97,13 +73,7 @@
       "domain": "ML/RL",
       "lang": "Python",
       "stars": 576,
-      "shapeFiles": [
-        "AGENTS.md",
-        "CLAUDE.md(stub)",
-        ".agents/",
-        ".claude/",
-        ".claude-plugin/"
-      ],
+      "shapeFiles": ["AGENTS.md", "CLAUDE.md(stub)", ".agents/", ".claude/", ".claude-plugin/"],
       "notes": "Full substrate, RL training environment"
     },
     {
@@ -118,10 +88,7 @@
       "domain": "ML/agents",
       "lang": "Python",
       "stars": 103,
-      "shapeFiles": [
-        "AGENTS.md",
-        "CLAUDE.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "CLAUDE.md"],
       "notes": "Both files large; Microsoft-public OSS"
     },
     {
@@ -136,10 +103,7 @@
       "domain": "web/lib",
       "lang": "TS",
       "stars": 42576,
-      "shapeFiles": [
-        "AGENTS.md",
-        "CLAUDE.md(stub)"
-      ],
+      "shapeFiles": ["AGENTS.md", "CLAUDE.md(stub)"],
       "notes": "Massive-star OSS lib; stub-CLAUDE pattern"
     },
     {
@@ -154,12 +118,7 @@
       "domain": "mobile/lib",
       "lang": "TS",
       "stars": 1011,
-      "shapeFiles": [
-        "AGENTS.md",
-        "CLAUDE.md",
-        ".agents/",
-        ".claude/"
-      ],
+      "shapeFiles": ["AGENTS.md", "CLAUDE.md", ".agents/", ".claude/"],
       "notes": "Korean OSS mobile navigation"
     },
     {
@@ -174,10 +133,7 @@
       "domain": "backend/NestJS",
       "lang": "TS",
       "stars": 29,
-      "shapeFiles": [
-        "CLAUDE.md",
-        ".claude/"
-      ],
+      "shapeFiles": ["CLAUDE.md", ".claude/"],
       "notes": ".claude/skills/gql.md GraphQL skill"
     },
     {
@@ -192,9 +148,7 @@
       "domain": "music",
       "lang": "TS",
       "stars": 419,
-      "shapeFiles": [
-        "agents.md"
-      ],
+      "shapeFiles": ["agents.md"],
       "notes": "Music-software domain; lowercase agents.md only"
     },
     {
@@ -209,10 +163,7 @@
       "domain": "game",
       "lang": "Elixir",
       "stars": 833,
-      "shapeFiles": [
-        "AGENTS.md",
-        "CLAUDE.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "CLAUDE.md"],
       "notes": "Multiplayer game; Elixir host"
     },
     {
@@ -227,9 +178,7 @@
       "domain": "infra/bot",
       "lang": "TS",
       "stars": 16,
-      "shapeFiles": [
-        "claude.md"
-      ],
+      "shapeFiles": ["claude.md"],
       "notes": "lowercase claude.md only"
     },
     {
@@ -244,12 +193,7 @@
       "domain": "mobile/editor",
       "lang": "Kotlin",
       "stars": 731,
-      "shapeFiles": [
-        "AGENTS.md",
-        "CLAUDE.md(stub)",
-        ".agents/",
-        ".claude/"
-      ],
+      "shapeFiles": ["AGENTS.md", "CLAUDE.md(stub)", ".agents/", ".claude/"],
       "notes": "Android domain; stub-CLAUDE"
     },
     {
@@ -264,11 +208,7 @@
       "domain": "design-system",
       "lang": "JS",
       "stars": 14,
-      "shapeFiles": [
-        "agents.md",
-        "CLAUDE.md",
-        ".claude/"
-      ],
+      "shapeFiles": ["agents.md", "CLAUDE.md", ".claude/"],
       "notes": "lowercase agents.md; .claude/skills/icon.md real skill"
     },
     {
@@ -283,71 +223,49 @@
       "domain": "ACP-adapter",
       "lang": "Zig",
       "stars": 41,
-      "shapeFiles": [
-        "AGENTS.md",
-        "CLAUDE.md(stub)",
-        ".claude/"
-      ],
+      "shapeFiles": ["AGENTS.md", "CLAUDE.md(stub)", ".claude/"],
       "notes": "Zig language; tests parser against unusual host"
     },
     {
       "slug": "tools-canonical-headings",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "TOOLS.md uses the canonical \"### name # R<n>, CAPS\" heading shape; exercises policy-generate end-to-end (golden-path counterpart to F-004)."
     },
     {
       "slug": "session-no-terminal-event",
       "kind": "synthetic",
-      "shapeFiles": [
-        "sessions/"
-      ],
+      "shapeFiles": ["sessions/"],
       "notes": "session.jsonl with no terminal event. Triggers jsonl-starter-v0/session/no-terminal-event."
     },
     {
       "slug": "agents-secret-literal",
       "kind": "synthetic",
-      "shapeFiles": [
-        "gateway.jsonc"
-      ],
+      "shapeFiles": ["gateway.jsonc"],
       "notes": "gateway.jsonc with literal-shaped (fake) tokens. Triggers jsonc-starter-v0/config/secret-as-literal on github-pat + slack-token shapes."
     },
     {
       "slug": "lobster-duplicate-step-id",
       "kind": "synthetic",
-      "shapeFiles": [
-        "*.lobster"
-      ],
+      "shapeFiles": ["*.lobster"],
       "notes": "pipeline.lobster with two steps sharing . Triggers lobster-yaml-starter-v0/step/duplicate-id."
     },
     {
       "slug": "policy-drifted",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "policy.jsonc"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "policy.jsonc"],
       "notes": "TOOLS.md has a tool not in policy.jsonc. policy check should detect drift."
     },
     {
       "slug": "memory-invalid-scope",
       "kind": "synthetic",
-      "shapeFiles": [
-        "MEMORY.md"
-      ],
+      "shapeFiles": ["MEMORY.md"],
       "notes": "MEMORY.md frontmatter has scope: bogus (not in allowed set). Triggers starter-v0/memory/invalid-scope-value."
     },
     {
       "slug": "lkg-pre-populated-labels",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "Fixture for the LKG labels workflow. Stage, then exercise promote --label / rollback --label manually."
     },
     {
@@ -395,12 +313,7 @@
     {
       "slug": "plugin-discord-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: discord (communication, maturity:typical, 3 tools)"
     },
     {
@@ -419,12 +332,7 @@
     {
       "slug": "plugin-slack-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: slack (communication, maturity:typical, 3 tools)"
     },
     {
@@ -443,12 +351,7 @@
     {
       "slug": "plugin-telegram-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: telegram (communication, maturity:typical, 2 tools)"
     },
     {
@@ -467,12 +370,7 @@
     {
       "slug": "plugin-signal-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: signal (communication, maturity:typical, 2 tools)"
     },
     {
@@ -491,12 +389,7 @@
     {
       "slug": "plugin-whatsapp-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: whatsapp (communication, maturity:typical, 2 tools)"
     },
     {
@@ -515,12 +408,7 @@
     {
       "slug": "plugin-sms-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: sms (communication, maturity:typical, 1 tools)"
     },
     {
@@ -539,12 +427,7 @@
     {
       "slug": "plugin-voice-call-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: voice-call (communication, maturity:typical, 2 tools)"
     },
     {
@@ -563,12 +446,7 @@
     {
       "slug": "plugin-email-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: email (communication, maturity:typical, 2 tools)"
     },
     {
@@ -587,12 +465,7 @@
     {
       "slug": "plugin-matrix-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: matrix (communication, maturity:typical, 2 tools)"
     },
     {
@@ -611,12 +484,7 @@
     {
       "slug": "plugin-notion-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: notion (productivity, maturity:typical, 3 tools)"
     },
     {
@@ -635,12 +503,7 @@
     {
       "slug": "plugin-obsidian-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: obsidian (productivity, maturity:typical, 3 tools)"
     },
     {
@@ -659,12 +522,7 @@
     {
       "slug": "plugin-things-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: things (productivity, maturity:typical, 2 tools)"
     },
     {
@@ -683,12 +541,7 @@
     {
       "slug": "plugin-trello-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: trello (productivity, maturity:typical, 3 tools)"
     },
     {
@@ -707,12 +560,7 @@
     {
       "slug": "plugin-todoist-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: todoist (productivity, maturity:typical, 2 tools)"
     },
     {
@@ -731,12 +579,7 @@
     {
       "slug": "plugin-clickup-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: clickup (productivity, maturity:typical, 2 tools)"
     },
     {
@@ -755,12 +598,7 @@
     {
       "slug": "plugin-asana-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: asana (productivity, maturity:typical, 2 tools)"
     },
     {
@@ -779,12 +617,7 @@
     {
       "slug": "plugin-linear-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: linear (productivity, maturity:typical, 3 tools)"
     },
     {
@@ -803,12 +636,7 @@
     {
       "slug": "plugin-apple-notes-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: apple-notes (productivity, maturity:typical, 2 tools)"
     },
     {
@@ -827,12 +655,7 @@
     {
       "slug": "plugin-apple-reminders-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: apple-reminders (productivity, maturity:typical, 2 tools)"
     },
     {
@@ -851,12 +674,7 @@
     {
       "slug": "plugin-github-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: github (developer, maturity:typical, 3 tools)"
     },
     {
@@ -875,12 +693,7 @@
     {
       "slug": "plugin-gitlab-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: gitlab (developer, maturity:typical, 2 tools)"
     },
     {
@@ -899,12 +712,7 @@
     {
       "slug": "plugin-npm-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: npm (developer, maturity:typical, 2 tools)"
     },
     {
@@ -923,12 +731,7 @@
     {
       "slug": "plugin-docker-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: docker (developer, maturity:typical, 3 tools)"
     },
     {
@@ -947,12 +750,7 @@
     {
       "slug": "plugin-kubernetes-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: kubernetes (developer, maturity:typical, 2 tools)"
     },
     {
@@ -971,12 +769,7 @@
     {
       "slug": "plugin-gh-issues-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: gh-issues (developer, maturity:typical, 2 tools)"
     },
     {
@@ -995,12 +788,7 @@
     {
       "slug": "plugin-mcporter-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: mcporter (developer, maturity:typical, 2 tools)"
     },
     {
@@ -1019,12 +807,7 @@
     {
       "slug": "plugin-spotify-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: spotify (media, maturity:typical, 3 tools)"
     },
     {
@@ -1043,12 +826,7 @@
     {
       "slug": "plugin-youtube-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: youtube (media, maturity:typical, 2 tools)"
     },
     {
@@ -1067,12 +845,7 @@
     {
       "slug": "plugin-sonos-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: sonos (media, maturity:typical, 2 tools)"
     },
     {
@@ -1091,12 +864,7 @@
     {
       "slug": "plugin-tts-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: tts (media, maturity:typical, 2 tools)"
     },
     {
@@ -1115,12 +883,7 @@
     {
       "slug": "plugin-whisper-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: whisper (media, maturity:typical, 2 tools)"
     },
     {
@@ -1139,12 +902,7 @@
     {
       "slug": "plugin-video-frames-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: video-frames (media, maturity:typical, 1 tools)"
     },
     {
@@ -1163,12 +921,7 @@
     {
       "slug": "plugin-nano-pdf-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: nano-pdf (media, maturity:typical, 2 tools)"
     },
     {
@@ -1187,12 +940,7 @@
     {
       "slug": "plugin-shell-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: shell (system, maturity:typical, 1 tools)"
     },
     {
@@ -1211,12 +959,7 @@
     {
       "slug": "plugin-ssh-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: ssh (system, maturity:typical, 2 tools)"
     },
     {
@@ -1235,12 +978,7 @@
     {
       "slug": "plugin-filesystem-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: filesystem (system, maturity:typical, 4 tools)"
     },
     {
@@ -1259,12 +997,7 @@
     {
       "slug": "plugin-screenshot-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: screenshot (system, maturity:typical, 2 tools)"
     },
     {
@@ -1283,12 +1016,7 @@
     {
       "slug": "plugin-camsnap-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: camsnap (system, maturity:typical, 1 tools)"
     },
     {
@@ -1307,12 +1035,7 @@
     {
       "slug": "plugin-system-info-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: system-info (system, maturity:typical, 3 tools)"
     },
     {
@@ -1331,12 +1054,7 @@
     {
       "slug": "plugin-brave-search-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: brave-search (search, maturity:typical, 1 tools)"
     },
     {
@@ -1355,12 +1073,7 @@
     {
       "slug": "plugin-google-search-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: google-search (search, maturity:typical, 1 tools)"
     },
     {
@@ -1379,12 +1092,7 @@
     {
       "slug": "plugin-semantic-search-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: semantic-search (search, maturity:typical, 2 tools)"
     },
     {
@@ -1403,12 +1111,7 @@
     {
       "slug": "plugin-blogwatcher-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: blogwatcher (search, maturity:typical, 2 tools)"
     },
     {
@@ -1427,12 +1130,7 @@
     {
       "slug": "plugin-openai-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: openai (ai_ml, maturity:typical, 2 tools)"
     },
     {
@@ -1451,12 +1149,7 @@
     {
       "slug": "plugin-anthropic-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: anthropic (ai_ml, maturity:typical, 1 tools)"
     },
     {
@@ -1475,12 +1168,7 @@
     {
       "slug": "plugin-gemini-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: gemini (ai_ml, maturity:typical, 1 tools)"
     },
     {
@@ -1499,12 +1187,7 @@
     {
       "slug": "plugin-ollama-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: ollama (ai_ml, maturity:typical, 2 tools)"
     },
     {
@@ -1523,12 +1206,7 @@
     {
       "slug": "plugin-vllm-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: vllm (ai_ml, maturity:typical, 1 tools)"
     },
     {
@@ -1547,12 +1225,7 @@
     {
       "slug": "plugin-stripe-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: stripe (finance, maturity:typical, 2 tools)"
     },
     {
@@ -1571,12 +1244,7 @@
     {
       "slug": "plugin-ordercli-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: ordercli (finance, maturity:typical, 2 tools)"
     },
     {
@@ -1595,12 +1263,7 @@
     {
       "slug": "plugin-openhue-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: openhue (home, maturity:typical, 2 tools)"
     },
     {
@@ -1619,12 +1282,7 @@
     {
       "slug": "plugin-homekit-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: homekit (home, maturity:typical, 2 tools)"
     },
     {
@@ -1643,12 +1301,7 @@
     {
       "slug": "plugin-jira-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: jira (work, maturity:typical, 2 tools)"
     },
     {
@@ -1667,12 +1320,7 @@
     {
       "slug": "plugin-confluence-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: confluence (work, maturity:typical, 2 tools)"
     },
     {
@@ -1691,12 +1339,7 @@
     {
       "slug": "plugin-sharepoint-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: sharepoint (work, maturity:typical, 2 tools)"
     },
     {
@@ -1715,12 +1358,7 @@
     {
       "slug": "plugin-microsoft-teams-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: microsoft-teams (work, maturity:typical, 2 tools)"
     },
     {
@@ -1739,12 +1377,7 @@
     {
       "slug": "plugin-zoom-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: zoom (work, maturity:typical, 1 tools)"
     },
     {
@@ -1763,12 +1396,7 @@
     {
       "slug": "plugin-1password-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: 1password (work, maturity:typical, 1 tools)"
     },
     {
@@ -1787,232 +1415,151 @@
     {
       "slug": "adversarial-manifest-malformed-json",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "manifest.json"
-      ],
+      "shapeFiles": ["AGENTS.md", "manifest.json"],
       "notes": "adversarial: Manifest JSON is intentionally malformed; substrate should not crash on parse."
     },
     {
       "slug": "adversarial-manifest-references-missing-skill",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "manifest.json",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "manifest.json", "TOOLS.md"],
       "notes": "adversarial: Manifest references a skills/<name>/SKILL.md path that does not exist; cross-reference check should flag."
     },
     {
       "slug": "adversarial-tools-sentinel-injection",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: Bytes contain __OPENCLAW_REDACTED__ literal; emit-time guard should refuse to write back / round-trip should fail."
     },
     {
       "slug": "adversarial-tools-shell-metacharacter-id",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: Tool ID has `; rm -rf /` — anything that pipes the ID into a shell pipeline is at risk. Substrate should reject the ID."
     },
     {
       "slug": "adversarial-tools-emoji-id",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: Tool ID contains emoji codepoint; round-trip should preserve UTF-8."
     },
     {
       "slug": "adversarial-tools-very-long-id",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: Tool ID is 512 characters; should not crash parser or hang regex matching."
     },
     {
       "slug": "adversarial-tools-duplicate-id",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: Same tool id declared twice with different risk — second silently overrides; lint should flag."
     },
     {
       "slug": "adversarial-tools-r1-with-irreversible",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: R1 risk + IRREVERSIBLE_EXTERNAL cap is semantically inconsistent; policy lint should catch."
     },
     {
       "slug": "adversarial-tools-bogus-sensitivity",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: sensitivity:bogus-tier-7 is not in the allowed set (public/internal/confidential/restricted)."
     },
     {
       "slug": "adversarial-frontmatter-malformed-yaml",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: YAML frontmatter is malformed; AGENTS.md parse should produce a graceful error not crash the manifest walker."
     },
     {
       "slug": "adversarial-skill-tier-out-of-range",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "skills/bad-skill/SKILL.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "skills/bad-skill/SKILL.md"],
       "notes": "adversarial: SKILL.md frontmatter has tier:T99 — outside allowed T1/T2/T3 range."
     },
     {
       "slug": "adversarial-memory-bogus-scope",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "MEMORY.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "MEMORY.md"],
       "notes": "adversarial: Already covered by memory-invalid-scope but pinned in adversarial set as a baseline."
     },
     {
       "slug": "adversarial-jsonc-utf8-bom",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "gateway.jsonc"
-      ],
+      "shapeFiles": ["AGENTS.md", "gateway.jsonc"],
       "notes": "adversarial: gateway.jsonc starts with UTF-8 BOM (\\uFEFF); parser should handle gracefully."
     },
     {
       "slug": "adversarial-jsonc-circular-deep",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "gateway.jsonc"
-      ],
+      "shapeFiles": ["AGENTS.md", "gateway.jsonc"],
       "notes": "adversarial: Deep nesting; should not blow stack or hang."
     },
     {
       "slug": "adversarial-jsonc-secret-zero-hash",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "policy.jsonc"
-      ],
+      "shapeFiles": ["AGENTS.md", "policy.jsonc"],
       "notes": "adversarial: F-005: secret-as-literal rule false-positives on all-zero hashes. Pin it."
     },
     {
       "slug": "adversarial-session-malformed-line",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "sessions/session-broken.jsonl"
-      ],
+      "shapeFiles": ["AGENTS.md", "sessions/session-broken.jsonl"],
       "notes": "adversarial: Session log has a non-JSON line; jsonl-starter rule should flag malformed-line."
     },
     {
       "slug": "adversarial-session-empty",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "sessions/session-empty.jsonl"
-      ],
+      "shapeFiles": ["AGENTS.md", "sessions/session-empty.jsonl"],
       "notes": "adversarial: Session log is empty (0 bytes); jsonl-starter empty-log rule should flag."
     },
     {
       "slug": "adversarial-lobster-mutually-exclusive-body",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "pipeline.lobster"
-      ],
+      "shapeFiles": ["AGENTS.md", "pipeline.lobster"],
       "notes": "adversarial: Step has both `command:` and `pipeline:` — mutually exclusive; lint should flag."
     },
     {
       "slug": "adversarial-lobster-undefined-stdin-ref",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "pipeline.lobster"
-      ],
+      "shapeFiles": ["AGENTS.md", "pipeline.lobster"],
       "notes": "adversarial: `in:` references a step or output that does not exist in this workflow."
     },
     {
       "slug": "adversarial-empty-canonical-files",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "SOUL.md",
-        "IDENTITY.md",
-        "MEMORY.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "SOUL.md", "IDENTITY.md", "MEMORY.md"],
       "notes": "adversarial: All canonical files are 0 bytes; substrate should not crash on empty inputs."
     },
     {
       "slug": "adversarial-lkg-state-malformed",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        ".openclaw/lkg-health.json"
-      ],
+      "shapeFiles": ["AGENTS.md", ".openclaw/lkg-health.json"],
       "notes": "adversarial: lkg-health.json is invalid JSON; cage should produce LKG_STATE_FILE_CORRUPT error not crash."
     },
     {
       "slug": "adversarial-lkg-state-future-version",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        ".openclaw/lkg-health.json"
-      ],
+      "shapeFiles": ["AGENTS.md", ".openclaw/lkg-health.json"],
       "notes": "adversarial: lkg-health.json declares a future schema version; cage should produce LKG_STATE_FILE_VERSION_MISMATCH."
     },
     {
       "slug": "adversarial-workspace-json-malformed",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "workspace.json"
-      ],
+      "shapeFiles": ["AGENTS.md", "workspace.json"],
       "notes": "adversarial: workspace.json is invalid; substrate should fall back to defaults rather than crash."
     },
     {
       "slug": "adversarial-workspace-json-skip-everything",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "workspace.json"
-      ],
+      "shapeFiles": ["AGENTS.md", "workspace.json"],
       "notes": "adversarial: workspace.json skips literally everything via wildcards; substrate behavior should be observable (zero work) not silent."
     },
     {
       "slug": "plugin-hashicorp-vault-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: hashicorp-vault (security, maturity:typical, 3 tools)"
     },
     {
@@ -2031,12 +1578,7 @@
     {
       "slug": "plugin-aws-secrets-manager-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: aws-secrets-manager (security, maturity:typical, 2 tools)"
     },
     {
@@ -2055,12 +1597,7 @@
     {
       "slug": "plugin-gpg-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: gpg (security, maturity:typical, 3 tools)"
     },
     {
@@ -2079,12 +1616,7 @@
     {
       "slug": "plugin-age-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: age (security, maturity:typical, 2 tools)"
     },
     {
@@ -2103,12 +1635,7 @@
     {
       "slug": "plugin-trivy-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: trivy (security, maturity:typical, 2 tools)"
     },
     {
@@ -2127,12 +1654,7 @@
     {
       "slug": "plugin-snyk-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: snyk (security, maturity:typical, 2 tools)"
     },
     {
@@ -2151,12 +1673,7 @@
     {
       "slug": "plugin-gitleaks-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: gitleaks (security, maturity:typical, 2 tools)"
     },
     {
@@ -2175,12 +1692,7 @@
     {
       "slug": "plugin-cosign-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: cosign (security, maturity:typical, 2 tools)"
     },
     {
@@ -2199,12 +1711,7 @@
     {
       "slug": "plugin-oauth2-token-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: oauth2-token (security, maturity:typical, 2 tools)"
     },
     {
@@ -2223,12 +1730,7 @@
     {
       "slug": "plugin-mfa-yubikey-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: mfa-yubikey (security, maturity:typical, 2 tools)"
     },
     {
@@ -2247,12 +1749,7 @@
     {
       "slug": "plugin-postgres-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: postgres (data, maturity:typical, 3 tools)"
     },
     {
@@ -2271,12 +1768,7 @@
     {
       "slug": "plugin-mysql-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: mysql (data, maturity:typical, 2 tools)"
     },
     {
@@ -2295,12 +1787,7 @@
     {
       "slug": "plugin-sqlite-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: sqlite (data, maturity:typical, 2 tools)"
     },
     {
@@ -2319,12 +1806,7 @@
     {
       "slug": "plugin-mongodb-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: mongodb (data, maturity:typical, 3 tools)"
     },
     {
@@ -2343,12 +1825,7 @@
     {
       "slug": "plugin-redis-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: redis (data, maturity:typical, 3 tools)"
     },
     {
@@ -2367,12 +1844,7 @@
     {
       "slug": "plugin-snowflake-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: snowflake (data, maturity:typical, 2 tools)"
     },
     {
@@ -2391,12 +1863,7 @@
     {
       "slug": "plugin-bigquery-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: bigquery (data, maturity:typical, 2 tools)"
     },
     {
@@ -2415,12 +1882,7 @@
     {
       "slug": "plugin-clickhouse-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: clickhouse (data, maturity:typical, 2 tools)"
     },
     {
@@ -2439,12 +1901,7 @@
     {
       "slug": "plugin-elasticsearch-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: elasticsearch (data, maturity:typical, 3 tools)"
     },
     {
@@ -2463,12 +1920,7 @@
     {
       "slug": "plugin-airflow-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: airflow (data, maturity:typical, 2 tools)"
     },
     {
@@ -2487,12 +1939,7 @@
     {
       "slug": "plugin-dbt-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: dbt (data, maturity:typical, 2 tools)"
     },
     {
@@ -2511,12 +1958,7 @@
     {
       "slug": "plugin-kafka-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: kafka (data, maturity:typical, 2 tools)"
     },
     {
@@ -2535,12 +1977,7 @@
     {
       "slug": "plugin-terraform-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: terraform (infra, maturity:typical, 3 tools)"
     },
     {
@@ -2559,12 +1996,7 @@
     {
       "slug": "plugin-pulumi-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: pulumi (infra, maturity:typical, 2 tools)"
     },
     {
@@ -2583,12 +2015,7 @@
     {
       "slug": "plugin-ansible-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: ansible (infra, maturity:typical, 2 tools)"
     },
     {
@@ -2607,12 +2034,7 @@
     {
       "slug": "plugin-aws-cli-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: aws-cli (infra, maturity:typical, 2 tools)"
     },
     {
@@ -2631,12 +2053,7 @@
     {
       "slug": "plugin-gcloud-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: gcloud (infra, maturity:typical, 2 tools)"
     },
     {
@@ -2655,12 +2072,7 @@
     {
       "slug": "plugin-azure-cli-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: azure-cli (infra, maturity:typical, 2 tools)"
     },
     {
@@ -2679,12 +2091,7 @@
     {
       "slug": "plugin-helm-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: helm (infra, maturity:typical, 2 tools)"
     },
     {
@@ -2703,12 +2110,7 @@
     {
       "slug": "plugin-flux-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: flux (infra, maturity:typical, 2 tools)"
     },
     {
@@ -2727,12 +2129,7 @@
     {
       "slug": "plugin-argocd-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: argocd (infra, maturity:typical, 2 tools)"
     },
     {
@@ -2751,12 +2148,7 @@
     {
       "slug": "plugin-cloudflare-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: cloudflare (infra, maturity:typical, 2 tools)"
     },
     {
@@ -2775,12 +2167,7 @@
     {
       "slug": "plugin-fastly-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: fastly (infra, maturity:typical, 2 tools)"
     },
     {
@@ -2799,12 +2186,7 @@
     {
       "slug": "plugin-playwright-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: playwright (testing, maturity:typical, 2 tools)"
     },
     {
@@ -2823,12 +2205,7 @@
     {
       "slug": "plugin-cypress-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: cypress (testing, maturity:typical, 2 tools)"
     },
     {
@@ -2847,12 +2224,7 @@
     {
       "slug": "plugin-selenium-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: selenium (testing, maturity:typical, 2 tools)"
     },
     {
@@ -2871,12 +2243,7 @@
     {
       "slug": "plugin-puppeteer-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: puppeteer (testing, maturity:typical, 2 tools)"
     },
     {
@@ -2895,12 +2262,7 @@
     {
       "slug": "plugin-jest-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: jest (testing, maturity:typical, 2 tools)"
     },
     {
@@ -2919,12 +2281,7 @@
     {
       "slug": "plugin-vitest-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: vitest (testing, maturity:typical, 2 tools)"
     },
     {
@@ -2943,12 +2300,7 @@
     {
       "slug": "plugin-k6-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: k6 (testing, maturity:typical, 1 tools)"
     },
     {
@@ -2967,12 +2319,7 @@
     {
       "slug": "plugin-locust-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: locust (testing, maturity:typical, 1 tools)"
     },
     {
@@ -2991,12 +2338,7 @@
     {
       "slug": "plugin-storybook-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: storybook (testing, maturity:typical, 2 tools)"
     },
     {
@@ -3015,12 +2357,7 @@
     {
       "slug": "plugin-percy-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: percy (testing, maturity:typical, 1 tools)"
     },
     {
@@ -3039,12 +2376,7 @@
     {
       "slug": "plugin-xcode-build-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: xcode-build (mobile, maturity:typical, 3 tools)"
     },
     {
@@ -3063,12 +2395,7 @@
     {
       "slug": "plugin-gradle-android-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: gradle-android (mobile, maturity:typical, 2 tools)"
     },
     {
@@ -3087,12 +2414,7 @@
     {
       "slug": "plugin-fastlane-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: fastlane (mobile, maturity:typical, 2 tools)"
     },
     {
@@ -3111,12 +2433,7 @@
     {
       "slug": "plugin-expo-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: expo (mobile, maturity:typical, 2 tools)"
     },
     {
@@ -3135,12 +2452,7 @@
     {
       "slug": "plugin-flutter-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: flutter (mobile, maturity:typical, 2 tools)"
     },
     {
@@ -3159,12 +2471,7 @@
     {
       "slug": "plugin-detox-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: detox (mobile, maturity:typical, 1 tools)"
     },
     {
@@ -3183,12 +2490,7 @@
     {
       "slug": "plugin-jupyter-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: jupyter (science, maturity:typical, 2 tools)"
     },
     {
@@ -3207,12 +2509,7 @@
     {
       "slug": "plugin-matlab-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: matlab (science, maturity:typical, 1 tools)"
     },
     {
@@ -3231,12 +2528,7 @@
     {
       "slug": "plugin-rstudio-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: rstudio (science, maturity:typical, 1 tools)"
     },
     {
@@ -3255,12 +2547,7 @@
     {
       "slug": "plugin-sympy-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: sympy (science, maturity:typical, 2 tools)"
     },
     {
@@ -3279,12 +2566,7 @@
     {
       "slug": "plugin-gnuplot-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: gnuplot (science, maturity:typical, 1 tools)"
     },
     {
@@ -3303,12 +2585,7 @@
     {
       "slug": "plugin-biopython-typical",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md",
-        "manifest.json",
-        "skills/"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md", "manifest.json", "skills/"],
       "notes": "synthetic 3rd-party openclaw plugin: biopython (science, maturity:typical, 2 tools)"
     },
     {
@@ -3327,279 +2604,187 @@
     {
       "slug": "adversarial-md-utf16-le-bom",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md"
-      ],
+      "shapeFiles": ["AGENTS.md"],
       "notes": "adversarial: AGENTS.md saved in UTF-16 LE with BOM; parser should detect or fail gracefully (most expect UTF-8)."
     },
     {
       "slug": "adversarial-md-mixed-line-endings",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: Mixed CRLF / LF / CR-only line endings within one file; line-counting + parsing should not desync."
     },
     {
       "slug": "adversarial-md-trailing-crs",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md"
-      ],
+      "shapeFiles": ["AGENTS.md"],
       "notes": "adversarial: Lone-CR runs as fake newlines (legacy macOS); md parser should treat consistently."
     },
     {
       "slug": "adversarial-tools-nfc-vs-nfd-collision",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: Unicode NFC vs NFD collision: two visually-identical IDs that the substrate may treat as duplicates or distinct depending on normalization policy."
     },
     {
       "slug": "adversarial-tools-rtl-override",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: Tool ID contains U+202E (right-to-left override); spoofing-class issue. Substrate should flag or strip."
     },
     {
       "slug": "adversarial-tools-zero-width-space",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: ZWSP in tool ID; visually identical but distinct from another tool id; collision-class issue."
     },
     {
       "slug": "adversarial-tools-homoglyph-cyrillic",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: Cyrillic а (U+0430) vs Latin a homoglyph; classic phishing/impersonation pattern."
     },
     {
       "slug": "adversarial-tools-path-traversal-id",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: Tool ID is a path-traversal pattern. Substrate must not concatenate raw IDs into FS paths."
     },
     {
       "slug": "adversarial-skill-name-path-traversal",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "manifest.json"
-      ],
+      "shapeFiles": ["AGENTS.md", "manifest.json"],
       "notes": "adversarial: manifest.json skill name contains parent-directory traversal in the namespace separator."
     },
     {
       "slug": "adversarial-workflow-absolute-path-ref",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "pipeline.lobster"
-      ],
+      "shapeFiles": ["AGENTS.md", "pipeline.lobster"],
       "notes": "adversarial: lobster step references absolute system path. Sandbox boundaries should reject."
     },
     {
       "slug": "adversarial-gateway-localhost-url",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "gateway.jsonc"
-      ],
+      "shapeFiles": ["AGENTS.md", "gateway.jsonc"],
       "notes": "adversarial: gateway endpoint points at localhost — common SSRF / misconfiguration pattern."
     },
     {
       "slug": "adversarial-gateway-file-uri",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "gateway.jsonc"
-      ],
+      "shapeFiles": ["AGENTS.md", "gateway.jsonc"],
       "notes": "adversarial: gateway endpoint is a file:// URI — protocol smuggling."
     },
     {
       "slug": "adversarial-gateway-data-uri",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "gateway.jsonc"
-      ],
+      "shapeFiles": ["AGENTS.md", "gateway.jsonc"],
       "notes": "adversarial: gateway endpoint is a data: URI — should not be accepted as a network endpoint."
     },
     {
       "slug": "adversarial-tools-template-todo",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: AGENTS.md/TOOLS.md scaffolded from template but never customized. Lint should flag <TODO> placeholders."
     },
     {
       "slug": "adversarial-tools-xxx-marker",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "TOOLS.md"
-      ],
+      "shapeFiles": ["AGENTS.md", "TOOLS.md"],
       "notes": "adversarial: XXX/FIXME markers leaked into shipped artifact."
     },
     {
       "slug": "adversarial-policy-unfilled-version",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "policy.jsonc"
-      ],
+      "shapeFiles": ["AGENTS.md", "policy.jsonc"],
       "notes": "adversarial: policy.jsonc has unfilled mustache template placeholders."
     },
     {
       "slug": "adversarial-lkg-state-future-timestamp",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        ".openclaw/lkg-health.json"
-      ],
+      "shapeFiles": ["AGENTS.md", ".openclaw/lkg-health.json"],
       "notes": "adversarial: lkg-health.json entry has a far-future promotedAt timestamp; clock-skew handling."
     },
     {
       "slug": "adversarial-lkg-state-empty-entries",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        ".openclaw/lkg-health.json"
-      ],
+      "shapeFiles": ["AGENTS.md", ".openclaw/lkg-health.json"],
       "notes": "adversarial: Valid but empty lkg-health.json — should report tracked=0, no error."
     },
     {
       "slug": "adversarial-lkg-state-stale-fingerprint",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        ".openclaw/lkg-health.json"
-      ],
+      "shapeFiles": ["AGENTS.md", ".openclaw/lkg-health.json"],
       "notes": "adversarial: Stale fingerprint mismatch — typical post-edit recovery scenario; cage status should report drift."
     },
     {
       "slug": "adversarial-lkg-state-missing-tracker",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        ".openclaw/lkg-health.json"
-      ],
+      "shapeFiles": ["AGENTS.md", ".openclaw/lkg-health.json"],
       "notes": "adversarial: lkg state references a path that no longer exists on disk; should not crash, should report orphan."
     },
     {
       "slug": "adversarial-session-very-large-line",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "sessions/session-huge.jsonl"
-      ],
+      "shapeFiles": ["AGENTS.md", "sessions/session-huge.jsonl"],
       "notes": "adversarial: A single jsonl line exceeds 64KB; parsers using line-buffered scanners may truncate."
     },
     {
       "slug": "adversarial-session-only-newlines",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "sessions/session-blank.jsonl"
-      ],
+      "shapeFiles": ["AGENTS.md", "sessions/session-blank.jsonl"],
       "notes": "adversarial: Session log is only newlines; should not be flagged as malformed-line N times."
     },
     {
       "slug": "adversarial-session-trailing-data",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "sessions/session-untermdata.jsonl"
-      ],
+      "shapeFiles": ["AGENTS.md", "sessions/session-untermdata.jsonl"],
       "notes": "adversarial: Last line has no trailing newline (POSIX-imperfect); jsonl reader should still emit it."
     },
     {
       "slug": "adversarial-workspace-json-empty-file",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "workspace.json"
-      ],
+      "shapeFiles": ["AGENTS.md", "workspace.json"],
       "notes": "adversarial: workspace.json is 0 bytes; loader treats as empty config (per LWC-06) — verify substrate plumbing."
     },
     {
       "slug": "adversarial-workspace-json-array-root",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "workspace.json"
-      ],
+      "shapeFiles": ["AGENTS.md", "workspace.json"],
       "notes": "adversarial: workspace.json root is an array, not object; should produce WORKSPACE_CONFIG_NOT_OBJECT (LWC-09)."
     },
     {
       "slug": "adversarial-workspace-json-string-root",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "workspace.json"
-      ],
+      "shapeFiles": ["AGENTS.md", "workspace.json"],
       "notes": "adversarial: workspace.json root is a bare string; same WORKSPACE_CONFIG_NOT_OBJECT path."
     },
     {
       "slug": "adversarial-workspace-json-deeply-nested-skip",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "workspace.json"
-      ],
+      "shapeFiles": ["AGENTS.md", "workspace.json"],
       "notes": "adversarial: workspace.json has 100-deep array nesting in lint.skip; jsonc parser should not blow stack."
     },
     {
       "slug": "adversarial-manifest-empty-contributes",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "manifest.json"
-      ],
+      "shapeFiles": ["AGENTS.md", "manifest.json"],
       "notes": "adversarial: Plugin with empty contributes — degenerate but valid; should not crash."
     },
     {
       "slug": "adversarial-manifest-circular-skill-tool-ref",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "manifest.json"
-      ],
+      "shapeFiles": ["AGENTS.md", "manifest.json"],
       "notes": "adversarial: Manifest swaps tool/skill IDs — they reference each other under the wrong category."
     },
     {
       "slug": "adversarial-manifest-leading-junk",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "manifest.json"
-      ],
+      "shapeFiles": ["AGENTS.md", "manifest.json"],
       "notes": "adversarial: Leading non-breaking-space whitespace before the JSON document; some parsers reject."
     },
     {
       "slug": "compo-shell-plus-fs",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/shell/",
-        "plugins/filesystem/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/shell/", "plugins/filesystem/"],
       "notes": "composition: shell + filesystem: classic powerful pair; aggregate risk should surface."
     },
     {
@@ -3616,33 +2801,19 @@
     {
       "slug": "compo-monitoring-stack",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/snyk/",
-        "plugins/trivy/",
-        "plugins/gitleaks/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/snyk/", "plugins/trivy/", "plugins/gitleaks/"],
       "notes": "composition: Three security scanners; aggregate findings should not double-count."
     },
     {
       "slug": "compo-data-stack",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/postgres/",
-        "plugins/redis/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/postgres/", "plugins/redis/"],
       "notes": "composition: Postgres + Redis: typical app data tier."
     },
     {
       "slug": "compo-ai-providers",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/openai/",
-        "plugins/anthropic/",
-        "plugins/ollama/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/openai/", "plugins/anthropic/", "plugins/ollama/"],
       "notes": "composition: Three LLM providers — fallback / multi-provider routing scenario."
     },
     {
@@ -3659,86 +2830,49 @@
     {
       "slug": "compo-infra-pipeline",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/terraform/",
-        "plugins/kubernetes/",
-        "plugins/helm/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/terraform/", "plugins/kubernetes/", "plugins/helm/"],
       "notes": "composition: IaC pipeline: terraform + kubernetes + helm."
     },
     {
       "slug": "compo-test-stack",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/playwright/",
-        "plugins/vitest/",
-        "plugins/storybook/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/playwright/", "plugins/vitest/", "plugins/storybook/"],
       "notes": "composition: Frontend testing trio."
     },
     {
       "slug": "compo-comm-cascade",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/email/",
-        "plugins/sms/",
-        "plugins/voice-call/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/email/", "plugins/sms/", "plugins/voice-call/"],
       "notes": "composition: Three high-risk irreversible-external comm channels co-existing."
     },
     {
       "slug": "compo-finance-stack",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/stripe/",
-        "plugins/ordercli/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/stripe/", "plugins/ordercli/"],
       "notes": "composition: Two financial-action plugins; aggregate risk surface."
     },
     {
       "slug": "compo-ide-trio",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/github/",
-        "plugins/gitlab/",
-        "plugins/jira/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/github/", "plugins/gitlab/", "plugins/jira/"],
       "notes": "composition: Three issue/PR trackers — interesting routing decisions for the agent."
     },
     {
       "slug": "compo-knowledge-base",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/notion/",
-        "plugins/confluence/",
-        "plugins/obsidian/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/notion/", "plugins/confluence/", "plugins/obsidian/"],
       "notes": "composition: Three knowledge-base plugins; cross-platform note coordination."
     },
     {
       "slug": "compo-music-controls",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/spotify/",
-        "plugins/sonos/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/spotify/", "plugins/sonos/"],
       "notes": "composition: Music-control plugins; \"where does play go\" routing."
     },
     {
       "slug": "compo-secrets-stack",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/hashicorp-vault/",
-        "plugins/1password/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/hashicorp-vault/", "plugins/1password/"],
       "notes": "composition: Two secret-store plugins side-by-side; identity/credential ownership."
     },
     {
@@ -3755,21 +2889,13 @@
     {
       "slug": "compo-pdf-stack",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/nano-pdf/",
-        "plugins/whisper/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/nano-pdf/", "plugins/whisper/"],
       "notes": "composition: Document-processing pair: PDF + audio transcript."
     },
     {
       "slug": "compo-home-stack",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/openhue/",
-        "plugins/homekit/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/openhue/", "plugins/homekit/"],
       "notes": "composition: Two smart-home control plugins; overlapping device sets."
     },
     {
@@ -3786,91 +2912,55 @@
     {
       "slug": "compo-tool-id-collision",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/plug-a/",
-        "plugins/plug-b/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/plug-a/", "plugins/plug-b/"],
       "notes": "composition: Two plugins both contribute \"exec\" tool; namespacing must keep them distinct (plug-a/exec vs plug-b/exec)."
     },
     {
       "slug": "compo-conflicting-risk-same-name",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/safe-shell/",
-        "plugins/unsafe-shell/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/safe-shell/", "plugins/unsafe-shell/"],
       "notes": "composition: Two plugins, both have \"run\" tool, wildly different risk classes; aggregator should not flatten."
     },
     {
       "slug": "compo-skill-name-collision",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/plug-x/",
-        "plugins/plug-y/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/plug-x/", "plugins/plug-y/"],
       "notes": "composition: Two plugins ship same-named skill; namespace must keep them distinct."
     },
     {
       "slug": "compo-cross-plugin-skill-ref",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/provider/",
-        "plugins/consumer/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/provider/", "plugins/consumer/"],
       "notes": "composition: consumer plugin manifest references provider/fetch as a dependency; cross-plugin binding."
     },
     {
       "slug": "compo-mismatched-tool-versions",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/svc-v1/",
-        "plugins/svc-v2/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/svc-v1/", "plugins/svc-v2/"],
       "notes": "composition: Same plugin author, two version directories — typical migration-in-progress shape."
     },
     {
       "slug": "compo-alpha-plus-rich",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/old-stable/",
-        "plugins/new-alpha/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/old-stable/", "plugins/new-alpha/"],
       "notes": "composition: One mature plugin (skills + workflows + doctor) alongside an alpha (manifest only)."
     },
     {
       "slug": "compo-three-maturity-tiers",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/minimal/",
-        "plugins/typical/",
-        "plugins/rich/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/minimal/", "plugins/typical/", "plugins/rich/"],
       "notes": "composition: Three plugins at different maturity levels; gateway should treat each per its own contract."
     },
     {
       "slug": "compo-one-plugin-half-installed",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/installed/",
-        "plugins/partial/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/installed/", "plugins/partial/"],
       "notes": "composition: One fully-installed plugin + one mid-install (manifest declared, tools dir empty)."
     },
     {
       "slug": "compo-removed-plugin-stale-refs",
       "kind": "synthetic",
-      "shapeFiles": [
-        "AGENTS.md",
-        "plugins/active/"
-      ],
+      "shapeFiles": ["AGENTS.md", "plugins/active/"],
       "notes": "composition: Workspace.AGENTS.md references a plugin that was uninstalled; stale doc reference."
     }
   ]

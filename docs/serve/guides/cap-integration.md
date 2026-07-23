@@ -37,19 +37,19 @@ When your integration calls a protected endpoint like
 `/snap/promote`:
 
 ```ts
-const res = await fetch('/snap/promote', {
-  method: 'POST',
-  headers: { 'Authorization': `Bearer ${token}` },
-  body: JSON.stringify({ snapshotId: 'snap-xyz' }),
+const res = await fetch("/snap/promote", {
+  method: "POST",
+  headers: { Authorization: `Bearer ${token}` },
+  body: JSON.stringify({ snapshotId: "snap-xyz" }),
 });
 
 if (res.status === 202) {
   // approval required — get the handleId and subscribe
   const { handleId } = await res.json();
-  const approvalStream = new EventSource('/approvals/subscribe');
-  approvalStream.addEventListener('approval-response', (ev) => {
+  const approvalStream = new EventSource("/approvals/subscribe");
+  approvalStream.addEventListener("approval-response", (ev) => {
     const response = JSON.parse(ev.data);
-    if (response.handleId === handleId && response.outcome === 'approve') {
+    if (response.handleId === handleId && response.outcome === "approve") {
       // now retry the promote
     }
   });

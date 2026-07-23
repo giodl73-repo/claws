@@ -23,31 +23,31 @@
  * @module @bic/v2-prototype/tests/v2-chain-threat-model
  */
 
-import * as fs from 'node:fs/promises';
-import * as os from 'node:os';
-import * as path from 'node:path';
-import { afterEach, describe, expect, it } from 'vitest';
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
+import * as path from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
 
-import { generateInMemory } from '@bic/openclaw-policy';
+import { generateInMemory } from "@bic/openclaw-policy";
 import {
   filesystemStore,
   workspaceRefStore,
   type SnapshotId,
   type SnapshotStore,
   type RefStore,
-} from '@bic/openclaw-snap';
+} from "@bic/openclaw-snap";
 import {
   buildPolicyPlugin,
   type PolicyContextWithSnapshot,
-} from '@bic/openclaw-guardrails/policy-runtime';
+} from "@bic/openclaw-guardrails/policy-runtime";
 import type {
   AuthorizationDecision,
   GuardrailProvider,
   ToolCallEvent,
-} from '@bic/openclaw-guardrails';
-import { type PolicyIR } from '@bic/v2-prototype';
+} from "@bic/openclaw-guardrails";
+import { type PolicyIR } from "@bic/v2-prototype";
 
-const TEXT_DECODER = new TextDecoder('utf-8');
+const TEXT_DECODER = new TextDecoder("utf-8");
 
 const live: Array<{ scratch: string }> = [];
 afterEach(async () => {
@@ -63,32 +63,35 @@ afterEach(async () => {
  */
 function ruleEvaluator(store: SnapshotStore): GuardrailProvider {
   return {
-    name: 'rule-evaluator',
+    name: "rule-evaluator",
     async preAuthorize(event: ToolCallEvent): Promise<AuthorizationDecision> {
       const snap = (event.context as { snapshotId?: SnapshotId }).snapshotId;
-      if (snap === undefined) return { decision: 'deny', reason: 'no-snap' };
-      const bytes = await store.read(snap, '.openclaw/policy/policy-ir.json');
+      if (snap === undefined) return { decision: "deny", reason: "no-snap" };
+      const bytes = await store.read(snap, ".openclaw/policy/policy-ir.json");
       const ir = JSON.parse(TEXT_DECODER.decode(bytes)) as PolicyIR;
       for (const rule of ir.denyRules) {
         if (rule.when.tool !== undefined && rule.when.tool === event.tool) {
-          return { decision: 'deny', reason: rule.reason };
+          return { decision: "deny", reason: rule.reason };
         }
       }
-      return { decision: 'allow', riskLevel: 1 };
+      return { decision: "allow", riskLevel: 1 };
     },
     async postAudit() {},
     getCapabilities() {
       return {
-        description: 'rule eval', version: '0',
-        riskClassification: false, auditTrail: false,
-        externalApproval: false, argumentModification: false,
+        description: "rule eval",
+        version: "0",
+        riskClassification: false,
+        auditTrail: false,
+        externalApproval: false,
+        argumentModification: false,
       };
     },
   };
 }
 
-describe('Threat model — supervisor authority limits', () => {
-  it('S101 [TRUST-BOUNDARY GAP] direct-fs bypass evades policy-plugin denyRule for snap_promote', async () => {
+describe("Threat model — supervisor authority limits", () => {
+  it("S101 [TRUST-BOUNDARY GAP] direct-fs bypass evades policy-plugin denyRule for snap_promote", async () => {
     // ───────────────────────────────────────────────────────────────────
     // Threat model:
     //   - Supervisor (legitimate operator) authors a PolicyIR with
@@ -124,35 +127,43 @@ describe('Threat model — supervisor authority limits', () => {
     // This test pins the gap so we notice when defense lands.
     // ───────────────────────────────────────────────────────────────────
 
-    const scratch = await fs.mkdtemp(path.join(os.tmpdir(), 'v2-threat-'));
+    const scratch = await fs.mkdtemp(path.join(os.tmpdir(), "v2-threat-"));
     live.push({ scratch });
-    const workspace = path.join(scratch, 'workspace');
-    const storeRoot = path.join(scratch, 'snap-store');
+    const workspace = path.join(scratch, "workspace");
+    const storeRoot = path.join(scratch, "snap-store");
     await fs.mkdir(workspace, { recursive: true });
     await fs.mkdir(storeRoot, { recursive: true });
 
     // Supervisor authors and captures snap-A: the IR has denyRule for
     // snap_promote. Set this as HEAD.
-    const FROZEN = (): Date => new Date('2026-04-30T00:00:00.000Z');
+    const FROZEN = (): Date => new Date("2026-04-30T00:00:00.000Z");
     const supervisorOut = generateInMemory({
       workspaceRoot: workspace,
       draft: {
-        soul: { denyRules: [], modelAllowlist: [], tone: '' },
+        soul: { denyRules: [], modelAllowlist: [], tone: "" },
         user: { oboScope: [], authorityBounds: [] },
         agents: { delegationMap: {}, architectureBoundaries: [] },
         tools: [
           // 'snap_promote' as a declared tool with a deny rule.
           // R5 marks it as critical; the soul rule explicitly blocks it.
-          { name: 'snap_promote', riskLevel: 5, capabilities: ['IRREVERSIBLE_EXTERNAL'], effectiveTier: 'R5' },
+          {
+            name: "snap_promote",
+            riskLevel: 5,
+            capabilities: ["IRREVERSIBLE_EXTERNAL"],
+            effectiveTier: "R5",
+          },
         ],
         skills: [],
         governance: { rules: [], sensitivityPropagation: [], governanceSurface: [] },
-        identity: { name: 'supervisor' },
+        identity: { name: "supervisor" },
       },
       now: FROZEN,
     });
-    await fs.mkdir(path.join(workspace, '.openclaw', 'policy'), { recursive: true });
-    await fs.writeFile(path.join(workspace, '.openclaw', 'policy', 'policy-ir.json'), supervisorOut.policyIr);
+    await fs.mkdir(path.join(workspace, ".openclaw", "policy"), { recursive: true });
+    await fs.writeFile(
+      path.join(workspace, ".openclaw", "policy", "policy-ir.json"),
+      supervisorOut.policyIr,
+    );
 
     const store = filesystemStore({ root: storeRoot });
     const refs = workspaceRefStore({ root: storeRoot });
@@ -165,17 +176,20 @@ describe('Threat model — supervisor authority limits', () => {
     const attackerOut = generateInMemory({
       workspaceRoot: workspace,
       draft: {
-        soul: { denyRules: [], modelAllowlist: [], tone: '' },
+        soul: { denyRules: [], modelAllowlist: [], tone: "" },
         user: { oboScope: [], authorityBounds: [] },
         agents: { delegationMap: {}, architectureBoundaries: [] },
         tools: [],
         skills: [],
         governance: { rules: [], sensitivityPropagation: [], governanceSurface: [] },
-        identity: { name: 'attacker' },
+        identity: { name: "attacker" },
       },
       now: FROZEN,
     });
-    await fs.writeFile(path.join(workspace, '.openclaw', 'policy', 'policy-ir.json'), attackerOut.policyIr);
+    await fs.writeFile(
+      path.join(workspace, ".openclaw", "policy", "policy-ir.json"),
+      attackerOut.policyIr,
+    );
     const snapB = await store.capture(workspace);
     expect(snapB).not.toBe(snapA);
 
@@ -184,13 +198,14 @@ describe('Threat model — supervisor authority limits', () => {
     // CURRENT PolicyIR (snapA's, since HEAD=snapA), sees the deny rule,
     // and blocks. Supervisor authority HOLDS at this layer.
     const plugin = buildPolicyPlugin(ruleEvaluator(store), { store });
-    const toolDecision = await plugin.evaluate(
-      { toolName: 'snap_promote', params: {} },
-      { toolName: 'snap_promote', sessionId: 'attacker-session', snapshotId: snapA } as PolicyContextWithSnapshot,
-    );
+    const toolDecision = await plugin.evaluate({ toolName: "snap_promote", params: {} }, {
+      toolName: "snap_promote",
+      sessionId: "attacker-session",
+      snapshotId: snapA,
+    } as PolicyContextWithSnapshot);
     expect(toolDecision).toMatchObject({
       block: true,
-      blockReason: expect.stringContaining('r5-fail-closed'),
+      blockReason: expect.stringContaining("r5-fail-closed"),
     });
 
     // ── PATH B: direct fs bypass ──────────────────────────────────────
@@ -200,14 +215,15 @@ describe('Threat model — supervisor authority limits', () => {
     //
     // (refPath() is internal to workspaceRefStore — we reproduce the
     // same hashing scheme to write at the right path.)
-    const crypto = await import('node:crypto');
-    const wsKey = crypto.createHash('sha256').update(workspace, 'utf8').digest('hex').slice(0, 32);
-    const refPath = path.join(storeRoot, 'refs', `${wsKey}.json`);
-    const directWriteContent = JSON.stringify({
-      HEAD: snapB,                  // ← attacker's snap
-      STAGE: null,
-      history: [snapA],
-    }) + '\n';
+    const crypto = await import("node:crypto");
+    const wsKey = crypto.createHash("sha256").update(workspace, "utf8").digest("hex").slice(0, 32);
+    const refPath = path.join(storeRoot, "refs", `${wsKey}.json`);
+    const directWriteContent =
+      JSON.stringify({
+        HEAD: snapB, // ← attacker's snap
+        STAGE: null,
+        history: [snapA],
+      }) + "\n";
     await fs.writeFile(refPath, directWriteContent);
 
     // Verify the bypass worked: refs.getHead returns the attacker's snap.
@@ -217,10 +233,11 @@ describe('Threat model — supervisor authority limits', () => {
     // bind to. A subsequent tool call evaluated against snapB would not
     // be blocked by the supervisor's rule — because the supervisor's
     // rule was in snapA, not snapB.
-    const newSessionDecision = await plugin.evaluate(
-      { toolName: 'snap_promote', params: {} },
-      { toolName: 'snap_promote', sessionId: 'fresh-session', snapshotId: snapB } as PolicyContextWithSnapshot,
-    );
+    const newSessionDecision = await plugin.evaluate({ toolName: "snap_promote", params: {} }, {
+      toolName: "snap_promote",
+      sessionId: "fresh-session",
+      snapshotId: snapB,
+    } as PolicyContextWithSnapshot);
     expect(newSessionDecision).toBeUndefined(); // allow → no-op
 
     // ── ASSERTION: the threat model gap is real ───────────────────────

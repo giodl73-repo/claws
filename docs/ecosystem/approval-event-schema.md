@@ -10,11 +10,11 @@
 
 When `GuardrailProvider` returns `{ decision: 'allow', requiresExternalApproval: true }`, the host must present an approval gate to the user before the tool invocation proceeds. Today, every host invents its own format:
 
-| Host | Transport | Format |
-|------|-----------|--------|
-| Aether | SSE | Custom event with ad-hoc JSON payload |
-| ClawPilot | IPC | Desktop-native message with proprietary schema |
-| CLI | stdio | Plain-text prompt or structured JSON (varies by implementation) |
+| Host      | Transport | Format                                                          |
+| --------- | --------- | --------------------------------------------------------------- |
+| Aether    | SSE       | Custom event with ad-hoc JSON payload                           |
+| ClawPilot | IPC       | Desktop-native message with proprietary schema                  |
+| CLI       | stdio     | Plain-text prompt or structured JSON (varies by implementation) |
 
 The result: **approval UX is not portable.** A guardrail provider that works with Aether cannot drive ClawPilot's approval dialog without a host-specific adapter. Tooling authors who build audit dashboards, policy managers, or compliance reporters must reverse-engineer each host's event format independently. Security teams cannot write a single SIEM integration that covers all hosts.
 
@@ -72,11 +72,11 @@ A mapped union that pairs each `RiskLevel` with its capability name:
 
 ```typescript
 type RiskClassification =
-  | { level: 1; capability: 'read' }
-  | { level: 2; capability: 'write' }
-  | { level: 3; capability: 'communicate' }
-  | { level: 4; capability: 'execute' }
-  | { level: 5; capability: 'transact' };
+  | { level: 1; capability: "read" }
+  | { level: 2; capability: "write" }
+  | { level: 3; capability: "communicate" }
+  | { level: 4; capability: "execute" }
+  | { level: 5; capability: "transact" };
 ```
 
 ### ApprovalRequestEvent
@@ -89,7 +89,7 @@ interface ApprovalRequestEvent {
   schemaVersion: 1;
 
   /** Discriminator for event routing. */
-  type: 'approval_request';
+  type: "approval_request";
 
   /** Unique identifier for this approval request. Correlates with the response. */
   requestId: string;
@@ -142,7 +142,7 @@ interface ApprovalResponseEvent {
   schemaVersion: 1;
 
   /** Discriminator for event routing. */
-  type: 'approval_response';
+  type: "approval_response";
 
   /** Matches the requestId from the corresponding ApprovalRequestEvent. */
   requestId: string;
@@ -153,11 +153,11 @@ interface ApprovalResponseEvent {
   /** The outcome of the approval gate. */
   decision: {
     /** Whether the tool call was approved, denied, or timed out. */
-    status: 'approved' | 'denied' | 'timeout';
+    status: "approved" | "denied" | "timeout";
 
     /** Who or what made the decision. */
     decidedBy: {
-      type: 'user' | 'policy' | 'system';
+      type: "user" | "policy" | "system";
       identity?: string;
     };
 
@@ -183,7 +183,7 @@ interface ApprovalTimeoutPolicy {
   readonly timeoutMs: number;
 
   /** What happens when the timeout expires. */
-  readonly failMode: 'deny' | 'allow';
+  readonly failMode: "deny" | "allow";
 
   /**
    * Risk levels that are always denied on timeout, regardless of failMode.
@@ -200,13 +200,13 @@ interface ApprovalTimeoutPolicy {
 
 ## Design Principles
 
-| Principle | Rationale |
-|-----------|-----------|
-| **Transport-Agnostic** | The schema defines JSON shapes, not delivery mechanisms. Hosts choose SSE, IPC, stdio, WebSocket, or any future transport. The schema remains identical across all of them. |
-| **Correlatable** | Every `ApprovalRequestEvent` carries a `requestId`. The corresponding `ApprovalResponseEvent` echoes it. Audit systems join on `requestId` without relying on timestamps or ordering heuristics. |
-| **Auditable** | Every event includes `timestamp`, `context.conversationId`, and `governance.provider`. A SIEM integration can reconstruct the full approval chain from events alone, without access to host-internal state. |
-| **Extensible** | The `extensions` field on both events allows vendors to attach host-specific metadata without forking the schema. Extensions are opaque to the core schema; hosts that do not recognize them pass them through unchanged. |
-| **Vendor-Neutral** | No field references a specific host, product, or company. The schema works for Aether, ClawPilot, third-party CLI tools, and hosts that do not exist yet. |
+| Principle              | Rationale                                                                                                                                                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Transport-Agnostic** | The schema defines JSON shapes, not delivery mechanisms. Hosts choose SSE, IPC, stdio, WebSocket, or any future transport. The schema remains identical across all of them.                                               |
+| **Correlatable**       | Every `ApprovalRequestEvent` carries a `requestId`. The corresponding `ApprovalResponseEvent` echoes it. Audit systems join on `requestId` without relying on timestamps or ordering heuristics.                          |
+| **Auditable**          | Every event includes `timestamp`, `context.conversationId`, and `governance.provider`. A SIEM integration can reconstruct the full approval chain from events alone, without access to host-internal state.               |
+| **Extensible**         | The `extensions` field on both events allows vendors to attach host-specific metadata without forking the schema. Extensions are opaque to the core schema; hosts that do not recognize them pass them through unchanged. |
+| **Vendor-Neutral**     | No field references a specific host, product, or company. The schema works for Aether, ClawPilot, third-party CLI tools, and hosts that do not exist yet.                                                                 |
 
 ---
 
@@ -214,12 +214,12 @@ interface ApprovalTimeoutPolicy {
 
 The schema is transport-agnostic, but hosts need concrete guidance on how to carry these events over their chosen transport. The following table maps the standard transports:
 
-| Host | Transport | Mapping |
-|------|-----------|---------|
-| Aether | SSE | New `'ta'` event type. The `data` field contains the JSON-serialized `ApprovalRequestEvent` or `ApprovalResponseEvent`. |
-| ClawPilot | IPC | Native IPC message. The message payload is the JSON-serialized event. Message type discriminator uses the event's `type` field. |
-| CLI | stdio | One JSON object per line on stdout. The host reads `type` to distinguish approval events from other output. |
-| Custom | WebSocket | JSON message frame. The `type` field serves as the message discriminator within the WebSocket channel. |
+| Host      | Transport | Mapping                                                                                                                         |
+| --------- | --------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Aether    | SSE       | New `'ta'` event type. The `data` field contains the JSON-serialized `ApprovalRequestEvent` or `ApprovalResponseEvent`.         |
+| ClawPilot | IPC       | Native IPC message. The message payload is the JSON-serialized event. Message type discriminator uses the event's `type` field. |
+| CLI       | stdio     | One JSON object per line on stdout. The host reads `type` to distinguish approval events from other output.                     |
+| Custom    | WebSocket | JSON message frame. The `type` field serves as the message discriminator within the WebSocket channel.                          |
 
 Hosts that support multiple transports (e.g., Aether with both SSE and WebSocket) emit the same JSON on each transport. The schema does not change; only the framing does.
 
@@ -308,21 +308,21 @@ Cowork (the VS Code extension) listens for Aether's SSE stream. With this schema
 
 ## Value to Community
 
-| Audience | Benefit |
-|----------|---------|
+| Audience              | Benefit                                                                                                                                                                                               |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Host implementors** | Build approval gates once against a stable schema instead of reverse-engineering each guardrail provider's proprietary format. New hosts get approval UX for free by implementing the event contract. |
-| **Tooling authors** | Audit dashboards, policy managers, and compliance reporters consume one schema across all hosts. No host-specific adapters. |
-| **Security teams** | Write a single SIEM integration that ingests approval events from any conforming host. Correlate across Aether, ClawPilot, and CLI deployments with one parser. |
-| **Ecosystem** | Guardrail providers that emit the standard schema work on every host without modification. The approval layer becomes a platform feature, not a host-specific implementation detail. |
+| **Tooling authors**   | Audit dashboards, policy managers, and compliance reporters consume one schema across all hosts. No host-specific adapters.                                                                           |
+| **Security teams**    | Write a single SIEM integration that ingests approval events from any conforming host. Correlate across Aether, ClawPilot, and CLI deployments with one parser.                                       |
+| **Ecosystem**         | Guardrail providers that emit the standard schema work on every host without modification. The approval layer becomes a platform feature, not a host-specific implementation detail.                  |
 
 ---
 
 ## Open Questions
 
-| Question | Context |
-|----------|---------|
+| Question               | Context                                                                                                                                                                                                                                                                                                |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Argument redaction** | Should `toolCall.arguments` be redacted by default in the `ApprovalRequestEvent`? Arguments may contain sensitive data (file paths, credentials, PII). Redaction would improve privacy but reduce auditability. A middle ground: redact by default, allow hosts to opt into full arguments via policy. |
-| **Modify decision** | Should there be a fourth `status` value (`'modified'`) for cases where the user approves but changes the tool arguments? This is relevant for hosts that allow argument editing in the approval dialog. Adding it now is forward-compatible; omitting it means a future schema version bump. |
-| **Batch approval** | Should the schema support batch approval (one response covering multiple requests)? Some UIs present "approve all R1-R2 tools" as a convenience. Batch approval could be modeled as multiple individual responses or as a new `ApprovalBatchResponseEvent`. Neither approach is clearly better. |
-| **i18n** | The `reason` fields on `risk` and `decision` are free-text strings. Should the schema define a locale field or require machine-readable reason codes alongside human-readable text? Reason codes would enable localized UIs without parsing English strings. |
-| **npm scope** | The `@openclaw` scope on npm is not yet registered. The contribution path assumes it will be available. If the scope is taken, alternatives include `@openclaw-governance` or publishing under the `openclaw-` prefix without a scope. |
+| **Modify decision**    | Should there be a fourth `status` value (`'modified'`) for cases where the user approves but changes the tool arguments? This is relevant for hosts that allow argument editing in the approval dialog. Adding it now is forward-compatible; omitting it means a future schema version bump.           |
+| **Batch approval**     | Should the schema support batch approval (one response covering multiple requests)? Some UIs present "approve all R1-R2 tools" as a convenience. Batch approval could be modeled as multiple individual responses or as a new `ApprovalBatchResponseEvent`. Neither approach is clearly better.        |
+| **i18n**               | The `reason` fields on `risk` and `decision` are free-text strings. Should the schema define a locale field or require machine-readable reason codes alongside human-readable text? Reason codes would enable localized UIs without parsing English strings.                                           |
+| **npm scope**          | The `@openclaw` scope on npm is not yet registered. The contribution path assumes it will be available. If the scope is taken, alternatives include `@openclaw-governance` or publishing under the `openclaw-` prefix without a scope.                                                                 |

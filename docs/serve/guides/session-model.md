@@ -45,10 +45,10 @@ Session cookies expire at the earlier of: bearer token's
 `/fleet/events` all stream via SSE. Client model:
 
 ```ts
-const stream = new EventSource('/snap/events', {
-  withCredentials: true,  // send session cookie
+const stream = new EventSource("/snap/events", {
+  withCredentials: true, // send session cookie
 });
-stream.addEventListener('state-change', (ev) => {
+stream.addEventListener("state-change", (ev) => {
   const data = JSON.parse(ev.data);
   // ...
 });

@@ -11,14 +11,14 @@
  * `HostContext.identityBridge` have a working reference impl out of the box.
  */
 
-import type { AgentIdentity, IdentityBridge } from '../types.js';
+import type { AgentIdentity, IdentityBridge } from "../types.js";
 import type {
   IdentityProtocol,
   TokenIdentity,
   TokenPayload,
   ValidationConfig,
   ValidationResult,
-} from './types.js';
+} from "./types.js";
 
 const DEFAULT_CLOCK_SKEW_SECONDS = 30;
 
@@ -27,7 +27,7 @@ export function validateOidc(
   config: ValidationConfig,
   now?: Date,
 ): ValidationResult {
-  return validateToken(payload, config, 'oidc', now);
+  return validateToken(payload, config, "oidc", now);
 }
 
 export function validateSaml(
@@ -35,7 +35,7 @@ export function validateSaml(
   config: ValidationConfig,
   now?: Date,
 ): ValidationResult {
-  return validateToken(payload, config, 'saml', now);
+  return validateToken(payload, config, "saml", now);
 }
 
 function validateToken(
@@ -58,7 +58,7 @@ function validateToken(
   if (!audiences.includes(config.audience)) {
     return {
       valid: false,
-      error: `Audience mismatch: expected "${config.audience}", got "${audiences.join(', ')}"`,
+      error: `Audience mismatch: expected "${config.audience}", got "${audiences.join(", ")}"`,
     };
   }
 
@@ -84,10 +84,7 @@ function validateToken(
   return { valid: true, identity };
 }
 
-export function resolveIdentity(
-  payload: TokenPayload,
-  protocol: IdentityProtocol,
-): TokenIdentity {
+export function resolveIdentity(payload: TokenPayload, protocol: IdentityProtocol): TokenIdentity {
   const { sub, iss, exp, iat, email, name, groups, tid, ...rest } = payload;
   return {
     subject: sub,
@@ -117,10 +114,10 @@ export async function exchangeOboToken(
     return exchangeFn(userToken, agentId);
   }
   if (userToken.length === 0) {
-    throw new Error('userToken required for OBO exchange');
+    throw new Error("userToken required for OBO exchange");
   }
   if (agentId.length === 0) {
-    throw new Error('agentId required for OBO exchange');
+    throw new Error("agentId required for OBO exchange");
   }
   return `obo:${agentId}:${userToken}`;
 }
@@ -169,7 +166,7 @@ function toAgentIdentity(
   now: Date,
   payload: TokenPayload,
 ): AgentIdentity {
-  const tenantId = identity.tenantId ?? (typeof payload.tid === 'string' ? payload.tid : '');
+  const tenantId = identity.tenantId ?? (typeof payload.tid === "string" ? payload.tid : "");
   return {
     agentId,
     tenantId,
@@ -188,17 +185,16 @@ function toAgentIdentity(
  * `RevocationCache`.
  */
 export function createIdentityBridge(config: IdentityBridgeConfig): IdentityBridge {
-  const protocol = config.protocol ?? 'oidc';
+  const protocol = config.protocol ?? "oidc";
   const revocation = config.revocationCache ?? createRevocationCache();
-  const resolveAgentId =
-    config.resolveAgentId ?? ((payload: TokenPayload) => payload.sub);
+  const resolveAgentId = config.resolveAgentId ?? ((payload: TokenPayload) => payload.sub);
 
   let cache = revocation;
 
   return {
     async verify(token: string): Promise<AgentIdentity> {
       const payload = config.tokenDecoder(token);
-      const validator = protocol === 'oidc' ? validateOidc : validateSaml;
+      const validator = protocol === "oidc" ? validateOidc : validateSaml;
       const result = validator(payload, {
         issuer: config.issuer,
         audience: config.audience,
@@ -207,7 +203,7 @@ export function createIdentityBridge(config: IdentityBridgeConfig): IdentityBrid
         }),
       });
       if (!result.valid || result.identity === undefined) {
-        throw new Error(result.error ?? 'Token validation failed');
+        throw new Error(result.error ?? "Token validation failed");
       }
       if (isRevoked(cache, result.identity.subject)) {
         throw new Error(`Principal "${result.identity.subject}" is revoked`);

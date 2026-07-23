@@ -61,22 +61,22 @@ via hash comparison.
 
 Broadcast retries transient failures automatically:
 
-| Failure type | Retries | Backoff |
-|--------------|---------|---------|
-| Network timeout | 3 | Exponential (1s, 2s, 4s) |
-| Permission denied | 0 | Not transient |
-| Not initialized | 0 | Needs `claws init` first |
-| Disk full | 0 | Not transient |
+| Failure type      | Retries | Backoff                  |
+| ----------------- | ------- | ------------------------ |
+| Network timeout   | 3       | Exponential (1s, 2s, 4s) |
+| Permission denied | 0       | Not transient            |
+| Not initialized   | 0       | Needs `claws init` first |
+| Disk full         | 0       | Not transient            |
 
 After retries exhaust, the workspace is marked failed and broadcast continues.
 
 ## Broadcast vs push
 
-| | `claws broadcast` | `claws push` |
-|---|---|---|
-| **Sends** | Policy YAML files | Compiled artifacts |
-| **Requires rebuild** | Yes | No |
-| **Use when** | Policy changed | Deploy known-good build |
+|                      | `claws broadcast` | `claws push`            |
+| -------------------- | ----------------- | ----------------------- |
+| **Sends**            | Policy YAML files | Compiled artifacts      |
+| **Requires rebuild** | Yes               | No                      |
+| **Use when**         | Policy changed    | Deploy known-good build |
 
 ## Typical workflow
 
@@ -106,6 +106,7 @@ across the fleet timeline.
 ## Scenario-Driven Additions
 
 ### From fleet-operations scenarios (89 findings applied)
+
 - Broadcast partial failure semantics: exit code 0 for full success, exit code 2 for partial success (some workspaces failed), exit code 1 for total failure
 - Retry mechanism with idempotency via manifest state machine: re-running broadcast skips already-updated workspaces via hash comparison
 - Broadcast manifest schema and storage location defined: manifest tracks per-workspace status, version, timestamp, and failure reason

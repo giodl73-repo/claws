@@ -19,7 +19,7 @@ export interface AuditEntry {
   action: string;
   target: string;
   scope: string;
-  outcome: 'pending' | 'success' | 'failed';
+  outcome: "pending" | "success" | "failed";
   reason?: string;
   hash: string;
   previousHash: string;
@@ -63,4 +63,4 @@ export interface AuditQuery {
 }
 
 /** Supported audit trail export formats. Per guardrails.md §/audit. */
-export type ExportFormat = 'cef' | 'jsonl' | 'syslog';
+export type ExportFormat = "cef" | "jsonl" | "syslog";

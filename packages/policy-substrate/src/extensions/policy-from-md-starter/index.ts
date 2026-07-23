@@ -14,17 +14,14 @@
  * @module @openclaw/policy/extensions/policy-from-md-starter
  */
 
-import type {
-  DenyRule,
-  ToolSpec,
-} from '../../plugin-sdk/policy/types.js';
-import type { PolicyExtractorSpec } from '../../plugin-sdk/policy/api.js';
-import { denyRulesFromSoulMd } from './extractors/deny-rules-from-soul-md.js';
-import { toolsFromToolsMd } from './extractors/tools-from-tools-md.js';
+import type { DenyRule, ToolSpec } from "../../plugin-sdk/policy/types.js";
+import type { PolicyExtractorSpec } from "../../plugin-sdk/policy/api.js";
+import { denyRulesFromSoulMd } from "./extractors/deny-rules-from-soul-md.js";
+import { toolsFromToolsMd } from "./extractors/tools-from-tools-md.js";
 
-export { denyRulesFromSoulMd } from './extractors/deny-rules-from-soul-md.js';
-export { toolsFromToolsMd } from './extractors/tools-from-tools-md.js';
-export { mdPolicyGenerator, type MdGeneratorInput } from './generator.js';
+export { denyRulesFromSoulMd } from "./extractors/deny-rules-from-soul-md.js";
+export { toolsFromToolsMd } from "./extractors/tools-from-tools-md.js";
+export { mdPolicyGenerator, type MdGeneratorInput } from "./generator.js";
 
 /**
  * Deny-rule extractors. Run with `runExtractors({ specs: STARTER_DENY_RULE_EXTRACTORS_V0, files })`.

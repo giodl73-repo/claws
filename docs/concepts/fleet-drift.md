@@ -46,12 +46,12 @@ $ claws drift
 
 ## What causes drift
 
-| Cause | Frequency | Example |
-|-------|-----------|---------|
-| Manual edit | Common | Developer lowered trust tier to unblock a tool |
-| Skipped upgrade | Occasional | Workspace missed last broadcast |
-| File deletion | Rare | Someone cleaned up "unused" files in `.claws/` |
-| External tool | Rare | Another automation overwrote `claws.json` |
+| Cause           | Frequency  | Example                                        |
+| --------------- | ---------- | ---------------------------------------------- |
+| Manual edit     | Common     | Developer lowered trust tier to unblock a tool |
+| Skipped upgrade | Occasional | Workspace missed last broadcast                |
+| File deletion   | Rare       | Someone cleaned up "unused" files in `.claws/` |
+| External tool   | Rare       | Another automation overwrote `claws.json`      |
 
 The inner ring (`claws watch`) catches edits in the workspace where they
 happen. The outer ring catches them fleet-wide, including workspaces where
@@ -108,6 +108,7 @@ claws check --fleet --fix       # auto-remediate
 ## Scenario-Driven Additions
 
 ### From fleet-operations scenarios (89 findings applied)
+
 - Drift hash composition: SHA-256 of claws.json + policy YAML files + GovernanceIR hash combined into a single composite hash for efficient comparison
 - Drift severity classification: CRITICAL (trust tier lowered, security escalation), HIGH (policy file modified or deleted), LOW (cosmetic or non-security config change)
 - Fleet baseline definition and manifest storage: promoted snapshot becomes the baseline; drift is measured against the baseline, not the last broadcast

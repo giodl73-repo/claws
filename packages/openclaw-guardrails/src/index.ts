@@ -28,10 +28,10 @@ export type {
   RiskLevel,
   Sensitivity,
   ToolCallEvent,
-} from './types.js';
+} from "./types.js";
 
 // Provider lifecycle + host context
-export type { HostContext, ProviderLifecycle } from './types.js';
+export type { HostContext, ProviderLifecycle } from "./types.js";
 
 // 5 supporting types (gateway-eng M1 closure)
 export type {
@@ -42,31 +42,28 @@ export type {
   IdentityBridge,
   Logger,
   SnapshotMeta,
-} from './types.js';
+} from "./types.js";
 
 // Composition engine (guardrails.md §Summary — "shared composition rules")
-export { ProviderRegistryImpl, composeDecisions } from './registry.js';
+export { ProviderRegistryImpl, composeDecisions } from "./registry.js";
 
 // Upstream adapter — translates GuardrailProvider → upstream's
 // PluginTrustedToolPolicyRegistration (vocabulary translation, stateless).
 // Per .craft/out/proposals/guardrails-adapter.md.
-export { toTrustedToolPolicy } from './openclaw-adapter.js';
+export { toTrustedToolPolicy } from "./openclaw-adapter.js";
 export type {
   UpstreamPluginHookBeforeToolCallEvent,
   UpstreamPluginHookToolContext,
   UpstreamPluginToolPolicyDecision,
   UpstreamPluginTrustedToolPolicyRegistration,
-} from './openclaw-adapter.js';
+} from "./openclaw-adapter.js";
 
 // Handle-binding validator (CL-07 §1a + CL-11 §3a first-failing order)
-export {
-  validateHandle,
-  EVALUATION_ORDER,
-} from './handle-binding/index.js';
+export { validateHandle, EVALUATION_ORDER } from "./handle-binding/index.js";
 export type {
   ApprovalHandle,
   InvalidReason,
   ValidationContext,
   ValidationDeps,
   ValidationResult,
-} from './handle-binding/index.js';
+} from "./handle-binding/index.js";

@@ -8,20 +8,20 @@
  * sentinel; `RiskClassification` covers the 1..5 production range.
  */
 
-import type { RiskLevel as RiskLevelBase } from '../types.js';
+import type { RiskLevel as RiskLevelBase } from "../types.js";
 
 export type RiskLevel = RiskLevelBase;
 
 export type RiskClassification =
-  | { level: 1; capability: 'read' }
-  | { level: 2; capability: 'write' }
-  | { level: 3; capability: 'communicate' }
-  | { level: 4; capability: 'execute' }
-  | { level: 5; capability: 'transact' };
+  | { level: 1; capability: "read" }
+  | { level: 2; capability: "write" }
+  | { level: 3; capability: "communicate" }
+  | { level: 4; capability: "execute" }
+  | { level: 5; capability: "transact" };
 
 export interface ApprovalRequestEvent {
   schemaVersion: 1;
-  type: 'approval_request';
+  type: "approval_request";
   requestId: string;
   timestamp: string;
   toolCall: {
@@ -47,13 +47,13 @@ export interface ApprovalRequestEvent {
 
 export interface ApprovalResponseEvent {
   schemaVersion: 1;
-  type: 'approval_response';
+  type: "approval_response";
   requestId: string;
   timestamp: string;
   decision: {
-    status: 'approved' | 'denied' | 'timeout';
+    status: "approved" | "denied" | "timeout";
     decidedBy: {
-      type: 'user' | 'policy' | 'system';
+      type: "user" | "policy" | "system";
       identity?: string;
     };
     reason?: string;
@@ -64,16 +64,16 @@ export interface ApprovalResponseEvent {
 
 export interface ApprovalTimeoutPolicy {
   readonly defaultTtlSeconds: number;
-  readonly onTimeout: 'deny' | 'escalate';
+  readonly onTimeout: "deny" | "escalate";
   readonly escalationTargets?: readonly string[];
 }
 
-export type Sensitivity = 'public' | 'internal' | 'confidential' | 'restricted';
+export type Sensitivity = "public" | "internal" | "confidential" | "restricted";
 
 export interface GovernanceApprovalMetadata {
   readonly approvalHandle: string;
   readonly contentHash: string;
   readonly riskLevel?: RiskLevel;
   readonly sensitivity?: Sensitivity;
-  readonly category?: 'tool_call' | 'file_ingest' | 'snapshot_promote' | 'policy_generate';
+  readonly category?: "tool_call" | "file_ingest" | "snapshot_promote" | "policy_generate";
 }

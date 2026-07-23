@@ -12,13 +12,13 @@
  * @module @bic/v2-prototype/policy-ir
  */
 
-import type { SnapshotId, SnapshotInternalPath } from './snapshot.js';
+import type { SnapshotId, SnapshotInternalPath } from "./snapshot.js";
 
 /** Risk tier on a tool spec (or any policy-bearing artifact). */
-export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
+export type RiskLevel = "low" | "medium" | "high" | "critical";
 
 /** Sensitivity tier on data the tool sees / produces. */
-export type Sensitivity = 'public' | 'internal' | 'confidential' | 'restricted';
+export type Sensitivity = "public" | "internal" | "confidential" | "restricted";
 
 /** Per-tool spec that policy evaluates against. */
 export interface ToolSpec {
@@ -41,10 +41,10 @@ export interface DenyRule {
 
 /** Decision returned by a policy evaluator for a tool call. */
 export type Decision =
-  | { readonly kind: 'allow' }
-  | { readonly kind: 'deny'; readonly reason: string; readonly rule?: string }
-  | { readonly kind: 'requires-approval'; readonly reason: string }
-  | { readonly kind: 'params'; readonly mutate: Readonly<Record<string, unknown>> };
+  | { readonly kind: "allow" }
+  | { readonly kind: "deny"; readonly reason: string; readonly rule?: string }
+  | { readonly kind: "requires-approval"; readonly reason: string }
+  | { readonly kind: "params"; readonly mutate: Readonly<Record<string, unknown>> };
 
 /**
  * The compiled, content-addressable policy artifact that rides inside
@@ -90,4 +90,4 @@ export interface PolicyGenerator<TValidated> {
  * PolicyIR lives INSIDE a snapshot, not as a workspace file, so the
  * 9-entry `OC_WORKSPACE_FILES` registry constraint does not apply.
  */
-export const POLICY_IR_PATH: SnapshotInternalPath = '.openclaw/policy/policy-ir.json';
+export const POLICY_IR_PATH: SnapshotInternalPath = ".openclaw/policy/policy-ir.json";

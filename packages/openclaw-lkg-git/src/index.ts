@@ -13,13 +13,13 @@
  * @module @bic/openclaw-lkg-git
  */
 
-export { gitLKGStore } from './git-lkg-store.js';
+export { gitLKGStore } from "./git-lkg-store.js";
 export type {
   AuditRecord,
   GitAuthorship,
   GitLKGStoreOptions,
   RecoveryNotice,
-} from './git-lkg-store.js';
+} from "./git-lkg-store.js";
 
 // Re-export the v2 contract types so consumers don't need a direct
 // `@bic/v2-prototype` dep just for type imports.
@@ -33,5 +33,5 @@ export type {
   LKGTracker,
   ValidationIssue,
   ValidationResult,
-} from '@bic/v2-prototype';
-export { LKGErrorImpl } from '@bic/v2-prototype';
+} from "@bic/v2-prototype";
+export { LKGErrorImpl } from "@bic/v2-prototype";

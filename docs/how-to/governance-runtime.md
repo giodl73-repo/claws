@@ -20,11 +20,13 @@ The L1 governance skill provides prompt-level guidance without blocking. It advi
 # Governance Advisory
 
 ## Before using tools
+
 - Check tool classification against your permission tier
 - Verify data classification for any accessed entities
 - Ensure OBO boundary compliance
 
 ## Required checks
+
 - R3+ tools require explicit task authorization
 - Confidential data requires elicitation gate approval
 - All actions are audit-logged

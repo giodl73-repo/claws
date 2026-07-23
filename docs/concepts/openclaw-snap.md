@@ -56,7 +56,7 @@ The state is represented in code as:
 
 ```ts
 // claws-sdk/packages/snap/src/types.ts
-export type SnapshotStatus = 'draft' | 'current' | 'superseded';
+export type SnapshotStatus = "draft" | "current" | "superseded";
 ```
 
 `NONE` and `STAGED` are not `SnapshotStatus` values — they exist before the registry is involved. The registry only sees objects that already have IDs.
@@ -85,12 +85,12 @@ Every ID in the package has the form `sha256-<base64url>`. Two are load-bearing:
 // claws-sdk/packages/snap/src/canonical.ts
 export function computeSnapshotId(files: Readonly<Record<string, string>>): string;
 export function computePolicyId(ir: Record<string, unknown>): string;
-export const POLICY_IR_PATH = '.openclaw/policy/policy-ir.json';
+export const POLICY_IR_PATH = ".openclaw/policy/policy-ir.json";
 ```
 
 `computeSnapshotId` sorts paths, canonicalizes the `{path → content}` map via RFC 8785 JCS (`canonicalHash` from `@bic/openclaw-workspace/canonicalize`), and returns the digest. Sorted keys plus canonical JSON means the ID is a pure function of the byte content — same files on two hosts produce the same ID, byte-for-byte.
 
-`computePolicyId` delegates to `computeStrippedHash(ir, ['policyId', 'canonicalizerVersion'])` from the same canonicalize module. Stripping those two fields before hashing is what makes the PolicyIR's `policyId` a self-referential declaration (the IR says what hash it *claims* to have), which the server re-derives and checks at promote time.
+`computePolicyId` delegates to `computeStrippedHash(ir, ['policyId', 'canonicalizerVersion'])` from the same canonicalize module. Stripping those two fields before hashing is what makes the PolicyIR's `policyId` a self-referential declaration (the IR says what hash it _claims_ to have), which the server re-derives and checks at promote time.
 
 The shared `computeStrippedHash` is how `@openclaw/snap` and `@openclaw/policy` avoid drifting. Both depend on `@bic/openclaw-workspace/canonicalize` as a peer; a PolicyIR major version is a coordinated release across those three packages.
 
@@ -120,13 +120,13 @@ if (computed !== declared) return err(409, toSnapError('POLICY_IR_INCONSISTENT',
 
 Error codes emitted from this check:
 
-| Code | When |
-|------|------|
-| `POLICY_NOT_GENERATED` | `.openclaw/policy/policy-ir.json` is missing and `promotionRequirePolicy` is true (default) |
-| `POLICY_IR_MALFORMED` | `safeParse` failed, or the parsed value is not an object |
-| `POLICY_IR_INCONSISTENT` | `policyId` is missing, non-string, or does not equal `computePolicyId(ir)` |
+| Code                            | When                                                                                               |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `POLICY_NOT_GENERATED`          | `.openclaw/policy/policy-ir.json` is missing and `promotionRequirePolicy` is true (default)        |
+| `POLICY_IR_MALFORMED`           | `safeParse` failed, or the parsed value is not an object                                           |
+| `POLICY_IR_INCONSISTENT`        | `policyId` is missing, non-string, or does not equal `computePolicyId(ir)`                         |
 | `POLICY_IR_VERSION_UNSUPPORTED` | Upload time only — the bundle declares a `canonicalizerVersion` outside the server's supported set |
-| `POLICY_ID_MISMATCH` | Upload time only — client sent `X-Expected-Policy-Id` and it does not match `computePolicyId` |
+| `POLICY_ID_MISMATCH`            | Upload time only — client sent `X-Expected-Policy-Id` and it does not match `computePolicyId`      |
 
 All are reported under the unified `SnapError` envelope at HTTP 409 on promote and HTTP 400 on upload. A workspace with no `policy-ir.json` cannot be promoted in a governance deployment — there is nothing for the gateway to enforce.
 
@@ -142,8 +142,8 @@ All are reported under the unified `SnapError` envelope at HTTP 409 on promote a
 
 ```ts
 // claws-sdk/packages/snap/src/index.ts
-export { startServer } from './server/index.js';
-export type { ServerHandle, StartServerOptions } from './server/startServer.js';
+export { startServer } from "./server/index.js";
+export type { ServerHandle, StartServerOptions } from "./server/startServer.js";
 ```
 
 ```ts
@@ -161,17 +161,17 @@ export interface StartServerOptions {
 
 ### Routes
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| `POST` | `/v1/snapshots` | Upload pre-made files; server computes ID; returns `{ id, status: 'draft' }` |
-| `GET` | `/v1/snapshots` | List snapshots (paginated via `limit`) |
-| `GET` | `/v1/snapshots/:id` | Fetch a full snapshot by ID |
-| `POST` | `/v1/snapshots/:id/promote` | Transition to `current` (audited) |
-| `POST` | `/v1/snapshots/:id/rollback` | Re-promote a prior snapshot (audited) |
-| `GET` | `/v1/policy/current` | Convenience: current snapshot's `policy-ir.json` |
-| `GET` | `/v1/resolve?uri=oc://…` | Resolve an `oc://` URI against the current snapshot |
-| `GET` | `/v1/snapshots/:id/resolve?uri=` | Resolve an `oc://` URI against a specific snapshot |
-| `GET` | `/v1/healthz` | Liveness; also reports whether `authContext` is configured |
+| Method | Path                             | Purpose                                                                      |
+| ------ | -------------------------------- | ---------------------------------------------------------------------------- |
+| `POST` | `/v1/snapshots`                  | Upload pre-made files; server computes ID; returns `{ id, status: 'draft' }` |
+| `GET`  | `/v1/snapshots`                  | List snapshots (paginated via `limit`)                                       |
+| `GET`  | `/v1/snapshots/:id`              | Fetch a full snapshot by ID                                                  |
+| `POST` | `/v1/snapshots/:id/promote`      | Transition to `current` (audited)                                            |
+| `POST` | `/v1/snapshots/:id/rollback`     | Re-promote a prior snapshot (audited)                                        |
+| `GET`  | `/v1/policy/current`             | Convenience: current snapshot's `policy-ir.json`                             |
+| `GET`  | `/v1/resolve?uri=oc://…`         | Resolve an `oc://` URI against the current snapshot                          |
+| `GET`  | `/v1/snapshots/:id/resolve?uri=` | Resolve an `oc://` URI against a specific snapshot                           |
+| `GET`  | `/v1/healthz`                    | Liveness; also reports whether `authContext` is configured                   |
 
 No `/v1/compile`, no `/v1/validate`. Generation lives in `@openclaw/policy`; snap serves pre-generated artifacts.
 
@@ -190,12 +190,12 @@ async function readBody(req: http.IncomingMessage): Promise<unknown> {
     const buf = chunk as Buffer;
     total += buf.length;
     if (total > MAX_BODY_BYTES) {
-      throw new Error('request body exceeds 10 MiB limit');
+      throw new Error("request body exceeds 10 MiB limit");
     }
     chunks.push(buf);
   }
   if (chunks.length === 0) return undefined;
-  const raw = Buffer.concat(chunks).toString('utf8');
+  const raw = Buffer.concat(chunks).toString("utf8");
   return safeParse(raw, { maxDepth: 100 });
 }
 ```
@@ -274,17 +274,17 @@ Every 4xx response (and the one 503, `AUTH_CONTEXT_UNAVAILABLE`) across every ro
 ```ts
 // claws-sdk/packages/snap/src/types.ts
 export type SnapErrorCode =
-  | 'SNAPSHOT_MALFORMED'
-  | 'SNAPSHOT_ID_MISMATCH'
-  | 'SNAPSHOT_NOT_FOUND'
-  | 'POLICY_ID_MISMATCH'
-  | 'POLICY_NOT_GENERATED'
-  | 'POLICY_IR_MALFORMED'
-  | 'POLICY_IR_INCONSISTENT'
-  | 'POLICY_IR_VERSION_UNSUPPORTED'
-  | 'FORBIDDEN'
-  | 'IDEMPOTENCY_KEY_REQUIRED'
-  | 'AUTH_CONTEXT_UNAVAILABLE';
+  | "SNAPSHOT_MALFORMED"
+  | "SNAPSHOT_ID_MISMATCH"
+  | "SNAPSHOT_NOT_FOUND"
+  | "POLICY_ID_MISMATCH"
+  | "POLICY_NOT_GENERATED"
+  | "POLICY_IR_MALFORMED"
+  | "POLICY_IR_INCONSISTENT"
+  | "POLICY_IR_VERSION_UNSUPPORTED"
+  | "FORBIDDEN"
+  | "IDEMPOTENCY_KEY_REQUIRED"
+  | "AUTH_CONTEXT_UNAVAILABLE";
 
 export interface SnapError {
   readonly code: SnapErrorCode;
@@ -298,11 +298,7 @@ The enum is **closed**. Every error path — `JSON.parse` SyntaxError, store fai
 
 ```ts
 // claws-sdk/packages/snap/src/error.ts
-export function toSnapError(
-  code: SnapErrorCode,
-  err: unknown,
-  ctx: ErrContext = {},
-): SnapError;
+export function toSnapError(code: SnapErrorCode, err: unknown, ctx: ErrContext = {}): SnapError;
 ```
 
 This is where the safety contract lives. `toSnapError` does four things, every time:
@@ -318,11 +314,11 @@ All via `sanitizeMessage`:
 // claws-sdk/packages/snap/src/error.ts
 export function sanitizeMessage(raw: string): string {
   const scrubbed = raw
-    .replace(GITHUB_TOKEN, '[REDACTED:GITHUB_TOKEN]')
-    .replace(JWT, '[REDACTED:JWT]')
-    .replace(BEARER, '[redacted]')
-    .replace(SECRET_KV, '[redacted]')
-    .replace(ABSOLUTE_PATH, ' [path]');
+    .replace(GITHUB_TOKEN, "[REDACTED:GITHUB_TOKEN]")
+    .replace(JWT, "[REDACTED:JWT]")
+    .replace(BEARER, "[redacted]")
+    .replace(SECRET_KV, "[redacted]")
+    .replace(ABSOLUTE_PATH, " [path]");
   if (scrubbed.length <= MAX_MESSAGE) return scrubbed;
   return `${scrubbed.slice(0, MAX_MESSAGE - 1)}…`;
 }
@@ -352,20 +348,20 @@ When an error is about a specific snapshot, the envelope populates `snapshotId` 
 
 The `openclaw snap` CLI group is the thin composition layer in front of the library. Eleven user-facing verbs cover the full workspace-to-registry lifecycle; the twelfth verb is `serve`, which starts the HTTP server above.
 
-| Group | Verb | What it does |
-|-------|------|--------------|
-| Stage toggle | `stage on` / `stage off` | Flip per-workspace auto-staging; writes to `.openclaw/stage-config.json` |
-| Working tree | `status` | One-shot view: stage rules + working tree + drafts + current |
-| Working tree | `diff --staged` | Local diff: `.openclaw/.stage/<path>` vs canonical (no registry call) |
-| Working tree | `discard --stage` | Clear `.stage/` without uploading |
-| Registry | `upload` | `POST /v1/snapshots`; flags `--promote` (atomic upload + promote), `--local`, `--label` |
-| Registry | `list` | `GET /v1/snapshots`; filter by `--status` |
-| Registry | `diff <a> <b>` | Two-snapshot semantic diff (imports `diffPolicyIR` from `@openclaw/policy` at the handler layer) |
-| Registry | `checkout <id>` | Reset working tree to snapshot (git-parallel) |
-| Registry | `promote <id>` | `POST /v1/snapshots/:id/promote` |
-| Registry | `rollback <id>` | `POST /v1/snapshots/:id/rollback` |
-| Registry | `discard <id>` | Drop a draft from the registry (history snapshots are preserved) |
-| Daemon | `serve` | Start the HTTP server |
+| Group        | Verb                     | What it does                                                                                     |
+| ------------ | ------------------------ | ------------------------------------------------------------------------------------------------ |
+| Stage toggle | `stage on` / `stage off` | Flip per-workspace auto-staging; writes to `.openclaw/stage-config.json`                         |
+| Working tree | `status`                 | One-shot view: stage rules + working tree + drafts + current                                     |
+| Working tree | `diff --staged`          | Local diff: `.openclaw/.stage/<path>` vs canonical (no registry call)                            |
+| Working tree | `discard --stage`        | Clear `.stage/` without uploading                                                                |
+| Registry     | `upload`                 | `POST /v1/snapshots`; flags `--promote` (atomic upload + promote), `--local`, `--label`          |
+| Registry     | `list`                   | `GET /v1/snapshots`; filter by `--status`                                                        |
+| Registry     | `diff <a> <b>`           | Two-snapshot semantic diff (imports `diffPolicyIR` from `@openclaw/policy` at the handler layer) |
+| Registry     | `checkout <id>`          | Reset working tree to snapshot (git-parallel)                                                    |
+| Registry     | `promote <id>`           | `POST /v1/snapshots/:id/promote`                                                                 |
+| Registry     | `rollback <id>`          | `POST /v1/snapshots/:id/rollback`                                                                |
+| Registry     | `discard <id>`           | Drop a draft from the registry (history snapshots are preserved)                                 |
+| Daemon       | `serve`                  | Start the HTTP server                                                                            |
 
 The handler source lives at `claws-sdk/packages/snap/src/cli-handlers/`. Default staging posture is `off` — staging is opt-in per workspace, matching OC-today behavior. For the operator's angle on any of these, follow the cross-links in [See also](#see-also).
 

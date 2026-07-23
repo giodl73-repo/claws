@@ -1,4 +1,4 @@
-import type { InvalidReason } from '../types.js';
+import type { InvalidReason } from "../types.js";
 
 export interface KeyIdInput {
   readonly handleKeyId: string;
@@ -6,5 +6,5 @@ export interface KeyIdInput {
 }
 
 export function checkKeyId(input: KeyIdInput): InvalidReason | null {
-  return input.trustSet.has(input.handleKeyId) ? null : 'unknown-keyId';
+  return input.trustSet.has(input.handleKeyId) ? null : "unknown-keyId";
 }

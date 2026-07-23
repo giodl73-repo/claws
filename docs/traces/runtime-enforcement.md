@@ -112,6 +112,7 @@ When a governance handler crashes:
 ```
 
 Key failure modes:
+
 - **Single crash**: fail-closed (deny), retry next call
 - **Persistent crash** (3+ in 60s): alert, disable handler, require operator recovery
 - **Stack overflow** (RangeError): systemic — escalate immediately

@@ -8,12 +8,12 @@ Clean removal of governance artifacts from a workspace, restoring the original O
 
 ## What Gets Removed
 
-| Artifact | Location | Removed |
-|----------|----------|---------|
-| claws.json | Workspace root | Yes |
-| .claws/ directory | Governance artifacts | Yes |
-| OC configuration files | Workspace root | **Never** |
-| User-authored skills | skills/ | **Never** |
+| Artifact               | Location             | Removed   |
+| ---------------------- | -------------------- | --------- |
+| claws.json             | Workspace root       | Yes       |
+| .claws/ directory      | Governance artifacts | Yes       |
+| OC configuration files | Workspace root       | **Never** |
+| User-authored skills   | skills/              | **Never** |
 
 ## Uninstall Process
 

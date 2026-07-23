@@ -12,25 +12,28 @@
  * (`tools/migrate-sensitivity-syntax`) drive workspaces toward the
  * canonical form over time.
  */
-import type { LintRule, LintFinding } from '@openclaw/oc-lint/plugin-sdk';
-import { scanToolHeaders } from './_tools-md-scan.js';
+import type { LintRule, LintFinding } from "@openclaw/oc-lint/plugin-sdk";
+import { scanToolHeaders } from "./_tools-md-scan.js";
 
-const KNOWN_BARE_WORDS = ['public', 'internal', 'confidential', 'restricted'];
+const KNOWN_BARE_WORDS = ["public", "internal", "confidential", "restricted"];
 
 export const toolsLegacySensitivitySyntax: LintRule = {
-  id: 'policy-starter-v0/tools/legacy-sensitivity-syntax',
-  severity: 'info',
+  id: "policy-starter-v0/tools/legacy-sensitivity-syntax",
+  severity: "info",
   description:
-    'TOOLS.md tool declares sensitivity via legacy bare-word; prefer canonical `sensitivity:<level>`',
-  appliesTo: 'TOOLS.md',
+    "TOOLS.md tool declares sensitivity via legacy bare-word; prefer canonical `sensitivity:<level>`",
+  appliesTo: "TOOLS.md",
   check(ctx) {
     const findings: LintFinding[] = [];
     for (const hit of scanToolHeaders(ctx.ast)) {
-      if (hit.meta === '') continue;
+      if (hit.meta === "") continue;
       // Skip if explicit `sensitivity:<level>` is already there.
       if (/\bsensitivity\s*:\s*\w+/i.test(hit.meta)) continue;
       // Detect bare-word token-level match.
-      const tokens = hit.meta.toLowerCase().split(/[,\s]+/).map((t) => t.trim());
+      const tokens = hit.meta
+        .toLowerCase()
+        .split(/[,\s]+/)
+        .map((t) => t.trim());
       const bareMatch = tokens.find((t) => KNOWN_BARE_WORDS.includes(t));
       if (bareMatch === undefined) continue;
       findings.push({

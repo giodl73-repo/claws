@@ -29,19 +29,19 @@ This also makes the building blocks independently valuable. A customer who wants
 
 11 individual MIT-licensed packages. Each is standalone. Each works without claws.
 
-| Package | What it does | Deps |
-|---------|-------------|------|
-| `@craftworks/readers` | Workspace file reader via WorkspaceReader interface. BOM stripping, LF normalization, sidecar resolution | None |
-| `@craftworks/sift` | Typed expression engine. Parse, evaluate, bind. General-purpose -- not governance-specific | None |
-| `@craftworks/audit` | Ed25519-signed hash chain. Append-only, tamper-evident, JSON export | `@craftworks/crypto` |
-| `@craftworks/crypto` | Ed25519 keypair, HMAC-SHA256, SHA-256. Thin wrapper over Node.js `crypto` | None |
-| `@craftworks/emit` | Code generation framework. EmitTarget interface, staging, atomic writes | None |
-| `@craftworks/enforce` | Fail-mode enforcement engine. Configurable per risk level | None |
-| `@craftworks/security` | Input sanitization, injection defense patterns, credential leak detection | None |
-| `@craftworks/schema` | Zod-based config validation framework | None |
-| `@craftworks/skill-kit` | `skill()` factory + decorator infrastructure for agent skills | None |
-| `@craftworks/test` | Check validator + security scans. Scenario runner framework | `@craftworks/sift`, `@craftworks/schema` |
-| `@craftworks/runtime` | Thin runtime helpers (classify, elicit, audit) for skill execution | `@craftworks/audit`, `@craftworks/enforce` |
+| Package                 | What it does                                                                                             | Deps                                       |
+| ----------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `@craftworks/readers`   | Workspace file reader via WorkspaceReader interface. BOM stripping, LF normalization, sidecar resolution | None                                       |
+| `@craftworks/sift`      | Typed expression engine. Parse, evaluate, bind. General-purpose -- not governance-specific               | None                                       |
+| `@craftworks/audit`     | Ed25519-signed hash chain. Append-only, tamper-evident, JSON export                                      | `@craftworks/crypto`                       |
+| `@craftworks/crypto`    | Ed25519 keypair, HMAC-SHA256, SHA-256. Thin wrapper over Node.js `crypto`                                | None                                       |
+| `@craftworks/emit`      | Code generation framework. EmitTarget interface, staging, atomic writes                                  | None                                       |
+| `@craftworks/enforce`   | Fail-mode enforcement engine. Configurable per risk level                                                | None                                       |
+| `@craftworks/security`  | Input sanitization, injection defense patterns, credential leak detection                                | None                                       |
+| `@craftworks/schema`    | Zod-based config validation framework                                                                    | None                                       |
+| `@craftworks/skill-kit` | `skill()` factory + decorator infrastructure for agent skills                                            | None                                       |
+| `@craftworks/test`      | Check validator + security scans. Scenario runner framework                                              | `@craftworks/sift`, `@craftworks/schema`   |
+| `@craftworks/runtime`   | Thin runtime helpers (classify, elicit, audit) for skill execution                                       | `@craftworks/audit`, `@craftworks/enforce` |
 
 Every package has its own `package.json`, its own test suite, its own `CHANGELOG.md`. They are published independently to public npm. They carry no `@claws/*` dependency -- the building blocks do not know claws exists.
 
@@ -75,23 +75,24 @@ claws composes the building blocks into a governance-specific compilation pipeli
 // @claws/compiler/src/index.ts — governance composition of Craftworks blocks
 
 // Infrastructure (re-exported from @craftworks/*)
-export { WorkspaceReader, NodeFsReader } from '@craftworks/readers';
-export { SiftEngine, parseExpression } from '@craftworks/sift';
-export { AuditChain, createChain, verifyChain } from '@craftworks/audit';
-export { sign, verify, hash, generateKeyPair } from '@craftworks/crypto';
-export { EmitTarget, emit } from '@craftworks/emit';
-export { FailMode, validateFailModes } from '@craftworks/enforce';
+export { WorkspaceReader, NodeFsReader } from "@craftworks/readers";
+export { SiftEngine, parseExpression } from "@craftworks/sift";
+export { AuditChain, createChain, verifyChain } from "@craftworks/audit";
+export { sign, verify, hash, generateKeyPair } from "@craftworks/crypto";
+export { EmitTarget, emit } from "@craftworks/emit";
+export { FailMode, validateFailModes } from "@craftworks/enforce";
 
 // Governance-specific (unique to claws)
-export { GovernanceIR, GovAnalysis, CapabilityManifest } from './ir/index.js';
-export { OpenClawTarget, ClaudeCodeTarget } from './targets/index.js';
-export { R5_FAIL_CLOSED } from './rules/fail-closed.js';
-export { compile, build, CompileOptions, BuildOptions } from './host/index.js';
-export { parseOCWorkspace } from './parser/index.js';
-export { analyzeRules, GOVERNANCE_RULES } from './rules/index.js';
+export { GovernanceIR, GovAnalysis, CapabilityManifest } from "./ir/index.js";
+export { OpenClawTarget, ClaudeCodeTarget } from "./targets/index.js";
+export { R5_FAIL_CLOSED } from "./rules/fail-closed.js";
+export { compile, build, CompileOptions, BuildOptions } from "./host/index.js";
+export { parseOCWorkspace } from "./parser/index.js";
+export { analyzeRules, GOVERNANCE_RULES } from "./rules/index.js";
 ```
 
 What lives in `@claws/compiler` itself (not re-exported):
+
 - **GovernanceIR** types and serialization (~300 lines)
 - **OC parser** that reads 9 specific files and builds a governance AST (~500 lines)
 - **29 governance rules** and the rule analyzer (~400 lines)
@@ -107,17 +108,17 @@ Total governance-specific code: ~2,100 lines. Everything else is composed from L
 
 The paid tier imports `@claws/compiler` and adds enterprise modules:
 
-| Module | What it adds |
-|--------|-------------|
-| Fleet | Scan, broadcast, drift detection, kill switch, fleet reporting |
-| Compliance | SOC2, HIPAA, EU AI Act evidence generation |
-| SIEM | CEF, syslog, NDJSON streaming export |
-| PRESS | Bipartite compression, cache, profiles, quality |
-| RELAX | Policy expression evaluation with full eval engine |
-| Identity | OIDC/SAML/RBAC bridge |
-| Budget | Tracking + fleet aggregation |
-| LSP | claws-lsp language server |
-| Snapshots | Save/restore/diff workspace snapshots |
+| Module              | What it adds                                                             |
+| ------------------- | ------------------------------------------------------------------------ |
+| Fleet               | Scan, broadcast, drift detection, kill switch, fleet reporting           |
+| Compliance          | SOC2, HIPAA, EU AI Act evidence generation                               |
+| SIEM                | CEF, syslog, NDJSON streaming export                                     |
+| PRESS               | Bipartite compression, cache, profiles, quality                          |
+| RELAX               | Policy expression evaluation with full eval engine                       |
+| Identity            | OIDC/SAML/RBAC bridge                                                    |
+| Budget              | Tracking + fleet aggregation                                             |
+| LSP                 | claws-lsp language server                                                |
+| Snapshots           | Save/restore/diff workspace snapshots                                    |
 | Multi-platform emit | 5 additional emit targets (Cursor, Windsurf, Bedrock, Vertex, LangGraph) |
 
 Enterprise uses curated re-exports from the compiler -- an explicit symbol list, not `export *`.
@@ -202,10 +203,10 @@ npm install @craftworks/readers @craftworks/sift @craftworks/enforce @craftworks
 
 ```typescript
 // acmesafe-compiler/src/index.ts
-import { NodeFsReader } from '@craftworks/readers';
-import { SiftEngine } from '@craftworks/sift';
-import { validateFailModes } from '@craftworks/enforce';
-import { EmitTarget } from '@craftworks/emit';
+import { NodeFsReader } from "@craftworks/readers";
+import { SiftEngine } from "@craftworks/sift";
+import { validateFailModes } from "@craftworks/enforce";
+import { EmitTarget } from "@craftworks/emit";
 
 export async function acmesafeCompile(workspace: string) {
   const reader = new NodeFsReader(workspace);
@@ -225,8 +226,8 @@ npm install @craftworks/audit @craftworks/sift
 ```
 
 ```typescript
-import { createChain } from '@craftworks/audit';
-import { parseExpression, SiftEngine } from '@craftworks/sift';
+import { createChain } from "@craftworks/audit";
+import { parseExpression, SiftEngine } from "@craftworks/sift";
 
 // Use audit chains for their own agent monitoring (nothing to do with governance)
 const chain = createChain({ keyPair: await generateKeyPair() });
@@ -239,16 +240,16 @@ Two packages, ~40KB total, zero governance opinions, zero `@claws/*` dependencie
 
 ## What Craftworks supports vs what is customer-owned
 
-| | Craftworks supports | Customer owns |
-|---|---|---|
-| **Bug in @craftworks/sift** | Fix it, release patch | -- |
-| **Bug in customer's composition** | -- | Customer debugs their own wiring |
-| **New emit target request** | Evaluate, maybe add to @craftworks/emit | Customer can implement EmitTarget now |
-| **Security vulnerability in @craftworks/crypto** | CVE, patch, advisory | -- |
-| **Customer's branded compiler crashes** | -- | Customer's product, customer's support |
-| **Bug in @claws/compiler governance rules** | Fix it, release patch | -- |
-| **Customer wants different governance rules** | -- | Compose @craftworks/* blocks with their own rules |
-| **@claws/enterprise features** | Full support, SLA, dedicated channel | -- |
+|                                                  | Craftworks supports                     | Customer owns                                     |
+| ------------------------------------------------ | --------------------------------------- | ------------------------------------------------- |
+| **Bug in @craftworks/sift**                      | Fix it, release patch                   | --                                                |
+| **Bug in customer's composition**                | --                                      | Customer debugs their own wiring                  |
+| **New emit target request**                      | Evaluate, maybe add to @craftworks/emit | Customer can implement EmitTarget now             |
+| **Security vulnerability in @craftworks/crypto** | CVE, patch, advisory                    | --                                                |
+| **Customer's branded compiler crashes**          | --                                      | Customer's product, customer's support            |
+| **Bug in @claws/compiler governance rules**      | Fix it, release patch                   | --                                                |
+| **Customer wants different governance rules**    | --                                      | Compose @craftworks/* blocks with their own rules |
+| **@claws/enterprise features**                   | Full support, SLA, dedicated channel    | --                                                |
 
 The boundary: Craftworks maintains the infrastructure blocks. claws maintains the governance composition. Customers own anything they build on top of either layer. We never support someone's custom composition, but we always support the blocks and the compiler they used to build it.
 
@@ -277,6 +278,7 @@ These hold regardless of which layer or composition a customer uses:
 ## Timeline
 
 Post-Thoth, ~10 weeks total:
+
 - Phase 1 (8 weeks): Extract 11 building blocks from compiler-sdk and agent-sdk into `@craftworks/*` packages
 - Phase 2 (2 weeks): Wire `@claws/compiler` composition layer, publish all packages, migration guide
 

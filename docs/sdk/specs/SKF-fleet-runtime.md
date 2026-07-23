@@ -20,12 +20,12 @@ in their local `claws.json`.
 interface FleetBinding {
   readonly version: 1;
   readonly fleetName: string;
-  readonly policyIR: GovernanceIR;    // compiled fleet base
+  readonly policyIR: GovernanceIR; // compiled fleet base
   readonly trustSet: TrustSet;
   readonly hosts: ReadonlyArray<HostBinding>;
-  readonly severityGate: 'block' | 'warn' | 'off';
-  readonly signedBy: string;          // fleet admin principal
-  readonly signature: string;         // HMAC over canonical bytes
+  readonly severityGate: "block" | "warn" | "off";
+  readonly signedBy: string; // fleet admin principal
+  readonly signature: string; // HMAC over canonical bytes
 }
 ```
 

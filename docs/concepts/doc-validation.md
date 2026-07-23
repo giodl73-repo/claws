@@ -4,21 +4,21 @@
 
 ## The 11 surfaces
 
-A surface is a *kind* of doc. Every atom declares a subset of these as required; every doc manifest declares which atoms it serves.
+A surface is a _kind_ of doc. Every atom declares a subset of these as required; every doc manifest declares which atoms it serves.
 
-| Surface     | What it is                                                                     |
-|-------------|--------------------------------------------------------------------------------|
-| `guide`     | Narrative concept or how-it-works doc (this file is a `guide`)                 |
-| `deck`      | Pitch / overview slides (marp-compiled markdown)                               |
-| `tutorial`  | Step-by-step walkthrough a reader can follow hands-on                          |
-| `trace`     | End-to-end pipeline walkthrough with real artifacts                            |
-| `spec`      | Normative specification — the authoritative contract                            |
-| `story`     | Customer-facing narrative / motivation                                          |
-| `howto`     | Task-oriented recipe ("how do I do X?")                                         |
-| `example`   | Runnable code sample with explanation                                           |
-| `research`  | Background investigation, landscape analysis, or design rationale              |
-| `index`     | Hub page linking to a cluster of docs                                           |
-| `root`      | Top-level entry (README, landing page)                                          |
+| Surface    | What it is                                                        |
+| ---------- | ----------------------------------------------------------------- |
+| `guide`    | Narrative concept or how-it-works doc (this file is a `guide`)    |
+| `deck`     | Pitch / overview slides (marp-compiled markdown)                  |
+| `tutorial` | Step-by-step walkthrough a reader can follow hands-on             |
+| `trace`    | End-to-end pipeline walkthrough with real artifacts               |
+| `spec`     | Normative specification — the authoritative contract              |
+| `story`    | Customer-facing narrative / motivation                            |
+| `howto`    | Task-oriented recipe ("how do I do X?")                           |
+| `example`  | Runnable code sample with explanation                             |
+| `research` | Background investigation, landscape analysis, or design rationale |
+| `index`    | Hub page linking to a cluster of docs                             |
+| `root`     | Top-level entry (README, landing page)                            |
 
 These surface names are generic doc-system concepts and stay stable across the migration.
 
@@ -36,7 +36,7 @@ Conceptually:
   ...
 ```
 
-Individual atoms may *add* to the matrix default via their `surfaces` field, but cannot fall below it — the matrix is the floor.
+Individual atoms may _add_ to the matrix default via their `surfaces` field, but cannot fall below it — the matrix is the floor.
 
 ## Surface contracts
 
@@ -83,25 +83,25 @@ The oracle cross-references: every atom referenced in a manifest must exist in `
 
 Each gap has a code, severity, message template, a hint, and a `docsLink`. The shape is `{ code, severity, message, hint, docsLink }` — this is what shows up in CI annotations.
 
-| Code                          | Severity | Message                                                  | Hint                                                    |
-|-------------------------------|----------|----------------------------------------------------------|---------------------------------------------------------|
-| `MISSING_SURFACE_CONTRACT`    | error    | Atom has no `docs/specs/contracts/{id}.yaml`             | Run `claws make atom <slug>` or author the contract    |
-| `MISSING_REQUIRED_SURFACE`    | error    | Surface required by matrix + atom not found              | Add the doc at the path named by the contract          |
-| `MISSING_REQUIRED_COVERAGE`   | error    | Required `must-cover` slot not found in the doc           | Add the missing H2/H3 section                          |
-| `ORPHAN_CONTRACT`             | error    | Contract exists but no registry row                      | Add the row or delete the contract                     |
-| `ORPHAN_DOC`                  | warn     | Doc not served by any manifest                           | Add to nearest `doc-manifest.yaml` or delete            |
-| `UNKNOWN_ATOM_IN_MANIFEST`    | error    | Manifest references atom not in registry                 | Fix slug or add the atom row                           |
-| `STALE_AUTHORITY`             | error    | Mirror content hash diverges from authority              | Re-run scrubber / regenerate mirror                    |
-| `DEPRECATED_REPLACES_MISSING` | error    | Deprecated atom's `replaces:` target not in registry     | Fix the slug or set `replaces: null`                   |
-| `DRAFT_SPEC_LINK_BROKEN`      | error    | `spec:` cites a draft path that doesn't exist            | Add the draft or remove the citation                   |
-| `STATUS_SURFACE_MISMATCH`     | warn     | Stable atom still linked via draft spec                  | Promote the spec or move to `draft` status             |
-| `MANIFEST_PATH_UNREACHABLE`   | error    | Manifest names a file that doesn't exist                 | Update the path or create the file                     |
-| `SURFACE_PATH_COLLISION`      | error    | Two contracts point the same surface at the same file     | Split the surface or merge the atoms                   |
-| `REQUIRED_FIELD_MISSING`      | error    | Registry row missing a required field                    | Add the field (13 are required)                        |
-| `SCENARIO_DISCRIMINATOR_INVALID` | error | `scenario.source` is neither `series` nor `unit-test`    | Pick one shape; no partial fields                      |
-| `SCENARIO_SERIES_UNDECLARED`  | error    | `scenario.series` names a series absent from manifest    | Register it in `tests/accept/scenarios/manifest.yaml`  |
-| `ORPHAN_SCENARIO_SERIES`      | error    | `tests/accept/scenarios/{series-id}/` exists but no atom claims it | Add `scenario.series: [series-id]` to a registry row, or delete the scenario directory |
-| `MISSING_SCENARIO_DIR`        | error    | Atom cites `scenario.series` but `tests/accept/scenarios/{series-id}/` is absent | Create the scenario directory with ≥1 `S{NN}-*/scenario.yaml` |
+| Code                             | Severity | Message                                                                          | Hint                                                                                   |
+| -------------------------------- | -------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `MISSING_SURFACE_CONTRACT`       | error    | Atom has no `docs/specs/contracts/{id}.yaml`                                     | Run `claws make atom <slug>` or author the contract                                    |
+| `MISSING_REQUIRED_SURFACE`       | error    | Surface required by matrix + atom not found                                      | Add the doc at the path named by the contract                                          |
+| `MISSING_REQUIRED_COVERAGE`      | error    | Required `must-cover` slot not found in the doc                                  | Add the missing H2/H3 section                                                          |
+| `ORPHAN_CONTRACT`                | error    | Contract exists but no registry row                                              | Add the row or delete the contract                                                     |
+| `ORPHAN_DOC`                     | warn     | Doc not served by any manifest                                                   | Add to nearest `doc-manifest.yaml` or delete                                           |
+| `UNKNOWN_ATOM_IN_MANIFEST`       | error    | Manifest references atom not in registry                                         | Fix slug or add the atom row                                                           |
+| `STALE_AUTHORITY`                | error    | Mirror content hash diverges from authority                                      | Re-run scrubber / regenerate mirror                                                    |
+| `DEPRECATED_REPLACES_MISSING`    | error    | Deprecated atom's `replaces:` target not in registry                             | Fix the slug or set `replaces: null`                                                   |
+| `DRAFT_SPEC_LINK_BROKEN`         | error    | `spec:` cites a draft path that doesn't exist                                    | Add the draft or remove the citation                                                   |
+| `STATUS_SURFACE_MISMATCH`        | warn     | Stable atom still linked via draft spec                                          | Promote the spec or move to `draft` status                                             |
+| `MANIFEST_PATH_UNREACHABLE`      | error    | Manifest names a file that doesn't exist                                         | Update the path or create the file                                                     |
+| `SURFACE_PATH_COLLISION`         | error    | Two contracts point the same surface at the same file                            | Split the surface or merge the atoms                                                   |
+| `REQUIRED_FIELD_MISSING`         | error    | Registry row missing a required field                                            | Add the field (13 are required)                                                        |
+| `SCENARIO_DISCRIMINATOR_INVALID` | error    | `scenario.source` is neither `series` nor `unit-test`                            | Pick one shape; no partial fields                                                      |
+| `SCENARIO_SERIES_UNDECLARED`     | error    | `scenario.series` names a series absent from manifest                            | Register it in `tests/accept/scenarios/manifest.yaml`                                  |
+| `ORPHAN_SCENARIO_SERIES`         | error    | `tests/accept/scenarios/{series-id}/` exists but no atom claims it               | Add `scenario.series: [series-id]` to a registry row, or delete the scenario directory |
+| `MISSING_SCENARIO_DIR`           | error    | Atom cites `scenario.series` but `tests/accept/scenarios/{series-id}/` is absent | Create the scenario directory with ≥1 `S{NN}-*/scenario.yaml`                          |
 
 ## `known-gaps.yaml` acknowledgment
 

@@ -23,13 +23,13 @@ Any OC developer               Skill developers               claws compiler
 
 5 packages contributed to the OpenClaw ecosystem. These solve real problems independently. They happen to be powered by Craftworks infrastructure, but they work without claws, without claws.json, without any governance compiler.
 
-| Package | What it does | Size |
-|---------|-------------|------|
-| `@openclaw/audit-chain` | Hash-chained audit trails for any OC agent | ~20KB |
-| `@openclaw/budget-meter` | Token/cost controls with 80/95/100% threshold alerts | ~8KB |
-| `@openclaw/identity-bridge` | Enterprise SSO (OIDC/SAML) for OC agents | ~3KB |
-| `@openclaw/siem-emitter` | SOC integration in 4 formats (SARIF, CEF, JSON, syslog) | ~5KB |
-| `@openclaw/secret-scanner` | Credential leak detection for agent workspaces | ~4KB |
+| Package                     | What it does                                            | Size  |
+| --------------------------- | ------------------------------------------------------- | ----- |
+| `@openclaw/audit-chain`     | Hash-chained audit trails for any OC agent              | ~20KB |
+| `@openclaw/budget-meter`    | Token/cost controls with 80/95/100% threshold alerts    | ~8KB  |
+| `@openclaw/identity-bridge` | Enterprise SSO (OIDC/SAML) for OC agents                | ~3KB  |
+| `@openclaw/siem-emitter`    | SOC integration in 4 formats (SARIF, CEF, JSON, syslog) | ~5KB  |
+| `@openclaw/secret-scanner`  | Credential leak detection for agent workspaces          | ~4KB  |
 
 These are genuine ecosystem contributions. An OC developer who never uses claws can `npm install @openclaw/audit-chain` and get a production-quality audit trail. The founder's test: "Are these genuinely useful to the community, or just a funnel?" They are useful.
 
@@ -37,35 +37,35 @@ These are genuine ecosystem contributions. An OC developer who never uses claws 
 
 11+ standalone libraries for governance-aware development. Every library works without the claws compiler. The compiler is the integration layer; the libraries are standalone value.
 
-| Package | Purpose | Standalone? | Size |
-|---------|---------|-------------|------|
-| `@claws/sift` | Typed expression engine for policy rules (sift) | Yes | ~25KB |
-| `@claws/audit` | Audit trail with hash chain | Yes | ~15KB |
-| `@claws/security` | Input sanitization, injection defense patterns | Yes | ~12KB |
-| `@claws/budget` | Token/spending controls for skills | Yes | ~8KB |
-| `@claws/data` | Typed data access with sensitivity labels | Yes | ~10KB |
-| `@claws/report` | Document generation (markdown, HTML, JSON, PDF) | Yes | ~20KB |
-| `@claws/identity` | Agent authentication helpers | Yes | ~5KB |
-| `@claws/schema` | Config validation (Zod-based) | Yes | ~8KB |
-| `@bic/claws-skill-kit` | `skill()` factory + 6 governance decorators | Yes | ~35KB |
-| `@bic/claws-test` | Scenario runner + governance validator + security scanner | Yes | ~45KB |
-| `@claws/runtime` | 7 thin governance helpers (classify, elicit, audit) | No* | ~15KB |
+| Package                | Purpose                                                   | Standalone? | Size  |
+| ---------------------- | --------------------------------------------------------- | ----------- | ----- |
+| `@claws/sift`          | Typed expression engine for policy rules (sift)           | Yes         | ~25KB |
+| `@claws/audit`         | Audit trail with hash chain                               | Yes         | ~15KB |
+| `@claws/security`      | Input sanitization, injection defense patterns            | Yes         | ~12KB |
+| `@claws/budget`        | Token/spending controls for skills                        | Yes         | ~8KB  |
+| `@claws/data`          | Typed data access with sensitivity labels                 | Yes         | ~10KB |
+| `@claws/report`        | Document generation (markdown, HTML, JSON, PDF)           | Yes         | ~20KB |
+| `@claws/identity`      | Agent authentication helpers                              | Yes         | ~5KB  |
+| `@claws/schema`        | Config validation (Zod-based)                             | Yes         | ~8KB  |
+| `@bic/claws-skill-kit` | `skill()` factory + 6 governance decorators               | Yes         | ~35KB |
+| `@bic/claws-test`      | Scenario runner + governance validator + security scanner | Yes         | ~45KB |
+| `@claws/runtime`       | 7 thin governance helpers (classify, elicit, audit)       | No*         | ~15KB |
 
 \* `@claws/runtime` depends on `@openclaw/*` packages. All others are fully standalone.
 
 ### Standalone usage example: @claws/sift
 
 ```typescript
-import { SiftEngine, parseExpression } from '@claws/sift';
+import { SiftEngine, parseExpression } from "@claws/sift";
 
 const expr = parseExpression('tool.risk >= R3 AND tool.obo != "none"');
 const engine = new SiftEngine();
 const result = engine.evaluate(expr, {
-  tool: { name: 'send-email', risk: 'R5', obo: 'email' }
+  tool: { name: "send-email", risk: "R5", obo: "email" },
 });
 
-console.log(result.matched);   // true
-console.log(result.bindings);  // { tool: { name: 'send-email', ... } }
+console.log(result.matched); // true
+console.log(result.bindings); // { tool: { name: 'send-email', ... } }
 ```
 
 No claws compiler. No claws.json. Pure library usage. Any OC developer can use typed policy expressions in their skill today.
@@ -86,12 +86,12 @@ The claws-sdk sits as a sibling to craftworks-sdk, both built on compiler-sdk + 
 
 Every line of generated code must look like something an OC developer would write themselves. This is the boundary test:
 
-| In generated code? | Import | Verdict |
-|---------------------|--------|---------|
-| Yes | `@openclaw/audit-chain` | Correct -- OC-native package |
-| Yes | `@claws/sift` | Correct -- standalone library |
-| **No** | `@craftworks/compiler-sdk` | **Violation** -- internal infrastructure leaked |
-| **No** | `@craftworks/agent-sdk` | **Violation** -- internal infrastructure leaked |
+| In generated code? | Import                     | Verdict                                         |
+| ------------------ | -------------------------- | ----------------------------------------------- |
+| Yes                | `@openclaw/audit-chain`    | Correct -- OC-native package                    |
+| Yes                | `@claws/sift`              | Correct -- standalone library                   |
+| **No**             | `@craftworks/compiler-sdk` | **Violation** -- internal infrastructure leaked |
+| **No**             | `@craftworks/agent-sdk`    | **Violation** -- internal infrastructure leaked |
 
 If a developer reads the generated `plugins/claws-governance/index.ts` and sees `import { WorkAgentSupervisor } from '@craftworks/agent-sdk'`, the design has failed. The generated code references `@claws/*` and `@openclaw/*` packages that the developer can inspect, understand, and replace.
 

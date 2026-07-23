@@ -25,11 +25,7 @@
  * @module @bic/openclaw-guardrails/openclaw-adapter
  */
 
-import type {
-  AuthorizationDecision,
-  GuardrailProvider,
-  ToolCallEvent,
-} from './types.js';
+import type { AuthorizationDecision, GuardrailProvider, ToolCallEvent } from "./types.js";
 
 /**
  * Upstream `PluginTrustedToolPolicyRegistration` shape, mirrored locally
@@ -53,9 +49,9 @@ export interface UpstreamPluginToolPolicyDecision {
   readonly requireApproval?: {
     readonly title: string;
     readonly description: string;
-    readonly severity?: 'info' | 'warning' | 'critical';
+    readonly severity?: "info" | "warning" | "critical";
     readonly timeoutMs?: number;
-    readonly timeoutBehavior?: 'allow' | 'deny';
+    readonly timeoutBehavior?: "allow" | "deny";
     readonly pluginId?: string;
   };
 }
@@ -82,10 +78,7 @@ export interface UpstreamPluginTrustedToolPolicyRegistration {
   readonly evaluate: (
     event: UpstreamPluginHookBeforeToolCallEvent,
     ctx: UpstreamPluginHookToolContext,
-  ) =>
-    | UpstreamPluginToolPolicyDecision
-    | void
-    | Promise<UpstreamPluginToolPolicyDecision | void>;
+  ) => UpstreamPluginToolPolicyDecision | void | Promise<UpstreamPluginToolPolicyDecision | void>;
 }
 
 /**
@@ -105,8 +98,7 @@ export function toTrustedToolPolicy(
   return {
     id: provider.name,
     description:
-      provider.getCapabilities?.()?.description ??
-      `Claws guardrail provider: ${provider.name}`,
+      provider.getCapabilities?.()?.description ?? `Claws guardrail provider: ${provider.name}`,
     evaluate: async (event, ctx) => {
       const toolCallEvent = upstreamEventToClawsEvent(event, ctx);
       let decision: AuthorizationDecision;
@@ -139,11 +131,11 @@ function upstreamEventToClawsEvent(
   // a local cast; the wire shape is the same either way.
   const ctxWithSnap = ctx as UpstreamPluginHookToolContext & { snapshotId?: string };
   return {
-    server: 'gateway',
+    server: "gateway",
     tool: event.toolName,
     arguments: event.params,
     context: {
-      conversationId: ctx.sessionId ?? ctx.sessionKey ?? '',
+      conversationId: ctx.sessionId ?? ctx.sessionKey ?? "",
       ...(ctx.agentId !== undefined ? { agentId: ctx.agentId } : {}),
       ...(ctxWithSnap.snapshotId !== undefined ? { snapshotId: ctxWithSnap.snapshotId } : {}),
     },
@@ -159,26 +151,27 @@ function mapDecision(
   decision: AuthorizationDecision,
 ): UpstreamPluginToolPolicyDecision | undefined {
   switch (decision.decision) {
-    case 'allow':
+    case "allow":
       // No-op for the chain; upstream's runner moves to the next plugin.
       return undefined;
-    case 'deny':
+    case "deny":
       return {
         block: true,
         blockReason: decision.reason,
       };
-    case 'review':
+    case "review":
       return {
         requireApproval: {
-          title: 'Approval required',
+          title: "Approval required",
           description: decision.reason,
-          severity: decision.riskLevel !== undefined && decision.riskLevel >= 4 ? 'critical' : 'warning',
+          severity:
+            decision.riskLevel !== undefined && decision.riskLevel >= 4 ? "critical" : "warning",
         },
       };
-    case 'modify':
+    case "modify":
       return {
         params:
-          typeof decision.modifiedArguments === 'object' &&
+          typeof decision.modifiedArguments === "object" &&
           decision.modifiedArguments !== null &&
           !Array.isArray(decision.modifiedArguments)
             ? (decision.modifiedArguments as Record<string, unknown>)

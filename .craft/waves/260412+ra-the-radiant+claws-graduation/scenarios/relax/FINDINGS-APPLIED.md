@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Grammar independence**: grammar must not depend on governance types, identifier character set definition, discriminated union AST types
 - **Round-trip fidelity**: serializer precedence-preserving parenthesization, string literal escape round-trip, numeric literal format preservation
 - **AST semantics**: structural vs semantic equivalence definition, comment preservation in AST and serialization, whitespace preservation policy for embedded expressions

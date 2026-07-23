@@ -8,13 +8,13 @@ Language Server Protocol implementation for real-time governance feedback in IDE
 
 ## Capabilities
 
-| Feature | What It Does |
-|---------|-------------|
-| Diagnostics | Real-time policy validation errors and warnings |
-| Completions | Autocomplete for policy rule fields, atom references, severity levels |
-| Hover | Show mechanical intent and documentation for policy rules |
-| Go to definition | Jump from a rule reference to the authoritative spec |
-| Code actions | Quick fixes for common policy misconfigurations |
+| Feature          | What It Does                                                          |
+| ---------------- | --------------------------------------------------------------------- |
+| Diagnostics      | Real-time policy validation errors and warnings                       |
+| Completions      | Autocomplete for policy rule fields, atom references, severity levels |
+| Hover            | Show mechanical intent and documentation for policy rules             |
+| Go to definition | Jump from a rule reference to the authoritative spec                  |
+| Code actions     | Quick fixes for common policy misconfigurations                       |
 
 ## Latency Budget
 

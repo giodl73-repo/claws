@@ -22,11 +22,11 @@ This PR establishes the client-side primitive without install enforcement:
           "id": "company-approved",
           "url": "https://feeds.example.com/openclaw/feed.json",
           "integrity": "sha256:...",
-          "requireAttestation": true
-        }
-      ]
-    }
-  }
+          "requireAttestation": true,
+        },
+      ],
+    },
+  },
 }
 ```
 

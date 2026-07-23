@@ -19,6 +19,7 @@ claws build
 ```
 
 The build pipeline:
+
 1. Reads 9 workspace files (SOUL.md, AGENTS.md, TOOLS.md, etc.)
 2. Constructs GovernanceIR from workspace state + policy rules
 3. Generates CapabilityManifest (what the workspace can do)

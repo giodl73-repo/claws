@@ -14,11 +14,11 @@ An agent in a healthcare organization may access patient records, insurance clai
 
 The three highest-risk scenarios:
 
-| Scenario | HIPAA risk | claws defense |
-|----------|-----------|---------------|
+| Scenario                                                                            | HIPAA risk                        | claws defense                                                                       |
+| ----------------------------------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------- |
 | Agent reads patient records and includes PHI in a summary sent to an external party | Unauthorized disclosure (164.502) | G-A2A-FLOW: RESTRICTED data cannot flow to agents with external communication scope |
-| Agent sends email containing PHI without human review | Unauthorized use (164.502) | G-ELICIT: R5 elicitation gate blocks external communication without approval |
-| Agent stores PHI in an unencrypted log | Integrity failure (164.312(c)(1)) | G-SECRETS: all data at rest encrypted; audit chain signed |
+| Agent sends email containing PHI without human review                               | Unauthorized use (164.502)        | G-ELICIT: R5 elicitation gate blocks external communication without approval        |
+| Agent stores PHI in an unencrypted log                                              | Integrity failure (164.312(c)(1)) | G-SECRETS: all data at rest encrypted; audit chain signed                           |
 
 ---
 
@@ -26,22 +26,22 @@ The three highest-risk scenarios:
 
 claws uses data sensitivity labels to identify and govern PHI. Every data flow through the workspace is labeled:
 
-| Label | Sensitivity | PHI treatment |
-|-------|------------|---------------|
-| PUBLIC | None | Not PHI. No special handling. |
-| INTERNAL | Low | Not PHI, but internal-only. Standard governance. |
-| CONFIDENTIAL | Medium | May contain PHI. Elevated governance. Agent identity L1+ required. |
-| RESTRICTED | High | Contains or may contain PHI. Full governance. Agent identity L2+ required. R5 elicitation gates for any external action. |
+| Label        | Sensitivity | PHI treatment                                                                                                            |
+| ------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| PUBLIC       | None        | Not PHI. No special handling.                                                                                            |
+| INTERNAL     | Low         | Not PHI, but internal-only. Standard governance.                                                                         |
+| CONFIDENTIAL | Medium      | May contain PHI. Elevated governance. Agent identity L1+ required.                                                       |
+| RESTRICTED   | High        | Contains or may contain PHI. Full governance. Agent identity L2+ required. R5 elicitation gates for any external action. |
 
 The RESTRICTED label triggers the following constraints:
 
-| Constraint | What it enforces |
-|-----------|-----------------|
+| Constraint             | What it enforces                                                             |
+| ---------------------- | ---------------------------------------------------------------------------- |
 | Agent identity minimum | L2 (HMAC-signed fleet identity) or higher required to access RESTRICTED data |
-| Data flow ceiling | RESTRICTED data cannot flow to agents with lower classification scope |
-| High-water mark | Once data is labeled RESTRICTED, no downstream operation can downgrade it |
-| Audit trail | Every access to RESTRICTED data is recorded in the audit chain |
-| Fail mode | All tools accessing RESTRICTED data fail closed on governance error |
+| Data flow ceiling      | RESTRICTED data cannot flow to agents with lower classification scope        |
+| High-water mark        | Once data is labeled RESTRICTED, no downstream operation can downgrade it    |
+| Audit trail            | Every access to RESTRICTED data is recorded in the audit chain               |
+| Fail mode              | All tools accessing RESTRICTED data fail closed on governance error          |
 
 ---
 
@@ -49,28 +49,28 @@ The RESTRICTED label triggers the following constraints:
 
 ### Technical safeguards (45 CFR 164.312)
 
-| HIPAA Section | Requirement | claws Rule | Evidence |
-|--------------|-------------|-----------|----------|
-| 164.312(a)(1) | Access control -- unique user identification, emergency access, automatic logoff, encryption | G-CLASS + G-PERM (RESTRICTED label for PHI) | Tool classification records showing PHI tools governed at R2+ |
-| 164.312(b) | Audit controls -- record and examine activity in systems containing ePHI | Audit chain + SIEM export | Hash-chained audit log with governance events for all PHI access |
-| 164.312(c)(1) | Integrity -- protect ePHI from improper alteration or destruction | Hash chain verification (`claws audit verify`) | Chain integrity report covering observation period |
-| 164.312(d) | Person or entity authentication -- verify identity before granting access | G-A2A-IDENTITY (L2+ for PHI access) | Agent identity records showing authentication level for PHI-accessing agents |
-| 164.312(e)(1) | Transmission security -- guard against unauthorized access during transmission | G-A2A-FLOW (RESTRICTED data flow labels) | Data flow records showing RESTRICTED ceiling on PHI transmission channels |
+| HIPAA Section | Requirement                                                                                  | claws Rule                                     | Evidence                                                                     |
+| ------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------- |
+| 164.312(a)(1) | Access control -- unique user identification, emergency access, automatic logoff, encryption | G-CLASS + G-PERM (RESTRICTED label for PHI)    | Tool classification records showing PHI tools governed at R2+                |
+| 164.312(b)    | Audit controls -- record and examine activity in systems containing ePHI                     | Audit chain + SIEM export                      | Hash-chained audit log with governance events for all PHI access             |
+| 164.312(c)(1) | Integrity -- protect ePHI from improper alteration or destruction                            | Hash chain verification (`claws audit verify`) | Chain integrity report covering observation period                           |
+| 164.312(d)    | Person or entity authentication -- verify identity before granting access                    | G-A2A-IDENTITY (L2+ for PHI access)            | Agent identity records showing authentication level for PHI-accessing agents |
+| 164.312(e)(1) | Transmission security -- guard against unauthorized access during transmission               | G-A2A-FLOW (RESTRICTED data flow labels)       | Data flow records showing RESTRICTED ceiling on PHI transmission channels    |
 
 ### Administrative safeguards (45 CFR 164.308)
 
-| HIPAA Section | Requirement | claws Evidence |
-|--------------|-------------|---------------|
-| 164.308(a)(1) | Security management process -- risk analysis and risk management | `claws assess` risk classification output |
-| 164.308(a)(3) | Workforce security -- authorization and supervision | G-ELICIT approval records for PHI-touching tools |
-| 164.308(a)(4) | Information access management | G-CLASS + G-PERM tool classification and permission matrix |
-| 164.308(a)(5) | Security awareness and training | Policy version history showing governance rule updates |
-| 164.308(a)(6) | Security incident procedures | Kill switch records + SIEM export history |
+| HIPAA Section | Requirement                                                      | claws Evidence                                             |
+| ------------- | ---------------------------------------------------------------- | ---------------------------------------------------------- |
+| 164.308(a)(1) | Security management process -- risk analysis and risk management | `claws assess` risk classification output                  |
+| 164.308(a)(3) | Workforce security -- authorization and supervision              | G-ELICIT approval records for PHI-touching tools           |
+| 164.308(a)(4) | Information access management                                    | G-CLASS + G-PERM tool classification and permission matrix |
+| 164.308(a)(5) | Security awareness and training                                  | Policy version history showing governance rule updates     |
+| 164.308(a)(6) | Security incident procedures                                     | Kill switch records + SIEM export history                  |
 
 ### Physical safeguards (45 CFR 164.310)
 
-| HIPAA Section | Requirement | claws Evidence |
-|--------------|-------------|---------------|
+| HIPAA Section | Requirement                                   | claws Evidence                                                                 |
+| ------------- | --------------------------------------------- | ------------------------------------------------------------------------------ |
 | 164.310(d)(1) | Device and media controls -- disposal, re-use | `claws snap` workspace state records; `claws keys revoke` for compromised keys |
 
 Physical safeguards are primarily infrastructure-level controls (facility access, workstation security). claws's contribution is limited to data lifecycle governance within the agent workspace.
@@ -81,14 +81,14 @@ Physical safeguards are primarily infrastructure-level controls (facility access
 
 `claws comply hipaa` produces a structured evidence package:
 
-| Section | Contents |
-|---------|----------|
+| Section                   | Contents                                                                    |
+| ------------------------- | --------------------------------------------------------------------------- |
 | **Safeguard assessments** | Per-safeguard status: implemented, partial, not implemented, not applicable |
-| **PHI data inventory** | Tools and data flows labeled RESTRICTED, with access records |
-| **Agent identity report** | Identity level (L0-L3) for each agent accessing PHI |
-| **Audit chain summary** | Event counts, chain integrity, PHI-specific access events |
-| **Findings** | Gaps with severity, remediation guidance, and compliance deadlines |
-| **Signature** | Ed25519 or HMAC signature over the package |
+| **PHI data inventory**    | Tools and data flows labeled RESTRICTED, with access records                |
+| **Agent identity report** | Identity level (L0-L3) for each agent accessing PHI                         |
+| **Audit chain summary**   | Event counts, chain integrity, PHI-specific access events                   |
+| **Findings**              | Gaps with severity, remediation guidance, and compliance deadlines          |
+| **Signature**             | Ed25519 or HMAC signature over the package                                  |
 
 ---
 
@@ -96,13 +96,13 @@ Physical safeguards are primarily infrastructure-level controls (facility access
 
 For a healthcare organization deploying AI agents, the minimum claws configuration for HIPAA alignment:
 
-| Requirement | Configuration |
-|-------------|--------------|
-| Label all patient data tools as RESTRICTED | `claws.json` data labels for EMR, claims, lab tools |
-| Require L2+ identity for PHI-accessing agents | Agent identity policy in trust groups |
+| Requirement                                               | Configuration                                                           |
+| --------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Label all patient data tools as RESTRICTED                | `claws.json` data labels for EMR, claims, lab tools                     |
+| Require L2+ identity for PHI-accessing agents             | Agent identity policy in trust groups                                   |
 | Enable R5 elicitation gates on all external communication | Default for R5 tools; verify no pre-approval overrides for PHI contexts |
-| Export governance events to SIEM | `claws audit export --format cef` to organization's SIEM |
-| Verify audit chain integrity weekly | `claws audit verify` scheduled or on-demand |
+| Export governance events to SIEM                          | `claws audit export --format cef` to organization's SIEM                |
+| Verify audit chain integrity weekly                       | `claws audit verify` scheduled or on-demand                             |
 
 ---
 
@@ -115,6 +115,7 @@ Every agent that accesses patient data is identified through data sensitivity la
 ## Scenario-Driven Additions
 
 ### From compliance-evidence scenarios (48 findings applied)
+
 - Per-PII-type label coverage check: evidence validates that each of the 18 HIPAA identifier types has a corresponding data label if present in the workspace
 - 164.312(d) mapping for single-agent workspaces: person-or-entity authentication evidence addresses the case where only one agent exists (identity level still required)
 - 164.312(e)(1) transmission security gap analysis: evidence identifies tools that send data externally without encryption or access controls

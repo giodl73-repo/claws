@@ -4,94 +4,94 @@ entries:
     type: guide
     path: docs/claws/traces/init-and-config.md
     atoms:
-    - claws-init
+      - claws-init
   claws-json-trace:
     type: guide
     path: docs/claws/traces/init-and-config.md
     atoms:
-    - claws-json
+      - claws-json
   claws-compiler-trace:
     type: guide
     path: docs/claws/traces/governance-engine.md
     atoms:
-    - claws-compiler
+      - claws-compiler
   workflow-inversion-trace:
     type: guide
     path: docs/claws/traces/governance-engine.md
     atoms:
-    - workflow-inversion
+      - workflow-inversion
   three-engine-model-trace:
     type: guide
     path: docs/claws/traces/governance-engine.md
     atoms:
-    - three-engine-model
+      - three-engine-model
   three-rings-trace:
     type: guide
     path: docs/claws/traces/architecture-and-rings.md
     atoms:
-    - three-rings
+      - three-rings
   skill-kit-trace:
     type: guide
     path: docs/claws/traces/skill-and-packages.md
     atoms:
-    - skill-kit
+      - skill-kit
   three-tier-packages-trace:
     type: guide
     path: docs/claws/traces/skill-and-packages.md
     atoms:
-    - three-tier-packages
+      - three-tier-packages
   tier-adoption-trace:
     type: guide
     path: docs/claws/traces/skills-and-tiers.md
     atoms:
-    - tier-adoption
+      - tier-adoption
   defense-in-depth-trace:
     type: guide
     path: docs/claws/traces/runtime-enforcement.md
     atoms:
-    - defense-in-depth
+      - defense-in-depth
   fail-mode-trace:
     type: guide
     path: docs/claws/traces/fail-and-operations.md
     atoms:
-    - fail-mode
+      - fail-mode
   tool-classification-trace:
     type: guide
     path: docs/claws/traces/operations-and-tools.md
     atoms:
-    - tool-classification
+      - tool-classification
   obo-boundary-trace:
     type: guide
     path: docs/claws/traces/architecture-and-rings.md
     atoms:
-    - obo-boundary
+      - obo-boundary
   elicitation-gate-trace:
     type: guide
     path: docs/claws/traces/runtime-enforcement.md
     atoms:
-    - elicitation-gate
+      - elicitation-gate
   compliance-artifact-trace:
     type: guide
     path: docs/claws/traces/compliance-and-ops.md
     atoms:
-    - compliance-artifact
+      - compliance-artifact
   kill-switch-trace:
     type: guide
     path: docs/claws/traces/compliance-and-kill.md
     atoms:
-    - kill-switch
+      - kill-switch
   governance-plugin-trace:
     type: guide
     path: docs/claws/traces/runtime-enforcement.md
     atoms:
-    - governance-plugin
+      - governance-plugin
   lossless-roundtrip-trace:
     type: guide
     path: docs/claws/traces/init-and-compile.md
     atoms:
-    - lossless-roundtrip
+      - lossless-roundtrip
   dotnet-for-oc-trace:
     type: guide
     path: docs/claws/traces/skill-and-packages.md
     atoms:
-    - dotnet-for-oc
+      - dotnet-for-oc

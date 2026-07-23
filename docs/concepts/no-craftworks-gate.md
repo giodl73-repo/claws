@@ -66,37 +66,37 @@ The allowlist lives at repo root. Each entry has four fields:
 version: 1
 entries:
   - path: MIGRATION.md
-    pattern: 'craftworks'
+    pattern: "craftworks"
     reason: |
       Root-level migration narrative explaining the lift from gim-home/craftworks
       to bic/claws. Required attribution; cannot be removed.
-    reviewer: '@bic/claws-release-eng'
-    expires: null    # permanent
+    reviewer: "@bic/claws-release-eng"
+    expires: null # permanent
 
   - path: scripts/scrub-doc.mjs
-    pattern: '@craftworks/|craftworks'
+    pattern: "@craftworks/|craftworks"
     reason: |
       Scrubber script MUST contain the regex it enforces. Excluding its own
       source is required for the gate to be self-consistent.
-    reviewer: '@bic/claws-release-eng'
+    reviewer: "@bic/claws-release-eng"
     expires: null
 
   - path: docs/contributing/migration.md
-    pattern: 'craftworks'
+    pattern: "craftworks"
     reason: |
       Contributor-facing narrative documenting the migration origin. Required
       for git archaeology / onboarding context.
-    reviewer: '@bic/claws-release-eng'
+    reviewer: "@bic/claws-release-eng"
     expires: null
 ```
 
-| Field      | Meaning                                                                                     |
-|------------|---------------------------------------------------------------------------------------------|
-| `path`     | Glob or literal path. Globs (`devtools/repo-ops/src/**`) match subtrees.                    |
-| `pattern`  | Regex the entry allows. The gate only suppresses matches against this specific pattern.     |
-| `reason`   | Why this exemption exists. Multi-line prose. Audited during stale-audit.                    |
-| `reviewer` | GitHub team that must approve edits. Must match a team in `.github/CODEOWNERS`.             |
-| `expires`  | ISO-8601 date or `null` for permanent. `--stale-audit` surfaces entries past expiry.        |
+| Field      | Meaning                                                                                 |
+| ---------- | --------------------------------------------------------------------------------------- |
+| `path`     | Glob or literal path. Globs (`devtools/repo-ops/src/**`) match subtrees.                |
+| `pattern`  | Regex the entry allows. The gate only suppresses matches against this specific pattern. |
+| `reason`   | Why this exemption exists. Multi-line prose. Audited during stale-audit.                |
+| `reviewer` | GitHub team that must approve edits. Must match a team in `.github/CODEOWNERS`.         |
+| `expires`  | ISO-8601 date or `null` for permanent. `--stale-audit` surfaces entries past expiry.    |
 
 Legitimate exemptions fall into four categories: (1) attribution / migration narrative (`MIGRATION.md`, `LICENSE`, `NOTICE`, `docs/contributing/migration.md`), (2) the gate's own source (`devtools/repo-ops/src/no-craftworks/**`), (3) the scrubber's own source (`scripts/scrub-doc.mjs`, `devtools/repo-ops/src/scrubber/**`), (4) test fixtures that assert the gate fires (`devtools/repo-ops/test/**`).
 

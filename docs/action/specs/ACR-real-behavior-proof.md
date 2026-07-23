@@ -20,7 +20,7 @@ production resources.
 Pull requests that change user-visible behavior, command behavior, policy
 behavior, integrations, or CI gates should include:
 
-~~~md
+```md
 ## Real behavior proof
 
 **Behavior addressed:** What changed, and which issue or user problem it fixes.
@@ -35,7 +35,7 @@ steps run against the patched code.
 **Observed result after fix:** The result that proves the behavior now works.
 
 **What was not tested:** Honest limits of the proof.
-~~~
+```
 
 The checker should accept these exact fields first. It may also accept short
 aliases for compatibility, but the canonical form above is what docs and PR
@@ -77,7 +77,7 @@ is ready to make it required.
 
 ## Example
 
-~~~md
+````md
 ## Real behavior proof
 
 **Behavior addressed:** `claws policy check` now reports a clean attestation
@@ -102,7 +102,7 @@ emitted an attestation hash.
 
 **What was not tested:** No remote supervisor accepted the attestation in this
 proof.
-~~~
+````
 
 ## Stability
 

@@ -7,14 +7,11 @@
  * for isolation.
  */
 
-export type { InvalidReason } from './types.js';
-export {
-  validateHandle,
-  EVALUATION_ORDER,
-} from './validator.js';
+export type { InvalidReason } from "./types.js";
+export { validateHandle, EVALUATION_ORDER } from "./validator.js";
 export type {
   ApprovalHandle,
   ValidationContext,
   ValidationDeps,
   ValidationResult,
-} from './validator.js';
+} from "./validator.js";

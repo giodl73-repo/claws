@@ -6,11 +6,11 @@
 
 Every feature in the SDK lives in one of three states:
 
-| State | Meaning | Visibility |
-|-------|---------|------------|
-| **incubating** | New feature, internal APIs likely to change | Internal subpaths only |
-| **graduated** | Stable, tested, externally usable | Exposed on `/api` facade |
-| **deprecated** | Replaced; kept for compat | `@deprecated` tag, 2-version grace |
+| State          | Meaning                                     | Visibility                         |
+| -------------- | ------------------------------------------- | ---------------------------------- |
+| **incubating** | New feature, internal APIs likely to change | Internal subpaths only             |
+| **graduated**  | Stable, tested, externally usable           | Exposed on `/api` facade           |
+| **deprecated** | Replaced; kept for compat                   | `@deprecated` tag, 2-version grace |
 
 ## Graduation criteria
 
@@ -30,12 +30,12 @@ A feature graduates from incubating → graduated when ALL of:
 
 Once graduated, changes follow strict semver:
 
-| Change | Bump | Notice |
-|--------|------|--------|
-| Fix a bug (behaviour change to match spec) | patch | CHANGELOG |
-| Add optional param / new function | minor | CHANGELOG |
-| Change error type / remove field | major | migration guide |
-| Remove function | major | 2-version deprecation window |
+| Change                                     | Bump  | Notice                       |
+| ------------------------------------------ | ----- | ---------------------------- |
+| Fix a bug (behaviour change to match spec) | patch | CHANGELOG                    |
+| Add optional param / new function          | minor | CHANGELOG                    |
+| Change error type / remove field           | major | migration guide              |
+| Remove function                            | major | 2-version deprecation window |
 
 A graduated feature CANNOT revert to incubating. It can deprecate
 and be replaced, but never "un-graduate".

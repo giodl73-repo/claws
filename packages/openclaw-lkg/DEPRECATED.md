@@ -35,11 +35,11 @@ Replace imports:
 
 ```ts
 // before
-import { FsLKGStore, type LKGTracker } from '@bic/openclaw-lkg';
+import { FsLKGStore, type LKGTracker } from "@bic/openclaw-lkg";
 
 // after
-import { FsLKGStore } from '@openclaw/lkg/fs';
-import type { LKGTracker } from '@openclaw/lkg';
+import { FsLKGStore } from "@openclaw/lkg/fs";
+import type { LKGTracker } from "@openclaw/lkg";
 ```
 
 The contract types are byte-compatible at the shape level; the new

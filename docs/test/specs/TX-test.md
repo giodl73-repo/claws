@@ -16,11 +16,11 @@ The claws test harness. Three load-bearing components:
 
 ## Sub-spec index
 
-| Code | File | Authority over |
-|------|------|----------------|
-| **TXA** | [TXA-accept-runner.md](./TXA-accept-runner.md) | manifest schema, runner registry, scenario min-count |
-| **TXD** | [TXD-doc-validation.md](./TXD-doc-validation.md) | 17 diagnostic codes, exit-code semantics |
-| **TXN** | [TXN-no-craftworks.md](./TXN-no-craftworks.md) | allowlist, homoglyph detection, exit-code 2 |
+| Code    | File                                             | Authority over                                       |
+| ------- | ------------------------------------------------ | ---------------------------------------------------- |
+| **TXA** | [TXA-accept-runner.md](./TXA-accept-runner.md)   | manifest schema, runner registry, scenario min-count |
+| **TXD** | [TXD-doc-validation.md](./TXD-doc-validation.md) | 17 diagnostic codes, exit-code semantics             |
+| **TXN** | [TXN-no-craftworks.md](./TXN-no-craftworks.md)   | allowlist, homoglyph detection, exit-code 2          |
 
 ## Where it runs
 

@@ -16,6 +16,7 @@ The short answer: yes, in three precise seams — none of them hot-load.
 ## Macro shape
 
 <!-- proof:compiled from="proof:tree kind=org" uri="" -->
+
 ```org
 Gateway process (Node.js)
 ├── Frame dispatcher: TypeBox schemas, role and scope auth, rate limit
@@ -26,6 +27,7 @@ Gateway process (Node.js)
 ├── Sandbox bridge: docker exec stdio
 └── Diagnostic event bus: in-proc pub or sub with metadata.trusted gate
 ```
+
 <!-- /proof:compiled -->
 
 Clients connect via WebSocket (loopback `ws://` by default; private network
@@ -40,24 +42,24 @@ Observability flows out the right.
 The gateway is extensible — but not in the "load arbitrary code into a hot
 kernel" sense. It is closer to nginx (compile-time linked modules) than
 Apache `mod_lua` (runtime hot-load). The constraint is deliberate per
-`AGENTS.md`: *"manifest-first control plane; broad mutable registries
-transitional."*
+`AGENTS.md`: _"manifest-first control plane; broad mutable registries
+transitional."_
 
-| Seam | Plugins register | Trust posture |
-|------|------------------|---------------|
-| `api.registerGatewayMethod(name, handler)` | a custom RPC method on the dispatcher | host-side, plugin-trusted |
-| `api.registerHttpRoute({path, auth, scope, handler})` | HTTP routes on the gateway server | host-side; `auth: "gateway"` + `scope: "trusted-operator"` gate access |
-| `api.on(gateway_*, handler)` | gateway lifecycle hooks | `before_dispatch` is **claiming** — first `handled=true` wins |
+| Seam                                                  | Plugins register                      | Trust posture                                                          |
+| ----------------------------------------------------- | ------------------------------------- | ---------------------------------------------------------------------- |
+| `api.registerGatewayMethod(name, handler)`            | a custom RPC method on the dispatcher | host-side, plugin-trusted                                              |
+| `api.registerHttpRoute({path, auth, scope, handler})` | HTTP routes on the gateway server     | host-side; `auth: "gateway"` + `scope: "trusted-operator"` gate access |
+| `api.on(gateway_*, handler)`                          | gateway lifecycle hooks               | `before_dispatch` is **claiming** — first `handled=true` wins          |
 
 What you cannot do:
 
-| Action | Why blocked |
-|--------|-------------|
-| Add new frame envelope types | The four (req, res, event, hello-ok) are frozen TypeBox; adding requires Swift codegen |
-| Replace the dispatcher | Single dispatcher, not pluggable |
-| Inject methods at runtime after boot | Registry is built once, frozen, repopulated only on full reload |
-| Skip the auth + scope matrix | Roles and scopes are matrix-checked per method |
-| Skip the rate-limit budget | Control-plane writes consume from a 3-per-60s budget per actor |
+| Action                               | Why blocked                                                                            |
+| ------------------------------------ | -------------------------------------------------------------------------------------- |
+| Add new frame envelope types         | The four (req, res, event, hello-ok) are frozen TypeBox; adding requires Swift codegen |
+| Replace the dispatcher               | Single dispatcher, not pluggable                                                       |
+| Inject methods at runtime after boot | Registry is built once, frozen, repopulated only on full reload                        |
+| Skip the auth + scope matrix         | Roles and scopes are matrix-checked per method                                         |
+| Skip the rate-limit budget           | Control-plane writes consume from a 3-per-60s budget per actor                         |
 
 ---
 
@@ -65,12 +67,12 @@ What you cannot do:
 
 The four wire envelopes defined at `src/gateway/protocol/schema/frames.ts:72-175`:
 
-| Frame | Discriminator | Required fields |
-|-------|---------------|-----------------|
-| Request | `type: "req"` | `id`, `method`, optional `params` |
-| Response | `type: "res"` | `id`, `ok`, optional `payload`, optional `error` |
-| Event | `type: "event"` | `event`, optional `payload`, optional `seq`, optional `stateVersion` |
-| HelloOk | `type: "hello-ok"` | `protocol`, `server.*`, `features.*`, `snapshot`, `auth.*`, `policy.*` |
+| Frame    | Discriminator      | Required fields                                                        |
+| -------- | ------------------ | ---------------------------------------------------------------------- |
+| Request  | `type: "req"`      | `id`, `method`, optional `params`                                      |
+| Response | `type: "res"`      | `id`, `ok`, optional `payload`, optional `error`                       |
+| Event    | `type: "event"`    | `event`, optional `payload`, optional `seq`, optional `stateVersion`   |
+| HelloOk  | `type: "hello-ok"` | `protocol`, `server.*`, `features.*`, `snapshot`, `auth.*`, `policy.*` |
 
 Method names are arbitrary strings — typos fail at dispatch, not at parse
 time. There is no compile-time TypeScript union of method names, so adding
@@ -81,6 +83,7 @@ a method is cheap; verifying it is wired correctly is the reviewer's job.
 ## Dispatch flow
 
 <!-- proof:compiled from="proof:tree kind=taxonomy" uri="" -->
+
 ```taxonomy
 handleGatewayRequest()
 ├── Auth + scope check: roles operator vs node, scopes admin vs write
@@ -89,6 +92,7 @@ handleGatewayRequest()
 ├── Wrap in plugin scope: AsyncLocalStorage so subagents preserve context
 └── Invoke handler: with GatewayRequestHandlerOptions
 ```
+
 <!-- /proof:compiled -->
 
 ---
@@ -101,6 +105,7 @@ gateway** as a child request. The child inherits the parent's
 agent calls work without context threading.
 
 <!-- proof:compiled from="proof:tree kind=taxonomy" uri="" -->
+
 ```taxonomy
 Plugin reaches gateway
 ├── subagent.run params: re-dispatch as child request
@@ -108,16 +113,17 @@ Plugin reaches gateway
 ├── channel methods: channel plugin runtime API
 └── HTTP route: handler called for matching path
 ```
+
 <!-- /proof:compiled -->
 
 ---
 
 ## Two non-WS entry points worth knowing
 
-| Surface | Use |
-|---------|-----|
-| Process-global fallback context | Channel adapters that don't flow through `handleGatewayRequest` (Telegram poll, WhatsApp) — set via `setFallbackGatewayContextResolver()` |
-| `openclaw mcp serve` stdio bridge | OpenClaw exposes its own MCP server; speaks stdio to MCP clients |
+| Surface                           | Use                                                                                                                                       |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Process-global fallback context   | Channel adapters that don't flow through `handleGatewayRequest` (Telegram poll, WhatsApp) — set via `setFallbackGatewayContextResolver()` |
+| `openclaw mcp serve` stdio bridge | OpenClaw exposes its own MCP server; speaks stdio to MCP clients                                                                          |
 
 ---
 

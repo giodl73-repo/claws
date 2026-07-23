@@ -48,12 +48,13 @@ File permissions are set to 0o600 (owner read/write only). On Windows this is be
 
 The vault derives a 256-bit encryption key from the user's passphrase and salt:
 
-| KDF | Parameters | When used |
-|-----|-----------|-----------|
-| **Argon2id** | Memory: 256 MiB, Time: 4, Parallelism: 4 (OWASP recommended) | When `argon2` native module is installed |
-| **scrypt** (fallback) | N: 131072, r: 8, p: 1 | When Argon2id is unavailable |
+| KDF                   | Parameters                                                   | When used                                |
+| --------------------- | ------------------------------------------------------------ | ---------------------------------------- |
+| **Argon2id**          | Memory: 256 MiB, Time: 4, Parallelism: 4 (OWASP recommended) | When `argon2` native module is installed |
+| **scrypt** (fallback) | N: 131072, r: 8, p: 1                                        | When Argon2id is unavailable             |
 
 Argon2id has enforced parameter floors to prevent weak configurations:
+
 - Memory: minimum 65,536 KiB (64 MiB)
 - Time: minimum 3 iterations
 - Parallelism: minimum 1
@@ -64,10 +65,10 @@ The KDF used is recorded in the vault file (`"kdf": "argon2id"` or `"kdf": "scry
 
 ## Passphrase requirements
 
-| Requirement | Value |
-|-------------|-------|
-| Minimum length | 12 characters |
-| Minimum entropy | 40 bits |
+| Requirement     | Value         |
+| --------------- | ------------- |
+| Minimum length  | 12 characters |
+| Minimum entropy | 40 bits       |
 
 Entropy estimation uses the minimum of charset-class estimation and unique-character estimation. This prevents `aaaaaaaaaaaa` from scoring high despite having only one unique character.
 
@@ -77,11 +78,11 @@ Entropy estimation uses the minimum of charset-class estimation and unique-chara
 
 Each vault entry is encrypted independently using AES-256-GCM:
 
-| Component | Size | Purpose |
-|-----------|------|---------|
-| IV | 12 bytes | Initialization vector (random per entry) |
-| Auth tag | 16 bytes | Integrity verification |
-| Ciphertext | variable | Encrypted value |
+| Component  | Size     | Purpose                                  |
+| ---------- | -------- | ---------------------------------------- |
+| IV         | 12 bytes | Initialization vector (random per entry) |
+| Auth tag   | 16 bytes | Integrity verification                   |
+| Ciphertext | variable | Encrypted value                          |
 
 Independent encryption means a wrong passphrase produces a descriptive error on the specific entry rather than corrupting the entire vault.
 
@@ -90,26 +91,26 @@ Independent encryption means a wrong passphrase produces a descriptive error on 
 ## API
 
 ```ts
-import { init, set, get, list, del, defaultVaultConfig } from '@bic/claws-sdk/protect/secrets';
+import { init, set, get, list, del, defaultVaultConfig } from "@bic/claws-sdk/protect/secrets";
 
-const config = defaultVaultConfig('/workspace');
+const config = defaultVaultConfig("/workspace");
 
 // Initialize a new vault
-const { kdf } = await init(config, 'my-secure-passphrase');
+const { kdf } = await init(config, "my-secure-passphrase");
 // kdf: 'argon2id' or 'scrypt'
 
 // Store a secret
-await set(config, 'signing-key', 'ed25519-private-key-pem...', 'my-secure-passphrase');
+await set(config, "signing-key", "ed25519-private-key-pem...", "my-secure-passphrase");
 
 // Retrieve a secret
-const key = await get(config, 'signing-key', 'my-secure-passphrase');
+const key = await get(config, "signing-key", "my-secure-passphrase");
 
 // List stored keys (no values exposed)
 const keys = await list(config);
 // ['signing-key']
 
 // Delete a secret (requires passphrase for verification)
-await del(config, 'signing-key', 'my-secure-passphrase');
+await del(config, "signing-key", "my-secure-passphrase");
 ```
 
 ---
@@ -120,12 +121,12 @@ await del(config, 'signing-key', 'my-secure-passphrase');
 
 The `ceremony.ts` module provides M-of-N Shamir's Secret Sharing for root key management:
 
-| Operation | What happens |
-|-----------|-------------|
+| Operation                                                   | What happens                                                                                         |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `initCeremony(workspace, { totalShares: 5, threshold: 3 })` | Generate 32-byte root key, split into 5 shares (3 required to reconstruct), register in key registry |
-| `shamirSplit(keyHex, n, t)` | Split a key into N shares with threshold T using GF(256) Shamir SSS |
-| `shamirReconstruct(shares, expectedHash)` | Reconstruct from M+ shares via Lagrange interpolation, verify against SHA-256 hash |
-| `recordParticipant(identity, shareIndex)` | Track who received which share with timestamp |
+| `shamirSplit(keyHex, n, t)`                                 | Split a key into N shares with threshold T using GF(256) Shamir SSS                                  |
+| `shamirReconstruct(shares, expectedHash)`                   | Reconstruct from M+ shares via Lagrange interpolation, verify against SHA-256 hash                   |
+| `recordParticipant(identity, shareIndex)`                   | Track who received which share with timestamp                                                        |
 
 The raw key material is never returned to the caller or written to disk. Only the SHA-256 verification hash is persisted; the unsplit key exists only in memory during the ceremony.
 
@@ -135,14 +136,14 @@ The raw key material is never returned to the caller or written to disk. Only th
 
 ## Key types
 
-| Type | Module |
-|------|--------|
-| `VaultConfig` | `claws-sdk/protect/types` |
-| `Argon2Params` | `claws-sdk/protect/secrets` |
-| `CeremonyShare` | `claws-sdk/keys/ceremony` |
-| `CeremonyInitResult` | `claws-sdk/keys/ceremony` |
-| `ShareParticipant` | `claws-sdk/keys/ceremony` |
-| `SingleDevKeyResult` | `claws-sdk/keys/ceremony` |
+| Type                 | Module                      |
+| -------------------- | --------------------------- |
+| `VaultConfig`        | `claws-sdk/protect/types`   |
+| `Argon2Params`       | `claws-sdk/protect/secrets` |
+| `CeremonyShare`      | `claws-sdk/keys/ceremony`   |
+| `CeremonyInitResult` | `claws-sdk/keys/ceremony`   |
+| `ShareParticipant`   | `claws-sdk/keys/ceremony`   |
+| `SingleDevKeyResult` | `claws-sdk/keys/ceremony`   |
 
 ---
 

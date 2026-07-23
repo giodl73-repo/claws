@@ -33,11 +33,11 @@ Governance enforcement happens at three levels:
   └─────────────────────────────────────────┘
 ```
 
-| Ring | Trigger | Latency | Scope |
-|------|---------|---------|-------|
-| Inner | File save | < 300ms batch | Single workspace, governance rules |
-| Middle | CLI command | Sub-second | Single workspace, full pipeline |
-| Outer | Fleet scan | Minutes | All workspaces in fleet |
+| Ring   | Trigger     | Latency       | Scope                              |
+| ------ | ----------- | ------------- | ---------------------------------- |
+| Inner  | File save   | < 300ms batch | Single workspace, governance rules |
+| Middle | CLI command | Sub-second    | Single workspace, full pipeline    |
+| Outer  | Fleet scan  | Minutes       | All workspaces in fleet            |
 
 ### 2. The inner ring: file watcher
 

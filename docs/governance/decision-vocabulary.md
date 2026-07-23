@@ -6,14 +6,15 @@
 
 Every provider decision lands in one of four verbs. Both `GuardrailProvider.preAuthorize` and `FileIngestProvider.beforeIngest` return an `AuthorizationDecision` whose `decision` field is one of these.
 
-| Verb     | Meaning                                                 | Example                                                                 | When to use                                                       |
-|----------|---------------------------------------------------------|-------------------------------------------------------------------------|-------------------------------------------------------------------|
-| `allow`  | Proceed as-is.                                          | `{ decision: 'allow' }`                                                 | The call is safe under this policy. Optional `requiresExternalApproval: true` still escalates for belt-and-braces audit. |
-| `deny`   | Reject with a reason. No further processing.            | `{ decision: 'deny', reason: 'R5 tool blocked in PUBLIC workspace' }`   | Hard policy violation. The tool never runs; the file never writes. Audited as a `DecisionEntry` with `decision: 'deny'`. |
-| `review` | Route to supervisor with a signed `approvalHandle`.     | `{ decision: 'review', approvalHandle, requiresExternalApproval: true }` | Human judgement required. The call stalls until companion app responds with a signed verdict. |
-| `modify` | Rewrite args (tool call) or `redirectPath` (ingest).    | `{ decision: 'modify', modifiedArgs: { to: 'sanitized@...' } }`         | The call can proceed with safer inputs. Use sparingly — `modify` is powerful and audit-visible. |
+| Verb     | Meaning                                              | Example                                                                  | When to use                                                                                                              |
+| -------- | ---------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `allow`  | Proceed as-is.                                       | `{ decision: 'allow' }`                                                  | The call is safe under this policy. Optional `requiresExternalApproval: true` still escalates for belt-and-braces audit. |
+| `deny`   | Reject with a reason. No further processing.         | `{ decision: 'deny', reason: 'R5 tool blocked in PUBLIC workspace' }`    | Hard policy violation. The tool never runs; the file never writes. Audited as a `DecisionEntry` with `decision: 'deny'`. |
+| `review` | Route to supervisor with a signed `approvalHandle`.  | `{ decision: 'review', approvalHandle, requiresExternalApproval: true }` | Human judgement required. The call stalls until companion app responds with a signed verdict.                            |
+| `modify` | Rewrite args (tool call) or `redirectPath` (ingest). | `{ decision: 'modify', modifiedArgs: { to: 'sanitized@...' } }`          | The call can proceed with safer inputs. Use sparingly — `modify` is powerful and audit-visible.                          |
 
 `modify` differs between interfaces:
+
 - **GuardrailProvider.modify** returns `modifiedArgs: unknown` — the arguments the tool receives are replaced.
 - **FileIngestProvider.modify** may return `redirectPath: string` — the file is written to a different path (e.g., quarantined into `.openclaw/.stage/quarantine/{original}`).
 
@@ -27,12 +28,12 @@ When multiple providers register against the same hook, their decisions merge. T
 
 ```ts
 function merge(decisions: AuthorizationDecision[]): AuthorizationDecision {
-  if (decisions.some(d => d.decision === 'deny')) return pickDeny(decisions);
-  if (decisions.some(d => d.decision === 'review')) return mergeReview(decisions);
-  const modifies = decisions.filter(d => d.decision === 'modify');
+  if (decisions.some((d) => d.decision === "deny")) return pickDeny(decisions);
+  if (decisions.some((d) => d.decision === "review")) return mergeReview(decisions);
+  const modifies = decisions.filter((d) => d.decision === "modify");
   if (modifies.length > 1) return escalateConflict(modifies);
   if (modifies.length === 1) return modifies[0];
-  return { decision: 'allow' };
+  return { decision: "allow" };
 }
 ```
 
@@ -44,8 +45,8 @@ When a `FileIngestProvider` returns `modify` with `redirectPath`, the host enfor
 
 ```ts
 const canonical = canonicalize(workspaceRoot, redirectPath);
-if (!canonical.startsWith(join(workspaceRoot, '.openclaw', '.stage'))) {
-  return reject({ invalidReason: 'redirect-path-escape' });
+if (!canonical.startsWith(join(workspaceRoot, ".openclaw", ".stage"))) {
+  return reject({ invalidReason: "redirect-path-escape" });
 }
 ```
 
@@ -89,16 +90,16 @@ Per the CL-07 amendment, effective tier enforcement runs on **two paths** becaus
 
 ```ts
 class NoPIIGuardrail implements GuardrailProvider {
-  providerId = 'no-pii';
+  providerId = "no-pii";
 
   async preAuthorize(call: ToolCall, ctx: AuthorizationContext): Promise<AuthorizationDecision> {
-    if (ctx.effectiveSensitivity === 'RESTRICTED' && call.toolName === 'post_to_public_blog') {
+    if (ctx.effectiveSensitivity === "RESTRICTED" && call.toolName === "post_to_public_blog") {
       return {
-        decision: 'deny',
-        reason: 'RESTRICTED data cannot flow to public-blog tool',
+        decision: "deny",
+        reason: "RESTRICTED data cannot flow to public-blog tool",
       };
     }
-    return { decision: 'allow' };
+    return { decision: "allow" };
   }
 }
 ```
@@ -107,16 +108,19 @@ And a `modify` with `redirectPath`:
 
 ```ts
 class QuarantineIngress implements FileIngestProvider {
-  providerId = 'quarantine';
+  providerId = "quarantine";
 
-  async beforeIngest(event: FileIngestEvent, ctx: AuthorizationContext): Promise<AuthorizationDecision> {
-    if (ctx.contentClassifier === 'untrusted') {
+  async beforeIngest(
+    event: FileIngestEvent,
+    ctx: AuthorizationContext,
+  ): Promise<AuthorizationDecision> {
+    if (ctx.contentClassifier === "untrusted") {
       return {
-        decision: 'modify',
-        redirectPath: '.openclaw/.stage/quarantine/' + basename(event.path),
+        decision: "modify",
+        redirectPath: ".openclaw/.stage/quarantine/" + basename(event.path),
       };
     }
-    return { decision: 'allow' };
+    return { decision: "allow" };
   }
 }
 ```

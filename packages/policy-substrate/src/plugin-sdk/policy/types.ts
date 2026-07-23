@@ -16,21 +16,21 @@
  * @module @openclaw/plugin-sdk/policy
  */
 
-import type { LKGFingerprint } from '@openclaw/lkg';
+import type { LKGFingerprint } from "@openclaw/lkg";
 
 /**
  * Tier label used in `policy-ir.json` for cross-plane audit
  * alignment. Mirrors the convention shipped on
  * `DecisionEntry.effectiveTier` in the gateway audit log.
  */
-export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
+export type RiskLevel = "low" | "medium" | "high" | "critical";
 
 /**
  * Sensitivity classification of a tool's data surface. Used to
  * compute capability bounds and to gate cross-tier flow in the
  * G-CHAIN provenance check.
  */
-export type Sensitivity = 'public' | 'internal' | 'confidential' | 'restricted';
+export type Sensitivity = "public" | "internal" | "confidential" | "restricted";
 
 /**
  * Decision the guardrail emits per tool call. The policy IR enables
@@ -47,10 +47,10 @@ export type Sensitivity = 'public' | 'internal' | 'confidential' | 'restricted';
  *    substitutions).
  */
 export type Decision =
-  | { readonly kind: 'allow' }
-  | { readonly kind: 'deny'; readonly reason: string; readonly rule?: string }
-  | { readonly kind: 'requires-approval'; readonly reason: string }
-  | { readonly kind: 'params'; readonly mutate: Readonly<Record<string, unknown>> };
+  | { readonly kind: "allow" }
+  | { readonly kind: "deny"; readonly reason: string; readonly rule?: string }
+  | { readonly kind: "requires-approval"; readonly reason: string }
+  | { readonly kind: "params"; readonly mutate: Readonly<Record<string, unknown>> };
 
 /**
  * One tool surface declared in the workspace authoring source. The
@@ -139,4 +139,4 @@ export interface PolicyGenerator<TValidated> {
  * description of the in-memory shape; the file itself is just
  * `policy.jsonc` — no separate IR file.
  */
-export const POLICY_PATH: 'policy.jsonc' = 'policy.jsonc';
+export const POLICY_PATH: "policy.jsonc" = "policy.jsonc";

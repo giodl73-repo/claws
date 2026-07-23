@@ -55,19 +55,21 @@ When multiple providers return different decisions:
 The `requiresExternalApproval` field is OR'd across all providers and
 composed with fleet policy:
 
-| Risk Level | Default | Fleet Override | Final |
-|------------|---------|---------------|-------|
-| R1-R2 (low) | false | Can escalate to true | Fleet wins |
-| R3 (medium) | true | Can override to false | Fleet wins |
-| R4 (high) | true | Can override to false | Fleet wins |
-| R5 (critical) | true | **Cannot override** | Always true |
+| Risk Level    | Default | Fleet Override        | Final       |
+| ------------- | ------- | --------------------- | ----------- |
+| R1-R2 (low)   | false   | Can escalate to true  | Fleet wins  |
+| R3 (medium)   | true    | Can override to false | Fleet wins  |
+| R4 (high)     | true    | Can override to false | Fleet wins  |
+| R5 (critical) | true    | **Cannot override**   | Always true |
 
 Fleet override precedence (per CM3):
+
 - If fleet says R3 auto-approve, provider MUST NOT set
   requiresExternalApproval: true for R3 tools.
 - Provider reads fleet policy before setting the field.
 
 R5 enforcement (per CISO W2):
+
 - R3+ MUST set requiresExternalApproval: true unless fleet override
   explicitly permits false.
 - R5 is non-negotiable: always true regardless of any override.
@@ -78,13 +80,13 @@ R5 enforcement (per CISO W2):
 
 When a provider throws an exception during `preAuthorize()`:
 
-| Risk Level | Fail Mode | Overridable | Behavior |
-|------------|-----------|-------------|----------|
-| R1 | fail-open | No | Tool proceeds |
-| R2 | fail-open | No | Tool proceeds |
-| R3 | fail-closed | Yes (fleet) | Default: tool blocked |
-| R4 | fail-closed | Yes (fleet) | Default: tool blocked |
-| R5 | fail-closed | **No** | Tool blocked (non-negotiable) |
+| Risk Level | Fail Mode   | Overridable | Behavior                      |
+| ---------- | ----------- | ----------- | ----------------------------- |
+| R1         | fail-open   | No          | Tool proceeds                 |
+| R2         | fail-open   | No          | Tool proceeds                 |
+| R3         | fail-closed | Yes (fleet) | Default: tool blocked         |
+| R4         | fail-closed | Yes (fleet) | Default: tool blocked         |
+| R5         | fail-closed | **No**      | Tool blocked (non-negotiable) |
 
 The 100ms SLA on `preAuthorize()` means exceeding the timeout is
 treated as a thrown exception and the fail-mode table applies.
@@ -110,6 +112,7 @@ catch unintended de-escalations.
 ## Empty Registry
 
 If no providers are registered, the registry returns:
+
 ```json
 { "decision": "deny", "reason": "No governance providers registered" }
 ```
@@ -126,8 +129,8 @@ review decisions. The type system enforces this:
 
 ```typescript
 interface ReviewDecision {
-  decision: 'review';
-  requiresExternalApproval: true;  // literal true, not boolean
+  decision: "review";
+  requiresExternalApproval: true; // literal true, not boolean
 }
 ```
 

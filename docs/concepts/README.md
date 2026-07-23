@@ -147,24 +147,24 @@ These guides cover the claws dev server, CI enforcement, and trust infrastructur
 
 Atoms referenced in claws concept guides, searchable via `/lookup atom:<name>`.
 
-| Atom | ID | Guide |
-|------|----|-------|
-| `atom:pinch` | C52 | [pinch.md](pinch.md) |
-| `atom:claws-uninstall` | C33 | [claws-uninstall.md](claws-uninstall.md) |
-| `atom:claws-assess` | C73 | [claws-assess.md](claws-assess.md) |
-| `atom:claws-doctor` | C81 | [claws-doctor.md](claws-doctor.md) |
-| `atom:claws-compiler` | C01 | [compiler.md](compiler.md) |
-| `atom:workflow-inversion` | C05 | [workflow-inversion.md](workflow-inversion.md) |
-| `atom:governance-badge` | C42 | [governance-badge.md](governance-badge.md) |
-| `atom:error-contract` | C44 | [error-contract.md](error-contract.md) |
-| `atom:upstream-contrib` | C91 | [upstream-contrib.md](upstream-contrib.md) |
-| `atom:cicd-pipeline` | C92 | [cicd-pipeline.md](cicd-pipeline.md) |
-| `atom:claws-sift` | C53 | [claws-sift.md](claws-sift.md) |
-| `atom:governance-skill` | C21 | [governance-skill.md](governance-skill.md) |
-| `atom:claws-bypass` | C25 | [claws-bypass.md](claws-bypass.md) |
-| `atom:snap-restore` | C84 | [snap-restore.md](snap-restore.md) |
-| `atom:latency-budget` | C86 | [latency-budget.md](latency-budget.md) |
+| Atom                       | ID  | Guide                                            |
+| -------------------------- | --- | ------------------------------------------------ |
+| `atom:pinch`               | C52 | [pinch.md](pinch.md)                             |
+| `atom:claws-uninstall`     | C33 | [claws-uninstall.md](claws-uninstall.md)         |
+| `atom:claws-assess`        | C73 | [claws-assess.md](claws-assess.md)               |
+| `atom:claws-doctor`        | C81 | [claws-doctor.md](claws-doctor.md)               |
+| `atom:claws-compiler`      | C01 | [compiler.md](compiler.md)                       |
+| `atom:workflow-inversion`  | C05 | [workflow-inversion.md](workflow-inversion.md)   |
+| `atom:governance-badge`    | C42 | [governance-badge.md](governance-badge.md)       |
+| `atom:error-contract`      | C44 | [error-contract.md](error-contract.md)           |
+| `atom:upstream-contrib`    | C91 | [upstream-contrib.md](upstream-contrib.md)       |
+| `atom:cicd-pipeline`       | C92 | [cicd-pipeline.md](cicd-pipeline.md)             |
+| `atom:claws-sift`          | C53 | [claws-sift.md](claws-sift.md)                   |
+| `atom:governance-skill`    | C21 | [governance-skill.md](governance-skill.md)       |
+| `atom:claws-bypass`        | C25 | [claws-bypass.md](claws-bypass.md)               |
+| `atom:snap-restore`        | C84 | [snap-restore.md](snap-restore.md)               |
+| `atom:latency-budget`      | C86 | [latency-budget.md](latency-budget.md)           |
 | `atom:compliance-artifact` | C15 | [compliance-artifact.md](compliance-artifact.md) |
-| `atom:audit-verify` | C75 | [audit-verify.md](audit-verify.md) |
-| `atom:fleet-doctor` | C63 | [fleet-doctor.md](fleet-doctor.md) |
-| `atom:fleet-comply` | C64 | [fleet-comply.md](fleet-comply.md) |
+| `atom:audit-verify`        | C75 | [audit-verify.md](audit-verify.md)               |
+| `atom:fleet-doctor`        | C63 | [fleet-doctor.md](fleet-doctor.md)               |
+| `atom:fleet-comply`        | C64 | [fleet-comply.md](fleet-comply.md)               |

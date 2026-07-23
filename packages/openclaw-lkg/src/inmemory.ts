@@ -15,10 +15,10 @@ import type {
   LKGStore,
   LKGTracker,
   ValidationIssue,
-} from '@bic/v2-prototype';
-import { LKGErrorImpl } from '@bic/v2-prototype';
+} from "@bic/v2-prototype";
+import { LKGErrorImpl } from "@bic/v2-prototype";
 
-import { hashRaw, makeFingerprint } from './fingerprint.js';
+import { hashRaw, makeFingerprint } from "./fingerprint.js";
 
 interface InMemoryRegistered<T = unknown> {
   readonly tracker: LKGTracker<T>;
@@ -57,11 +57,8 @@ export interface InMemoryLKGStore extends LKGStore {
   getClobbered(path: string): ReadonlyMap<string, string>;
 }
 
-function makeSuspiciousSignature(
-  current: LKGFingerprint,
-  reasons: readonly string[],
-): string {
-  return `${current.hash}:${[...reasons].sort().join(',')}`;
+function makeSuspiciousSignature(current: LKGFingerprint, reasons: readonly string[]): string {
+  return `${current.hash}:${[...reasons].sort().join(",")}`;
 }
 
 export function inMemoryLKGStore(opts: InMemoryLKGStoreOptions = {}): InMemoryLKGStore {
@@ -72,7 +69,7 @@ export function inMemoryLKGStore(opts: InMemoryLKGStoreOptions = {}): InMemoryLK
     const reg = trackers.get(filePath);
     if (reg === undefined) {
       throw new LKGErrorImpl(
-        'LKG_TRACKER_PATH_INVALID',
+        "LKG_TRACKER_PATH_INVALID",
         `No tracker registered for path: ${filePath}`,
       );
     }
@@ -94,11 +91,7 @@ export function inMemoryLKGStore(opts: InMemoryLKGStoreOptions = {}): InMemoryLK
     return { clobberedPath, restoredFrom: promoted };
   }
 
-  function promote<T>(
-    reg: InMemoryRegistered<T>,
-    raw: string,
-    fingerprint: LKGFingerprint,
-  ): void {
+  function promote<T>(reg: InMemoryRegistered<T>, raw: string, fingerprint: LKGFingerprint): void {
     reg.lkg = raw;
     reg.entry = {
       ...reg.entry,
@@ -112,7 +105,7 @@ export function inMemoryLKGStore(opts: InMemoryLKGStoreOptions = {}): InMemoryLK
     register<T>(tracker: LKGTracker<T>): void {
       if (trackers.has(tracker.path)) {
         throw new LKGErrorImpl(
-          'LKG_TRACKER_PATH_COLLISION',
+          "LKG_TRACKER_PATH_COLLISION",
           `Tracker already registered for path: ${tracker.path}`,
         );
       }
@@ -149,9 +142,9 @@ export function inMemoryLKGStore(opts: InMemoryLKGStoreOptions = {}): InMemoryLK
 
       if (raw === null) {
         const issues: ValidationIssue[] = [
-          { path: '', message: 'no active content', code: 'read-failed' },
+          { path: "", message: "no active content", code: "read-failed" },
         ];
-        return { outcome: 'failed', reason: 'read-failed', issues };
+        return { outcome: "failed", reason: "read-failed", issues };
       }
 
       const fingerprint = makeFingerprint({ raw, stat: null, observedAt });
@@ -161,21 +154,21 @@ export function inMemoryLKGStore(opts: InMemoryLKGStoreOptions = {}): InMemoryLK
         parsed = (reg.tracker as LKGTracker<unknown>).parse(raw);
       } catch (err) {
         const issues: ValidationIssue[] = [
-          { path: '', message: `parse failed: ${(err as Error).message}`, code: 'unparseable' },
+          { path: "", message: `parse failed: ${(err as Error).message}`, code: "unparseable" },
         ];
         const skip =
           reg.tracker.shouldRecover !== undefined &&
           reg.tracker.shouldRecover({ valid: false, issues }) === false;
         if (skip) {
-          return { outcome: 'skipped', reason: 'tracker-shouldRecover-false', issues };
+          return { outcome: "skipped", reason: "tracker-shouldRecover-false", issues };
         }
         const recovery = recoverFrom(reg, raw, observedAt);
         if (recovery === null) {
-          return { outcome: 'skipped', reason: 'no-lkg-available', issues };
+          return { outcome: "skipped", reason: "no-lkg-available", issues };
         }
         return {
-          outcome: 'recovered',
-          reason: 'unparseable',
+          outcome: "recovered",
+          reason: "unparseable",
           clobberedPath: recovery.clobberedPath,
           restoredFrom: recovery.restoredFrom,
         };
@@ -203,24 +196,24 @@ export function inMemoryLKGStore(opts: InMemoryLKGStoreOptions = {}): InMemoryLK
           reg.entry.lastPromotedGood.hash !== fingerprint.hash
         ) {
           promote(reg, raw, fingerprint);
-          return { outcome: 'promoted', fingerprint };
+          return { outcome: "promoted", fingerprint };
         }
-        return { outcome: 'valid', fingerprint };
+        return { outcome: "valid", fingerprint };
       }
 
       if (validation.valid && suspicious.length > 0) {
         const sig = makeSuspiciousSignature(fingerprint, suspicious);
         if (reg.entry.lastObservedSuspiciousSignature === sig) {
-          return { outcome: 'valid', fingerprint };
+          return { outcome: "valid", fingerprint };
         }
         reg.entry = { ...reg.entry, lastObservedSuspiciousSignature: sig };
         const recovery = recoverFrom(reg, raw, observedAt);
         if (recovery === null) {
-          return { outcome: 'skipped', reason: 'no-lkg-available', issues: [] };
+          return { outcome: "skipped", reason: "no-lkg-available", issues: [] };
         }
         return {
-          outcome: 'recovered',
-          reason: `suspicious:${suspicious.join(',')}`,
+          outcome: "recovered",
+          reason: `suspicious:${suspicious.join(",")}`,
           clobberedPath: recovery.clobberedPath,
           restoredFrom: recovery.restoredFrom,
         };
@@ -234,8 +227,8 @@ export function inMemoryLKGStore(opts: InMemoryLKGStoreOptions = {}): InMemoryLK
         }) === false;
       if (skip) {
         return {
-          outcome: 'skipped',
-          reason: 'plugin-local-invalidity',
+          outcome: "skipped",
+          reason: "plugin-local-invalidity",
           issues: validation.issues,
         };
       }
@@ -243,14 +236,14 @@ export function inMemoryLKGStore(opts: InMemoryLKGStoreOptions = {}): InMemoryLK
       const recovery = recoverFrom(reg, raw, observedAt);
       if (recovery === null) {
         return {
-          outcome: 'skipped',
-          reason: 'no-lkg-available',
+          outcome: "skipped",
+          reason: "no-lkg-available",
           issues: validation.issues,
         };
       }
       return {
-        outcome: 'recovered',
-        reason: 'invalid',
+        outcome: "recovered",
+        reason: "invalid",
         clobberedPath: recovery.clobberedPath,
         restoredFrom: recovery.restoredFrom,
       };
@@ -260,7 +253,7 @@ export function inMemoryLKGStore(opts: InMemoryLKGStoreOptions = {}): InMemoryLK
       const reg = lookup(filePath);
       if (reg.lkg === null) {
         throw new LKGErrorImpl(
-          'LKG_STORE_UNAVAILABLE',
+          "LKG_STORE_UNAVAILABLE",
           `LKG not yet established for ${reg.tracker.path}`,
         );
       }

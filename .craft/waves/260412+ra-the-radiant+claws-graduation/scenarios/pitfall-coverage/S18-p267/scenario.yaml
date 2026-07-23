@@ -15,7 +15,10 @@ expect:
   prevention: "`claws check --compat` enforces Extension Contract Rule 4 (named re-exports only, no wildcards) for the compiler-sdk compat layer. Explicit subpath entries required for all compat shims."
 
 simulate:
-  failures: ["Wildcard re-exports in compat layer cause silent symbol collision; wildcard subpath patterns narrow silently"]
+  failures:
+    [
+      "Wildcard re-exports in compat layer cause silent symbol collision; wildcard subpath patterns narrow silently",
+    ]
   halt: null
   budget: null
 

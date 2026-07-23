@@ -29,26 +29,32 @@
  *     stdoutContains?: string,
  *   }
  */
-import { existsSync } from 'node:fs';
-import { mkdir, readFile, rm, writeFile, appendFile } from 'node:fs/promises';
-import { spawnSync } from 'node:child_process';
-import { dirname, join, resolve as resolvePath } from 'node:path';
+import { existsSync } from "node:fs";
+import { mkdir, readFile, rm, writeFile, appendFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { dirname, join, resolve as resolvePath } from "node:path";
 
-export const FORK_BIN = 'C:/src/openclaw-fork/openclaw.mjs';
+export const FORK_BIN = "C:/src/openclaw-fork/openclaw.mjs";
 
 function runOpenclaw(args, cwd) {
-  const proc = spawnSync('node', [FORK_BIN, ...args], {
+  const proc = spawnSync("node", [FORK_BIN, ...args], {
     cwd,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
   });
   let parsed = null;
-  try { parsed = JSON.parse(proc.stdout); } catch { /* not JSON */ }
+  try {
+    parsed = JSON.parse(proc.stdout);
+  } catch {
+    /* not JSON */
+  }
   let parsedErr = null;
   try {
-    const trimmed = (proc.stderr || '').trim();
-    if (trimmed.startsWith('{')) parsedErr = JSON.parse(trimmed);
-  } catch { /* not JSON */ }
+    const trimmed = (proc.stderr || "").trim();
+    if (trimmed.startsWith("{")) parsedErr = JSON.parse(trimmed);
+  } catch {
+    /* not JSON */
+  }
   return {
     args,
     exitCode: proc.status,
@@ -67,11 +73,11 @@ function pluck(obj, path) {
   if (obj === null || obj === undefined) return undefined;
   // Tokenize: split on '.' then handle [N] suffixes inline.
   const tokens = [];
-  for (const part of path.split('.')) {
+  for (const part of path.split(".")) {
     const m = part.match(/^([^\[\]]*)((?:\[\d+\])*)$/);
     if (!m) return undefined;
-    if (m[1] !== '') tokens.push(m[1]);
-    for (const idx of (m[2].match(/\[\d+\]/g) ?? [])) {
+    if (m[1] !== "") tokens.push(m[1]);
+    for (const idx of m[2].match(/\[\d+\]/g) ?? []) {
       tokens.push(parseInt(idx.slice(1, -1), 10));
     }
   }
@@ -87,7 +93,9 @@ function assertExpect(stepName, result, expect) {
   const failures = [];
   if (expect.exitCode !== undefined) {
     if (!matchValue(expect.exitCode, result.exitCode)) {
-      failures.push(`exitCode: expected ${JSON.stringify(expect.exitCode)}, got ${result.exitCode}`);
+      failures.push(
+        `exitCode: expected ${JSON.stringify(expect.exitCode)}, got ${result.exitCode}`,
+      );
     }
   }
   if (expect.ok !== undefined) {
@@ -98,7 +106,10 @@ function assertExpect(stepName, result, expect) {
     for (const [path, want] of Object.entries(expect.parsed)) {
       const got = pluck(result.parsed, path);
       const okMatch = matchValue(want, got);
-      if (!okMatch) failures.push(`parsed.${path}: expected ${JSON.stringify(want)}, got ${JSON.stringify(got)}`);
+      if (!okMatch)
+        failures.push(
+          `parsed.${path}: expected ${JSON.stringify(want)}, got ${JSON.stringify(got)}`,
+        );
     }
   }
   if (expect.stderrContains !== undefined && !result.stderr.includes(expect.stderrContains)) {
@@ -117,11 +128,13 @@ function assertExpect(stepName, result, expect) {
 function matchValue(want, got) {
   if (want === got) return true;
   // Special matchers — operator objects: {greaterThan: N}, {matches: /regex/}
-  if (want && typeof want === 'object' && !Array.isArray(want)) {
-    if (typeof want.greaterThan === 'number') return typeof got === 'number' && got > want.greaterThan;
-    if (typeof want.atLeast === 'number') return typeof got === 'number' && got >= want.atLeast;
-    if (typeof want.atMost === 'number') return typeof got === 'number' && got <= want.atMost;
-    if (typeof want.matches === 'string') return typeof got === 'string' && new RegExp(want.matches).test(got);
+  if (want && typeof want === "object" && !Array.isArray(want)) {
+    if (typeof want.greaterThan === "number")
+      return typeof got === "number" && got > want.greaterThan;
+    if (typeof want.atLeast === "number") return typeof got === "number" && got >= want.atLeast;
+    if (typeof want.atMost === "number") return typeof got === "number" && got <= want.atMost;
+    if (typeof want.matches === "string")
+      return typeof got === "string" && new RegExp(want.matches).test(got);
     if (Array.isArray(want.oneOf)) return want.oneOf.includes(got);
   }
   return false;
@@ -135,9 +148,9 @@ async function applyEdit(workspaceDir, edit) {
       continue;
     }
     await mkdir(dirname(full), { recursive: true });
-    if (typeof op.set === 'string') {
+    if (typeof op.set === "string") {
       await writeFile(full, op.set);
-    } else if (typeof op.append === 'string') {
+    } else if (typeof op.append === "string") {
       await appendFile(full, op.append);
     } else if (op.bytes instanceof Uint8Array || Buffer.isBuffer(op.bytes)) {
       await writeFile(full, op.bytes);
@@ -152,11 +165,20 @@ async function checkFile(workspaceDir, fileChecks) {
   for (const [relPath, check] of Object.entries(fileChecks)) {
     const full = resolvePath(workspaceDir, relPath);
     const exists = existsSync(full);
-    if (check.exists === true && !exists) { failures.push(`${relPath}: expected to exist`); continue; }
-    if (check.exists === false && exists) { failures.push(`${relPath}: expected to not exist`); continue; }
+    if (check.exists === true && !exists) {
+      failures.push(`${relPath}: expected to exist`);
+      continue;
+    }
+    if (check.exists === false && exists) {
+      failures.push(`${relPath}: expected to not exist`);
+      continue;
+    }
     if (check.equals !== undefined || check.contains !== undefined || check.matches !== undefined) {
-      if (!exists) { failures.push(`${relPath}: missing (cannot check contents)`); continue; }
-      const body = await readFile(full, 'utf8');
+      if (!exists) {
+        failures.push(`${relPath}: missing (cannot check contents)`);
+        continue;
+      }
+      const body = await readFile(full, "utf8");
       if (check.equals !== undefined && body !== check.equals) {
         failures.push(`${relPath}: contents differ from equals`);
       }
@@ -218,7 +240,7 @@ export async function runScenario(scenario, opts) {
         failures = await checkFile(workspaceDir, step.file);
       } else if (step.expect !== undefined) {
         if (lastRunResult === null) {
-          failures.push('expect step has no preceding run step to assert against');
+          failures.push("expect step has no preceding run step to assert against");
         } else {
           failures = assertExpect(stepName, lastRunResult, step.expect);
         }
@@ -235,7 +257,7 @@ export async function runScenario(scenario, opts) {
 
     if (resultsDir && result) {
       await writeFile(
-        join(resultsDir, `step-${String(i + 1).padStart(2, '0')}-${slugify(stepName)}.json`),
+        join(resultsDir, `step-${String(i + 1).padStart(2, "0")}-${slugify(stepName)}.json`),
         JSON.stringify(result, null, 2),
       );
     }
@@ -245,5 +267,9 @@ export async function runScenario(scenario, opts) {
 }
 
 function slugify(s) {
-  return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  return String(s)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60);
 }

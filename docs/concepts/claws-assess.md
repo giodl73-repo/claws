@@ -26,16 +26,17 @@ Regulatory risk classification for AI agent workspaces.
 
 ## Risk Levels
 
-| Level | Meaning | Action Required |
-|-------|---------|----------------|
-| Low | No regulated data, no external tools | Advisory only |
-| Medium | Internal data, limited tool access | Standard governance |
-| High | PII, external APIs, multi-agent coordination | Enhanced governance + audit |
-| Critical | PHI, financial data, autonomous decisions | Full compliance suite required |
+| Level    | Meaning                                      | Action Required                |
+| -------- | -------------------------------------------- | ------------------------------ |
+| Low      | No regulated data, no external tools         | Advisory only                  |
+| Medium   | Internal data, limited tool access           | Standard governance            |
+| High     | PII, external APIs, multi-agent coordination | Enhanced governance + audit    |
+| Critical | PHI, financial data, autonomous decisions    | Full compliance suite required |
 
 ## Framework Coverage
 
 The assessment checks applicability for:
+
 - **SOC2 Type II** -- triggered by external data access or multi-tenant deployment
 - **HIPAA** -- triggered by PHI entity types or healthcare domain markers
 - **EU AI Act** -- triggered by autonomous decision-making capabilities

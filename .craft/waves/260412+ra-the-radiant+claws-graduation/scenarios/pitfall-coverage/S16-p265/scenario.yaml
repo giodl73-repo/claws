@@ -15,7 +15,8 @@ expect:
   prevention: "`claws compile` wraps emitter exceptions in typed EmitError with platform ID, IR hash, and stack trace. ValidationResult uses explicit severity levels (pass/warn/fail). Gate evaluation errors fail closed per R5 principle."
 
 simulate:
-  failures: ["Emitter plugin throws unhandled exception during emit with no platform context in the error"]
+  failures:
+    ["Emitter plugin throws unhandled exception during emit with no platform context in the error"]
   halt: null
   budget: null
 

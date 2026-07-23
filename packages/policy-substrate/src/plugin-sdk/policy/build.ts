@@ -11,18 +11,10 @@
  * @module @openclaw/plugin-sdk/policy/build
  */
 
-import type { LKGFingerprint } from '@openclaw/lkg';
-import type {
-  DenyRule,
-  PolicyIR,
-  ToolSpec,
-} from './types.js';
-import {
-  runExtractors,
-  type PolicyExtractFile,
-  type PolicyExtractorSpec,
-} from './api.js';
-import { computePolicyId } from './canonicalize.js';
+import type { LKGFingerprint } from "@openclaw/lkg";
+import type { DenyRule, PolicyIR, ToolSpec } from "./types.js";
+import { runExtractors, type PolicyExtractFile, type PolicyExtractorSpec } from "./api.js";
+import { computePolicyId } from "./canonicalize.js";
 
 /**
  * Schema version of the PolicyIR shape produced by this builder.
@@ -30,7 +22,7 @@ import { computePolicyId } from './canonicalize.js';
  * `version` field is independent so the IR shape can evolve at a
  * different cadence than the SDK API.
  */
-export const POLICY_IR_VERSION = '0.1.0';
+export const POLICY_IR_VERSION = "0.1.0";
 
 export interface BuildPolicyIROptions {
   readonly files: readonly PolicyExtractFile[];
@@ -76,7 +68,7 @@ export function buildPolicyIR(opts: BuildPolicyIROptions): PolicyIR {
   const denyRules = [...denyById.values()];
 
   const generatedAt = (opts.nowIso ?? (() => new Date().toISOString()))();
-  const body: Omit<PolicyIR, 'policyId'> = {
+  const body: Omit<PolicyIR, "policyId"> = {
     version: POLICY_IR_VERSION,
     generatedAt,
     generatedFrom: opts.anchor,

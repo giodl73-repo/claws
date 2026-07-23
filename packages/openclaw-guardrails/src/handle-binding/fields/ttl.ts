@@ -1,4 +1,4 @@
-import type { InvalidReason } from '../types.js';
+import type { InvalidReason } from "../types.js";
 
 export interface TtlInput {
   readonly handleTtl: number;
@@ -10,5 +10,5 @@ export interface TtlInput {
  * a relative duration). Fails closed when `clock() >= handleTtl`.
  */
 export function checkTtl(input: TtlInput): InvalidReason | null {
-  return input.clock() < input.handleTtl ? null : 'ttl-expired';
+  return input.clock() < input.handleTtl ? null : "ttl-expired";
 }

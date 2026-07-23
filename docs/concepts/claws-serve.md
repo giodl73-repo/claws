@@ -40,18 +40,18 @@ The server binds to `127.0.0.1:3939` by default. When `--host 0.0.0.0` is used, 
 
 ## HTTP endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/health` | Uptime (seconds), heap memory (bytes), compilation count |
-| `GET` | `/status` | File count, last compile time, violation summary (error/warning/info). Returns 501 when no compile function is configured |
-| `POST` | `/compile` | Trigger recompilation. Returns the full GovernanceIR, cache hit flag, and duration in ms |
-| `GET` | `/ir` | Return cached GovernanceIR with `ETag` and `Cache-Control: private, no-cache` headers. 404 if no compilation has run |
-| `GET` | `/diagnostics` | Flat list of governance violations: ruleId, level, message, target, diagnosticCode |
-| `GET` | `/tensions` | Cross-file tension list with cluster mapping (A-G: A = OBO conflicts, B = multi-constraint, C-G reserved) and resolution guidance |
-| `POST` | `/snapshot` | Save a named governance snapshot from the current cached IR |
-| `GET` | `/diff?from=X&to=Y` | Compare two named snapshots: added/removed/changed violations, tension delta, risk level shifts |
-| `POST` | `/invalidate` | Force-clear the compilation cache. Next `GET /ir` returns 404 until recompilation |
-| `GET` | `/classify/:tool` | Look up a tool's risk classification: R-level (R1-R5), classification string, OBO flag, description |
+| Method | Path                | Description                                                                                                                       |
+| ------ | ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/health`           | Uptime (seconds), heap memory (bytes), compilation count                                                                          |
+| `GET`  | `/status`           | File count, last compile time, violation summary (error/warning/info). Returns 501 when no compile function is configured         |
+| `POST` | `/compile`          | Trigger recompilation. Returns the full GovernanceIR, cache hit flag, and duration in ms                                          |
+| `GET`  | `/ir`               | Return cached GovernanceIR with `ETag` and `Cache-Control: private, no-cache` headers. 404 if no compilation has run              |
+| `GET`  | `/diagnostics`      | Flat list of governance violations: ruleId, level, message, target, diagnosticCode                                                |
+| `GET`  | `/tensions`         | Cross-file tension list with cluster mapping (A-G: A = OBO conflicts, B = multi-constraint, C-G reserved) and resolution guidance |
+| `POST` | `/snapshot`         | Save a named governance snapshot from the current cached IR                                                                       |
+| `GET`  | `/diff?from=X&to=Y` | Compare two named snapshots: added/removed/changed violations, tension delta, risk level shifts                                   |
+| `POST` | `/invalidate`       | Force-clear the compilation cache. Next `GET /ir` returns 404 until recompilation                                                 |
+| `GET`  | `/classify/:tool`   | Look up a tool's risk classification: R-level (R1-R5), classification string, OBO flag, description                               |
 
 ---
 
@@ -59,15 +59,15 @@ The server binds to `127.0.0.1:3939` by default. When `--host 0.0.0.0` is used, 
 
 Connect to `ws://localhost:3939/ws` to receive real-time governance events. The server pushes 7 event types:
 
-| Event type | Payload | When emitted |
-|------------|---------|--------------|
-| `compile:start` | `{}` | Compilation triggered |
-| `compile:complete` | `{ cached, durationMs }` | Compilation finished |
-| `diagnostic:update` | `{ violationCount, warningCount }` | Violations or warnings detected after compile |
-| `tension:detected` | `{ totalConflicts, oboConflicts, multiConstraintConflicts }` | Conflicts found after compile |
-| `tension:resolved` | `{ reason }` | Cache invalidated (conflicts cleared) |
-| `snapshot:saved` | `{ name, timestamp }` | Named snapshot saved |
-| `ir:invalidated` | `{}` | Cache force-cleared |
+| Event type          | Payload                                                      | When emitted                                  |
+| ------------------- | ------------------------------------------------------------ | --------------------------------------------- |
+| `compile:start`     | `{}`                                                         | Compilation triggered                         |
+| `compile:complete`  | `{ cached, durationMs }`                                     | Compilation finished                          |
+| `diagnostic:update` | `{ violationCount, warningCount }`                           | Violations or warnings detected after compile |
+| `tension:detected`  | `{ totalConflicts, oboConflicts, multiConstraintConflicts }` | Conflicts found after compile                 |
+| `tension:resolved`  | `{ reason }`                                                 | Cache invalidated (conflicts cleared)         |
+| `snapshot:saved`    | `{ name, timestamp }`                                        | Named snapshot saved                          |
+| `ir:invalidated`    | `{}`                                                         | Cache force-cleared                           |
 
 Wire format: JSON with `type`, `timestamp` (ISO 8601), and `payload` fields.
 
@@ -85,7 +85,7 @@ The server's compilation cache uses SHA-256 content hashing to skip recompilatio
 - `clear()` -- invalidate cache (used by `POST /invalidate`)
 
 ```ts
-const host = new CompilationHost(compileFn, '/workspace');
+const host = new CompilationHost(compileFn, "/workspace");
 const result = await host.compile();
 // result.cached === true when IR hash matches previous compilation
 ```
@@ -94,12 +94,12 @@ const result = await host.compile();
 
 ## Middleware stack
 
-| Middleware | Behavior |
-|-----------|----------|
-| **CORS** | Deny-by-default: no `Access-Control-Allow-Origin` header. Sets `X-Content-Type-Options: nosniff` and `X-Frame-Options: DENY` |
-| **Content-Type** | POST routes require `application/json`. Returns 415 otherwise |
-| **Body limit** | Rejects payloads over 1 MB via `Content-Length` header. Returns 413 for oversized, 411 when `Content-Length` is missing |
-| **Rate limit** | Sliding window: max 10 requests/minute to `POST /compile` (configurable via `rateLimitMax`). Returns 429 when exceeded |
+| Middleware       | Behavior                                                                                                                     |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **CORS**         | Deny-by-default: no `Access-Control-Allow-Origin` header. Sets `X-Content-Type-Options: nosniff` and `X-Frame-Options: DENY` |
+| **Content-Type** | POST routes require `application/json`. Returns 415 otherwise                                                                |
+| **Body limit**   | Rejects payloads over 1 MB via `Content-Length` header. Returns 413 for oversized, 411 when `Content-Length` is missing      |
+| **Rate limit**   | Sliding window: max 10 requests/minute to `POST /compile` (configurable via `rateLimitMax`). Returns 429 when exceeded       |
 
 ---
 
@@ -111,26 +111,26 @@ When bound to localhost (default), the server accepts WebSocket upgrades only fr
 
 ## Configuration
 
-| Option | Default | Environment variable |
-|--------|---------|---------------------|
-| Port | `3939` | `CLAWS_PORT` |
-| Host | `127.0.0.1` | -- |
-| Rate limit | `10/min` | -- |
-| WebSocket | enabled | `--no-ws` to disable |
+| Option          | Default        | Environment variable                |
+| --------------- | -------------- | ----------------------------------- |
+| Port            | `3939`         | `CLAWS_PORT`                        |
+| Host            | `127.0.0.1`    | --                                  |
+| Rate limit      | `10/min`       | --                                  |
+| WebSocket       | enabled        | `--no-ws` to disable                |
 | Allowed origins | localhost-only | `allowedOrigins` in `ServerOptions` |
 
 ---
 
 ## Key types
 
-| Type | Module |
-|------|--------|
-| `ServerOptions` | `claws-serve/server` |
-| `ServerState` | `claws-serve/server` |
-| `CompilationHost` | `claws-serve/compilation-host` |
-| `CompileFn` | `claws-serve/compilation-host` |
-| `WsEvent` / `WsEventType` | `claws-serve/ws/events` |
-| `ClientManager` | `claws-serve/ws/events` |
+| Type                        | Module                                                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `ServerOptions`             | `claws-serve/server`                                                                                          |
+| `ServerState`               | `claws-serve/server`                                                                                          |
+| `CompilationHost`           | `claws-serve/compilation-host`                                                                                |
+| `CompileFn`                 | `claws-serve/compilation-host`                                                                                |
+| `WsEvent` / `WsEventType`   | `claws-serve/ws/events`                                                                                       |
+| `ClientManager`             | `claws-serve/ws/events`                                                                                       |
 | `Snapshot` / `SnapshotDiff` | `claws-serve/routes/snapshot` (HTTP-layer types wrapping the SDK-level domain model in `claws-sdk/snapshot/`) |
 
 ---

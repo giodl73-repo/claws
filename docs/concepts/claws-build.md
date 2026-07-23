@@ -104,6 +104,7 @@ AGENTS.md, or claws.json. Or run `claws watch` and never think about it again.
 ## Scenario-Driven Additions
 
 ### From lossless-roundtrip scenarios (32 findings applied)
+
 - BOM preservation: UTF-8 and UTF-16 BOMs in workspace files are stripped in-memory during parse but never removed from disk; build output is unaffected by source file BOM presence
 - CRLF handling: mixed line endings (CRLF/LF/CR) are normalized internally; generated artifacts follow workspace convention or force LF -- source files are never rewritten
 - Idempotent builds: deterministic serialization (sorted-key JSON, lexicographic file paths, timestamps excluded from hash) ensures repeated builds produce byte-identical output when sources are unchanged

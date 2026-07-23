@@ -8,14 +8,14 @@ Middle ring diagnostic and repair tool for governance health.
 
 ## Diagnostic Checks
 
-| Check | What It Validates |
-|-------|-------------------|
-| Config schema | claws.json matches current schema version |
-| Policy syntax | All policy YAML files parse without errors |
-| Rule references | Policy rules reference valid atoms and fields |
-| Chain integrity | CGR hash chain is unbroken |
+| Check                 | What It Validates                                     |
+| --------------------- | ----------------------------------------------------- |
+| Config schema         | claws.json matches current schema version             |
+| Policy syntax         | All policy YAML files parse without errors            |
+| Rule references       | Policy rules reference valid atoms and fields         |
+| Chain integrity       | CGR hash chain is unbroken                            |
 | Version compatibility | claws-sdk version compatible with workspace artifacts |
-| Deprecated features | Flags usage of deprecated config keys or rule syntax |
+| Deprecated features   | Flags usage of deprecated config keys or rule syntax  |
 
 ## Usage
 

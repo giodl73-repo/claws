@@ -13,17 +13,17 @@
  * Advisory-only: no auto-fix. Operators must decide which level
  * they meant.
  */
-import type { LintRule, LintFinding } from '@openclaw/oc-lint/plugin-sdk';
-import { scanToolHeaders } from './_tools-md-scan.js';
+import type { LintRule, LintFinding } from "@openclaw/oc-lint/plugin-sdk";
+import { scanToolHeaders } from "./_tools-md-scan.js";
 
-const KNOWN_LEVELS = ['public', 'internal', 'confidential', 'restricted'];
+const KNOWN_LEVELS = ["public", "internal", "confidential", "restricted"];
 
 export const toolsUnknownSensitivityToken: LintRule = {
-  id: 'policy-starter-v0/tools/unknown-sensitivity-token',
-  severity: 'warning',
+  id: "policy-starter-v0/tools/unknown-sensitivity-token",
+  severity: "warning",
   description:
-    'TOOLS.md tool declares `sensitivity:<bogus>` not in {public, internal, confidential, restricted}',
-  appliesTo: 'TOOLS.md',
+    "TOOLS.md tool declares `sensitivity:<bogus>` not in {public, internal, confidential, restricted}",
+  appliesTo: "TOOLS.md",
   check(ctx) {
     const findings: LintFinding[] = [];
     for (const hit of scanToolHeaders(ctx.ast)) {
@@ -35,7 +35,7 @@ export const toolsUnknownSensitivityToken: LintRule = {
         message: `tool '${hit.name}' declares unknown sensitivity '${level}'; extractor will fall through to capability-derived default`,
         ocPath: `oc://TOOLS.md/Tools/${hit.name}`,
         line: hit.line,
-        fixHint: `replace with one of: ${KNOWN_LEVELS.join(', ')}`,
+        fixHint: `replace with one of: ${KNOWN_LEVELS.join(", ")}`,
       });
     }
     return findings;

@@ -12,12 +12,12 @@ The inner ring is the fastest governance feedback loop -- it runs on every file 
 
 The inner ring supports two trigger modes, and the distinction matters:
 
-| Mode | Trigger | Use case |
-|------|---------|----------|
-| **file-save** | Editor save event (Ctrl+S) | Real-time feedback during development |
+| Mode          | Trigger                         | Use case                                      |
+| ------------- | ------------------------------- | --------------------------------------------- |
+| **file-save** | Editor save event (Ctrl+S)      | Real-time feedback during development         |
 | **git-stage** | `git add` / staging area change | Pre-commit validation (middle ring territory) |
 
-The inner ring's default mode is **file-save**. This is distinct from `--staged` mode used by the middle ring (dead man's switch, pre-commit hooks). The two modes watch different file states and must not be conflated. *(Source: three-rings S01-F01)*
+The inner ring's default mode is **file-save**. This is distinct from `--staged` mode used by the middle ring (dead man's switch, pre-commit hooks). The two modes watch different file states and must not be conflated. _(Source: three-rings S01-F01)_
 
 ---
 
@@ -29,7 +29,7 @@ Rapid file saves (e.g., auto-save every keystroke, or saving multiple files in q
 - Partial-state validation (checking file A before file B is also saved)
 - Excessive CPU usage from per-keystroke compilation
 
-The batch window is configurable but defaults to 300ms as a balance between responsiveness and efficiency. *(Source: three-rings S01-F03)*
+The batch window is configurable but defaults to 300ms as a balance between responsiveness and efficiency. _(Source: three-rings S01-F03)_
 
 ---
 
@@ -39,14 +39,14 @@ The inner ring watcher produces output in **append mode** by default -- new diag
 
 Output includes:
 
-| Field | Description |
-|-------|-------------|
-| Timestamp | When the check ran |
-| Files changed | Which files triggered the check |
-| Violations | New or changed violations with severity |
-| Delta | What changed since last check (new, resolved, unchanged) |
+| Field         | Description                                              |
+| ------------- | -------------------------------------------------------- |
+| Timestamp     | When the check ran                                       |
+| Files changed | Which files triggered the check                          |
+| Violations    | New or changed violations with severity                  |
+| Delta         | What changed since last check (new, resolved, unchanged) |
 
-*(Source: three-rings S01-F04)*
+_(Source: three-rings S01-F04)_
 
 ---
 
@@ -58,7 +58,7 @@ On Windows, file system watchers (ReadDirectoryChangesW) emit duplicate events f
 2. Event coalescing within the batch window
 3. PID-file enforcement to prevent multiple watcher instances
 
-Without deduplication, a single Ctrl+S on Windows can trigger 2-4 redundant governance checks. *(Source: three-rings S01-F06, P-169)*
+Without deduplication, a single Ctrl+S on Windows can trigger 2-4 redundant governance checks. _(Source: three-rings S01-F06, P-169)_
 
 ---
 
@@ -70,7 +70,7 @@ The inner ring maintains a cached tool-to-skill dependency index. When a file sa
 - Severity: warning (intentional removal) or high (accidental deletion)
 - The diagnostic includes the skill name, the missing tool, and the file where the tool was previously declared
 
-This requires the inner ring to maintain a pre-save state snapshot of tool declarations for comparison. *(Source: three-rings S06-F01, S06-F03)*
+This requires the inner ring to maintain a pre-save state snapshot of tool declarations for comparison. _(Source: three-rings S06-F01, S06-F03)_
 
 ---
 
@@ -82,7 +82,7 @@ The inner ring validates **governance rules only** -- it does not check infrastr
 
 ## Concurrency
 
-Only one inner ring watcher instance runs per workspace, enforced via a PID file. The watcher pauses during middle ring operations (e.g., `claws doctor --fix`) to avoid false violations against intermediate file states. It resumes automatically when the middle ring operation completes. *(Source: three-rings S05-F02, P-168)*
+Only one inner ring watcher instance runs per workspace, enforced via a PID file. The watcher pauses during middle ring operations (e.g., `claws doctor --fix`) to avoid false violations against intermediate file states. It resumes automatically when the middle ring operation completes. _(Source: three-rings S05-F02, P-168)_
 
 ---
 

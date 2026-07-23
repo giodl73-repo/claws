@@ -23,7 +23,7 @@
 export type RiskLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
 /** Content sensitivity label (ISO 27001 / Microsoft Information Protection shape). */
-export type Sensitivity = 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';
+export type Sensitivity = "PUBLIC" | "INTERNAL" | "CONFIDENTIAL" | "RESTRICTED";
 
 // ---------------------------------------------------------------------------
 // Events
@@ -69,11 +69,11 @@ export interface FileIngestEvent {
 // ---------------------------------------------------------------------------
 
 export type AuthorizationDecision =
-  | { decision: 'allow'; riskLevel?: RiskLevel; requiresExternalApproval?: boolean }
-  | { decision: 'deny'; reason: string; riskLevel?: RiskLevel }
-  | { decision: 'review'; reason: string; approvalHandle?: string; riskLevel?: RiskLevel }
+  | { decision: "allow"; riskLevel?: RiskLevel; requiresExternalApproval?: boolean }
+  | { decision: "deny"; reason: string; riskLevel?: RiskLevel }
+  | { decision: "review"; reason: string; approvalHandle?: string; riskLevel?: RiskLevel }
   | {
-      decision: 'modify';
+      decision: "modify";
       modifiedArguments: unknown;
       reason?: string;
       riskLevel?: RiskLevel;
@@ -85,10 +85,10 @@ export type AuthorizationDecision =
 // ---------------------------------------------------------------------------
 
 export type IngestDecision =
-  | { decision: 'allow'; sensitivity?: Sensitivity; requiresExternalApproval?: boolean }
-  | { decision: 'deny'; reason: string }
-  | { decision: 'review'; reason: string; approvalHandle?: string }
-  | { decision: 'modify'; modifiedContent: string; redirectPath?: string; reason?: string };
+  | { decision: "allow"; sensitivity?: Sensitivity; requiresExternalApproval?: boolean }
+  | { decision: "deny"; reason: string }
+  | { decision: "review"; reason: string; approvalHandle?: string }
+  | { decision: "modify"; modifiedContent: string; redirectPath?: string; reason?: string };
 
 // ---------------------------------------------------------------------------
 // Capabilities
@@ -153,7 +153,7 @@ export interface AuditEntrySummary {
   action: string;
   target: string;
   scope: string;
-  outcome: 'pending' | 'success' | 'failed';
+  outcome: "pending" | "success" | "failed";
   reason?: string;
 }
 
@@ -227,7 +227,7 @@ export interface HostContext {
   identityBridge: IdentityBridge;
   approvalHandleSigner: (binding: HandleBinding) => Promise<string>;
   snapshot: SnapshotMeta | null;
-  stageMode: 'on' | 'off';
+  stageMode: "on" | "off";
   logger: Logger;
 }
 
@@ -235,5 +235,5 @@ export interface ProviderLifecycle {
   init?(ctx: HostContext): Promise<void>;
   shutdown?(): Promise<void>;
   onSnapshotPromoted?(meta: SnapshotMeta): Promise<void>;
-  onStageModeChanged?(next: 'on' | 'off'): Promise<void>;
+  onStageModeChanged?(next: "on" | "off"): Promise<void>;
 }

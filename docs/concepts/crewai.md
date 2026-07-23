@@ -12,11 +12,11 @@ CrewAI is a multi-agent orchestration framework with hierarchical delegation. cl
 
 CrewAI detection checks multiple configuration filenames because the framework's config format has evolved:
 
-| Marker | Status |
-|--------|--------|
-| `crewai.yaml` | Current primary config |
-| `crew.yaml` | Known alternative filename |
-| `pyproject.toml` (with `[tool.crewai]`) | Package-embedded config |
+| Marker                                  | Status                     |
+| --------------------------------------- | -------------------------- |
+| `crewai.yaml`                           | Current primary config     |
+| `crew.yaml`                             | Known alternative filename |
+| `pyproject.toml` (with `[tool.crewai]`) | Package-embedded config    |
 
 P-242 (CrewAI config format evolution breaks detection) drives the multi-filename approach. Hardcoding a single filename would cause detection failures when CrewAI changes conventions. claws checks all known filenames and raises a diagnostic if multiple are present with conflicting content.
 
@@ -28,12 +28,12 @@ The `targets.crewai.version` field in `claws.json` enables version-targeted emis
 
 CrewAI's core feature is hierarchical delegation -- a manager agent delegates tasks to worker agents. claws maps this to the A2A governance model:
 
-| CrewAI concept | claws governance rule |
-|----------------|----------------------|
-| Manager delegates to worker | G-A2A-DELEGATE with per-tool ceiling |
-| Worker uses tool | G-A2A-TRUST with delegation-only trust level |
-| Hierarchical crew | Delegation depth limit (default 10) |
-| Task routing | Delegation map with per-invocation check |
+| CrewAI concept              | claws governance rule                        |
+| --------------------------- | -------------------------------------------- |
+| Manager delegates to worker | G-A2A-DELEGATE with per-tool ceiling         |
+| Worker uses tool            | G-A2A-TRUST with delegation-only trust level |
+| Hierarchical crew           | Delegation depth limit (default 10)          |
+| Task routing                | Delegation map with per-invocation check     |
 
 **Hierarchical delegation cycle detection**: CrewAI allows complex delegation chains. claws's compile-time analysis detects cycles in the delegation graph that would cause infinite task forwarding. A cycle is a compile-time error, not a warning.
 
@@ -51,10 +51,10 @@ CrewAI guard configuration can be placed in a separate file or injected into the
 
 CrewAI supports agent memory (short-term, long-term, entity memory). claws maps `MEMORY.md` governance rules to CrewAI's memory system:
 
-| MEMORY.md directive | CrewAI enforcement |
-|--------------------|-------------------|
-| Data classification labels | Memory partition by classification level |
-| Retention policy | Memory TTL configuration |
+| MEMORY.md directive        | CrewAI enforcement                          |
+| -------------------------- | ------------------------------------------- |
+| Data classification labels | Memory partition by classification level    |
+| Retention policy           | Memory TTL configuration                    |
 | Cross-agent memory sharing | Memory scope restricted to delegation chain |
 
 Memory governance prevents a worker agent from reading memory entries written by agents outside its delegation chain. This maps to the G-A2A-FLOW transitive label propagation model -- data classification flows through the delegation graph.

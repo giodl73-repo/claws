@@ -13,13 +13,13 @@ This doc is the handover playbook for when that greenlight happens.
 
 The 5 `packages/openclaw-*` publish targets:
 
-| Current (@bic) | Target (@openclaw) | Source |
-|---|---|---|
-| `@bic/openclaw-workspace` | `@openclaw/workspace` | `packages/openclaw-workspace/` |
+| Current (@bic)             | Target (@openclaw)     | Source                          |
+| -------------------------- | ---------------------- | ------------------------------- |
+| `@bic/openclaw-workspace`  | `@openclaw/workspace`  | `packages/openclaw-workspace/`  |
 | `@bic/openclaw-guardrails` | `@openclaw/guardrails` | `packages/openclaw-guardrails/` |
-| `@bic/openclaw-policy` | `@openclaw/policy` | `packages/openclaw-policy/` |
-| `@bic/openclaw-snap` | `@openclaw/snap` | `packages/openclaw-snap/` |
-| `@bic/openclaw-lsp` | `@openclaw/lsp` | `packages/openclaw-lsp/` |
+| `@bic/openclaw-policy`     | `@openclaw/policy`     | `packages/openclaw-policy/`     |
+| `@bic/openclaw-snap`       | `@openclaw/snap`       | `packages/openclaw-snap/`       |
+| `@bic/openclaw-lsp`        | `@openclaw/lsp`        | `packages/openclaw-lsp/`        |
 
 ## What changes mechanically
 

@@ -1,4 +1,4 @@
-import type { InvalidReason } from '../types.js';
+import type { InvalidReason } from "../types.js";
 
 export interface NonceInput {
   readonly nonce: string;
@@ -12,5 +12,5 @@ export interface NonceInput {
  * `validateNonce` returns `true` when the nonce is fresh, `false` on reuse.
  */
 export function checkNonce(input: NonceInput): InvalidReason | null {
-  return input.validateNonce(input.nonce, input.scope) ? null : 'nonce-reuse';
+  return input.validateNonce(input.nonce, input.scope) ? null : "nonce-reuse";
 }

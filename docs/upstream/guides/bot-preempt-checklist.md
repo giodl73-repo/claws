@@ -26,11 +26,11 @@ description.
 
 Upstream uses three automated reviewers in addition to human maintainers:
 
-| Reviewer | Cares about | Common verdict patterns |
-|---|---|---|
-| **Greptile** | Cross-file consistency, perf regressions in hot paths, type narrowing, subtle behavior changes | Flags untyped JSON entry, missing baseline-hash refresh, `any`-typed boundary, hot-path generic try/catch |
-| **Copilot** | Idioms, naming, comment density, duplicate helpers | Flags duplicate utility, inconsistent naming, missing JSDoc on public symbol, helper that lives in the wrong module |
-| **chatgpt-codex** | Security posture, plugin tenancy, input validation, prototype pollution | Flags caller-supplied `pluginId`, missing Zod schema at host boundary, missing JSON size cap, prototype-pollution paths in plugin payload reads |
+| Reviewer          | Cares about                                                                                    | Common verdict patterns                                                                                                                         |
+| ----------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Greptile**      | Cross-file consistency, perf regressions in hot paths, type narrowing, subtle behavior changes | Flags untyped JSON entry, missing baseline-hash refresh, `any`-typed boundary, hot-path generic try/catch                                       |
+| **Copilot**       | Idioms, naming, comment density, duplicate helpers                                             | Flags duplicate utility, inconsistent naming, missing JSDoc on public symbol, helper that lives in the wrong module                             |
+| **chatgpt-codex** | Security posture, plugin tenancy, input validation, prototype pollution                        | Flags caller-supplied `pluginId`, missing Zod schema at host boundary, missing JSON size cap, prototype-pollution paths in plugin payload reads |
 
 Median time to first review: **<4 hours**. The trio enforces the **10-PR-per-author cap** (auto-close at 11) and the **2-open-at-a-time** culture (more than two open from the same author triggers reviewer pushback). PR descriptions that lead with explicit core-not-extension justification close in **median <4 hours with 1 round of changes**; descriptions that read as extension/skill-shaped get auto-closed with `r:third-party-extension` or `r:skill` labels.
 
@@ -143,33 +143,33 @@ git diff CHANGELOG.md
 
 Top categories of reviewer pushback observed in upstream history (with anchor PR # for reference). Pre-empting these in the description / code prevents the round-trip.
 
-| Category | What the bot says | Pre-empt by |
-|---|---|---|
-| Plugin tenancy | "caller-supplied `pluginId` allows spoofing" | Take `pluginId` from authenticated caller; cite §2 rule 1 in description |
-| Memory leaks | "timer not cleared on unsubscribe" | Bounded retention + explicit cleanup in `dispose()` / `unsubscribe()` |
-| Untyped input | "boundary accepts `unknown`; no validation" | Zod schema at boundary; cite §2 rule 2 |
-| Behavior parity | "this changes behavior for <case>; no test asserting equivalence" | Add backward-compat test (cf. PR-1's plain-JSON case); cite the test in description |
-| CHANGELOG drift | "CHANGELOG entry inserted mid-section" | Append at end of target section; cite §2 rule 10 |
-| Generic catch | "`catch (e)` in hot path masks failure modes" | Distinguish error sources with named error types; cite §2 rule 5 (PR #72287 anchor) |
-| Schema exports | "schema imported but not exported from package" | Re-export Zod schema from package root; check `dist/index.d.ts` after build |
-| Duplicate helpers | "this util duplicates `<other-file>:fn`" | One module per concern; cite §2 rule 6 (PR #72287 anchor) |
+| Category          | What the bot says                                                 | Pre-empt by                                                                         |
+| ----------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Plugin tenancy    | "caller-supplied `pluginId` allows spoofing"                      | Take `pluginId` from authenticated caller; cite §2 rule 1 in description            |
+| Memory leaks      | "timer not cleared on unsubscribe"                                | Bounded retention + explicit cleanup in `dispose()` / `unsubscribe()`               |
+| Untyped input     | "boundary accepts `unknown`; no validation"                       | Zod schema at boundary; cite §2 rule 2                                              |
+| Behavior parity   | "this changes behavior for <case>; no test asserting equivalence" | Add backward-compat test (cf. PR-1's plain-JSON case); cite the test in description |
+| CHANGELOG drift   | "CHANGELOG entry inserted mid-section"                            | Append at end of target section; cite §2 rule 10                                    |
+| Generic catch     | "`catch (e)` in hot path masks failure modes"                     | Distinguish error sources with named error types; cite §2 rule 5 (PR #72287 anchor) |
+| Schema exports    | "schema imported but not exported from package"                   | Re-export Zod schema from package root; check `dist/index.d.ts` after build         |
+| Duplicate helpers | "this util duplicates `<other-file>:fn`"                          | One module per concern; cite §2 rule 6 (PR #72287 anchor)                           |
 
 ## §6 Citation anchors (back to UG-upstream § 2.1)
 
-| Constraint | Spec anchor | Checklist item |
-|---|---|---|
-| pluginId scoping | UG-upstream § 2.1.1 | §3 item 6 |
-| Host-boundary validation | UG-upstream § 2.1.2 | §3 item 7 |
-| Prototype-pollution prohibition | UG-upstream § 2.1.3 | §3 item 8 |
-| JSON size cap | UG-upstream § 2.1.4 | §3 item 9 |
-| No generic try/catch | UG-upstream § 2.1.5 | §3 item 10 |
-| DRY helpers | UG-upstream § 2.1.6 | §3 item 11 |
-| Baseline hash refresh | UG-upstream § 2.1.7 | §3 item 3 |
-| SDK overview refresh | UG-upstream § 2.1.8 | §3 item 4 |
-| Swift models regen | UG-upstream § 2.1.9 | §3 item 5 |
-| CHANGELOG end-of-section | UG-upstream § 2.1.10 | §3 item 12 |
-| 10-PR cap + 2-open culture | UG-upstream § 2.2 | (wave-level constraint, not per-PR) |
-| Bot-reviewer trio | UG-upstream § 2.3 | §1 of this guide |
+| Constraint                      | Spec anchor          | Checklist item                      |
+| ------------------------------- | -------------------- | ----------------------------------- |
+| pluginId scoping                | UG-upstream § 2.1.1  | §3 item 6                           |
+| Host-boundary validation        | UG-upstream § 2.1.2  | §3 item 7                           |
+| Prototype-pollution prohibition | UG-upstream § 2.1.3  | §3 item 8                           |
+| JSON size cap                   | UG-upstream § 2.1.4  | §3 item 9                           |
+| No generic try/catch            | UG-upstream § 2.1.5  | §3 item 10                          |
+| DRY helpers                     | UG-upstream § 2.1.6  | §3 item 11                          |
+| Baseline hash refresh           | UG-upstream § 2.1.7  | §3 item 3                           |
+| SDK overview refresh            | UG-upstream § 2.1.8  | §3 item 4                           |
+| Swift models regen              | UG-upstream § 2.1.9  | §3 item 5                           |
+| CHANGELOG end-of-section        | UG-upstream § 2.1.10 | §3 item 12                          |
+| 10-PR cap + 2-open culture      | UG-upstream § 2.2    | (wave-level constraint, not per-PR) |
+| Bot-reviewer trio               | UG-upstream § 2.3    | §1 of this guide                    |
 
 ## §7 Versioning
 

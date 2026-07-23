@@ -46,25 +46,25 @@ claws make atom guardrail-provider \
 
 Templated from `devtools/repo-ops/atom-templates/`:
 
-| Template | Output |
-|---|---|
-| `atoms-registry-row.md.hbs` | new row inserted at the `governance` layer in `docs/concepts/atoms-registry.md` |
-| `surface-contract.yaml.hbs` | `docs/specs/contracts/guardrail-provider.yaml` with narrative placeholders per surface |
-| `scenario.yaml.hbs` | `tests/accept/scenarios/governance-decision/S01-guardrail-provider-happy-path/scenario.yaml` + `fixtures/` (one per series-id) |
+| Template                    | Output                                                                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `atoms-registry-row.md.hbs` | new row inserted at the `governance` layer in `docs/concepts/atoms-registry.md`                                                |
+| `surface-contract.yaml.hbs` | `docs/specs/contracts/guardrail-provider.yaml` with narrative placeholders per surface                                         |
+| `scenario.yaml.hbs`         | `tests/accept/scenarios/governance-decision/S01-guardrail-provider-happy-path/scenario.yaml` + `fixtures/` (one per series-id) |
 
 ### Flags you'll actually use
 
-| Flag | Purpose |
-|---|---|
-| `--layer` | one of `compiler`, `security`, `runtime`, `cli`, `governance`, `workspace`, `testing`, `ops` |
-| `--visibility` | `public` (stable contract), `internal` (cross-package but not exported), `private` (single-package) |
-| `--doc-type` | `concept`, `process`, `command`, `spec`, `domain` |
-| `--surfaces` | comma list from the 11-surface matrix |
-| `--scenario-source` | `series` (default) or `unit-test` exemption |
-| `--scenario-series` | comma list of semantic series ids (e.g. `governance-decision`) |
-| `--status` | `draft` (default for new atoms) → promote to `stable` later |
-| `--dry-run` | prints unified diff; writes nothing; skips editor |
-| `--no-editor` | writes files but doesn't open them |
+| Flag                | Purpose                                                                                             |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| `--layer`           | one of `compiler`, `security`, `runtime`, `cli`, `governance`, `workspace`, `testing`, `ops`        |
+| `--visibility`      | `public` (stable contract), `internal` (cross-package but not exported), `private` (single-package) |
+| `--doc-type`        | `concept`, `process`, `command`, `spec`, `domain`                                                   |
+| `--surfaces`        | comma list from the 11-surface matrix                                                               |
+| `--scenario-source` | `series` (default) or `unit-test` exemption                                                         |
+| `--scenario-series` | comma list of semantic series ids (e.g. `governance-decision`)                                      |
+| `--status`          | `draft` (default for new atoms) → promote to `stable` later                                         |
+| `--dry-run`         | prints unified diff; writes nothing; skips editor                                                   |
+| `--no-editor`       | writes files but doesn't open them                                                                  |
 
 ### Editor cascade
 
@@ -124,12 +124,12 @@ is a narrow carve-out, not the easy path.
 
 ## Common mistakes
 
-| Symptom | Cause | Fix |
-|---|---|---|
-| Contract YAML exists, `--check atoms` still fails | filename doesn't match atom id | rename file to `{atom-id without "atom:" prefix}.yaml` |
-| Scaffolded but CI fails on series min-count | manifest.yaml `min` > scenarios present | add scenarios, or lower min in `tests/accept/scenarios/manifest.yaml` |
-| `scenario-source: series` with no series listed | discriminated-union violation | add `--scenario-series` or switch to `unit-test` exemption |
-| Cross-wave atom reference broken | atom renamed elsewhere | `claws doctor --check atoms` will flag; update `reuses` field |
+| Symptom                                           | Cause                                   | Fix                                                                   |
+| ------------------------------------------------- | --------------------------------------- | --------------------------------------------------------------------- |
+| Contract YAML exists, `--check atoms` still fails | filename doesn't match atom id          | rename file to `{atom-id without "atom:" prefix}.yaml`                |
+| Scaffolded but CI fails on series min-count       | manifest.yaml `min` > scenarios present | add scenarios, or lower min in `tests/accept/scenarios/manifest.yaml` |
+| `scenario-source: series` with no series listed   | discriminated-union violation           | add `--scenario-series` or switch to `unit-test` exemption            |
+| Cross-wave atom reference broken                  | atom renamed elsewhere                  | `claws doctor --check atoms` will flag; update `reuses` field         |
 
 ## Cross-references
 

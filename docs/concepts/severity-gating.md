@@ -18,12 +18,12 @@ Severity gating controls which violations block merges and which are reported as
 
 The `should_block_for_severity` function -- a bash shell function in `claws-action/scripts/run.sh`, not an SDK export -- determines whether to fail based on the severities present in SARIF results:
 
-| `fail-on` value | Blocks on |
-|-----------------|-----------|
-| `critical` | Only critical-severity violations |
-| `high` | Critical or high |
-| `medium` | Critical, high, or medium |
-| `all` (default) | Any violation |
+| `fail-on` value | Blocks on                         |
+| --------------- | --------------------------------- |
+| `critical`      | Only critical-severity violations |
+| `high`          | Critical or high                  |
+| `medium`        | Critical, high, or medium         |
+| `all` (default) | Any violation                     |
 
 SARIF-level aliases are normalized: `error` maps to `critical`, `warning` to `medium`, `note` maps to `all`. The alias `none` also maps to `all` via the shell function's catch-all default -- it is not a standard SARIF level but is accepted for convenience (e.g., `fail-on: 'none'` means "block on any violation").
 
@@ -47,12 +47,12 @@ This is the recommended starting point for new repositories.
 
 The `claws-action/examples/gradual.yml` workflow demonstrates the recommended adoption schedule:
 
-| Week | Configuration | Effect |
-|------|--------------|--------|
-| 1 | `warn-only: 'true'` | Observe violations as PR annotations without blocking any merges |
-| 2 | `fail-on: 'critical'` | Block only critical violations (e.g., missing approval gates on dangerous tools) |
-| 4 | `fail-on: 'high'` | Block critical + high. Medium violations remain warnings |
-| 8 | `fail-on: 'all'` | Full enforcement -- all violations block merges |
+| Week | Configuration         | Effect                                                                           |
+| ---- | --------------------- | -------------------------------------------------------------------------------- |
+| 1    | `warn-only: 'true'`   | Observe violations as PR annotations without blocking any merges                 |
+| 2    | `fail-on: 'critical'` | Block only critical violations (e.g., missing approval gates on dangerous tools) |
+| 4    | `fail-on: 'high'`     | Block critical + high. Medium violations remain warnings                         |
+| 8    | `fail-on: 'all'`      | Full enforcement -- all violations block merges                                  |
 
 This ramp covers CI enforcement thresholds. For the broader organizational adoption model (maker/citizen/developer tiers), see [Three-Tier Adoption](three-tier-adoption.md).
 
@@ -89,16 +89,16 @@ or
 # Block on critical + high, report medium as warnings
 - uses: craftworks/claws-action@v1
   with:
-    stage: '1'
-    format: 'sarif'
-    fail-on: 'high'
+    stage: "1"
+    format: "sarif"
+    fail-on: "high"
 
 # Observe everything without blocking
 - uses: craftworks/claws-action@v1
   with:
-    stage: '1'
-    format: 'sarif'
-    warn-only: 'true'
+    stage: "1"
+    format: "sarif"
+    warn-only: "true"
 ```
 
 ---

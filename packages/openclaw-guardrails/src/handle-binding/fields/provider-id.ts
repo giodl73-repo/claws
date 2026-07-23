@@ -1,4 +1,4 @@
-import type { InvalidReason } from '../types.js';
+import type { InvalidReason } from "../types.js";
 
 export interface ProviderIdInput {
   readonly handleProviderId: string;
@@ -6,7 +6,5 @@ export interface ProviderIdInput {
 }
 
 export function checkProviderId(input: ProviderIdInput): InvalidReason | null {
-  return input.handleProviderId === input.expectedProviderId
-    ? null
-    : 'provider-id-mismatch';
+  return input.handleProviderId === input.expectedProviderId ? null : "provider-id-mismatch";
 }

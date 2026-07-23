@@ -18,10 +18,10 @@ import type {
   GuardrailProvider,
   RiskLevel,
   ToolCallEvent,
-} from './types.js';
+} from "./types.js";
 
 /** Decision priority for composition: higher index wins. */
-const DECISION_PRIORITY: Record<AuthorizationDecision['decision'], number> = {
+const DECISION_PRIORITY: Record<AuthorizationDecision["decision"], number> = {
   allow: 0,
   modify: 1,
   review: 2,
@@ -70,10 +70,10 @@ export class ProviderRegistryImpl {
       // Empty registry — warn loudly, default to allow so the host can still
       // run the call. Operators who wanted deny-by-default must register one.
       console.warn(
-        'WARNING: ProviderRegistry has no providers registered. ' +
-          'Defaulting to allow-all. Configure at least one GuardrailProvider.',
+        "WARNING: ProviderRegistry has no providers registered. " +
+          "Defaulting to allow-all. Configure at least one GuardrailProvider.",
       );
-      return { decision: 'allow' };
+      return { decision: "allow" };
     }
 
     const decisions: AuthorizationDecision[] = [];
@@ -117,7 +117,7 @@ export function composeDecisions(
   decisions: readonly AuthorizationDecision[],
 ): AuthorizationDecision {
   if (decisions.length === 0) {
-    return { decision: 'allow' };
+    return { decision: "allow" };
   }
 
   let anyR5 = false;
@@ -148,30 +148,30 @@ export function composeDecisions(
   }
 
   switch (winner.decision) {
-    case 'deny':
+    case "deny":
       return {
-        decision: 'deny',
+        decision: "deny",
         reason: winner.reason,
         ...(highestRisk !== undefined && { riskLevel: highestRisk }),
       };
-    case 'review':
+    case "review":
       return {
-        decision: 'review',
+        decision: "review",
         reason: winner.reason,
         ...(winner.approvalHandle !== undefined && { approvalHandle: winner.approvalHandle }),
         ...(highestRisk !== undefined && { riskLevel: highestRisk }),
       };
-    case 'modify':
+    case "modify":
       return {
-        decision: 'modify',
+        decision: "modify",
         modifiedArguments: winner.modifiedArguments,
         ...(winner.reason !== undefined && { reason: winner.reason }),
         ...(highestRisk !== undefined && { riskLevel: highestRisk }),
         ...(anyRequiresExternal && { requiresExternalApproval: true }),
       };
-    case 'allow':
+    case "allow":
       return {
-        decision: 'allow',
+        decision: "allow",
         ...(anyRequiresExternal && { requiresExternalApproval: true }),
         ...(highestRisk !== undefined && { riskLevel: highestRisk }),
       };
@@ -179,13 +179,13 @@ export function composeDecisions(
 }
 
 function getRiskLevel(d: AuthorizationDecision): RiskLevel | undefined {
-  return 'riskLevel' in d ? d.riskLevel : undefined;
+  return "riskLevel" in d ? d.riskLevel : undefined;
 }
 
 function getRequiresExternalApproval(d: AuthorizationDecision): boolean {
-  if (d.decision === 'deny') return false;
-  if (d.decision === 'review') return true;
-  if (d.decision === 'allow') return d.requiresExternalApproval === true;
+  if (d.decision === "deny") return false;
+  if (d.decision === "review") return true;
+  if (d.decision === "allow") return d.requiresExternalApproval === true;
   // modify variant carries the flag to preserve R5 force-external-approval
   // when a modify winner composes with an allow-R5 peer
   return d.requiresExternalApproval === true;

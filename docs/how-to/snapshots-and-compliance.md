@@ -11,6 +11,7 @@ claws snap --name "pre-upgrade"
 ```
 
 Snapshots save:
+
 - claws.json configuration
 - All .claws/ policies and rules
 - Compiled governance artifacts
@@ -46,7 +47,7 @@ claws check
   [PASS] OBO boundary: FOR-user mode enforced
   [PASS] Fail modes: R5 fail-closed confirmed
   [FAIL] Audit chain: 2 unsigned entries found
-  
+
   1 violation (error), 0 warnings
 ```
 
@@ -61,11 +62,13 @@ claws comply --framework eu-ai-act --out compliance/eu-ai-act/
 ```
 
 SOC2 Type II evidence includes:
+
 - Temporal evidence snapshots (before/after state)
 - Control mapping (governance rules to SOC2 controls)
 - Audit chain excerpts with HMAC verification
 
 HIPAA evidence includes:
+
 - PHI safeguard documentation
 - Access control matrices (permission tiers to data classification)
 - Retention policy compliance proof
@@ -79,6 +82,7 @@ claws uninstall
 ```
 
 This removes:
+
 - `.claws/` directory and all policies
 - `claws.json` configuration
 - Generated governance skills and plugins

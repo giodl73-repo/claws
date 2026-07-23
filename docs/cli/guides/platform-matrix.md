@@ -22,13 +22,13 @@ the CLI detects and adapts to seven platforms:
 
 ## What varies across platforms
 
-| Feature | Web | VSCode | Lobster | Standalone |
-|---------|-----|--------|---------|------------|
-| ANSI colour | off | auto | off | auto |
-| Progress bars | off | on | off | on |
-| Boxes / unicode | off | on | off | on |
-| Clipboard | off | off | off | off |
-| Absolute paths | off | on | off | on |
+| Feature         | Web | VSCode | Lobster | Standalone |
+| --------------- | --- | ------ | ------- | ---------- |
+| ANSI colour     | off | auto   | off     | auto       |
+| Progress bars   | off | on     | off     | on         |
+| Boxes / unicode | off | on     | off     | on         |
+| Clipboard       | off | off    | off     | off        |
+| Absolute paths  | off | on     | off     | on         |
 
 Claude Code desktop is the one platform with clipboard support
 (Electron APIs make it straightforward).

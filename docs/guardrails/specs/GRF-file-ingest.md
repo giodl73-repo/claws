@@ -12,8 +12,8 @@ interface FileIngestProvider {
 }
 
 interface IngestContext {
-  readonly path: string;           // oc:// URI
-  readonly originalPath: string;   // fs path as seen by host
+  readonly path: string; // oc:// URI
+  readonly originalPath: string; // fs path as seen by host
   readonly size: number;
   readonly contentType: string | null;
   readonly caller: Principal;

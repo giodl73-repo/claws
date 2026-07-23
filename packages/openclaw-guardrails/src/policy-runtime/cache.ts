@@ -18,7 +18,7 @@
  * @module @bic/openclaw-guardrails/policy-runtime/cache
  */
 
-import type { PolicyIR, SnapshotId } from '@bic/v2-prototype';
+import type { PolicyIR, SnapshotId } from "@bic/v2-prototype";
 
 export const MAX_SNAPSHOTS_PER_SESSION = 8;
 export const SWEEP_INTERVAL_MS = 60_000;

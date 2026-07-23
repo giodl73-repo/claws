@@ -25,6 +25,7 @@ How the three engines compile governance, how the three rings enforce it, and ho
 ```
 
 The three engines work independently:
+
 - **Policy Engine** -- parses, validates, and tests policy rules without compiling
 - **Compile Engine** -- transforms validated rules into enforceable GovernanceIR
 - **Audit Engine** -- operates on the CGR chain without re-compiling

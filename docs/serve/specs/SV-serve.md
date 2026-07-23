@@ -21,11 +21,11 @@ companion apps hit claws governance remotely.
 
 ## Sub-spec index
 
-| Code | File | Authority over |
-|------|------|----------------|
-| **SVR** | [SVR-rest-api.md](./SVR-rest-api.md) | 43-route surface, auth model, pagination, error shape |
-| **SVI** | [SVI-workspace-introspect.md](./SVI-workspace-introspect.md) | Read-only workspace endpoints, AST serialization |
-| **SVC** | [SVC-cap-surfaces.md](./SVC-cap-surfaces.md) | Cap-integration: capability-scoped access, trust escalation |
+| Code    | File                                                         | Authority over                                              |
+| ------- | ------------------------------------------------------------ | ----------------------------------------------------------- |
+| **SVR** | [SVR-rest-api.md](./SVR-rest-api.md)                         | 43-route surface, auth model, pagination, error shape       |
+| **SVI** | [SVI-workspace-introspect.md](./SVI-workspace-introspect.md) | Read-only workspace endpoints, AST serialization            |
+| **SVC** | [SVC-cap-surfaces.md](./SVC-cap-surfaces.md)                 | Cap-integration: capability-scoped access, trust escalation |
 
 ## Stability
 

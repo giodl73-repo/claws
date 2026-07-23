@@ -20,7 +20,7 @@ import type {
   BudgetWindow,
   CostRecord,
   ThresholdAlert,
-} from './types.js';
+} from "./types.js";
 
 /** The public meter contract per guardrails.md §/budget. */
 export interface BudgetMeter {
@@ -103,7 +103,7 @@ export class InMemoryBudgetMeter implements BudgetMeter {
 
     if (frac >= 1) {
       return {
-        status: 'exceeded',
+        status: "exceeded",
         over: overage(this.normLimits, projectedSpent),
         onExhausted: this.policy.onExhausted,
       };
@@ -117,14 +117,14 @@ export class InMemoryBudgetMeter implements BudgetMeter {
         fractionUsed: frac,
       };
       return {
-        status: 'threshold',
+        status: "threshold",
         remaining: subClamp(this.normLimits, projectedSpent),
         alert,
       };
     }
 
     return {
-      status: 'ok',
+      status: "ok",
       remaining: subClamp(this.normLimits, projectedSpent),
     };
   }
@@ -137,9 +137,7 @@ export class InMemoryBudgetMeter implements BudgetMeter {
   window(): { start: string; end: string; spent: CostRecord; limit: CostRecord } {
     this.rolloverIfNeeded();
     const start = this.windowStart.toISOString();
-    const end = new Date(
-      this.windowStart.getTime() + WINDOW_MS[this.policy.window],
-    ).toISOString();
+    const end = new Date(this.windowStart.getTime() + WINDOW_MS[this.policy.window]).toISOString();
     return { start, end, spent: this.spent, limit: this.policy.limits };
   }
 
@@ -153,9 +151,7 @@ export class InMemoryBudgetMeter implements BudgetMeter {
     }
   }
 
-  private pickFiringThreshold(
-    frac: number,
-  ): { index: number; config: BudgetThreshold } | null {
+  private pickFiringThreshold(frac: number): { index: number; config: BudgetThreshold } | null {
     const thresholds = this.policy.thresholds ?? [];
     for (let i = 0; i < thresholds.length; i++) {
       const t = thresholds[i]!;
@@ -172,9 +168,6 @@ export class InMemoryBudgetMeter implements BudgetMeter {
  * Factory. Returns a `BudgetMeter` conforming to guardrails.md §/budget.
  * Clock injectable for deterministic tests.
  */
-export function createBudgetMeter(
-  policy: BudgetPolicy,
-  clock?: () => Date,
-): BudgetMeter {
+export function createBudgetMeter(policy: BudgetPolicy, clock?: () => Date): BudgetMeter {
   return new InMemoryBudgetMeter(policy, clock);
 }

@@ -1,27 +1,18 @@
-import { defineConfig, defineProject } from 'vitest/config';
+import { defineConfig, defineProject } from "vitest/config";
 
-const sharedExclude = [
-  '**/node_modules/**',
-  '**/dist/**',
-];
+const sharedExclude = ["**/node_modules/**", "**/dist/**"];
 
 export default defineConfig({
   test: {
-    include: ['tests/**/*.test.ts'],
+    include: ["tests/**/*.test.ts"],
     forceExit: true,
     testTimeout: 15_000,
     exclude: sharedExclude,
     coverage: {
-      provider: 'v8',
-      reportsDirectory: 'coverage',
-      include: ['src/**'],
-      exclude: [
-        'src/**/*.d.ts',
-        'src/**/index.ts',
-        'src/types.ts',
-        'src/**/types.ts',
-        'tests/**',
-      ],
+      provider: "v8",
+      reportsDirectory: "coverage",
+      include: ["src/**"],
+      exclude: ["src/**/*.d.ts", "src/**/index.ts", "src/types.ts", "src/**/types.ts", "tests/**"],
       thresholds: {
         perFile: true,
         statements: 95,
@@ -33,8 +24,8 @@ export default defineConfig({
     projects: [
       defineProject({
         test: {
-          name: 'unit',
-          include: ['tests/**/*.unit.test.ts'],
+          name: "unit",
+          include: ["tests/**/*.unit.test.ts"],
           forceExit: true,
           testTimeout: 15_000,
           exclude: sharedExclude,
@@ -42,8 +33,8 @@ export default defineConfig({
       }),
       defineProject({
         test: {
-          name: 'integration',
-          include: ['tests/**/*.integration.test.ts'],
+          name: "integration",
+          include: ["tests/**/*.integration.test.ts"],
           forceExit: true,
           testTimeout: 15_000,
           exclude: sharedExclude,

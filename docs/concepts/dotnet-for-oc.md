@@ -25,29 +25,29 @@ The libraries are the foundation. The compiler is the integration. Fleet is the 
 
 These are not wrappers or stubs. Each `@claws/*` package solves a real problem that OC skill developers face today:
 
-| Package | Problem it solves |
-|---------|-------------------|
-| `@claws/sift` | "I need typed expressions for policy rules" |
-| `@claws/audit` | "I need tamper-evident audit trails" |
-| `@claws/security` | "I need input sanitization against prompt injection" |
-| `@claws/budget` | "I need token/cost controls" |
-| `@claws/data` | "I need typed data access with sensitivity labels" |
-| `@claws/report` | "I need to generate compliance documents" |
-| `@claws/identity` | "I need agent authentication helpers" |
-| `@claws/schema` | "I need config validation" |
+| Package                | Problem it solves                                       |
+| ---------------------- | ------------------------------------------------------- |
+| `@claws/sift`          | "I need typed expressions for policy rules"             |
+| `@claws/audit`         | "I need tamper-evident audit trails"                    |
+| `@claws/security`      | "I need input sanitization against prompt injection"    |
+| `@claws/budget`        | "I need token/cost controls"                            |
+| `@claws/data`          | "I need typed data access with sensitivity labels"      |
+| `@claws/report`        | "I need to generate compliance documents"               |
+| `@claws/identity`      | "I need agent authentication helpers"                   |
+| `@claws/schema`        | "I need config validation"                              |
 | `@bic/claws-skill-kit` | "I need a `skill()` factory with governance decorators" |
-| `@bic/claws-test` | "I need to test governance behavior" |
-| `@claws/runtime` | "I need classify/elicit/audit helpers at runtime" |
+| `@bic/claws-test`      | "I need to test governance behavior"                    |
+| `@claws/runtime`       | "I need classify/elicit/audit helpers at runtime"       |
 
 Plus 5 @openclaw/* packages contributed directly to the OC ecosystem:
 
-| Package | Problem it solves |
-|---------|-------------------|
-| `@openclaw/audit-chain` | "I need hash-chained audit for any agent" |
-| `@openclaw/budget-meter` | "I need threshold alerts for token spending" |
-| `@openclaw/identity-bridge` | "I need enterprise SSO in my agent" |
-| `@openclaw/siem-emitter` | "I need to forward events to my SOC" |
-| `@openclaw/secret-scanner` | "I need to detect leaked credentials" |
+| Package                     | Problem it solves                            |
+| --------------------------- | -------------------------------------------- |
+| `@openclaw/audit-chain`     | "I need hash-chained audit for any agent"    |
+| `@openclaw/budget-meter`    | "I need threshold alerts for token spending" |
+| `@openclaw/identity-bridge` | "I need enterprise SSO in my agent"          |
+| `@openclaw/siem-emitter`    | "I need to forward events to my SOC"         |
+| `@openclaw/secret-scanner`  | "I need to detect leaked credentials"        |
 
 Every package is MIT-licensed, standalone, and useful without the claws compiler. An OC developer can `npm install @claws/security` and get production-quality input sanitization today. They never need to hear the word "governance."
 

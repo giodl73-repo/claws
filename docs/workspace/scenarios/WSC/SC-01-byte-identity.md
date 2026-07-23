@@ -11,7 +11,7 @@ covers: [atom:WSC]
 A fixed JSON value:
 
 ```json
-{"b": 2, "a": [1, 2, 3], "c": {"nested": true}}
+{ "b": 2, "a": [1, 2, 3], "c": { "nested": true } }
 ```
 
 ## Run

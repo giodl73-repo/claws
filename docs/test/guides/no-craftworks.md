@@ -39,6 +39,7 @@ claws test no-craftworks
 ```
 
 Exit code:
+
 - `0` — no references found
 - `2` — references found (distinct from doc-gate's exit 1)
 

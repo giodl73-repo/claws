@@ -30,14 +30,14 @@ export interface FileIngestProvider {
 
 The symmetry is the point. Integrators do not learn two governance models; they learn one and apply it at two hook points.
 
-| Surface | OC hook wrapped | Peer contract | Decision type |
-|---------|----------------|---------------|---------------|
-| Tool execution | `before_tool_call` | `GuardrailProvider.preAuthorize` | `AuthorizationDecision` |
-| File ingest | `before_workspace_file_ingest` | `FileIngestProvider.beforeIngest` | `IngestDecision` |
-| Post-hoc audit | (both) | `postAudit` / `afterIngest` | fire-and-forget |
-| Capability reflection | (both) | `getCapabilities()` | `GuardrailCapabilities` / `FileIngestCapabilities` |
+| Surface               | OC hook wrapped                | Peer contract                     | Decision type                                      |
+| --------------------- | ------------------------------ | --------------------------------- | -------------------------------------------------- |
+| Tool execution        | `before_tool_call`             | `GuardrailProvider.preAuthorize`  | `AuthorizationDecision`                            |
+| File ingest           | `before_workspace_file_ingest` | `FileIngestProvider.beforeIngest` | `IngestDecision`                                   |
+| Post-hoc audit        | (both)                         | `postAudit` / `afterIngest`       | fire-and-forget                                    |
+| Capability reflection | (both)                         | `getCapabilities()`               | `GuardrailCapabilities` / `FileIngestCapabilities` |
 
-Provider authors only construct events coming *into* these hooks (`ToolCallEvent`, `FileIngestEvent`) and decisions coming *out*. Everything else -- audit sinks, approval signers, identity bridges, snapshot metadata, logging -- arrives through `HostContext` at `init()` time, so providers never construct per-tenant infrastructure at module load.
+Provider authors only construct events coming _into_ these hooks (`ToolCallEvent`, `FileIngestEvent`) and decisions coming _out_. Everything else -- audit sinks, approval signers, identity bridges, snapshot metadata, logging -- arrives through `HostContext` at `init()` time, so providers never construct per-tenant infrastructure at module load.
 
 ---
 
@@ -45,28 +45,33 @@ Provider authors only construct events coming *into* these hooks (`ToolCallEvent
 
 Both contracts share a four-variant discriminated union. Each variant means something concrete on each surface:
 
-| Variant | `GuardrailProvider` (tool call) | `FileIngestProvider` (file ingest) |
-|---------|-------------------------------|----------------------------------|
-| `allow` | Tool runs with the original arguments. May carry `riskLevel` and `requiresExternalApproval` for sticky enforcement. | File is ingested as provided. May carry `sensitivity` and `requiresExternalApproval`. |
-| `deny` | Tool does not run. `reason` is surfaced to the agent and logged. | File is rejected. `reason` is surfaced and logged. Nothing is written to the workspace. |
-| `review` | Tool is suspended; OC-core wraps the hook-result in `requireApproval`. `approvalHandle` is an HMAC-signed opaque string that the companion app must re-present. | Ingest is suspended; same approval envelope. Same handle binding rules. |
-| `modify` | Arguments are rewritten. `modifiedArguments` replaces the original `ToolCallEvent.arguments`. | Content is rewritten, or the write is redirected: `modifiedContent` replaces the payload, `redirectPath` (optional) reroutes to `.openclaw/.stage/<path>` so the canonical workspace is untouched until promotion. |
+| Variant  | `GuardrailProvider` (tool call)                                                                                                                                 | `FileIngestProvider` (file ingest)                                                                                                                                                                                 |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `allow`  | Tool runs with the original arguments. May carry `riskLevel` and `requiresExternalApproval` for sticky enforcement.                                             | File is ingested as provided. May carry `sensitivity` and `requiresExternalApproval`.                                                                                                                              |
+| `deny`   | Tool does not run. `reason` is surfaced to the agent and logged.                                                                                                | File is rejected. `reason` is surfaced and logged. Nothing is written to the workspace.                                                                                                                            |
+| `review` | Tool is suspended; OC-core wraps the hook-result in `requireApproval`. `approvalHandle` is an HMAC-signed opaque string that the companion app must re-present. | Ingest is suspended; same approval envelope. Same handle binding rules.                                                                                                                                            |
+| `modify` | Arguments are rewritten. `modifiedArguments` replaces the original `ToolCallEvent.arguments`.                                                                   | Content is rewritten, or the write is redirected: `modifiedContent` replaces the payload, `redirectPath` (optional) reroutes to `.openclaw/.stage/<path>` so the canonical workspace is untouched until promotion. |
 
 The `modify` variant is asymmetric -- on tool calls it rewrites arguments; on file ingest it additionally supports redirect-to-stage for the snap staging lifecycle (see [@openclaw/snap](openclaw-snap.md) for the draft → current → superseded flow). Everything else is identical between the two surfaces.
 
 ```ts
 export type AuthorizationDecision =
-  | { decision: 'allow'; riskLevel?: RiskLevel; requiresExternalApproval?: boolean }
-  | { decision: 'deny'; reason: string; riskLevel?: RiskLevel }
-  | { decision: 'review'; reason: string; approvalHandle?: string; riskLevel?: RiskLevel }
-  | { decision: 'modify'; modifiedArguments: unknown; reason?: string;
-      riskLevel?: RiskLevel; requiresExternalApproval?: boolean };
+  | { decision: "allow"; riskLevel?: RiskLevel; requiresExternalApproval?: boolean }
+  | { decision: "deny"; reason: string; riskLevel?: RiskLevel }
+  | { decision: "review"; reason: string; approvalHandle?: string; riskLevel?: RiskLevel }
+  | {
+      decision: "modify";
+      modifiedArguments: unknown;
+      reason?: string;
+      riskLevel?: RiskLevel;
+      requiresExternalApproval?: boolean;
+    };
 
 export type IngestDecision =
-  | { decision: 'allow'; sensitivity?: Sensitivity; requiresExternalApproval?: boolean }
-  | { decision: 'deny'; reason: string }
-  | { decision: 'review'; reason: string; approvalHandle?: string }
-  | { decision: 'modify'; modifiedContent: string; redirectPath?: string; reason?: string };
+  | { decision: "allow"; sensitivity?: Sensitivity; requiresExternalApproval?: boolean }
+  | { decision: "deny"; reason: string }
+  | { decision: "review"; reason: string; approvalHandle?: string }
+  | { decision: "modify"; modifiedContent: string; redirectPath?: string; reason?: string };
 ```
 
 `RiskLevel` is the `R0..R5` scale ([R0 unclassified, R1 read, R2 write, R3 communicate, R4 execute, R5 transact/irreversible-external]); `Sensitivity` is `PUBLIC | INTERNAL | CONFIDENTIAL | RESTRICTED`. See [risk-tiers](risk-tiers.md) for how declared tiers compose with `args_from` provenance (G-CHAIN).
@@ -87,12 +92,12 @@ Higher-priority variants mask lower ones. The composition engine lives in the de
 
 Read row (provider A) vs column (provider B). Cells show the composed winner; ordering is commutative.
 
-|         | **A allow**          | **A modify**        | **A review**        | **A deny** |
-|---------|---------------------|---------------------|---------------------|------------|
-| **B allow**   | `allow` [^extern]   | `modify` [^r5carry] | `review` [^conj]    | `deny`     |
-| **B modify**  | `modify` [^r5carry] | `modify` [^merge]   | `review` [^conj]    | `deny`     |
-| **B review**  | `review` [^conj]    | `review` [^conj]    | `review` [^conj]    | `deny`     |
-| **B deny**    | `deny`              | `deny`              | `deny`              | `deny`     |
+|              | **A allow**         | **A modify**        | **A review**     | **A deny** |
+| ------------ | ------------------- | ------------------- | ---------------- | ---------- |
+| **B allow**  | `allow` [^extern]   | `modify` [^r5carry] | `review` [^conj] | `deny`     |
+| **B modify** | `modify` [^r5carry] | `modify` [^merge]   | `review` [^conj] | `deny`     |
+| **B review** | `review` [^conj]    | `review` [^conj]    | `review` [^conj] | `deny`     |
+| **B deny**   | `deny`              | `deny`              | `deny`           | `deny`     |
 
 [^extern]: `requiresExternalApproval` is OR-reduced across all providers. If any `allow` peer set it, the composed `allow` carries it. Any R5 `riskLevel` anywhere in the set forces it to `true` -- see R5 invariant below.
 
@@ -133,9 +138,12 @@ Key exports (`@bic/openclaw-guardrails/audit`):
 ```ts
 export function append(store: ChainStore, input: AppendInput): Promise<ChainEntry>;
 export function query(store: ChainStore, q: AuditQuery): AsyncIterable<ChainEntry>;
-export function verifyChain(store: ChainStore, range?: { from: string; to: string }): Promise<VerifyResult>;
+export function verifyChain(
+  store: ChainStore,
+  range?: { from: string; to: string },
+): Promise<VerifyResult>;
 export function createChainStore(path: string): ChainStore;
-export function createWALStore(path: string): WALStore;           // crash-recovery
+export function createWALStore(path: string): WALStore; // crash-recovery
 export function jsonlExport(iter: AsyncIterable<AuditEntry>): AsyncIterable<string>;
 export function cefExport(iter: AsyncIterable<AuditEntry>): AsyncIterable<string>;
 export function syslogExport(iter: AsyncIterable<AuditEntry>): AsyncIterable<string>;
@@ -153,7 +161,11 @@ Key exports (`@bic/openclaw-guardrails/approvals`):
 ```ts
 export function signHandle(binding: HandleBinding, key: Buffer): Promise<string>;
 export function parseHandle(handle: string): ParsedHandle;
-export function verifyHandle(handle: string, key: Buffer, expectedBinding: HandleBinding): Promise<VerifyResult>;
+export function verifyHandle(
+  handle: string,
+  key: Buffer,
+  expectedBinding: HandleBinding,
+): Promise<VerifyResult>;
 export function isApprovalRequest(ev: unknown): ev is ApprovalRequestEvent;
 export function isApprovalResponse(ev: unknown): ev is ApprovalResponseEvent;
 export function validateTimeoutPolicy(p: ApprovalTimeoutPolicy): void;
@@ -171,16 +183,18 @@ Key exports (`@bic/openclaw-guardrails/budget`):
 
 ```ts
 export function createBudgetMeter(policy: BudgetPolicy): BudgetMeter;
-export class InMemoryBudgetMeter implements BudgetMeter { /* ... */ }
+export class InMemoryBudgetMeter implements BudgetMeter {
+  /* ... */
+}
 export interface BudgetMeter {
   check(event: ToolCallEvent | FileIngestEvent): Promise<BudgetDecision>;
   record(event: ToolCallEvent | FileIngestEvent, actual: CostRecord): Promise<void>;
   window(): { start: string; end: string; spent: CostRecord; limit: CostRecord };
 }
 export type BudgetDecision =
-  | { status: 'ok'; remaining: CostRecord }
-  | { status: 'threshold'; remaining: CostRecord; alert: ThresholdAlert }
-  | { status: 'exceeded'; over: CostRecord };
+  | { status: "ok"; remaining: CostRecord }
+  | { status: "threshold"; remaining: CostRecord; alert: ThresholdAlert }
+  | { status: "exceeded"; over: CostRecord };
 ```
 
 Thresholds are percentages of the limit (e.g., alert at 0.8, throttle at 0.95, deny at 1.0); `onExhausted` picks `deny` (fail-closed), `throttle` (slow but allow), or `alert-only` (audit but allow).
@@ -197,7 +211,11 @@ Key exports (`@bic/openclaw-guardrails/identity`):
 export function createIdentityBridge(cfg: IdentityBridgeConfig): IdentityBridge;
 export function validateOidc(token: string, cfg: ValidationConfig): Promise<ValidationResult>;
 export function validateSaml(assertion: string, cfg: ValidationConfig): Promise<ValidationResult>;
-export function exchangeOboToken(userToken: string, agentId: string, cfg: IdentityBridgeConfig): Promise<string>;
+export function exchangeOboToken(
+  userToken: string,
+  agentId: string,
+  cfg: IdentityBridgeConfig,
+): Promise<string>;
 export function resolveIdentity(token: string, bridge: IdentityBridge): Promise<AgentIdentity>;
 export function createRevocationCache(): RevocationCache;
 export function isRevoked(principal: string, cache: RevocationCache): boolean;
@@ -208,8 +226,16 @@ export function createRoleStore(): RoleStore;
 export function addRole(store: RoleStore, role: Role): void;
 export function mapGroup(store: RoleStore, group: string, roles: string[]): void;
 export function resolveRoles(store: RoleStore, identity: AgentIdentity): Role[];
-export function authorize(store: RoleStore, identity: AgentIdentity, permission: Permission): AccessDecision;
-export function checkAccess(store: RoleStore, identity: AgentIdentity, permission: Permission): boolean;
+export function authorize(
+  store: RoleStore,
+  identity: AgentIdentity,
+  permission: Permission,
+): AccessDecision;
+export function checkAccess(
+  store: RoleStore,
+  identity: AgentIdentity,
+  permission: Permission,
+): boolean;
 ```
 
 OIDC and SAML share one `ValidationResult` shape. Revocation is checked per-request via introspection endpoint or the local CRL cache. OBO tokens carry `{issuedAt, expiresAt}` so the downstream service can see the delegation window.
@@ -228,7 +254,7 @@ export function toNdjson(entry: AuditEntry): string;
 export function toSyslog(entry: AuditEntry, opts?: SyslogOpts): string;
 export function emit(entry: AuditEntry, format: EmitFormat): string;
 export function emitBatch(entries: AuditEntry[], format: EmitFormat): string[];
-export type EmitFormat = 'cef' | 'ndjson' | 'syslog';
+export type EmitFormat = "cef" | "ndjson" | "syslog";
 ```
 
 CEF field mapping covers all governance event categories (tool classification, elicitation, policy change, kill switch, drift, A2A, integrity) with explicit CEF severity (0–10). Syslog messages exceeding RFC 5424 limits are split with correlation IDs -- never silently truncated. `oc://` URIs pass through unmodified so SIEM rules can key on canonical workspace paths.
@@ -243,7 +269,9 @@ Key exports (`@bic/openclaw-guardrails/secrets`):
 
 ```ts
 export function createSecretScanner(opts?: ScanOptions): SecretScanner;
-export class DefaultSecretScanner implements SecretScanner { /* ... */ }
+export class DefaultSecretScanner implements SecretScanner {
+  /* ... */
+}
 export interface SecretScanner {
   scan(content: string, opts?: ScanOptions): ScanResult;
   registerPattern(pattern: SecretPattern): void;
@@ -266,21 +294,21 @@ Used by: a FileIngestProvider that calls `scanner.scan(event.contentPreview)` in
 Each subpath is its own entry point. A consumer that only wants hash-chain audit writes this:
 
 ```ts
-import { append, verifyChain, createChainStore } from '@bic/openclaw-guardrails/audit';
+import { append, verifyChain, createChainStore } from "@bic/openclaw-guardrails/audit";
 ```
 
 …and the bundler pulls **only** `/audit`'s module graph. `/siem`, `/identity`, `/secrets`, `/budget`, `/approvals` never enter the bundle.
 
 This is verified by the CP-9 P43 scenario (`scenario-guardrails-subpaths.md`), which builds a fixture package with a rollup config that imports only `@bic/openclaw-guardrails/audit`, asserts the generated bundle contains no symbols from the other five subpaths, and measures per-subpath bundle size. Target sizes (gzipped, on the stable 0.1 interface):
 
-| Subpath | Bundle size (gzip) | Notes |
-|---------|-------------------|-------|
-| `/audit` | 18 kB | largest — hash-chain + WAL + three export formats |
-| `/approvals` | 14 kB | HMAC handle signer + verifier + timeout policy |
-| `/budget` | 9 kB | meter + threshold engine + CostRecord |
-| `/identity` | ~11 kB | OIDC + SAML + RBAC (varies by JWT library) |
-| `/siem` | ~8 kB | three format serializers, shared with `/audit` exporters |
-| `/secrets` | ~12 kB | default patterns + entropy + masking |
+| Subpath      | Bundle size (gzip) | Notes                                                    |
+| ------------ | ------------------ | -------------------------------------------------------- |
+| `/audit`     | 18 kB              | largest — hash-chain + WAL + three export formats        |
+| `/approvals` | 14 kB              | HMAC handle signer + verifier + timeout policy           |
+| `/budget`    | 9 kB               | meter + threshold engine + CostRecord                    |
+| `/identity`  | ~11 kB             | OIDC + SAML + RBAC (varies by JWT library)               |
+| `/siem`      | ~8 kB              | three format serializers, shared with `/audit` exporters |
+| `/secrets`   | ~12 kB             | default patterns + entropy + masking                     |
 
 Two load-bearing requirements make the tree-shake work:
 
@@ -295,15 +323,15 @@ The scenario's F3 finding is explicit: `sideEffects: false` is not a nice-to-hav
 
 A reasonable alternative would be six packages: `@openclaw/guardrails-audit`, `@openclaw/guardrails-approvals`, and so on. We rejected that for one reason: **version lockstep**.
 
-| Concern | Six packages | One package, six subpaths |
-|---------|--------------|--------------------------|
-| Install footprint | 6 lockfile entries, 6 `node_modules` trees | 1 lockfile entry, 1 `node_modules` tree |
-| Bundle footprint | Same (tree-shake works either way if exports are clean) | Same |
-| Version skew | `audit@0.2` + `approvals@0.1` is legal and breaks at runtime when `HandleBinding` diverges | Impossible — single `version` field |
-| Cross-subpath types | Published as their own package or duplicated | Type-only re-exports from default (`AuditSink`, `HandleBinding`) |
-| `composeDecisions` ownership | Has to live in a 7th "core" package | Lives in default, no extra install |
-| Upgrade flow | `npm update @openclaw/guardrails-*` with 6 separate changelogs | `npm update @openclaw/guardrails` with one changelog |
-| SRE blast radius | One skewed version becomes a production incident | Impossible by construction |
+| Concern                      | Six packages                                                                               | One package, six subpaths                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Install footprint            | 6 lockfile entries, 6 `node_modules` trees                                                 | 1 lockfile entry, 1 `node_modules` tree                          |
+| Bundle footprint             | Same (tree-shake works either way if exports are clean)                                    | Same                                                             |
+| Version skew                 | `audit@0.2` + `approvals@0.1` is legal and breaks at runtime when `HandleBinding` diverges | Impossible — single `version` field                              |
+| Cross-subpath types          | Published as their own package or duplicated                                               | Type-only re-exports from default (`AuditSink`, `HandleBinding`) |
+| `composeDecisions` ownership | Has to live in a 7th "core" package                                                        | Lives in default, no extra install                               |
+| Upgrade flow                 | `npm update @openclaw/guardrails-*` with 6 separate changelogs                             | `npm update @openclaw/guardrails` with one changelog             |
+| SRE blast radius             | One skewed version becomes a production incident                                           | Impossible by construction                                       |
 
 The runtime primitives share cross-cutting invariants: `/approvals` produces a handle that `/audit` hashes; `/audit`'s `AuditEntry` is the input `/siem` serializes; `/identity` resolves the principal that ends up in the `HandleBinding` from `/approvals`. If those shapes drift, the whole model breaks. Keeping them in one `version` field is how we enforce "all six move together or none move."
 
@@ -317,19 +345,19 @@ Providers that need injected dependencies MAY implement `ProviderLifecycle`. Pro
 
 ```ts
 export interface HostContext {
-  auditSink: AuditSink;                                           // per-tenant, pre-keyed
-  identityBridge: IdentityBridge;                                 // resolves principals
-  approvalHandleSigner: (b: HandleBinding) => Promise<string>;    // trusted-plane call-out
-  snapshot: SnapshotMeta | null;                                  // current snap, if any
-  stageMode: 'on' | 'off';                                        // workspace staging toggle
-  logger: Logger;                                                 // structured logger
+  auditSink: AuditSink; // per-tenant, pre-keyed
+  identityBridge: IdentityBridge; // resolves principals
+  approvalHandleSigner: (b: HandleBinding) => Promise<string>; // trusted-plane call-out
+  snapshot: SnapshotMeta | null; // current snap, if any
+  stageMode: "on" | "off"; // workspace staging toggle
+  logger: Logger; // structured logger
 }
 
 export interface ProviderLifecycle {
-  init?(ctx: HostContext): Promise<void>;                         // once, before any call
-  shutdown?(): Promise<void>;                                     // graceful stop
-  onSnapshotPromoted?(meta: SnapshotMeta): Promise<void>;         // hot-reload on snap promote
-  onStageModeChanged?(next: 'on' | 'off'): Promise<void>;         // staging toggle
+  init?(ctx: HostContext): Promise<void>; // once, before any call
+  shutdown?(): Promise<void>; // graceful stop
+  onSnapshotPromoted?(meta: SnapshotMeta): Promise<void>; // hot-reload on snap promote
+  onStageModeChanged?(next: "on" | "off"): Promise<void>; // staging toggle
 }
 ```
 
@@ -356,16 +384,16 @@ Zero `@microsoft/*` imports. CI-enforced per-PR. The package is designed to leav
 
 Semver across the whole package. What each change type buys:
 
-| Change | Bump |
-|--------|------|
-| Add a new optional field to a subpath type | Minor |
-| Add a new subpath | Minor |
-| Add a new export to an existing subpath | Minor |
+| Change                                                                   | Bump  |
+| ------------------------------------------------------------------------ | ----- |
+| Add a new optional field to a subpath type                               | Minor |
+| Add a new subpath                                                        | Minor |
+| Add a new export to an existing subpath                                  | Minor |
 | Rename a top-level interface (`GuardrailProvider`, `FileIngestProvider`) | Major |
-| Remove a subpath | Major |
-| Change the handle-binding algorithm (HMAC → Ed25519, field order) | Major |
-| Change `composeDecisions` priority ordering | Major |
-| Change the R5 carry invariant | Major |
+| Remove a subpath                                                         | Major |
+| Change the handle-binding algorithm (HMAC → Ed25519, field order)        | Major |
+| Change `composeDecisions` priority ordering                              | Major |
+| Change the R5 carry invariant                                            | Major |
 
 A 1.x → 2.x bump requires coordinated upgrade across every adopter because the governance contract itself changes shape. The 0.x track explicitly permits breaking changes between minors -- we use it to finalize the interface before committing to semver.
 

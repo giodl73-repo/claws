@@ -15,15 +15,15 @@
  * @module @bic/openclaw-guardrails/handle-binding/validator
  */
 
-import type { InvalidReason } from './types.js';
-import { checkSignature } from './fields/signature.js';
-import { checkProviderId } from './fields/provider-id.js';
-import { checkContentHash } from './fields/content-hash.js';
-import { checkSequenceNumber } from './fields/sequence-number.js';
-import { checkApproverPrincipal } from './fields/approver-principal.js';
-import { checkKeyId } from './fields/key-id.js';
-import { checkTtl } from './fields/ttl.js';
-import { checkNonce } from './fields/nonce.js';
+import type { InvalidReason } from "./types.js";
+import { checkSignature } from "./fields/signature.js";
+import { checkProviderId } from "./fields/provider-id.js";
+import { checkContentHash } from "./fields/content-hash.js";
+import { checkSequenceNumber } from "./fields/sequence-number.js";
+import { checkApproverPrincipal } from "./fields/approver-principal.js";
+import { checkKeyId } from "./fields/key-id.js";
+import { checkTtl } from "./fields/ttl.js";
+import { checkNonce } from "./fields/nonce.js";
 
 /**
  * The signed handle a companion produced. `ttl` is the absolute expiry
@@ -77,14 +77,14 @@ export type ValidationResult =
  * `docs/governance/approval-flow.md` — any change must land in lockstep.
  */
 export const EVALUATION_ORDER = [
-  'signature',
-  'provider-id',
-  'content-hash',
-  'sequence-number',
-  'approver-principal',
-  'key-id',
-  'ttl',
-  'nonce',
+  "signature",
+  "provider-id",
+  "content-hash",
+  "sequence-number",
+  "approver-principal",
+  "key-id",
+  "ttl",
+  "nonce",
 ] as const;
 
 export function validateHandle(

@@ -16,20 +16,20 @@ WHERE: .claws/policies/data-protection.yaml:12
 
 ## Components
 
-| Part | Content | Required |
-|------|---------|----------|
-| WHAT | Plain-language description of the problem | Always |
-| HOW | Actionable fix suggestion | Always (even if generic) |
-| WHERE | File path and line number | When available |
+| Part  | Content                                   | Required                 |
+| ----- | ----------------------------------------- | ------------------------ |
+| WHAT  | Plain-language description of the problem | Always                   |
+| HOW   | Actionable fix suggestion                 | Always (even if generic) |
+| WHERE | File path and line number                 | When available           |
 
 ## Severity Levels
 
-| Severity | Meaning | Pipeline Effect |
-|----------|---------|----------------|
-| error | Must be fixed before proceeding | Halts compilation |
-| warning | Should be fixed but does not block | Logged to CGR |
-| info | Informational, no action needed | Logged only |
-| hint | Suggestion for improvement | Displayed, not logged |
+| Severity | Meaning                            | Pipeline Effect       |
+| -------- | ---------------------------------- | --------------------- |
+| error    | Must be fixed before proceeding    | Halts compilation     |
+| warning  | Should be fixed but does not block | Logged to CGR         |
+| info     | Informational, no action needed    | Logged only           |
+| hint     | Suggestion for improvement         | Displayed, not logged |
 
 ## Diagnostic Codes
 

@@ -13,11 +13,11 @@ observe.
 
 ## At a glance
 
-| Channel | Style | Purpose | Count |
-|---------|-------|---------|-------|
-| Typed plugin hooks | pull, runtime-invoked | modify behavior | 35 named hooks |
-| Legacy / internal hooks | pull, runtime-fired | react to internal lifecycle | 6 events x 4 source tiers |
-| Diagnostic event stream | push, fire-and-forget | observe metrics + outcomes | ~30 event types |
+| Channel                 | Style                 | Purpose                     | Count                     |
+| ----------------------- | --------------------- | --------------------------- | ------------------------- |
+| Typed plugin hooks      | pull, runtime-invoked | modify behavior             | 35 named hooks            |
+| Legacy / internal hooks | pull, runtime-fired   | react to internal lifecycle | 6 events x 4 source tiers |
+| Diagnostic event stream | push, fire-and-forget | observe metrics + outcomes  | ~30 event types           |
 
 All three are global singletons keyed by `Symbol.for("openclaw.x.state.v1")`
 so they survive bundle-chunk splitting. None of them speak to the others.
@@ -27,6 +27,7 @@ so they survive bundle-chunk splitting. None of them speak to the others.
 ## Channel taxonomy
 
 <!-- proof:compiled from="proof:tree kind=taxonomy" uri="" -->
+
 ```taxonomy
 Plugin runtime channels
 ├── Typed plugin hooks
@@ -45,6 +46,7 @@ Plugin runtime channels
     ├── Examples: model.usage, run.completed, tool.execution.error
     └── Trust gate: metadata.trusted plus WeakSet anti-spoof
 ```
+
 <!-- /proof:compiled -->
 
 ---
@@ -52,6 +54,7 @@ Plugin runtime channels
 ## Decision rule
 
 <!-- proof:compiled from="proof:tree kind=taxonomy" uri="" -->
+
 ```taxonomy
 Picking a channel
 ├── Need to modify behavior? Use typed plugin hooks.
@@ -60,18 +63,19 @@ Picking a channel
 ├── Need to block a tool call? Typed hooks (before_tool_call, fail-closed).
 └── Need to record telemetry? Diagnostic events.
 ```
+
 <!-- /proof:compiled -->
 
 ---
 
 ## Failure + timeout policy
 
-| Channel | Failure default | Timeout |
-|---------|-----------------|---------|
-| Typed hooks | fail-open (errors logged, execution continues) | per-hook — `before_prompt_build` 15s, `agent_end` 30s |
-| Typed hooks (`before_tool_call`) | **fail-closed** (errors abort the call) | per-hook |
-| Legacy hooks | fail-open (caught + logged) | none |
-| Diagnostic events | fire-and-forget; throwing subscribers caught + logged | none — async drain queue with **10K silent drop** cap |
+| Channel                          | Failure default                                       | Timeout                                               |
+| -------------------------------- | ----------------------------------------------------- | ----------------------------------------------------- |
+| Typed hooks                      | fail-open (errors logged, execution continues)        | per-hook — `before_prompt_build` 15s, `agent_end` 30s |
+| Typed hooks (`before_tool_call`) | **fail-closed** (errors abort the call)               | per-hook                                              |
+| Legacy hooks                     | fail-open (caught + logged)                           | none                                                  |
+| Diagnostic events                | fire-and-forget; throwing subscribers caught + logged | none — async drain queue with **10K silent drop** cap |
 
 The fail-closed policy on `before_tool_call` is the only asymmetry. Tool
 call safety is critical; a malfunctioning approval/block plugin must abort
@@ -85,16 +89,16 @@ Different typed hooks combine plugin results differently. Picking the wrong
 mental model here is the second-most-common mistake. The merge rule is **per
 hook**, not uniform.
 
-| Hook | Merger | Rule |
-|------|--------|------|
-| `before_model_resolve` | first-wins | higher priority's defined override sticks |
-| `before_prompt_build` | concatenate | systemPrompt first-wins, contexts appended |
-| `agent_turn_prepare` | concatenate | prepend + append context summed |
-| `before_agent_finalize` | precedence | finalize > revise > continue |
-| `subagent_spawning` | error-first | merge if no error, return error early |
-| `before_install` | concatenate findings, sticky block | block once = block always |
-| `message_sending` | content last-wins, sticky cancel | any cancel halts |
-| `before_tool_call` | params freeze on approval | once any plugin requests approval, lower-priority can't rewrite params |
+| Hook                    | Merger                             | Rule                                                                   |
+| ----------------------- | ---------------------------------- | ---------------------------------------------------------------------- |
+| `before_model_resolve`  | first-wins                         | higher priority's defined override sticks                              |
+| `before_prompt_build`   | concatenate                        | systemPrompt first-wins, contexts appended                             |
+| `agent_turn_prepare`    | concatenate                        | prepend + append context summed                                        |
+| `before_agent_finalize` | precedence                         | finalize > revise > continue                                           |
+| `subagent_spawning`     | error-first                        | merge if no error, return error early                                  |
+| `before_install`        | concatenate findings, sticky block | block once = block always                                              |
+| `message_sending`       | content last-wins, sticky cancel   | any cancel halts                                                       |
+| `before_tool_call`      | params freeze on approval          | once any plugin requests approval, lower-priority can't rewrite params |
 
 See [`design/openclaw/hook-engine-typed.md`](../../../design/openclaw/hook-engine-typed.md) §"Per-hook merge functions".
 
@@ -102,15 +106,15 @@ See [`design/openclaw/hook-engine-typed.md`](../../../design/openclaw/hook-engin
 
 ## Diagnostic event types (excerpt)
 
-| Type | Producer side | Carries |
-|------|---------------|---------|
-| `model.usage` | LLM call wrapper | tokens (in/out/cache), cost USD, duration |
-| `run.started` / `run.completed` | agent harness | runId, outcome, duration |
-| `tool.execution.completed` | tool runner | duration, result classification |
-| `harness.run.error` | agent harness | phase, errorCategory |
-| `diagnostic.memory.sample` | logging/diagnostic-memory.ts | RSS, heap, uptime |
-| `context.assembled` | context engine | messageCount, tokens, prompt size |
-| `telemetry.exporter` | diagnostics extensions | exporter id, status |
+| Type                            | Producer side                | Carries                                   |
+| ------------------------------- | ---------------------------- | ----------------------------------------- |
+| `model.usage`                   | LLM call wrapper             | tokens (in/out/cache), cost USD, duration |
+| `run.started` / `run.completed` | agent harness                | runId, outcome, duration                  |
+| `tool.execution.completed`      | tool runner                  | duration, result classification           |
+| `harness.run.error`             | agent harness                | phase, errorCategory                      |
+| `diagnostic.memory.sample`      | logging/diagnostic-memory.ts | RSS, heap, uptime                         |
+| `context.assembled`             | context engine               | messageCount, tokens, prompt size         |
+| `telemetry.exporter`            | diagnostics extensions       | exporter id, status                       |
 
 Full list: [`design/openclaw/diagnostic-event-stream.md`](../../../design/openclaw/diagnostic-event-stream.md).
 

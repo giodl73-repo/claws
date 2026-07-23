@@ -15,7 +15,10 @@ expect:
   prevention: "`claws migrate --downgrade` provides bidirectional codemod for import path migration. Audit chain format frozen before extraction. Backport policy defined for fixes during compat window."
 
 simulate:
-  failures: ["Consumer downgrades from extracted packages to monolith and encounters audit chain format incompatibility and missing bug fixes"]
+  failures:
+    [
+      "Consumer downgrades from extracted packages to monolith and encounters audit chain format incompatibility and missing bug fixes",
+    ]
   halt: null
   budget: null
 

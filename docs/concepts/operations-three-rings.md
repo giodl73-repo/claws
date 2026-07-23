@@ -27,11 +27,11 @@ at different cadences, catch different problems, and cover different scopes.
 +-----------------------------------------------------------+
 ```
 
-| Ring | Trigger | Latency | Catches |
-|------|---------|---------|---------|
-| Inner | File save, git commit | <1s | 70% of issues |
-| Middle | Platform/claws upgrade | <15s | 20% of issues |
-| Outer | Weekly cron, on-demand | <120s | 10% of issues |
+| Ring   | Trigger                | Latency | Catches       |
+| ------ | ---------------------- | ------- | ------------- |
+| Inner  | File save, git commit  | <1s     | 70% of issues |
+| Middle | Platform/claws upgrade | <15s    | 20% of issues |
+| Outer  | Weekly cron, on-demand | <120s   | 10% of issues |
 
 ## Inner ring: catch it on save
 
@@ -113,6 +113,7 @@ only two new flags (`--post-upgrade` on doctor, `--pre-upgrade` on snap save).
 ## Scenario-Driven Additions
 
 ### From three-rings scenarios (50 findings applied)
+
 - IR file concurrency model: atomic write or file-level locking prevents TOCTOU races where outer ring reads a partially-written GovernanceIR file (P-167)
 - Cross-ring cache invalidation protocol: when middle ring modifies workspace state, inner ring cache is explicitly invalidated
 - Inner ring paused during middle-ring operations to prevent false violations against intermediate state during doctor --fix (P-168)

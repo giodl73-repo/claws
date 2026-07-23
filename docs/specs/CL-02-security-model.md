@@ -17,6 +17,7 @@ The OBO boundary -- where an agent acts AS the user rather than FOR the user -- 
 ## Scope
 
 **In scope**:
+
 - Per-tool risk classification (R1-R5)
 - A2A governance (agent identity, trust boundaries, FE6 fence pass)
 - Injection defense (16 compile-time rules across 4 layers)
@@ -25,6 +26,7 @@ The OBO boundary -- where an agent acts AS the user rather than FOR the user -- 
 - 34 governance rules across 9 rule groups (adds G-CHAIN for tool-argument provenance)
 
 **Out of scope**:
+
 - Runtime enforcement mechanics (CL-03)
 - Compilation pipeline for governance rules (CL-04)
 - CI/CD integration for security scanning (CL-05)
@@ -67,26 +69,26 @@ Trust Tier (T0-T4)          -- CEILING: can this workspace use this tool?
 
 ### Governance Rule Table (34 rules)
 
-| Rule Group | Rules | OWASP Risk | Compile-time? |
-|-----------|-------|-----------|--------------|
-| **G-CLASS** | Per-tool R1-R5 risk scoring | #1 Excessive Agency | Yes |
-| **G-PERM** | Capability-based permissions (READ/WRITE/COMMUNICATE/EXECUTE/TRANSACT) | #2 Access Control | Yes |
-| **G-DATA** | Data sensitivity labels (PUBLIC/INTERNAL/CONFIDENTIAL/RESTRICTED) | #2 Access Control | Partial |
-| **G-CHAIN** (5 rules) | Tool-argument provenance; R-tier laundering defense via intra-agent chains | #1 Excessive Agency | Yes |
-| **G-A2A-IDENTITY** | Agent identity verification (L0 declared through L3 attested/PKI) | #5 Inter-Agent | Yes |
-| **G-A2A-TRUST** | Default-deny trust boundaries between agents | #5 Inter-Agent | Yes |
-| **G-A2A-FLOW** | Data flow labels across agent boundaries | #5 Inter-Agent | Yes |
-| **G-A2A-ESCALATE** | No transitive trust, chain depth limits | #5 Inter-Agent | Yes |
-| **G-A2A-DELEGATE** | Delegation permission ceiling (never exceeds delegator) | #5 Inter-Agent | Yes |
-| **G-INPUT** (4 rules) | System prompt isolation, trust labeling, input sanitization, URL validation | #3 Injection | Partial |
-| **G-CONTEXT** (4 rules) | Boundary markers, tool/memory/skill isolation | #3 Injection | Partial |
-| **G-OUTPUT** (4 rules) | Data redaction, URL rules, format validation, chain validation | #3 Injection | Partial |
-| **G-BOUND** (4 rules) | Step/tool/budget/recursion limits | #3 Injection | Yes |
-| **G-ELICIT** | OBO actions require human approval | #4 Tool Misuse | Yes |
-| **G-ELICIT-TIMEOUT** | Deny-default on approval timeout | #4 Tool Misuse | Yes |
-| **G-ELICIT-CHAIN** | No transitive OBO delegation (max 1 hop) | #4 Tool Misuse | Yes |
-| **G-ELICIT-AUDIT** | All approval decisions recorded in audit chain | #4 Tool Misuse | Yes |
-| **G-SUPPLY** | Skill signing + malicious skill scanning | #9 Supply Chain | Yes |
+| Rule Group              | Rules                                                                       | OWASP Risk          | Compile-time? |
+| ----------------------- | --------------------------------------------------------------------------- | ------------------- | ------------- |
+| **G-CLASS**             | Per-tool R1-R5 risk scoring                                                 | #1 Excessive Agency | Yes           |
+| **G-PERM**              | Capability-based permissions (READ/WRITE/COMMUNICATE/EXECUTE/TRANSACT)      | #2 Access Control   | Yes           |
+| **G-DATA**              | Data sensitivity labels (PUBLIC/INTERNAL/CONFIDENTIAL/RESTRICTED)           | #2 Access Control   | Partial       |
+| **G-CHAIN** (5 rules)   | Tool-argument provenance; R-tier laundering defense via intra-agent chains  | #1 Excessive Agency | Yes           |
+| **G-A2A-IDENTITY**      | Agent identity verification (L0 declared through L3 attested/PKI)           | #5 Inter-Agent      | Yes           |
+| **G-A2A-TRUST**         | Default-deny trust boundaries between agents                                | #5 Inter-Agent      | Yes           |
+| **G-A2A-FLOW**          | Data flow labels across agent boundaries                                    | #5 Inter-Agent      | Yes           |
+| **G-A2A-ESCALATE**      | No transitive trust, chain depth limits                                     | #5 Inter-Agent      | Yes           |
+| **G-A2A-DELEGATE**      | Delegation permission ceiling (never exceeds delegator)                     | #5 Inter-Agent      | Yes           |
+| **G-INPUT** (4 rules)   | System prompt isolation, trust labeling, input sanitization, URL validation | #3 Injection        | Partial       |
+| **G-CONTEXT** (4 rules) | Boundary markers, tool/memory/skill isolation                               | #3 Injection        | Partial       |
+| **G-OUTPUT** (4 rules)  | Data redaction, URL rules, format validation, chain validation              | #3 Injection        | Partial       |
+| **G-BOUND** (4 rules)   | Step/tool/budget/recursion limits                                           | #3 Injection        | Yes           |
+| **G-ELICIT**            | OBO actions require human approval                                          | #4 Tool Misuse      | Yes           |
+| **G-ELICIT-TIMEOUT**    | Deny-default on approval timeout                                            | #4 Tool Misuse      | Yes           |
+| **G-ELICIT-CHAIN**      | No transitive OBO delegation (max 1 hop)                                    | #4 Tool Misuse      | Yes           |
+| **G-ELICIT-AUDIT**      | All approval decisions recorded in audit chain                              | #4 Tool Misuse      | Yes           |
+| **G-SUPPLY**            | Skill signing + malicious skill scanning                                    | #9 Supply Chain     | Yes           |
 
 ### The OBO Boundary
 
@@ -104,6 +106,7 @@ Ask Agent B for info            Ask Agent B to act as user
 **Test**: "Would a reasonable person expect to be asked before this happens?"
 
 **Elicitation flow**:
+
 1. Agent identifies R5/OBO tool call
 2. Approval request presented to user (inline or async)
 3. Timeout = 300s (configurable per policy)
@@ -113,16 +116,17 @@ Ask Agent B for info            Ask Agent B to act as user
 
 ### Agent Identity (L0-L3)
 
-| Level | Mechanism | Trust |
-|-------|-----------|-------|
-| L0 | Declared name in config | None (advisory) |
-| L1 | Shared secret (API key) | Basic |
-| L2 | Signed by fleet (HMAC) | Organizational |
-| L3 | PKI-attested certificate | Full |
+| Level | Mechanism                | Trust           |
+| ----- | ------------------------ | --------------- |
+| L0    | Declared name in config  | None (advisory) |
+| L1    | Shared secret (API key)  | Basic           |
+| L2    | Signed by fleet (HMAC)   | Organizational  |
+| L3    | PKI-attested certificate | Full            |
 
 ### FE6: A2A Boundary Fence Pass
 
 FE6 is a new fence pass (after FE1-FE5) that validates at compile time:
+
 - Agent identity completeness for declared communication channels
 - Trust policy consistency (no contradictions in trust groups)
 - Transitive trust detection (flag and block A-trusts-B-trusts-C chains)
@@ -132,18 +136,18 @@ FE6 is a new fence pass (after FE1-FE5) that validates at compile time:
 
 ### OWASP Coverage (Before/After)
 
-| # | Risk | Before | After |
-|---|------|--------|-------|
-| 1 | Excessive Agency | Partial (T0-T4) | **Full** (+ R1-R5, G-CLASS, G-PERM) |
-| 2 | Inadequate Access Control | Partial (G3) | **Full** (+ G-PERM, G-DATA, capability matrix) |
-| 3 | Prompt Injection | None | **Partial** (16 rules reduce surface; runtime needed) |
-| 4 | Tool Misuse | Partial (FE5) | **Full** (+ G-ELICIT, OBO gates, deny-default) |
-| 5 | Insecure Inter-Agent Comms | None | **Full** (+ G-A2A-*, FE6, default-deny) |
-| 6 | Unreliable Output | None | **Partial** (G-OUTPUT + chain validation) |
-| 7 | Insufficient Monitoring | Full | **Full** (+ incident classification) |
-| 8 | Memory Poisoning | None | **Partial** (G-CONTEXT memory isolation) |
-| 9 | Supply Chain | Partial (G2) | **Full** (+ G-SUPPLY, skill signing) |
-| 10 | Cascading Hallucination | None | **Partial** (G-BOUND + chain validation) |
+| #   | Risk                       | Before          | After                                                 |
+| --- | -------------------------- | --------------- | ----------------------------------------------------- |
+| 1   | Excessive Agency           | Partial (T0-T4) | **Full** (+ R1-R5, G-CLASS, G-PERM)                   |
+| 2   | Inadequate Access Control  | Partial (G3)    | **Full** (+ G-PERM, G-DATA, capability matrix)        |
+| 3   | Prompt Injection           | None            | **Partial** (16 rules reduce surface; runtime needed) |
+| 4   | Tool Misuse                | Partial (FE5)   | **Full** (+ G-ELICIT, OBO gates, deny-default)        |
+| 5   | Insecure Inter-Agent Comms | None            | **Full** (+ G-A2A-*, FE6, default-deny)               |
+| 6   | Unreliable Output          | None            | **Partial** (G-OUTPUT + chain validation)             |
+| 7   | Insufficient Monitoring    | Full            | **Full** (+ incident classification)                  |
+| 8   | Memory Poisoning           | None            | **Partial** (G-CONTEXT memory isolation)              |
+| 9   | Supply Chain               | Partial (G2)    | **Full** (+ G-SUPPLY, skill signing)                  |
+| 10  | Cascading Hallucination    | None            | **Partial** (G-BOUND + chain validation)              |
 
 ### Injection Defense: The Guardrail Sandwich
 
@@ -163,6 +167,7 @@ The OC Gateway hook runner defaults to `fail-open` for all hooks (see `hooks.ts`
 **Handler-level deny-on-error**: Every claws `before_tool_call` handler wraps its body in a try/catch that returns `{ block: true, blockReason: "governance-error: <message>" }` on ANY exception. This inverts fail-open to fail-closed at the handler level, independent of the hook runner's `catchErrors` behavior.
 
 **Catch clause simplicity requirement** (S04-F01): The catch clause is the ONLY defense until the upstream PR lands the failMode field. If the catch clause itself throws, the Gateway's fail-open takes over and R5 tools execute ungoverned. The catch clause MUST be as simple as possible — no complex logic, no allocations, no async operations. Specifically:
+
 - The `riskLevel()` lookup must be pre-computed at handler registration time, not evaluated in the catch path (S05-F01: if `riskLevel()` itself crashes, R3-R4 tools configured as fail-closed would get fail-open behavior via the Gateway default)
 - If the risk level lookup fails in the catch clause, the fallback is fail-closed for ALL tools, not just R5 (S07-F04)
 - The catch clause must handle both sync errors (throws) and async errors (Promise rejections) — unhandled microtask rejections escape the catch (S07-F06)
@@ -174,16 +179,16 @@ The OC Gateway hook runner defaults to `fail-open` for all hooks (see `hooks.ts`
 ```typescript
 api.on("before_tool_call", async (event, ctx) => {
   try {
-    return evaluatePolicy(event, ctx);   // normal path
+    return evaluatePolicy(event, ctx); // normal path
   } catch (err) {
     // Pre-computed risk map avoids riskLevel() crash in catch path
-    const risk = riskMap.get(event.toolName) ?? 5;  // unknown tool = fail-closed
+    const risk = riskMap.get(event.toolName) ?? 5; // unknown tool = fail-closed
     if (risk >= 5) {
       return { block: true, blockReason: `claws-governance-error: ${sanitizeError(err)}` };
     }
     // R1-R2: fail-open (don't break reads)
     // R3-R4: configurable (enterprise decides)
-    return failModeForRisk(risk, err);  // checks claws.json config, not just defaults
+    return failModeForRisk(risk, err); // checks claws.json config, not just defaults
   }
 });
 ```
@@ -210,7 +215,7 @@ api.on("before_tool_call", async (event, ctx) => {
 // Proposed addition to PluginHookRegistration
 type PluginHookRegistration = {
   // ... existing fields
-  failMode?: "fail-open" | "fail-closed";  // default: "fail-open" (backward compat)
+  failMode?: "fail-open" | "fail-closed"; // default: "fail-open" (backward compat)
 };
 ```
 
@@ -232,12 +237,12 @@ Self-signed HMAC audit chains do not survive legal discovery. Auditors and oppos
 ```yaml
 # .claws/config/audit.yaml
 signing:
-  algorithm: ed25519          # or hmac-sha256 (default)
-  keyRef: org-audit-key       # references .claws/keys/ or KMS
+  algorithm: ed25519 # or hmac-sha256 (default)
+  keyRef: org-audit-key # references .claws/keys/ or KMS
   timestampAuthority:
     enabled: true
-    url: https://freetsa.org/tsr   # RFC 3161 TSA (or enterprise TSA)
-    fallback: local                 # local timestamp if TSA unreachable
+    url: https://freetsa.org/tsr # RFC 3161 TSA (or enterprise TSA)
+    fallback: local # local timestamp if TSA unreachable
 ```
 
 **External timestamp authority**: Every audit chain entry is counter-signed by an RFC 3161 Timestamp Authority. This provides independent proof that the entry existed at the claimed time, which is the standard legal discovery requires.
@@ -245,6 +250,7 @@ signing:
 **Witness protocol**: For enterprise deployments, a witness service receives a copy of each audit entry's hash in real-time. The witness maintains an independent Merkle tree. During legal discovery, the witness can attest to the completeness and ordering of the audit chain without access to the chain contents (zero-knowledge witness).
 
 Witness flow:
+
 1. claws records governance decision -> audit chain entry
 2. Entry hash sent to witness service (internal or third-party)
 3. Witness appends hash to its Merkle tree, returns receipt
@@ -257,21 +263,21 @@ All cryptographic operations (audit signing, approval tokens, agent identity L2)
 
 **Key storage**:
 
-| Environment | Storage | Path |
-|------------|---------|------|
-| Developer | File-based | `.claws/keys/{key-id}.pem` (chmod 600) |
-| Team | Environment variable | `CLAWS_SIGNING_KEY` / `CLAWS_AUDIT_KEY` |
-| Enterprise | External KMS | AWS KMS, Azure Key Vault, HashiCorp Vault |
+| Environment | Storage              | Path                                      |
+| ----------- | -------------------- | ----------------------------------------- |
+| Developer   | File-based           | `.claws/keys/{key-id}.pem` (chmod 600)    |
+| Team        | Environment variable | `CLAWS_SIGNING_KEY` / `CLAWS_AUDIT_KEY`   |
+| Enterprise  | External KMS         | AWS KMS, Azure Key Vault, HashiCorp Vault |
 
 ```yaml
 # .claws/config/keys.yaml
 keys:
   audit-signing:
     type: ed25519
-    storage: file                # file | env | kms
+    storage: file # file | env | kms
     path: .claws/keys/audit.pem
-    kms:                         # only if storage: kms
-      provider: aws-kms          # aws-kms | azure-kv | hashicorp
+    kms: # only if storage: kms
+      provider: aws-kms # aws-kms | azure-kv | hashicorp
       keyId: arn:aws:kms:...
   approval-tokens:
     type: hmac-sha256
@@ -289,15 +295,16 @@ keys:
 
 **Key rotation schedule**:
 
-| Key Type | Rotation Period | Grace Period | Overlap |
-|----------|----------------|-------------|---------|
-| Audit signing | 90 days | 30 days | Old key verifies, new key signs |
-| Approval tokens | 30 days | 7 days | Both keys valid during grace |
-| Agent identity | 180 days | 60 days | Certificate chain supports overlap |
+| Key Type        | Rotation Period | Grace Period | Overlap                            |
+| --------------- | --------------- | ------------ | ---------------------------------- |
+| Audit signing   | 90 days         | 30 days      | Old key verifies, new key signs    |
+| Approval tokens | 30 days         | 7 days       | Both keys valid during grace       |
+| Agent identity  | 180 days        | 60 days      | Certificate chain supports overlap |
 
 `claws keys rotate <key-id>` triggers manual rotation. `claws keys check` reports keys approaching rotation deadline.
 
 **Compromise recovery**:
+
 1. `claws keys revoke <key-id>` -- immediately revoke a compromised key
 2. All audit entries signed with the revoked key are flagged `SIGNING_KEY_REVOKED` (not deleted)
 3. `claws keys rekey <key-id>` -- generate new key and re-sign all entries in the current audit chain with the new key. Old signatures are preserved alongside new ones for forensic continuity.
@@ -310,6 +317,7 @@ keys:
 `claws kill` routes through the Gateway. If the Gateway is compromised, the kill switch fails. Three out-of-band kill paths ensure governance can always be terminated:
 
 **1. File-based kill**: The claws plugin watches for a `.claws/KILL` file. On detection:
+
 - All `before_tool_call` handlers immediately return `{ block: true, blockReason: "governance-killed" }`
 - Audit chain records the kill event
 - File content is the kill reason (e.g., `echo "CVE-2026-99999" > .claws/KILL`)
@@ -317,11 +325,13 @@ keys:
 - To resume: delete `.claws/KILL` and run `claws resume`
 
 **2. OS signal handler**: The claws plugin registers a handler for `SIGUSR1` (Unix) or a named event (Windows). On signal:
+
 - Same behavior as file-based kill
 - Useful for automated incident response scripts
 - `kill -USR1 $(cat .claws/runtime/gateway.pid)` triggers the kill
 
 **3. Sidecar-initiated kill**: The L5 sidecar (CL-03) monitors the governance plugin's health endpoint. If the health endpoint fails to respond within 5s (configurable), the sidecar:
+
 - Writes `.claws/KILL` (triggers path 1 as redundancy)
 - Sends SIGUSR1 to the Gateway process (triggers path 2 as redundancy)
 - If both fail within 10s: terminates the Gateway process via SIGTERM/SIGKILL
@@ -337,45 +347,45 @@ The kill switch works when the Gateway is compromised because paths 1 and 2 oper
 
 ```typescript
 type SOC2Evidence = {
-  version: '1.0';
-  framework: 'soc2-type-ii';
-  generatedAt: string;                    // ISO 8601
-  generatedBy: string;                    // claws version + workspace hash
+  version: "1.0";
+  framework: "soc2-type-ii";
+  generatedAt: string; // ISO 8601
+  generatedBy: string; // claws version + workspace hash
   period: { start: string; end: string }; // observation period (6-12 months)
-  signature: AsymmetricSignature;         // Ed25519 or HMAC
+  signature: AsymmetricSignature; // Ed25519 or HMAC
   workspace: {
     path: string;
-    platform: string;                     // openclaw, cursor, etc.
+    platform: string; // openclaw, cursor, etc.
     trustTier: number;
-    policyVersion: string;                // hash of .claws/policies/
+    policyVersion: string; // hash of .claws/policies/
   };
   controls: SOC2Control[];
   auditChainSummary: {
     totalEvents: number;
-    firstEvent: string;                   // ISO 8601
+    firstEvent: string; // ISO 8601
     lastEvent: string;
-    chainIntegrity: 'verified' | 'broken' | 'unchecked';
-    breakPoints: string[];                // timestamps of any breaks
+    chainIntegrity: "verified" | "broken" | "unchecked";
+    breakPoints: string[]; // timestamps of any breaks
   };
   findings: ComplianceFinding[];
 };
 
 type SOC2Control = {
-  id: string;                             // e.g., "CC6.1", "CC7.2"
-  category: string;                       // "Logical and Physical Access", etc.
+  id: string; // e.g., "CC6.1", "CC7.2"
+  category: string; // "Logical and Physical Access", etc.
   description: string;
-  status: 'satisfied' | 'partially-satisfied' | 'not-satisfied' | 'not-applicable';
+  status: "satisfied" | "partially-satisfied" | "not-satisfied" | "not-applicable";
   evidence: {
-    governanceRules: string[];            // e.g., ["G-CLASS", "G-ELICIT"]
-    auditEvents: number;                  // count of relevant events in period
+    governanceRules: string[]; // e.g., ["G-CLASS", "G-ELICIT"]
+    auditEvents: number; // count of relevant events in period
     lastChecked: string;
-    artifacts: string[];                  // file paths to supporting evidence
+    artifacts: string[]; // file paths to supporting evidence
   };
 };
 
 type ComplianceFinding = {
-  severity: 'critical' | 'high' | 'medium' | 'low';
-  control: string;                        // SOC2 control ID
+  severity: "critical" | "high" | "medium" | "low";
+  control: string; // SOC2 control ID
   finding: string;
   remediation: string;
   deadline: string | null;
@@ -384,37 +394,37 @@ type ComplianceFinding = {
 
 **SOC2 control mapping:**
 
-| SOC2 Control | claws Rule(s) | Evidence source |
-|-------------|--------------|----------------|
-| CC6.1 Logical access | G-CLASS, G-PERM, G-A2A-TRUST | Tool classification + A2A trust groups |
-| CC6.2 Auth mechanisms | G-A2A-IDENTITY, G-ELICIT | Agent identity levels + approval records |
-| CC6.3 Access control | G-CLASS (R1-R5), FE6 | Per-tool risk scoring + fence pass results |
-| CC6.6 Access reviews | `claws drift`, `claws check --fleet` | Drift detection reports + fleet scan results |
-| CC6.8 Encryption | G-SECRETS, key management | Vault encryption + key rotation records |
-| CC7.1 Incident detection | G-OUTPUT, G-INPUT, audit chain | Output guards + input validation + events |
-| CC7.2 Incident response | `claws kill`, audit export | Kill switch records + SIEM export |
-| CC7.3 Change mgmt | `claws snap`, `claws diff` | Snapshot history + governance diffs |
-| CC8.1 Monitoring | `claws watch`, `claws drift` | Three-ring coverage data |
+| SOC2 Control             | claws Rule(s)                        | Evidence source                              |
+| ------------------------ | ------------------------------------ | -------------------------------------------- |
+| CC6.1 Logical access     | G-CLASS, G-PERM, G-A2A-TRUST         | Tool classification + A2A trust groups       |
+| CC6.2 Auth mechanisms    | G-A2A-IDENTITY, G-ELICIT             | Agent identity levels + approval records     |
+| CC6.3 Access control     | G-CLASS (R1-R5), FE6                 | Per-tool risk scoring + fence pass results   |
+| CC6.6 Access reviews     | `claws drift`, `claws check --fleet` | Drift detection reports + fleet scan results |
+| CC6.8 Encryption         | G-SECRETS, key management            | Vault encryption + key rotation records      |
+| CC7.1 Incident detection | G-OUTPUT, G-INPUT, audit chain       | Output guards + input validation + events    |
+| CC7.2 Incident response  | `claws kill`, audit export           | Kill switch records + SIEM export            |
+| CC7.3 Change mgmt        | `claws snap`, `claws diff`           | Snapshot history + governance diffs          |
+| CC8.1 Monitoring         | `claws watch`, `claws drift`         | Three-ring coverage data                     |
 
 ### HIPAA Security Rule Evidence
 
 ```typescript
 type HIPAAEvidence = {
-  version: '1.0';
-  framework: 'hipaa-security-rule';
+  version: "1.0";
+  framework: "hipaa-security-rule";
   generatedAt: string;
   signature: AsymmetricSignature;
   safeguards: HIPAASafeguard[];
 };
 
 type HIPAASafeguard = {
-  id: string;                             // e.g., "164.312(a)(1)"
-  type: 'administrative' | 'physical' | 'technical';
+  id: string; // e.g., "164.312(a)(1)"
+  type: "administrative" | "physical" | "technical";
   requirement: string;
-  status: 'implemented' | 'partial' | 'not-implemented' | 'not-applicable';
+  status: "implemented" | "partial" | "not-implemented" | "not-applicable";
   evidence: {
     governanceRules: string[];
-    dataLabels: string[];                 // PHI fields detected
+    dataLabels: string[]; // PHI fields detected
     auditEvents: number;
   };
 };
@@ -422,38 +432,38 @@ type HIPAASafeguard = {
 
 **Key HIPAA safeguard mappings:**
 
-| HIPAA § | Requirement | claws Rule |
-|---------|------------|-----------|
-| 164.312(a)(1) | Access control | G-CLASS + G-PERM (RESTRICTED label for PHI) |
-| 164.312(b) | Audit controls | Audit chain + SIEM export |
-| 164.312(c)(1) | Integrity | Hash chain verification (`claws audit verify`) |
-| 164.312(d) | Authentication | G-A2A-IDENTITY (L2+ for PHI access) |
-| 164.312(e)(1) | Transmission security | G-A2A-FLOW (RESTRICTED data flow labels) |
+| HIPAA §       | Requirement           | claws Rule                                     |
+| ------------- | --------------------- | ---------------------------------------------- |
+| 164.312(a)(1) | Access control        | G-CLASS + G-PERM (RESTRICTED label for PHI)    |
+| 164.312(b)    | Audit controls        | Audit chain + SIEM export                      |
+| 164.312(c)(1) | Integrity             | Hash chain verification (`claws audit verify`) |
+| 164.312(d)    | Authentication        | G-A2A-IDENTITY (L2+ for PHI access)            |
+| 164.312(e)(1) | Transmission security | G-A2A-FLOW (RESTRICTED data flow labels)       |
 
 ### EU AI Act Risk Assessment
 
 ```typescript
 type EUAIActAssessment = {
-  version: '1.0';
-  framework: 'eu-ai-act';
+  version: "1.0";
+  framework: "eu-ai-act";
   generatedAt: string;
   signature: AsymmetricSignature;
   systemClassification: {
-    article6Category: 'minimal' | 'limited' | 'high' | 'unacceptable';
-    annexIIICategory: string | null;      // e.g., "Annex III, 1(a) biometric"
+    article6Category: "minimal" | "limited" | "high" | "unacceptable";
+    annexIIICategory: string | null; // e.g., "Annex III, 1(a) biometric"
     rationale: string;
   };
   article13Transparency: {
     systemDescription: string;
     capabilitiesDisclosed: boolean;
     limitationsDisclosed: boolean;
-    humanOversight: string;               // maps to G-ELICIT configuration
+    humanOversight: string; // maps to G-ELICIT configuration
   };
   article14HumanOversight: {
     oboGatesConfigured: boolean;
     denyDefaultEnabled: boolean;
     killSwitchAvailable: boolean;
-    oversightLevel: 'full' | 'partial' | 'minimal';
+    oversightLevel: "full" | "partial" | "minimal";
   };
 };
 ```
@@ -479,47 +489,47 @@ The evidence package is reproducible: given the same audit chain and policy vers
 - **Deny-default on timeout**: If the human does not respond to an elicitation request within the timeout period, the action is DENIED.
 - **Data sensitivity high-water-mark**: Once data is labeled CONFIDENTIAL, it cannot be downgraded to PUBLIC by any downstream operation.
 - **Keys must never exist in plaintext outside controlled storage**: File keys are chmod 600. KMS keys are never exported. Environment variable keys are documented as the least-secure option.
-- **Trust tier to risk level mapping (authoritative)**: T0=R1-max, T1=R2-max, T2=R3-max, T3=R4-max, T4=R5-max. This mapping must be consistent with CL-01 claws.json schema. *(Source: CFC-S02-F01)*
-- **R1 vs R2 classification requires data context**: Both R1 and R2 tools have READ capability. The differentiator is data sensitivity: local file reads are R1 (observe), database reads with potentially sensitive data are R2 (read). G-CLASS must use data sensitivity context from MEMORY.md labels, not just capability type. *(Source: CP-S06-F01)*
-- **OBO detection is context-dependent**: For some tools (e.g., post-slack), OBO status depends on context: posting to a public channel may be FOR-user, posting to a DM is AS-user. G-CLASS must consider channel/target context when available, not just tool name. *(Source: CP-S06-F02)*
-- **Multi-capability max-risk rule**: A tool with multiple capabilities (e.g., send-email has COMMUNICATE + TRANSACT) must be classified at the HIGHEST risk level implied by any capability. Classification must use maximum, not first-match. *(Source: CP-S06-F05)*
-- **Sandbox status as classification modifier**: R4 tools may have different mitigation status (shell-exec is unsandboxed, container-run is sandboxed). Classification captures risk level but ToolManifestEntry should include a `sandboxed: boolean` field for downstream use. *(Source: CP-S06-F04)*
-- **L0 default when IDENTITY.md absent**: Without IDENTITY.md, agent identity defaults to L0 (declared name only). If A2A communication is configured elsewhere (e.g., in claws.json trust groups), G-A2A-IDENTITY must warn that L0 is insufficient for fleet communication. Absent file must not suppress applicable rules. *(Source: CP-S03-F01)*
-- **OBO tools without USER.md authority**: Without USER.md, no OBO scope exists. If TOOLS.md contains R5/OBO tools, the absence of USER.md means tools are ungoverned at the authority level. G-ELICIT must produce a warning, not silently pass. *(Source: CP-S03-F02)*
-- **Absent vs explicit label handling for G-DATA**: Without MEMORY.md, data sensitivity labels default to unset. G-DATA must distinguish "no labels declared" (warning) from "labels declared as PUBLIC" (intentional). *(Source: CP-S03-F03)*
-- **Key reference validation at compile time**: IDENTITY.md configuring L2 identity (HMAC signed by fleet) requires a key reference. If the key is not in .claws/keys/, the compiler must warn at compile time. An unresolvable key reference must not be deferred to runtime. *(Source: CP-S02-F06)*
-- **Intra vs cross-workspace delegation**: G-A2A-DELEGATE validates delegation ceilings within a single workspace. Cross-workspace delegation (subagent in workspace B operating under a different trust tier) requires fleet-level validation (CL-05), not just intra-workspace FE6. *(Source: CFC-S02-F02)*
-- **Data flow ceiling direction semantics**: G-A2A-FLOW data flow ceiling applies to data SENT to the agent, not data the agent retrieves externally. External data has unknown labels at compile time. *(Source: CP-S07-F03)*
-- **Default data flow ceiling**: If AGENTS.md does not declare a data flow ceiling for an agent, the default must be documented. Recommend defaulting to PUBLIC (least privilege for incoming data) consistent with default-deny principle. *(Source: CFC-S04-F06)*
-- **Pre-authorized vs ungoverned distinction for G-ELICIT**: USER.md may pre-authorize OBO scope ("you may send emails on my behalf"), which is a standing authorization. G-ELICIT must distinguish pre-authorized (acknowledged, gate permanently open, audit-logged) from ungoverned (no policy at all). *(Source: CFC-S03-F03)*
-- **Conditional standing approval for schedules**: Standing approval for scheduled R5 tools (pre-authorization in USER.md) should have conditions: time-bound, scope-limited (specific report/tool only), with full audit logging. Unconditional standing approval for R5 is dangerous. *(Source: CFC-S07-F02)*
-- **G-ELICIT-CHAIN for schedule delegation**: If a scheduled task delegates to a subagent that invokes an R5 tool, the pre-authorization must cover the subagent's R5 tool specifically, not just the parent's delegation. *(Source: CFC-S07-F07)*
-- **G-BOUND delegation cycle vs recursion limit**: Compile-time cycle detection (CIRCULAR-DELEGATION) prevents runtime infinite delegation loops. G-BOUND recursion limits are the runtime safety net, but compile-time detection is preferred. *(Source: CFC-S05-F03)*
-- **Processing vs forwarding distinction for G-A2A-FLOW**: G-A2A-FLOW checks label mismatches at compile time. If an agent receives CONFIDENTIAL data and produces PUBLIC output (redacting sensitive fields), the compile-time check flags the label mismatch even though the output may be safe. The distinction between processing and forwarding cannot be verified at compile time. *(Source: CFC-S04-F02)*
-- **OBO-WITHOUT-ELICIT immune to advisory mode**: OBO-WITHOUT-ELICIT remains error severity regardless of `strict: false` (advisory mode). R5 fail-closed is non-negotiable, and an R5/OBO tool without elicitation contradicts this invariant. This makes OBO-WITHOUT-ELICIT the only conflict that cannot be downgraded by advisory mode. *(Source: SCV-S03-F06)*
-- **Exhaustive three-source check before OBO error**: Before firing OBO-WITHOUT-ELICIT as an error, the ANALYZE phase must exhaustively check TOOLS.md, SOUL.md, and USER.md. If any one provides elicitation coverage (USER.md pre-authorization, SOUL.md elicitation constraint), the conflict resolves. False-positive errors that block compilation despite valid coverage are critical bugs. *(Source: SCV-S03-F02)*
-- **Fleet-inherited policies resolve OBO-WITHOUT-ELICIT**: Fleet-level inherited configuration may provide the elicitation policy. If the workspace inherits from a fleet template that configures send-email elicitation, the conflict resolves at the fleet level. ANALYZE must check fleet inheritance before flagging. *(Source: SCV-S03-F03)*
-- **Fail-mode configuration precedence order**: The fail-mode precedence must be: per-tool > per-risk-level > global > default. This order is authoritative and must be tested for all combinations. If global fail-closed is set AND a per-tool override for read-file is fail-open, the per-tool override wins. *(Source: SCV-S04-F06, SCV-S12-F01)*
-- **R3-R4 default change requires migration guidance**: The default fail-closed for R3-R4 is a breaking behavioral change from the earlier unspecified state. Existing workspaces that relied on implicit fail-open behavior will see write tools blocked on governance errors. Documentation and migration guidance are required. *(Source: SCV-S04-F01)*
-- **Global fail-closed availability warning**: When `failMode.global: fail-closed` is configured, the compiler SHOULD warn: "CLAWS-W025: global fail-closed will block R1 read tools on governance errors." The warning is informational -- the enterprise made a deliberate choice. *(Source: SCV-S12-F02)*
-- **Global fail-open security warning**: When `failMode.global: fail-open` is configured, the compiler SHOULD warn: "CLAWS-W026: global fail-open overrides R3-R4 fail-closed default. R3 write tools will execute on governance errors." The warning names the affected tools. *(Source: SCV-S12-F06)*
-- **Global override R5 ceiling**: `failMode.global: fail-open` MUST NOT override R5 fail-closed. The global override can make things MORE restrictive (R1 fail-closed) but cannot make R5 less restrictive. This asymmetry is enforced at config validation time. *(Source: SCV-S12-F05)*
-- **Built-in tool ceiling exception**: Platform built-in tools (OC exec = R4) that exceed the trust tier ceiling should produce a warning (not error) because the operator cannot remove platform built-ins. The warning should recommend raising the trust tier or disabling the built-in via exec-approvals. *(Source: SCV-S11-F03)*
-- **Bidirectional ceiling violation resolution**: Trust-ceiling violation resolution should present three options: (1) raise trustTier, (2) remove the tool, (3) override classification downward. Each has different trade-offs. *(Source: SCV-S11-F06)*
-- **Reclassification cascading effects**: Reclassification from R5 to R4 changes three security properties: (1) fail-mode becomes configurable, (2) elicitation gate may no longer be required, (3) the tool is no longer flagged as OBO boundary. All three changes must be reflected consistently across all governance layers and artifacts. *(Source: SCV-S13-F01)*
-- **Mandatory reason for R5 reclassification**: A reclassification from R5 to R4 without a reason field produces a warning: "CLAWS-W015: R5 reclassification without reason -- consider documenting why this tool does not require OBO governance." *(Source: SCV-S13-F02)*
-- **Bidirectional reclassification**: Upward reclassification (R1 to R5) is allowed -- more restrictive is always safe. It produces an informational note: "R1 tool reclassified to R5 -- OBO governance will be applied." *(Source: SCV-S13-F03)*
-- **Compliance reclassification audit trail**: The compliance evidence package (SOC2) must include all reclassifications with reasons. `claws comply soc2` output includes a reclassification table with tool name, original risk, override risk, reason, and date. *(Source: SCV-S13-F06)*
-- **Effective vs derived count reporting**: GovAnalysis summary must report both derived and effective R5 counts: "10 tools classified R5 (5 overridden to R4, 5 effective R5)." *(Source: SCV-S13-F07)*
-- **G-ELICIT normalization before cross-reference**: Tool name cross-reference in elicitation policies should use the same normalization as the rest of the pipeline (hyphens/underscores/casing). If normalization resolves the mismatch, no warning is needed. Warnings fire only when normalization cannot find a match. *(Source: SCV-S10-F01)*
-- **Fuzzy match suggestion quality**: "Did you mean?" suggestions must pick the CLOSEST match by edit distance. Multiple close matches should be listed. Threshold: suggest if edit distance <= 3. *(Source: SCV-S10-F02)*
-- **Orphaned R5 policy escalation**: An orphaned elicitation policy (misspelled tool name, no close match) that targets an R5 classification should escalate from warning to error, because the real R5 tool is left ungoverned. *(Source: SCV-S10-F03)*
-- **Built-in tool cross-reference**: Tool names in claws.json may reference platform built-in tools not in TOOLS.md. The cross-reference must check both TOOLS.md and the platform built-in tool set. *(Source: SCV-S10-F04)*
-- **Cascading diagnostic chain for misspellings**: A misspelled tool name that leaves the real tool ungoverned should show both the cross-reference warning AND the OBO-WITHOUT-ELICIT error, making the cause (misspelling) and effect (ungoverned R5 tool) clear. *(Source: SCV-S10-F05)*
-- **Versioned tool name handling**: Tool names with version suffixes (e.g., "send-payment-v2") must not be flagged as misspellings of the un-versioned name. They are different tools. *(Source: SCV-S10-F06)*
-- **Resolution strength ordering**: When OBO-WITHOUT-ELICIT presents resolution alternatives ("add elicitation policy in claws.json" vs "add OBO scope in USER.md"), the resolution should note the security difference: claws.json requires per-use approval (stronger), USER.md grants standing authorization (weaker). Recommend claws.json for R5 tools. *(Source: SCV-S03-F07)*
-- **Reclassification fail-mode warning**: When a tool is reclassified from R1 to R3, the compiler MUST warn that fail-open is explicitly configured for a risk level that defaults to fail-closed. *(Source: SCV-S04-F08)*
-- **Strict equality in fail-mode check**: The runtime fail-mode check must use strict equality (`===`). If `config.failModeR3R4` is `undefined` (not configured), the comparison returns `false`, meaning fail-closed (correct). Coercion-based comparison (`==`) would break this. *(Source: SCV-S04-F03)*
+- **Trust tier to risk level mapping (authoritative)**: T0=R1-max, T1=R2-max, T2=R3-max, T3=R4-max, T4=R5-max. This mapping must be consistent with CL-01 claws.json schema. _(Source: CFC-S02-F01)_
+- **R1 vs R2 classification requires data context**: Both R1 and R2 tools have READ capability. The differentiator is data sensitivity: local file reads are R1 (observe), database reads with potentially sensitive data are R2 (read). G-CLASS must use data sensitivity context from MEMORY.md labels, not just capability type. _(Source: CP-S06-F01)_
+- **OBO detection is context-dependent**: For some tools (e.g., post-slack), OBO status depends on context: posting to a public channel may be FOR-user, posting to a DM is AS-user. G-CLASS must consider channel/target context when available, not just tool name. _(Source: CP-S06-F02)_
+- **Multi-capability max-risk rule**: A tool with multiple capabilities (e.g., send-email has COMMUNICATE + TRANSACT) must be classified at the HIGHEST risk level implied by any capability. Classification must use maximum, not first-match. _(Source: CP-S06-F05)_
+- **Sandbox status as classification modifier**: R4 tools may have different mitigation status (shell-exec is unsandboxed, container-run is sandboxed). Classification captures risk level but ToolManifestEntry should include a `sandboxed: boolean` field for downstream use. _(Source: CP-S06-F04)_
+- **L0 default when IDENTITY.md absent**: Without IDENTITY.md, agent identity defaults to L0 (declared name only). If A2A communication is configured elsewhere (e.g., in claws.json trust groups), G-A2A-IDENTITY must warn that L0 is insufficient for fleet communication. Absent file must not suppress applicable rules. _(Source: CP-S03-F01)_
+- **OBO tools without USER.md authority**: Without USER.md, no OBO scope exists. If TOOLS.md contains R5/OBO tools, the absence of USER.md means tools are ungoverned at the authority level. G-ELICIT must produce a warning, not silently pass. _(Source: CP-S03-F02)_
+- **Absent vs explicit label handling for G-DATA**: Without MEMORY.md, data sensitivity labels default to unset. G-DATA must distinguish "no labels declared" (warning) from "labels declared as PUBLIC" (intentional). _(Source: CP-S03-F03)_
+- **Key reference validation at compile time**: IDENTITY.md configuring L2 identity (HMAC signed by fleet) requires a key reference. If the key is not in .claws/keys/, the compiler must warn at compile time. An unresolvable key reference must not be deferred to runtime. _(Source: CP-S02-F06)_
+- **Intra vs cross-workspace delegation**: G-A2A-DELEGATE validates delegation ceilings within a single workspace. Cross-workspace delegation (subagent in workspace B operating under a different trust tier) requires fleet-level validation (CL-05), not just intra-workspace FE6. _(Source: CFC-S02-F02)_
+- **Data flow ceiling direction semantics**: G-A2A-FLOW data flow ceiling applies to data SENT to the agent, not data the agent retrieves externally. External data has unknown labels at compile time. _(Source: CP-S07-F03)_
+- **Default data flow ceiling**: If AGENTS.md does not declare a data flow ceiling for an agent, the default must be documented. Recommend defaulting to PUBLIC (least privilege for incoming data) consistent with default-deny principle. _(Source: CFC-S04-F06)_
+- **Pre-authorized vs ungoverned distinction for G-ELICIT**: USER.md may pre-authorize OBO scope ("you may send emails on my behalf"), which is a standing authorization. G-ELICIT must distinguish pre-authorized (acknowledged, gate permanently open, audit-logged) from ungoverned (no policy at all). _(Source: CFC-S03-F03)_
+- **Conditional standing approval for schedules**: Standing approval for scheduled R5 tools (pre-authorization in USER.md) should have conditions: time-bound, scope-limited (specific report/tool only), with full audit logging. Unconditional standing approval for R5 is dangerous. _(Source: CFC-S07-F02)_
+- **G-ELICIT-CHAIN for schedule delegation**: If a scheduled task delegates to a subagent that invokes an R5 tool, the pre-authorization must cover the subagent's R5 tool specifically, not just the parent's delegation. _(Source: CFC-S07-F07)_
+- **G-BOUND delegation cycle vs recursion limit**: Compile-time cycle detection (CIRCULAR-DELEGATION) prevents runtime infinite delegation loops. G-BOUND recursion limits are the runtime safety net, but compile-time detection is preferred. _(Source: CFC-S05-F03)_
+- **Processing vs forwarding distinction for G-A2A-FLOW**: G-A2A-FLOW checks label mismatches at compile time. If an agent receives CONFIDENTIAL data and produces PUBLIC output (redacting sensitive fields), the compile-time check flags the label mismatch even though the output may be safe. The distinction between processing and forwarding cannot be verified at compile time. _(Source: CFC-S04-F02)_
+- **OBO-WITHOUT-ELICIT immune to advisory mode**: OBO-WITHOUT-ELICIT remains error severity regardless of `strict: false` (advisory mode). R5 fail-closed is non-negotiable, and an R5/OBO tool without elicitation contradicts this invariant. This makes OBO-WITHOUT-ELICIT the only conflict that cannot be downgraded by advisory mode. _(Source: SCV-S03-F06)_
+- **Exhaustive three-source check before OBO error**: Before firing OBO-WITHOUT-ELICIT as an error, the ANALYZE phase must exhaustively check TOOLS.md, SOUL.md, and USER.md. If any one provides elicitation coverage (USER.md pre-authorization, SOUL.md elicitation constraint), the conflict resolves. False-positive errors that block compilation despite valid coverage are critical bugs. _(Source: SCV-S03-F02)_
+- **Fleet-inherited policies resolve OBO-WITHOUT-ELICIT**: Fleet-level inherited configuration may provide the elicitation policy. If the workspace inherits from a fleet template that configures send-email elicitation, the conflict resolves at the fleet level. ANALYZE must check fleet inheritance before flagging. _(Source: SCV-S03-F03)_
+- **Fail-mode configuration precedence order**: The fail-mode precedence must be: per-tool > per-risk-level > global > default. This order is authoritative and must be tested for all combinations. If global fail-closed is set AND a per-tool override for read-file is fail-open, the per-tool override wins. _(Source: SCV-S04-F06, SCV-S12-F01)_
+- **R3-R4 default change requires migration guidance**: The default fail-closed for R3-R4 is a breaking behavioral change from the earlier unspecified state. Existing workspaces that relied on implicit fail-open behavior will see write tools blocked on governance errors. Documentation and migration guidance are required. _(Source: SCV-S04-F01)_
+- **Global fail-closed availability warning**: When `failMode.global: fail-closed` is configured, the compiler SHOULD warn: "CLAWS-W025: global fail-closed will block R1 read tools on governance errors." The warning is informational -- the enterprise made a deliberate choice. _(Source: SCV-S12-F02)_
+- **Global fail-open security warning**: When `failMode.global: fail-open` is configured, the compiler SHOULD warn: "CLAWS-W026: global fail-open overrides R3-R4 fail-closed default. R3 write tools will execute on governance errors." The warning names the affected tools. _(Source: SCV-S12-F06)_
+- **Global override R5 ceiling**: `failMode.global: fail-open` MUST NOT override R5 fail-closed. The global override can make things MORE restrictive (R1 fail-closed) but cannot make R5 less restrictive. This asymmetry is enforced at config validation time. _(Source: SCV-S12-F05)_
+- **Built-in tool ceiling exception**: Platform built-in tools (OC exec = R4) that exceed the trust tier ceiling should produce a warning (not error) because the operator cannot remove platform built-ins. The warning should recommend raising the trust tier or disabling the built-in via exec-approvals. _(Source: SCV-S11-F03)_
+- **Bidirectional ceiling violation resolution**: Trust-ceiling violation resolution should present three options: (1) raise trustTier, (2) remove the tool, (3) override classification downward. Each has different trade-offs. _(Source: SCV-S11-F06)_
+- **Reclassification cascading effects**: Reclassification from R5 to R4 changes three security properties: (1) fail-mode becomes configurable, (2) elicitation gate may no longer be required, (3) the tool is no longer flagged as OBO boundary. All three changes must be reflected consistently across all governance layers and artifacts. _(Source: SCV-S13-F01)_
+- **Mandatory reason for R5 reclassification**: A reclassification from R5 to R4 without a reason field produces a warning: "CLAWS-W015: R5 reclassification without reason -- consider documenting why this tool does not require OBO governance." _(Source: SCV-S13-F02)_
+- **Bidirectional reclassification**: Upward reclassification (R1 to R5) is allowed -- more restrictive is always safe. It produces an informational note: "R1 tool reclassified to R5 -- OBO governance will be applied." _(Source: SCV-S13-F03)_
+- **Compliance reclassification audit trail**: The compliance evidence package (SOC2) must include all reclassifications with reasons. `claws comply soc2` output includes a reclassification table with tool name, original risk, override risk, reason, and date. _(Source: SCV-S13-F06)_
+- **Effective vs derived count reporting**: GovAnalysis summary must report both derived and effective R5 counts: "10 tools classified R5 (5 overridden to R4, 5 effective R5)." _(Source: SCV-S13-F07)_
+- **G-ELICIT normalization before cross-reference**: Tool name cross-reference in elicitation policies should use the same normalization as the rest of the pipeline (hyphens/underscores/casing). If normalization resolves the mismatch, no warning is needed. Warnings fire only when normalization cannot find a match. _(Source: SCV-S10-F01)_
+- **Fuzzy match suggestion quality**: "Did you mean?" suggestions must pick the CLOSEST match by edit distance. Multiple close matches should be listed. Threshold: suggest if edit distance <= 3. _(Source: SCV-S10-F02)_
+- **Orphaned R5 policy escalation**: An orphaned elicitation policy (misspelled tool name, no close match) that targets an R5 classification should escalate from warning to error, because the real R5 tool is left ungoverned. _(Source: SCV-S10-F03)_
+- **Built-in tool cross-reference**: Tool names in claws.json may reference platform built-in tools not in TOOLS.md. The cross-reference must check both TOOLS.md and the platform built-in tool set. _(Source: SCV-S10-F04)_
+- **Cascading diagnostic chain for misspellings**: A misspelled tool name that leaves the real tool ungoverned should show both the cross-reference warning AND the OBO-WITHOUT-ELICIT error, making the cause (misspelling) and effect (ungoverned R5 tool) clear. _(Source: SCV-S10-F05)_
+- **Versioned tool name handling**: Tool names with version suffixes (e.g., "send-payment-v2") must not be flagged as misspellings of the un-versioned name. They are different tools. _(Source: SCV-S10-F06)_
+- **Resolution strength ordering**: When OBO-WITHOUT-ELICIT presents resolution alternatives ("add elicitation policy in claws.json" vs "add OBO scope in USER.md"), the resolution should note the security difference: claws.json requires per-use approval (stronger), USER.md grants standing authorization (weaker). Recommend claws.json for R5 tools. _(Source: SCV-S03-F07)_
+- **Reclassification fail-mode warning**: When a tool is reclassified from R1 to R3, the compiler MUST warn that fail-open is explicitly configured for a risk level that defaults to fail-closed. _(Source: SCV-S04-F08)_
+- **Strict equality in fail-mode check**: The runtime fail-mode check must use strict equality (`===`). If `config.failModeR3R4` is `undefined` (not configured), the comparison returns `false`, meaning fail-closed (correct). Coercion-based comparison (`==`) would break this. _(Source: SCV-S04-F03)_
 
 ## Scenario-Driven Amendments (governance-rules S01-S12)
 
@@ -532,6 +542,7 @@ The following amendments are derived from 60 major/warning findings across 12 go
 G-CLASS risk scoring MUST NOT rely solely on keyword extraction from TOOLS.md descriptions. A tool named "send-invoice" whose description says "generates an invoice PDF" must still be classified as R5 if its declared capabilities include TRANSACT or if capability analysis detects credential forwarding, external API calls with user identity, or irreversible external side effects.
 
 Classification precedence:
+
 1. **Explicit claws.json override** -- highest priority, replaces derived score
 2. **Capability analysis** -- examines declared capabilities (READ/WRITE/COMMUNICATE/EXECUTE/TRANSACT)
 3. **Behavioral heuristic** -- OBO detection patterns ("send on behalf of", "act as user", credential forwarding)
@@ -544,8 +555,8 @@ The OBO flag supports per-workspace overrides in claws.json for tools where the 
 classification:
   overrides:
     send-invoice:
-      risk: R3           # override default R5
-      obo: false          # override default OBO detection
+      risk: R3 # override default R5
+      obo: false # override default OBO detection
       reason: "generates PDF for review, does not send"
 ```
 
@@ -567,12 +578,12 @@ When claws.json includes a custom classification table, the override REPLACES th
 
 Platform built-in tools (OC `exec`, `read`, `write`, `bash`) that are not declared in TOOLS.md are still classified. claws ships default classification tables per platform:
 
-| Platform | Tool | Default Classification |
-|----------|------|----------------------|
-| OpenClaw | exec | R4/EXECUTE |
-| OpenClaw | read | R2/READ |
-| OpenClaw | write | R3/WRITE |
-| OpenClaw | bash | R4/EXECUTE |
+| Platform | Tool  | Default Classification |
+| -------- | ----- | ---------------------- |
+| OpenClaw | exec  | R4/EXECUTE             |
+| OpenClaw | read  | R2/READ                |
+| OpenClaw | write | R3/WRITE               |
+| OpenClaw | bash  | R4/EXECUTE             |
 
 Custom platforms provide classification tables via `claws.json`. This resolves Open Question #1.
 
@@ -587,6 +598,7 @@ If claws.json does not explicitly list workspace capabilities, the default is **
 **Source**: S02-F02 (major)
 
 G-PERM violations include bidirectional fix suggestions:
+
 - "Add READ to workspace capabilities in claws.json" (expand workspace)
 - "Remove readonly-query from TOOLS.md" (reduce tool set)
 
@@ -595,6 +607,7 @@ G-PERM violations include bidirectional fix suggestions:
 **Source**: S02-F03 (warning)
 
 G-PERM emits advisory warnings for common capability combinations that suggest misconfiguration:
+
 - `{WRITE, EXECUTE}` without `READ` -- deployment workspace that cannot verify what it deployed
 - `{READ}` only -- workspace with no write or execute capability may be over-restricted
 - `{TRANSACT}` without `COMMUNICATE` -- payment processing without notification capability
@@ -643,6 +656,7 @@ Memory sensitivity operates at per-entry granularity. Tools that access only PUB
 **Source**: S04-F01 (major)
 
 Tool delegation from parent to subagent implies a minimum trust grant for the delegation channel. If AGENTS.md declares a subagent with delegated tools, a trust relationship is implicitly created:
+
 - Parent can send tool invocation requests
 - Subagent can return results
 - Subagent does NOT gain trust to communicate with sibling agents
@@ -660,7 +674,7 @@ The violation "no trust declaration" includes a fix suggestion:
 # Minimum trust declaration for subagent with delegated tools
 agents:
   data-fetcher:
-    trust: delegation-only    # implicit: parent->agent tool delegation
+    trust: delegation-only # implicit: parent->agent tool delegation
 ```
 
 If AGENTS.md format cannot express trust, trust declarations fall back to claws.json `agents.trustGroups`.
@@ -670,6 +684,7 @@ If AGENTS.md format cannot express trust, trust declarations fall back to claws.
 **Source**: S04-F03 (warning)
 
 Trust declarations can be expressed in:
+
 1. **AGENTS.md** -- inline with agent declarations (structured format required)
 2. **claws.json** -- `agents.trustGroups` section (always available)
 
@@ -702,6 +717,7 @@ G-A2A-IDENTITY warnings for L0 identity in fleet contexts explain the impersonat
 **Source**: S05-F02 (warning)
 
 Identity level requirements depend on communication scope:
+
 - **Local-only agents** (same workspace, no fleet): L0 acceptable
 - **Fleet-participating agents** (cross-workspace): L2+ recommended
 
@@ -715,7 +731,7 @@ claws.json supports a configurable minimum identity level:
 
 ```yaml
 identity:
-  minimumLevel: L2    # L0, L1, L2, L3
+  minimumLevel: L2 # L0, L1, L2, L3
 ```
 
 Agents below the minimum produce an error (not warning).
@@ -737,6 +753,7 @@ The Guardrail Sandwich (G-INPUT -> G-CONTEXT -> G-BOUND -> G-OUTPUT) is tested e
 **Source**: S06-F03 (warning)
 
 G-INPUT fix suggestions are platform-specific:
+
 - **OpenClaw**: system/user/assistant message boundaries + `output_isolation: true`
 - **Cursor**: context isolation tags
 - **Claude**: tool result boundaries
@@ -746,6 +763,7 @@ G-INPUT fix suggestions are platform-specific:
 **Source**: S06-F04 (warning)
 
 G-INPUT differentiates tools by data source trust level:
+
 - **External data tools** (web, API, email): Output inherently untrusted. Isolation required.
 - **Local data tools** (file reader, local DB): Output user-controlled. Isolation recommended.
 
@@ -766,6 +784,7 @@ G-CONTEXT at compile time checks CONFIGURATION, not CONTENT. The check: "does th
 **Source**: S07-F04 (warning)
 
 G-CONTEXT differentiates memory loading contexts:
+
 - **System prompt context** (dangerous): G-CONTEXT error
 - **User message context** (moderate): G-CONTEXT warning
 - **Tool call context** (safest): G-CONTEXT note
@@ -776,12 +795,12 @@ G-CONTEXT differentiates memory loading contexts:
 
 Multi-sub-rule groups have individual diagnostic codes:
 
-| Group | Sub-rule codes |
-|-------|---------------|
-| G-INPUT | G-INPUT-01 (system prompt isolation), G-INPUT-02 (trust labeling), G-INPUT-03 (sanitization), G-INPUT-04 (URL validation) |
+| Group     | Sub-rule codes                                                                                                                  |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| G-INPUT   | G-INPUT-01 (system prompt isolation), G-INPUT-02 (trust labeling), G-INPUT-03 (sanitization), G-INPUT-04 (URL validation)       |
 | G-CONTEXT | G-CONTEXT-01 (boundary markers), G-CONTEXT-02 (tool isolation), G-CONTEXT-03 (memory isolation), G-CONTEXT-04 (skill isolation) |
-| G-OUTPUT | G-OUTPUT-01 (data redaction), G-OUTPUT-02 (URL rules), G-OUTPUT-03 (format validation), G-OUTPUT-04 (chain validation) |
-| G-BOUND | G-BOUND-01 (step limits), G-BOUND-02 (tool call limits), G-BOUND-03 (budget limits), G-BOUND-04 (recursion limits) |
+| G-OUTPUT  | G-OUTPUT-01 (data redaction), G-OUTPUT-02 (URL rules), G-OUTPUT-03 (format validation), G-OUTPUT-04 (chain validation)          |
+| G-BOUND   | G-BOUND-01 (step limits), G-BOUND-02 (tool call limits), G-BOUND-03 (budget limits), G-BOUND-04 (recursion limits)              |
 
 ### Amendment A29: G-OUTPUT Compile-Time Scope (G-OUTPUT)
 
@@ -810,12 +829,12 @@ Without PII type declarations, G-OUTPUT applies catch-all redaction. With declar
 
 Output redaction is configurable per channel:
 
-| Channel | Redaction behavior |
-|---------|-------------------|
-| User response | Redact PII (masked values) |
-| Audit chain | Full PII preserved (forensic integrity) |
-| SIEM export | Event-level data only (no PII content) |
-| Subagent delegation | Inherit source data labels |
+| Channel             | Redaction behavior                      |
+| ------------------- | --------------------------------------- |
+| User response       | Redact PII (masked values)              |
+| Audit chain         | Full PII preserved (forensic integrity) |
+| SIEM export         | Event-level data only (no PII content)  |
+| Subagent delegation | Inherit source data labels              |
 
 ### Amendment A32: Per-Sub-Rule Individual Checking (G-BOUND)
 
@@ -831,7 +850,7 @@ Missing bounds produce warnings by default. Enterprise deployments escalate via:
 
 ```yaml
 bounds:
-  strictMode: true    # missing bounds = error (default: false)
+  strictMode: true # missing bounds = error (default: false)
 ```
 
 ### Amendment A34: Recommended Limit Ranges (G-BOUND)
@@ -840,12 +859,12 @@ bounds:
 
 Recommended limit ranges as advisory guidance:
 
-| Limit | Range | Notes |
-|-------|-------|-------|
-| maxSteps | 50-500 | Per-agent session |
-| maxToolCalls | 10-100 | Per-turn ceiling |
-| maxBudget | $0.10-$10.00 | Token cost ceiling |
-| maxRecursionDepth | 2-5 | Shared with G-A2A-ESCALATE |
+| Limit             | Range        | Notes                      |
+| ----------------- | ------------ | -------------------------- |
+| maxSteps          | 50-500       | Per-agent session          |
+| maxToolCalls      | 10-100       | Per-turn ceiling           |
+| maxBudget         | $0.10-$10.00 | Token cost ceiling         |
+| maxRecursionDepth | 2-5          | Shared with G-A2A-ESCALATE |
 
 ### Amendment A35: G-BOUND + G-A2A-ESCALATE Shared Config
 
@@ -900,6 +919,7 @@ The generated plugin overrides platform approve-on-timeout default to deny-on-ti
 **Source**: S11-F02 (major)
 
 G-ELICIT-TIMEOUT validates field interactions:
+
 - `mode: inline` + `timeout > 120` -> warning (long inline block)
 - `mode: async` + `timeout: 300` -> typical (no warning)
 - `mode: pre-approved` + timeout -> note (timeout ignored)
@@ -938,7 +958,7 @@ G-SUPPLY severity is configurable:
 
 ```yaml
 supply:
-  unsignedSeverity: error    # error for production, warning for dev
+  unsignedSeverity: error # error for production, warning for dev
 ```
 
 ### Amendment A48: Signature Verification Prerequisites (G-SUPPLY)
@@ -951,11 +971,11 @@ G-SUPPLY checks: (1) skill has signature, (2) workspace can verify it. Signed sk
 
 **Source**: S12-F03 (warning)
 
-| Tier | Condition | Severity |
-|------|-----------|----------|
-| Unsigned | No signature | Warning (configurable to error) |
-| Signed-untrusted | Valid sig, unknown signer | Warning |
-| Signed-trusted | Valid sig, known signer | Pass |
+| Tier             | Condition                 | Severity                        |
+| ---------------- | ------------------------- | ------------------------------- |
+| Unsigned         | No signature              | Warning (configurable to error) |
+| Signed-untrusted | Valid sig, unknown signer | Warning                         |
+| Signed-trusted   | Valid sig, known signer   | Pass                            |
 
 ### Amendment A50: Malicious Skill Blocklist (G-SUPPLY)
 
@@ -967,11 +987,11 @@ G-SUPPLY checks `.claws/supply/blocklist.json` (auto-updated from ClawHub adviso
 
 **Source**: S12-F06 (major)
 
-| Status | Condition |
-|--------|-----------|
-| satisfied | All skills signed-trusted |
+| Status              | Condition                        |
+| ------------------- | -------------------------------- |
+| satisfied           | All skills signed-trusted        |
 | partially-satisfied | Any unsigned or signed-untrusted |
-| not-satisfied | No signing infrastructure |
+| not-satisfied       | No signing infrastructure        |
 
 ### Amendment A52: G-OUTPUT Incident Response Path (Compliance)
 
@@ -1901,7 +1921,7 @@ Fleet: each workspace has own signing key. Central aggregator needs all keys for
 
 **Source**: PF2-S13-F01 (major)
 
-Tool names carry strong behavioral signals. "send-*" implies transact/OBO. "read-*" implies observe. "delete-*" implies destructive write. Classifier must analyze tool name, not just description text.
+Tool names carry strong behavioral signals. "send-_" implies transact/OBO. "read-_" implies observe. "delete-*" implies destructive write. Classifier must analyze tool name, not just description text.
 
 ### Amendment A205: Four-Level Classification Precedence (G-CLASS)
 
@@ -3119,7 +3139,7 @@ URL shorteners (bit.ly, t.ly) defeat domain allowlist validation because the vis
 
 **Source**: ID-S03-F05 (warning)
 
-Overly broad allowlist patterns (* and *.*) defeat URL validation. The compiler warns when allowlist patterns are so broad they provide zero runtime protection. A workspace with an allowlist of ["*"] passes the compile-time structure check but has no security value.
+Overly broad allowlist patterns (* and _._) defeat URL validation. The compiler warns when allowlist patterns are so broad they provide zero runtime protection. A workspace with an allowlist of ["*"] passes the compile-time structure check but has no security value.
 
 ### Amendment A406: URL Validation Across All Output Channels (G-OUTPUT)
 
@@ -3447,187 +3467,187 @@ The RFC 3161 timestamp authority response is obtained at generation time and var
 
 Between a fleet policy push and workspace recompilation, the governance plugin enforces rules the administrator has explicitly revoked. Any R5 tool call during this stale enforcement window proceeds under the old policy. The security model must define the stale enforcement window as a known security gap and require minimization to seconds, not hours. The governance plugin must compare the policy overlay timestamp against its own build timestamp and enter degraded mode (deny R4/R5 tools) if the policy is newer than the build.
 
-*(Sources: PA-S09-F02)*
+_(Sources: PA-S09-F02)_
 
 ### Amendment A460: Runtime Trust Tier Ceiling Check (G-ENFORCEMENT)
 
 Build-time enforcement of fleet trust tier ceilings is the first line of defense, but runtime enforcement is the backstop. The governance plugin must check the fleet tier ceiling on every tool call, not just at build time. If the plugin's compiled tier exceeds the fleet ceiling (because the plugin was built before the ceiling was imposed), the plugin must fail-closed for R4/R5 tools. This prevents trust tier drift escalation (T2 to T3) from allowing R5 tools to auto-approve without human review during the detection window.
 
-*(Sources: PA-S11-F05)*
+_(Sources: PA-S11-F05)_
 
 ### Amendment A461: Canonical Cross-Workspace Delegation Reference Format (G-A2A-DELEGATE)
 
 CL-02 must define a canonical cross-workspace delegation reference format: `fleet://{workspace-name}/agents/{agent-name}`. All other formats (relative paths, shorthand, bare names) must be rejected at compile time with a diagnostic that includes the canonical format. The workspace-name in the reference must match the workspace's declared name in claws.json (logical identity), not the directory name or hostname. References must be validated during check, not only during fleet scan. Cross-workspace delegation references should include a version or hash component for safety (e.g., `fleet://alpha-prod/agents/finance@v2.3`) to prevent silent behavior changes in delegated agents.
 
-*(Sources: PA-S20-F01, PA-S20-F02, PA-S20-F04, PA-S20-F06)*
+_(Sources: PA-S20-F01, PA-S20-F02, PA-S20-F04, PA-S20-F06)_
 
 ### Amendment A462: Floor-Only Inheritance for Elicitation Policy (G-ELICIT)
 
 Local workspace policy can raise the security floor above the fleet template but can never lower it below. CL-02 must define floor-only inheritance as a first-class concept: local policy >= fleet floor in all governance dimensions. The strictness comparison must be semantic (understanding that elicit_all_r3_plus is stricter than elicit_r5_only), covering trust tier, elicitation scope, fail mode, data sensitivity labels, and tool risk classifications. Floor enforcement must happen at compile time during check, producing a hard error with the fleet floor, local policy, and an explanation of why the local policy is less strict. The error message must suggest the exception request workflow rather than local workarounds.
 
-*(Sources: PA-S21-F01, PA-S21-F02, PA-S21-F03, PA-S21-F06)*
+_(Sources: PA-S21-F01, PA-S21-F02, PA-S21-F03, PA-S21-F06)_
 
 ### Amendment A463: Mandatory Impact Analysis for Fleet Template Changes (G-ELICIT)
 
 Fleet template modifications that remove or weaken a policy must undergo mandatory impact analysis before application. The analysis must show which workspaces depend on the policy, what governance rules reference it, and what failures will result. OBO-WITHOUT-ELICIT cascades must be identified specifically: when an elicitation policy is removed, all workspaces with OBO delegations referencing tools covered by that policy are enumerated. The impact analysis must distinguish between hard errors (OBO-WITHOUT-ELICIT cascade) and soft degradation (fewer warnings), with error-causing removals flagged as CRITICAL impacts.
 
-*(Sources: PA-S22-F01, PA-S22-F02, PA-S22-F04)*
+_(Sources: PA-S22-F01, PA-S22-F02, PA-S22-F04)_
 
 ### Amendment A464: Case-Insensitive Agent Name Collision Detection (G-A2A-IDENTITY)
 
 G-A2A-IDENTITY must mandate case-insensitive agent name collision detection at both workspace and fleet level. Agent names must be normalized to a canonical lowercase form at parse time; the original casing is preserved for display, but all identity operations (collision detection, routing, delegation references) use the normalized form. A2A routing must refuse delivery on ambiguous names. Beyond case sensitivity, the collision detection should apply NFKC Unicode normalization and confusable detection per Unicode Technical Report 39 to prevent homoglyph impersonation attacks.
 
-*(Sources: PA-S24-F01, PA-S24-F02, PA-S24-F03, PA-S24-F05)*
+_(Sources: PA-S24-F01, PA-S24-F02, PA-S24-F03, PA-S24-F05)_
 
 ### Amendment A465: Approval Token Parameter Hash Binding (G-ELICIT)
 
 The approval token MUST include a cryptographic hash (HMAC-SHA256) of the complete parameter set at the moment of user approval, covering the full serialized parameter tree including deeply nested fields and arrays. At execution time, the runtime recomputes the hash of the actual invocation parameters and compares it to the token's embedded hash. Any mismatch results in immediate denial without re-prompt. Framework-managed parameters (timestamps, request IDs, nonces) must be declared in the TOOLS.md schema and excluded from the approval hash. Binary parameters must be hashed as raw bytes, not their string representation.
 
-*(Sources: PT1-S01-F01, PT1-S01-F04, PT1-S01-F06, PT1-S01-F09)*
+_(Sources: PT1-S01-F01, PT1-S01-F04, PT1-S01-F06, PT1-S01-F09)_
 
 ### Amendment A466: Approval Token Expiry and Replay Prevention (G-ELICIT)
 
 The 60-second validity window must be enforced using monotonic clock elapsed-time comparison, not wall clock, to prevent clock-manipulation bypass. The validity window is a compile-time constant in the emitted handler, non-configurable by the agent; enterprise fleet policy may reduce below 60s but never extend it. A replayed token with valid signature but expired timestamp must produce a distinct audit event type (obo-token-expired) separate from forgery and parameter mismatch. Each approval token must be consumed exactly once via a nonce cache (TTL = validity window + grace period). The approval flow should include delivery confirmation so the user knows whether the action succeeded or failed. For distributed deployments, tokens should be instance-bound to prevent cross-instance replay.
 
-*(Sources: PT1-S02-F01, PT1-S02-F02, PT1-S02-F03, PT1-S02-F05, PT1-S02-F07, PT1-S02-F08)*
+_(Sources: PT1-S02-F01, PT1-S02-F02, PT1-S02-F03, PT1-S02-F05, PT1-S02-F07, PT1-S02-F08)_
 
 ### Amendment A467: AbortSignal Capability Probe for R5 Handler Registration (G-ELICIT)
 
 The handler registration code emitted by claws must include an explicit runtime capability probe for AbortSignal support before registering any R5 handler. The probe must test actual abort callback behavior, not just API surface existence. If the probe fails, R5 handler registration must throw a hard error; R1-R4 tools may still register on platforms without AbortSignal support. The registration refusal must emit an audit event even though no tool execution occurred. As defense-in-depth, a secondary per-invocation AbortSignal verification must run before each R5 tool execution, guarding against TOCTOU between probe and invocation.
 
-*(Sources: PT1-S03-F01, PT1-S03-F05, PT1-S03-F07, PT1-S03-F08)*
+_(Sources: PT1-S03-F01, PT1-S03-F05, PT1-S03-F07, PT1-S03-F08)_
 
 ### Amendment A468: Pending-Request Deduplication for Elicitation (G-ELICIT)
 
 The runtime must maintain a pending-request table keyed by (agent_id, tool_name, parameter_hash) to detect and suppress duplicate elicitation requests caused by agent framework retries. The deduplication must use the same canonical parameter serialization as the TOCTOU check. When the user responds to the original prompt, the outcome must propagate to all deduplicated retries: exactly one tool execution regardless of the number of framework retries. The audit trail must record both the original request and each suppressed duplicate, with timestamps, surfacing the suppressed-duplicate count as a framework configuration health metric.
 
-*(Sources: PT1-S04-F01, PT1-S04-F03, PT1-S04-F04)*
+_(Sources: PT1-S04-F01, PT1-S04-F03, PT1-S04-F04)_
 
 ### Amendment A469: Per-Agent Rate Limiting for R5 Elicitation (G-ELICIT)
 
 The rate limit must be per-agent (not global), scoped to R5 elicitation requests (not approvals), counting on request creation not user response. Default: 5 requests per 60-second window, fleet-adjustable downward but not upward. When the limit is exceeded, all subsequent R5 requests from that agent within the window must be denied silently before reaching the UI transport. Progressive cooldown applies: first violation = 60s cooldown, second within 5 minutes = 300s, third = agent quarantine pending operator intervention. The agent_id must be cryptographically bound to the session to prevent identity spoofing. Each R5 prompt must include a mandatory risk summary and require explicit acknowledgment, not just a click.
 
-*(Sources: PT1-S05-F01, PT1-S05-F02, PT1-S05-F03, PT1-S05-F04, PT1-S05-F05, PT1-S05-F06, PT1-S05-F07, PT1-S05-F08)*
+_(Sources: PT1-S05-F01, PT1-S05-F02, PT1-S05-F03, PT1-S05-F04, PT1-S05-F05, PT1-S05-F06, PT1-S05-F07, PT1-S05-F08)_
 
 ### Amendment A470: Agent-Bound Non-Transferable Approval Tokens (G-ELICIT)
 
 Approval tokens must be bound to the agent identity (agent_id) that requested them and are non-transferable. The runtime verifies that the agent_id in the token matches the agent_id making the current invocation; any mismatch is a transitive delegation attempt and is blocked with a security incident audit event. Approval cannot be inherited or inferred from data flow; the runtime has no concept of "inherited approval." A2A trust and OBO approval are orthogonal dimensions: trust says "this agent can participate," approval says "this specific action is authorized." The OBO model is strictly single-hop (user -> agent -> tool) with no transitive delegation. Standing approvals must include agent_id or agent class in their condition clause; unrestricted standing approvals trigger a compile-time broad-scope warning.
 
-*(Sources: PT1-S07-F01, PT1-S07-F02, PT1-S07-F03, PT1-S07-F05, PT1-S07-F08)*
+_(Sources: PT1-S07-F01, PT1-S07-F02, PT1-S07-F03, PT1-S07-F05, PT1-S07-F08)_
 
 ### Amendment A471: Governance-Critical Path R5 Escalation (G-ELICIT)
 
 Any file-write operation targeting USER.md, claws.json, SOUL.md, TOOLS.md, AGENTS.md, ROLES.md, SCHEDULE.md, WORKFLOWS.md, or DATAMAP.md must be classified as R5/OBO regardless of the tool's normal risk classification. The governance-critical path list is a compile-time constant embedded in the generated handler, not configurable by agents at runtime. The R5 approval prompt must show a diff of the proposed change, not just "approve file write?" Path matching must resolve symbolic links, path traversal, and handle case-insensitive comparison on Windows. Each governance file write requires independent R5 approval. The three-source precedence order (SOUL.md deny > claws.json > USER.md) is validated at compile time for pre-authorization entries.
 
-*(Sources: PT1-S08-F01, PT1-S08-F02, PT1-S08-F03, PT1-S08-F04, PT1-S08-F06)*
+_(Sources: PT1-S08-F01, PT1-S08-F02, PT1-S08-F03, PT1-S08-F04, PT1-S08-F06)_
 
 ### Amendment A472: Standing Approval Mandatory Expiry (G-ELICIT)
 
 Standing approvals must have a mandatory expiry date in the source configuration with a default of 90 days from creation. The compiled handler must check the expiry date at runtime (not just at compile time) as a defense against indefinite stale approvals. When the expiry passes, the standing approval is automatically invalid even without recompilation, and R5 tools revert to per-invocation elicitation. This addresses the stale standing approval drift scenario where an operator revokes a standing approval in claws.json but forgets to recompile and redeploy the handler.
 
-*(Sources: PT1-S09-F05)*
+_(Sources: PT1-S09-F05)_
 
 ### Amendment A473: Constant-Time Token Signature Verification (G-ELICIT)
 
 Approval token signature verification must use constant-time comparison (crypto.timingSafeEqual) to prevent timing side-channel attacks. The constant-time guarantee must extend to the length check: length normalization must occur before comparison to prevent length-probing attacks. Constant-time comparison is the primary defense, with rate limiting as secondary defense-in-depth. The timing attack reduces brute force from 2^256 to 8192 attempts for HMAC-SHA256, making it trivially feasible without constant-time comparison. The compiler's VERIFY phase must perform static analysis on the emitted code to confirm no non-constant-time comparisons are used on security-sensitive values.
 
-*(Sources: PT1-S11-F02, PT1-S11-F03)*
+_(Sources: PT1-S11-F02, PT1-S11-F03)_
 
 ### Amendment A474: Platform-Managed Approval Key Storage (G-ELICIT)
 
 The approval key must NEVER exist in the workspace directory tree. The claws init command must store the key in a platform-managed secure location: OS keychain (macOS Keychain, Windows Credential Manager, Linux Secret Service) or external secrets manager. The claws.json key reference must be a URI (keychain://claws/approval-key), not a file path. The key must not appear in environment variables; if container deployments require env-based config, the variable must contain a secrets manager reference, not the key itself. Key rotation must include time-bounded old-key retention during the grace period (24 hours, matching redeployment SLA) with mandatory deletion after expiry.
 
-*(Sources: PT1-S12-F01, PT1-S12-F05, PT1-S12-F06)*
+_(Sources: PT1-S12-F01, PT1-S12-F05, PT1-S12-F06)_
 
 ### Amendment A475: Fleet-Level Agent Identity Requirements (G-A2A-IDENTITY)
 
 L0 identity (name-only, no cryptographic binding) is insufficient for fleet contexts. The fleet identity layer must enforce minimum L1 identity: workspace-qualified names that prevent cross-workspace ambiguity. Fleet-wide collision detection must emit OC-POLICY-E-IDENTITY when agents share names across workspaces. Cross-workspace delegation resolution must fail deterministically on ambiguous names, not depend on scan order or hash table insertion. The compiler must emit a diagnostic warning when a workspace uses L0 identity in a fleet context. Audit events must always show fully qualified workspace/agent paths, never bare display names, to prevent display-name spoofing.
 
-*(Sources: PT1-S13-F01, PT1-S13-F02, PT1-S13-F03, PT1-S13-F04, PT1-S13-F05)*
+_(Sources: PT1-S13-F01, PT1-S13-F02, PT1-S13-F03, PT1-S13-F04, PT1-S13-F05)_
 
 ### Amendment A476: Transitive Trust Bridge Detection in FE6 (FE6)
 
 Multi-group membership creates implicit transitive trust that is invisible in per-group analysis. FE6 must compute the capability union for multi-group agents and flag when the union exceeds any single group's intended capability set. The trust graph must model groups as nodes and shared members as edges, running bipartite graph connectivity analysis (BFS/DFS) to detect bridging paths. The compiler must perform a mandatory cross-group analysis pass because per-group validation is insufficient. Accidental bridges produce an error; declared bridges (explicit bridge: true annotation in AGENTS.md) produce a warning with an audit record. Chain bridges (A-B through X, B-C through Y creating A-C) require transitive closure detection. The diagnostic must show the full trust path with capability union.
 
-*(Sources: PT1-S15-F01, PT1-S15-F02, PT1-S15-F03, PT1-S15-F04, PT1-S15-F05, PT1-S15-F06, PT1-S15-F07)*
+_(Sources: PT1-S15-F01, PT1-S15-F02, PT1-S15-F03, PT1-S15-F04, PT1-S15-F05, PT1-S15-F06, PT1-S15-F07)_
 
 ### Amendment A477: Transitive High-Water-Mark Label Propagation (G-A2A-FLOW)
 
 Adjacent-pair label checking is fundamentally insufficient for delegation chains longer than 2 agents. The high-water-mark label must propagate through the entire chain: if the source is CONFIDENTIAL, every subsequent agent must be rated CONFIDENTIAL or higher. There must be zero tolerance for label downgrades in chains; the "within tolerance" per-hop concept is eliminated. Label propagation must handle DAGs (directed acyclic graphs) where each agent's effective label is the maximum of all incoming labels from all paths. Labels are inherited from input to output based on data provenance, not agent intent. Data transformation may legitimately reduce sensitivity only through explicit declassification annotations requiring human approval via G-ELICIT. Cycle-free graph is a precondition for label propagation correctness.
 
-*(Sources: PT1-S17-F01, PT1-S17-F02, PT1-S17-F03, PT1-S17-F04, PT1-S17-F07, PT1-S17-F08)*
+_(Sources: PT1-S17-F01, PT1-S17-F02, PT1-S17-F03, PT1-S17-F04, PT1-S17-F07, PT1-S17-F08)_
 
 ### Amendment A478: Delegation Graph Cycle Detection Before Label Propagation (G-A2A-DELEGATE)
 
 Cycle detection must be the FIRST analysis pass on the delegation graph, before any label propagation, trust computation, or flow analysis. The algorithm must handle both direct cycles (A-B-A) and indirect cycles (A-B-C-A) via Tarjan's SCC or DFS with back-edge detection, marking all participating nodes. Self-delegation (agent delegates to itself) must be rejected as a separate check. Cycle detection must run on the expanded graph after group membership resolution, since group-to-group delegation can introduce invisible cycles. If cycles are detected, the compiler must report them with full path including edge labels and refuse to compile (fail-closed). Label propagation should include a maximum iteration count (V iterations) as a safety net against undetected cycles.
 
-*(Sources: PT1-S18-F01, PT1-S18-F02, PT1-S18-F03, PT1-S18-F04, PT1-S18-F05, PT1-S18-F06, PT1-S18-F07)*
+_(Sources: PT1-S18-F01, PT1-S18-F02, PT1-S18-F03, PT1-S18-F04, PT1-S18-F05, PT1-S18-F06, PT1-S18-F07)_
 
 ### Amendment A479: Implicit All-Delegation R5/OBO Expansion Warning (G-A2A-DELEGATE)
 
 The `tools: all` shorthand must not be accepted silently when the expansion includes R4+ or OBO tools. The compiler must emit IMPLICIT-R4-DELEGATION warning enumerating every R4+ tool in the expansion, requiring either explicit listing or an acknowledgment annotation. OBO tools must be excluded from all-expansion entirely, always requiring explicit listing with justification. The tool manifest must be re-evaluated on every compilation; a cached expansion from a previous run creates a TOCTOU risk when new R5 tools are added. The diagnostic must show the full expansion with risk classification per tool. Inclusion lists are preferred over exclusion patterns (tools: all minus [Bash]) since exclusion is fragile against new R5 tools. Audit events for delegations must include the resolved tool list, not the raw "all" keyword.
 
-*(Sources: PT1-S19-F01, PT1-S19-F02, PT1-S19-F03, PT1-S19-F04, PT1-S19-F05, PT1-S19-F06)*
+_(Sources: PT1-S19-F01, PT1-S19-F02, PT1-S19-F03, PT1-S19-F04, PT1-S19-F05, PT1-S19-F06)_
 
 ### Amendment A480: Side-Channel Defense Taxonomy (G-CONTEXT, G-DATA)
 
 The security model must define a side-channel defense taxonomy: file system, environment variables, shared memory, stdout/stderr, network sockets, clipboard, and OS IPC. The defense-in-depth approach is: (1) isolate what is practical (environment, temp directories per agent), (2) track what is feasible (file reads/writes with label propagation), (3) document what is out-of-scope (network, clipboard) with recommended mitigations. The Bash tool is the highest-risk side-channel vector because it provides unrestricted OS access; the practical defense is restricting Bash access and accepting the side-channel risk for agents that have it. Audit trails must capture file system operations across all agents in a session for forensic reconstruction of side-channel communication.
 
-*(Sources: PT1-S20-F04, PT1-S20-F06)*
+_(Sources: PT1-S20-F04, PT1-S20-F06)_
 
 ### Amendment A481: DNS Exfiltration as Out-of-Scope Attack Vector (G-OUTPUT)
 
 DNS-based data exfiltration (encoding secrets as subdomains) is fundamentally outside the scope of application-level URL inspection because DNS resolution happens before the HTTP request, leaking subdomain content even if the HTTP request is blocked. CL-02 must explicitly document this as an out-of-scope attack vector with a clear explanation of why application-level defense is insufficient. The compiler should emit an advisory diagnostic when it detects URL patterns indicating possible DNS exfiltration (long subdomains, base64-like strings). The recommended mitigation is network-level DNS monitoring with anomaly detection. The Bash tool can execute arbitrary DNS lookups (nslookup, dig) that bypass all URL inspection, reinforcing that DNS defense must be at the network layer. Redirect-following URL inspection and separate IP-vs-domain URL inspection paths are required for completeness. The governance IR should carry a DNS allowlist for network infrastructure to consume.
 
-*(Sources: PT1-S24-F01, PT1-S24-F02, PT1-S24-F03, PT1-S24-F04, PT1-S24-F05, PT1-S24-F06, PT1-S24-F07)*
+_(Sources: PT1-S24-F01, PT1-S24-F02, PT1-S24-F03, PT1-S24-F04, PT1-S24-F05, PT1-S24-F06, PT1-S24-F07)_
 
 ### Amendment A482: Cross-Session Memory Provenance and Trust Labels (G-CONTEXT-03)
 
 Every memory entry must carry immutable provenance metadata: session ID, agent ID, timestamp, and the creating tool call. Memory entries must carry three-tier trust labels: TRUSTED (written by user or verified agent), UNVERIFIED (written by agent without human approval), and TAINTED (written during a compromised session). Context assembly must only load TRUSTED entries into the INSTRUCTION zone; UNVERIFIED entries enter the DATA zone with boundary markers; TAINTED entries are quarantined. Retroactive tainting by session ID must be supported for post-hoc compromise discovery. Memory display must show provenance. Memory pruning must respect provenance, preserving TAINTED entries longer for forensic purposes. The provenance and trust label pattern should extend to all cross-session persistent state (configuration files, workspace state, cached data).
 
-*(Sources: PT1-S27-F01, PT1-S27-F02, PT1-S27-F03, PT1-S27-F04, PT1-S27-F06, PT1-S27-F07, PT1-S27-F08)*
+_(Sources: PT1-S27-F01, PT1-S27-F02, PT1-S27-F03, PT1-S27-F04, PT1-S27-F06, PT1-S27-F07, PT1-S27-F08)_
 
 ### Amendment A483: Audit Chain Break Scope Assessment in Evidence (Audit Chain)
 
 A single missing audit chain entry invalidates all subsequent entries because each entry's prevHash references the prior. The compliance evidence generator must detect breaks BEFORE packaging evidence and include a break scope assessment: number of breaks, total affected entries, and coverage percentage (verified/total). Witness recovery must be attempted for every detected break with the outcome (recovered, unreachable, not-configured) recorded in the evidence package. SOC2 auditors treat any gap as a material weakness, so the evidence must include a mandatory AUDIT-CHAIN-INTEGRITY-BROKEN finding, never omitting or silently excluding broken segments. Pre-break entries remain fully verified and usable as evidence with clear temporal boundaries. The chain integrity status should support a 'partial' status with verified-up-to entry number. Remediation guidance for broken chains must be included.
 
-*(Sources: PT2-S01-F01, PT2-S01-F02, PT2-S01-F03, PT2-S01-F04, PT2-S01-F05, PT2-S01-F06, PT2-S01-F07, PT2-S01-F08)*
+_(Sources: PT2-S01-F01, PT2-S01-F02, PT2-S01-F03, PT2-S01-F04, PT2-S01-F05, PT2-S01-F06, PT2-S01-F07, PT2-S01-F08)_
 
 ### Amendment A484: Witness Cross-Reference for Tampered Chain Detection (Audit Chain)
 
 Break detection that only verifies internal hash chain consistency is insufficient because an attacker who can rewrite entries produces a chain that passes sequential hash verification. The verify command must cross-reference every entry's hash against witness service attestations, detecting divergence as tampering. Timestamp divergence detection (chain-recorded vs witness-attested) catches rewrites that happened hours after original events. When witness attestations are absent, the compliance evidence must report witness coverage gaps as reduced assurance. Tampered entries must be compared at the governance-decision level (deny-to-allow changes are critical findings). The audit chain file should use append-only filesystem protection (chattr +a on Linux, NTFS append-only ACLs on Windows). Witness diversity (external timestamping authority + internal sidecar + cloud witness) is recommended for enterprise compliance tiers.
 
-*(Sources: PT2-S02-F01, PT2-S02-F02, PT2-S02-F03, PT2-S02-F04, PT2-S02-F05, PT2-S02-F07, PT2-S02-F08)*
+_(Sources: PT2-S02-F01, PT2-S02-F02, PT2-S02-F03, PT2-S02-F04, PT2-S02-F05, PT2-S02-F07, PT2-S02-F08)_
 
 ### Amendment A485: RFC 8785 Canonical JSON for Cross-Platform Evidence Reproducibility (Reproducibility)
 
 All audit chain entries must be serialized using RFC 8785 (JSON Canonicalization Scheme) with deterministic key ordering (sorted lexicographically by Unicode code point). Evidence hashes must be computed over the canonical form, not the stored form. Existing non-canonical entries cannot be retroactively re-serialized (that would break the chain); the evidence generator must maintain a stored-to-canonical hash mapping. The RFC 8785 implementation must be tested across all supported platforms (Windows, macOS, Linux) and Node.js versions (18, 20, 22). Unicode string normalization must use NFC before canonical sorting to handle macOS HFS+ NFD filenames. The evidence package format itself must be canonical at all levels. Evidence packages must include a serialization-version field for backward compatibility.
 
-*(Sources: PT2-S03-F01, PT2-S03-F02, PT2-S03-F03, PT2-S03-F04, PT2-S03-F06, PT2-S03-F07)*
+_(Sources: PT2-S03-F01, PT2-S03-F02, PT2-S03-F03, PT2-S03-F04, PT2-S03-F06, PT2-S03-F07)_
 
 ### Amendment A486: String Representation for Precision-Sensitive Numeric Values (Reproducibility)
 
 IEEE 754 doubles have multiple valid string representations, causing evidence hash divergence across platforms (0.1 vs 0.10000000000000001). All monetary and measurement values in audit chain entries must be stored as string representations with explicit precision, not raw floating-point JSON numbers. Budget values use string-encoded decimals (e.g., "0.10" for 10 cents). Risk scores use one decimal place. Timing values are truncated to integer milliseconds. The schema validator must reject raw floating-point values in precision-sensitive fields. The compliance specification should define cross-language test vectors for verifier conformance. Existing entries with raw floats are canonicalized using RFC 8785 number rules during migration, with dual format support.
 
-*(Sources: PT2-S04-F01, PT2-S04-F02, PT2-S04-F03, PT2-S04-F04, PT2-S04-F05, PT2-S04-F06, PT2-S04-F07, PT2-S04-F08)*
+_(Sources: PT2-S04-F01, PT2-S04-F02, PT2-S04-F03, PT2-S04-F04, PT2-S04-F05, PT2-S04-F06, PT2-S04-F07, PT2-S04-F08)_
 
 ### Amendment A487: HIPAA PHI Classification for Audit Chains (HIPAA)
 
 When HIPAA compliance mode is active, the audit chain must be automatically classified as PHI storage in the compliance metadata because tool invocation parameters may contain patient names, MRNs, and diagnosis codes. The chain file must be encrypted at rest (AES-256-GCM with platform key store management). Access to PHI-classified chains must be restricted to authorized personnel with filesystem permissions verified by `comply --verify`. The compliance evidence must include a manifest of all PHI types present for breach scope assessment. Tool invocation parameters containing PHI should be redacted in the standard chain view but preserved in a separate encrypted forensic store. The witness service metadata must be evaluated for indirect PHI exposure (tool name + timestamp combinations). HIPAA 6-year retention requirements must be balanced with data minimization through retention policies with automatic expiry and secure deletion.
 
-*(Sources: PT2-S05-F01, PT2-S05-F02, PT2-S05-F03, PT2-S05-F04, PT2-S05-F05, PT2-S05-F07, PT2-S05-F08)*
+_(Sources: PT2-S05-F01, PT2-S05-F02, PT2-S05-F03, PT2-S05-F04, PT2-S05-F05, PT2-S05-F07, PT2-S05-F08)_
 
 ### Amendment A488: Normative CEF Severity Mapping for SIEM Export (SIEM Export)
 
 Every governance event type must have an explicit mapping to CEF severity levels 0-10, included in CL-02 as a normative reference. The mapping must align with the governance risk model: R5 deny events map to CEF 9-10, R4 deny to CEF 7-8, R3 to CEF 5-6, R2 to CEF 3-4, R1 to CEF 1-2, informational events to CEF 0. Custom governance rules must require a severity field or derive it from risk classification; unmapped event types must fail loudly with OC-POLICY-E231 rather than defaulting to 0 (Unknown). The mapping table must also define deviceAction, deviceEventClassId (claws-specific namespace), and extension fields. The severity mapping should be configurable per-workspace with a floor (R5 events cannot be mapped below CEF 7). The severity model should be format-agnostic (internal 1-10 scale) with per-format adapters for CEF, LEEF, JSON syslog, and OpenTelemetry.
 
-*(Sources: PT2-S06-F01, PT2-S06-F02, PT2-S06-F03, PT2-S06-F04, PT2-S06-F05, PT2-S06-F07)*
+_(Sources: PT2-S06-F01, PT2-S06-F02, PT2-S06-F03, PT2-S06-F04, PT2-S06-F05, PT2-S06-F07)_
 
 ## Horus Container Threat-Model Amendments
 
 ### Amendment A489: G-CHAIN Tool-Argument Provenance — New Rule Family (G-CHAIN)
 
-G-CHAIN is a new governance-rule family that defends against **R-tier laundering via intra-agent tool chains**. The canonical attack: an R1 reader tool (e.g., `read-document`) fetches RESTRICTED data; its output becomes an argument to an R1 sender tool (e.g., `send-email`). Neither tool is R5 individually; the *chain* is. G-A2A-FLOW handles inter-agent data flow; G-CHAIN handles intra-agent tool-to-tool provenance.
+G-CHAIN is a new governance-rule family that defends against **R-tier laundering via intra-agent tool chains**. The canonical attack: an R1 reader tool (e.g., `read-document`) fetches RESTRICTED data; its output becomes an argument to an R1 sender tool (e.g., `send-email`). Neither tool is R5 individually; the _chain_ is. G-A2A-FLOW handles inter-agent data flow; G-CHAIN handles intra-agent tool-to-tool provenance.
 
 **Schema additions (CL-09)**
 
@@ -3643,6 +3663,7 @@ TOOLS.md tool declarations MAY include an `args_from` field declaring the permit
 ```
 
 Source-label grammar:
+
 - `user_prompt` — the user's current prompt text
 - `tool_output.<name>` — the structured output of a prior tool call
 - `memory.<label>` — a MEMORY.md entry with the named sensitivity label
@@ -3654,7 +3675,7 @@ Source-label grammar:
 1. **G-CHAIN-01 Provenance schema validation** — reject malformed `args_from` declarations at compile time (unknown source labels, cyclic references). OC-POLICY-E230.
 2. **G-CHAIN-02 Source-to-risk propagation** — if any declared source produces RESTRICTED-labeled data (via G-DATA label propagation), the consuming tool's effective risk tier elevates by one (R1→R2, R3→R4). If any source in the chain carries RESTRICTED + IRREVERSIBLE_EXTERNAL consumer → effective tier R5. The elevated tier drives G-CLASS, G-ELICIT, and all downstream enforcement.
 3. **G-CHAIN-03 Unspecified-provenance default-deny** — tools with R3+ classification that consume non-`user_prompt` data without declaring `args_from` are rejected at compile time (OC-POLICY-E231). R1/R2 tools omitting `args_from` produce CLAWS-W030 warning, not error.
-4. **G-CHAIN-04 Transitive provenance walk** — when `args_from` references `tool_output.B`, the compiler walks B's own `args_from` to determine the *ultimate* source labels. The chain graph must terminate in `user_prompt`, `memory.<label>`, or `agent_literal`. Unbounded or incomplete chains produce OC-POLICY-E232.
+4. **G-CHAIN-04 Transitive provenance walk** — when `args_from` references `tool_output.B`, the compiler walks B's own `args_from` to determine the _ultimate_ source labels. The chain graph must terminate in `user_prompt`, `memory.<label>`, or `agent_literal`. Unbounded or incomplete chains produce OC-POLICY-E232.
 5. **G-CHAIN-05 Irreversible-external mandatory declaration** — any tool whose capability set includes IRREVERSIBLE_EXTERNAL (send-email, post-slack, http-post-external, file-upload-external, transact) MUST declare `args_from` for every argument. Omission → OC-POLICY-E233 (hard error; no advisory downgrade).
 
 **Runtime enforcement**
@@ -3681,43 +3702,43 @@ G-CHAIN closes the R-tier laundering gap identified in the Horus container threa
 - G-CHAIN is a **compile-time + runtime declarative** check. It cannot detect provenance laundering through agent-level transformation (e.g., the agent reads RESTRICTED data, manually re-types the content into `user_prompt` format, then invokes a tool). That residual risk is covered by Tier 3 LLM-judge output-scan rules, not G-CHAIN.
 - G-CHAIN assumes the agent planner emits honest `arg_provenance`. When the planner is compromised, envelope tampering is the operative attack; defended by Invariant 2 (compiled policy authoritative) + Invariant 3 (correlationId/replay defense).
 
-*(Sources: Horus container threat model D4 — tool-argument chaining; `docs/claws/proposals/aether-integration.md` §3.4.3 trust model; PITFALLS.md P-351 — R-tier laundering via intra-agent chain)*
+_(Sources: Horus container threat model D4 — tool-argument chaining; `docs/claws/proposals/aether-integration.md` §3.4.3 trust model; PITFALLS.md P-351 — R-tier laundering via intra-agent chain)_
 
 ## Praetor Integration Amendments
 
-**Identity bridge for OBO tokens** *(CL-07 §6)*: Approval token verification for OBO (on-behalf-of) operations must integrate with enterprise identity providers via OIDC and SAML protocols. The identity bridge validates that the approving principal is authenticated through the organization's IdP before accepting OBO approval tokens. Token claims (sub, groups, roles) are extracted and mapped to claws trust tiers. Expired or revoked IdP sessions invalidate outstanding OBO approvals. The bridge must support both interactive (browser redirect) and service-to-service (client credentials) OIDC flows.
+**Identity bridge for OBO tokens** _(CL-07 §6)_: Approval token verification for OBO (on-behalf-of) operations must integrate with enterprise identity providers via OIDC and SAML protocols. The identity bridge validates that the approving principal is authenticated through the organization's IdP before accepting OBO approval tokens. Token claims (sub, groups, roles) are extracted and mapped to claws trust tiers. Expired or revoked IdP sessions invalidate outstanding OBO approvals. The bridge must support both interactive (browser redirect) and service-to-service (client credentials) OIDC flows.
 
-**Credential escrow for signing keys** *(CL-07 §6)*: OBO approval signing keys are stored in the guard secrets vault using AES-256-GCM encryption, consistent with the existing `.claws/secrets/vault.enc` architecture. The escrow system provides key lifecycle management: generation, rotation, revocation, and expiry. Key material never leaves the vault in plaintext -- signing operations are performed within the vault boundary. Fleet environments use per-workspace key isolation (see P-208). The escrow integrates with the audit chain, recording all key lifecycle events.
+**Credential escrow for signing keys** _(CL-07 §6)_: OBO approval signing keys are stored in the guard secrets vault using AES-256-GCM encryption, consistent with the existing `.claws/secrets/vault.enc` architecture. The escrow system provides key lifecycle management: generation, rotation, revocation, and expiry. Key material never leaves the vault in plaintext -- signing operations are performed within the vault boundary. Fleet environments use per-workspace key isolation (see P-208). The escrow integrates with the audit chain, recording all key lifecycle events.
 
-**SSO groups to trust tiers** *(CL-07 §6)*: Enterprise identity provider groups (Azure AD groups, Okta groups, LDAP groups) map to workspace trust tiers (T0-T4). The mapping is defined in `claws.json` under `identity.groupMapping` and evaluated at compile time to determine the effective trust tier for the authenticated principal. Group-to-tier mapping follows a highest-tier-wins policy when a principal belongs to multiple groups. Unmapped groups default to T1 (conservative). The mapping must be auditable and produce a clear trail from IdP group membership to effective trust tier.
+**SSO groups to trust tiers** _(CL-07 §6)_: Enterprise identity provider groups (Azure AD groups, Okta groups, LDAP groups) map to workspace trust tiers (T0-T4). The mapping is defined in `claws.json` under `identity.groupMapping` and evaluated at compile time to determine the effective trust tier for the authenticated principal. Group-to-tier mapping follows a highest-tier-wins policy when a principal belongs to multiple groups. Unmapped groups default to T1 (conservative). The mapping must be auditable and produce a clear trail from IdP group membership to effective trust tier.
 
-**Section locks (FE6)** *(CL-07 §6)*: SOUL.md governance sections are locked by role using the FE6 fence pass mechanism with hash verification. Each locked section carries a role identifier (e.g., `governance-admin`) and a SHA-256 hash of the section content. Modifications to locked sections by unauthorized roles produce OC-POLICY-E401 diagnostics at compile time. The lock mechanism is enforced during the PARSE phase before any IR construction. Hash verification detects both unauthorized modifications and accidental edits. The lock metadata is stored in SOUL.md frontmatter, not in external files, to maintain lossless round-trip properties.
+**Section locks (FE6)** _(CL-07 §6)_: SOUL.md governance sections are locked by role using the FE6 fence pass mechanism with hash verification. Each locked section carries a role identifier (e.g., `governance-admin`) and a SHA-256 hash of the section content. Modifications to locked sections by unauthorized roles produce OC-POLICY-E401 diagnostics at compile time. The lock mechanism is enforced during the PARSE phase before any IR construction. Hash verification detects both unauthorized modifications and accidental edits. The lock metadata is stored in SOUL.md frontmatter, not in external files, to maintain lossless round-trip properties.
 
-**Fleet identity scoping** *(CL-07 §6)*: Fleet scan and broadcast operations respect identity-based workspace access controls. An authenticated principal can only scan workspaces their IdP groups grant access to. Fleet-level commands (`claws fleet scan`, `claws fleet broadcast`) filter workspace lists through the identity bridge before execution. Workspace access is determined by the intersection of fleet membership and IdP group-to-workspace mapping. Unauthorized workspace access attempts are recorded in the audit chain with the requesting principal's identity.
+**Fleet identity scoping** _(CL-07 §6)_: Fleet scan and broadcast operations respect identity-based workspace access controls. An authenticated principal can only scan workspaces their IdP groups grant access to. Fleet-level commands (`claws fleet scan`, `claws fleet broadcast`) filter workspace lists through the identity bridge before execution. Workspace access is determined by the intersection of fleet membership and IdP group-to-workspace mapping. Unauthorized workspace access attempts are recorded in the audit chain with the requesting principal's identity.
 
-**Provenance in audit chain** *(CL-07 §1)*: InputResolver provenance metadata is recorded in audit chain entries for every governance input file resolved during compilation. Each audit entry includes: source type (file, package, URL), resolved path, content hash (SHA-256), resolution timestamp, and SRI verification result (for URL sources). This provenance trail enables post-hoc verification that compiled governance rules originated from authorized sources. The audit chain entry format extends the existing event schema with an `inputProvenance` field array.
+**Provenance in audit chain** _(CL-07 §1)_: InputResolver provenance metadata is recorded in audit chain entries for every governance input file resolved during compilation. Each audit entry includes: source type (file, package, URL), resolved path, content hash (SHA-256), resolution timestamp, and SRI verification result (for URL sources). This provenance trail enables post-hoc verification that compiled governance rules originated from authorized sources. The audit chain entry format extends the existing event schema with an `inputProvenance` field array.
 
 ## Integration Scenario Amendments
 
-**OIDC claim mapping validation** *(INT-IB-S01)*: The identity bridge must validate OIDC token claims against a configurable claim schema before extracting trust tier mappings. Malformed or unexpected claims (missing `sub`, non-standard `groups` format) must produce structured diagnostics rather than silent fallback to default trust tiers. The claim schema must support standard OIDC claims and custom enterprise claims.
+**OIDC claim mapping validation** _(INT-IB-S01)_: The identity bridge must validate OIDC token claims against a configurable claim schema before extracting trust tier mappings. Malformed or unexpected claims (missing `sub`, non-standard `groups` format) must produce structured diagnostics rather than silent fallback to default trust tiers. The claim schema must support standard OIDC claims and custom enterprise claims.
 
-**Credential escrow rotation under load** *(INT-IB-S02)*: Key rotation in the credential escrow must be atomic -- in-flight OBO approvals signed with the old key remain valid until their natural expiry, while new approvals use the rotated key. The rotation window must be configurable (default 24h dual-key overlap). Rotation events produce audit chain entries with both old and new key fingerprints.
+**Credential escrow rotation under load** _(INT-IB-S02)_: Key rotation in the credential escrow must be atomic -- in-flight OBO approvals signed with the old key remain valid until their natural expiry, while new approvals use the rotated key. The rotation window must be configurable (default 24h dual-key overlap). Rotation events produce audit chain entries with both old and new key fingerprints.
 
-**SSO group hierarchy resolution** *(INT-IB-S03)*: Enterprise IdPs often use nested group hierarchies (e.g., `Engineering > Platform > Governance-Admins`). The group-to-tier mapping must resolve nested groups to their effective tier. When a principal inherits group membership through nesting, the trust tier must match what a direct member would receive. Group resolution must handle circular nesting gracefully with a configurable depth limit.
+**SSO group hierarchy resolution** _(INT-IB-S03)_: Enterprise IdPs often use nested group hierarchies (e.g., `Engineering > Platform > Governance-Admins`). The group-to-tier mapping must resolve nested groups to their effective tier. When a principal inherits group membership through nesting, the trust tier must match what a direct member would receive. Group resolution must handle circular nesting gracefully with a configurable depth limit.
 
-**Section lock hash collision resistance** *(INT-IB-S04)*: The SHA-256 hash verification for FE6 section locks must cover the complete section content including whitespace and line endings. Platform-specific line ending differences (CRLF on Windows, LF on Unix) must be normalized before hashing to prevent false lock violations in cross-platform teams. The normalization strategy must be documented and deterministic.
+**Section lock hash collision resistance** _(INT-IB-S04)_: The SHA-256 hash verification for FE6 section locks must cover the complete section content including whitespace and line endings. Platform-specific line ending differences (CRLF on Windows, LF on Unix) must be normalized before hashing to prevent false lock violations in cross-platform teams. The normalization strategy must be documented and deterministic.
 
-**Fleet identity timeout and caching** *(INT-IB-S05)*: Fleet scan operations touching hundreds of workspaces must cache identity verification results to avoid per-workspace IdP round-trips. The cache TTL must be configurable (default 5 minutes) and must not exceed the IdP session lifetime. Cache invalidation must be triggered by IdP session revocation events when supported by the IdP (OIDC back-channel logout).
+**Fleet identity timeout and caching** _(INT-IB-S05)_: Fleet scan operations touching hundreds of workspaces must cache identity verification results to avoid per-workspace IdP round-trips. The cache TTL must be configurable (default 5 minutes) and must not exceed the IdP session lifetime. Cache invalidation must be triggered by IdP session revocation events when supported by the IdP (OIDC back-channel logout).
 
-**OBO approval chain of custody** *(INT-IB-S06)*: OBO approval tokens must carry a verifiable chain of custody: original requester identity, approving principal identity, approval timestamp, and scope constraints. The chain of custody is verified at runtime before tool execution. Forged or tampered approval tokens produce OC-POLICY-E402 diagnostics and a critical audit chain event. The verification must be constant-time to prevent timing attacks on approval token structure.
+**OBO approval chain of custody** _(INT-IB-S06)_: OBO approval tokens must carry a verifiable chain of custody: original requester identity, approving principal identity, approval timestamp, and scope constraints. The chain of custody is verified at runtime before tool execution. Forged or tampered approval tokens produce OC-POLICY-E402 diagnostics and a critical audit chain event. The verification must be constant-time to prevent timing attacks on approval token structure.
 
-**Input provenance for package sources** *(INT-IR-S04)*: When governance inputs are resolved from package sources (@claws/* or @openclaw/* packages), the provenance record must include package name, version, registry URL, and package integrity hash. This enables supply chain verification for governance rules distributed through npm registries.
+**Input provenance for package sources** _(INT-IR-S04)_: When governance inputs are resolved from package sources (@claws/* or @openclaw/* packages), the provenance record must include package name, version, registry URL, and package integrity hash. This enables supply chain verification for governance rules distributed through npm registries.
 
-**Package trust validation** *(INT-PO-S02)*: Packages declared in the `packages` output section must pass trust validation before publication: the signing key must be in the credential escrow, the package manifest must include valid provenance, and the package contents must match the declared build hash. Fleet-managed workspaces may require additional trust gates (e.g., governance-admin approval) before package publication.
+**Package trust validation** _(INT-PO-S02)_: Packages declared in the `packages` output section must pass trust validation before publication: the signing key must be in the credential escrow, the package manifest must include valid provenance, and the package contents must match the declared build hash. Fleet-managed workspaces may require additional trust gates (e.g., governance-admin approval) before package publication.
 
-**Identity bridge failover** *(INT-IB-S07)*: When the enterprise IdP is unreachable, the identity bridge must follow a configurable failover policy: fail-closed (deny all OBO approvals, default for T3+ workspaces), fail-open with degraded trust (allow with T1 ceiling, optional for T0-T2), or cached-credentials (use last-known-good IdP response within TTL). The failover mode must be audited.
+**Identity bridge failover** _(INT-IB-S07)_: When the enterprise IdP is unreachable, the identity bridge must follow a configurable failover policy: fail-closed (deny all OBO approvals, default for T3+ workspaces), fail-open with degraded trust (allow with T1 ceiling, optional for T0-T2), or cached-credentials (use last-known-good IdP response within TTL). The failover mode must be audited.
 
-**Cross-IdP federation** *(INT-IB-S08)*: Enterprises with multiple IdPs (e.g., Azure AD for employees, Okta for contractors) must be supported through IdP federation configuration. Each IdP maps to a separate trust domain with independent group-to-tier mappings. Cross-domain OBO approvals require explicit federation trust configuration. The identity bridge must detect and reject cross-domain token reuse attacks.
+**Cross-IdP federation** _(INT-IB-S08)_: Enterprises with multiple IdPs (e.g., Azure AD for employees, Okta for contractors) must be supported through IdP federation configuration. Each IdP maps to a separate trust domain with independent group-to-tier mappings. Cross-domain OBO approvals require explicit federation trust configuration. The identity bridge must detect and reject cross-domain token reuse attacks.
 
 ## Open Questions
 
@@ -3726,13 +3747,13 @@ G-CHAIN closes the R-tier laundering gap identified in the Horus container threa
 3. Should claws contribute the A2A governance spec to OWASP as a standard?
 4. How should injection defense rules interact with the three-ring model (Q12e)? Inner ring checks G-INPUT on save; middle ring checks after upgrade?
 5. Should `claws check --security` be a dedicated mode that runs only security-specific rules?
-6. Should G-A2A-FLOW support a "processing exemption" annotation that allows an agent with PUBLIC ceiling to receive CONFIDENTIAL data if it provably redacts before output? *(Source: CFC-S04-F02)*
-7. Should the verb-to-risk heuristic dictionary (send/post/delete -> R5, write/create -> R3, read/get -> R1) be configurable per workspace? *(Source: PC2-S09)*
-8. Should per-channel redaction configurations be required for R5 workspaces or advisory for all? *(Source: PC2-S10)*
-9. Should compound attack surface analysis be automated beyond pairwise interactions? *(Source: PF2-S26)*
+6. Should G-A2A-FLOW support a "processing exemption" annotation that allows an agent with PUBLIC ceiling to receive CONFIDENTIAL data if it provably redacts before output? _(Source: CFC-S04-F02)_
+7. Should the verb-to-risk heuristic dictionary (send/post/delete -> R5, write/create -> R3, read/get -> R1) be configurable per workspace? _(Source: PC2-S09)_
+8. Should per-channel redaction configurations be required for R5 workspaces or advisory for all? _(Source: PC2-S10)_
+9. Should compound attack surface analysis be automated beyond pairwise interactions? _(Source: PF2-S26)_
 
 ## Research References
 
-| Source | What it contributed |
-|--------|-------------------|
-| Q12h | Four security layers (classification, A2A, injection, elicitation), 29 governance rules, OWASP mapping, OBO boundary definition, FE6 fence pass, agent identity levels |
+| Source | What it contributed                                                                                                                                                    |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q12h   | Four security layers (classification, A2A, injection, elicitation), 29 governance rules, OWASP mapping, OBO boundary definition, FE6 fence pass, agent identity levels |

@@ -185,9 +185,10 @@ caller-supplied `options.now` — NEVER from `new Date()` or `Date.now()`.
 This clause subsumes the CM-7 fix landed in commit `571b937d0`.
 
 **Determinism scope**: "byte-identical output" is asserted across:
-  - the **same** `compiler.version` (the IR's stamped version)
-  - the **same** `typescript` major.minor range (`ts.version` stays within a
-    single minor family during a given compile session)
+
+- the **same** `compiler.version` (the IR's stamped version)
+- the **same** `typescript` major.minor range (`ts.version` stays within a
+  single minor family during a given compile session)
 
 `typescript` printer output can drift across minor versions (e.g. whitespace
 normalization changes); this is acceptable risk because the runtime `ts`
@@ -562,19 +563,19 @@ payload inference:
 
 ```typescript
 export class CompilerEventBus {
-  on<T extends CompilerEvent['type']>(
+  on<T extends CompilerEvent["type"]>(
     type: T,
-    listener: (event: Extract<CompilerEvent, { type: T }>) => void
-  ): () => void;  // returns unsubscribe function
+    listener: (event: Extract<CompilerEvent, { type: T }>) => void,
+  ): () => void; // returns unsubscribe function
 
-  once<T extends CompilerEvent['type']>(
+  once<T extends CompilerEvent["type"]>(
     type: T,
-    listener: (event: Extract<CompilerEvent, { type: T }>) => void
+    listener: (event: Extract<CompilerEvent, { type: T }>) => void,
   ): () => void;
 
-  off<T extends CompilerEvent['type']>(
+  off<T extends CompilerEvent["type"]>(
     type: T,
-    listener: (event: Extract<CompilerEvent, { type: T }>) => void
+    listener: (event: Extract<CompilerEvent, { type: T }>) => void,
   ): void;
 }
 ```
@@ -589,26 +590,44 @@ field is `readonly`:
 
 ```typescript
 export type CompilerEvent =
-  | { type: 'compile.start'; contentHash: string; targets: readonly EmitTarget[]; cacheEnabled: boolean; now: string }
-  | { type: 'read.start'; stage: StageName; inputPath: string }
-  | { type: 'read.complete'; stage: StageName; cacheHit: boolean; durationMs: number; byteHash: string }
-  | { type: 'read.failed'; stage: StageName; error: string }
-  | { type: 'enforce.start'; violationCount: number }
-  | { type: 'enforce.denied'; violations: readonly R5Violation[]; severity: ViolationSeverity }
-  | { type: 'enforce.complete'; durationMs: number }
-  | { type: 'emit.start'; target: EmitTarget }
-  | { type: 'emit.complete'; target: EmitTarget; files: readonly EmittedFile[]; durationMs: number }
-  | { type: 'emit.failed'; target: EmitTarget; error: string }
-  | { type: 'validate.start'; target: EmitTarget }
-  | { type: 'validate.complete'; target: EmitTarget; report: ValidationReport; durationMs: number }
-  | { type: 'validate.failed'; target: EmitTarget; report: ValidationReport }
-  | { type: 'cache.hit'; key: string; stage?: StageName }   // stage? for per-stage cache hits
-  | { type: 'cache.miss'; key: string; stage?: StageName }
-  | { type: 'cache.write'; key: string; stage?: StageName; sizeBytes: number }
-  | { type: 'cache.evicted'; key: string; stage?: StageName; reason: 'lru' | 'quota' | 'ttl' | 'clear'; sizeBytes: number }
-  | { type: 'compile.complete'; durationMs: number; result: CompileResult }
-  | { type: 'compile.failed'; durationMs: number; diagnostics: readonly CompileDiagnostic[] }
-  | { type: 'compile.cancelled'; durationMs: number; reason: string };
+  | {
+      type: "compile.start";
+      contentHash: string;
+      targets: readonly EmitTarget[];
+      cacheEnabled: boolean;
+      now: string;
+    }
+  | { type: "read.start"; stage: StageName; inputPath: string }
+  | {
+      type: "read.complete";
+      stage: StageName;
+      cacheHit: boolean;
+      durationMs: number;
+      byteHash: string;
+    }
+  | { type: "read.failed"; stage: StageName; error: string }
+  | { type: "enforce.start"; violationCount: number }
+  | { type: "enforce.denied"; violations: readonly R5Violation[]; severity: ViolationSeverity }
+  | { type: "enforce.complete"; durationMs: number }
+  | { type: "emit.start"; target: EmitTarget }
+  | { type: "emit.complete"; target: EmitTarget; files: readonly EmittedFile[]; durationMs: number }
+  | { type: "emit.failed"; target: EmitTarget; error: string }
+  | { type: "validate.start"; target: EmitTarget }
+  | { type: "validate.complete"; target: EmitTarget; report: ValidationReport; durationMs: number }
+  | { type: "validate.failed"; target: EmitTarget; report: ValidationReport }
+  | { type: "cache.hit"; key: string; stage?: StageName } // stage? for per-stage cache hits
+  | { type: "cache.miss"; key: string; stage?: StageName }
+  | { type: "cache.write"; key: string; stage?: StageName; sizeBytes: number }
+  | {
+      type: "cache.evicted";
+      key: string;
+      stage?: StageName;
+      reason: "lru" | "quota" | "ttl" | "clear";
+      sizeBytes: number;
+    }
+  | { type: "compile.complete"; durationMs: number; result: CompileResult }
+  | { type: "compile.failed"; durationMs: number; diagnostics: readonly CompileDiagnostic[] }
+  | { type: "compile.cancelled"; durationMs: number; reason: string };
 
 // `ViolationSeverity` is the governance-surface type
 // (`claws-sdk/src/compiler/enforce/types.ts#ViolationSeverity`) shared with
@@ -678,8 +697,8 @@ Every emitter MUST fire events at stage boundaries when
 may be emitted and NO cache entry may be persisted. The failure path
 surfaces via `compile.failed` / `emit.failed` / `validate.failed`; consumers
 relying on `cache.write` to detect a durable compile outcome MUST see it
-only when the compile produced a persisted cache entry. *(Source:
-hot-reload/S01-F07)*
+only when the compile produced a persisted cache entry. _(Source:
+hot-reload/S01-F07)_
 
 Events are fire-and-forget. Listener errors are caught by the bus and logged
 but MUST NOT propagate back into the compiler. The bus itself does not throw
@@ -689,7 +708,7 @@ break the compile.
 When `CompileOptions.events` is absent, the compiler MUST NOT allocate a bus
 or emit events — the hook surface is opt-in and has zero cost when not used.
 
-**Backpressure semantics** *(Source: hot-reload/S01-F04)*: The bus is
+**Backpressure semantics** _(Source: hot-reload/S01-F04)_: The bus is
 **synchronous fire-and-forget from the compiler's perspective**. Listeners
 are invoked on the emitting thread (§9.4) inside the bus's `emit` call,
 but because §9.3 guarantees listener exceptions are caught and §9.7
@@ -702,7 +721,7 @@ immediately). The bus does NOT buffer events or drop on overflow —
 high-frequency event storms (e.g. per-stage `cache.hit` bursts across
 a large fleet compile) are the consumer's concern to throttle.
 
-**Payload carries `workspace` identifier** *(Source: hot-reload/S01-F08)*:
+**Payload carries `workspace` identifier** _(Source: hot-reload/S01-F08)_:
 Every `CompilerEvent` payload MUST carry a `workspace: string` field
 identifying the workspace the event pertains to. In fleet mode (CL-01
 §claws fleet compile), multiple workspaces compile concurrently; their
@@ -713,7 +732,7 @@ can route events correctly. §9.2's event-union types MUST be read as
 type definitions above elide it for readability; the normative contract
 is `workspace` is present on every event.
 
-**Monotonic timestamps** *(Source: hot-reload/S01-F09)*: Event
+**Monotonic timestamps** _(Source: hot-reload/S01-F09)_: Event
 timestamps are sourced from a **monotonic clock** (e.g. `process.hrtime`
 or `performance.now()` expressed in nanoseconds since compile start),
 NEVER from `Date.now()` or `new Date().getTime()`. Wall-clock timestamps

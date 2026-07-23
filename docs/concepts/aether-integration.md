@@ -73,15 +73,16 @@ When resolving a policy for a specific tool call, `resolvePolicy` follows this p
 
 Once approval policies are deployed as artifacts, they must be protected from tampering. At container restart, `verifyGovernanceArtifacts` ensures the deployed artifacts match what the compiler produced:
 
-| Step | What happens |
-|------|-------------|
-| 1 | Read `.claws-manifest.json` from the deployment path |
-| 2 | Validate manifest structure (non-empty artifacts, schema version) |
-| 3 | Verify manifest signature using the configured `KeyResolver` |
-| 4 | Compute SHA-256 of each listed artifact |
-| 5 | Compare computed hashes against manifest-recorded hashes |
+| Step | What happens                                                      |
+| ---- | ----------------------------------------------------------------- |
+| 1    | Read `.claws-manifest.json` from the deployment path              |
+| 2    | Validate manifest structure (non-empty artifacts, schema version) |
+| 3    | Verify manifest signature using the configured `KeyResolver`      |
+| 4    | Compute SHA-256 of each listed artifact                           |
+| 5    | Compare computed hashes against manifest-recorded hashes          |
 
 Key constraints:
+
 - Empty manifest (zero artifacts) is always a hard failure (prevents bypass)
 - Missing signature is a warning by default, a hard failure when `requireSigned: true`
 - Missing manifest entirely is a warning (backward compatible with pre-signing era)
@@ -92,16 +93,16 @@ Key constraints:
 
 ## Key types and functions
 
-| Symbol | Module | Purpose |
-|--------|--------|---------|
-| `emitHostApprovalPolicies()` | `claws-sdk/emit/emit-host-approval-policies` | Generate `host-approval-policies.json` from GovernanceIR |
-| `resolvePolicy(policyIndex, server, tool)` | `claws-sdk/emit/emit-host-approval-policies` | O(1) policy lookup from pre-indexed map |
-| `resolveApprovalGate()` | `claws-sdk/governance/fleet-precedence` | Determine final `requiresExternalApproval` value |
-| `verifyGovernanceArtifacts()` | `claws-sdk/compliance/blob-verify` | Verify manifest + artifact integrity at container restart |
-| `HostApprovalPolicy` | `claws-sdk/emit/host-approval-policy-types` | Per-tool policy entry in the generated JSON |
-| `FleetApprovalOverride` | `claws-sdk/governance/fleet-precedence` | Governance-layer fleet override (used by `resolveApprovalGate`) |
-| `FleetOverride` | `claws-sdk/emit/host-approval-policy-types` | Emit-layer fleet override (JSON-serializable, used in policy generation) |
-| `fromFleetOverride()` | `claws-sdk/governance/fleet-precedence` | Bridge: converts emit-layer `FleetOverride` to governance-layer `FleetApprovalOverride` |
+| Symbol                                     | Module                                       | Purpose                                                                                 |
+| ------------------------------------------ | -------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `emitHostApprovalPolicies()`               | `claws-sdk/emit/emit-host-approval-policies` | Generate `host-approval-policies.json` from GovernanceIR                                |
+| `resolvePolicy(policyIndex, server, tool)` | `claws-sdk/emit/emit-host-approval-policies` | O(1) policy lookup from pre-indexed map                                                 |
+| `resolveApprovalGate()`                    | `claws-sdk/governance/fleet-precedence`      | Determine final `requiresExternalApproval` value                                        |
+| `verifyGovernanceArtifacts()`              | `claws-sdk/compliance/blob-verify`           | Verify manifest + artifact integrity at container restart                               |
+| `HostApprovalPolicy`                       | `claws-sdk/emit/host-approval-policy-types`  | Per-tool policy entry in the generated JSON                                             |
+| `FleetApprovalOverride`                    | `claws-sdk/governance/fleet-precedence`      | Governance-layer fleet override (used by `resolveApprovalGate`)                         |
+| `FleetOverride`                            | `claws-sdk/emit/host-approval-policy-types`  | Emit-layer fleet override (JSON-serializable, used in policy generation)                |
+| `fromFleetOverride()`                      | `claws-sdk/governance/fleet-precedence`      | Bridge: converts emit-layer `FleetOverride` to governance-layer `FleetApprovalOverride` |
 
 ---
 

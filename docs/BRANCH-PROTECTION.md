@@ -10,33 +10,41 @@ microsoft.ghe.com/bic/claws → Settings → Branches → Branch protection rule
 ## Required settings on `main`
 
 ### Require a pull request before merging
+
 - [x] Required
 - [x] Require approvals: **1**
 - [x] Dismiss stale pull request approvals when new commits are pushed
 - [x] Require review from Code Owners (enforces `CODEOWNERS` at repo root)
 
 ### Require status checks to pass before merging
+
 - [x] Required
 - [x] Require branches to be up to date before merging
 
 Required status checks (exact job names from `.github/workflows/`):
+
 - `ci / build-test (ubuntu-latest)` — from `ci.yml`
 - `ci / build-test (windows-latest)` — from `ci.yml`
 - `no-craftworks / residue-grep (CL-13 v1.7)` — from `no-craftworks.yml`
 
 Once the acceptance workflow stabilizes, also add:
+
 - `acceptance / repo-migration` — from `acceptance.yml`
 
 ### Require conversation resolution before merging
+
 - [x] Required
 
 ### Restrict who can push to matching branches
+
 - [x] Restrict to CODEOWNERS equivalents (no direct pushes to `main`)
 
 ### Do not allow bypassing the above settings
+
 - [x] Required — even admins use PRs
 
 ### Rules that apply to everyone including administrators
+
 - [x] Required
 
 ## Settings explicitly NOT enabled yet
@@ -59,6 +67,7 @@ Once the acceptance workflow stabilizes, also add:
 ## How to audit
 
 After applying:
+
 1. Try a direct push from a clone on `main` — should be rejected
 2. Open a PR with no approvals — merge should be blocked
 3. Open a PR where CI fails — merge should be blocked

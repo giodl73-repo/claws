@@ -15,6 +15,7 @@ Real environment tested:
 <OS, checkout, source harness/live app, services, and dependencies.>
 
 Exact steps or command run after this patch:
+
 1. <Step or command>
 2. <Step or command>
 

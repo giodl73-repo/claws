@@ -9,16 +9,17 @@
  * If the substrate insists on every new field being present, this is
  * a forced-upgrade story and worth noting.
  */
-export const slug = 'upgrade-policy-jsonc-old-shape';
-export const description = 'older policy.jsonc shape (missing newer fields) → check runs gracefully';
+export const slug = "upgrade-policy-jsonc-old-shape";
+export const description =
+  "older policy.jsonc shape (missing newer fields) → check runs gracefully";
 
 export const setup = {
   files: {
-    'AGENTS.md': `# Agent\n## Boundaries\n- none\n`,
-    'TOOLS.md': `# Tools\n\n## Tools\n\n### t # R1, READ\nA tool.\n`,
+    "AGENTS.md": `# Agent\n## Boundaries\n- none\n`,
+    "TOOLS.md": `# Tools\n\n## Tools\n\n### t # R1, READ\nA tool.\n`,
     // Older shape: just version + tools + denyRules. No policyId,
     // no generatedFrom, no generatedAt. Realistic of pre-v0.1 outputs.
-    'policy.jsonc': `{
+    "policy.jsonc": `{
   "version": "0.0.5",
   "tools": [
     { "id": "t", "risk": 1, "caps": ["READ"], "sensitivity": "public" }
@@ -31,8 +32,8 @@ export const setup = {
 
 export const steps = [
   {
-    name: 'policy check on old-shape policy.jsonc',
-    run: ['policy', 'check', '.'],
+    name: "policy check on old-shape policy.jsonc",
+    run: ["policy", "check", "."],
     // Either it works (graceful) or it fails with a code we can act on.
     // Crashing with ERR_INTERNAL would be the bad case.
     expect: { exitCode: { oneOf: [0, 1, 2] } },

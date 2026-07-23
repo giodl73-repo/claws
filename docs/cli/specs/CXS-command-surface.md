@@ -21,6 +21,7 @@ The CLI surfaces commands in three layers:
 Total across all groups: 18 commands.
 
 Examples:
+
 - `claws snap`: list, promote, rollback, current, events
 - `claws policy`: generate, validate, verify, diff
 - `claws doctor`: (no sub-commands; runs the full diagnostic pass)
@@ -41,13 +42,13 @@ documented defaults.
 
 ## Exit codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | Success |
-| 1 | User error (bad args, missing config) |
-| 2 | Runtime error (SDK exception, network failure) |
-| 3 | Governance denial (policy blocked the operation) |
-| 4 | Partial success with warnings |
+| Code | Meaning                                          |
+| ---- | ------------------------------------------------ |
+| 0    | Success                                          |
+| 1    | User error (bad args, missing config)            |
+| 2    | Runtime error (SDK exception, network failure)   |
+| 3    | Governance denial (policy blocked the operation) |
+| 4    | Partial success with warnings                    |
 
 `doctor` exits 0 only when ALL checks pass. Any WARN yields 4.
 

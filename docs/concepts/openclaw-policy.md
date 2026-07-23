@@ -18,11 +18,11 @@ The policy generator turns declarative workspace files into enforceable gateway 
 
 Every `openclaw policy generate` run writes the full artifact set into `.openclaw/policy/` inside the workspace. There is no target flag; consumers that only want the IR read `policy-ir.json` and ignore the plugin file.
 
-| Artifact | Purpose | Consumer |
-|----------|---------|----------|
-| `policy-ir.json` | Canonical declarative IR -- tools, skills, deny rules, propagation edges | Any reader: gateway, audit tooling, review UI, diff |
-| `gateway-plugin.ts` | Executable TypeScript plugin implementing `GuardrailProvider` + `FileIngestProvider` | OC Gateway hook registration |
-| `audit-manifest.json` | Event taxonomy this snapshot will emit at runtime | SIEM ingestors, audit sinks |
+| Artifact              | Purpose                                                                              | Consumer                                            |
+| --------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------- |
+| `policy-ir.json`      | Canonical declarative IR -- tools, skills, deny rules, propagation edges             | Any reader: gateway, audit tooling, review UI, diff |
+| `gateway-plugin.ts`   | Executable TypeScript plugin implementing `GuardrailProvider` + `FileIngestProvider` | OC Gateway hook registration                        |
+| `audit-manifest.json` | Event taxonomy this snapshot will emit at runtime                                    | SIEM ingestors, audit sinks                         |
 
 The generator **never mutates source originals**. It writes only to `.openclaw/policy/`. Byte-for-byte round-trip on source files is an invariant gated by CI.
 
@@ -33,7 +33,7 @@ The generator **never mutates source originals**. It writes only to `.openclaw/p
 ```ts
 // from @bic/openclaw-policy
 export function computePolicyId(ir: PolicyIR): string {
-  return computeStrippedHash(ir, ['policyId', 'canonicalizerVersion']);
+  return computeStrippedHash(ir, ["policyId", "canonicalizerVersion"]);
 }
 ```
 
@@ -51,7 +51,7 @@ import {
   emitPluginCode,
   emitAuditManifest,
   type EmitPluginOptions,
-} from '@bic/openclaw-policy';
+} from "@bic/openclaw-policy";
 ```
 
 Runtime helpers used by the emitted plugin live under the locked ABI subpath `@bic/openclaw-policy/runtime` (`asHookResult`, `issueHandle`, `propagatedSensitivity`, `matchDenyRules`). The emitted plugin imports from that subpath; the generator itself does not depend on the runtime at runtime.
@@ -60,19 +60,24 @@ Runtime helpers used by the emitted plugin live under the locked ABI subpath `@b
 
 Generation is four phases. `openclaw policy check` runs the first three; `openclaw policy generate` runs all four. The split matters because `check` is editor-on-save fast and never touches disk.
 
-| Phase | Input | Output | Failure mode |
-|-------|-------|--------|--------------|
-| **Parse** | Workspace source files (SOUL.md, TOOLS.md, AGENTS.md, USER.md, IDENTITY.md, skills) | Typed AST via `@bic/openclaw-workspace/ast` PEG grammars | `error` diagnostics -- malformed markdown or YAML frontmatter |
-| **Extract** | AST | `PolicyIR` draft (tools, skills, deny rules, delegation map, oboScope, governance surface) | `error` diagnostics -- unknown provenance sources, unresolved delegation targets |
-| **Analyze** | IR draft | Validated IR + governance-fatal check results | Non-waivable `error` diagnostics on R5 fail-open, `args_from` cycles, IRREVERSIBLE_EXTERNAL clamp violations |
-| **Emit** | Validated IR | `policy-ir.json`, `gateway-plugin.ts`, `audit-manifest.json` | Refusal on forbidden-import scan failure; deterministic otherwise |
+| Phase       | Input                                                                               | Output                                                                                     | Failure mode                                                                                                 |
+| ----------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| **Parse**   | Workspace source files (SOUL.md, TOOLS.md, AGENTS.md, USER.md, IDENTITY.md, skills) | Typed AST via `@bic/openclaw-workspace/ast` PEG grammars                                   | `error` diagnostics -- malformed markdown or YAML frontmatter                                                |
+| **Extract** | AST                                                                                 | `PolicyIR` draft (tools, skills, deny rules, delegation map, oboScope, governance surface) | `error` diagnostics -- unknown provenance sources, unresolved delegation targets                             |
+| **Analyze** | IR draft                                                                            | Validated IR + governance-fatal check results                                              | Non-waivable `error` diagnostics on R5 fail-open, `args_from` cycles, IRREVERSIBLE_EXTERNAL clamp violations |
+| **Emit**    | Validated IR                                                                        | `policy-ir.json`, `gateway-plugin.ts`, `audit-manifest.json`                               | Refusal on forbidden-import scan failure; deterministic otherwise                                            |
 
 The authoritative entry points:
 
 ```ts
 // compile/index.ts — Parse + Extract + Analyze
-export { analyze, parseWorkspaceFile, extractTools,
-         extractDenyRules, buildGovernanceAst } from '@bic/openclaw-policy';
+export {
+  analyze,
+  parseWorkspaceFile,
+  extractTools,
+  extractDenyRules,
+  buildGovernanceAst,
+} from "@bic/openclaw-policy";
 ```
 
 `finalizeIR` turns an extract-phase draft into a complete `PolicyIR` with `policyId` and `canonicalizerVersion` filled in. `generateInMemory` wraps `finalizeIR` + all three emitters and returns an `InMemoryArtifacts` record that callers can route to disk, a snapshot uploader, or an in-process mock gateway.
@@ -83,18 +88,18 @@ PolicyIR is the shared data structure between the generator and everything downs
 
 ```ts
 export interface PolicyIR {
-  version: string;                       // semver of the IR schema
-  policyId: string;                      // computePolicyId(this)
-  canonicalizerVersion: string;          // diagnostic; stripped before hashing
+  version: string; // semver of the IR schema
+  policyId: string; // computePolicyId(this)
+  canonicalizerVersion: string; // diagnostic; stripped before hashing
 
   soul: {
-    denyRules: DenyRule[];               // SOUL.md boundary rules
-    modelAllowlist: string[];            // approved model IDs
-    tone: string;                        // personality, for prompt assembly
+    denyRules: DenyRule[]; // SOUL.md boundary rules
+    modelAllowlist: string[]; // approved model IDs
+    tone: string; // personality, for prompt assembly
   };
 
   user: {
-    oboScope: string[];                  // on-behalf-of boundary
+    oboScope: string[]; // on-behalf-of boundary
     authorityBounds: AuthorityBound[];
   };
 
@@ -103,13 +108,13 @@ export interface PolicyIR {
     architectureBoundaries: Boundary[];
   };
 
-  tools: ToolSpec[];                     // riskLevel, capabilities, argsFrom
-  skills: SkillSpec[];                   // sensitivity + declaredCapabilities
+  tools: ToolSpec[]; // riskLevel, capabilities, argsFrom
+  skills: SkillSpec[]; // sensitivity + declaredCapabilities
 
   governance: {
-    rules: GovernanceRule[];             // compiled G-rule evaluations
-    sensitivityPropagation: Edge[];      // G-CHAIN edges
-    governanceSurface: string[];         // files the agent cannot mutate
+    rules: GovernanceRule[]; // compiled G-rule evaluations
+    sensitivityPropagation: Edge[]; // G-CHAIN edges
+    governanceSurface: string[]; // files the agent cannot mutate
   };
 
   identity: { name: string; emoji?: string };
@@ -122,15 +127,15 @@ Two version lines matter for compatibility: the npm-package version of `@bic/ope
 
 ## Risk tiers (R0-R5)
 
-Risk tier classifies what a tool *does*. Sensitivity classifies what data *is*. Every governance decision considers both.
+Risk tier classifies what a tool _does_. Sensitivity classifies what data _is_. Every governance decision considers both.
 
-| Tier | Name | Examples | Default enforcement |
-|------|------|----------|---------------------|
-| **R0** | None / pure | `vibe-check`, `get-time` | fail-open; audit optional |
-| **R1** | Read | `read-inbox`, `list-skills` | fail-open; audit standard |
-| **R2** | Write / local | `save-draft`, `update-task` | fail-open; audit standard |
-| **R3** | Communicate / internal | `ping-teammate`, `post-standup` | configurable; audit required |
-| **R4** | Execute / elevated | `run-shell`, `install-dep` | configurable; audit required; review recommended |
+| Tier   | Name                             | Examples                                    | Default enforcement                                       |
+| ------ | -------------------------------- | ------------------------------------------- | --------------------------------------------------------- |
+| **R0** | None / pure                      | `vibe-check`, `get-time`                    | fail-open; audit optional                                 |
+| **R1** | Read                             | `read-inbox`, `list-skills`                 | fail-open; audit standard                                 |
+| **R2** | Write / local                    | `save-draft`, `update-task`                 | fail-open; audit standard                                 |
+| **R3** | Communicate / internal           | `ping-teammate`, `post-standup`             | configurable; audit required                              |
+| **R4** | Execute / elevated               | `run-shell`, `install-dep`                  | configurable; audit required; review recommended          |
 | **R5** | Transact / irreversible-external | `post-publicly`, `send-email`, `wire-funds` | **fail-closed, non-waivable**; external approval required |
 
 Tier metadata is a field on `ToolSpec`:
@@ -138,7 +143,7 @@ Tier metadata is a field on `ToolSpec`:
 ```ts
 export interface ToolSpec {
   name: string;
-  riskLevel: RiskLevel;                    // 0 | 1 | 2 | 3 | 4 | 5
+  riskLevel: RiskLevel; // 0 | 1 | 2 | 3 | 4 | 5
   capabilities: Capability[];
   argsFrom?: Record<string, ProvenanceSource[]>;
 }
@@ -181,56 +186,79 @@ Consider a minimal workspace for an agent named Waffles who drafts standups and 
 
 ```markdown
 # SOUL.md
+
 ## Boundaries
+
 - Never post publicly without asking first.
 - Never share anything tagged RESTRICTED beyond the team.
 
 # TOOLS.md
-### post-to-channel        # R5, COMMUNICATE, IRREVERSIBLE_EXTERNAL
-  args_from:
-    message: [user_prompt, tool_output.draft-reply?]
-    channel: [user_prompt]
 
-### draft-reply            # R1, READ
-### vibe-check             # R0
+### post-to-channel # R5, COMMUNICATE, IRREVERSIBLE_EXTERNAL
+
+args_from:
+message: [user_prompt, tool_output.draft-reply?]
+channel: [user_prompt]
+
+### draft-reply # R1, READ
+
+### vibe-check # R0
 ```
 
 `openclaw policy generate` writes the three artifacts. The emitted `gateway-plugin.ts` imports the policyIR, builds a guardrail provider, and wires it to the OC hook surface:
 
 ```ts
 // waffles.gateway-plugin.ts  (emitted — don't hand-edit)
-import { issueHandle, propagatedSensitivity, matchDenyRules }
-  from '@bic/openclaw-policy/runtime';
-import type { GuardrailProvider, FileIngestProvider, ProviderLifecycle,
-  HostContext, AuthorizationDecision, IngestDecision }
-  from '@bic/openclaw-guardrails';
-import { formatOcPath } from '@bic/openclaw-workspace/path';
-import POLICY_IR from './policy-ir.json' with { type: 'json' };
+import { issueHandle, propagatedSensitivity, matchDenyRules } from "@bic/openclaw-policy/runtime";
+import type {
+  GuardrailProvider,
+  FileIngestProvider,
+  ProviderLifecycle,
+  HostContext,
+  AuthorizationDecision,
+  IngestDecision,
+} from "@bic/openclaw-guardrails";
+import { formatOcPath } from "@bic/openclaw-workspace/path";
+import POLICY_IR from "./policy-ir.json" with { type: "json" };
 
-const SNAPSHOT = 'sha256-3a7f…';
-const PROVIDER_NAME = 'waffles';
+const SNAPSHOT = "sha256-3a7f…";
+const PROVIDER_NAME = "waffles";
 
 let ctx: HostContext;
 
 const guardrail: GuardrailProvider & ProviderLifecycle = {
   name: PROVIDER_NAME,
-  async init(hostCtx) { ctx = hostCtx; },
-  getCapabilities: () => ({ description: '…', version: POLICY_IR.version,
-    riskClassification: true, auditTrail: true,
-    externalApproval: true, argumentModification: false }),
+  async init(hostCtx) {
+    ctx = hostCtx;
+  },
+  getCapabilities: () => ({
+    description: "…",
+    version: POLICY_IR.version,
+    riskClassification: true,
+    auditTrail: true,
+    externalApproval: true,
+    argumentModification: false,
+  }),
   async preAuthorize(e) {
     const tool = POLICY_IR.tools.find((t) => t.name === e.tool);
-    if (!tool) return { decision: 'deny', reason: 'unknown tool' };
+    if (!tool) return { decision: "deny", reason: "unknown tool" };
     if (tool.riskLevel === 5) {
-      const tainted = propagatedSensitivity(e.provenance, POLICY_IR) === 'RESTRICTED';
-      if (tainted) return { decision: 'review', reason: 'RESTRICTED source',
-        approvalHandle: await issueHandle(ctx, e) };
+      const tainted = propagatedSensitivity(e.provenance, POLICY_IR) === "RESTRICTED";
+      if (tainted)
+        return {
+          decision: "review",
+          reason: "RESTRICTED source",
+          approvalHandle: await issueHandle(ctx, e),
+        };
     }
     const rule = matchDenyRules(e, POLICY_IR.soul.denyRules);
-    if (rule) return { decision: 'review', reason: rule.reason,
-      approvalHandle: await issueHandle(ctx, e) };
-    return { decision: 'allow', riskLevel: tool.riskLevel,
-      requiresExternalApproval: tool.capabilities.includes('IRREVERSIBLE_EXTERNAL') };
+    if (rule)
+      return { decision: "review", reason: rule.reason, approvalHandle: await issueHandle(ctx, e) };
+    return {
+      decision: "allow",
+      riskLevel: tool.riskLevel,
+      requiresExternalApproval: tool.capabilities.includes("IRREVERSIBLE_EXTERNAL"),
+    };
   },
   /* postAudit, onSnapshotPromoted … */
 };
@@ -248,21 +276,17 @@ Three things are worth noting about this shape:
 
 Data sensitivity is orthogonal to risk tier. Every workspace file, tool output, and memory read carries a label.
 
-| Label | Meaning | Typical sources | Default handling |
-|-------|---------|-----------------|------------------|
-| **PUBLIC** | Shareable externally without constraint | Marketing copy, open-source READMEs, public web scrapes | No restriction |
-| **INTERNAL** | Usable inside the organization | Employee directory, internal wiki, Teams chat | Block external (R5) egress unless explicitly approved |
-| **CONFIDENTIAL** | Named team / scope only | Unreleased product plans, financial drafts, customer lists | In-scope identity required; no cross-tenant egress |
-| **RESTRICTED** | Regulated / high-risk | Health records, payroll, export-controlled IP, RESTRICTED-tagged SOUL sources | **`requiresExternalApproval: true`, sticky, non-downgradable** |
+| Label            | Meaning                                 | Typical sources                                                               | Default handling                                               |
+| ---------------- | --------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| **PUBLIC**       | Shareable externally without constraint | Marketing copy, open-source READMEs, public web scrapes                       | No restriction                                                 |
+| **INTERNAL**     | Usable inside the organization          | Employee directory, internal wiki, Teams chat                                 | Block external (R5) egress unless explicitly approved          |
+| **CONFIDENTIAL** | Named team / scope only                 | Unreleased product plans, financial drafts, customer lists                    | In-scope identity required; no cross-tenant egress             |
+| **RESTRICTED**   | Regulated / high-risk                   | Health records, payroll, export-controlled IP, RESTRICTED-tagged SOUL sources | **`requiresExternalApproval: true`, sticky, non-downgradable** |
 
 The type is declared in `@bic/openclaw-policy/types`:
 
 ```ts
-export type Sensitivity =
-  | 'PUBLIC'
-  | 'INTERNAL'
-  | 'CONFIDENTIAL'
-  | 'RESTRICTED';
+export type Sensitivity = "PUBLIC" | "INTERNAL" | "CONFIDENTIAL" | "RESTRICTED";
 ```
 
 ### G-CHAIN -- sensitivity propagation
@@ -287,10 +311,10 @@ At runtime the emitted plugin calls `propagatedSensitivity(e.provenance, POLICY_
 
 ```ts
 export type ProvenanceSource =
-  | 'user_prompt'
+  | "user_prompt"
   | { tool_output: string; optional?: boolean }
   | { memory: Sensitivity }
-  | 'agent_literal';
+  | "agent_literal";
 ```
 
 ---
@@ -299,13 +323,13 @@ export type ProvenanceSource =
 
 The cross-product produces the effective decision. The emitted plugin's `preAuthorize` path walks it on every tool call.
 
-| | PUBLIC | INTERNAL | CONFIDENTIAL | RESTRICTED |
-|---|--------|----------|--------------|------------|
-| **R0** | allow | allow | allow | allow (audit only) |
-| **R1** | allow | allow | allow | allow (audit high-cardinality) |
-| **R2** | allow | allow | allow (in-scope check) | review |
-| **R3** | allow | allow | review | review (external approval) |
-| **R4** | allow | review | review | review (external approval) |
+|        | PUBLIC                   | INTERNAL                 | CONFIDENTIAL             | RESTRICTED                                     |
+| ------ | ------------------------ | ------------------------ | ------------------------ | ---------------------------------------------- |
+| **R0** | allow                    | allow                    | allow                    | allow (audit only)                             |
+| **R1** | allow                    | allow                    | allow                    | allow (audit high-cardinality)                 |
+| **R2** | allow                    | allow                    | allow (in-scope check)   | review                                         |
+| **R3** | allow                    | allow                    | review                   | review (external approval)                     |
+| **R4** | allow                    | review                   | review                   | review (external approval)                     |
 | **R5** | review (approval forced) | review (approval forced) | review (approval forced) | review (approval forced, **non-downgradable**) |
 
 Three decision shapes cover the grid:
@@ -322,19 +346,16 @@ RESTRICTED x any tier collapses to `requireApproval: true`. That field is **enve
 
 The same generator emits two namespace variants. `claws policy generate --scope <prefix>` controls the emitted `gateway-plugin.ts` import names. Two accepted values:
 
-| Scope | Default? | Import shape | Intended use |
-|-------|----------|--------------|--------------|
-| `@bic/openclaw` | yes | `@bic/openclaw-policy/runtime`, `@bic/openclaw-guardrails`, `@bic/openclaw-workspace/path` | Internal deploys on GHE Packages (`bic-internal`) |
-| `@openclaw` | no | `@openclaw/policy/runtime`, `@openclaw/guardrails`, `@openclaw/workspace/path` | Upstream-public builds (OC core contribution) |
+| Scope           | Default? | Import shape                                                                               | Intended use                                      |
+| --------------- | -------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| `@bic/openclaw` | yes      | `@bic/openclaw-policy/runtime`, `@bic/openclaw-guardrails`, `@bic/openclaw-workspace/path` | Internal deploys on GHE Packages (`bic-internal`) |
+| `@openclaw`     | no       | `@openclaw/policy/runtime`, `@openclaw/guardrails`, `@openclaw/workspace/path`             | Upstream-public builds (OC core contribution)     |
 
 The parser is strict -- anything other than these two values throws:
 
 ```ts
 // @bic/openclaw-policy/emit/scope.ts
-export const SCOPE_CHOICES: readonly ScopePrefix[] = [
-  '@bic/openclaw',
-  '@openclaw',
-] as const;
+export const SCOPE_CHOICES: readonly ScopePrefix[] = ["@bic/openclaw", "@openclaw"] as const;
 
 export function parseScopeArg(args: readonly string[]): ScopePrefix;
 ```
@@ -362,13 +383,13 @@ The emitter also runs a **forbidden-import scan** on every rendered plugin (`ver
 
 The generator is the first of five top-level jobs. The other four are direct named exports of `@bic/openclaw-policy` -- a single install gets behaviour tests, a mock gateway, compliance evaluation, and audit verification, all consuming the same `PolicyIR` and `audit-manifest.json`.
 
-| Helper | Purpose | CLI entry point |
-|--------|---------|-----------------|
-| `runScenarios` | Run YAML behaviour scenarios against the emitted plugin; fixture workspace + declared events + expected decisions | `openclaw policy test` |
-| `startMockGateway` | Stand up an OC-compatible endpoint on a port; load the generated plugin; replay decisions against in-memory state | `openclaw policy sim` |
+| Helper               | Purpose                                                                                                                | CLI entry point          |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `runScenarios`       | Run YAML behaviour scenarios against the emitted plugin; fixture workspace + declared events + expected decisions      | `openclaw policy test`   |
+| `startMockGateway`   | Stand up an OC-compatible endpoint on a port; load the generated plugin; replay decisions against in-memory state      | `openclaw policy sim`    |
 | `evaluateCompliance` | Run a `Rubric` (soc2, hipaa, eu-ai-act, nist-ai-rmf, or custom) against a snapshot; return a signed `ComplianceReport` | `openclaw policy comply` |
-| `verifyAudit` | Walk the hash chain produced by `@bic/openclaw-guardrails/audit`; report first tamper point if any | `openclaw policy verify` |
-| `renderReport` | Turn compliance / audit / snapshot-diff output into markdown / HTML / JSON / PDF | `openclaw policy report` |
+| `verifyAudit`        | Walk the hash chain produced by `@bic/openclaw-guardrails/audit`; report first tamper point if any                     | `openclaw policy verify` |
+| `renderReport`       | Turn compliance / audit / snapshot-diff output into markdown / HTML / JSON / PDF                                       | `openclaw policy report` |
 
 All outputs carry `snapshotId` so re-runs reconstruct exactly the policy in force at time T. The mock gateway is distinct from `snap serve` -- sim speaks agent-facing endpoints (tool-call, file-ingest); `snap serve` speaks management endpoints (snapshot upload + registry).
 
@@ -376,11 +397,11 @@ All outputs carry `snapshotId` so re-runs reconstruct exactly the policy in forc
 
 `evaluateCompliance` evaluates three classes of requirement. The `Rubric` format is YAML, loaded via `loadRubric(idOrPath)`; four built-ins ship (`soc2`, `hipaa`, `eu-ai-act`, `nist-ai-rmf`) and custom rubrics load from a path.
 
-| Kind | Source of truth | Example predicate |
-|------|-----------------|-------------------|
-| `static` | PolicyIR alone | "every R5 tool declares IRREVERSIBLE_EXTERNAL" |
-| `structural` | PolicyIR + audit manifest | "audit retention >= 1 year" |
-| `dynamic` | Live audit stream (windowed) | "all R5 decisions in last 30 days had external approval" |
+| Kind         | Source of truth              | Example predicate                                        |
+| ------------ | ---------------------------- | -------------------------------------------------------- |
+| `static`     | PolicyIR alone               | "every R5 tool declares IRREVERSIBLE_EXTERNAL"           |
+| `structural` | PolicyIR + audit manifest    | "audit retention >= 1 year"                              |
+| `dynamic`    | Live audit stream (windowed) | "all R5 decisions in last 30 days had external approval" |
 
 `ComplianceReport` output is signed (`hmac-sha256` by default; Ed25519 for enterprise, shared with the audit chain). Each requirement carries `evidence` -- `oc_uri` (direct IR references), `audit_correlation` (chain entries that substantiate the finding), or `sample` (quoted evidence from the stream). `renderReport` turns the JSON into an auditor-friendly surface.
 
@@ -390,17 +411,17 @@ All outputs carry `snapshotId` so re-runs reconstruct exactly the policy in forc
 
 Nine verbs on the `openclaw policy` subcommand group. Handlers add zero business logic -- they parse argv, call library functions, and render to the terminal. Snapshot management (list / promote / rollback / serve) is the peer `openclaw snap` group, not part of policy.
 
-| Verb | Purpose | Exit code on error |
-|------|---------|--------------------|
-| `check` | Parse + validate source files; diagnostics only (fast, editor-friendly) | 1 on any error |
-| `generate` | Write `policy-ir.json` + `gateway-plugin.ts` + `audit-manifest.json` into `.openclaw/policy/` | 1 on governance-fatal/structural error |
-| `watch` | Continuous `check` on file change; tight dev loop | -- (interactive) |
-| `comply` | Run a rubric (soc2 / hipaa / eu-ai-act / nist-ai-rmf / custom) against the current workspace; produce signed `ComplianceReport` | 1 if any requirement fails |
-| `test` | Run YAML scenarios against the current workspace; behaviour-level assertions on the emitted plugin | 1 if any scenario fails |
-| `sim` | Local mock OC gateway (agent-facing); loads the generated plugin, replays decisions against in-memory state | -- (server) |
-| `report` | Render compliance / audit / snapshot-diff output to markdown / HTML / JSON / PDF | 1 on render error |
-| `verify` | Hash-chain integrity check on the audit stream (delegates to `@bic/openclaw-guardrails/audit`) | 3 on chain break |
-| `diff` | Semantic PolicyIR diff between two snapshots (structural, not text); powers `openclaw snap diff` | -- |
+| Verb       | Purpose                                                                                                                         | Exit code on error                     |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `check`    | Parse + validate source files; diagnostics only (fast, editor-friendly)                                                         | 1 on any error                         |
+| `generate` | Write `policy-ir.json` + `gateway-plugin.ts` + `audit-manifest.json` into `.openclaw/policy/`                                   | 1 on governance-fatal/structural error |
+| `watch`    | Continuous `check` on file change; tight dev loop                                                                               | -- (interactive)                       |
+| `comply`   | Run a rubric (soc2 / hipaa / eu-ai-act / nist-ai-rmf / custom) against the current workspace; produce signed `ComplianceReport` | 1 if any requirement fails             |
+| `test`     | Run YAML scenarios against the current workspace; behaviour-level assertions on the emitted plugin                              | 1 if any scenario fails                |
+| `sim`      | Local mock OC gateway (agent-facing); loads the generated plugin, replays decisions against in-memory state                     | -- (server)                            |
+| `report`   | Render compliance / audit / snapshot-diff output to markdown / HTML / JSON / PDF                                                | 1 on render error                      |
+| `verify`   | Hash-chain integrity check on the audit stream (delegates to `@bic/openclaw-guardrails/audit`)                                  | 3 on chain break                       |
+| `diff`     | Semantic PolicyIR diff between two snapshots (structural, not text); powers `openclaw snap diff`                                | --                                     |
 
 Exit codes are consistent across the group: `0` success, `1` any fatal error, `2` internal generator bug, `3` CLI usage error. CI can pattern-match on them.
 

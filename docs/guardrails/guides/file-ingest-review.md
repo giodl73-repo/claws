@@ -30,7 +30,7 @@ If a provider returns `{ kind: 'modify', redirectPath: 'oc://...' }`:
 1. Runtime re-parses `redirectPath` with `parseOcUri` (12 rejection
    vectors, see `../../workspace/specs/WSP-path.md`)
 2. Runtime re-resolves with `resolveFsPath(redirectPath,
-   workspaceRoot)` (symlink escape check)
+workspaceRoot)` (symlink escape check)
 3. If either step fails, the redirect is discarded, the ingest is
    denied, and a `DecisionEntry` with
    `invalidReason: 'redirect-path-escape'` is written to the chain

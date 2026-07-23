@@ -35,16 +35,16 @@ Swap the package name. Subpath shape is preserved: the compiler exposes `./gover
 
 ```typescript
 // before
-import { compile, type CompileResult } from '@bic/claws-sdk';
-import { OCEmitter } from '@bic/claws-sdk/emit';
-import { AuditChain } from '@bic/claws-sdk/audit';
-import { validate } from '@bic/claws-sdk/test';
+import { compile, type CompileResult } from "@bic/claws-sdk";
+import { OCEmitter } from "@bic/claws-sdk/emit";
+import { AuditChain } from "@bic/claws-sdk/audit";
+import { validate } from "@bic/claws-sdk/test";
 
 // after
-import { compile, type CompileResult } from '@bic/claws-sdk';
-import { OCEmitter } from '@bic/claws-sdk/emit';
-import { AuditChain } from '@bic/claws-sdk/audit';
-import { validate } from '@bic/claws-sdk/test';
+import { compile, type CompileResult } from "@bic/claws-sdk";
+import { OCEmitter } from "@bic/claws-sdk/emit";
+import { AuditChain } from "@bic/claws-sdk/audit";
+import { validate } from "@bic/claws-sdk/test";
 ```
 
 See `api-mapping.md` for the full symbol-by-symbol table.
@@ -76,13 +76,13 @@ Every free-tier symbol is re-exported from `@bic/claws-sdk` at the same path. Yo
 
 ```typescript
 // unchanged
-import { compile, type CompileResult } from '@bic/claws-sdk';
-import { OCEmitter } from '@bic/claws-sdk/emit';
+import { compile, type CompileResult } from "@bic/claws-sdk";
+import { OCEmitter } from "@bic/claws-sdk/emit";
 
 // enterprise-only modules (unchanged too)
-import { FleetScanner, DriftDetector } from '@bic/claws-sdk/fleet';
-import { SOC2EvidenceBuilder } from '@bic/claws-sdk/compliance';
-import { CEFEmitter } from '@bic/claws-sdk/siem';
+import { FleetScanner, DriftDetector } from "@bic/claws-sdk/fleet";
+import { SOC2EvidenceBuilder } from "@bic/claws-sdk/compliance";
+import { CEFEmitter } from "@bic/claws-sdk/siem";
 ```
 
 ### Step 3 — verify the integrity pin
@@ -117,18 +117,18 @@ You want the smallest possible footprint and only need one or two dialects (for 
 
 ### Available Tier 1 / Tier 2 packages
 
-| Package | Purpose | Size |
-|---------|---------|------|
-| `@openclaw/audit-chain` | Hash-chained audit trails | ~20 KB |
-| `@openclaw/budget-meter` | Token/cost controls | ~8 KB |
-| `@openclaw/identity-bridge` | OIDC/SAML SSO | ~3 KB |
-| `@openclaw/siem-emitter` | SARIF/CEF/JSON/syslog | ~5 KB |
-| `@openclaw/secret-scanner` | Credential leak detection | ~4 KB |
-| `@claws/relax` | Policy expression engine | ~25 KB |
-| `@claws/audit` | Standalone audit trail | ~15 KB |
-| `@claws/security` | Input sanitization | ~12 KB |
-| `@claws/budget` | Skill budget controls | ~8 KB |
-| `@bic/claws-skill-kit` | `skill()` factory + decorators | ~35 KB |
+| Package                     | Purpose                        | Size   |
+| --------------------------- | ------------------------------ | ------ |
+| `@openclaw/audit-chain`     | Hash-chained audit trails      | ~20 KB |
+| `@openclaw/budget-meter`    | Token/cost controls            | ~8 KB  |
+| `@openclaw/identity-bridge` | OIDC/SAML SSO                  | ~3 KB  |
+| `@openclaw/siem-emitter`    | SARIF/CEF/JSON/syslog          | ~5 KB  |
+| `@openclaw/secret-scanner`  | Credential leak detection      | ~4 KB  |
+| `@claws/relax`              | Policy expression engine       | ~25 KB |
+| `@claws/audit`              | Standalone audit trail         | ~15 KB |
+| `@claws/security`           | Input sanitization             | ~12 KB |
+| `@claws/budget`             | Skill budget controls          | ~8 KB  |
+| `@bic/claws-skill-kit`      | `skill()` factory + decorators | ~35 KB |
 
 See `docs/claws/architecture/three-tier-packages.md` for the full tier map.
 
@@ -136,10 +136,10 @@ See `docs/claws/architecture/three-tier-packages.md` for the full tier map.
 
 ```typescript
 // before: pulling the whole SDK for one helper
-import { AuditChain } from '@bic/claws-sdk/audit';
+import { AuditChain } from "@bic/claws-sdk/audit";
 
 // after: use the OC-native package
-import { AuditChain } from '@openclaw/audit-chain';
+import { AuditChain } from "@openclaw/audit-chain";
 ```
 
 The `@bic/claws-sdk` `AuditChain` and the `@openclaw/audit-chain` `AuditChain` are behaviorally equivalent for the Tier 1 surface. The compiler version also exposes Ed25519-signed entries and the chain-validation pipeline — if you need those, stay on `@bic/claws-sdk`.

@@ -37,11 +37,11 @@ If verification fails, the output identifies the exact entry where the chain bro
 
 Published skills receive governance badges on ClawHub. Badge tiers:
 
-| Tier | Badge | Requirements |
-|------|-------|-------------|
-| DECLARED | Risk + OBO + classification | Frontmatter present |
-| TYPED | + type-safe handler | `@bic/claws-skill-kit` used |
-| VERIFIED | + signed manifest + dependency scan | `claws publish` |
+| Tier     | Badge                               | Requirements                |
+| -------- | ----------------------------------- | --------------------------- |
+| DECLARED | Risk + OBO + classification         | Frontmatter present         |
+| TYPED    | + type-safe handler                 | `@bic/claws-skill-kit` used |
+| VERIFIED | + signed manifest + dependency scan | `claws publish`             |
 
 Graduate from DECLARED to VERIFIED:
 

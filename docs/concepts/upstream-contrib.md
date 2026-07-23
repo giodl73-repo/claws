@@ -26,12 +26,12 @@ claws is built on top of the OpenClaw specification. Where it extends OC with go
 
 ## Package Scope
 
-| Package | What It Provides |
-|---------|-----------------|
-| @openclaw/governance-types | TypeScript types for governance IR |
-| @openclaw/policy-parser | YAML policy rule parser |
-| @openclaw/audit-chain | CGR hash chain implementation |
-| @openclaw/capability-scan | Workspace capability manifest builder |
+| Package                    | What It Provides                      |
+| -------------------------- | ------------------------------------- |
+| @openclaw/governance-types | TypeScript types for governance IR    |
+| @openclaw/policy-parser    | YAML policy rule parser               |
+| @openclaw/audit-chain      | CGR hash chain implementation         |
+| @openclaw/capability-scan  | Workspace capability manifest builder |
 
 ## Design Principle
 

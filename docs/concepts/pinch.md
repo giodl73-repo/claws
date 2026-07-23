@@ -10,17 +10,18 @@ pinch is a generalization of the PRESS context-pressure system used in the craft
 
 ## Compression Strategy
 
-| Field Type | Compression | Reason |
-|-----------|-------------|--------|
-| Rule conditions | Preserved verbatim | Enforcement-critical |
-| Severity levels | Preserved verbatim | Enforcement-critical |
-| Mechanical intent | Summarized | Documentary |
-| Policy descriptions | Dropped | Not needed at runtime |
-| Audit metadata | Dropped | Available via CGR chain |
+| Field Type          | Compression        | Reason                  |
+| ------------------- | ------------------ | ----------------------- |
+| Rule conditions     | Preserved verbatim | Enforcement-critical    |
+| Severity levels     | Preserved verbatim | Enforcement-critical    |
+| Mechanical intent   | Summarized         | Documentary             |
+| Policy descriptions | Dropped            | Not needed at runtime   |
+| Audit metadata      | Dropped            | Available via CGR chain |
 
 ## Token Savings
 
 Typical governance context for a workspace with 20 policy rules:
+
 - **Uncompressed**: ~4000 tokens
 - **After pinch**: ~1200 tokens (70% reduction)
 

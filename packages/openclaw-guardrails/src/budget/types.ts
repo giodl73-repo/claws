@@ -6,7 +6,7 @@
  * actions. `CostRecord` is the unit of metering (tokens + USD cost).
  */
 
-import type { FileIngestEvent, ToolCallEvent } from '../types.js';
+import type { FileIngestEvent, ToolCallEvent } from "../types.js";
 
 /** Unit of metering: token counts + USD cost. Either field is optional. */
 export interface CostRecord {
@@ -17,13 +17,13 @@ export interface CostRecord {
 }
 
 /** Budget window — hour, day, or calendar-month rolling. */
-export type BudgetWindow = 'hour' | 'day' | 'month';
+export type BudgetWindow = "hour" | "day" | "month";
 
 /** Action to take at a threshold boundary. */
-export type ThresholdAction = 'alert' | 'throttle' | 'deny';
+export type ThresholdAction = "alert" | "throttle" | "deny";
 
 /** Action to take once the budget is exhausted. */
-export type OnExhausted = 'deny' | 'throttle' | 'alert-only';
+export type OnExhausted = "deny" | "throttle" | "alert-only";
 
 /** Threshold configuration: fraction 0..1 of the limit + action. */
 export interface BudgetThreshold {
@@ -54,9 +54,9 @@ export interface BudgetPolicy {
 
 /** Decision returned by `BudgetMeter.check()` for a prospective operation. */
 export type BudgetDecision =
-  | { status: 'ok'; remaining: CostRecord }
-  | { status: 'threshold'; remaining: CostRecord; alert: ThresholdAlert }
-  | { status: 'exceeded'; over: CostRecord; onExhausted: OnExhausted };
+  | { status: "ok"; remaining: CostRecord }
+  | { status: "threshold"; remaining: CostRecord; alert: ThresholdAlert }
+  | { status: "exceeded"; over: CostRecord; onExhausted: OnExhausted };
 
 /** Event type the meter accepts for both `check()` and `record()`. */
 export type BudgetEvent = ToolCallEvent | FileIngestEvent;

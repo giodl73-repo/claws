@@ -8,11 +8,11 @@ Governance badges are visual indicators of a workspace's governance maturity. Wh
 
 ## Badge Levels
 
-| Level | Requirement | Trust |
-|-------|------------|-------|
-| DECLARED | claws.json exists with governance declarations | Low -- self-reported |
-| TYPED | GovernanceIR compiles without errors | Medium -- machine-validated syntax |
-| VERIFIED | Full compliance suite passes with evidence chain | High -- automated verification |
+| Level    | Requirement                                      | Trust                              |
+| -------- | ------------------------------------------------ | ---------------------------------- |
+| DECLARED | claws.json exists with governance declarations   | Low -- self-reported               |
+| TYPED    | GovernanceIR compiles without errors             | Medium -- machine-validated syntax |
+| VERIFIED | Full compliance suite passes with evidence chain | High -- automated verification     |
 
 ## Earning Badges
 

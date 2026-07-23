@@ -68,6 +68,7 @@ Skills and governance packages are organized into three tiers:
 ```
 
 The tier determines supply chain trust:
+
 - **Tier 1**: auto-trusted, no additional verification
 - **Tier 2**: requires workspace-level opt-in, supply chain warnings
 - **Tier 3**: trusted within the publishing organization

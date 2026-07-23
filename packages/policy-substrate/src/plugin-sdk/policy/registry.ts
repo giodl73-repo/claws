@@ -15,7 +15,7 @@
  * @module @openclaw/plugin-sdk/policy/registry
  */
 
-import type { PolicyGenerator } from './types.js';
+import type { PolicyGenerator } from "./types.js";
 
 /**
  * One registered generator. Adds id + description metadata so the
@@ -50,9 +50,7 @@ const REGISTRY = new Map<string, PolicyGeneratorSpec<unknown>>();
  *     generator: mdPolicyGenerator,
  *   });
  */
-export function registerPolicyGenerator<TValidated>(
-  spec: PolicyGeneratorSpec<TValidated>,
-): void {
+export function registerPolicyGenerator<TValidated>(spec: PolicyGeneratorSpec<TValidated>): void {
   REGISTRY.set(spec.id, spec as PolicyGeneratorSpec<unknown>);
 }
 
@@ -60,9 +58,7 @@ export function registerPolicyGenerator<TValidated>(
  * Look up a registered generator by id. Returns `null` if not
  * registered.
  */
-export function getPolicyGenerator(
-  id: string,
-): PolicyGeneratorSpec<unknown> | null {
+export function getPolicyGenerator(id: string): PolicyGeneratorSpec<unknown> | null {
   return REGISTRY.get(id) ?? null;
 }
 

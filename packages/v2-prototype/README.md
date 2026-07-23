@@ -22,11 +22,11 @@ that "somewhere."
 
 ## What's inside
 
-| Subpath | Mirrors upstream |
-|---|---|
-| `@bic/v2-prototype/snapshot` | `@openclaw/plugin-sdk/snapshot` |
-| `@bic/v2-prototype/policy-ir` | `@openclaw/plugin-sdk/policy-ir` |
-| `@bic/v2-prototype/policy-ir-runtime` | `@openclaw/plugin-sdk/policy-ir-runtime` |
+| Subpath                                  | Mirrors upstream                                                      |
+| ---------------------------------------- | --------------------------------------------------------------------- |
+| `@bic/v2-prototype/snapshot`             | `@openclaw/plugin-sdk/snapshot`                                       |
+| `@bic/v2-prototype/policy-ir`            | `@openclaw/plugin-sdk/policy-ir`                                      |
+| `@bic/v2-prototype/policy-ir-runtime`    | `@openclaw/plugin-sdk/policy-ir-runtime`                              |
 | `@bic/v2-prototype/hook-types-extension` | `@openclaw/plugin-sdk/hook-types` (extension via declaration merging) |
 
 Pure types + a handful of runtime helpers (4 lock-point ABI helpers

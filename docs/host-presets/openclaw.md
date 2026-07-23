@@ -12,12 +12,12 @@ ship.
 
 ## HostAdapter methods — openclaw-vanilla mapping
 
-| `HostAdapter` method | `OpenClawVanillaAdapter` implementation |
-|---|---|
-| `extractIdentity(req)` | OS user via `os.userInfo().username` or `--principal` CLI flag override. Single-user (`tenantId: null`, `sessionId: null`). |
-| `routePolicy(ctx)` | Single locally-compiled `.openclaw/policy/policy-ir.json` — no snap, no registry lookup. |
-| `getApprovalSink(ctx)` | Returns `OpenClawStdinSink` — JSON entries to stdout, ApprovalEntry read from stdin via `readline`. Declared `scope: 'ephemeral'`. |
-| `shapeResponse(decision, ctx)` | Process stdout (JSON) + exit code: 0 allow, 1 deny, 75 (EX_TEMPFAIL) review-pending. |
+| `HostAdapter` method           | `OpenClawVanillaAdapter` implementation                                                                                            |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `extractIdentity(req)`         | OS user via `os.userInfo().username` or `--principal` CLI flag override. Single-user (`tenantId: null`, `sessionId: null`).        |
+| `routePolicy(ctx)`             | Single locally-compiled `.openclaw/policy/policy-ir.json` — no snap, no registry lookup.                                           |
+| `getApprovalSink(ctx)`         | Returns `OpenClawStdinSink` — JSON entries to stdout, ApprovalEntry read from stdin via `readline`. Declared `scope: 'ephemeral'`. |
+| `shapeResponse(decision, ctx)` | Process stdout (JSON) + exit code: 0 allow, 1 deny, 75 (EX_TEMPFAIL) review-pending.                                               |
 
 See `testing--host-presets.md` for the matrix model and
 `host-adapter-contract.md` for the interface all four adapters
@@ -25,9 +25,9 @@ implement.
 
 ## What the openclaw preset proves
 
-Proposal §1.8 states: *"a host can run Layer 1 + 3 on a single tenant without
+Proposal §1.8 states: _"a host can run Layer 1 + 3 on a single tenant without
 a snapshot registry (local `.openclaw/policy/` compiled into the running
-plugin)."*  The openclaw preset is the sim proof of exactly that claim.
+plugin)."_ The openclaw preset is the sim proof of exactly that claim.
 
 Specifically it proves:
 
@@ -47,15 +47,15 @@ Specifically it proves:
 
 ```ts
 const openclawPreset: HostPresetConfig = {
-  name: 'openclaw',
+  name: "openclaw",
   decide: {
     providers: [/* GuardrailProvider + FileIngestProvider fixtures */],
-    mergerMode: 'strict-oc7',
+    mergerMode: "strict-oc7",
   },
-  track:         { mode: 'off' },          // Layer 2 absent
-  enforceReview: { companionMode: 'cli-stdin', signer: 'local-dev' },
-  workspace:     { mount: 'local-dir' },
-  scope:         '@bic/openclaw',          // or '@openclaw' via scope-flip
+  track: { mode: "off" }, // Layer 2 absent
+  enforceReview: { companionMode: "cli-stdin", signer: "local-dev" },
+  workspace: { mount: "local-dir" },
+  scope: "@bic/openclaw", // or '@openclaw' via scope-flip
 };
 ```
 
@@ -71,15 +71,15 @@ Key values:
 
 ## What openclaw SKIPS (compared to lobster/aether)
 
-| Feature                           | lobster / aether | openclaw |
-|-----------------------------------|------------------|----------|
-| `snap serve` daemon               | spawned          | **not spawned** |
-| `onSnapshotPromoted` hook         | fires on promote | **never fires** |
-| `stage` redirect to `.openclaw/.stage/` | container-RO path | **not applicable** (direct writes) |
-| Supervisor HTTP callback          | signed HMAC over HTTP | stdin prompt |
-| Container-RO `WriteRejection`     | platform-neutral `cause: 'readonly-mount'` | **not applicable** |
-| `SidecarUnreachableEntry`         | logged on 2× healthz fail | **not applicable** (no sidecar) |
-| `currentSnapshotId`               | tracked by snap  | **`null`** always |
+| Feature                                 | lobster / aether                           | openclaw                           |
+| --------------------------------------- | ------------------------------------------ | ---------------------------------- |
+| `snap serve` daemon                     | spawned                                    | **not spawned**                    |
+| `onSnapshotPromoted` hook               | fires on promote                           | **never fires**                    |
+| `stage` redirect to `.openclaw/.stage/` | container-RO path                          | **not applicable** (direct writes) |
+| Supervisor HTTP callback                | signed HMAC over HTTP                      | stdin prompt                       |
+| Container-RO `WriteRejection`           | platform-neutral `cause: 'readonly-mount'` | **not applicable**                 |
+| `SidecarUnreachableEntry`               | logged on 2× healthz fail                  | **not applicable** (no sidecar)    |
+| `currentSnapshotId`                     | tracked by snap                            | **`null`** always                  |
 
 This subtractive list is the point of the preset. Every capability listed
 above is a Microsoft-infra cost an adopter might not want. openclaw proves

@@ -164,26 +164,26 @@
 
 ## What Runs Where
 
-| Artifact | Produced By | Consumed By | Enforcement Point |
-|----------|-------------|-------------|-------------------|
-| Gateway plugin (`index.ts`) | `claws build` | OC Gateway (in container + ClawPilot) | L2-L4: every tool call |
-| `exec-approvals.json` | `claws build` | OC host (Gateway reads at startup) | L4: backup allowlist |
-| `SKILL.md` | `claws build` | LLM context (injected by Gateway) | L1: advisory only |
-| `host-approval-policies.json` | `claws build` | Aether `ApprovalPolicyRegistry`, ClawPilot | HOST: credential-gated approval UX |
-| `.claws-manifest.json` | `claws publish` | Aether blob rehydration, ClawPilot | Integrity: tamper detection |
-| `lobster.yaml` | Developer | OC Gateway (workflow engine) | Workflow orchestration |
+| Artifact                      | Produced By     | Consumed By                                | Enforcement Point                  |
+| ----------------------------- | --------------- | ------------------------------------------ | ---------------------------------- |
+| Gateway plugin (`index.ts`)   | `claws build`   | OC Gateway (in container + ClawPilot)      | L2-L4: every tool call             |
+| `exec-approvals.json`         | `claws build`   | OC host (Gateway reads at startup)         | L4: backup allowlist               |
+| `SKILL.md`                    | `claws build`   | LLM context (injected by Gateway)          | L1: advisory only                  |
+| `host-approval-policies.json` | `claws build`   | Aether `ApprovalPolicyRegistry`, ClawPilot | HOST: credential-gated approval UX |
+| `.claws-manifest.json`        | `claws publish` | Aether blob rehydration, ClawPilot         | Integrity: tamper detection        |
+| `lobster.yaml`                | Developer       | OC Gateway (workflow engine)               | Workflow orchestration             |
 
 ## Security Properties
 
-| Property | Cloud Container | ClawPilot Device |
-|----------|----------------|-----------------|
-| Network isolation | gRPC only (no egress) | Full local network |
-| LLM credential | Aether metered pipeline | Direct API key |
-| Graph credential | Aether holds (OBO token) | User's local credential |
-| Plugin integrity | Blob signature verified at startup | Local `.claws-manifest.json` |
-| Unknown tool default | R5 fail-closed | R5 fail-closed |
-| Approval UX | Cowork SSE dialog | ClawPilot desktop dialog |
-| Kill switch | L5 sidecar (if deployed) | L5 sidecar (local) |
+| Property             | Cloud Container                    | ClawPilot Device             |
+| -------------------- | ---------------------------------- | ---------------------------- |
+| Network isolation    | gRPC only (no egress)              | Full local network           |
+| LLM credential       | Aether metered pipeline            | Direct API key               |
+| Graph credential     | Aether holds (OBO token)           | User's local credential      |
+| Plugin integrity     | Blob signature verified at startup | Local `.claws-manifest.json` |
+| Unknown tool default | R5 fail-closed                     | R5 fail-closed               |
+| Approval UX          | Cowork SSE dialog                  | ClawPilot desktop dialog     |
+| Kill switch          | L5 sidecar (if deployed)           | L5 sidecar (local)           |
 
 ## Composition Model
 

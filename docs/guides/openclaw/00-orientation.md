@@ -17,21 +17,22 @@ detail.
 
 ## Guide index
 
-| Guide | What you learn |
-|-------|----------------|
-| [01 Plugin lifecycle](01-plugin-lifecycle.md) | How a manifest becomes a live registration |
-| [02 Three channels](02-three-channels.md) | Typed hooks vs legacy hooks vs diagnostic events |
-| [03 Gateway bus](03-gateway-bus.md) | Gateway as everything-bus + three extensibility seams |
-| [04 Turn anatomy](04-turn-anatomy.md) | Hooks, sandbox, and LLM in one request |
-| [05 Trust boundary](05-trust-boundary.md) | metadata.trusted, WeakSet anti-spoof, redaction |
-| [06 Manifest activation](06-manifest-activation.md) | Six trigger types that decide what loads |
-| [07 Validate with proof](07-validate-with-proof.md) | Lint these guides with `proof check` |
+| Guide                                               | What you learn                                        |
+| --------------------------------------------------- | ----------------------------------------------------- |
+| [01 Plugin lifecycle](01-plugin-lifecycle.md)       | How a manifest becomes a live registration            |
+| [02 Three channels](02-three-channels.md)           | Typed hooks vs legacy hooks vs diagnostic events      |
+| [03 Gateway bus](03-gateway-bus.md)                 | Gateway as everything-bus + three extensibility seams |
+| [04 Turn anatomy](04-turn-anatomy.md)               | Hooks, sandbox, and LLM in one request                |
+| [05 Trust boundary](05-trust-boundary.md)           | metadata.trusted, WeakSet anti-spoof, redaction       |
+| [06 Manifest activation](06-manifest-activation.md) | Six trigger types that decide what loads              |
+| [07 Validate with proof](07-validate-with-proof.md) | Lint these guides with `proof check`                  |
 
 ---
 
 ## Source layout
 
 <!-- proof:compiled from="proof:tree kind=org" uri="" -->
+
 ```org
 design/
 ├── src/openclaw/: proof source (.source.md)
@@ -47,6 +48,7 @@ design/
 ├── openclaw/guides/: compiled output (.md, proof-generated)
 └── proof.toml: compile config
 ```
+
 <!-- /proof:compiled -->
 
 ---
@@ -76,7 +78,7 @@ the team uses.
 
 For someone new to OpenClaw:
 
-1. Start with [03 Gateway bus](03-gateway-bus.md) — answers "what *is* OpenClaw."
+1. Start with [03 Gateway bus](03-gateway-bus.md) — answers "what _is_ OpenClaw."
 2. Then [01 Plugin lifecycle](01-plugin-lifecycle.md) — how plugins plug in.
 3. Then [04 Turn anatomy](04-turn-anatomy.md) — how a request flows.
 4. Then [02 Three channels](02-three-channels.md) and [05 Trust boundary](05-trust-boundary.md) — observation + security.

@@ -18,9 +18,9 @@
                   ┌─────────────┼─────────────┐
                   │             │             │
             craftworks-sdk   claws-sdk     (future SDKs)
-            (craft/guard/    (governance    
-             fleet domains)   compiler,     
-                              OC adapters)  
+            (craft/guard/    (governance
+             fleet domains)   compiler,
+                              OC adapters)
                   │             │
                   │        ┌────┼────────────────────┐
                   │        │    │            │        │
@@ -375,6 +375,7 @@ FORBIDDEN IMPORTS (enforced by lint rule):
 ```
 
 These rules are enforced by:
+
 1. **tsconfig.json paths** — no path aliases for forbidden packages
 2. **ESLint no-restricted-imports** — explicit deny list
 3. **CI check** — `madge --circular --no-color claws-sdk/src/` to detect import cycles via dependency graph analysis (structural, not grep-based)
@@ -385,19 +386,19 @@ These rules are enforced by:
 
 shared-cli is 7,487 lines. claws-base-cli needs a SUBSET, adapted for claws branding:
 
-| shared-cli module | claws-base-cli equivalent | Rewrite or duplicate? |
-|-------------------|--------------------------|----------------------|
-| `output/format-json.ts` | `output/format-json.ts` | Duplicate (identical pattern) |
-| `output/format-sarif.ts` | `output/format-sarif.ts` | Duplicate (identical SARIF schema) |
-| `output/format-csv.ts` | `output/format-csv.ts` | Duplicate (trivial) |
-| `output/format-default.ts` | `output/format-default.ts` | Rewrite (claws-specific formatting) |
-| `output/color.ts` | `output/color.ts` | Rewrite (R1-R5 risk colors) |
-| `output/table.ts` | `output/table.ts` | Duplicate (generic table renderer) |
-| `output/progress.ts` | `terminal/progress.ts` | Duplicate (progress bar) |
-| `core/errors.ts` | `terminal/errors.ts` | Rewrite (WHAT + HOW + WHERE contract) |
-| `core/logger.ts` | `core/logger.ts` | Duplicate (structured logging) |
-| `splash/banner.ts` | `terminal/banner.ts` | Rewrite (claws branding, not craft) |
-| `tui/*` | NOT included | claws v1 has no TUI — terminal output only |
+| shared-cli module          | claws-base-cli equivalent  | Rewrite or duplicate?                      |
+| -------------------------- | -------------------------- | ------------------------------------------ |
+| `output/format-json.ts`    | `output/format-json.ts`    | Duplicate (identical pattern)              |
+| `output/format-sarif.ts`   | `output/format-sarif.ts`   | Duplicate (identical SARIF schema)         |
+| `output/format-csv.ts`     | `output/format-csv.ts`     | Duplicate (trivial)                        |
+| `output/format-default.ts` | `output/format-default.ts` | Rewrite (claws-specific formatting)        |
+| `output/color.ts`          | `output/color.ts`          | Rewrite (R1-R5 risk colors)                |
+| `output/table.ts`          | `output/table.ts`          | Duplicate (generic table renderer)         |
+| `output/progress.ts`       | `terminal/progress.ts`     | Duplicate (progress bar)                   |
+| `core/errors.ts`           | `terminal/errors.ts`       | Rewrite (WHAT + HOW + WHERE contract)      |
+| `core/logger.ts`           | `core/logger.ts`           | Duplicate (structured logging)             |
+| `splash/banner.ts`         | `terminal/banner.ts`       | Rewrite (claws branding, not craft)        |
+| `tui/*`                    | NOT included               | claws v1 has no TUI — terminal output only |
 
 **Estimated size**: ~2,000 lines (vs shared-cli's 7,487). No TUI, no wallboard, no Ink rendering.
 
@@ -409,18 +410,18 @@ shared-cli is 7,487 lines. claws-base-cli needs a SUBSET, adapted for claws bran
 
 The user noted: "just like TypeScript has multiple commands." TypeScript ships:
 
-| Binary | What it does |
-|--------|-------------|
-| `tsc` | The compiler |
+| Binary     | What it does                |
+| ---------- | --------------------------- |
+| `tsc`      | The compiler                |
 | `tsserver` | Language server for editors |
 
 claws mirrors this:
 
-| Binary | Package | What it does |
-|--------|---------|-------------|
-| `claws` | claws-cli | The governance compiler (40 commands) |
-| `claws-lsp` | claws-lsp | Language server for VS Code |
-| `claws-serve` | claws-serve | HTTP API daemon for CI/CD + Gateway |
+| Binary        | Package     | What it does                          |
+| ------------- | ----------- | ------------------------------------- |
+| `claws`       | claws-cli   | The governance compiler (40 commands) |
+| `claws-lsp`   | claws-lsp   | Language server for VS Code           |
+| `claws-serve` | claws-serve | HTTP API daemon for CI/CD + Gateway   |
 
 All three share `claws-sdk` as the engine. claws-cli and claws-serve also share `claws-base-cli` for output formatting. claws-lsp does NOT use claws-base-cli (no terminal output in a language server).
 
@@ -477,11 +478,11 @@ shared-cli  claws-base-cli  claws-skill-kit  claws-test   (parallel, all depend 
 
 Each claws package follows the Craftworks test convention:
 
-| Suffix | Tier | What it tests |
-|--------|------|--------------|
-| `.unit.test.ts` | L0 | Pure functions, no I/O |
-| `.integration.test.ts` | L1/L2 | Multi-module, cross-package |
-| `.e2e.test.ts` | L2+ | Full pipeline (parse → emit) |
+| Suffix                 | Tier  | What it tests                |
+| ---------------------- | ----- | ---------------------------- |
+| `.unit.test.ts`        | L0    | Pure functions, no I/O       |
+| `.integration.test.ts` | L1/L2 | Multi-module, cross-package  |
+| `.e2e.test.ts`         | L2+   | Full pipeline (parse → emit) |
 
 Run per-package: `cd claws-sdk && vitest run`
 Run all claws: `vitest run --project claws-sdk claws-base-cli claws-cli`
@@ -490,13 +491,13 @@ Run all claws: `vitest run --project claws-sdk claws-base-cli claws-cli`
 
 ## Implementation Phases
 
-| Phase | Packages | What ships |
-|-------|----------|-----------|
-| **1** | claws-sdk (compile + governance + emit) + claws-cli (minimal inline output) | `claws compile`, `claws check`, `claws build` |
-| **2** | claws-base-cli (extracted from Phase 1 inline output) + claws-skill-kit + claws-test | Full 40-command CLI, skill author SDK |
-| **3** | claws-sdk (compliance + context) | `claws comply`, `claws audit`, fleet commands |
-| **4** | claws-lsp | VS Code extension |
-| **5** | claws-serve | HTTP API daemon |
+| Phase | Packages                                                                             | What ships                                    |
+| ----- | ------------------------------------------------------------------------------------ | --------------------------------------------- |
+| **1** | claws-sdk (compile + governance + emit) + claws-cli (minimal inline output)          | `claws compile`, `claws check`, `claws build` |
+| **2** | claws-base-cli (extracted from Phase 1 inline output) + claws-skill-kit + claws-test | Full 40-command CLI, skill author SDK         |
+| **3** | claws-sdk (compliance + context)                                                     | `claws comply`, `claws audit`, fleet commands |
+| **4** | claws-lsp                                                                            | VS Code extension                             |
+| **5** | claws-serve                                                                          | HTTP API daemon                               |
 
 Phase 1 is the MVP: compile OC workspace files, run governance checks, emit a Gateway plugin. Everything else builds on that foundation.
 
@@ -529,40 +530,43 @@ In priority order for Phase 1:
 Across three phases (Ptah, Anubis, Thoth), 18 scenario series produced 198+ scenarios and ~2,452 findings that were applied back into specs, plans, pitfalls, and guides. This section summarizes the cumulative impact.
 
 ### Phase 1: Ptah (Foundation) — 133 scenarios, 1,056 findings
+
 - 5 scenario series: compile-pipeline, governance-rules, fail-mode, emit-artifacts, cross-file-conflicts
 - Plus 4 coverage/validation series: pitfall-coverage-1, pitfall-coverage-2, spec-constraint-validation, pitfall-final-1, pitfall-final-2
 - CL-02 received 291 amendments (A1-A291)
 - 161 pitfalls cataloged (P-001 through P-161)
 
 ### Phase 2: Anubis (Operations) — 35 scenarios, ~280 findings
+
 - 3 series: three-rings (6), fleet-operations (10), snapshot-lifecycle (6)
 - Plus 35 pitfall scenarios (pitfall-anubis)
 - Key design areas: ring coordination, fleet scan/broadcast/drift/kill, snapshot save/restore/diff/promote
 
 ### Phase 3: Thoth (Ecosystem) — 30 scenarios, ~362 findings
+
 - 7 series: obo-elicitation (8), a2a-governance (6), injection-defense (6), compliance-evidence (6), skill-lifecycle (5), lossless-roundtrip (5), platform-detection (7)
 - Plus 53 pitfall scenarios (pitfall-thoth-1, pitfall-thoth-2)
 - Key design areas: OBO boundary, A2A trust, injection defense, compliance evidence, skill lifecycle, lossless guarantee, 7-platform detection
 
 ### Cumulative Impact
 
-| Metric | Ptah | Anubis+Thoth | Total |
-|--------|------|-------------|-------|
-| Regular scenarios | 70+ | 65 | 135+ |
-| Pitfall scenarios | 62 | 88 | 150 |
-| Total findings | 1,056 | ~1,396 | ~2,452 |
-| Spec amendments | 291 (CL-02) | ~620 (all specs) | ~911 |
-| Pitfalls | P-001–P-161 | P-162–P-249 | 249 |
-| Plans updated | — | 15 | 15 |
-| Guides updated/created | — | ~52 | ~52 |
+| Metric                 | Ptah        | Anubis+Thoth     | Total  |
+| ---------------------- | ----------- | ---------------- | ------ |
+| Regular scenarios      | 70+         | 65               | 135+   |
+| Pitfall scenarios      | 62          | 88               | 150    |
+| Total findings         | 1,056       | ~1,396           | ~2,452 |
+| Spec amendments        | 291 (CL-02) | ~620 (all specs) | ~911   |
+| Pitfalls               | P-001–P-161 | P-162–P-249      | 249    |
+| Plans updated          | —           | 15               | 15     |
+| Guides updated/created | —           | ~52              | ~52    |
 
 ### Spec Amendment Summary
 
-| Spec | Amendments | Key areas |
-|------|-----------|-----------|
-| CL-01 | 35 | Platform detection matrix, claws.json v2, standing approvals |
-| CL-02 | 488 (A1-A488) | G-ELICIT, G-A2A-*, G-INPUT/CONTEXT/OUTPUT/BOUND, compliance |
-| CL-03 | 62 | Runtime enforcement, TOCTOU, lateral movement, WAL, chain validation |
-| CL-04 | 79 | Lossless pipeline, BOM/CRLF, deterministic serialization, platform codegen |
-| CL-05 | 235 | Three-rings, fleet ops, snapshots, skill lifecycle, maker experience |
-| CL-06 | 12 | Python guard package, ClawHub marketplace, fleet governance |
+| Spec  | Amendments    | Key areas                                                                  |
+| ----- | ------------- | -------------------------------------------------------------------------- |
+| CL-01 | 35            | Platform detection matrix, claws.json v2, standing approvals               |
+| CL-02 | 488 (A1-A488) | G-ELICIT, G-A2A-*, G-INPUT/CONTEXT/OUTPUT/BOUND, compliance                |
+| CL-03 | 62            | Runtime enforcement, TOCTOU, lateral movement, WAL, chain validation       |
+| CL-04 | 79            | Lossless pipeline, BOM/CRLF, deterministic serialization, platform codegen |
+| CL-05 | 235           | Three-rings, fleet ops, snapshots, skill lifecycle, maker experience       |
+| CL-06 | 12            | Python guard package, ClawHub marketplace, fleet governance                |

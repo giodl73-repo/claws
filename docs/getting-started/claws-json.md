@@ -33,27 +33,27 @@ Three fields. That's a valid, governed workspace.
 
 ## Field by field
 
-| Field | Required | Default | What it does |
-|-------|----------|---------|-------------|
-| `version` | Yes | -- | Schema version. Always `2`. |
-| `enabled` | Yes | -- | Master toggle. `false` disables all governance. |
-| `trustTier` | No | `2` | How much you trust your agent (0-4). Always defaults to T2 if omitted -- never undefined. |
-| `platform` | No | auto | Override platform detection (`openclaw`, `cursor`, `claude`, etc). |
-| `template` | No | `minimal` | Policy template: `soc2`, `hipaa`, `eu-ai-act`, `minimal`. |
-| `policies` | No | `[]` | Paths to policy YAML files. |
-| `audit` | No | -- | Audit chain settings (retention, SIEM format). |
-| `budget` | No | -- | Token budget limits. |
-| `targets` | No | -- | Per-platform overrides for cross-compilation. |
+| Field       | Required | Default   | What it does                                                                              |
+| ----------- | -------- | --------- | ----------------------------------------------------------------------------------------- |
+| `version`   | Yes      | --        | Schema version. Always `2`.                                                               |
+| `enabled`   | Yes      | --        | Master toggle. `false` disables all governance.                                           |
+| `trustTier` | No       | `2`       | How much you trust your agent (0-4). Always defaults to T2 if omitted -- never undefined. |
+| `platform`  | No       | auto      | Override platform detection (`openclaw`, `cursor`, `claude`, etc).                        |
+| `template`  | No       | `minimal` | Policy template: `soc2`, `hipaa`, `eu-ai-act`, `minimal`.                                 |
+| `policies`  | No       | `[]`      | Paths to policy YAML files.                                                               |
+| `audit`     | No       | --        | Audit chain settings (retention, SIEM format).                                            |
+| `budget`    | No       | --        | Token budget limits.                                                                      |
+| `targets`   | No       | --        | Per-platform overrides for cross-compilation.                                             |
 
 ## Trust tiers
 
-| Tier | Meaning | Example |
-|------|---------|---------|
-| T0 | No trust (R1 max) | Read-only, no tool access |
-| T1 | Minimal (R2 max) | Safe tools only (search, read) |
-| T2 | Standard (R3 max) | Most tools, some restrictions (default) |
-| T3 | Elevated (R4 max) | Sensitive tools (file write, network) |
-| T4 | Full (R5 max) | Everything, including system-level access |
+| Tier | Meaning           | Example                                   |
+| ---- | ----------------- | ----------------------------------------- |
+| T0   | No trust (R1 max) | Read-only, no tool access                 |
+| T1   | Minimal (R2 max)  | Safe tools only (search, read)            |
+| T2   | Standard (R3 max) | Most tools, some restrictions (default)   |
+| T3   | Elevated (R4 max) | Sensitive tools (file write, network)     |
+| T4   | Full (R5 max)     | Everything, including system-level access |
 
 If `claws pinch` says a tool needs a higher tier, either raise the tier or
 remove the tool.
@@ -97,6 +97,7 @@ Add fields as you need them -- everything optional stays optional.
 ## Scenario-Driven Additions
 
 ### From obo-elicitation scenarios (68 findings applied)
+
 - Standing approval schema: claws.json supports structured pre-authorization with conditions (time-bound, scope-limited, tool-specific) for scheduled R5 tools
 - Standing approval compile-time validation: unconditional R5 standing approval produces a warning/error; overlapping standing approvals are detected
 - Three-source precedence for elicitation: SOUL.md deny > claws.json policy > USER.md pre-authorization
@@ -104,6 +105,7 @@ Add fields as you need them -- everything optional stays optional.
 - Per-tool timeout overrides and approval mode selection (inline, async, pre-approved) declared in claws.json
 
 ### From platform-detection scenarios (47 findings applied)
+
 - Per-target trust tier overrides in the `targets` section enable cross-compilation with platform-specific governance levels
 - `targets.bedrock.guardrailId` supports the Bedrock guardrail update workflow; `targets.crewai.version` enables version-targeted emission
 - Platform field supports explicit override of auto-detection; zero-config mode works without claws.json via synthetic defaults

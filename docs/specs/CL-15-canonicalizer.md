@@ -23,6 +23,7 @@ All three consumers MUST invoke the same canonicalization function from `@opencl
 ### 2. Algorithm
 
 The canonicalizer implements RFC 8785 JSON Canonicalization Scheme (JCS):
+
 - UTF-8 encoded output
 - Object keys sorted by UTF-16 code unit order (lexicographic on codepoints)
 - No whitespace between tokens
@@ -44,6 +45,7 @@ Canonicalizer algorithm version is pinned in `@openclaw/workspace/canonicalize/p
 ### 6. Pre-hashing requirement
 
 Any consumer that hashes canonicalized output (policy IR → policyId, workspace files → snapshotId, audit entry → hash-chain link) MUST:
+
 - Canonicalize first
 - Hash over the canonicalized bytes only
 - Never hash over in-memory object representations (different serializations would produce different hashes for the same logical content)

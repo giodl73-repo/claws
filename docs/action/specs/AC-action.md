@@ -13,10 +13,10 @@ land in GitHub's security tab, and gates merge based on severity.
 ```yaml
 - uses: gim-home/claws-action@v0.1
   with:
-    workspace: .                   # path to workspace root
-    severity-gate: warn            # block | warn | off (default: warn)
-    cache: true                    # enable ACC cache (default: true)
-    fleet: acme                    # optional fleet override
+    workspace: . # path to workspace root
+    severity-gate: warn # block | warn | off (default: warn)
+    cache: true # enable ACC cache (default: true)
+    fleet: acme # optional fleet override
 ```
 
 ## Outputs
@@ -28,10 +28,10 @@ land in GitHub's security tab, and gates merge based on severity.
 
 ## Sub-spec index
 
-| Code | File | Authority over |
-|------|------|----------------|
-| **ACS** | [ACS-sarif-pipeline.md](./ACS-sarif-pipeline.md) | Finding → SARIF translation, severity mapping |
-| **ACC** | [ACC-action-cache.md](./ACC-action-cache.md) | Workspace-to-policy cache keyed on content hash |
+| Code    | File                                             | Authority over                                  |
+| ------- | ------------------------------------------------ | ----------------------------------------------- |
+| **ACS** | [ACS-sarif-pipeline.md](./ACS-sarif-pipeline.md) | Finding → SARIF translation, severity mapping   |
+| **ACC** | [ACC-action-cache.md](./ACC-action-cache.md)     | Workspace-to-policy cache keyed on content hash |
 
 ## Stability
 

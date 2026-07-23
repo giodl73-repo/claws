@@ -4,13 +4,13 @@
 
 ## Badge states
 
-| State | Color | Meaning |
-|-------|-------|---------|
-| **GRAY** | grey | Ring 1 (DECLARED) — minimal adoption |
-| **BLUE** | blue | Ring 2 (TYPED) — arg schemas present |
-| **GREEN** | green | Ring 3 (VERIFIED) — scenarios + coverage |
+| State      | Color  | Meaning                                           |
+| ---------- | ------ | ------------------------------------------------- |
+| **GRAY**   | grey   | Ring 1 (DECLARED) — minimal adoption              |
+| **BLUE**   | blue   | Ring 2 (TYPED) — arg schemas present              |
+| **GREEN**  | green  | Ring 3 (VERIFIED) — scenarios + coverage          |
 | **YELLOW** | yellow | Incomplete — some tools at lower ring than others |
-| **RED** | red | Broken — compile fails or validation blocks |
+| **RED**    | red    | Broken — compile fails or validation blocks       |
 
 The badge is per-SKILL (one badge per skill in the workspace), not
 per-workspace.

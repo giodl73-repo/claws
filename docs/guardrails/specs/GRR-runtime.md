@@ -19,13 +19,13 @@ guard — it runs BEFORE a snapshot is promoted. See
 
 ## Fail-mode policy
 
-| Tier | Fail mode | Rationale |
-|------|-----------|-----------|
-| R1 | `open` | Low-risk reads; blocking on guardrail outage is worse than allowing |
-| R2 | `open` | Same |
-| R3 | `configurable` | Host decides; most hosts default `open` for availability |
-| R4 | `configurable` | Host decides; most hosts default `closed` for safety |
-| R5 | `closed` (fixed) | Never fail open; always escalate |
+| Tier | Fail mode        | Rationale                                                           |
+| ---- | ---------------- | ------------------------------------------------------------------- |
+| R1   | `open`           | Low-risk reads; blocking on guardrail outage is worse than allowing |
+| R2   | `open`           | Same                                                                |
+| R3   | `configurable`   | Host decides; most hosts default `open` for availability            |
+| R4   | `configurable`   | Host decides; most hosts default `closed` for safety                |
+| R5   | `closed` (fixed) | Never fail open; always escalate                                    |
 
 `configurable` means the host passes a `failMode: 'open' | 'closed'`
 in `HostContext` that the runtime honours for that tier.
@@ -50,7 +50,7 @@ async function enforce(
   ctx: AuthorizationContext,
   policy: PolicyIR,
   providers: readonly GuardrailProvider[],
-): Promise<HookResult>
+): Promise<HookResult>;
 ```
 
 `enforce` runs every provider's `preAuthorize` in parallel, merges

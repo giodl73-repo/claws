@@ -17,23 +17,23 @@
      └──────(restore)── rolling-back  ready'
 ```
 
-| State | Meaning |
-|-------|---------|
-| `init` | Daemon started, no snapshot loaded yet |
-| `ready` | A snapshot is active and serving requests |
-| `promoting` | A new snapshot is being validated + staged |
+| State          | Meaning                                    |
+| -------------- | ------------------------------------------ |
+| `init`         | Daemon started, no snapshot loaded yet     |
+| `ready`        | A snapshot is active and serving requests  |
+| `promoting`    | A new snapshot is being validated + staged |
 | `rolling-back` | A promote failed, restoring prior snapshot |
 
 ## Valid transitions
 
-| From | To | Trigger |
-|------|----|---------|
-| `init` | `ready` | Load snapshot from disk on boot |
-| `ready` | `promoting` | `promote()` call from operator |
-| `promoting` | `ready` | Validation + staging succeeded |
-| `promoting` | `rolling-back` | Validation or staging failed |
-| `rolling-back` | `ready` | Prior snapshot restored |
-| `rolling-back` | `init` | Prior snapshot also failed to restore — daemon halts serving |
+| From           | To             | Trigger                                                      |
+| -------------- | -------------- | ------------------------------------------------------------ |
+| `init`         | `ready`        | Load snapshot from disk on boot                              |
+| `ready`        | `promoting`    | `promote()` call from operator                               |
+| `promoting`    | `ready`        | Validation + staging succeeded                               |
+| `promoting`    | `rolling-back` | Validation or staging failed                                 |
+| `rolling-back` | `ready`        | Prior snapshot restored                                      |
+| `rolling-back` | `init`         | Prior snapshot also failed to restore — daemon halts serving |
 
 Every other transition is invalid and raises `SnapStateError`.
 
@@ -43,7 +43,7 @@ Every other transition is invalid and raises `SnapStateError`.
 class SnapStateError extends Error {
   readonly from: SnapState;
   readonly to: SnapState;
-  readonly attempted: string;  // the method called, e.g. 'promote'
+  readonly attempted: string; // the method called, e.g. 'promote'
 }
 ```
 

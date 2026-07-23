@@ -27,6 +27,7 @@ This is not a freemium split. It is a supply chain: Craftworks infrastructure ->
 ## Scope
 
 **In scope**:
+
 - Three-layer architecture (blocks, compiler, enterprise)
 - 10 core + 7 emitter building block packages extracted from compiler-sdk/agent-sdk
 - 3 claws packages that compose a subset of the blocks
@@ -40,6 +41,7 @@ This is not a freemium split. It is a supply chain: Craftworks infrastructure ->
 - Ownership model (who maintains what, who supports what)
 
 **Out of scope**:
+
 - Pricing model, subscription tiers, billing
 - npm scope registration (prerequisite, not this spec)
 - Licensing legal review
@@ -114,14 +116,14 @@ The 10+7 model was established by the package-extraction plan R1/R2 reviews (5 r
 
 Reads 9 OpenClaw workspace files and provides typed IR. Merges the former oc-readers + oc-ir.
 
-| Responsibility | Detail |
-|---------------|--------|
-| Reading | 9 OC files: SOUL.md, AGENTS.md, TOOLS.md, IDENTITY.md, USER.md, BOOTSTRAP.md, HEARTBEAT.md, openclaw.json, canvas/ |
-| AST | `OCWorkspaceAST` -- typed AST with one node per file |
-| IR | `OCWorkspaceIR`, `SoulIR`, `AgentsIR`, `ToolsIR`, etc. |
-| Serialization | `serialize()` / `deserialize()` with round-trip guarantee |
-| Parsing | Frontmatter extraction, markdown section parsing, JSON/YAML, Zod validation |
-| Encoding | BOM/CRLF handling (internalized from normalize) |
+| Responsibility | Detail                                                                                                             |
+| -------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Reading        | 9 OC files: SOUL.md, AGENTS.md, TOOLS.md, IDENTITY.md, USER.md, BOOTSTRAP.md, HEARTBEAT.md, openclaw.json, canvas/ |
+| AST            | `OCWorkspaceAST` -- typed AST with one node per file                                                               |
+| IR             | `OCWorkspaceIR`, `SoulIR`, `AgentsIR`, `ToolsIR`, etc.                                                             |
+| Serialization  | `serialize()` / `deserialize()` with round-trip guarantee                                                          |
+| Parsing        | Frontmatter extraction, markdown section parsing, JSON/YAML, Zod validation                                        |
+| Encoding       | BOM/CRLF handling (internalized from normalize)                                                                    |
 
 ```typescript
 interface WorkspaceReader {
@@ -139,12 +141,12 @@ interface WorkspaceReader {
 
 Platform detection, workspace discovery, and text normalization. Merges platform-detect + workspace-discovery + normalize.
 
-| Responsibility | Detail |
-|---------------|--------|
-| Detection | Scan directory for platform marker files (7 platforms) |
-| Discovery | Enumerate workspaces in a directory tree |
-| Normalize | BOM stripping, CRLF normalization, encoding detection |
-| Platforms | OpenClaw, Claude Code, Cursor, Windsurf, Cline, Roo, Aider |
+| Responsibility | Detail                                                     |
+| -------------- | ---------------------------------------------------------- |
+| Detection      | Scan directory for platform marker files (7 platforms)     |
+| Discovery      | Enumerate workspaces in a directory tree                   |
+| Normalize      | BOM stripping, CRLF normalization, encoding detection      |
+| Platforms      | OpenClaw, Claude Code, Cursor, Windsurf, Cline, Roo, Aider |
 
 **Dependencies**: none (leaf package)
 **Lines (est.)**: ~1400
@@ -155,20 +157,20 @@ Platform detection, workspace discovery, and text normalization. Merges platform
 
 Cryptographic primitives + hash-chained audit trail. Merges crypto + audit-chain into one package.
 
-| Responsibility | Detail |
-|---------------|--------|
-| Ed25519 | Keypair generation, sign, verify |
-| HMAC-SHA256 | Message authentication codes |
-| SHA-256 | Content hashing for cache keys and chain links |
-| Key management | Generate, export, import Ed25519 keypairs |
-| Audit chain | Append-only JSONL with hash links, Ed25519 signed |
-| Verification | Full-chain and single-entry verification |
+| Responsibility | Detail                                            |
+| -------------- | ------------------------------------------------- |
+| Ed25519        | Keypair generation, sign, verify                  |
+| HMAC-SHA256    | Message authentication codes                      |
+| SHA-256        | Content hashing for cache keys and chain links    |
+| Key management | Generate, export, import Ed25519 keypairs         |
+| Audit chain    | Append-only JSONL with hash links, Ed25519 signed |
+| Verification   | Full-chain and single-entry verification          |
 
 ```typescript
 interface AuditChain<E> {
   append(event: E): Promise<ChainEntry<E>>;
   verify(): Promise<VerificationResult>;
-  export(format: 'jsonl'): AsyncIterable<string>;
+  export(format: "jsonl"): AsyncIterable<string>;
   readonly head: ChainEntry<E> | null;
   readonly length: number;
 }
@@ -185,11 +187,11 @@ Note: `AuditChain<E>` is generic. claws instantiates it as `AuditChain<AuditEven
 
 Policy walker, gates, runtime enforcement, and budget tracking. Merges governance-primitives + governance-runtime + budget-tracker.
 
-| Responsibility | Detail |
-|---------------|--------|
-| Policy types | Risk levels, gate types, fail-mode policy definitions |
-| Policy walker | Traverse and evaluate governance policy trees |
-| Runtime gates | Before-tool-call enforcement, blocking decisions |
+| Responsibility  | Detail                                                        |
+| --------------- | ------------------------------------------------------------- |
+| Policy types    | Risk levels, gate types, fail-mode policy definitions         |
+| Policy walker   | Traverse and evaluate governance policy trees                 |
+| Runtime gates   | Before-tool-call enforcement, blocking decisions              |
 | Budget tracking | Token counting, fleet budget aggregation, charter enforcement |
 
 **Dependencies**: `@craftworks/crypto`
@@ -201,11 +203,11 @@ Policy walker, gates, runtime enforcement, and budget tracking. Merges governanc
 
 Emit framework: platform registry, emitter base classes, TS codegen utilities. This is the framework; per-platform emitters are plugins.
 
-| Responsibility | Detail |
-|---------------|--------|
-| EmitRegistry | Register and discover emitter plugins |
-| EmitTarget | Base class for platform-specific emitters |
-| TS codegen | Shared TypeScript code generation utilities |
+| Responsibility | Detail                                      |
+| -------------- | ------------------------------------------- |
+| EmitRegistry   | Register and discover emitter plugins       |
+| EmitTarget     | Base class for platform-specific emitters   |
+| TS codegen     | Shared TypeScript code generation utilities |
 
 **Dependencies**: `@craftworks/forma`
 **Lines (est.)**: ~1500
@@ -216,11 +218,11 @@ Emit framework: platform registry, emitter base classes, TS codegen utilities. T
 
 RELAX expression parser and evaluator. Standalone, no merges.
 
-| Responsibility | Detail |
-|---------------|--------|
-| Parser | RELAX expression grammar |
-| Evaluator | Typed expression evaluation, tiered bindings |
-| Fill | RELAX template fill (variable substitution) |
+| Responsibility | Detail                                       |
+| -------------- | -------------------------------------------- |
+| Parser         | RELAX expression grammar                     |
+| Evaluator      | Typed expression evaluation, tiered bindings |
+| Fill           | RELAX template fill (variable substitution)  |
 
 **Dependencies**: none (leaf package)
 **Lines (est.)**: ~2000
@@ -231,11 +233,11 @@ RELAX expression parser and evaluator. Standalone, no merges.
 
 Context collections and DAG operations. Renamed from context-dag.
 
-| Responsibility | Detail |
-|---------------|--------|
-| Collections | Compiled context collections |
-| DAG ops | Directed acyclic graph operations |
-| Sharing | Structural sharing for context trees |
+| Responsibility | Detail                               |
+| -------------- | ------------------------------------ |
+| Collections    | Compiled context collections         |
+| DAG ops        | Directed acyclic graph operations    |
+| Sharing        | Structural sharing for context trees |
 
 **Dependencies**: `@craftworks/crypto`
 **Lines (est.)**: ~1500
@@ -246,11 +248,11 @@ Context collections and DAG operations. Renamed from context-dag.
 
 Stage-task graph execution with quality gates and skill discovery. Merges execution-engine + skill-resolver.
 
-| Responsibility | Detail |
-|---------------|--------|
-| Task graph | Stage-task dependency resolution and execution |
-| Quality gates | Pass/fail gate evaluation between stages |
-| Skill resolver | Skill discovery, ASP resolution |
+| Responsibility | Detail                                         |
+| -------------- | ---------------------------------------------- |
+| Task graph     | Stage-task dependency resolution and execution |
+| Quality gates  | Pass/fail gate evaluation between stages       |
+| Skill resolver | Skill discovery, ASP resolution                |
 
 **Dependencies**: `@craftworks/governance`
 **Lines (est.)**: ~2800
@@ -261,11 +263,11 @@ Stage-task graph execution with quality gates and skill discovery. Merges execut
 
 Rubric evaluation, assertions, and judging. Renamed from eval-framework.
 
-| Responsibility | Detail |
-|---------------|--------|
-| Rubric | Evaluation rubric definition and parsing |
-| Assertions | Test assertions for governance properties |
-| Judge | Automated judging with pass^k support |
+| Responsibility | Detail                                    |
+| -------------- | ----------------------------------------- |
+| Rubric         | Evaluation rubric definition and parsing  |
+| Assertions     | Test assertions for governance properties |
+| Judge          | Automated judging with pass^k support     |
 
 **Dependencies**: none (leaf package)
 **Lines (est.)**: ~1200
@@ -276,11 +278,11 @@ Rubric evaluation, assertions, and judging. Renamed from eval-framework.
 
 File, package, and URL resolution with provenance tracking. Renamed from input-resolver.
 
-| Responsibility | Detail |
-|---------------|--------|
-| Resolution | File path, npm package, and URL input resolution |
-| Provenance | Track origin and trust level of resolved inputs |
-| Caching | Cache resolved inputs for repeated compilation |
+| Responsibility | Detail                                           |
+| -------------- | ------------------------------------------------ |
+| Resolution     | File path, npm package, and URL input resolution |
+| Provenance     | Track origin and trust level of resolved inputs  |
+| Caching        | Cache resolved inputs for repeated compilation   |
 
 **Dependencies**: none (leaf package)
 **Lines (est.)**: ~800
@@ -291,15 +293,15 @@ File, package, and URL resolution with provenance tracking. Renamed from input-r
 
 Each emitter depends on `@craftworks/codegen` and installs independently. Consumers cherry-pick their platform.
 
-| Plugin | Lines (est.) | Who installs it |
-|--------|-------------|----------------|
-| **@craftworks/emit-oc** | ~500 | OpenClaw developers |
-| **@craftworks/emit-cc** | ~400 | Claude Code users |
-| **@craftworks/emit-cursor** | ~300 | Cursor users |
-| **@craftworks/emit-copilot** | ~300 | GitHub Copilot users |
-| **@craftworks/emit-bedrock** | ~400 | AWS Bedrock customers |
-| **@craftworks/emit-langgraph** | ~400 | LangGraph/Python teams |
-| **@craftworks/emit-crewai** | ~400 | CrewAI teams |
+| Plugin                         | Lines (est.) | Who installs it        |
+| ------------------------------ | ------------ | ---------------------- |
+| **@craftworks/emit-oc**        | ~500         | OpenClaw developers    |
+| **@craftworks/emit-cc**        | ~400         | Claude Code users      |
+| **@craftworks/emit-cursor**    | ~300         | Cursor users           |
+| **@craftworks/emit-copilot**   | ~300         | GitHub Copilot users   |
+| **@craftworks/emit-bedrock**   | ~400         | AWS Bedrock customers  |
+| **@craftworks/emit-langgraph** | ~400         | LangGraph/Python teams |
+| **@craftworks/emit-crewai**    | ~400         | CrewAI teams           |
 
 **Dependencies**: `@craftworks/codegen` (each)
 **Extracted from**: emit/platforms/ in compiler-sdk
@@ -393,72 +395,87 @@ Layer 3: Enterprise (@bic/claws-sdk)
 
 #### What claws adds on top of building blocks
 
-| Addition | Detail |
-|----------|--------|
-| Intent extraction | Parses OCWorkspaceAST (from `@craftworks/forma`) into `CapabilityManifest` -- mechanical intents, tool classifications, delegation graphs, trust tiers |
-| 29 G-rules | G01-G29 governance rules with extensible `RuleRegistry`. Each rule checks a `CapabilityManifest` and produces findings |
-| GovernanceIR | The claws-specific IR: `GovernanceIR`, `FailMode<R>`, `GovAnalysis`, `ConflictReport`, `AuditEvent`, `MechanicalIntent`. Serializable, inspectable, diffable |
-| R5 fail-closed gate | Non-negotiable enforcement. The compiler refuses to emit R5 fail-open code. Not configurable |
-| Compile orchestrator | Sequences PARSE -> EXTRACT -> ANALYZE -> OPTIMIZE -> EMIT across building blocks + claws modules |
-| OC Gateway emitter | Produces `plugins/claws-governance/index.ts` -- executable TypeScript for the OC Gateway |
-| Claude Code emitter | Produces `CLAUDE.md` + `.claude/settings.json` governance output (R1 C4) |
-| .claws sidecar | Sidecar directory layout resolver, cache, staging (R1 M-02) |
-| CLI | `claws compile`, `claws pinch`, `claws build`, `claws init`, `claws new`, `claws annotate` |
+| Addition             | Detail                                                                                                                                                       |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Intent extraction    | Parses OCWorkspaceAST (from `@craftworks/forma`) into `CapabilityManifest` -- mechanical intents, tool classifications, delegation graphs, trust tiers       |
+| 29 G-rules           | G01-G29 governance rules with extensible `RuleRegistry`. Each rule checks a `CapabilityManifest` and produces findings                                       |
+| GovernanceIR         | The claws-specific IR: `GovernanceIR`, `FailMode<R>`, `GovAnalysis`, `ConflictReport`, `AuditEvent`, `MechanicalIntent`. Serializable, inspectable, diffable |
+| R5 fail-closed gate  | Non-negotiable enforcement. The compiler refuses to emit R5 fail-open code. Not configurable                                                                 |
+| Compile orchestrator | Sequences PARSE -> EXTRACT -> ANALYZE -> OPTIMIZE -> EMIT across building blocks + claws modules                                                             |
+| OC Gateway emitter   | Produces `plugins/claws-governance/index.ts` -- executable TypeScript for the OC Gateway                                                                     |
+| Claude Code emitter  | Produces `CLAUDE.md` + `.claude/settings.json` governance output (R1 C4)                                                                                     |
+| .claws sidecar       | Sidecar directory layout resolver, cache, staging (R1 M-02)                                                                                                  |
+| CLI                  | `claws compile`, `claws pinch`, `claws build`, `claws init`, `claws new`, `claws annotate`                                                                   |
 
 ```typescript
 // @claws/compiler/src/index.ts
 
 // Re-export building block types that claws consumers need
-export type { OCWorkspaceAST, FileAST, OCFileType, OCWorkspaceIR } from '@craftworks/forma';
-export type { Platform } from '@craftworks/workspace';
-export type { AuditChain, ChainEntry } from '@craftworks/crypto';
+export type { OCWorkspaceAST, FileAST, OCFileType, OCWorkspaceIR } from "@craftworks/forma";
+export type { Platform } from "@craftworks/workspace";
+export type { AuditChain, ChainEntry } from "@craftworks/crypto";
 
 // claws's own types and functions
 export {
-  type GovernanceIR, type FailMode, type CapabilityManifest,
-  type GovAnalysis, type ConflictReport, type AuditEvent,
+  type GovernanceIR,
+  type FailMode,
+  type CapabilityManifest,
+  type GovAnalysis,
+  type ConflictReport,
+  type AuditEvent,
   type MechanicalIntent,
-  serialize, deserialize, validateFailModes, validateIR,
-} from './ir/index.js';
+  serialize,
+  deserialize,
+  validateFailModes,
+  validateIR,
+} from "./ir/index.js";
 
 export {
-  type Rule, type RuleRegistry, type RuleCategory, type Severity,
-  createRuleRegistry, builtinRules,
-} from './rules/index.js';
+  type Rule,
+  type RuleRegistry,
+  type RuleCategory,
+  type Severity,
+  createRuleRegistry,
+  builtinRules,
+} from "./rules/index.js";
 
 export {
-  type EmitTarget, type EmitOptions, type Artifact,
-  type ValidationResult, EmitRegistry,
-  createOCEmitter, createClaudeCodeEmitter,
-} from './emit/index.js';
+  type EmitTarget,
+  type EmitOptions,
+  type Artifact,
+  type ValidationResult,
+  EmitRegistry,
+  createOCEmitter,
+  createClaudeCodeEmitter,
+} from "./emit/index.js";
 
-export { compile, pinch, build } from './orchestrator.js';
-export { detectPlatforms, normalize } from '@craftworks/workspace';
+export { compile, pinch, build } from "./orchestrator.js";
+export { detectPlatforms, normalize } from "@craftworks/workspace";
 ```
 
 #### What belongs WHERE
 
 This is the critical design decision: what lives in `@craftworks/*` blocks vs what lives in `@claws/compiler`.
 
-| Capability | Lives in | Rationale |
-|-----------|----------|-----------|
-| Read 9 OC files + IR types | `@craftworks/forma` | General-purpose OC infrastructure; anyone reading OC workspaces needs this |
-| Ed25519, SHA-256, audit chain | `@craftworks/crypto` | General-purpose crypto + tamper-evident audit; could be used for build logs, deployment records |
-| Platform detection, discovery, normalize | `@craftworks/workspace` | General-purpose; any tool that targets multiple AI platforms needs this |
-| Policy walker, gates, budget | `@craftworks/governance` | General-purpose enforcement framework; not governance-rule-specific |
-| Emit framework + base classes | `@craftworks/codegen` | General-purpose TS codegen; emitters are plugins |
-| RELAX expressions | `@craftworks/relax` | General-purpose expression evaluator |
-| Context DAG | `@craftworks/context` | General-purpose DAG operations |
-| Task graph + skill resolver | `@craftworks/execution` | General-purpose execution engine |
-| Rubric + assertions | `@craftworks/eval` | General-purpose evaluation framework |
-| Input resolution | `@craftworks/input` | General-purpose file/URL resolution |
-| Per-platform emitters | `@craftworks/emit-*` (7) | Each platform's codegen, installable independently |
-| 29 governance rules | `@claws/compiler` | Governance-specific; the rules ARE the claws product |
-| GovernanceIR | `@claws/compiler` | Governance-specific IR; only meaningful in a governance context |
-| R5 fail-closed | `@claws/compiler` | Governance policy decision; the blocks have no opinion on policy |
-| Intent extraction | `@claws/compiler` | Governance-specific interpretation of workspace content |
-| Compile orchestrator | `@claws/compiler` | Sequences claws-specific phases |
-| .claws sidecar layout | `@claws/compiler` | claws-specific directory structure |
+| Capability                               | Lives in                 | Rationale                                                                                       |
+| ---------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------- |
+| Read 9 OC files + IR types               | `@craftworks/forma`      | General-purpose OC infrastructure; anyone reading OC workspaces needs this                      |
+| Ed25519, SHA-256, audit chain            | `@craftworks/crypto`     | General-purpose crypto + tamper-evident audit; could be used for build logs, deployment records |
+| Platform detection, discovery, normalize | `@craftworks/workspace`  | General-purpose; any tool that targets multiple AI platforms needs this                         |
+| Policy walker, gates, budget             | `@craftworks/governance` | General-purpose enforcement framework; not governance-rule-specific                             |
+| Emit framework + base classes            | `@craftworks/codegen`    | General-purpose TS codegen; emitters are plugins                                                |
+| RELAX expressions                        | `@craftworks/relax`      | General-purpose expression evaluator                                                            |
+| Context DAG                              | `@craftworks/context`    | General-purpose DAG operations                                                                  |
+| Task graph + skill resolver              | `@craftworks/execution`  | General-purpose execution engine                                                                |
+| Rubric + assertions                      | `@craftworks/eval`       | General-purpose evaluation framework                                                            |
+| Input resolution                         | `@craftworks/input`      | General-purpose file/URL resolution                                                             |
+| Per-platform emitters                    | `@craftworks/emit-*` (7) | Each platform's codegen, installable independently                                              |
+| 29 governance rules                      | `@claws/compiler`        | Governance-specific; the rules ARE the claws product                                            |
+| GovernanceIR                             | `@claws/compiler`        | Governance-specific IR; only meaningful in a governance context                                 |
+| R5 fail-closed                           | `@claws/compiler`        | Governance policy decision; the blocks have no opinion on policy                                |
+| Intent extraction                        | `@claws/compiler`        | Governance-specific interpretation of workspace content                                         |
+| Compile orchestrator                     | `@claws/compiler`        | Sequences claws-specific phases                                                                 |
+| .claws sidecar layout                    | `@claws/compiler`        | claws-specific directory structure                                                              |
 
 **The litmus test**: Could a non-governance tool use this? If yes, it belongs in `@craftworks/*`. If it only makes sense in a governance context, it belongs in `@claws/compiler`.
 
@@ -476,40 +493,40 @@ Already standalone. Skill decorators, factory, mock gateway. No `@craftworks/*` 
 
 #### Scale Modules
 
-| Module | Description |
-|--------|-------------|
-| `fleet/` | Scan, broadcast, drift detection, kill, report across workspaces |
-| `compliance/` | SOC2, HIPAA, EU AI Act evidence generation |
-| `siem/` | CEF, syslog, NDJSON streaming to enterprise SIEM |
-| `budget/` | Token tracking, fleet budget aggregation, charter enforcement |
-| `audit-ext/` | RFC3161 timestamps, fleet-wide audit aggregation, legal evidence |
-| `ci-cd/` | GitHub Actions / CI pipeline integration |
+| Module        | Description                                                      |
+| ------------- | ---------------------------------------------------------------- |
+| `fleet/`      | Scan, broadcast, drift detection, kill, report across workspaces |
+| `compliance/` | SOC2, HIPAA, EU AI Act evidence generation                       |
+| `siem/`       | CEF, syslog, NDJSON streaming to enterprise SIEM                 |
+| `budget/`     | Token tracking, fleet budget aggregation, charter enforcement    |
+| `audit-ext/`  | RFC3161 timestamps, fleet-wide audit aggregation, legal evidence |
+| `ci-cd/`      | GitHub Actions / CI pipeline integration                         |
 
 #### Depth Modules
 
-| Module | Description |
-|--------|-------------|
-| `press/` | PRESS compression (bipartite split, cache, profiles, quality, rewrite) |
-| `relax/` | RELAX policy evaluation (typed expressions, tiered bindings) |
-| `lsp/` | claws-lsp language server (document cache, project index) |
-| `snapshots/` | Save, restore, diff, promote governance snapshots |
-| `context/` | Context DAG (compiled context collections) |
-| `serve/` | SERVE API mode (HTTP server for governance queries) |
-| `identity/` | OIDC/SAML/RBAC identity bridge |
-| `ontology/` | OntologyIR (compliance ontology types) |
+| Module       | Description                                                            |
+| ------------ | ---------------------------------------------------------------------- |
+| `press/`     | PRESS compression (bipartite split, cache, profiles, quality, rewrite) |
+| `relax/`     | RELAX policy evaluation (typed expressions, tiered bindings)           |
+| `lsp/`       | claws-lsp language server (document cache, project index)              |
+| `snapshots/` | Save, restore, diff, promote governance snapshots                      |
+| `context/`   | Context DAG (compiled context collections)                             |
+| `serve/`     | SERVE API mode (HTTP server for governance queries)                    |
+| `identity/`  | OIDC/SAML/RBAC identity bridge                                         |
+| `ontology/`  | OntologyIR (compliance ontology types)                                 |
 
 #### Additional Emit Targets
 
 Enterprise pulls in 5 additional emitter plugins from Layer 1 and registers them:
 
 ```typescript
-import { EmitRegistry } from '@claws/compiler';
+import { EmitRegistry } from "@claws/compiler";
 // These are Layer 1 building blocks — @craftworks/emit-* packages
-import { CursorEmitTarget } from '@craftworks/emit-cursor';
-import { CopilotEmitTarget } from '@craftworks/emit-copilot';
-import { BedrockEmitTarget } from '@craftworks/emit-bedrock';
-import { LangGraphEmitTarget } from '@craftworks/emit-langgraph';
-import { CrewAIEmitTarget } from '@craftworks/emit-crewai';
+import { CursorEmitTarget } from "@craftworks/emit-cursor";
+import { CopilotEmitTarget } from "@craftworks/emit-copilot";
+import { BedrockEmitTarget } from "@craftworks/emit-bedrock";
+import { LangGraphEmitTarget } from "@craftworks/emit-langgraph";
+import { CrewAIEmitTarget } from "@craftworks/emit-crewai";
 
 EmitRegistry.register(new CursorEmitTarget());
 EmitRegistry.register(new CopilotEmitTarget());
@@ -567,25 +584,27 @@ EmitRegistry.register(new CrewAIEmitTarget());
 ```
 
 **Craftworks maintains both ends of the stack**:
+
 - Layer 1 building blocks (10 core + 7 emitters + manifest): general-purpose infrastructure, published as MIT
 - Layer 3 enterprise: proprietary extensions, the revenue layer
 
 **The claws team maintains the middle**:
+
 - Layer 2 governance compiler: the composition that makes building blocks into a governance product
 
 **Why this matters for competition**: A competitor could import `@craftworks/forma`, `@craftworks/crypto`, and `@craftworks/codegen` to build a totally different tool. Craftworks benefits because the building blocks get wider adoption, more bug reports, and more ecosystem gravity. The moat is claws's governance rules, GovernanceIR, and the enterprise tier -- not the infrastructure.
 
 #### Support Boundaries
 
-| Package | Maintained by | Bug reports to | SLA |
-|---------|--------------|---------------|-----|
-| `@craftworks/*` (10 core) | Craftworks | craftworks GitHub | Community (MIT) |
-| `@craftworks/emit-*` (7 emitters) | Craftworks | craftworks GitHub | Community (MIT) |
-| `@craftworks/platform` (manifest) | Craftworks | craftworks GitHub | Community (MIT) |
-| `@claws/compiler` | claws team | claws GitHub | Community (MIT) |
-| `@bic/claws-skill-kit` | claws team | claws GitHub | Community (MIT) |
-| `@bic/claws-test` | claws team | claws GitHub | Community (MIT) |
-| `@bic/claws-sdk` | Craftworks | Craftworks support | Enterprise SLA |
+| Package                           | Maintained by | Bug reports to     | SLA             |
+| --------------------------------- | ------------- | ------------------ | --------------- |
+| `@craftworks/*` (10 core)         | Craftworks    | craftworks GitHub  | Community (MIT) |
+| `@craftworks/emit-*` (7 emitters) | Craftworks    | craftworks GitHub  | Community (MIT) |
+| `@craftworks/platform` (manifest) | Craftworks    | craftworks GitHub  | Community (MIT) |
+| `@claws/compiler`                 | claws team    | claws GitHub       | Community (MIT) |
+| `@bic/claws-skill-kit`            | claws team    | claws GitHub       | Community (MIT) |
+| `@bic/claws-test`                 | claws team    | claws GitHub       | Community (MIT) |
+| `@bic/claws-sdk`                  | Craftworks    | Craftworks support | Enterprise SLA  |
 
 ### API Stability Contract
 
@@ -593,19 +612,19 @@ EmitRegistry.register(new CrewAIEmitTarget());
 
 Each package follows semver independently. `@craftworks/platform` manifest declares tested-together versions.
 
-| Package | Stability | Rationale |
-|---------|-----------|-----------|
-| `@craftworks/forma` | Medium | IR types + readers; AST may evolve as OC workspace format evolves |
-| `@craftworks/crypto` | High (rare majors) | Crypto must be stable for audit chain compatibility; chain format changes break verification |
-| `@craftworks/workspace` | Low (frequent minors) | New platforms = minor; removed platform = major |
-| `@craftworks/governance` | High (rare majors) | Policy types consumed by execution and all downstream |
-| `@craftworks/codegen` | Medium | Emit framework may add new base methods as platforms evolve |
-| `@craftworks/relax` | High (rare majors) | Expression grammar must be stable for policy portability |
-| `@craftworks/context` | High (rare majors) | DAG format consumed by context collections |
-| `@craftworks/execution` | Medium | Task graph may evolve with new gate types |
-| `@craftworks/eval` | Medium | Rubric format may add new assertion types |
-| `@craftworks/input` | High (rare majors) | Resolution protocol is a stable contract |
-| `@craftworks/emit-*` (7) | Low (frequent minors) | Platform-specific; updates when target platform changes |
+| Package                  | Stability             | Rationale                                                                                    |
+| ------------------------ | --------------------- | -------------------------------------------------------------------------------------------- |
+| `@craftworks/forma`      | Medium                | IR types + readers; AST may evolve as OC workspace format evolves                            |
+| `@craftworks/crypto`     | High (rare majors)    | Crypto must be stable for audit chain compatibility; chain format changes break verification |
+| `@craftworks/workspace`  | Low (frequent minors) | New platforms = minor; removed platform = major                                              |
+| `@craftworks/governance` | High (rare majors)    | Policy types consumed by execution and all downstream                                        |
+| `@craftworks/codegen`    | Medium                | Emit framework may add new base methods as platforms evolve                                  |
+| `@craftworks/relax`      | High (rare majors)    | Expression grammar must be stable for policy portability                                     |
+| `@craftworks/context`    | High (rare majors)    | DAG format consumed by context collections                                                   |
+| `@craftworks/execution`  | Medium                | Task graph may evolve with new gate types                                                    |
+| `@craftworks/eval`       | Medium                | Rubric format may add new assertion types                                                    |
+| `@craftworks/input`      | High (rare majors)    | Resolution protocol is a stable contract                                                     |
+| `@craftworks/emit-*` (7) | Low (frequent minors) | Platform-specific; updates when target platform changes                                      |
 
 Every package publishes: `publint` validation, API diff check, `CHANGELOG.md`, TypeScript `.d.ts` declarations.
 
@@ -627,6 +646,7 @@ Every package publishes: `publint` validation, API diff check, `CHANGELOG.md`, T
 ```
 
 Compiler semver:
+
 - If any dependency ships a **major**, the compiler ships a **major**
 - If any dependency ships a **minor**, the compiler ships at least a **minor**
 - Compiler-only changes (rules, GovernanceIR) follow their own semver
@@ -695,31 +715,33 @@ compiler-sdk                          @craftworks/* building blocks
 Blocks are extracted in dependency order. Each phase is independently testable.
 
 ```
+
 Phase 1: Leaf packages (no @craftworks/ deps)
-  @craftworks/crypto          -- crypto + audit chain
-  @craftworks/workspace       -- detect + discover + normalize
-  @craftworks/relax           -- expression parser + evaluator
-  @craftworks/eval            -- rubric + assertions
-  @craftworks/input           -- file/URL resolution
+@craftworks/crypto -- crypto + audit chain
+@craftworks/workspace -- detect + discover + normalize
+@craftworks/relax -- expression parser + evaluator
+@craftworks/eval -- rubric + assertions
+@craftworks/input -- file/URL resolution
 
 Phase 2: Mid-tier packages (depend on Phase 1)
-  @craftworks/forma           -- readers + IR (depends on crypto)
-  @craftworks/governance      -- primitives + runtime + budget (depends on crypto)
-  @craftworks/context         -- context DAG (depends on crypto)
+@craftworks/forma -- readers + IR (depends on crypto)
+@craftworks/governance -- primitives + runtime + budget (depends on crypto)
+@craftworks/context -- context DAG (depends on crypto)
 
 Phase 3: Framework packages (depend on Phase 2)
-  @craftworks/codegen         -- emit framework (depends on forma)
-  @craftworks/execution       -- task graph + skills (depends on governance)
+@craftworks/codegen -- emit framework (depends on forma)
+@craftworks/execution -- task graph + skills (depends on governance)
 
 Phase 4: Emitter plugins (depend on codegen)
-  @craftworks/emit-oc, emit-cc, emit-cursor, emit-copilot,
-  emit-bedrock, emit-langgraph, emit-crewai
+@craftworks/emit-oc, emit-cc, emit-cursor, emit-copilot,
+emit-bedrock, emit-langgraph, emit-crewai
 
 Phase 5: Composition + manifest
-  @claws/compiler             -- composes subset of blocks + governance logic
-  @craftworks/platform        -- compatibility manifest
-  Remove compiler-sdk from @claws/compiler's dependencies
-  Remove agent-sdk from @claws/compiler's dependencies
+@claws/compiler -- composes subset of blocks + governance logic
+@craftworks/platform -- compatibility manifest
+Remove compiler-sdk from @claws/compiler's dependencies
+Remove agent-sdk from @claws/compiler's dependencies
+
 ```
 
 #### Divergence Prevention
@@ -729,12 +751,14 @@ Three layers prevent extracted code from silently diverging from the originals:
 **Canary tests.** CI runs building blocks against compiler-sdk test fixtures. Upstream behavior changes fail canary tests before the block ships.
 
 ```
+
 canary-tests/
-  fixtures/              -- shared with compiler-sdk
-  reader-canary.ts       -- parse fixtures with @craftworks/forma
-  ir-canary.ts           -- serialize/deserialize round-trip
-  crypto-canary.ts       -- signature cross-verification
-  audit-canary.ts        -- chain cross-verification
+fixtures/ -- shared with compiler-sdk
+reader-canary.ts -- parse fixtures with @craftworks/forma
+ir-canary.ts -- serialize/deserialize round-trip
+crypto-canary.ts -- signature cross-verification
+audit-canary.ts -- chain cross-verification
+
 ```
 
 **IR schema versioning.** `@craftworks/forma` IR carries a `version` field. `@claws/compiler`'s GovernanceIR carries its own `version`. Version mismatch between layers fails fast.
@@ -748,20 +772,22 @@ Extraction must prove that building blocks produce identical output to the compi
 #### Reader Equivalence
 
 ```
-  Fixture workspace (9 OC files)
-       |                    |
-       v                    v
-  FORMA path            Block path
-  (compiler-sdk)        (@craftworks/forma)
-       |                    |
-       v                    v
-  OCWorkspaceIR         OCWorkspaceAST
-       |                    |
-       +--------+-----------+
-                |
-                v
-          deep-equal assertion
-          (structural, field-by-field)
+
+Fixture workspace (9 OC files)
+| |
+v v
+FORMA path Block path
+(compiler-sdk) (@craftworks/forma)
+| |
+v v
+OCWorkspaceIR OCWorkspaceAST
+| |
++--------+-----------+
+|
+v
+deep-equal assertion
+(structural, field-by-field)
+
 ```
 
 **Fixture set**: 20+ workspaces -- minimal, full, BOM-prefixed, CRLF, large (100+ tools), empty/missing/malformed files.
@@ -786,26 +812,29 @@ Extraction must prove that building blocks produce identical output to the compi
 End-to-end: same workspace -> same GovernanceIR -> same emit artifacts.
 
 ```
-  Fixture workspace
-       |                          |
-       v                          v
-  Pre-graduation path          Post-graduation path
-  (compiler-sdk readers        (@craftworks/forma
-   + claws rules/emit)          + @claws/compiler rules/emit)
-       |                          |
-       v                          v
-  GovernanceIR                 GovernanceIR
-       |                          |
-       v                          v
-  plugins/index.ts             plugins/index.ts
-  CLAUDE.md                    CLAUDE.md
-       |                          |
-       +----------+---------------+
-                  |
-                  v
-            byte-level comparison
-            (stripping timestamps)
-```
+
+Fixture workspace
+| |
+v v
+Pre-graduation path Post-graduation path
+(compiler-sdk readers (@craftworks/forma
+
+- claws rules/emit) + @claws/compiler rules/emit)
+  | |
+  v v
+  GovernanceIR GovernanceIR
+  | |
+  v v
+  plugins/index.ts plugins/index.ts
+  CLAUDE.md CLAUDE.md
+  | |
+  +----------+---------------+
+  |
+  v
+  byte-level comparison
+  (stripping timestamps)
+
+````
 
 #### Equivalence Test Coverage
 
@@ -829,7 +858,7 @@ The building blocks are general-purpose. claws is one composition. Others are po
 ```bash
 npm install @claws/compiler    # pulls all @craftworks/* blocks
 claws pinch
-```
+````
 
 This is the standard path. The claws compiler is the product.
 
@@ -838,9 +867,9 @@ This is the standard path. The claws compiler is the product.
 A competitor uses Craftworks blocks to build "GuardianAI":
 
 ```typescript
-import { createReader } from '@craftworks/forma';
-import { AuditChain } from '@craftworks/crypto';
-import { detectPlatforms } from '@craftworks/workspace';
+import { createReader } from "@craftworks/forma";
+import { AuditChain } from "@craftworks/crypto";
+import { detectPlatforms } from "@craftworks/workspace";
 
 // GuardianAI's own rules, IR, and emit logic
 const ast = await createReader().read(workspaceRoot);
@@ -849,7 +878,7 @@ const chain = new AuditChain<GuardianEvent>(keyPair);
 
 // Totally different governance approach
 const guardianResult = guardianAnalyze(ast, platforms);
-await chain.append({ type: 'guardian-compile', result: guardianResult });
+await chain.append({ type: "guardian-compile", result: guardianResult });
 ```
 
 Craftworks benefits: wider block adoption, more bug reports. The moat remains claws's 29 G-rules, GovernanceIR, and the enterprise tier.
@@ -863,10 +892,10 @@ npm install @craftworks/forma
 ```
 
 ```typescript
-import { createReader } from '@craftworks/forma';
+import { createReader } from "@craftworks/forma";
 
 // Read workspaces for their own compliance dashboard
-const ast = await createReader().read('/org/agent-workspace');
+const ast = await createReader().read("/org/agent-workspace");
 const tools = ast.tools.declarations;
 // Feed into their own compliance system -- no claws involved
 ```
@@ -879,30 +908,30 @@ npm install @bic/claws-sdk
 ```
 
 ```typescript
-import { compile } from '@claws/compiler';
-import { FleetScanner, SOC2Evidence } from '@bic/claws-sdk';
+import { compile } from "@claws/compiler";
+import { FleetScanner, SOC2Evidence } from "@bic/claws-sdk";
 
-const ir = await compile('./workspace');
+const ir = await compile("./workspace");
 const fleet = new FleetScanner();
-const workspaces = await fleet.scan('/org');
+const workspaces = await fleet.scan("/org");
 const evidence = SOC2Evidence.generate(ir);
 ```
 
 ### Tier Detection and Command Gating
 
 ```typescript
-export type Tier = 'blocks' | 'compiler' | 'enterprise';
+export type Tier = "blocks" | "compiler" | "enterprise";
 
 export function detectTier(): Tier {
   try {
-    require.resolve('@bic/claws-sdk');
-    return 'enterprise';
+    require.resolve("@bic/claws-sdk");
+    return "enterprise";
   } catch {
     try {
-      require.resolve('@claws/compiler');
-      return 'compiler';
+      require.resolve("@claws/compiler");
+      return "compiler";
     } catch {
-      return 'blocks';
+      return "blocks";
     }
   }
 }
@@ -933,6 +962,7 @@ Extraction proceeds with a parallel-path feature flag during migration:
 **Rollback triggers**: equivalence test failure (high), user-reported parse error (high), >2x perf regression (medium), crypto signature mismatch (critical).
 
 **Point of no return**: Dependencies removed only when:
+
 1. All 90 equivalence tests pass for 2+ weeks
 2. Zero user-reported errors on standalone path
 3. Performance within 1.5x of monolith path
@@ -1078,7 +1108,7 @@ These apply to ALL 7 emitter plugins (@craftworks/emit-oc, emit-cc, emit-cursor,
 
 55. **C55: Subpath export stability.** All subpath exports from compiler-sdk must be validated against actual dist/ files in CI. Subpath shims must use explicit entries (no wildcards). Shims must use targeted subpath imports from @craftworks/*, not barrel imports. Physical dist/ shims needed alongside exports map for legacy TS moduleResolution. (backward-compat/S02 F01, F02, F04, F05, F07)
 
-56. **C56: Bidirectional codemod.** Provide a jscodeshift codemod for both upgrade (compiler-sdk -> @craftworks/*) and downgrade (@craftworks/* -> compiler-sdk). Codemod must cover src/, test/, and config files. Downgrade script must include npm prune and TS build cache cleanup. (backward-compat/S03 F02, F06, F07)
+56. **C56: Bidirectional codemod.** Provide a jscodeshift codemod for both upgrade (compiler-sdk -> @craftworks/_) and downgrade (@craftworks/_ -> compiler-sdk). Codemod must cover src/, test/, and config files. Downgrade script must include npm prune and TS build cache cleanup. (backward-compat/S03 F02, F06, F07)
 
 57. **C57: Compat layer lifecycle.** Define removal milestone for compiler-sdk compat re-exports (e.g., compiler-sdk 3.0.0). Deprecation via JSDoc @deprecated, not runtime console.warn(). CI job compares old vs new export lists to prevent accidental symbol drops. (backward-compat/S01 F07-F09)
 
@@ -1124,16 +1154,16 @@ These apply to ALL 7 emitter plugins (@craftworks/emit-oc, emit-cc, emit-cursor,
 
 ## Research References
 
-| Source | What it contributed |
-|--------|-------------------|
-| Graduation plan (`claws-sdk-graduation.md`) | Module inventory, effort estimates, internalization strategies |
-| R1 review (5 roles, 46 findings) | 6 consensus findings: R5 in free tier, no export *, scope revision, 2nd emit target, API contract, Ed25519 in free tier |
-| R1 Architect amendments (M-01 to M-03) | WorkspaceReader interface, detection heuristics split, BOM/CRLF normalization |
-| Package-extraction plan R1 (5 roles, 41 findings) | Consensus: 10-12 packages, not 25; domain-based merges |
-| Package-extraction plan R2 (3 roles, 15 findings) | Affirmed 10+7 model; 6 must-address for plan consistency |
-| CL-04 Compilation Pipeline | 5-phase pipeline, GovernanceIR as stable pivot, emit 4-artifact model |
-| CL-07 Deep Integration | FORMA sidecar, atom reuse, eval framework, contribute/keep boundary |
-| CL-06 Platform Ecosystem | 7-platform detection, multi-platform emit, package ecosystem |
+| Source                                            | What it contributed                                                                                                     |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Graduation plan (`claws-sdk-graduation.md`)       | Module inventory, effort estimates, internalization strategies                                                          |
+| R1 review (5 roles, 46 findings)                  | 6 consensus findings: R5 in free tier, no export *, scope revision, 2nd emit target, API contract, Ed25519 in free tier |
+| R1 Architect amendments (M-01 to M-03)            | WorkspaceReader interface, detection heuristics split, BOM/CRLF normalization                                           |
+| Package-extraction plan R1 (5 roles, 41 findings) | Consensus: 10-12 packages, not 25; domain-based merges                                                                  |
+| Package-extraction plan R2 (3 roles, 15 findings) | Affirmed 10+7 model; 6 must-address for plan consistency                                                                |
+| CL-04 Compilation Pipeline                        | 5-phase pipeline, GovernanceIR as stable pivot, emit 4-artifact model                                                   |
+| CL-07 Deep Integration                            | FORMA sidecar, atom reuse, eval framework, contribute/keep boundary                                                     |
+| CL-06 Platform Ecosystem                          | 7-platform detection, multi-platform emit, package ecosystem                                                            |
 
 ---
 

@@ -6,16 +6,16 @@
 
 The server speaks LSP 3.17. Supported request types:
 
-| Request | Purpose |
-|---------|---------|
-| `initialize` / `shutdown` | Lifecycle |
-| `textDocument/didOpen`, `didChange`, `didSave`, `didClose` | Document sync |
-| `textDocument/publishDiagnostics` | G-rule findings |
-| `textDocument/hover` | Tool + atom info on hover |
-| `textDocument/codeAction` | Quick fixes |
-| `textDocument/completion` | Risk tier + tool name completions |
-| `workspace/didChangeConfiguration` | Pick up claws.json changes |
-| `workspace/executeCommand` | `claws.runDoctor`, `claws.validatePolicy` |
+| Request                                                    | Purpose                                   |
+| ---------------------------------------------------------- | ----------------------------------------- |
+| `initialize` / `shutdown`                                  | Lifecycle                                 |
+| `textDocument/didOpen`, `didChange`, `didSave`, `didClose` | Document sync                             |
+| `textDocument/publishDiagnostics`                          | G-rule findings                           |
+| `textDocument/hover`                                       | Tool + atom info on hover                 |
+| `textDocument/codeAction`                                  | Quick fixes                               |
+| `textDocument/completion`                                  | Risk tier + tool name completions         |
+| `workspace/didChangeConfiguration`                         | Pick up claws.json changes                |
+| `workspace/executeCommand`                                 | `claws.runDoctor`, `claws.validatePolicy` |
 
 ## Capability set
 

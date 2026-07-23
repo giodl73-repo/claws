@@ -59,8 +59,8 @@ RELATIVE paths:
 
 ```ts
 // inside packages/claws-sdk/src/fleet/resolver.ts
-import { compileGovernanceIR } from '../compile/index.js';  // ✓
-import { compileGovernanceIR } from '@bic/claws-sdk/compile';  // ✗
+import { compileGovernanceIR } from "../compile/index.js"; // ✓
+import { compileGovernanceIR } from "@bic/claws-sdk/compile"; // ✗
 ```
 
 Self-referential package imports via subpath work but discourage

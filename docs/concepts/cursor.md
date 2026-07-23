@@ -12,10 +12,10 @@ Cursor is an advisory-only enforcement platform. claws detects Cursor workspaces
 
 Cursor detection uses two markers:
 
-| Marker | Form | Notes |
-|--------|------|-------|
-| `.cursorrules` | File | Primary detection marker |
-| `.cursor/` | Directory | Forward-compatible detection for future Cursor config |
+| Marker         | Form      | Notes                                                 |
+| -------------- | --------- | ----------------------------------------------------- |
+| `.cursorrules` | File      | Primary detection marker                              |
+| `.cursor/`     | Directory | Forward-compatible detection for future Cursor config |
 
 Detection is case-sensitive on Linux. The `.cursor/` directory alone is detected for forward compatibility but does not override `.cursorrules`-based detection if both are present.
 
@@ -56,11 +56,11 @@ The delimiter format is stable across claws versions. If a user's `.cursorrules`
 
 Cursor workspaces default to T1 (minimum governance tier) because advisory enforcement cannot guarantee higher-tier compliance. The trust tier hierarchy for Cursor:
 
-| Tier | Available? | Constraint |
-|------|-----------|------------|
-| T1 | Yes (default) | Basic tool classification and advisory instructions |
-| T2 | Yes (with warning) | Governance-aware but enforcement not guaranteed |
-| T3 | No | Enterprise enforcement requires runtime blocking |
+| Tier | Available?         | Constraint                                          |
+| ---- | ------------------ | --------------------------------------------------- |
+| T1   | Yes (default)      | Basic tool classification and advisory instructions |
+| T2   | Yes (with warning) | Governance-aware but enforcement not guaranteed     |
+| T3   | No                 | Enterprise enforcement requires runtime blocking    |
 
 A developer can override to T2 via `claws.json`, but claws emits a warning that T2 compliance depends on LLM adherence to instructions. T3 is not available for Cursor targets.
 

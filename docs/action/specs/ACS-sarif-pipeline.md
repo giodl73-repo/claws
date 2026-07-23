@@ -23,20 +23,22 @@ becomes
   "ruleId": "doc-structure/required-top-file",
   "level": "error",
   "message": { "text": "workspace: missing required top-level file README.md" },
-  "locations": [{
-    "physicalLocation": {
-      "artifactLocation": { "uri": "workspace/README.md" }
+  "locations": [
+    {
+      "physicalLocation": {
+        "artifactLocation": { "uri": "workspace/README.md" }
+      }
     }
-  }]
+  ]
 }
 ```
 
 ## Severity mapping
 
-| Finding severity | SARIF level | GitHub annotation |
-|------------------|-------------|-------------------|
-| BLOCK | error | annotations show `ERROR` |
-| WARN | warning | annotations show `WARNING` |
+| Finding severity | SARIF level | GitHub annotation          |
+| ---------------- | ----------- | -------------------------- |
+| BLOCK            | error       | annotations show `ERROR`   |
+| WARN             | warning     | annotations show `WARNING` |
 
 ## Severity gate
 

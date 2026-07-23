@@ -27,22 +27,22 @@ second-pair-of-eyes review before merge.
 
 Rewrite package scopes and import paths to the bic/claws scope model:
 
-| From | To |
-|---|---|
-| `@craftworks/openclaw-*` | `@bic/openclaw-*` (contributed-staged) |
-| `@craftworks/clawc-*` | `@bic/clawc-*` (internal-only) |
-| `@craftworks/*` (other) | flag for manual review — reword or drop |
-| generic `"craftworks"` as org reference | drop (not applicable in standalone repo) |
+| From                                     | To                                                                |
+| ---------------------------------------- | ----------------------------------------------------------------- |
+| `@craftworks/openclaw-*`                 | `@bic/openclaw-*` (contributed-staged)                            |
+| `@craftworks/clawc-*`                    | `@bic/clawc-*` (internal-only)                                    |
+| `@craftworks/*` (other)                  | flag for manual review — reword or drop                           |
+| generic `"craftworks"` as org reference  | drop (not applicable in standalone repo)                          |
 | `craft-cli`, `compiler-sdk`, `agent-sdk` | drop or reword — these are monorepo packages that don't ship here |
 
 ### Step 2 — Terminology translation (automated)
 
-| From | To |
-|---|---|
-| `atom:` | **stays** (the registry concept survives) |
+| From     | To                                          |
+| -------- | ------------------------------------------- |
+| `atom:`  | **stays** (the registry concept survives)   |
 | `phase:` | `checkpoint:` (bic/claws uses CPs in prose) |
-| `wave:` | drop (craftworks ceremony) |
-| `pulse:` | reword as "task" or drop |
+| `wave:`  | drop (craftworks ceremony)                  |
+| `pulse:` | reword as "task" or drop                    |
 
 Atom references keep their slug; the registry is bic/claws-native.
 
@@ -57,7 +57,7 @@ Verify described behaviour still holds; don't just rewrite paths.
 
 Strip craftworks-internal ceremony — pulses, stages, flair, pulse-plan
 cross-references, sentences that only resolve by reading `.craft/waves/…`.
-If a file's *topic* is craftworks history (e.g. `docs/contributing/migration.md`),
+If a file's _topic_ is craftworks history (e.g. `docs/contributing/migration.md`),
 it's allowlist-protected and can keep the references it needs.
 
 ### Step 5 — No-craftworks grep (automated)
@@ -111,15 +111,15 @@ node scripts/scrub-doc.mjs packages/openclaw-guardrails/src/**/*.ts
 Some files legitimately name `craftworks` and stay. They are listed in
 `.no-craftworks-allowlist.yaml` (CODEOWNERS-gated by `@bic/claws-release-eng`):
 
-| Allowlisted | Reason |
-|---|---|
-| `MIGRATION.md` | attribution: root-level migration narrative |
-| `LICENSE`, `NOTICE` | copyright attribution if present in original |
-| `docs/contributing/migration.md` | contributor-facing migration lineage |
-| `scripts/scrub-doc.mjs` | scrubber source must name the pattern it enforces |
-| `devtools/repo-ops/src/**` | no-craftworks gate source must name the pattern |
-| `devtools/repo-ops/test/**` | gate tests need fixtures containing the string |
-| `.no-craftworks-allowlist.yaml` | self-reference |
+| Allowlisted                      | Reason                                            |
+| -------------------------------- | ------------------------------------------------- |
+| `MIGRATION.md`                   | attribution: root-level migration narrative       |
+| `LICENSE`, `NOTICE`              | copyright attribution if present in original      |
+| `docs/contributing/migration.md` | contributor-facing migration lineage              |
+| `scripts/scrub-doc.mjs`          | scrubber source must name the pattern it enforces |
+| `devtools/repo-ops/src/**`       | no-craftworks gate source must name the pattern   |
+| `devtools/repo-ops/test/**`      | gate tests need fixtures containing the string    |
+| `.no-craftworks-allowlist.yaml`  | self-reference                                    |
 
 Anything else that matches the pattern gets rewritten. Adding to the
 allowlist requires a PR reviewed by `@bic/claws-release-eng`, not a

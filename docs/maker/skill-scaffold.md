@@ -12,11 +12,11 @@
 
 The scaffold derives the maximum risk level from the workspace's current trust tier:
 
-| Workspace tier | Max scaffold risk | Reason |
-|----------------|------------------|--------|
-| T1 | R3 | T1 workspaces have limited enforcement |
-| T2 | R4 | T2 workspaces enforce up to R4 |
-| T3 | R5 | T3 enterprise workspaces support full risk range |
+| Workspace tier | Max scaffold risk | Reason                                           |
+| -------------- | ----------------- | ------------------------------------------------ |
+| T1             | R3                | T1 workspaces have limited enforcement           |
+| T2             | R4                | T2 workspaces enforce up to R4                   |
+| T3             | R5                | T3 enterprise workspaces support full risk range |
 
 P-225 (scaffold risk exceeds workspace trust tier) drives this constraint. Without it, a developer in a T2 workspace could scaffold an R5 skill that immediately fails governance checks. The scaffold should not produce something that breaks on first build.
 
@@ -40,11 +40,11 @@ Automatic silent installation is never performed. The developer always sees what
 
 When the skill name contains heuristic keywords suggesting OBO behavior, `claws scaffold` suggests setting `obo: true` in the frontmatter:
 
-| Keyword pattern | Suggestion |
-|----------------|------------|
-| `send-*`, `post-*`, `publish-*` | "This skill name suggests it acts as the user. Set obo: true?" |
-| `delete-*`, `remove-*`, `destroy-*` | "This skill name suggests destructive actions. Set obo: true?" |
-| `pay-*`, `invoice-*`, `transfer-*` | "This skill name suggests financial transactions. Set obo: true?" |
+| Keyword pattern                     | Suggestion                                                        |
+| ----------------------------------- | ----------------------------------------------------------------- |
+| `send-*`, `post-*`, `publish-*`     | "This skill name suggests it acts as the user. Set obo: true?"    |
+| `delete-*`, `remove-*`, `destroy-*` | "This skill name suggests destructive actions. Set obo: true?"    |
+| `pay-*`, `invoice-*`, `transfer-*`  | "This skill name suggests financial transactions. Set obo: true?" |
 
 The suggestion is advisory. The developer can decline. OBO heuristics have defined accuracy bounds -- claws does not claim certainty from name patterns alone.
 

@@ -12,9 +12,9 @@ LangGraph is a Python-first agent framework. claws detects LangGraph workspaces 
 
 LangGraph detection uses the `langgraph.json` configuration file:
 
-| Marker | Detection role |
-|--------|---------------|
-| `langgraph.json` | Primary -- LangGraph project configuration |
+| Marker                    | Detection role                                              |
+| ------------------------- | ----------------------------------------------------------- |
+| `langgraph.json`          | Primary -- LangGraph project configuration                  |
 | Config content inspection | JS vs Python distinction from dependencies and entry points |
 
 The JS vs Python distinction is critical. LangGraph supports both JavaScript and Python runtimes. claws inspects the config content (not just filename) to determine which language to target. P-241 (LangGraph Python output but claws only emits TypeScript) drove this requirement -- defaulting to TypeScript for a Python framework produces unusable guard decorators.
@@ -48,11 +48,11 @@ The Python guard package (`claws-guard`) is shared between LangGraph and CrewAI 
 
 LangGraph has native Human-in-the-Loop support via interrupt nodes. claws maps OBO elicitation gates to LangGraph's HITL mechanism:
 
-| claws concept | LangGraph equivalent |
-|---------------|---------------------|
-| Elicitation gate | Interrupt node with approval callback |
-| Deny-default timeout | Interrupt timeout with deny result |
-| Approval token | LangGraph state update with signed approval |
+| claws concept        | LangGraph equivalent                        |
+| -------------------- | ------------------------------------------- |
+| Elicitation gate     | Interrupt node with approval callback       |
+| Deny-default timeout | Interrupt timeout with deny result          |
+| Approval token       | LangGraph state update with signed approval |
 
 This integration means that R5/OBO tools on LangGraph have stronger enforcement than on advisory platforms (Cursor, Copilot). The LangGraph runtime actually pauses execution and waits for human input, rather than relying on the LLM to follow instructions.
 
@@ -62,11 +62,11 @@ This integration means that R5/OBO tools on LangGraph have stronger enforcement 
 
 Platform-specific performance budgets constrain guard code overhead:
 
-| Operation | Budget | Rationale |
-|-----------|--------|-----------|
+| Operation                   | Budget | Rationale                                  |
+| --------------------------- | ------ | ------------------------------------------ |
 | Guard evaluation (per tool) | < 10ms | Must not perceptibly delay tool invocation |
-| HITL interrupt setup | < 50ms | Interrupt node creation overhead |
-| Audit log write | < 5ms | Async write, non-blocking |
+| HITL interrupt setup        | < 50ms | Interrupt node creation overhead           |
+| Audit log write             | < 5ms  | Async write, non-blocking                  |
 
 These budgets apply to the emitted Python code, not to the compilation pipeline. The compilation pipeline has its own budget (200ms for ANALYZE phase).
 

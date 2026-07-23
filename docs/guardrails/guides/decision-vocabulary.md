@@ -12,11 +12,11 @@ authors.
 
 ## The 4 verbs
 
-| Verb | Meaning |
-|------|---------|
-| `allow` | Proceed as-is. Optional `requiresExternalApproval: true` still escalates. |
-| `deny` | Reject with `reason`. No further processing; audited. |
-| `review` | Route to supervisor with a signed `ApprovalHandle`. Call stalls. |
+| Verb     | Meaning                                                                       |
+| -------- | ----------------------------------------------------------------------------- |
+| `allow`  | Proceed as-is. Optional `requiresExternalApproval: true` still escalates.     |
+| `deny`   | Reject with `reason`. No further processing; audited.                         |
+| `review` | Route to supervisor with a signed `ApprovalHandle`. Call stalls.              |
 | `modify` | Rewrite `args` (tool call) or `redirectPath` (file ingest) before proceeding. |
 
 ## Composition rule

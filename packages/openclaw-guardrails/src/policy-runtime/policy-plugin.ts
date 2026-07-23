@@ -22,18 +22,18 @@ import {
   type SnapshotId,
   type SnapshotInternalPath,
   type SnapshotStore,
-} from '@bic/v2-prototype';
-import { POLICY_IR_PATH } from '@bic/v2-prototype';
+} from "@bic/v2-prototype";
+import { POLICY_IR_PATH } from "@bic/v2-prototype";
 
-import type { GuardrailProvider } from '../types.js';
-import { toTrustedToolPolicy } from '../openclaw-adapter.js';
+import type { GuardrailProvider } from "../types.js";
+import { toTrustedToolPolicy } from "../openclaw-adapter.js";
 import type {
   UpstreamPluginHookBeforeToolCallEvent,
   UpstreamPluginHookToolContext,
   UpstreamPluginToolPolicyDecision,
   UpstreamPluginTrustedToolPolicyRegistration,
-} from '../openclaw-adapter.js';
-import { PolicyIrCache } from './cache.js';
+} from "../openclaw-adapter.js";
+import { PolicyIrCache } from "./cache.js";
 
 /**
  * Extension to `UpstreamPluginHookToolContext` that adds the
@@ -94,7 +94,7 @@ export function buildPolicyPlugin(
       }
 
       // Step 2: cache lookup → snap.read fallback → validate.
-      const sessionKey = ctxWithSnap.sessionKey ?? ctxWithSnap.sessionId ?? '';
+      const sessionKey = ctxWithSnap.sessionKey ?? ctxWithSnap.sessionId ?? "";
       let ir: PolicyIR | undefined = cache.get(sessionKey, ctxWithSnap.snapshotId);
       if (ir === undefined) {
         try {
@@ -126,9 +126,9 @@ function failClosedMissingSnapshot(): UpstreamPluginToolPolicyDecision {
   return {
     block: true,
     blockReason:
-      'policy-plugin: evaluate() received without ctx.snapshotId. ' +
-      'Gateway must thread ctx.snapshotId at hook invocation time. ' +
-      'See https://docs.openclaw.ai/plugin-sdk/policy-ir#ctx-snapshot-id',
+      "policy-plugin: evaluate() received without ctx.snapshotId. " +
+      "Gateway must thread ctx.snapshotId at hook invocation time. " +
+      "See https://docs.openclaw.ai/plugin-sdk/policy-ir#ctx-snapshot-id",
   };
 }
 
@@ -162,9 +162,5 @@ async function loadAndValidate(
 
 // Re-exports so consumers can construct policy-plugin without importing
 // from multiple paths.
-export { PolicyIrCache } from './cache.js';
-export {
-  MAX_SNAPSHOTS_PER_SESSION,
-  SESSION_IDLE_MS,
-  SWEEP_INTERVAL_MS,
-} from './cache.js';
+export { PolicyIrCache } from "./cache.js";
+export { MAX_SNAPSHOTS_PER_SESSION, SESSION_IDLE_MS, SWEEP_INTERVAL_MS } from "./cache.js";

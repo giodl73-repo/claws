@@ -11,11 +11,11 @@ Configure the three concentric rings of governance enforcement: inner (real-time
 
 The three rings operate at different scopes and speeds:
 
-| Ring | Trigger | Latency | What it governs |
-|------|---------|---------|----------------|
-| Inner | File save in editor | < 300ms | Governance rules against cached IR |
+| Ring   | Trigger                                     | Latency           | What it governs                                      |
+| ------ | ------------------------------------------- | ----------------- | ---------------------------------------------------- |
+| Inner  | File save in editor                         | < 300ms           | Governance rules against cached IR                   |
 | Middle | CLI command (`claws check`, `claws doctor`) | Sub-second to 30s | Full pipeline: classification, policies, diagnostics |
-| Outer | Fleet scan or broadcast | Minutes | Cross-workspace drift, compliance baselines |
+| Outer  | Fleet scan or broadcast                     | Minutes           | Cross-workspace drift, compliance baselines          |
 
 Each ring is semi-independent. A solo developer uses inner and middle. Fleet operators add the outer ring. Configure only what you need.
 

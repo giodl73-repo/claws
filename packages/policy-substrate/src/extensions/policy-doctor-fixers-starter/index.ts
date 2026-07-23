@@ -35,15 +35,15 @@ import {
   registerDoctorHealthContribution,
   type DoctorHealthContribution,
   type OcPathFixerSpec,
-} from '@openclaw/oc-doctor/plugin-sdk';
+} from "@openclaw/oc-doctor/plugin-sdk";
 
-import { policyRegenerateOnDrift } from './fixers/policy-regenerate-on-drift.js';
-import { toolsBumpRiskOnIrreversible } from './fixers/tools-bump-risk-on-irreversible.js';
-import { toolsDedupeToolId } from './fixers/tools-dedupe-tool-id.js';
-import { toolsMigrateSensitivitySyntax } from './fixers/tools-migrate-sensitivity-syntax.js';
-import { toolsRecommendRiskFromCaps } from './fixers/tools-recommend-risk-from-caps.js';
-import { toolsSnapRiskLevel } from './fixers/tools-snap-risk-level.js';
-import { toolsSnapSensitivityToken } from './fixers/tools-snap-sensitivity-token.js';
+import { policyRegenerateOnDrift } from "./fixers/policy-regenerate-on-drift.js";
+import { toolsBumpRiskOnIrreversible } from "./fixers/tools-bump-risk-on-irreversible.js";
+import { toolsDedupeToolId } from "./fixers/tools-dedupe-tool-id.js";
+import { toolsMigrateSensitivitySyntax } from "./fixers/tools-migrate-sensitivity-syntax.js";
+import { toolsRecommendRiskFromCaps } from "./fixers/tools-recommend-risk-from-caps.js";
+import { toolsSnapRiskLevel } from "./fixers/tools-snap-risk-level.js";
+import { toolsSnapSensitivityToken } from "./fixers/tools-snap-sensitivity-token.js";
 
 /**
  * Auto-safe pack — additive / idempotent / capability-derived

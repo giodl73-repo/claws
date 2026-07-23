@@ -18,10 +18,10 @@ Signing lives in `claws-sdk/compliance/` -- the layer responsible for evidence i
 
 ## Signing modes
 
-| Mode | Algorithm | Use case | Verification |
-|------|-----------|----------|--------------|
-| Enterprise | Ed25519 | Multi-party verification, regulated environments | Public key only (no shared secret) |
-| Developer | HMAC-SHA256 | Single-user deployments, team-internal integrity | Shared secret required |
+| Mode       | Algorithm   | Use case                                         | Verification                       |
+| ---------- | ----------- | ------------------------------------------------ | ---------------------------------- |
+| Enterprise | Ed25519     | Multi-party verification, regulated environments | Public key only (no shared secret) |
+| Developer  | HMAC-SHA256 | Single-user deployments, team-internal integrity | Shared secret required             |
 
 ---
 
@@ -51,7 +51,7 @@ Key generation uses `crypto.generateKeyPairSync('ed25519')` with OS CSPRNG via `
 ### HMAC-SHA256 signing (developer)
 
 ```ts
-const envelope = signHmac256(evidence, sharedSecret, 'key-001');
+const envelope = signHmac256(evidence, sharedSecret, "key-001");
 const valid = verifyHmac256(envelope, evidence, sharedSecret);
 ```
 
@@ -74,7 +74,7 @@ const valid = verifyEvidence(envelope, evidence, keyOrSecret);
 const { publicKey, privateKey, keyId } = generateSigningKeyPair();
 
 // Store private key to disk with restricted permissions
-await storePrivateKey(privateKey, keyId, '.claws/keys/');
+await storePrivateKey(privateKey, keyId, ".claws/keys/");
 // Writes: .claws/keys/ed25519-sign-a1b2c3d4.pem (chmod 0o600)
 ```
 
@@ -86,11 +86,11 @@ Key IDs are validated against `/^[a-zA-Z0-9_-]+$/` to prevent path traversal.
 
 The `KeyResolver` interface decouples verification from key storage. Three built-in implementations cover common scenarios:
 
-| Resolver | Key source | When to use |
-|----------|-----------|-------------|
-| `EnvKeyResolver` | `CLAWS_VERIFY_KEY` env var (base64) | CI/CD, containers, cloud deployments |
-| `FileKeyResolver` | File path on disk (PEM or raw) | Local development, mounted secrets |
-| `NullKeyResolver` | Always returns null | Backward compatibility with unsigned manifests |
+| Resolver          | Key source                          | When to use                                    |
+| ----------------- | ----------------------------------- | ---------------------------------------------- |
+| `EnvKeyResolver`  | `CLAWS_VERIFY_KEY` env var (base64) | CI/CD, containers, cloud deployments           |
+| `FileKeyResolver` | File path on disk (PEM or raw)      | Local development, mounted secrets             |
+| `NullKeyResolver` | Always returns null                 | Backward compatibility with unsigned manifests |
 
 `EnvKeyResolver` also checks for key-ID-specific env vars (`CLAWS_VERIFY_KEY_{keyId}`) before falling back to the base variable, supporting key rotation in environment-based deployments.
 
@@ -102,12 +102,12 @@ Enterprise deployments implement `KeyResolver` to integrate with Azure Key Vault
 
 For legal and regulatory requirements, the artifact signer includes an RFC 3161 TSA client:
 
-| Step | What happens |
-|------|-------------|
-| 1 | Build DER-encoded ASN.1 timestamp request with SHA-256 hash + random nonce |
-| 2 | POST to TSA URL over HTTPS (TLS required, configurable allowlist) |
-| 3 | Validate response: check PKIStatus, nonce match, messageImprint hash match |
-| 4 | Return `TimestampToken` with TSA URL, hashed message, and response |
+| Step | What happens                                                               |
+| ---- | -------------------------------------------------------------------------- |
+| 1    | Build DER-encoded ASN.1 timestamp request with SHA-256 hash + random nonce |
+| 2    | POST to TSA URL over HTTPS (TLS required, configurable allowlist)          |
+| 3    | Validate response: check PKIStatus, nonce match, messageImprint hash match |
+| 4    | Return `TimestampToken` with TSA URL, hashed message, and response         |
 
 TSA URLs must use HTTPS and optionally be in a configured allowlist from `claws.json`. Request timeout defaults to 10 seconds.
 
@@ -118,7 +118,7 @@ TSA URLs must use HTTPS and optionally be in a configured allowlist from `claws.
 The same module provides HMAC signing for the audit chain. Each chain entry is signed by length-prefixing fields in deterministic order and computing an HMAC. Supported algorithms: SHA-256, SHA-384, SHA-512.
 
 ```ts
-const signedEntry = signAuditEntry(entry, key, 'key-001', 'sha256');
+const signedEntry = signAuditEntry(entry, key, "key-001", "sha256");
 const valid = verifyAuditEntry(signedEntry, key);
 ```
 
@@ -128,15 +128,15 @@ Length-prefixed encoding (`${byteLength}:${value}`) prevents delimiter confusion
 
 ## Key types
 
-| Type | Module |
-|------|--------|
-| `SignedEvidence` | `claws-sdk/compliance/artifact-signer` |
-| `SigningMode` | `claws-sdk/compliance/artifact-signer` |
-| `Ed25519KeyPair` | `claws-sdk/compliance/artifact-signer` |
-| `TimestampToken` | `claws-sdk/compliance/artifact-signer` |
-| `AuditChainEntry` | `claws-sdk/compliance/artifact-signer` |
-| `KeyResolver` | `claws-sdk/compliance/key-resolver` |
-| `EnvKeyResolver` / `FileKeyResolver` / `NullKeyResolver` | `claws-sdk/compliance/key-resolver` |
+| Type                                                     | Module                                 |
+| -------------------------------------------------------- | -------------------------------------- |
+| `SignedEvidence`                                         | `claws-sdk/compliance/artifact-signer` |
+| `SigningMode`                                            | `claws-sdk/compliance/artifact-signer` |
+| `Ed25519KeyPair`                                         | `claws-sdk/compliance/artifact-signer` |
+| `TimestampToken`                                         | `claws-sdk/compliance/artifact-signer` |
+| `AuditChainEntry`                                        | `claws-sdk/compliance/artifact-signer` |
+| `KeyResolver`                                            | `claws-sdk/compliance/key-resolver`    |
+| `EnvKeyResolver` / `FileKeyResolver` / `NullKeyResolver` | `claws-sdk/compliance/key-resolver`    |
 
 ---
 

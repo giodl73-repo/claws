@@ -1,5 +1,12 @@
 ---
-covers: [atom:GRF/path-canonicalize, atom:GRA/nonce-scope, atom:GRR/r5-contract, atom:GRH, atom:GRT/fs-watch-reload]
+covers:
+  [
+    atom:GRF/path-canonicalize,
+    atom:GRA/nonce-scope,
+    atom:GRR/r5-contract,
+    atom:GRH,
+    atom:GRT/fs-watch-reload,
+  ]
 ---
 
 # Pitfalls: paths, bindings, and R5

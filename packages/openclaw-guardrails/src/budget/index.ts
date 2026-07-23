@@ -15,7 +15,7 @@ export type {
   OnExhausted,
   ThresholdAction,
   ThresholdAlert,
-} from './types.js';
+} from "./types.js";
 
-export { createBudgetMeter, InMemoryBudgetMeter } from './meter.js';
-export type { BudgetMeter } from './meter.js';
+export { createBudgetMeter, InMemoryBudgetMeter } from "./meter.js";
+export type { BudgetMeter } from "./meter.js";

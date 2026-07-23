@@ -25,12 +25,7 @@
  * @module @openclaw/plugin-sdk/policy/runtime
  */
 
-import type {
-  Decision,
-  DenyRule,
-  PolicyIR,
-  ToolSpec,
-} from './types.js';
+import type { Decision, DenyRule, PolicyIR, ToolSpec } from "./types.js";
 
 /**
  * One approval-required entry in the derived list. Carries the
@@ -40,7 +35,7 @@ import type {
  */
 export interface ApprovalRequirement {
   readonly toolId: string;
-  readonly risk: ToolSpec['risk'];
+  readonly risk: ToolSpec["risk"];
   readonly capabilities: readonly string[];
   /** Human-readable rationale. */
   readonly reason: string;
@@ -59,16 +54,16 @@ export function approvalListFor(policy: PolicyIR): readonly ApprovalRequirement[
   const out: ApprovalRequirement[] = [];
   for (const tool of policy.tools) {
     const reasons: string[] = [];
-    if (tool.risk === 'critical') reasons.push('risk=critical');
-    if (tool.capabilities.includes('IRREVERSIBLE_EXTERNAL')) {
-      reasons.push('capability=IRREVERSIBLE_EXTERNAL');
+    if (tool.risk === "critical") reasons.push("risk=critical");
+    if (tool.capabilities.includes("IRREVERSIBLE_EXTERNAL")) {
+      reasons.push("capability=IRREVERSIBLE_EXTERNAL");
     }
     if (reasons.length === 0) continue;
     out.push({
       toolId: tool.id,
       risk: tool.risk,
       capabilities: tool.capabilities,
-      reason: reasons.join(', '),
+      reason: reasons.join(", "),
     });
   }
   return out;
@@ -99,14 +94,11 @@ export interface ToolCallInput {
  *   3. If the tool is on the approvals list, return `requires-approval`.
  *   4. Otherwise `allow`.
  */
-export function evaluateDecision(
-  policy: PolicyIR,
-  call: ToolCallInput,
-): Decision {
+export function evaluateDecision(policy: PolicyIR, call: ToolCallInput): Decision {
   const tool = policy.tools.find((t) => t.id === call.toolId);
   if (tool === undefined) {
     return {
-      kind: 'deny',
+      kind: "deny",
       reason: `unknown-tool: ${call.toolId}`,
     };
   }
@@ -114,7 +106,7 @@ export function evaluateDecision(
   const denyMatch = matchAnyDenyRule(policy.denyRules, tool, call);
   if (denyMatch !== null) {
     return {
-      kind: 'deny',
+      kind: "deny",
       reason: denyMatch.reason,
       rule: denyMatch.id,
     };
@@ -125,12 +117,12 @@ export function evaluateDecision(
   if (needsApproval) {
     const entry = approvals.find((a) => a.toolId === tool.id)!;
     return {
-      kind: 'requires-approval',
+      kind: "requires-approval",
       reason: entry.reason,
     };
   }
 
-  return { kind: 'allow' };
+  return { kind: "allow" };
 }
 
 function matchAnyDenyRule(
@@ -141,10 +133,7 @@ function matchAnyDenyRule(
   for (const rule of rules) {
     const w = rule.when;
     if (w.tool !== undefined && w.tool === tool.id) return rule;
-    if (
-      w.capability !== undefined &&
-      tool.capabilities.includes(w.capability)
-    ) {
+    if (w.capability !== undefined && tool.capabilities.includes(w.capability)) {
       return rule;
     }
     if (w.tag !== undefined) {
@@ -157,7 +146,7 @@ function matchAnyDenyRule(
       if (tool.id.toLowerCase().includes(stripStars(tag))) return rule;
       if (call.args !== undefined) {
         for (const v of Object.values(call.args)) {
-          if (typeof v !== 'string') continue;
+          if (typeof v !== "string") continue;
           if (tagMatchesValue(tag, v)) return rule;
         }
       }
@@ -167,7 +156,10 @@ function matchAnyDenyRule(
 }
 
 function stripStars(tag: string): string {
-  return tag.replace(/^\*+|\*+$/g, '').replace(/\*+/g, ' ').trim();
+  return tag
+    .replace(/^\*+|\*+$/g, "")
+    .replace(/\*+/g, " ")
+    .trim();
 }
 
 function tagMatchesValue(tag: string, value: string): boolean {
@@ -175,7 +167,7 @@ function tagMatchesValue(tag: string, value: string): boolean {
   // (case-insensitive) for the tag to match. Empty tag matches
   // everything (trivial deny).
   const keywords = tag
-    .split('*')
+    .split("*")
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
   if (keywords.length === 0) return true;

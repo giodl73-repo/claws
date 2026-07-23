@@ -8,17 +8,18 @@ Governance enforcement runs in the critical path of agent execution. Every milli
 
 ## Budget Allocations
 
-| Operation | Budget | Rationale |
-|-----------|--------|-----------|
-| Single hook execution | 50ms | Hooks run per-skill-call; must be imperceptible |
-| LSP diagnostic cycle | 200ms | Editor responsiveness threshold |
-| Full gate evaluation (G1-G4) | 500ms | Runs at pipeline boundaries, not per-call |
-| CGR chain write | 10ms | Append-only, batched |
-| Capability manifest scan | 1000ms | Runs once during build, not at runtime |
+| Operation                    | Budget | Rationale                                       |
+| ---------------------------- | ------ | ----------------------------------------------- |
+| Single hook execution        | 50ms   | Hooks run per-skill-call; must be imperceptible |
+| LSP diagnostic cycle         | 200ms  | Editor responsiveness threshold                 |
+| Full gate evaluation (G1-G4) | 500ms  | Runs at pipeline boundaries, not per-call       |
+| CGR chain write              | 10ms   | Append-only, batched                            |
+| Capability manifest scan     | 1000ms | Runs once during build, not at runtime          |
 
 ## Enforcement
 
 Operations that exceed their budget are:
+
 1. **Logged** -- a `CLAWS-PERF-001` diagnostic records the overage
 2. **Completed** -- the operation finishes (no timeout kill)
 3. **Flagged** -- fleet monitoring surfaces repeated overages

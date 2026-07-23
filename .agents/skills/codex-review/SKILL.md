@@ -8,6 +8,7 @@ description: "Codex code review closeout: local dirty changes, PR branch vs main
 Run Codex's built-in code review as a closeout check. This is code review (`codex review`), not Guardian `auto_review` approval routing.
 
 Use when:
+
 - user asks for Codex review / autoreview / second-model review
 - after non-trivial code edits, before final/commit/ship
 - reviewing a local branch or PR branch after fixes
@@ -87,6 +88,7 @@ Tradeoff: tests may force code changes that stale the review. If tests or review
 ## Context Efficiency
 
 Codex review is usually noisy. Default to a subagent filter when subagents are available. Ask it to run the review and return only:
+
 - actionable findings it accepts
 - findings it rejects, with one-line reason
 - exact files/tests to rerun
@@ -108,6 +110,7 @@ If installed from `agent-scripts`, path is:
 ```
 
 The helper:
+
 - chooses dirty `--uncommitted` first
 - otherwise uses current PR base if `gh pr view` works
 - otherwise uses `origin/main` for non-main branches
@@ -122,6 +125,7 @@ The helper:
 ## Final Report
 
 Include:
+
 - review command used
 - tests/proof run
 - findings accepted/rejected, briefly why

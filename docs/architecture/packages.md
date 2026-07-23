@@ -78,19 +78,19 @@ The SDK depends on `@bic/claws-sdk` at an exact pinned version (no caret, no til
 
 The SDK adds eleven enterprise modules on top of the compiler:
 
-| Module | Subpath | What it does |
-|--------|---------|-------------|
-| Fleet | `/fleet` | Scan, broadcast, drift detection across 47+ workspaces |
-| Compliance | `/compliance` | SOC 2, HIPAA, EU AI Act evidence builders |
-| SIEM | `/siem` | CEF, syslog, NDJSON emitters |
-| PRESS | `/press` | Agent-output compression |
-| RELAX | `/relax` | Typed expression engine for policy rules (enterprise variant) |
-| Identity | `/identity` | Entra / OIDC bridge, RBAC resolution |
-| Budget | `/budget` | Token/cost tracking, fleet-wide aggregation |
-| LSP | `/lsp` | Language server for claws config authoring |
-| Snapshot | `/snapshot` | Workspace state snapshot / restore |
-| Context | `/context` | Context DAG for multi-workspace dependency resolution |
-| Serve | `/serve` | `claws serve` daemon |
+| Module     | Subpath       | What it does                                                  |
+| ---------- | ------------- | ------------------------------------------------------------- |
+| Fleet      | `/fleet`      | Scan, broadcast, drift detection across 47+ workspaces        |
+| Compliance | `/compliance` | SOC 2, HIPAA, EU AI Act evidence builders                     |
+| SIEM       | `/siem`       | CEF, syslog, NDJSON emitters                                  |
+| PRESS      | `/press`      | Agent-output compression                                      |
+| RELAX      | `/relax`      | Typed expression engine for policy rules (enterprise variant) |
+| Identity   | `/identity`   | Entra / OIDC bridge, RBAC resolution                          |
+| Budget     | `/budget`     | Token/cost tracking, fleet-wide aggregation                   |
+| LSP        | `/lsp`        | Language server for claws config authoring                    |
+| Snapshot   | `/snapshot`   | Workspace state snapshot / restore                            |
+| Context    | `/context`    | Context DAG for multi-workspace dependency resolution         |
+| Serve      | `/serve`      | `claws serve` daemon                                          |
 
 The SDK also re-exports every free-tier symbol from `@bic/claws-sdk` at the same subpath. Enterprise consumers' imports work unchanged across the split.
 

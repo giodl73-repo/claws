@@ -46,28 +46,28 @@ Related:
 
 18 research questions (all Proposed) spanning the complete product design:
 
-| Phase | Questions | What they resolved |
-|-------|-----------|-------------------|
-| Surface | Q12a-d | One CLI, `claws`, 39 commands, check + snap |
-| Experience | Q12e-f | Three rings, upgrade flow, CI/CD pipeline |
-| Schema | Q12g | GlintConfig v2 (three-layer, 7 platforms) |
-| Security | Q12h-i | 4 security layers, 5 runtime insertion points |
-| Compiler | Q12j-k | 5-phase pipeline, three-tier packages |
-| Platform | Q12l-m | .NET for OpenClaw, claws-sdk sibling architecture |
-| Ecosystem | Q12n-o | 5,198 skills mapped, maker experience |
-| Deep | Q12p-r | Atoms reuse, VS Code, runtime contracts |
+| Phase      | Questions | What they resolved                                |
+| ---------- | --------- | ------------------------------------------------- |
+| Surface    | Q12a-d    | One CLI, `claws`, 39 commands, check + snap       |
+| Experience | Q12e-f    | Three rings, upgrade flow, CI/CD pipeline         |
+| Schema     | Q12g      | GlintConfig v2 (three-layer, 7 platforms)         |
+| Security   | Q12h-i    | 4 security layers, 5 runtime insertion points     |
+| Compiler   | Q12j-k    | 5-phase pipeline, three-tier packages             |
+| Platform   | Q12l-m    | .NET for OpenClaw, claws-sdk sibling architecture |
+| Ecosystem  | Q12n-o    | 5,198 skills mapped, maker experience             |
+| Deep       | Q12p-r    | Atoms reuse, VS Code, runtime contracts           |
 
 ## Review Panel
 
 8 roles in `.craft/roles/claws/`:
 
-| Layer | Role | Key question |
-|-------|------|-------------|
-| Platform | founder | "Can the user uninstall this?" |
-| Platform | gateway-eng | "50ms budget per hook?" |
-| Platform | skill-author | "Can I adopt this in 5 minutes?" |
-| Enterprise | ciso | "Can I show this to an auditor?" |
-| Enterprise | platform-eng | "47 workspaces in 10 minutes?" |
-| Enterprise | compliance | "Hand this to a Big 4 auditor?" |
-| User | power-user | "Does this replace my scripts?" |
-| User | new-hire | "4 commands in 5 minutes?" |
+| Layer      | Role         | Key question                     |
+| ---------- | ------------ | -------------------------------- |
+| Platform   | founder      | "Can the user uninstall this?"   |
+| Platform   | gateway-eng  | "50ms budget per hook?"          |
+| Platform   | skill-author | "Can I adopt this in 5 minutes?" |
+| Enterprise | ciso         | "Can I show this to an auditor?" |
+| Enterprise | platform-eng | "47 workspaces in 10 minutes?"   |
+| Enterprise | compliance   | "Hand this to a Big 4 auditor?"  |
+| User       | power-user   | "Does this replace my scripts?"  |
+| User       | new-hire     | "4 commands in 5 minutes?"       |

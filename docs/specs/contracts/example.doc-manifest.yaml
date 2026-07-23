@@ -4,129 +4,129 @@ entries:
     type: example
     path: docs/claws/examples/init-and-build.md
     atoms:
-    - check
+      - check
   snap-example:
     type: example
     path: docs/claws/examples/compliance-evidence.md
     atoms:
-    - snap
+      - snap
   claws-init-example:
     type: example
     path: docs/claws/examples/init-and-build.md
     atoms:
-    - claws-init
+      - claws-init
   claws-uninstall-example:
     type: example
     path: docs/claws/examples/init-and-build.md
     atoms:
-    - claws-uninstall
+      - claws-uninstall
   claws-json-example:
     type: example
     path: docs/claws/examples/init-and-build.md
     atoms:
-    - claws-json
+      - claws-json
   progressive-disclosure-example:
     type: example
     path: docs/claws/examples/init-and-build.md
     atoms:
-    - progressive-disclosure
+      - progressive-disclosure
   claws-compiler-example:
     type: example
     path: docs/claws/examples/compiler-engines.md
     atoms:
-    - claws-compiler
+      - claws-compiler
   workflow-inversion-example:
     type: example
     path: docs/claws/examples/compiler-engines.md
     atoms:
-    - workflow-inversion
+      - workflow-inversion
   three-engine-model-example:
     type: example
     path: docs/claws/examples/compiler-engines.md
     atoms:
-    - three-engine-model
+      - three-engine-model
   three-rings-example:
     type: example
     path: docs/claws/examples/security-model.md
     atoms:
-    - three-rings
+      - three-rings
   skill-kit-example:
     type: example
     path: docs/claws/examples/platform-ecosystem.md
     atoms:
-    - skill-kit
+      - skill-kit
   governance-badge-example:
     type: example
     path: docs/claws/examples/platform-ecosystem.md
     atoms:
-    - governance-badge
+      - governance-badge
   tier-adoption-example:
     type: example
     path: docs/claws/examples/platform-ecosystem.md
     atoms:
-    - tier-adoption
+      - tier-adoption
   three-tier-packages-example:
     type: example
     path: docs/claws/examples/platform-ecosystem.md
     atoms:
-    - three-tier-packages
+      - three-tier-packages
   pinch-example:
     type: example
     path: docs/claws/examples/platform-ecosystem.md
     atoms:
-    - pinch
+      - pinch
   lossless-roundtrip-example:
     type: example
     path: docs/claws/examples/init-and-build.md
     atoms:
-    - lossless-roundtrip
+      - lossless-roundtrip
   dotnet-for-oc-example:
     type: example
     path: docs/claws/examples/platform-ecosystem.md
     atoms:
-    - dotnet-for-oc
+      - dotnet-for-oc
   governance-plugin-example:
     type: example
     path: docs/claws/examples/compiler-engines.md
     atoms:
-    - governance-plugin
+      - governance-plugin
   defense-in-depth-example:
     type: example
     path: docs/claws/examples/security-model.md
     atoms:
-    - defense-in-depth
+      - defense-in-depth
   fail-mode-example:
     type: example
     path: docs/claws/examples/security-model.md
     atoms:
-    - fail-mode
+      - fail-mode
   claws-bypass-example:
     type: example
     path: docs/claws/examples/security-model.md
     atoms:
-    - claws-bypass
+      - claws-bypass
   tool-classification-example:
     type: example
     path: docs/claws/examples/security-model.md
     atoms:
-    - tool-classification
+      - tool-classification
   obo-boundary-example:
     type: example
     path: docs/claws/examples/security-model.md
     atoms:
-    - obo-boundary
+      - obo-boundary
   elicitation-gate-example:
     type: example
     path: docs/claws/examples/security-model.md
     atoms:
-    - elicitation-gate
+      - elicitation-gate
   compliance-artifact-example:
     type: example
     path: docs/claws/examples/compliance-evidence.md
     atoms:
-    - compliance-artifact
+      - compliance-artifact
   kill-switch-example:
     type: example
     path: docs/claws/examples/security-model.md
     atoms:
-    - kill-switch
+      - kill-switch

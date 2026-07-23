@@ -26,9 +26,9 @@
  * @module @openclaw/plugin-sdk/policy/adapter
  */
 
-import { promises as fs } from 'node:fs';
-import type { Decision, PolicyIR } from './types.js';
-import { evaluateDecision, type ToolCallInput } from './runtime.js';
+import { promises as fs } from "node:fs";
+import type { Decision, PolicyIR } from "./types.js";
+import { evaluateDecision, type ToolCallInput } from "./runtime.js";
 
 /**
  * Minimal event shape consumed by the adapter. Structural subset
@@ -62,10 +62,10 @@ export interface PolicyToolEvent {
  * of vocabulary; semantics are identical.
  */
 export type PluginToolPolicyDecision =
-  | { readonly decision: 'allow' }
-  | { readonly decision: 'block'; readonly reason: string; readonly rule?: string }
-  | { readonly decision: 'requires-approval'; readonly reason: string }
-  | { readonly decision: 'mutate-params'; readonly mutate: Readonly<Record<string, unknown>> };
+  | { readonly decision: "allow" }
+  | { readonly decision: "block"; readonly reason: string; readonly rule?: string }
+  | { readonly decision: "requires-approval"; readonly reason: string }
+  | { readonly decision: "mutate-params"; readonly mutate: Readonly<Record<string, unknown>> };
 
 /**
  * Pure mapping from our `Decision` shape to upstream's
@@ -75,16 +75,16 @@ export type PluginToolPolicyDecision =
  */
 export function mapDecisionToHostShape(d: Decision): PluginToolPolicyDecision {
   switch (d.kind) {
-    case 'allow':
-      return { decision: 'allow' };
-    case 'deny':
+    case "allow":
+      return { decision: "allow" };
+    case "deny":
       return d.rule !== undefined
-        ? { decision: 'block', reason: d.reason, rule: d.rule }
-        : { decision: 'block', reason: d.reason };
-    case 'requires-approval':
-      return { decision: 'requires-approval', reason: d.reason };
-    case 'params':
-      return { decision: 'mutate-params', mutate: d.mutate };
+        ? { decision: "block", reason: d.reason, rule: d.rule }
+        : { decision: "block", reason: d.reason };
+    case "requires-approval":
+      return { decision: "requires-approval", reason: d.reason };
+    case "params":
+      return { decision: "mutate-params", mutate: d.mutate };
   }
 }
 
@@ -95,9 +95,7 @@ export function mapDecisionToHostShape(d: Decision): PluginToolPolicyDecision {
  * Decision before downstream conversion. For direct registration,
  * use `policyTrustedToolPolicy` below.
  */
-export function makePolicyEvaluator(
-  policy: PolicyIR,
-): (event: PolicyToolEvent) => Decision {
+export function makePolicyEvaluator(policy: PolicyIR): (event: PolicyToolEvent) => Decision {
   return (event) => {
     const call: ToolCallInput =
       event.args !== undefined
@@ -157,6 +155,6 @@ export function policyTrustedToolPolicy(
  * that want it inline run it themselves.
  */
 export async function loadPolicyIRFromFile(path: string): Promise<PolicyIR> {
-  const raw = await fs.readFile(path, 'utf-8');
+  const raw = await fs.readFile(path, "utf-8");
   return JSON.parse(raw) as PolicyIR;
 }

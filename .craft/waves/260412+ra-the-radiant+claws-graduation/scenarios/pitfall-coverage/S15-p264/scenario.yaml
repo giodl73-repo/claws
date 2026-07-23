@@ -14,7 +14,10 @@ expect:
   prevention: "`claws check --registry` validates EmitRegistry for duplicate registrations. register() returns a RegistrationResult with conflict diagnostic showing both parties. Duplicate detection is mandatory, not optional."
 
 simulate:
-  failures: ["Two emitter plugins register with the same platform name, silently overwriting the first registration"]
+  failures:
+    [
+      "Two emitter plugins register with the same platform name, silently overwriting the first registration",
+    ]
   halt: null
   budget: null
 

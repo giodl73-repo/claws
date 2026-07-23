@@ -10,12 +10,12 @@ the real lobster deployment.
 
 ## HostAdapter methods — lobster mapping
 
-| `HostAdapter` method | `LobsterAdapter` implementation |
-|---|---|
-| `extractIdentity(req)` | Cowork session-principal extraction from `X-Session-Principal` header; single-tenant (`tenantId: null`). |
-| `routePolicy(ctx)` | `GET http://sidecar-snap/v1/policy/current`; on sidecar-unreachable fallback to on-disk `.openclaw/policy/policy-ir.json` with `SidecarUnreachableEntry` after 2-strike threshold. |
-| `getApprovalSink(ctx)` | Returns `LobsterSupervisorHttpSink` — HMAC-signed POST to supervisor companion, buffered write-behind to `.openclaw/audit/*.log`. |
-| `shapeResponse(decision, ctx)` | HTTP status + optional `Approval-Redirect` header pointing at supervisor's review URL (for `decision: 'review'`). |
+| `HostAdapter` method           | `LobsterAdapter` implementation                                                                                                                                                    |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `extractIdentity(req)`         | Cowork session-principal extraction from `X-Session-Principal` header; single-tenant (`tenantId: null`).                                                                           |
+| `routePolicy(ctx)`             | `GET http://sidecar-snap/v1/policy/current`; on sidecar-unreachable fallback to on-disk `.openclaw/policy/policy-ir.json` with `SidecarUnreachableEntry` after 2-strike threshold. |
+| `getApprovalSink(ctx)`         | Returns `LobsterSupervisorHttpSink` — HMAC-signed POST to supervisor companion, buffered write-behind to `.openclaw/audit/*.log`.                                                  |
+| `shapeResponse(decision, ctx)` | HTTP status + optional `Approval-Redirect` header pointing at supervisor's review URL (for `decision: 'review'`).                                                                  |
 
 See `testing--host-presets.md` for the matrix model and
 `host-adapter-contract.md` for the interface all four adapters
@@ -43,15 +43,15 @@ implement.
 
 ```ts
 const lobsterPreset: HostPresetConfig = {
-  name: 'lobster',
+  name: "lobster",
   decide: {
     providers: [/* GuardrailProvider + FileIngestProvider fixtures */],
-    mergerMode: 'strict-oc7',
+    mergerMode: "strict-oc7",
   },
-  track:         { mode: 'sidecar' },
-  enforceReview: { companionMode: 'supervisor-http', signer: 'cowork-supervisor' },
-  workspace:     { mount: 'container-RO' },
-  scope:         '@bic/openclaw',
+  track: { mode: "sidecar" },
+  enforceReview: { companionMode: "supervisor-http", signer: "cowork-supervisor" },
+  workspace: { mount: "container-RO" },
+  scope: "@bic/openclaw",
 };
 ```
 
@@ -104,7 +104,7 @@ The sim emits a single normalized shape regardless of OS:
 
 ```ts
 interface WriteRejection {
-  cause: 'readonly-mount';
+  cause: "readonly-mount";
   path: string;
   timestamp: number;
 }
@@ -114,11 +114,11 @@ Scenarios assert on `cause: 'readonly-mount'` only. The OS errno is
 **not observable to scenario code**. Wepwawet's real lobster integration is
 responsible for the translation:
 
-| OS       | Native errno / code        | → Emits            |
-|----------|----------------------------|--------------------|
-| Windows  | `ERROR_ACCESS_DENIED` (0x5) or `EACCES` | `cause: 'readonly-mount'` |
-| Linux    | `EROFS` (30)               | `cause: 'readonly-mount'` |
-| macOS    | `EROFS` or `EACCES`        | `cause: 'readonly-mount'` |
+| OS      | Native errno / code                     | → Emits                   |
+| ------- | --------------------------------------- | ------------------------- |
+| Windows | `ERROR_ACCESS_DENIED` (0x5) or `EACCES` | `cause: 'readonly-mount'` |
+| Linux   | `EROFS` (30)                            | `cause: 'readonly-mount'` |
+| macOS   | `EROFS` or `EACCES`                     | `cause: 'readonly-mount'` |
 
 This contract is also captured in `claws-sim-host-presets.md`
 "Platform-neutral RO-mount contract" and will be reflected in the CL-07

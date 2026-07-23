@@ -64,6 +64,7 @@ The host reads `host-approval-policies.json` and builds an in-memory
 policy index (Map<server, Map<tool, Policy>>) for O(1) resolution.
 
 Resolution order (per Aether PR #5067):
+
 1. Exact server + tool match
 2. Wildcard server (*) + tool match
 3. Global default: fail-closed (requires approval)
@@ -74,12 +75,12 @@ Resolution order (per Aether PR #5067):
 
 The artifact format uses generic field names:
 
-| Field | Description | Not |
-|-------|-------------|-----|
-| `server` | MCP server name | Not "Aether workspace" |
-| `tool` | Tool name | Not "Aether action" |
-| `requires_approval` | Approval gate flag | Not "Aether approval" |
-| `risk_level` | Risk classification | Not "Aether risk tier" |
+| Field               | Description         | Not                    |
+| ------------------- | ------------------- | ---------------------- |
+| `server`            | MCP server name     | Not "Aether workspace" |
+| `tool`              | Tool name           | Not "Aether action"    |
+| `requires_approval` | Approval gate flag  | Not "Aether approval"  |
+| `risk_level`        | Risk classification | Not "Aether risk tier" |
 
 Any host that reads these fields can implement the approval gate.
 Aether is the reference consumer -- other hosts (ClawPilot, CLI,

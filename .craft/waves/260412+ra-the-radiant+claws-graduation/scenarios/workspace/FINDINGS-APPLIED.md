@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Platform detection**: per-marker confidence rules (not just presence/absence), data-driven platform registry (not hardcoded enum), marker type annotation (file vs directory)
 - **Discovery**: default directory exclusion list, circular symlink detection via canonical path tracking, configurable maxDepth with default of 5
 - **Cross-platform normalization**: full 3-byte BOM check rejecting UTF-16 BOM, normalize replaces \r\n only preserving lone \r, single normalization implementation in workspace imported by forma

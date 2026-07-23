@@ -16,7 +16,7 @@ operators need to intervene.
 2. `fs.watch` fires a change event.
 3. Guardrails parses + validates the new file.
 4. **Success path**: atomic in-memory swap, `TrustReloadEntry { success:
-   true }` appended to the audit chain. Next `ApprovalHandle`
+true }` appended to the audit chain. Next `ApprovalHandle`
    verification uses the new keys.
 5. **Failure path**: existing trust set stays active,
    `TrustReloadEntry { success: false, reason }` appended. Next

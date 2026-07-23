@@ -15,7 +15,10 @@ expect:
   prevention: "`claws check --equivalence` runs dual-path compilation on a reference workspace and compares outputs. Every normalization pass is documented in the extraction map. Hash equivalence tested on identical input bytes before full GovernanceIR comparison."
 
 simulate:
-  failures: ["Pre-extraction and post-extraction compilation paths produce different GovernanceIR for the same input"]
+  failures:
+    [
+      "Pre-extraction and post-extraction compilation paths produce different GovernanceIR for the same input",
+    ]
   halt: null
   budget: null
 

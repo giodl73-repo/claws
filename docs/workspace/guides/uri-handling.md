@@ -17,7 +17,7 @@ it touches the filesystem.
 ### Layer 1: parser
 
 ```ts
-import { parseOcUri, OcPathError } from '@bic/openclaw-workspace/path';
+import { parseOcUri, OcPathError } from "@bic/openclaw-workspace/path";
 
 try {
   const ocPath = parseOcUri(userInput);

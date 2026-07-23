@@ -28,10 +28,10 @@ Replace imports:
 
 ```ts
 // before
-import { GitLKGStore } from '@bic/openclaw-lkg-git';
+import { GitLKGStore } from "@bic/openclaw-lkg-git";
 
 // after
-import { GitLKGStore } from '@openclaw/lkg-git';
+import { GitLKGStore } from "@openclaw/lkg-git";
 ```
 
 The contract types are byte-compatible at the shape level; the new

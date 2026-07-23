@@ -14,6 +14,7 @@ a big footprint across the codebase.
 ## The gate
 
 <!-- proof:compiled from="proof:tree kind=taxonomy" uri="" -->
+
 ```taxonomy
 metadata.trusted gate
 ├── Producer side: emitTrustedDiagnosticEvent vs emitDiagnosticEvent
@@ -22,6 +23,7 @@ metadata.trusted gate
 ├── Consumer side: if not metadata.trusted, return at the top of the handler
 └── log.record exemption: log records bypass the trust filter for observability
 ```
+
 <!-- /proof:compiled -->
 
 Cite: `src/infra/diagnostic-events.ts:516, :633-637, :744-752`.
@@ -30,10 +32,10 @@ Cite: `src/infra/diagnostic-events.ts:516, :633-637, :744-752`.
 
 ## Trusted vs untrusted producers
 
-| Side | Function | Used by |
-|------|----------|---------|
-| trusted=true | `emitTrustedDiagnosticEvent()` | core runtime: harness, model call, run, tool execution, context assembly |
-| trusted=false | `emitDiagnosticEvent()` | plugins, sandboxed processes, untrusted sources |
+| Side          | Function                       | Used by                                                                  |
+| ------------- | ------------------------------ | ------------------------------------------------------------------------ |
+| trusted=true  | `emitTrustedDiagnosticEvent()` | core runtime: harness, model call, run, tool execution, context assembly |
+| trusted=false | `emitDiagnosticEvent()`        | plugins, sandboxed processes, untrusted sources                          |
 
 Plugins do not have access to `emitTrustedDiagnosticEvent()`. The trust
 flag cannot be set externally — it is set by the dispatcher itself for
@@ -46,15 +48,15 @@ events it produces.
 `redactSensitiveText()` lives at `src/logging/redact.ts:146-158`, re-exported
 via `packages/plugin-sdk/src/security-runtime.ts:33`.
 
-| Pattern class | Examples |
-|---------------|----------|
-| Env-style assignments | `KEY=...`, `TOKEN=...`, `SECRET=...`, `PASSWORD=...` |
-| URL query params | `?access_token`, `?api_key`, `?secret` |
-| JSON fields | `"apiKey"`, `"token"`, `"secret"`, `"password"` |
-| CLI flags | `--api-key`, `--token`, `--password` |
-| Authorization headers | `Authorization: Bearer ...`, standalone `Bearer <20+ chars>` |
-| PEM blocks | `-----BEGIN/END PRIVATE KEY-----` whole-block |
-| Token prefixes | `sk-`, `ghp_`, `github_pat_`, `xoxb-`, `gsk_`, `AIza`, `pplx-`, `npm_`, telegram bot ids |
+| Pattern class         | Examples                                                                                 |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| Env-style assignments | `KEY=...`, `TOKEN=...`, `SECRET=...`, `PASSWORD=...`                                     |
+| URL query params      | `?access_token`, `?api_key`, `?secret`                                                   |
+| JSON fields           | `"apiKey"`, `"token"`, `"secret"`, `"password"`                                          |
+| CLI flags             | `--api-key`, `--token`, `--password`                                                     |
+| Authorization headers | `Authorization: Bearer ...`, standalone `Bearer <20+ chars>`                             |
+| PEM blocks            | `-----BEGIN/END PRIVATE KEY-----` whole-block                                            |
+| Token prefixes        | `sk-`, `ghp_`, `github_pat_`, `xoxb-`, `gsk_`, `AIza`, `pplx-`, `npm_`, telegram bot ids |
 
 Replacement: short tokens become `***`, long ones become `{first6}...{last4}`,
 PEM blocks preserve first + last line and redact the interior. **This is
@@ -67,14 +69,14 @@ human-readable masking, not cryptographic destruction.**
 The diagnostics extensions cap attribute keys, values, count, and series
 to prevent label explosion + abuse via crafted inputs.
 
-| Cap | Value | Applies to |
-|-----|-------|------------|
-| `LOW_CARDINALITY_VALUE_RE` | `^[A-Za-z0-9_.:-]{1,120}$` | both OTel + Prometheus attribute values |
-| `OTEL_LOG_ATTRIBUTE_KEY_RE` | `^[A-Za-z0-9_.:-]{1,96}$` | OTel log attribute keys |
-| `MAX_OTEL_LOG_ATTRIBUTE_COUNT` | 64 | attrs per log record |
-| `MAX_OTEL_LOG_ATTRIBUTE_VALUE_CHARS` | 4096 | chars per attr value |
-| `MAX_OTEL_CONTENT_ATTRIBUTE_CHARS` | 4096 (4 KB) | content-class attrs |
-| `MAX_PROMETHEUS_SERIES` | 2048 | hard cap, excess silently dropped |
+| Cap                                  | Value                      | Applies to                              |
+| ------------------------------------ | -------------------------- | --------------------------------------- |
+| `LOW_CARDINALITY_VALUE_RE`           | `^[A-Za-z0-9_.:-]{1,120}$` | both OTel + Prometheus attribute values |
+| `OTEL_LOG_ATTRIBUTE_KEY_RE`          | `^[A-Za-z0-9_.:-]{1,96}$`  | OTel log attribute keys                 |
+| `MAX_OTEL_LOG_ATTRIBUTE_COUNT`       | 64                         | attrs per log record                    |
+| `MAX_OTEL_LOG_ATTRIBUTE_VALUE_CHARS` | 4096                       | chars per attr value                    |
+| `MAX_OTEL_CONTENT_ATTRIBUTE_CHARS`   | 4096 (4 KB)                | content-class attrs                     |
+| `MAX_PROMETHEUS_SERIES`              | 2048                       | hard cap, excess silently dropped       |
 
 `DROPPED_OTEL_ATTRIBUTE_KEYS` (always stripped before export):
 `openclaw.callId`, `openclaw.runId`, `openclaw.sessionId`,
@@ -88,6 +90,7 @@ never reach exported attributes.
 ## Prototype pollution guard
 
 <!-- proof:compiled from="proof:tree kind=taxonomy" uri="" -->
+
 ```taxonomy
 isBlockedObjectKey()
 ├── Blocked keys: __proto__, prototype, constructor
@@ -95,6 +98,7 @@ isBlockedObjectKey()
 ├── Manifest normalization: every record-walker filters
 └── Plugin loading: prevents prototype pollution via crafted manifest fields
 ```
+
 <!-- /proof:compiled -->
 
 Cite: `src/infra/prototype-keys.ts:1-5`. Three keys, every record-walker
@@ -107,10 +111,10 @@ checks the function. Easy to miss in new code paths.
 Structured credential reference; decouples credential **location** from
 credential **materialization**.
 
-| Source | Resolution |
-|--------|------------|
-| `env` | environment variable lookup |
-| `file` | filesystem path (e.g., `/providers/openai/apiKey`) |
+| Source | Resolution                                                  |
+| ------ | ----------------------------------------------------------- |
+| `env`  | environment variable lookup                                 |
+| `file` | filesystem path (e.g., `/providers/openai/apiKey`)          |
 | `exec` | subprocess execution result, with strict exec ID validation |
 
 Resolved values **never** transit back into diagnostic events or OTel
@@ -121,11 +125,11 @@ at startup/reload.
 
 ## Sandbox boundary
 
-| Origin | Trust on emitted events | Why |
-|--------|-------------------------|-----|
-| Gateway process (harness, tool execution wrapper) | trusted=true | dispatcher-stamped |
-| Sandboxed subprocess output | trusted=false | comes through `docker exec` stdio |
-| Plugin-emitted in any scope | trusted=false | plugins do not get trusted emit |
+| Origin                                            | Trust on emitted events | Why                               |
+| ------------------------------------------------- | ----------------------- | --------------------------------- |
+| Gateway process (harness, tool execution wrapper) | trusted=true            | dispatcher-stamped                |
+| Sandboxed subprocess output                       | trusted=false           | comes through `docker exec` stdio |
+| Plugin-emitted in any scope                       | trusted=false           | plugins do not get trusted emit   |
 
 The sandbox-event boundary is enforced at the IPC seam. Sandboxed events
 cannot hijack OTel propagation or influence cardinality budgets — they're

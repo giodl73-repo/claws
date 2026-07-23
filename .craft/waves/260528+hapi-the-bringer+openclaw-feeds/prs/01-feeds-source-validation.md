@@ -26,13 +26,13 @@ feed sources for skills and plugins:
               "id": "company-approved",
               "url": "https://feeds.example.com/openclaw/feed.json",
               "trust": "pinned",
-              "integrity": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-            }
-          ]
-        }
-      }
-    }
-  }
+              "integrity": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            },
+          ],
+        },
+      },
+    },
+  },
 }
 ```
 

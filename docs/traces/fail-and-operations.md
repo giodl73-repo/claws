@@ -33,11 +33,11 @@ How governance handles failures, classifies tools, enforces on-behalf-of boundar
 
 ### Breakpoint: When to Use Each Mode
 
-| Mode | Use Case | Risk |
-|------|----------|------|
-| fail-closed | Production (default) | May block valid operations |
-| fail-open | Development/testing | May allow invalid operations |
-| fail-advisory | Migration period | Logs everything, blocks nothing |
+| Mode          | Use Case             | Risk                            |
+| ------------- | -------------------- | ------------------------------- |
+| fail-closed   | Production (default) | May block valid operations      |
+| fail-open     | Development/testing  | May allow invalid operations    |
+| fail-advisory | Migration period     | Logs everything, blocks nothing |
 
 ---
 

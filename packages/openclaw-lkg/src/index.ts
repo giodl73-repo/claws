@@ -14,15 +14,11 @@
  * @module @bic/openclaw-lkg
  */
 
-export { lkgStore } from './lkg-store.js';
-export type {
-  AuditRecord,
-  LKGStoreOptions,
-  RecoveryNotice,
-} from './lkg-store.js';
+export { lkgStore } from "./lkg-store.js";
+export type { AuditRecord, LKGStoreOptions, RecoveryNotice } from "./lkg-store.js";
 
-export { lkgPathFor, clobberedPathFor, isCompanionPath } from './paths.js';
-export { makeFingerprint, hashRaw } from './fingerprint.js';
+export { lkgPathFor, clobberedPathFor, isCompanionPath } from "./paths.js";
+export { makeFingerprint, hashRaw } from "./fingerprint.js";
 
 // Re-export the v2 contract types so consumers don't need a direct
 // `@bic/v2-prototype` dep just for type imports.
@@ -36,5 +32,5 @@ export type {
   LKGTracker,
   ValidationIssue,
   ValidationResult,
-} from '@bic/v2-prototype';
-export { LKGErrorImpl } from '@bic/v2-prototype';
+} from "@bic/v2-prototype";
+export { LKGErrorImpl } from "@bic/v2-prototype";

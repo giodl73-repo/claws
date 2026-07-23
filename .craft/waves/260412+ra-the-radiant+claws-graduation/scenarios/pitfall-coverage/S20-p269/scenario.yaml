@@ -15,7 +15,10 @@ expect:
   prevention: "`claws check --types` runs cross-layer type compatibility tests. Platform manifest declares minimum npm version for deduplication guarantee. No type aliasing of shared package exports allowed across layers."
 
 simulate:
-  failures: ["Duplicate .d.ts resolution paths cause nominally different types that fail TypeScript assignment checks in consumers"]
+  failures:
+    [
+      "Duplicate .d.ts resolution paths cause nominally different types that fail TypeScript assignment checks in consumers",
+    ]
   halt: null
   budget: null
 

@@ -8,7 +8,7 @@ The stable public API is a single subpath: `@bic/claws-sdk/api`.
 Consumers import ONLY from here:
 
 ```ts
-import { initWorkspace, runDoctor, promoteSnapshot } from '@bic/claws-sdk/api';
+import { initWorkspace, runDoctor, promoteSnapshot } from "@bic/claws-sdk/api";
 ```
 
 All other subpaths (`/compile`, `/fleet`, `/relax`) are INTERNAL —
@@ -16,14 +16,14 @@ no backwards-compat guarantee across minor versions.
 
 ## Semver policy
 
-| Change | Version bump |
-|--------|--------------|
-| New public-API function | minor |
-| New optional param on existing function | minor |
-| New required param on existing function | major |
-| Removed function | major |
-| Changed error type / shape | major |
-| Internal refactor | patch |
+| Change                                  | Version bump |
+| --------------------------------------- | ------------ |
+| New public-API function                 | minor        |
+| New optional param on existing function | minor        |
+| New required param on existing function | major        |
+| Removed function                        | major        |
+| Changed error type / shape              | major        |
+| Internal refactor                       | patch        |
 
 ## What lives in `/api`
 

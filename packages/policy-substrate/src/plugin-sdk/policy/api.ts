@@ -14,13 +14,13 @@
  * @module @openclaw/plugin-sdk/policy/api
  */
 
-import type { OcAst } from '@openclaw/oc-path';
+import type { OcAst } from "@openclaw/oc-path";
 
 /**
  * Stable SDK version. Plugins authored against a known SDK declare
  * this in `requires.sdkVersion`; the host warns on major mismatch.
  */
-export const SDK_VERSION = '0.1.0';
+export const SDK_VERSION = "0.1.0";
 
 /**
  * One file the runner has been handed: name + path + raw + parsed
@@ -112,9 +112,7 @@ export interface RunExtractorsOptions<T> {
  * order; inner loop = specs in input order; per-spec values
  * preserve the order returned by `extract()`.
  */
-export function runExtractors<T>(
-  opts: RunExtractorsOptions<T>,
-): readonly ExtractorResult<T>[] {
+export function runExtractors<T>(opts: RunExtractorsOptions<T>): readonly ExtractorResult<T>[] {
   const out: ExtractorResult<T>[] = [];
   for (const file of opts.files) {
     if (opts.signal?.aborted) return out;
@@ -140,13 +138,13 @@ export function runExtractors<T>(
  * Mirrors the lint and doctor runners' matcher exactly.
  */
 function matchGlob(glob: string, name: string): boolean {
-  if (glob === name || glob === '*') return true;
-  let pattern = glob.replace(/[.+^$()|[\]\\]/g, '\\$&');
+  if (glob === name || glob === "*") return true;
+  let pattern = glob.replace(/[.+^$()|[\]\\]/g, "\\$&");
   pattern = pattern.replace(/\{([^{}]+)\}/g, (_m, body: string) => {
-    const alts = body.split(',').map((s) => s.trim());
-    return `(?:${alts.join('|')})`;
+    const alts = body.split(",").map((s) => s.trim());
+    return `(?:${alts.join("|")})`;
   });
-  pattern = pattern.replace(/\*/g, '.*');
-  const re = new RegExp('^' + pattern + '$');
+  pattern = pattern.replace(/\*/g, ".*");
+  const re = new RegExp("^" + pattern + "$");
   return re.test(name);
 }

@@ -19,12 +19,12 @@ claws build
 
 The compiler reads your workspace files (SOUL.md, AGENTS.md, TOOLS.md, claws.json), classifies every tool by risk level (R1-R5), compiles governance rules, and emits four artifacts:
 
-| Artifact | What it does |
-|----------|-------------|
-| `skills/claws-governance/SKILL.md` | L1 advisory -- natural-language governance instructions the agent reads in its prompt context |
+| Artifact                            | What it does                                                                                    |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `skills/claws-governance/SKILL.md`  | L1 advisory -- natural-language governance instructions the agent reads in its prompt context   |
 | `plugins/claws-governance/index.ts` | L2+L3 enforcement -- Gateway plugin that intercepts tool calls and blocks violations at runtime |
-| `exec-approvals.json` | L4 host-level backup -- configures which tools require human approval |
-| `lobster.compiled.yaml` | Governance-injected workflow DAG (only emitted if your workspace has a `lobster.yaml`) |
+| `exec-approvals.json`               | L4 host-level backup -- configures which tools require human approval                           |
+| `lobster.compiled.yaml`             | Governance-injected workflow DAG (only emitted if your workspace has a `lobster.yaml`)          |
 
 The advisory skill can be ignored by the agent. The enforcement plugin cannot -- it blocks tool calls via `before_tool_call` hooks before they execute.
 

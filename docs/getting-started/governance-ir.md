@@ -28,9 +28,7 @@ R5 (critical) rules **must** fail-closed. The type system makes it
 structurally impossible to assign `'open'` to `FailMode<5>`:
 
 ```typescript
-type FailMode<R extends RuleLevel> = R extends 5
-  ? 'closed'
-  : 'open' | 'closed';
+type FailMode<R extends RuleLevel> = R extends 5 ? "closed" : "open" | "closed";
 ```
 
 - `FailMode<5>` resolves to `'closed'` only.
@@ -63,18 +61,18 @@ produces the same IR (byte-for-byte, verified by SHA-256 hash).
 
 ## Key Types
 
-| Type | Location | Purpose |
-|------|----------|---------|
-| `GovernanceIR` | `claws-sdk/src/ir/governance-ir.ts` | Top-level pivot type |
-| `CapabilityManifest` | `claws-sdk/src/ir/capability-manifest.ts` | Declared capabilities |
-| `GovAnalysis` | `claws-sdk/src/ir/gov-analysis.ts` | Analysis results |
-| `ConflictReport` | `claws-sdk/src/ir/conflict-report.ts` | OBO + multi-constraint conflicts |
-| `FailMode<R>` | `claws-sdk/src/ir/fail-mode.ts` | Parameterized fail mode |
-| `MechanicalIntent` | `claws-sdk/src/ir/mechanical-intent.ts` | 5 enforcement actions |
+| Type                 | Location                                  | Purpose                          |
+| -------------------- | ----------------------------------------- | -------------------------------- |
+| `GovernanceIR`       | `claws-sdk/src/ir/governance-ir.ts`       | Top-level pivot type             |
+| `CapabilityManifest` | `claws-sdk/src/ir/capability-manifest.ts` | Declared capabilities            |
+| `GovAnalysis`        | `claws-sdk/src/ir/gov-analysis.ts`        | Analysis results                 |
+| `ConflictReport`     | `claws-sdk/src/ir/conflict-report.ts`     | OBO + multi-constraint conflicts |
+| `FailMode<R>`        | `claws-sdk/src/ir/fail-mode.ts`           | Parameterized fail mode          |
+| `MechanicalIntent`   | `claws-sdk/src/ir/mechanical-intent.ts`   | 5 enforcement actions            |
 
 All types are re-exported from `claws-sdk/src/ir/index.ts` for
 convenient access:
 
 ```typescript
-import type { GovernanceIR, ConflictReport } from '@bic/claws-sdk/ir';
+import type { GovernanceIR, ConflictReport } from "@bic/claws-sdk/ir";
 ```

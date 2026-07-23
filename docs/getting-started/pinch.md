@@ -81,12 +81,12 @@ claws pinch --staged --quiet
 
 ## Quick reference
 
-| Command | When to use it |
-|---------|---------------|
-| `claws pinch` | Quick check, any time |
-| `claws pinch --fix` | Auto-fix what can be fixed |
-| `claws pinch --staged` | Pre-commit hook |
-| `claws pinch --watch` | Live feedback while editing |
-| `claws pinch --strict` | CI, zero-tolerance mode |
+| Command                | When to use it              |
+| ---------------------- | --------------------------- |
+| `claws pinch`          | Quick check, any time       |
+| `claws pinch --fix`    | Auto-fix what can be fixed  |
+| `claws pinch --staged` | Pre-commit hook             |
+| `claws pinch --watch`  | Live feedback while editing |
+| `claws pinch --strict` | CI, zero-tolerance mode     |
 
 Pinch runs in under a second. Run it constantly.

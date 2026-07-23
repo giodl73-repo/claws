@@ -29,11 +29,11 @@ File ingest is the same flow with `before_workspace_file_ingest` and `beforeInge
 
 ## Decision vocabulary
 
-| Verb | Meaning |
-|------|---------|
-| `allow` | Proceed as-is. Optional `requiresExternalApproval: true` still escalates. |
-| `deny` | Reject with `reason`. No further processing; audited. |
-| `review` | Route to supervisor with a signed `approvalHandle`. Call stalls. |
+| Verb     | Meaning                                                                       |
+| -------- | ----------------------------------------------------------------------------- |
+| `allow`  | Proceed as-is. Optional `requiresExternalApproval: true` still escalates.     |
+| `deny`   | Reject with `reason`. No further processing; audited.                         |
+| `review` | Route to supervisor with a signed `approvalHandle`. Call stalls.              |
 | `modify` | Rewrite `args` (tool call) or `redirectPath` (file ingest) before proceeding. |
 
 Composition rule: `deny > review > modify > allow`. OC-7 merger makes `requireApproval` non-downgradable — once any provider sets it, it stays set for the decision lifetime, and the companion receives every `ApprovalDescriptor` the plugins emitted (conjunctive — all must be approved).
@@ -44,14 +44,14 @@ Per proposal §1.5 Threading:
 
 ```ts
 interface ApprovalHandle {
-  providerId: string;        // which provider emitted the handle
-  contentHash: string;       // sha256 of file bytes or tool args
-  sequenceNumber: bigint;    // per-providerId, per-snapshot; closes replay-across-handles
+  providerId: string; // which provider emitted the handle
+  contentHash: string; // sha256 of file bytes or tool args
+  sequenceNumber: bigint; // per-providerId, per-snapshot; closes replay-across-handles
   approverPrincipal: string; // expected approver identity
-  keyId: string;             // HMAC key identifier from the trust set
-  ttl: number;               // epoch-ms expiration
-  nonce: string;             // random 128-bit, unique within (keyId, snapshotId)
-  signature: string;         // HMAC over the canonicalized handle body
+  keyId: string; // HMAC key identifier from the trust set
+  ttl: number; // epoch-ms expiration
+  nonce: string; // random 128-bit, unique within (keyId, snapshotId)
+  signature: string; // HMAC over the canonicalized handle body
 }
 ```
 
@@ -65,20 +65,21 @@ Per the CL-11 amendment:
 
 ```ts
 interface ApprovalEntry {
-  type: 'approval';
-  correlationId: string;     // matches DecisionEntry.correlationId
+  type: "approval";
+  correlationId: string; // matches DecisionEntry.correlationId
   handleId: string;
   approverPrincipal: string;
-  outcome: 'approve' | 'deny' | 'timeout' | 'rejected';
-  invalidReason?:            // present when outcome === 'rejected'
-    | 'provider-id-mismatch'
-    | 'content-hash-mismatch'
-    | 'sequence-rollback'
-    | 'principal-mismatch'
-    | 'unknown-keyId'
-    | 'ttl-expired'
-    | 'nonce-reuse'
-    | 'redirect-path-escape';
+  outcome: "approve" | "deny" | "timeout" | "rejected";
+  invalidReason?:
+    // present when outcome === 'rejected'
+    | "provider-id-mismatch"
+    | "content-hash-mismatch"
+    | "sequence-rollback"
+    | "principal-mismatch"
+    | "unknown-keyId"
+    | "ttl-expired"
+    | "nonce-reuse"
+    | "redirect-path-escape";
 }
 ```
 

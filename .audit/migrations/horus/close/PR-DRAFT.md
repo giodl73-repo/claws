@@ -80,12 +80,12 @@ interface HostAdapter {
 Four methods, four adapters, four `GRD/SC-*.md` scenarios that prove the shape
 holds for each host:
 
-| Adapter | Host | Wire | Identity signal | Approval sink |
-|---------|------|------|-----------------|---------------|
-| `OpenClawAdapter` | OpenClaw core (in-process hook) | direct call | HostContext | `InMemorySink` |
-| `LobsterAdapter` | Lobster editor MCP | stdio | MCP session | bespoke MCP channel |
-| `AetherAdapter` | Aether (Workday-grade gateway) | HTTPS / gRPC | mTLS subject CN | gRPC streaming sink |
-| `ClawsServiceAdapter` | `claws serve` standalone | HTTP + SSE | bearer / session cookie | SSE channel |
+| Adapter               | Host                            | Wire         | Identity signal         | Approval sink       |
+| --------------------- | ------------------------------- | ------------ | ----------------------- | ------------------- |
+| `OpenClawAdapter`     | OpenClaw core (in-process hook) | direct call  | HostContext             | `InMemorySink`      |
+| `LobsterAdapter`      | Lobster editor MCP              | stdio        | MCP session             | bespoke MCP channel |
+| `AetherAdapter`       | Aether (Workday-grade gateway)  | HTTPS / gRPC | mTLS subject CN         | gRPC streaming sink |
+| `ClawsServiceAdapter` | `claws serve` standalone        | HTTP + SSE   | bearer / session cookie | SSE channel         |
 
 The harness wires `enforce()` against each adapter in turn, fires a real review
 decision, lets the companion mock respond, verifies the audit-chain cross-links
@@ -131,14 +131,14 @@ in a first-failing order** before accepting the associated `ApprovalEntry`:
 
 ```ts
 interface ApprovalHandle {
-  readonly providerId: string;       // 1. which GuardrailProvider
-  readonly contentHash: string;      // 2. sha256 over canonicalized args
-  readonly sequenceNumber: number;   // 3. per-chain monotonic
-  readonly approverPrincipal: string;// 4. who can approve
-  readonly keyId: string;            // 5. HMAC key identifier
-  readonly ttl: number;              // 6. absolute epoch ms
-  readonly nonce: string;            // 7. 32-byte base64url, one-shot
-  readonly signature: string;        // HMAC-SHA256 over 1..7
+  readonly providerId: string; // 1. which GuardrailProvider
+  readonly contentHash: string; // 2. sha256 over canonicalized args
+  readonly sequenceNumber: number; // 3. per-chain monotonic
+  readonly approverPrincipal: string; // 4. who can approve
+  readonly keyId: string; // 5. HMAC key identifier
+  readonly ttl: number; // 6. absolute epoch ms
+  readonly nonce: string; // 7. 32-byte base64url, one-shot
+  readonly signature: string; // HMAC-SHA256 over 1..7
 }
 ```
 
@@ -247,16 +247,16 @@ Retired specs stay in place at `docs/specs/CL-*.md` with explicit
 `Status: Retired` headers + successor pointers. They are reference-only;
 content is preserved for provenance + historical-discussion value.
 
-| Retired | Successor |
-|---------|-----------|
-| CL-03 runtime-enforcement | `guardrails/specs/GR-guardrails.md` + `GRR-runtime.md` |
-| CL-04 compilation-pipeline | `policy/specs/PO-policy.md` + `POI-policy-ir.md` + `POC-compiler.md` |
-| CL-06 platform-ecosystem | per-package primary specs |
-| CL-07 deep-integration | `guardrails/specs/GRG` + `GRD` + `GRF` + `snap/specs/SNP` (Horus amendments A+B merged pulse 73) |
-| CL-08 freemium-boundary | `sdk/specs/SK-sdk.md` + `upstream/specs/UG-upstream.md` |
-| CL-09 oc-workspace-format | `workspace/specs/WS` + `WSA` + `WSE` + `WSP` + `WSC` |
-| CL-12 approval-event-schema | `guardrails/specs/GRA-audit-chain.md` |
-| CL-14 emitter-architecture | `workspace/specs/WSE-emitter.md` |
+| Retired                     | Successor                                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------------------------ |
+| CL-03 runtime-enforcement   | `guardrails/specs/GR-guardrails.md` + `GRR-runtime.md`                                           |
+| CL-04 compilation-pipeline  | `policy/specs/PO-policy.md` + `POI-policy-ir.md` + `POC-compiler.md`                             |
+| CL-06 platform-ecosystem    | per-package primary specs                                                                        |
+| CL-07 deep-integration      | `guardrails/specs/GRG` + `GRD` + `GRF` + `snap/specs/SNP` (Horus amendments A+B merged pulse 73) |
+| CL-08 freemium-boundary     | `sdk/specs/SK-sdk.md` + `upstream/specs/UG-upstream.md`                                          |
+| CL-09 oc-workspace-format   | `workspace/specs/WS` + `WSA` + `WSE` + `WSP` + `WSC`                                             |
+| CL-12 approval-event-schema | `guardrails/specs/GRA-audit-chain.md`                                                            |
+| CL-14 emitter-architecture  | `workspace/specs/WSE-emitter.md`                                                                 |
 
 **Promoted** from pulse-73 drafts to canonical v1.0 specs:
 
@@ -343,14 +343,14 @@ resolves. Idempotent — second run writes zero files.
 
 ## CI wiring (6 workflows on `.github/workflows/`)
 
-| Workflow | Scope | Matrix |
-|----------|-------|--------|
-| `ci.yml` | build + `npm test` + per-package tsc + CLI boot smoke | ubuntu + windows |
-| `acceptance.yml` | L3: unit/integration/e2e/accept on packages/claws + residue-grep | ubuntu/windows/macos × node 20/22 |
-| `canonicalizer-ci.yml` | 3-consumer byte-identity + parallel-canonicalizer guard + canonical-bytes artifact | ubuntu/windows/macos |
-| `no-craftworks.yml` | 3-pass residue-grep (CL-13 v1.7) with auto-comment on violation | ubuntu |
-| `test-e2e.yml` | full test/e2e: unit + integration + scenario + accept | ubuntu/windows/macos |
-| **`repo-ops.yml`** (NEW) | **CP-8 tooling: 60 tests hard + atoms-oracle live-gate hard + repo-ops/verify-links informational** | **ubuntu + windows** |
+| Workflow                 | Scope                                                                                               | Matrix                            |
+| ------------------------ | --------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `ci.yml`                 | build + `npm test` + per-package tsc + CLI boot smoke                                               | ubuntu + windows                  |
+| `acceptance.yml`         | L3: unit/integration/e2e/accept on packages/claws + residue-grep                                    | ubuntu/windows/macos × node 20/22 |
+| `canonicalizer-ci.yml`   | 3-consumer byte-identity + parallel-canonicalizer guard + canonical-bytes artifact                  | ubuntu/windows/macos              |
+| `no-craftworks.yml`      | 3-pass residue-grep (CL-13 v1.7) with auto-comment on violation                                     | ubuntu                            |
+| `test-e2e.yml`           | full test/e2e: unit + integration + scenario + accept                                               | ubuntu/windows/macos              |
+| **`repo-ops.yml`** (NEW) | **CP-8 tooling: 60 tests hard + atoms-oracle live-gate hard + repo-ops/verify-links informational** | **ubuntu + windows**              |
 
 The `repo-ops.yml` workflow has three jobs:
 
@@ -370,39 +370,39 @@ The `repo-ops.yml` workflow has three jobs:
 
 ## Stats
 
-| Metric | Count |
-|--------|-------|
-| Pulses committed | 77 (CP-1..CP-6 + CP-8; CP-7 moved to Wepwawet) |
-| Checkpoints landed | 7 |
-| Per-package doc dirs seeded | 14 (5 openclaw-* + 6 claws-* + 3 domains) |
-| Atoms in registry | 94 |
-| Oracle orphans (all 4 invariants) | 0 |
-| CL-NN specs retired | 8 |
-| CL-NN specs promoted | 2 (CL-15, CL-16) |
-| Amendments merged (pulse 73) | 5 drafts → 3 canonical specs |
-| New test cases (CP-8 tooling) | 60 (27 repo-ops + 9 atoms-oracle + 6 doc-sync + 18 guide-deploy) |
-| Scenarios landed this wave | 17 (3 WSP + 3 WSC + 4 GRD + 3 SNP + 4 audit-chain/conformance) |
-| HostAdapter shapes proven | 4 (OpenClaw, Lobster, Aether, ClawsService) |
-| CI workflows | 6 (5 existing + 1 new `repo-ops.yml`) |
-| `@craftworks/*` runtime imports | 0 (CI-guarded) |
-| Stale `clawc` references | 0 outside retained CL-NN archive |
+| Metric                            | Count                                                            |
+| --------------------------------- | ---------------------------------------------------------------- |
+| Pulses committed                  | 77 (CP-1..CP-6 + CP-8; CP-7 moved to Wepwawet)                   |
+| Checkpoints landed                | 7                                                                |
+| Per-package doc dirs seeded       | 14 (5 openclaw-* + 6 claws-* + 3 domains)                        |
+| Atoms in registry                 | 94                                                               |
+| Oracle orphans (all 4 invariants) | 0                                                                |
+| CL-NN specs retired               | 8                                                                |
+| CL-NN specs promoted              | 2 (CL-15, CL-16)                                                 |
+| Amendments merged (pulse 73)      | 5 drafts → 3 canonical specs                                     |
+| New test cases (CP-8 tooling)     | 60 (27 repo-ops + 9 atoms-oracle + 6 doc-sync + 18 guide-deploy) |
+| Scenarios landed this wave        | 17 (3 WSP + 3 WSC + 4 GRD + 3 SNP + 4 audit-chain/conformance)   |
+| HostAdapter shapes proven         | 4 (OpenClaw, Lobster, Aether, ClawsService)                      |
+| CI workflows                      | 6 (5 existing + 1 new `repo-ops.yml`)                            |
+| `@craftworks/*` runtime imports   | 0 (CI-guarded)                                                   |
+| Stale `clawc` references          | 0 outside retained CL-NN archive                                 |
 
 ---
 
 ## Security posture
 
-| Surface | Mitigation |
-|---------|------------|
-| R5 fail-closed | Pre-merge registry guard rejects any R5 tool with `failMode: 'open'` at policy-compile time; runtime backstop denies at invocation |
-| Approval handle | 7-tuple binding validator checks providerId / contentHash / sequenceNumber / approverPrincipal / keyId / ttl / nonce in first-failing order; HMAC-SHA256 signature over canonical bytes |
-| Audit chain | Hash-linked entries + correlationId cross-links (decision → approval → execution); 3 granular invalidReason codes for verifier findings (correlation-mismatch, chain-gap, hash-mismatch) |
-| Nonce scope | Per-(keyId, snapshotId) consume-once semantics; replay across snapshots detected by audit cluster inspection |
-| File-ingest redirect | `redirectPath` re-validated by `parseOcUri` + `resolveFsPath` at runtime — provider output never trusted |
-| `oc://` URI path | 12 rejection vectors caught at three independent layers (parser, provider re-validation, runtime symlink check) |
-| Canonicalizer byte-identity | CI matrix enforces ubuntu/windows/macos agreement on 20-vector fixture; divergence blocks merge |
-| TOCTOU race | `resolveFsPath` runs inside syscall boundary with O_NOFOLLOW / REPARSE_POINT flags on platforms that support them |
-| Trust-set reload | fs.watch failure path keeps prior set active — malformed reload NEVER leaves guardrails without a trust set |
-| No-craftworks gate | 3-pass residue-grep CI gate + homoglyph detection (NFKC normalise + ASCII fold) catches Cyrillic-а attempts |
+| Surface                     | Mitigation                                                                                                                                                                               |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R5 fail-closed              | Pre-merge registry guard rejects any R5 tool with `failMode: 'open'` at policy-compile time; runtime backstop denies at invocation                                                       |
+| Approval handle             | 7-tuple binding validator checks providerId / contentHash / sequenceNumber / approverPrincipal / keyId / ttl / nonce in first-failing order; HMAC-SHA256 signature over canonical bytes  |
+| Audit chain                 | Hash-linked entries + correlationId cross-links (decision → approval → execution); 3 granular invalidReason codes for verifier findings (correlation-mismatch, chain-gap, hash-mismatch) |
+| Nonce scope                 | Per-(keyId, snapshotId) consume-once semantics; replay across snapshots detected by audit cluster inspection                                                                             |
+| File-ingest redirect        | `redirectPath` re-validated by `parseOcUri` + `resolveFsPath` at runtime — provider output never trusted                                                                                 |
+| `oc://` URI path            | 12 rejection vectors caught at three independent layers (parser, provider re-validation, runtime symlink check)                                                                          |
+| Canonicalizer byte-identity | CI matrix enforces ubuntu/windows/macos agreement on 20-vector fixture; divergence blocks merge                                                                                          |
+| TOCTOU race                 | `resolveFsPath` runs inside syscall boundary with O_NOFOLLOW / REPARSE_POINT flags on platforms that support them                                                                        |
+| Trust-set reload            | fs.watch failure path keeps prior set active — malformed reload NEVER leaves guardrails without a trust set                                                                              |
+| No-craftworks gate          | 3-pass residue-grep CI gate + homoglyph detection (NFKC normalise + ASCII fold) catches Cyrillic-а attempts                                                                              |
 
 ---
 
@@ -433,15 +433,15 @@ The `repo-ops.yml` workflow has three jobs:
 
 ## Evidence (`.audit/migrations/horus/close/`)
 
-| File | Pulse | What it captures |
-|------|-------|------------------|
-| `spec-merge-evidence.json` | 73 | 5 drafts → 3 canonical specs with version bumps |
-| `guide-rewrite-evidence.json` | 74 | 18 guides deployed; per-guide source+dest SHAs + rewrite rules |
-| `doctor-check-docs-output.txt` | 74 | `claws doctor` captured output |
-| `atoms-oracle-sweep-evidence.json` | 75 | 94 atoms, 0 orphans, per-package breakdown |
-| `index-reconciliation-evidence.json` | 76 | Indexes updated + tooling landed + tests passed |
-| `PR-DRAFT.md` | 77 | this PR body |
-| `l3-acceptance-evidence.json` | 77 | Horus-new tooling gate outcome |
+| File                                 | Pulse | What it captures                                               |
+| ------------------------------------ | ----- | -------------------------------------------------------------- |
+| `spec-merge-evidence.json`           | 73    | 5 drafts → 3 canonical specs with version bumps                |
+| `guide-rewrite-evidence.json`        | 74    | 18 guides deployed; per-guide source+dest SHAs + rewrite rules |
+| `doctor-check-docs-output.txt`       | 74    | `claws doctor` captured output                                 |
+| `atoms-oracle-sweep-evidence.json`   | 75    | 94 atoms, 0 orphans, per-package breakdown                     |
+| `index-reconciliation-evidence.json` | 76    | Indexes updated + tooling landed + tests passed                |
+| `PR-DRAFT.md`                        | 77    | this PR body                                                   |
+| `l3-acceptance-evidence.json`        | 77    | Horus-new tooling gate outcome                                 |
 
 ---
 
@@ -492,8 +492,8 @@ or later, never by re-opening Horus.
 
 ---
 
-*77 pulses. 7 checkpoints. 14 per-package doc trees. 94 atoms. 0 orphans.
+_77 pulses. 7 checkpoints. 14 per-package doc trees. 94 atoms. 0 orphans.
 4 HostAdapter shapes proven. 60 new tests. 8 specs retired, 2 promoted.
-Zero craftworks refs. The binary is claws.*
+Zero craftworks refs. The binary is claws._
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

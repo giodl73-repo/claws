@@ -335,7 +335,15 @@ Notes:
         "profiles": {
           "allow": ["minimal"],
         },
-        "denyTools": ["group:runtime", "group:fs", "exec", "process", "write", "edit", "apply_patch"],
+        "denyTools": [
+          "group:runtime",
+          "group:fs",
+          "exec",
+          "process",
+          "write",
+          "edit",
+          "apply_patch",
+        ],
       },
       "agents": {
         "workspace": {

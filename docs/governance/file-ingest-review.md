@@ -27,23 +27,20 @@ Per the CL-07 amendment:
 ```ts
 interface FileIngestProvider {
   providerId: string;
-  beforeIngest(
-    event: FileIngestEvent,
-    ctx: AuthorizationContext
-  ): Promise<AuthorizationDecision>;
+  beforeIngest(event: FileIngestEvent, ctx: AuthorizationContext): Promise<AuthorizationDecision>;
   afterIngest?(
     event: FileIngestEvent,
     decision: AuthorizationDecision,
-    ctx: AuthorizationContext
+    ctx: AuthorizationContext,
   ): Promise<void>;
 }
 
 interface FileIngestEvent {
-  path: string;            // oc:// URI
-  operation: 'read' | 'write';
-  author: string;          // OC-populated; provider treats read-only
+  path: string; // oc:// URI
+  operation: "read" | "write";
+  author: string; // OC-populated; provider treats read-only
   sessionId: string;
-  previousHash?: string;   // sha256 of prior content (per OC-3)
+  previousHash?: string; // sha256 of prior content (per OC-3)
 }
 ```
 
@@ -53,11 +50,11 @@ interface FileIngestEvent {
 
 Same four verbs as tool execution:
 
-| Verb | File-ingest semantics |
-|------|----------------------|
-| `allow` | File enters agent context as-is. |
-| `deny` | File blocked; `DecisionEntry` written with `reason`. |
-| `review` | `approvalHandle` signed; companion receives request; call stalls. |
+| Verb     | File-ingest semantics                                                               |
+| -------- | ----------------------------------------------------------------------------------- |
+| `allow`  | File enters agent context as-is.                                                    |
+| `deny`   | File blocked; `DecisionEntry` written with `reason`.                                |
+| `review` | `approvalHandle` signed; companion receives request; call stalls.                   |
 | `modify` | `redirectPath` routes a pending write to `.openclaw/.stage/`. **File-ingest only.** |
 
 Tool calls' `modify` rewrites args. File ingest's `modify` redirects the write. Same verb, different payload.
@@ -80,6 +77,7 @@ Tool calls' `modify` rewrites args. File ingest's `modify` redirects the write. 
 ```
 
 Rejection modes:
+
 - `../` traversal outside the workspace stage
 - Absolute paths (`/etc/passwd`, `C:\Windows\System32\...`)
 - Symlink targets that escape the stage dir

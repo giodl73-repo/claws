@@ -6,12 +6,7 @@
  * all actions on a resource.
  */
 
-import type {
-  AccessDecision,
-  TokenIdentity,
-  Permission,
-  Role,
-} from './types.js';
+import type { AccessDecision, TokenIdentity, Permission, Role } from "./types.js";
 
 export interface RoleStore {
   roles: Map<string, Role>;
@@ -31,11 +26,7 @@ export function addRole(store: RoleStore, role: Role): RoleStore {
   return { ...store, roles };
 }
 
-export function mapGroup(
-  store: RoleStore,
-  group: string,
-  roleNames: string[],
-): RoleStore {
+export function mapGroup(store: RoleStore, group: string, roleNames: string[]): RoleStore {
   const groupMappings = new Map(store.groupMappings);
   groupMappings.set(group, roleNames);
   return { ...store, groupMappings };
@@ -69,7 +60,7 @@ export function checkAccess(roles: Role[], required: Permission): AccessDecision
     for (const perm of role.permissions) {
       if (
         perm.resource === required.resource &&
-        (perm.action === required.action || perm.action === '*')
+        (perm.action === required.action || perm.action === "*")
       ) {
         return {
           granted: true,

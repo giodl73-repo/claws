@@ -16,16 +16,16 @@ npm i @bic/openclaw-workspace
 ## Parse
 
 ```ts
-import { parse } from '@bic/openclaw-workspace/parse';
+import { parse } from "@bic/openclaw-workspace/parse";
 
 const ast = parse({
-  'AGENTS.md': fs.readFileSync('AGENTS.md'),
-  'TOOLS.md': fs.readFileSync('TOOLS.md'),
+  "AGENTS.md": fs.readFileSync("AGENTS.md"),
+  "TOOLS.md": fs.readFileSync("TOOLS.md"),
   // ... the other 7 bootstrap files, if present
 });
 
 if (ast.toolsMd === null) {
-  throw new Error('workspace missing required TOOLS.md');
+  throw new Error("workspace missing required TOOLS.md");
 }
 ```
 
@@ -36,7 +36,7 @@ in `ast.unknownFiles` so they survive round-trip.
 ## Walk
 
 ```ts
-import { walkAst } from '@bic/openclaw-workspace/ast';
+import { walkAst } from "@bic/openclaw-workspace/ast";
 
 walkAst(ast, {
   visitToolsMd: (tools) => {
@@ -50,9 +50,9 @@ walkAst(ast, {
 ## Resolve a path
 
 ```ts
-import { parseOcUri, resolveFsPath } from '@bic/openclaw-workspace/path';
+import { parseOcUri, resolveFsPath } from "@bic/openclaw-workspace/path";
 
-const ocPath = parseOcUri('oc://skills/my-skill');
+const ocPath = parseOcUri("oc://skills/my-skill");
 const absPath = resolveFsPath(ocPath, workspaceRoot);
 // absPath is guaranteed to be under workspaceRoot (symlink-followed).
 ```
@@ -64,7 +64,7 @@ const absPath = resolveFsPath(ocPath, workspaceRoot);
 ## Emit
 
 ```ts
-import { emit } from '@bic/openclaw-workspace/emit';
+import { emit } from "@bic/openclaw-workspace/emit";
 
 const files = emit(ast);
 for (const [name, bytes] of Object.entries(files)) {

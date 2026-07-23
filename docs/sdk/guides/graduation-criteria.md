@@ -10,16 +10,16 @@ exposed on the `/api` facade — use this checklist.
 ## Checklist
 
 - [ ] **Public-API shape settled**: no breaking changes in the last
-  4 weeks of internal-consumer use
+      4 weeks of internal-consumer use
 - [ ] **Test coverage**: per-file statements/branches/functions/lines
-  all ≥ 95/90/95/95
+      all ≥ 95/90/95/95
 - [ ] **Scenarios**: every new decision-table entry has a scenario
-  (L1 integration OR L2 e2e)
+      (L1 integration OR L2 e2e)
 - [ ] **Sub-spec update**: `SKA-public-api.md` reflects the new
-  public-API entry
+      public-API entry
 - [ ] **CHANGELOG**: entry under "Graduated" section
 - [ ] **Internal consumer migration**: all internal callers of the
-  internal-only import have switched to the `/api` facade
+      internal-only import have switched to the `/api` facade
 
 ## Review process
 

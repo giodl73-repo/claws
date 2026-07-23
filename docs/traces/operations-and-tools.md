@@ -53,7 +53,7 @@ When an agent uses a tool that acts on behalf of the user:
        │
        ├── [OBO Check]
        │     Read USER.md authority grants from GovernanceIR
-       │     Agent authorized for "email" scope? 
+       │     Agent authorized for "email" scope?
        │
        │     ├── YES: continue to elicitation
        │     │

@@ -44,13 +44,15 @@ These values are validated at build time. If your handler acts on behalf of the 
 Use the `skill()` factory from `@bic/claws-skill-kit`:
 
 ```typescript
-import { skill } from '@bic/claws-skill-kit';
+import { skill } from "@bic/claws-skill-kit";
 
 export default skill({
-  name: 'weather-lookup',
-  risk: 'R2', obo: 'none', data: 'PUBLIC',
+  name: "weather-lookup",
+  risk: "R2",
+  obo: "none",
+  data: "PUBLIC",
   handler: async (ctx) => {
-    const city = ctx.input.get('city');
+    const city = ctx.input.get("city");
     return { forecast: await fetchWeather(city) };
   },
 });
@@ -63,13 +65,13 @@ For higher-risk skills, use decorators (`@obo`, `@audit`, `@budget`, `@classify`
 Test the skill without a running OC Gateway:
 
 ```typescript
-import { MockGateway } from '@bic/claws-skill-kit/testing';
-import weatherLookup from './handler';
+import { MockGateway } from "@bic/claws-skill-kit/testing";
+import weatherLookup from "./handler";
 
 const gw = new MockGateway();
-gw.mock('fetchWeather', { temp: 72 });
+gw.mock("fetchWeather", { temp: 72 });
 
-const result = await gw.run(weatherLookup, { city: 'Seattle' });
+const result = await gw.run(weatherLookup, { city: "Seattle" });
 expect(result.forecast.temp).toBe(72);
 expect(gw.auditLog).toHaveLength(1);
 ```
@@ -98,10 +100,10 @@ This executes four steps in sequence: governance check (`claws check` -- all rul
 
 The published skill receives a badge based on its governance tier:
 
-| Tier | Badge shows |
-|------|------------|
-| DECLARED | Risk + OBO + data classification |
-| TYPED | + type-safe handler |
+| Tier     | Badge shows                         |
+| -------- | ----------------------------------- |
+| DECLARED | Risk + OBO + data classification    |
+| TYPED    | + type-safe handler                 |
 | VERIFIED | + signed manifest + dependency scan |
 
 ## What to do next

@@ -8,11 +8,11 @@ Governance artifacts (CGR chains, sealed snapshots, compliance evidence) are sig
 
 ## Key Types
 
-| Key | Algorithm | Purpose |
-|-----|-----------|---------|
-| Signing key | Ed25519 | CGR chain seals, snapshot signatures |
-| Encryption key | AES-256-GCM | Secrets vault, credential storage |
-| KDF key | Argon2id | Deriving encryption keys from passwords |
+| Key            | Algorithm   | Purpose                                 |
+| -------------- | ----------- | --------------------------------------- |
+| Signing key    | Ed25519     | CGR chain seals, snapshot signatures    |
+| Encryption key | AES-256-GCM | Secrets vault, credential storage       |
+| KDF key        | Argon2id    | Deriving encryption keys from passwords |
 
 ## Key Storage
 

@@ -7,7 +7,7 @@
  * maps one to the other.
  */
 
-export type IdentityProtocol = 'oidc' | 'saml';
+export type IdentityProtocol = "oidc" | "saml";
 
 export interface TokenPayload {
   sub: string;

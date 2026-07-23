@@ -5,24 +5,24 @@
  * incorporates the previous event's hash, creating a tamper-evident chain.
  */
 
-import { createHmac, randomUUID } from 'node:crypto';
-import { canonicalize } from '@bic/openclaw-workspace/canonicalize';
-import type { AuditEvent, AuditQuery, PruneResult } from './types.js';
+import { createHmac, randomUUID } from "node:crypto";
+import { canonicalize } from "@bic/openclaw-workspace/canonicalize";
+import type { AuditEvent, AuditQuery, PruneResult } from "./types.js";
 
 /** Genesis hash — the previousHash for the first event in a chain. */
-export const GENESIS_HASH = '0'.repeat(64);
+export const GENESIS_HASH = "0".repeat(64);
 
 const HMAC_FIELDS = [
-  'id',
-  'timestamp',
-  'source',
-  'actor',
-  'action',
-  'target',
-  'scope',
-  'outcome',
-  'reason',
-  'previousHash',
+  "id",
+  "timestamp",
+  "source",
+  "actor",
+  "action",
+  "target",
+  "scope",
+  "outcome",
+  "reason",
+  "previousHash",
 ] as const;
 
 /**
@@ -31,20 +31,20 @@ const HMAC_FIELDS = [
  * so audit hashes are byte-identical across every consumer of the peer.
  */
 export function computeHmac(
-  event: Omit<AuditEvent, 'hash'>,
+  event: Omit<AuditEvent, "hash">,
   previousHash: string,
   hmacKey: Buffer,
 ): string {
   const hashInput: Record<string, unknown> = { previousHash };
   for (const key of HMAC_FIELDS) {
-    if (key === 'previousHash') continue;
+    if (key === "previousHash") continue;
     const value = event[key as keyof typeof event];
     if (value !== undefined) {
       hashInput[key] = value;
     }
   }
   const payload = canonicalize(hashInput);
-  return createHmac('sha256', hmacKey).update(payload).digest('hex');
+  return createHmac("sha256", hmacKey).update(payload).digest("hex");
 }
 
 /** In-memory chain state. */
@@ -59,7 +59,7 @@ export function createChainStore(): ChainStore {
 }
 
 /** Fields required to append an event. */
-export type AppendInput = Omit<AuditEvent, 'id' | 'hash' | 'previousHash'>;
+export type AppendInput = Omit<AuditEvent, "id" | "hash" | "previousHash">;
 
 /**
  * Append an event to the chain.
@@ -72,7 +72,7 @@ export function append(
   const id = randomUUID();
   const previousHash = store.latestHash;
 
-  const eventBase: Omit<AuditEvent, 'hash'> = {
+  const eventBase: Omit<AuditEvent, "hash"> = {
     ...input,
     id,
     previousHash,

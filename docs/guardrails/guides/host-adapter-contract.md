@@ -25,12 +25,12 @@ core. See [GRD § Method semantics](../specs/GRD-host-adapter.md).
 
 ## 4 concrete adapters
 
-| Adapter | Host | Wire |
-|---------|------|------|
-| `OpenClawAdapter` | OpenClaw core | in-process |
-| `LobsterAdapter` | Lobster editor MCP | MCP over stdio |
-| `AetherAdapter` | Aether gateway | HTTPS / gRPC |
-| `ClawsServiceAdapter` | claws-service | HTTP + SSE |
+| Adapter               | Host               | Wire           |
+| --------------------- | ------------------ | -------------- |
+| `OpenClawAdapter`     | OpenClaw core      | in-process     |
+| `LobsterAdapter`      | Lobster editor MCP | MCP over stdio |
+| `AetherAdapter`       | Aether gateway     | HTTPS / gRPC   |
+| `ClawsServiceAdapter` | claws-service      | HTTP + SSE     |
 
 Scenarios for each adapter live in [../scenarios/GRD/](../scenarios/GRD/).
 

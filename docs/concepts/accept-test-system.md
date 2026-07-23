@@ -66,15 +66,15 @@ The top-level `scenario.yaml` schema is permissive — `z.record(z.string(), z.u
 
 Each runner is a semantic name — it describes the behaviour being exercised, not the plan that introduced it. Renaming or re-scoping a plan never renames a runner.
 
-| Runner             | Exercises                                                                 |
-|--------------------|---------------------------------------------------------------------------|
-| `compile-sim`       | Generator round-trip: `claws policy generate` → emitted artifacts → canonicalized re-emit produces byte-identical output. Used for `compile-roundtrip`, `atom-scaffold-roundtrip`. |
+| Runner              | Exercises                                                                                                                                                                              |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `compile-sim`       | Generator round-trip: `claws policy generate` → emitted artifacts → canonicalized re-emit produces byte-identical output. Used for `compile-roundtrip`, `atom-scaffold-roundtrip`.     |
 | `e2e-loop-sim`      | Full decide/track/enforce+review loop: provider `preAuthorize`, snap lifecycle, generated plugin, audit chain verification. Used for `governance-decision`, `provider-lifecycle-init`. |
-| `approval-flow-sim` | Approval-handle lifecycle: 8-field binding, `ApprovalEntry.outcome`, envelope stickiness. Used for `tool-at-risk-approval`, `file-ingest-review`. |
-| `host-shape-sim`    | Preset matrix: same behavioural suite under openclaw / lobster / aether host shapes. Used for `preset-matrix`, `tenant-isolation`. |
-| `pinch-sim`         | Rule-level spot-checks — single pinch points (one rule, one input, one expected decision). Used for narrow regression tests. |
-| `emit-sim`          | Artifact validation: does the emitted policy-ir.json / gateway-plugin.ts / audit-manifest.json match its schema + content rules? |
-| `security-sim`      | A2A trust, injection defense, provenance escalation. Used for `security-provenance`. |
+| `approval-flow-sim` | Approval-handle lifecycle: 8-field binding, `ApprovalEntry.outcome`, envelope stickiness. Used for `tool-at-risk-approval`, `file-ingest-review`.                                      |
+| `host-shape-sim`    | Preset matrix: same behavioural suite under openclaw / lobster / aether host shapes. Used for `preset-matrix`, `tenant-isolation`.                                                     |
+| `pinch-sim`         | Rule-level spot-checks — single pinch points (one rule, one input, one expected decision). Used for narrow regression tests.                                                           |
+| `emit-sim`          | Artifact validation: does the emitted policy-ir.json / gateway-plugin.ts / audit-manifest.json match its schema + content rules?                                                       |
+| `security-sim`      | A2A trust, injection defense, provenance escalation. Used for `security-provenance`.                                                                                                   |
 
 Each runner ships with a typed Zod schema for its `expect` block (`src/accept-runner/schemas/{runner}.schema.ts`). Scenarios load through the dispatcher, which selects the schema by looking up the runner via the series→runner mapping in `manifest.yaml`.
 
@@ -82,7 +82,7 @@ Each runner ships with a typed Zod schema for its `expect` block (`src/accept-ru
 
 Pre-Horus, craftworks had runners whose names named the plan that built them — `harness-sim`, `approval-sim`, `preset-sim`. When plan 4 renamed, every atom referencing `harness-sim` needed a coordinated rewrite. That's cascading drift.
 
-Semantic names — `e2e-loop-sim`, `approval-flow-sim`, `host-shape-sim` — describe the *behaviour*. Plan 4 builds the harness that `e2e-loop-sim` uses; if plan 4 renames, the runner name is unchanged because the behaviour is unchanged. This is why the Horus rename was load-bearing: `fleet-sim` was dropped (no downstream behaviour to test), and the other three runners were renamed to match their semantic function once and for all.
+Semantic names — `e2e-loop-sim`, `approval-flow-sim`, `host-shape-sim` — describe the _behaviour_. Plan 4 builds the harness that `e2e-loop-sim` uses; if plan 4 renames, the runner name is unchanged because the behaviour is unchanged. This is why the Horus rename was load-bearing: `fleet-sim` was dropped (no downstream behaviour to test), and the other three runners were renamed to match their semantic function once and for all.
 
 ## The `--dry-run-drop` flag
 
@@ -119,11 +119,11 @@ Forward-only sweeps miss renamed atoms that left their old scenario dir behind. 
 
 ## Runtime budgets per tier
 
-| Tier | What | Budget |
-|------|------|--------|
-| L0 unit | Per-runner schema validation, manifest loader, scenario loader | < 500ms total |
-| L1 integration | Real scenario tree loaded; fixture copy; no providers wired | < 2s |
-| L2 e2e (accept-runner scope) | Full runner with mocked layers | < 5s on ~350-scenario tree |
+| Tier                         | What                                                           | Budget                     |
+| ---------------------------- | -------------------------------------------------------------- | -------------------------- |
+| L0 unit                      | Per-runner schema validation, manifest loader, scenario loader | < 500ms total              |
+| L1 integration               | Real scenario tree loaded; fixture copy; no providers wired    | < 2s                       |
+| L2 e2e (accept-runner scope) | Full runner with mocked layers                                 | < 5s on ~350-scenario tree |
 
 `--check accept` (harness-less accept-runner invocation) shares the L1 budget. Running the full accept suite via the e2e harness is governed by plan 4's harness budgets, not this gate.
 

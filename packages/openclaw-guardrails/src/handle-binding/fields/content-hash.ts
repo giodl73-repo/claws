@@ -1,4 +1,4 @@
-import type { InvalidReason } from '../types.js';
+import type { InvalidReason } from "../types.js";
 
 export interface ContentHashInput {
   readonly handleContentHash: string;
@@ -11,7 +11,5 @@ export interface ContentHashInput {
  * authoritative for what the hash should be.
  */
 export function checkContentHash(input: ContentHashInput): InvalidReason | null {
-  return input.handleContentHash === input.canonicalInvocationHash
-    ? null
-    : 'content-hash-mismatch';
+  return input.handleContentHash === input.canonicalInvocationHash ? null : "content-hash-mismatch";
 }

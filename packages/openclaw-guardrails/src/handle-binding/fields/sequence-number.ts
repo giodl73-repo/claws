@@ -1,4 +1,4 @@
-import type { InvalidReason } from '../types.js';
+import type { InvalidReason } from "../types.js";
 
 export interface SequenceNumberInput {
   readonly handleSequenceNumber: number;
@@ -10,7 +10,5 @@ export interface SequenceNumberInput {
  * greater than the persisted high-water mark.
  */
 export function checkSequenceNumber(input: SequenceNumberInput): InvalidReason | null {
-  return input.handleSequenceNumber > input.highWaterMark
-    ? null
-    : 'sequence-rollback';
+  return input.handleSequenceNumber > input.highWaterMark ? null : "sequence-rollback";
 }

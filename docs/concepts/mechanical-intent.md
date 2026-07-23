@@ -19,9 +19,10 @@ intent:
 
 ## Why It Matters
 
-Without mechanical intent, a governance violation says "tool call blocked" but not *why*. With mechanical intent, the violation says "tool call blocked because this entity is classified as Confidential and the agent's permission tier is T1, which is below the required T2 threshold for PII access (data-protection policy, line 12)."
+Without mechanical intent, a governance violation says "tool call blocked" but not _why_. With mechanical intent, the violation says "tool call blocked because this entity is classified as Confidential and the agent's permission tier is T1, which is below the required T2 threshold for PII access (data-protection policy, line 12)."
 
 This is critical for:
+
 - **Audit** -- regulators need to see the reasoning chain, not just the outcome
 - **Debugging** -- developers need to understand which policy caused a block
 - **Evolution** -- when policies change, the intent record shows what was originally intended

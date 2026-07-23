@@ -19,6 +19,7 @@ claws init --name file-reader --risk R2
 ```
 
 This generates:
+
 - `SKILL.md` with governance annotations (risk level, fail mode, audit)
 - `handler.ts` with a skeleton handler function
 - `tsconfig.json` for TypeScript compilation
@@ -46,6 +47,7 @@ reasoningLimits:
 ```
 
 Three tiers of governance:
+
 - **Tier 1** (3 YAML lines): riskLevel, failMode, audit. Two minutes. Most skills stop here.
 - **Tier 2** (full YAML): adds inputValidation, outputGuards, supplyChainSignature, dataLabels, elicitationGate, reasoningLimits.
 - **Tier 3** (verified): all Tier 2 fields plus `claws test` passing with @bic/claws-test matchers.
@@ -59,6 +61,7 @@ claws build
 ```
 
 The build phase:
+
 1. Parses `SKILL.md` to extract governance annotations
 2. Discovers tools, agents, and scenarios
 3. Produces the GovernanceIR (capability manifest + analysis)
@@ -75,6 +78,7 @@ claws check
 ```
 
 This runs all 12 governance checks against the GovernanceIR:
+
 1. Risk-level consistency
 2. OBO boundary declarations
 3. Data label coverage
@@ -102,24 +106,20 @@ Write a governance test:
 
 ```typescript
 // tests/governance.test.ts
-import { describe, it, expect, beforeAll } from 'vitest';
-import { registerMatchers } from '@bic/claws-test/matchers';
-import type { GovernanceCheckInput } from '@bic/claws-test';
+import { describe, it, expect, beforeAll } from "vitest";
+import { registerMatchers } from "@bic/claws-test/matchers";
+import type { GovernanceCheckInput } from "@bic/claws-test";
 
 beforeAll(() => {
   registerMatchers();
 });
 
-describe('file-reader governance', () => {
+describe("file-reader governance", () => {
   const skill: GovernanceCheckInput = {
-    tools: [
-      { name: 'file-read', riskLevel: 'R2', oboFlag: false, classification: 'filesystem' },
-    ],
-    agents: [
-      { name: 'assistant', delegatesTo: [], hasTrustBoundary: true },
-    ],
-    declaredRiskLevel: 'R2',
-    failMode: 'closed',
+    tools: [{ name: "file-read", riskLevel: "R2", oboFlag: false, classification: "filesystem" }],
+    agents: [{ name: "assistant", delegatesTo: [], hasTrustBoundary: true }],
+    declaredRiskLevel: "R2",
+    failMode: "closed",
     hasInputValidation: true,
     hasOutputGuards: true,
     hasAuditTrail: true,
@@ -127,12 +127,12 @@ describe('file-reader governance', () => {
     reasoningLimits: { tokenBudget: 10000, maxRecursionDepth: 3 },
   };
 
-  it('passes all 12 governance checks', () => {
+  it("passes all 12 governance checks", () => {
     expect(skill).toPassGovernance();
   });
 
-  it('declares correct risk level', () => {
-    expect(skill).toHaveRiskLevel('R2');
+  it("declares correct risk level", () => {
+    expect(skill).toHaveRiskLevel("R2");
   });
 });
 ```
@@ -141,20 +141,20 @@ Write a security scan test:
 
 ```typescript
 // tests/security.test.ts
-import { describe, it, expect, beforeAll } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { registerMatchers } from '@bic/claws-test/matchers';
-import type { ScanInput } from '@bic/claws-test';
+import { describe, it, expect, beforeAll } from "vitest";
+import { readFileSync } from "node:fs";
+import { registerMatchers } from "@bic/claws-test/matchers";
+import type { ScanInput } from "@bic/claws-test";
 
 beforeAll(() => {
   registerMatchers();
 });
 
-describe('file-reader security', () => {
-  it('handler has zero security findings', () => {
-    const content = readFileSync('handler.ts', 'utf-8');
+describe("file-reader security", () => {
+  it("handler has zero security findings", () => {
+    const content = readFileSync("handler.ts", "utf-8");
     const scanInput: ScanInput = {
-      sources: [{ filePath: 'handler.ts', content }],
+      sources: [{ filePath: "handler.ts", content }],
     };
     expect(scanInput).toPassSecurityScan();
   });

@@ -8,50 +8,51 @@ For agent and harness entry points, start with `CONTEXT.md`.
 
 ## Active Map
 
-| Area | Home | Purpose |
-| --- | --- | --- |
-| OpenClaw PR work | `projects/openclaw/` | Current OpenClaw branches, PR notes, review loops, proof, and RFC tracking. |
-| Lobster work | `projects/lobster/` | Lobster worktrees, dashboard links, PR notes, and local runtime notes. |
-| Policy | `projects/policy/` | Active policy conformance, evidence, RFC, and Lobster baseline work. |
-| Doctor | `projects/doctor/` | Active doctor health and structured-repair PR stacks. |
-| Feeds | `projects/feeds/` | OpenClaw feed support and Lobster Scout feed PR stacks. |
-| Catalog | `projects/catalog/` | OpenClaw command/tool catalog metadata, generated docs, prompt/audit lenses, and PR/RFC stack notes. |
-| UX state | `projects/ux-state/` | Gated Lobster Feeds, Policy, and Context Budget UX previews, flags, and design-review notes. |
-| Admin | `projects/admin/` | Lobster admin spaces, managed policy baselines, and Partner Center notes. |
-| Config admin UX | `projects/config-admin/` | Shared Lobster/OpenClaw admin-config UX framework: settings descriptors, preview-first validation, governed save, and Scout CLI parity. |
-| Staffing | `projects/staffing/` | Lobster and ClawPilot staffing analysis and gap mapping; WorkIQ only as a search term. |
-| Context budget | `projects/context-budget/` | Context-budget PR plan, branches, and proof notes. |
-| Snapshot | `projects/snapshot/` | SQLite-safe snapshot/restore plugin, backup integration, failover substrate, and RFC coordination. |
-| OpenClaw hosting profiles | `projects/hosting-profiles/` | Standard hostee profiles, ready checks, status conditions, and container/platform hosting conventions for OpenClaw. |
-| Lobster/OpenClaw layering contracts | `projects/layering-contracts/` | Umbrella host-runtime contract portfolio, Lobster boundary audit, and upstream contract extraction. |
-| Managed Configuration | `projects/managed-config/` | Host/operator config authority, effective generations, conformance, and Lobster config-writer removal. |
-| Hosted Integration | `projects/hosted-integration/` | Host integration bundles, owner-selected capability bindings, Hosting Profiles, narrow carriers, and ProxyPipe retirement. |
-| Runtime State Continuity | `projects/state-continuity/` | State ownership, checkpoints, publication, dirty/synced status, fencing, restore, and persistence removal. |
-| PromoteClaw | `projects/promoteclaw/` | Regular Lobster OpenClaw version promotion from quarantine-cleared LTS releases, with patch carry-forward validation. |
-| TypeClaw | `projects/typeclaw/` | OpenClaw TypeScript native / TS7 performance and compatibility evaluation. |
-| Memory | `projects/memory/` | Agent memory strategy, OpenClaw assessment, and XAI report notes. |
-| Mail | `projects/mail/` | Mail-channel research, mail plugin options, and Exchange/Microsoft Graph integration framing. |
-| Claws | `projects/claws/` | OpenClaw RFC direction for runnable starter setups across skills, plugins, MCP servers, workspace files, persona files, and automations. |
-| Claws Review Bot | `projects/claws-review-bot/` | `@bic/claws-review-bot` package notes; primary Lobster PR reviewer lane plus separate ClawPilot issue-classifier experiment. |
-| Localization | `projects/localization/` | OpenClaw localization architecture, surface coverage, runtime errors, channel messages, and bounded evidence slices. |
-| oc-path | `projects/oc-path/` | oc-path worktrees, specs, and follow-up PRs. |
-| ClawPilot | `projects/clawpilot/` | ClawPilot feedback-to-issue tracking and issue-loop notes. |
-| Bugs | `projects/bugs/` | Cross-cutting bugfix triage, reproduction notes, and fix proof. |
-| Local tools | `tools/` | Repo-local operator tools and launch notes. |
-| WSL tools | `tools/wsl/` and `projects/wsl/` | Stable wrappers and WSL worktree index for OpenClaw/Lobster work under `/root/src`. |
-| PR loop | `projects/pr-loop/` | Active stacked-PR operations, dependency restacks, review refreshes, and CI gate handoffs. |
-| PR queues | `projects/prs/` | Cross-project PR tracking, staleness, proof, and watcher notes. |
-| Archived waves | `.craft/waves/` | Historical research, panels, proposals, and generated wave artifacts. Do not use this as the active task surface. |
+| Area                                | Home                             | Purpose                                                                                                                                  |
+| ----------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| OpenClaw PR work                    | `projects/openclaw/`             | Current OpenClaw branches, PR notes, review loops, proof, and RFC tracking.                                                              |
+| Lobster work                        | `projects/lobster/`              | Lobster worktrees, dashboard links, PR notes, and local runtime notes.                                                                   |
+| Policy                              | `projects/policy/`               | Active policy conformance, evidence, RFC, and Lobster baseline work.                                                                     |
+| Doctor                              | `projects/doctor/`               | Active doctor health and structured-repair PR stacks.                                                                                    |
+| Feeds                               | `projects/feeds/`                | OpenClaw feed support and Lobster Scout feed PR stacks.                                                                                  |
+| Catalog                             | `projects/catalog/`              | OpenClaw command/tool catalog metadata, generated docs, prompt/audit lenses, and PR/RFC stack notes.                                     |
+| UX state                            | `projects/ux-state/`             | Gated Lobster Feeds, Policy, and Context Budget UX previews, flags, and design-review notes.                                             |
+| Admin                               | `projects/admin/`                | Lobster admin spaces, managed policy baselines, and Partner Center notes.                                                                |
+| Config admin UX                     | `projects/config-admin/`         | Shared Lobster/OpenClaw admin-config UX framework: settings descriptors, preview-first validation, governed save, and Scout CLI parity.  |
+| Staffing                            | `projects/staffing/`             | Lobster and ClawPilot staffing analysis and gap mapping; WorkIQ only as a search term.                                                   |
+| Context budget                      | `projects/context-budget/`       | Context-budget PR plan, branches, and proof notes.                                                                                       |
+| Snapshot                            | `projects/snapshot/`             | SQLite-safe snapshot/restore plugin, backup integration, failover substrate, and RFC coordination.                                       |
+| OpenClaw hosting profiles           | `projects/hosting-profiles/`     | Standard hostee profiles, ready checks, status conditions, and container/platform hosting conventions for OpenClaw.                      |
+| Lobster/OpenClaw layering contracts | `projects/layering-contracts/`   | Umbrella host-runtime contract portfolio, Lobster boundary audit, and upstream contract extraction.                                      |
+| Managed Configuration               | `projects/managed-config/`       | Host/operator config authority, effective generations, conformance, and Lobster config-writer removal.                                   |
+| Hosted Integration                  | `projects/hosted-integration/`   | Host integration bundles, owner-selected capability bindings, Hosting Profiles, narrow carriers, and ProxyPipe retirement.               |
+| Runtime State Continuity            | `projects/state-continuity/`     | State ownership, checkpoints, publication, dirty/synced status, fencing, restore, and persistence removal.                               |
+| PromoteClaw                         | `projects/promoteclaw/`          | Regular Lobster OpenClaw version promotion from quarantine-cleared LTS releases, with patch carry-forward validation.                    |
+| TypeClaw                            | `projects/typeclaw/`             | OpenClaw TypeScript native / TS7 performance and compatibility evaluation.                                                               |
+| Memory                              | `projects/memory/`               | Agent memory strategy, OpenClaw assessment, and XAI report notes.                                                                        |
+| Mail                                | `projects/mail/`                 | Mail-channel research, mail plugin options, and Exchange/Microsoft Graph integration framing.                                            |
+| Claws                               | `projects/claws/`                | OpenClaw RFC direction for runnable starter setups across skills, plugins, MCP servers, workspace files, persona files, and automations. |
+| Claws Review Bot                    | `projects/claws-review-bot/`     | `@bic/claws-review-bot` package notes; primary Lobster PR reviewer lane plus separate ClawPilot issue-classifier experiment.             |
+| Localization                        | `projects/localization/`         | OpenClaw localization architecture, surface coverage, runtime errors, channel messages, and bounded evidence slices.                     |
+| oc-path                             | `projects/oc-path/`              | oc-path worktrees, specs, and follow-up PRs.                                                                                             |
+| ClawPilot                           | `projects/clawpilot/`            | ClawPilot feedback-to-issue tracking and issue-loop notes.                                                                               |
+| Rendezvous                          | `projects/rendezvous/`           | Gio-owned Lobster M5 commitments, July 31 forecasts, project ownership, and blockers.                                                    |
+| Bugs                                | `projects/bugs/`                 | Cross-cutting bugfix triage, reproduction notes, and fix proof.                                                                          |
+| Local tools                         | `tools/`                         | Repo-local operator tools and launch notes.                                                                                              |
+| WSL tools                           | `tools/wsl/` and `projects/wsl/` | Stable wrappers and WSL worktree index for OpenClaw/Lobster work under `/root/src`.                                                      |
+| PR loop                             | `projects/pr-loop/`              | Active stacked-PR operations, dependency restacks, review refreshes, and CI gate handoffs.                                               |
+| PR queues                           | `projects/prs/`                  | Cross-project PR tracking, staleness, proof, and watcher notes.                                                                          |
+| Archived waves                      | `.craft/waves/`                  | Historical research, panels, proposals, and generated wave artifacts. Do not use this as the active task surface.                        |
 
 ## Current External Worktrees
 
-| Project | Path | Notes |
-| --- | --- | --- |
-| OpenClaw | `C:\src\openclaw` and PR-specific `C:\src\openclaw-*` worktrees | Use for upstream OpenClaw implementation and PR stacks. |
-| Lobster | `C:\src\lobster` | Main Lobster checkout. |
-| LobsterTank | `C:\src\lobster-lobstertank` | Dashboard worktree; current dashboard code is in `tools/lobstertank/`. |
-| RFCs | `C:\src\openclaw-rfcs` or the active RFC worktree when present | Use for RFC text and discussion follow-up. |
-| WSL active index | `/root/src/_hapi` | Symlinks to active WSL OpenClaw/RFC worktrees. |
+| Project          | Path                                                            | Notes                                                                  |
+| ---------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| OpenClaw         | `C:\src\openclaw` and PR-specific `C:\src\openclaw-*` worktrees | Use for upstream OpenClaw implementation and PR stacks.                |
+| Lobster          | `C:\src\lobster`                                                | Main Lobster checkout.                                                 |
+| LobsterTank      | `C:\src\lobster-lobstertank`                                    | Dashboard worktree; current dashboard code is in `tools/lobstertank/`. |
+| RFCs             | `C:\src\openclaw-rfcs` or the active RFC worktree when present  | Use for RFC text and discussion follow-up.                             |
+| WSL active index | `/root/src/_hapi`                                               | Symlinks to active WSL OpenClaw/RFC worktrees.                         |
 
 ## Rules
 

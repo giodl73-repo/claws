@@ -3,7 +3,16 @@ entries:
   claws-spec-index:
     type: directory-index
     path: "design/claws/SPECS.md"
-    atoms: ["claws-compiler", "governance-ir", "tool-classification", "governance-plugin", "three-rings", "three-tier-packages", "lossless-roundtrip"]
+    atoms:
+      [
+        "claws-compiler",
+        "governance-ir",
+        "tool-classification",
+        "governance-plugin",
+        "three-rings",
+        "three-tier-packages",
+        "lossless-roundtrip",
+      ]
 
   claws-command-map:
     type: reference
@@ -13,7 +22,8 @@ entries:
   claws-pitfalls:
     type: reference
     path: "design/claws/PITFALLS.md"
-    atoms: ["obo-boundary", "fail-mode", "defense-in-depth", "tool-classification", "a2a-governance"]
+    atoms:
+      ["obo-boundary", "fail-mode", "defense-in-depth", "tool-classification", "a2a-governance"]
 
   claws-research:
     type: directory-index
@@ -28,22 +38,47 @@ entries:
   claws-atoms:
     type: directory-index
     path: "docs/claws/ATOMS.md"
-    atoms: ["*"]  # all claws atoms
+    atoms: ["*"] # all claws atoms
 
   claws-deck-technical:
     type: reference
     path: "docs/claws/presentations/claws-technical-deep.md"
-    atoms: ["claws-compiler", "governance-ir", "capability-manifest", "sift", "pinch", "governance-plugin"]
+    atoms:
+      [
+        "claws-compiler",
+        "governance-ir",
+        "capability-manifest",
+        "sift",
+        "pinch",
+        "governance-plugin",
+      ]
 
   claws-deck-security:
     type: reference
     path: "docs/claws/presentations/claws-security.md"
-    atoms: ["tool-classification", "obo-boundary", "a2a-governance", "injection-defense", "elicitation-gate", "defense-in-depth", "fail-mode"]
+    atoms:
+      [
+        "tool-classification",
+        "obo-boundary",
+        "a2a-governance",
+        "injection-defense",
+        "elicitation-gate",
+        "defense-in-depth",
+        "fail-mode",
+      ]
 
   claws-deck-compliance:
     type: reference
     path: "docs/claws/presentations/claws-compliance.md"
-    atoms: ["audit-chain", "soc2-compliance", "hipaa-compliance", "eu-ai-act", "siem-export", "fleet-comply"]
+    atoms:
+      [
+        "audit-chain",
+        "soc2-compliance",
+        "hipaa-compliance",
+        "eu-ai-act",
+        "siem-export",
+        "fleet-comply",
+      ]
 
   claws-deck-maker:
     type: reference

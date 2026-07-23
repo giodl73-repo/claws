@@ -8,15 +8,15 @@
 
 In the OC codebase, skills and plugins are fundamentally different:
 
-| | Skill | Plugin |
-|---|-------|--------|
-| **Format** | Markdown file (SKILL.md) | TypeScript module (index.ts) |
-| **Mechanism** | System prompt injection | Hook registration on Gateway |
-| **Has hook registration** | No | Yes (registers on Gateway hooks) |
-| **Can block actions** | No (advisory only) | Yes (`before_tool_call` returns `{ block: true }`) |
-| **Can intercept** | No | Yes (28 lifecycle hooks) |
-| **Token cost** | Yes (consumes context) | Zero (runs in Gateway process) |
-| **Source** | `src/agents/skills/types.ts` | `OpenClawPluginDefinition` |
+|                           | Skill                        | Plugin                                             |
+| ------------------------- | ---------------------------- | -------------------------------------------------- |
+| **Format**                | Markdown file (SKILL.md)     | TypeScript module (index.ts)                       |
+| **Mechanism**             | System prompt injection      | Hook registration on Gateway                       |
+| **Has hook registration** | No                           | Yes (registers on Gateway hooks)                   |
+| **Can block actions**     | No (advisory only)           | Yes (`before_tool_call` returns `{ block: true }`) |
+| **Can intercept**         | No                           | Yes (28 lifecycle hooks)                           |
+| **Token cost**            | Yes (consumes context)       | Zero (runs in Gateway process)                     |
+| **Source**                | `src/agents/skills/types.ts` | `OpenClawPluginDefinition`                         |
 
 Skills are prompt-only. They have no `execute()` method, no hook registration, no ability to intercept or block tool calls. A skill can say "please don't access production" in the system prompt. A plugin can prevent it.
 
@@ -45,8 +45,7 @@ This is the primary enforcement point. Every tool call passes through `before_to
 ```typescript
 api.on("before_tool_call", async (event, ctx) => {
   const risk = classifyToolRisk(event.toolName, event.params);
-  if (exceedsBudget(event, ctx))
-    return { block: true, blockReason: "G-BOUND: budget exceeded" };
+  if (exceedsBudget(event, ctx)) return { block: true, blockReason: "G-BOUND: budget exceeded" };
   if (requiresUserApproval(event, risk))
     return { block: true, blockReason: "G-ELICIT: user approval required" };
   return undefined; // allow
@@ -82,13 +81,13 @@ api.on("before_tool_call", async (event, ctx) => {
 
 The user sees 5 possible `PluginApprovalResolution` values:
 
-| Resolution | Meaning |
-|-----------|---------|
-| `allow-once` | Approve this single tool call |
+| Resolution     | Meaning                                               |
+| -------------- | ----------------------------------------------------- |
+| `allow-once`   | Approve this single tool call                         |
 | `allow-always` | Approve all future calls of this type in this session |
-| `deny` | Reject the tool call |
-| `timeout` | No response within timeoutMs -- deny-default applies |
-| `cancelled` | User dismissed the approval prompt |
+| `deny`         | Reject the tool call                                  |
+| `timeout`      | No response within timeoutMs -- deny-default applies  |
+| `cancelled`    | User dismissed the approval prompt                    |
 
 Use `requireApproval` for elicitation gates (OBO actions, R5 tools). Use
 `{ block: true }` for hard denials (budget exceeded, policy violation) where
@@ -98,15 +97,15 @@ no user override is appropriate.
 
 The Gateway exposes 28 hooks (as of OC v2.x). The governance plugin uses a subset:
 
-| Hook | Governance use | Layer |
-|------|---------------|-------|
-| `before_tool_call` | Classification, elicitation, budget, permissions | L2 |
-| `after_tool_call` | Audit chain append, output validation | L3 |
-| `subagent_spawning` | A2A trust escalation check, delegation depth | L3 |
-| `before_prompt_build` | Context assembly, governance layer injection | L3 |
-| `llm_output` | Output filtering (PII, secrets, URLs) | L3 |
-| `gateway_start` | Handler registration, table initialization | L3 |
-| `gateway_stop` | WAL flush, audit chain finalization | L3 |
+| Hook                  | Governance use                                   | Layer |
+| --------------------- | ------------------------------------------------ | ----- |
+| `before_tool_call`    | Classification, elicitation, budget, permissions | L2    |
+| `after_tool_call`     | Audit chain append, output validation            | L3    |
+| `subagent_spawning`   | A2A trust escalation check, delegation depth     | L3    |
+| `before_prompt_build` | Context assembly, governance layer injection     | L3    |
+| `llm_output`          | Output filtering (PII, secrets, URLs)            | L3    |
+| `gateway_start`       | Handler registration, table initialization       | L3    |
+| `gateway_stop`        | WAL flush, audit chain finalization              | L3    |
 
 Not all 28 hooks are used. The plugin registers only what the compiled governance rules require. If your workspace has no OBO tools, no elicitation hook is registered.
 
@@ -114,16 +113,17 @@ Not all 28 hooks are used. The plugin registers only what the compiled governanc
 
 The `before_tool_call` handler has 50ms to evaluate and return. This is non-negotiable -- the gateway-eng persona enforces it. The budget breaks down:
 
-| Operation | Time |
-|-----------|------|
-| Tool classification (lookup table) | <1ms |
-| Budget check (counter comparison) | <1ms |
-| A2A delegation check (graph lookup) | <5ms |
+| Operation                           | Time  |
+| ----------------------------------- | ----- |
+| Tool classification (lookup table)  | <1ms  |
+| Budget check (counter comparison)   | <1ms  |
+| A2A delegation check (graph lookup) | <5ms  |
 | Policy evaluation (rule table scan) | <10ms |
-| Total typical | <17ms |
-| Hard cap (`AbortSignal.timeout`) | 50ms |
+| Total typical                       | <17ms |
+| Hard cap (`AbortSignal.timeout`)    | 50ms  |
 
 If evaluation exceeds 50ms, the handler aborts and applies fail-mode:
+
 - R1-R2: configurable (default: fail-open -- don't break reads)
 - R3-R4: configurable (default: fail-closed for enterprise)
 - R5: deny (non-negotiable)
@@ -165,6 +165,7 @@ This plugin is a guest in your process. It respects the 50ms budget, uses pre-al
 ## Scenario-Driven Additions
 
 ### From fleet-operations scenarios (89 findings applied)
+
 - Governance plugin marker (`__claws_governance: true`) enables fleet scan identification of governed workspaces
 - Plugin ordering enforcement: governance plugin must verify its own position (first or early) at runtime via self-position check
 - Governance plugin ignores prior plugin approvals and performs authoritative evaluation independently
@@ -173,6 +174,7 @@ This plugin is a guest in your process. It respects the 50ms budget, uses pre-al
 - Fleet context input for inherited policy resolution flows into the ANALYZE phase
 
 ### From injection-defense scenarios (47 findings applied)
+
 - Guardrail Sandwich (G-INPUT, G-CONTEXT, G-BOUND, G-OUTPUT) layers fire at different chain steps, not sequentially
 - Nonce-based boundary markers replace fixed markers to prevent forgery; nonce confidentiality enforced (never in content)
 - G-CONTEXT marker injection is fail-closed independent of R-level -- crash during injection blocks the tool call

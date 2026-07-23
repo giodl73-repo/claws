@@ -25,13 +25,13 @@ The command creates 16 files and modifies 3 existing files. Originals are backed
 
 After init, your workspace contains:
 
-| Path | Purpose |
-|------|---------|
-| `claws.json` | Governance configuration (version, enabled, trust tier) |
-| `.claws/` | Policies, audit log, build cache, keys |
-| `.claws/audit/chain.jsonl` | Append-only audit log |
-| `skills/claws-governance/SKILL.md` | L1 advisory skill (prompt-level guidance) |
-| `plugins/claws-governance/` | L2+L3 enforcement plugin (runtime blocking) |
+| Path                               | Purpose                                                 |
+| ---------------------------------- | ------------------------------------------------------- |
+| `claws.json`                       | Governance configuration (version, enabled, trust tier) |
+| `.claws/`                          | Policies, audit log, build cache, keys                  |
+| `.claws/audit/chain.jsonl`         | Append-only audit log                                   |
+| `skills/claws-governance/SKILL.md` | L1 advisory skill (prompt-level guidance)               |
+| `plugins/claws-governance/`        | L2+L3 enforcement plugin (runtime blocking)             |
 
 Three existing files are also updated: `openclaw.json` (plugin registered), `exec-approvals.json` (allowlists synced), and `.gitignore` (.claws/ exclusions added).
 

@@ -14,11 +14,11 @@ Lateral movement occurs when a compromised agent in one workspace attempts to ac
 
 **Detection mechanism**: `claws scan` at fleet level correlates blocked A2A requests across workspaces. When the same agent identity is blocked in multiple workspaces within a time window, the fleet scanner raises a lateral movement alert.
 
-| Signal | Single workspace | Fleet correlation |
-|--------|-----------------|-------------------|
-| Agent blocked by G-A2A-TRUST | Normal enforcement | Pattern: same agent blocked in 3+ workspaces |
+| Signal                       | Single workspace   | Fleet correlation                                  |
+| ---------------------------- | ------------------ | -------------------------------------------------- |
+| Agent blocked by G-A2A-TRUST | Normal enforcement | Pattern: same agent blocked in 3+ workspaces       |
 | Unknown agent (default-deny) | Normal enforcement | Pattern: unknown agent probing multiple workspaces |
-| Trust condition failed | Normal enforcement | Pattern: trust failures with correlated timing |
+| Trust condition failed       | Normal enforcement | Pattern: trust failures with correlated timing     |
 
 **Alert context**: the lateral movement alert distinguishes between misconfiguration (agent legitimately needs access but trust is not declared) and compromise (agent identity is being used to probe). The distinction is based on:
 
@@ -39,11 +39,11 @@ Agent-level quarantine is preferred over workspace-level kill switch because it 
 
 L0 identity means the agent has no cryptographic identity -- it is identified only by name. In a single workspace, L0 is acceptable (the developer knows their agents). In a fleet, L0 is a critical vulnerability:
 
-| Identity level | Impersonation effort | Fleet risk |
-|----------------|---------------------|------------|
-| L0 (name only) | Zero -- any agent can claim any name | **Critical** |
-| L1 (key-based) | Key theft required | High |
-| L2 (fleet-issued) | Fleet compromise required | Medium |
+| Identity level    | Impersonation effort                 | Fleet risk   |
+| ----------------- | ------------------------------------ | ------------ |
+| L0 (name only)    | Zero -- any agent can claim any name | **Critical** |
+| L1 (key-based)    | Key theft required                   | High         |
+| L2 (fleet-issued) | Fleet compromise required            | Medium       |
 
 P-202 (L0 fleet identity impersonation) is the headline pitfall. An agent in workspace A can trivially claim to be an agent from workspace B by using the same name. There is no verification mechanism at L0.
 

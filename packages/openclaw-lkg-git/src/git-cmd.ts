@@ -7,8 +7,8 @@
  * @module @bic/openclaw-lkg-git/git-cmd
  */
 
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
@@ -32,26 +32,27 @@ export interface GitResult {
  * Throws if the process can't be spawned or (when
  * `tolerateNonZero !== true`) the exit code is non-zero.
  */
-export async function git(
-  args: readonly string[],
-  opts: GitInvocationOptions,
-): Promise<GitResult> {
+export async function git(args: readonly string[], opts: GitInvocationOptions): Promise<GitResult> {
   const configArgs: string[] = [];
   if (opts.config !== undefined) {
     for (const [k, v] of Object.entries(opts.config)) {
-      configArgs.push('-c', `${k}=${v}`);
+      configArgs.push("-c", `${k}=${v}`);
     }
   }
   const fullArgs = [...configArgs, ...args];
   try {
-    const result = await execFileAsync('git', fullArgs, {
+    const result = await execFileAsync("git", fullArgs, {
       cwd: opts.cwd,
       maxBuffer: 16 * 1024 * 1024,
     });
     const stdoutStr =
-      typeof result.stdout === 'string' ? result.stdout : (result.stdout as Buffer).toString('utf-8');
+      typeof result.stdout === "string"
+        ? result.stdout
+        : (result.stdout as Buffer).toString("utf-8");
     const stderrStr =
-      typeof result.stderr === 'string' ? result.stderr : (result.stderr as Buffer).toString('utf-8');
+      typeof result.stderr === "string"
+        ? result.stderr
+        : (result.stderr as Buffer).toString("utf-8");
     return { stdout: stdoutStr, stderr: stderrStr, exitCode: 0 };
   } catch (err) {
     const e = err as NodeJS.ErrnoException & {
@@ -59,16 +60,10 @@ export async function git(
       stderr?: string | Buffer;
       code?: number | string;
     };
-    if (opts.tolerateNonZero === true && typeof e.code === 'number') {
+    if (opts.tolerateNonZero === true && typeof e.code === "number") {
       return {
-        stdout:
-          typeof e.stdout === 'string'
-            ? e.stdout
-            : e.stdout?.toString('utf-8') ?? '',
-        stderr:
-          typeof e.stderr === 'string'
-            ? e.stderr
-            : e.stderr?.toString('utf-8') ?? '',
+        stdout: typeof e.stdout === "string" ? e.stdout : (e.stdout?.toString("utf-8") ?? ""),
+        stderr: typeof e.stderr === "string" ? e.stderr : (e.stderr?.toString("utf-8") ?? ""),
         exitCode: e.code,
       };
     }
@@ -88,23 +83,27 @@ export async function gitBinary(
   const configArgs: string[] = [];
   if (opts.config !== undefined) {
     for (const [k, v] of Object.entries(opts.config)) {
-      configArgs.push('-c', `${k}=${v}`);
+      configArgs.push("-c", `${k}=${v}`);
     }
   }
   const fullArgs = [...configArgs, ...args];
   return new Promise((resolve, reject) => {
     execFile(
-      'git',
+      "git",
       fullArgs,
-      { cwd: opts.cwd, maxBuffer: 64 * 1024 * 1024, encoding: 'buffer' },
+      { cwd: opts.cwd, maxBuffer: 64 * 1024 * 1024, encoding: "buffer" },
       (err, stdout, stderr) => {
         const stdoutBuf = stdout as unknown as Buffer;
         const stderrBuf = stderr as unknown as Buffer;
-        const stdoutBytes = new Uint8Array(stdoutBuf.buffer, stdoutBuf.byteOffset, stdoutBuf.byteLength);
-        const stderrText = stderrBuf.toString('utf-8');
+        const stdoutBytes = new Uint8Array(
+          stdoutBuf.buffer,
+          stdoutBuf.byteOffset,
+          stdoutBuf.byteLength,
+        );
+        const stderrText = stderrBuf.toString("utf-8");
         if (err !== null) {
           const e = err as NodeJS.ErrnoException & { code?: number | string };
-          if (opts.tolerateNonZero === true && typeof e.code === 'number') {
+          if (opts.tolerateNonZero === true && typeof e.code === "number") {
             resolve({ stdout: stdoutBytes, stderr: stderrText, exitCode: e.code });
             return;
           }

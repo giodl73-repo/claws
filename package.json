@@ -1,9 +1,13 @@
 {
   "name": "@bic/claws-monorepo",
   "version": "0.36.0",
-  "description": "claws monorepo — enterprise governance compiler for OpenClaw workspaces",
   "private": true,
-  "type": "module",
+  "description": "claws monorepo — enterprise governance compiler for OpenClaw workspaces",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gim-home/claws.git"
+  },
   "workspaces": [
     "packages/claws",
     "packages/claws-action",
@@ -28,6 +32,7 @@
     "packages/claws-review-bot",
     "test/e2e"
   ],
+  "type": "module",
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
@@ -41,18 +46,13 @@
     "lint": "npm run lint --workspaces --if-present",
     "residue-grep": "bash scripts/residue-grep.sh --mode=ci"
   },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.0"
+  },
   "engines": {
     "node": ">=20"
-  },
-  "devDependencies": {
-    "typescript": "^5.0.0",
-    "tsup": "^8.0.0",
-    "vitest": "^4.0.0",
-    "@vitest/coverage-v8": "^4.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/gim-home/claws.git"
-  },
-  "license": "UNLICENSED"
+  }
 }

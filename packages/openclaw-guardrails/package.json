@@ -2,11 +2,38 @@
   "name": "@bic/openclaw-guardrails",
   "version": "0.1.0",
   "description": "OpenClaw governance package — GuardrailProvider + FileIngestProvider interfaces plus six runtime subpaths (audit, approvals, budget, identity, siem, secrets).",
+  "keywords": [
+    "approvals",
+    "audit",
+    "bic",
+    "budget",
+    "governance",
+    "guardrail",
+    "identity",
+    "openclaw",
+    "secrets",
+    "siem"
+  ],
+  "homepage": "https://microsoft.ghe.com/bic/claws#readme",
+  "bugs": {
+    "url": "https://microsoft.ghe.com/bic/claws/issues"
+  },
   "license": "MIT",
+  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://microsoft.ghe.com/bic/claws.git",
+    "directory": "claws-sdk/packages/guardrails"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -50,23 +77,14 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.microsoft.ghe.com/"
+  },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"
-  },
-  "engines": {
-    "node": ">=20.0.0"
-  },
-  "peerDependencies": {
-    "@bic/openclaw-workspace": "^0.1.0",
-    "@bic/v2-prototype": "*"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
@@ -74,29 +92,11 @@
     "typescript": "^5.7.0",
     "vitest": "^3.1.1"
   },
-  "keywords": [
-    "openclaw",
-    "guardrail",
-    "governance",
-    "audit",
-    "approvals",
-    "budget",
-    "identity",
-    "siem",
-    "secrets",
-    "bic"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://microsoft.ghe.com/bic/claws.git",
-    "directory": "claws-sdk/packages/guardrails"
+  "peerDependencies": {
+    "@bic/openclaw-workspace": "^0.1.0",
+    "@bic/v2-prototype": "*"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.microsoft.ghe.com/"
-  },
-  "author": "",
-  "bugs": {
-    "url": "https://microsoft.ghe.com/bic/claws/issues"
-  },
-  "homepage": "https://microsoft.ghe.com/bic/claws#readme"
+  "engines": {
+    "node": ">=20.0.0"
+  }
 }

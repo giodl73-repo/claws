@@ -7,9 +7,9 @@
  *   3. writeComplete — record success or failure
  */
 
-import { randomUUID } from 'node:crypto';
-import type { AuditEvent, ChainEntry } from './types.js';
-import { computeHmac, GENESIS_HASH } from './chain.js';
+import { randomUUID } from "node:crypto";
+import type { AuditEvent, ChainEntry } from "./types.js";
+import { computeHmac, GENESIS_HASH } from "./chain.js";
 
 export interface WALStore {
   entries: ChainEntry[];
@@ -20,10 +20,7 @@ export function createWALStore(): WALStore {
   return { entries: [], latestHash: GENESIS_HASH };
 }
 
-export type PendingInput = Omit<
-  AuditEvent,
-  'id' | 'hash' | 'previousHash' | 'outcome'
->;
+export type PendingInput = Omit<AuditEvent, "id" | "hash" | "previousHash" | "outcome">;
 
 export function writePending(
   store: WALStore,
@@ -33,10 +30,10 @@ export function writePending(
   const id = randomUUID();
   const previousHash = store.latestHash;
 
-  const pendingBase: Omit<AuditEvent, 'hash'> = {
+  const pendingBase: Omit<AuditEvent, "hash"> = {
     ...input,
     id,
-    outcome: 'pending',
+    outcome: "pending",
     previousHash,
   };
 
@@ -56,13 +53,11 @@ export function writePending(
 export function writeComplete(
   store: WALStore,
   pendingId: string,
-  outcome: 'success' | 'failed',
+  outcome: "success" | "failed",
   hmacKey: Buffer,
   reason?: string,
 ): { store: WALStore; event: AuditEvent } {
-  const entryIndex = store.entries.findIndex(
-    (e) => e.pendingEvent.id === pendingId,
-  );
+  const entryIndex = store.entries.findIndex((e) => e.pendingEvent.id === pendingId);
   if (entryIndex === -1) {
     throw new Error(`WAL entry not found for pendingId: ${pendingId}`);
   }
@@ -71,7 +66,7 @@ export function writeComplete(
   const previousHash = store.latestHash;
 
   const { hash: _existingHash, ...base } = entry.pendingEvent;
-  const completeBase: Omit<AuditEvent, 'hash'> = {
+  const completeBase: Omit<AuditEvent, "hash"> = {
     ...base,
     outcome,
     previousHash,
@@ -102,11 +97,14 @@ export function findIncomplete(store: WALStore): ChainEntry[] {
 
 export function serialize(store: WALStore): string {
   const lines = store.entries.map((entry) => JSON.stringify(entry));
-  return lines.join('\n') + '\n';
+  return lines.join("\n") + "\n";
 }
 
 export function deserialize(jsonl: string): WALStore {
-  const lines = jsonl.trim().split('\n').filter((l) => l.length > 0);
+  const lines = jsonl
+    .trim()
+    .split("\n")
+    .filter((l) => l.length > 0);
   const entries: ChainEntry[] = lines.map((line) => JSON.parse(line) as ChainEntry);
 
   let latestHash = GENESIS_HASH;

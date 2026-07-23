@@ -27,30 +27,30 @@ $ claws audit export --format syslog | logger -t claws
   Exported 1,247 events in syslog format
 ```
 
-| Format | Use case | SIEM |
-|--------|----------|------|
-| CEF | Common Event Format, industry standard | Splunk, ArcSight, QRadar |
-| JSON | Structured ingestion, custom dashboards | Sentinel, Datadog, Elastic |
-| syslog | RFC 5424, traditional log collectors | Any syslog-capable collector |
+| Format | Use case                                | SIEM                         |
+| ------ | --------------------------------------- | ---------------------------- |
+| CEF    | Common Event Format, industry standard  | Splunk, ArcSight, QRadar     |
+| JSON   | Structured ingestion, custom dashboards | Sentinel, Datadog, Elastic   |
+| syslog | RFC 5424, traditional log collectors    | Any syslog-capable collector |
 
 ## What events are exported
 
 Every event in `.claws/audit/chain.jsonl` is exportable. The main event types:
 
-| Event | Severity | Meaning |
-|-------|----------|---------|
-| `PINCH_PASS` | INFO | Governance check passed |
-| `PINCH_FAIL` | WARNING/HIGH | Governance violation detected |
-| `OBO_APPROVED` | INFO | Human approved an OBO action |
-| `OBO_DENIED` | WARNING | Human denied (or timeout denied) an OBO action |
-| `OBO_TIMEOUT` | WARNING | Deny-default triggered on approval timeout |
-| `BUILD_COMPLETE` | INFO | Compilation + emit finished |
-| `KILL_ACTIVATED` | CRITICAL | Kill switch engaged |
-| `KILL_FLEET` | CRITICAL | Fleet-wide kill switch engaged |
-| `DRIFT_DETECTED` | WARNING | Workspace diverged from fleet policy |
-| `CHAIN_BREAK` | CRITICAL | Audit chain integrity violation |
-| `KEY_ROTATED` | INFO | Cryptographic key rotated |
-| `SNAP_RESTORED` | WARNING | Snapshot restore (rollback) |
+| Event            | Severity     | Meaning                                        |
+| ---------------- | ------------ | ---------------------------------------------- |
+| `PINCH_PASS`     | INFO         | Governance check passed                        |
+| `PINCH_FAIL`     | WARNING/HIGH | Governance violation detected                  |
+| `OBO_APPROVED`   | INFO         | Human approved an OBO action                   |
+| `OBO_DENIED`     | WARNING      | Human denied (or timeout denied) an OBO action |
+| `OBO_TIMEOUT`    | WARNING      | Deny-default triggered on approval timeout     |
+| `BUILD_COMPLETE` | INFO         | Compilation + emit finished                    |
+| `KILL_ACTIVATED` | CRITICAL     | Kill switch engaged                            |
+| `KILL_FLEET`     | CRITICAL     | Fleet-wide kill switch engaged                 |
+| `DRIFT_DETECTED` | WARNING      | Workspace diverged from fleet policy           |
+| `CHAIN_BREAK`    | CRITICAL     | Audit chain integrity violation                |
+| `KEY_ROTATED`    | INFO         | Cryptographic key rotated                      |
+| `SNAP_RESTORED`  | WARNING      | Snapshot restore (rollback)                    |
 
 Each event includes: timestamp (ISO 8601), workspace ID, agent name, rule ID,
 severity, outcome, and the hash chain link. CEF and syslog map severity to
@@ -133,6 +133,7 @@ export compromised data.
 ## Scenario-Driven Additions
 
 ### From compliance-evidence scenarios (48 findings applied)
+
 - CEF field mapping defined for all governance event types with explicit severity mapping to the CEF 0-10 scale
 - Syslog message size handling: messages exceeding RFC 5424 limits are split with correlation IDs rather than silently truncated
 - Consistent PII redaction across all export formats: user-facing fields redacted, audit chain fields preserved, SIEM fields event-only

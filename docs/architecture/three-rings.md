@@ -10,11 +10,11 @@ claws operates across three concentric rings of governance enforcement: the inne
 
 ## Ring Summary
 
-| Ring | Trigger | Latency | Scope |
-|------|---------|---------|-------|
-| Inner | File save (watcher) | < 300ms batch window | Single workspace, governance rules only |
-| Middle | Developer CLI command | Sub-second per operation | Single workspace, full pipeline |
-| Outer | Fleet scan / broadcast | Minutes (parallel across workspaces) | All workspaces in fleet |
+| Ring   | Trigger                | Latency                              | Scope                                   |
+| ------ | ---------------------- | ------------------------------------ | --------------------------------------- |
+| Inner  | File save (watcher)    | < 300ms batch window                 | Single workspace, governance rules only |
+| Middle | Developer CLI command  | Sub-second per operation             | Single workspace, full pipeline         |
+| Outer  | Fleet scan / broadcast | Minutes (parallel across workspaces) | All workspaces in fleet                 |
 
 ---
 
@@ -44,12 +44,12 @@ The inner ring watches workspace files and runs incremental governance checks on
 
 The middle ring covers CLI commands that operate on a single workspace:
 
-| Command | Operation |
-|---------|-----------|
-| `claws pinch` | Full governance check against compiled rules |
-| `claws doctor` | Diagnostic and repair for workspace health |
-| `claws snap save` | Snapshot all 9 workspace files |
-| `claws snap restore` | Restore from snapshot |
+| Command              | Operation                                    |
+| -------------------- | -------------------------------------------- |
+| `claws pinch`        | Full governance check against compiled rules |
+| `claws doctor`       | Diagnostic and repair for workspace health   |
+| `claws snap save`    | Snapshot all 9 workspace files               |
+| `claws snap restore` | Restore from snapshot                        |
 
 **Dead man's switch error handling**: P-163 (bash `&&` chaining causes incorrect error propagation) requires explicit per-step error handling. Each middle-ring command validates preconditions independently rather than relying on shell chaining.
 
@@ -81,10 +81,10 @@ The outer ring operates at fleet scale:
 
 When multiple rings operate concurrently, cache coherence is critical:
 
-| Event | Invalidation |
-|-------|-------------|
-| Middle ring writes new IR | Inner ring cache invalidated |
-| Outer ring broadcasts overlay | Middle ring re-evaluates on next command |
+| Event                          | Invalidation                                          |
+| ------------------------------ | ----------------------------------------------------- |
+| Middle ring writes new IR      | Inner ring cache invalidated                          |
+| Outer ring broadcasts overlay  | Middle ring re-evaluates on next command              |
 | Inner ring detects file change | Middle ring cache stale (flagged on next CLI command) |
 
 The IR file concurrency model uses atomic writes (write to temp file, rename) to prevent TOCTOU races. P-167 (concurrent inner/outer ring IR access creates TOCTOU race) drove this requirement.
@@ -95,10 +95,10 @@ The IR file concurrency model uses atomic writes (write to temp file, rename) to
 
 Diagnostics can escalate between rings when a lower ring detects an issue that requires a higher ring to resolve:
 
-| From | To | Example |
-|------|----|---------|
-| Inner | Middle | Inner ring detects tool removal; suggests `claws doctor` |
-| Middle | Outer | Middle ring detects cross-workspace trust issue; suggests `claws scan --fleet` |
+| From   | To     | Example                                                                        |
+| ------ | ------ | ------------------------------------------------------------------------------ |
+| Inner  | Middle | Inner ring detects tool removal; suggests `claws doctor`                       |
+| Middle | Outer  | Middle ring detects cross-workspace trust issue; suggests `claws scan --fleet` |
 
 **Human-initiated only**: escalation is a diagnostic suggestion, not an automatic action. The developer decides whether to follow the suggestion. No ring can trigger another ring's operations without human confirmation.
 

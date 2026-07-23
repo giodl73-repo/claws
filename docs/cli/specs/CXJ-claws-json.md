@@ -9,7 +9,7 @@ interface ClawsJson {
   readonly version: 1;
   readonly snapshotId: string;
   readonly policyArtifactSha256?: string;
-  readonly fleet?: string;        // fleet name for inheritance
+  readonly fleet?: string; // fleet name for inheritance
   readonly trust?: TrustConfig;
   readonly hosts?: ReadonlyArray<HostBinding>;
 }

@@ -86,35 +86,35 @@ Rationale: keeping the URI shape minimal shrinks the attack surface. Query-strin
 
 ```typescript
 export interface CanonicalOcUri {
-  scheme: 'oc';
-  tenantId: string;         // lowercased, punycode A-label form
-  path: string;              // NFC UTF-8, leading slash, no trailing slash unless root
-  canonical: string;         // the full canonical string form `oc://${tenantId}${path}`
-  rawLength: number;         // length of original input (for audit)
+  scheme: "oc";
+  tenantId: string; // lowercased, punycode A-label form
+  path: string; // NFC UTF-8, leading slash, no trailing slash unless root
+  canonical: string; // the full canonical string form `oc://${tenantId}${path}`
+  rawLength: number; // length of original input (for audit)
 }
 
 export type OcUriInvalidReason =
-  | 'scheme-mismatch'              // not 'oc' or mixed-case scheme
-  | 'userinfo-present'             // authority contains '@'
-  | 'empty-authority'              // no tenant-id
-  | 'idn-homoglyph'                // IDNA pass is not idempotent
-  | 'percent-encoded-slash'        // %2F / %2f in path
-  | 'fraction-slash'               // U+2044 in path
-  | 'backslash'                    // '\' in path
-  | 'overlong-utf8'                // non-shortest-form UTF-8
-  | 'null-byte'                    // \x00 anywhere
-  | 'bom'                          // U+FEFF anywhere
-  | 'control-character'            // \x01-\x1F or \x7F
-  | 'path-traversal-segment'       // '.' or '..' segment
-  | 'empty-segment'                // '//' in path
-  | 'double-decoded-rejection'     // decode round-trip hits a rejection vector
-  | 'query-present'                // '?' component
-  | 'fragment-present';            // '#' component
+  | "scheme-mismatch" // not 'oc' or mixed-case scheme
+  | "userinfo-present" // authority contains '@'
+  | "empty-authority" // no tenant-id
+  | "idn-homoglyph" // IDNA pass is not idempotent
+  | "percent-encoded-slash" // %2F / %2f in path
+  | "fraction-slash" // U+2044 in path
+  | "backslash" // '\' in path
+  | "overlong-utf8" // non-shortest-form UTF-8
+  | "null-byte" // \x00 anywhere
+  | "bom" // U+FEFF anywhere
+  | "control-character" // \x01-\x1F or \x7F
+  | "path-traversal-segment" // '.' or '..' segment
+  | "empty-segment" // '//' in path
+  | "double-decoded-rejection" // decode round-trip hits a rejection vector
+  | "query-present" // '?' component
+  | "fragment-present"; // '#' component
 
 export interface OcUriError {
   ok: false;
   reason: OcUriInvalidReason;
-  inputLength: number;             // audit-safe: length only, never echo the attacker-controlled bytes
+  inputLength: number; // audit-safe: length only, never echo the attacker-controlled bytes
 }
 
 export type OcUriResult = { ok: true; value: CanonicalOcUri } | OcUriError;
@@ -128,20 +128,20 @@ Notes on the error shape: `OcUriError` MUST NOT echo the offending input in the 
 
 Every implementation MUST have at least these 12 rejection vectors as L0 unit tests. Additional vectors MAY be added.
 
-| # | Attack vector | Example input | Expected `reason` |
-|---|---|---|---|
-| 1 | Percent-encoded slash | `oc://tenantB%2Fworkspace/TOOLS.md` | `percent-encoded-slash` |
-| 2 | Uppercase percent-encoded slash | `oc://tenantB%2fworkspace/TOOLS.md` | `percent-encoded-slash` |
-| 3 | Unicode fraction-slash | `oc://tenantB\u2044workspace/TOOLS.md` | `fraction-slash` |
-| 4 | NTFS backslash | `oc://tenantB/workspace\TOOLS.md` | `backslash` |
-| 5 | Overlong UTF-8 `/` | `oc://tenantB/\xC0\xAFworkspace/TOOLS.md` | `overlong-utf8` |
-| 6 | Null byte | `oc://tenantB/TOOLS.md\x00.txt` | `null-byte` |
-| 7 | BOM prefix | `\uFEFFoc://tenantB/TOOLS.md` | `bom` |
-| 8 | Mixed-case scheme | `OC://tenantB/TOOLS.md` | `scheme-mismatch` |
-| 9 | Userinfo present | `oc://alice@tenantB/TOOLS.md` | `userinfo-present` |
-| 10 | IDN homoglyph (Cyrillic `а`) | `oc://tenаntB/TOOLS.md` | `idn-homoglyph` |
-| 11 | Path traversal segment | `oc://tenantB/../tenantA/TOOLS.md` | `path-traversal-segment` |
-| 12 | Double-encoded slash | `oc://tenantB%252Fworkspace/TOOLS.md` | `double-decoded-rejection` |
+| #   | Attack vector                   | Example input                             | Expected `reason`          |
+| --- | ------------------------------- | ----------------------------------------- | -------------------------- |
+| 1   | Percent-encoded slash           | `oc://tenantB%2Fworkspace/TOOLS.md`       | `percent-encoded-slash`    |
+| 2   | Uppercase percent-encoded slash | `oc://tenantB%2fworkspace/TOOLS.md`       | `percent-encoded-slash`    |
+| 3   | Unicode fraction-slash          | `oc://tenantB\u2044workspace/TOOLS.md`    | `fraction-slash`           |
+| 4   | NTFS backslash                  | `oc://tenantB/workspace\TOOLS.md`         | `backslash`                |
+| 5   | Overlong UTF-8 `/`              | `oc://tenantB/\xC0\xAFworkspace/TOOLS.md` | `overlong-utf8`            |
+| 6   | Null byte                       | `oc://tenantB/TOOLS.md\x00.txt`           | `null-byte`                |
+| 7   | BOM prefix                      | `\uFEFFoc://tenantB/TOOLS.md`             | `bom`                      |
+| 8   | Mixed-case scheme               | `OC://tenantB/TOOLS.md`                   | `scheme-mismatch`          |
+| 9   | Userinfo present                | `oc://alice@tenantB/TOOLS.md`             | `userinfo-present`         |
+| 10  | IDN homoglyph (Cyrillic `а`)    | `oc://tenаntB/TOOLS.md`                   | `idn-homoglyph`            |
+| 11  | Path traversal segment          | `oc://tenantB/../tenantA/TOOLS.md`        | `path-traversal-segment`   |
+| 12  | Double-encoded slash            | `oc://tenantB%252Fworkspace/TOOLS.md`     | `double-decoded-rejection` |
 
 All 12 MUST be in the L0 suite at `packages/openclaw-workspace/test/oc-uri-canonical.unit.test.ts` (proposed location; wave-stage path is the authoring convention). Any canonicalizer that accepts any of these 12 fails the contract.
 
@@ -202,7 +202,7 @@ The two share the package scope but have no shared code; their contracts, failur
 
 ### 6. Impact on CL-13 repo-ops oracle amendment
 
-The CL-13 oracle amendment's plan 6 `cross-tenant-oc-URI-rejected-by-host-proxy` scenario cites this spec as its canonical source. Rejection is measured against the 12-vector L0 suite plus any host-preset-specific additions (e.g., aether may add tenant-allowlist checks *after* canonicalization; those checks presume canonical input).
+The CL-13 oracle amendment's plan 6 `cross-tenant-oc-URI-rejected-by-host-proxy` scenario cites this spec as its canonical source. Rejection is measured against the 12-vector L0 suite plus any host-preset-specific additions (e.g., aether may add tenant-allowlist checks _after_ canonicalization; those checks presume canonical input).
 
 ## Test tiers
 

@@ -12,14 +12,14 @@
 
 Fleet baselines are stored in the fleet manifest, separate from workspace-local snapshots. The storage backend must support:
 
-| Requirement | Rationale |
-|-------------|-----------|
+| Requirement            | Rationale                                                   |
+| ---------------------- | ----------------------------------------------------------- |
 | Cross-workspace access | All fleet workspaces read the baseline for drift comparison |
-| Version history | Rollback to previous baselines if a promotion causes issues |
-| Integrity verification | Baselines are signed and verified on read |
-| Concurrent read safety | Multiple drift scans read the baseline simultaneously |
+| Version history        | Rollback to previous baselines if a promotion causes issues |
+| Integrity verification | Baselines are signed and verified on read                   |
+| Concurrent read safety | Multiple drift scans read the baseline simultaneously       |
 
-The specific backend (shared filesystem, object storage, git repository) is a deployment decision. claws abstracts this behind a storage interface. *(Source: snapshot-lifecycle S03-F01)*
+The specific backend (shared filesystem, object storage, git repository) is a deployment decision. claws abstracts this behind a storage interface. _(Source: snapshot-lifecycle S03-F01)_
 
 ---
 
@@ -31,7 +31,7 @@ Promoting a snapshot to fleet baseline is a privileged operation. It requires:
 2. **Authorization**: Operator has fleet-admin or baseline-manager role
 3. **Audit**: Promotion event recorded with operator identity and reason
 
-Unauthorized promotion attempts are blocked and logged. In environments without auth infrastructure, promote requires `--i-am-authorized` flag as an explicit acknowledgment. *(Source: snapshot-lifecycle S03-F03)*
+Unauthorized promotion attempts are blocked and logged. In environments without auth infrastructure, promote requires `--i-am-authorized` flag as an explicit acknowledgment. _(Source: snapshot-lifecycle S03-F03)_
 
 ---
 
@@ -61,7 +61,7 @@ Error: Cannot promote snapshot with governance errors.
   Fix violations and re-save, or use a clean snapshot.
 ```
 
-*(Source: snapshot-lifecycle S03-F04, P-189)*
+_(Source: snapshot-lifecycle S03-F04, P-189)_
 
 ---
 
@@ -69,7 +69,7 @@ Error: Cannot promote snapshot with governance errors.
 
 When a new baseline is promoted, all cached drift results across the fleet are invalidated. Drift reports generated against the previous baseline are stale and must be regenerated. This prevents the scenario where workspaces appear "compliant" against an old baseline while drifting from the new one.
 
-The invalidation is communicated via the fleet manifest version bump. Drift tools check the baseline version before reporting and re-scan if stale. *(Source: snapshot-lifecycle S03-F05, P-190)*
+The invalidation is communicated via the fleet manifest version bump. Drift tools check the baseline version before reporting and re-scan if stale. _(Source: snapshot-lifecycle S03-F05, P-190)_
 
 ---
 
@@ -77,13 +77,13 @@ The invalidation is communicated via the fleet manifest version bump. Drift tool
 
 Fleets can maintain separate baselines per environment:
 
-| Environment | Baseline | Purpose |
-|-------------|----------|---------|
-| `production` | Strictest policy | Production workspaces |
-| `staging` | Production-equivalent | Pre-production validation |
-| `development` | Relaxed policy | Developer experimentation |
+| Environment   | Baseline              | Purpose                   |
+| ------------- | --------------------- | ------------------------- |
+| `production`  | Strictest policy      | Production workspaces     |
+| `staging`     | Production-equivalent | Pre-production validation |
+| `development` | Relaxed policy        | Developer experimentation |
 
-Each environment has independent promotion, versioning, and drift tracking. Promoting to production does not affect the development baseline. *(Source: snapshot-lifecycle S03-F06)*
+Each environment has independent promotion, versioning, and drift tracking. Promoting to production does not affect the development baseline. _(Source: snapshot-lifecycle S03-F06)_
 
 ---
 
@@ -95,7 +95,7 @@ Fleet baselines maintain a version history:
 - Previous versions are retained per the fleet retention policy
 - `claws snap promote --rollback` restores the previous baseline version
 
-Rollback is itself a privileged operation requiring the same auth as promotion. *(Source: snapshot-lifecycle S03-F07)*
+Rollback is itself a privileged operation requiring the same auth as promotion. _(Source: snapshot-lifecycle S03-F07)_
 
 ---
 
@@ -112,7 +112,7 @@ This will replace the production fleet baseline.
 Proceed? [y/N]
 ```
 
-`--dry-run` shows what would happen without making changes. `--yes` skips the confirmation for CI/CD pipelines. *(Source: snapshot-lifecycle S03-F08)*
+`--dry-run` shows what would happen without making changes. `--yes` skips the confirmation for CI/CD pipelines. _(Source: snapshot-lifecycle S03-F08)_
 
 ---
 

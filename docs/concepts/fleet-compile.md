@@ -80,16 +80,16 @@ only on `success: true`, and cache writes are atomic (tempfile + rename in
 
 Every run exposes a `FleetSummary` payload:
 
-| Field | Description |
-|---|---|
-| `totalWorkspaces` | discovered workspace count |
-| `succeeded` | workspaces with `status: 'success'` |
-| `failed` | workspaces with `status: 'failure'` |
-| `skipped` | workspaces with `status: 'cancelled'` or `'not-started'` |
-| `wallClockMs` | end-to-end wall-clock of the fleet run |
-| `peakConcurrency` | monotonic high-water-mark from the semaphore |
-| `parallelismRatio` | `sum(per-task ms) / wall-clock ms`; `>= 1` serial |
-| `maxConcurrency` | the `--max-concurrency` cap that ran |
+| Field              | Description                                              |
+| ------------------ | -------------------------------------------------------- |
+| `totalWorkspaces`  | discovered workspace count                               |
+| `succeeded`        | workspaces with `status: 'success'`                      |
+| `failed`           | workspaces with `status: 'failure'`                      |
+| `skipped`          | workspaces with `status: 'cancelled'` or `'not-started'` |
+| `wallClockMs`      | end-to-end wall-clock of the fleet run                   |
+| `peakConcurrency`  | monotonic high-water-mark from the semaphore             |
+| `parallelismRatio` | `sum(per-task ms) / wall-clock ms`; `>= 1` serial        |
+| `maxConcurrency`   | the `--max-concurrency` cap that ran                     |
 
 `peakConcurrency` is the **peak**, not the mean. If workspace durations vary
 (`A` takes 1s, `B` takes 10s), the steady-state concurrency dips near the
@@ -113,15 +113,15 @@ no wrapping array, no trailing comma.
 
 The diagnostic `kind` field is a closed discriminated union per CL-01 v1.2:
 
-| Kind | Typical stage | Cause |
-|---|---|---|
-| `MissingSoulFile` | `parse` | SOUL.md missing or unreadable |
-| `MalformedLobsterYaml` | `parse` | lobster.yaml YAML parse failed |
-| `MissingFrontmatterField` | `parse` | required frontmatter field absent |
-| `PermissionDenied` | `parse` | EACCES / EPERM on a workspace file |
-| `CompileFailed` | any | generic fallback; message preserved |
-| `EmitFailed` | `emit` | emit stage rejected the IR |
-| `ValidationFailed` | `validate` | 12-check validator rejected emit output |
+| Kind                      | Typical stage | Cause                                   |
+| ------------------------- | ------------- | --------------------------------------- |
+| `MissingSoulFile`         | `parse`       | SOUL.md missing or unreadable           |
+| `MalformedLobsterYaml`    | `parse`       | lobster.yaml YAML parse failed          |
+| `MissingFrontmatterField` | `parse`       | required frontmatter field absent       |
+| `PermissionDenied`        | `parse`       | EACCES / EPERM on a workspace file      |
+| `CompileFailed`           | any           | generic fallback; message preserved     |
+| `EmitFailed`              | `emit`        | emit stage rejected the IR              |
+| `ValidationFailed`        | `validate`    | 12-check validator rejected emit output |
 
 Adding a new `kind` is additive-only — new consumers must handle it; existing
 consumers keep compiling.
@@ -131,11 +131,11 @@ consumers keep compiling.
 Each in-flight compile loads the full workspace model into memory plus the
 emit artifacts for every target. Approximate budget:
 
-| Workspace size | Approx. peak memory per compile |
-|---|---|
-| Small (tutorial-scale) | ~50 MB |
-| Medium (production workspace) | ~200 MB |
-| Large (SOC2 + multi-target + audit chain) | ~500 MB |
+| Workspace size                            | Approx. peak memory per compile |
+| ----------------------------------------- | ------------------------------- |
+| Small (tutorial-scale)                    | ~50 MB                          |
+| Medium (production workspace)             | ~200 MB                         |
+| Large (SOC2 + multi-target + audit chain) | ~500 MB                         |
 
 At `--max-concurrency N`, peak fleet memory is approximately `N × per-compile`
 plus the orchestrator overhead (~20 MB). Some rules of thumb:

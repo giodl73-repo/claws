@@ -15,7 +15,10 @@ expect:
   prevention: "`claws check --singleton` detects multiple instances of governance in the dependency tree. Package includes singleton version check at import time that warns when multiple copies are detected."
 
 simulate:
-  failures: ["npm installs two versions of merged @craftworks/governance package through direct and transitive dependency paths"]
+  failures:
+    [
+      "npm installs two versions of merged @craftworks/governance package through direct and transitive dependency paths",
+    ]
   halt: null
   budget: null
 

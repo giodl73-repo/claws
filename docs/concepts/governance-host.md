@@ -8,14 +8,14 @@ GovernanceHost is the contract between the claws governance engine and the host 
 
 ## The Six Facets
 
-| Facet | What It Does |
-|-------|-------------|
-| `evaluate(rule)` | Evaluate a governance rule against current state |
-| `enforce(action)` | Apply an enforcement action (block, warn, log) |
-| `report(diagnostic)` | Emit a diagnostic to the host's output channel |
-| `query(expr)` | Run a sift expression against workspace state |
-| `checkpoint()` | Save governance state for crash recovery |
-| `health()` | Report governance engine health status |
+| Facet                | What It Does                                     |
+| -------------------- | ------------------------------------------------ |
+| `evaluate(rule)`     | Evaluate a governance rule against current state |
+| `enforce(action)`    | Apply an enforcement action (block, warn, log)   |
+| `report(diagnostic)` | Emit a diagnostic to the host's output channel   |
+| `query(expr)`        | Run a sift expression against workspace state    |
+| `checkpoint()`       | Save governance state for crash recovery         |
+| `health()`           | Report governance engine health status           |
 
 ## Host Implementations
 

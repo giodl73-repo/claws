@@ -12,11 +12,27 @@ Use **FACES**: **Frame, Audit, Compare, Evaluate, Slice**.
 Write the smallest falsifiable thesis before choosing implementation:
 
 - problem and affected users;
+- the owner system that already works and should remain authoritative;
 - current workaround and measurable cost;
-- proposed invariant or contract;
+- proposed shared capability, invariant, or contract;
+- ownership explicitly retained by each product area;
 - explicit V1 boundaries and non-goals;
 - deletion or simplification target;
 - evidence that would disprove the idea.
+
+Use **owner-first capability framing** in RFCs, PR descriptions, and stakeholder
+pitches:
+
+```text
+working owner system
++ missing shared capability
+-> easier reuse and consistent evidence
+```
+
+Lead with what already works. State what the proposal contributes around it,
+then name what remains owner-controlled: semantics, catalogs, workflows,
+rendering, publication, and review policy as applicable. Avoid language that
+implies a central platform will absorb or replace healthy owner systems.
 
 Keep active notes in the owning `projects/<area>/` surface. Load its `SESSION.md`
 and `README.md` first.

@@ -4,7 +4,7 @@ A typed declaration of what an AI agent workspace can do -- tools, data access, 
 
 ## Overview
 
-The capability manifest is a structured inventory of a workspace's runtime capabilities. It is produced during `claws build` by scanning the workspace's compiled artifacts and recording every tool grant, data source, model binding, and external integration. The manifest enables governance rules to make decisions based on what a workspace *can* do, not just what it *should* do.
+The capability manifest is a structured inventory of a workspace's runtime capabilities. It is produced during `claws build` by scanning the workspace's compiled artifacts and recording every tool grant, data source, model binding, and external integration. The manifest enables governance rules to make decisions based on what a workspace _can_ do, not just what it _should_ do.
 
 ## Manifest Contents
 

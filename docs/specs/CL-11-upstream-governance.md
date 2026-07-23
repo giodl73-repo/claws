@@ -107,12 +107,12 @@ system with no providers is fail-closed, not permissive.
 
 When a provider throws an exception during `preAuthorize()`:
 
-| Risk Level | Fail Mode | Behavior |
-|------------|-----------|----------|
-| R1-R2 | Fail-open | Tool proceeds (low risk, don't block on provider error) |
-| R3-R4 | Configurable | Default: fail-closed. Fleet policy can override to fail-open. |
-| R5 | Fail-closed | Tool blocked. **Non-negotiable, non-configurable.** |
-| Unknown / Missing / Invalid | Fail-closed | No risk classification = treat as R5. **Non-negotiable.** |
+| Risk Level                  | Fail Mode    | Behavior                                                      |
+| --------------------------- | ------------ | ------------------------------------------------------------- |
+| R1-R2                       | Fail-open    | Tool proceeds (low risk, don't block on provider error)       |
+| R3-R4                       | Configurable | Default: fail-closed. Fleet policy can override to fail-open. |
+| R5                          | Fail-closed  | Tool blocked. **Non-negotiable, non-configurable.**           |
+| Unknown / Missing / Invalid | Fail-closed  | No risk classification = treat as R5. **Non-negotiable.**     |
 
 The 100ms SLA on `preAuthorize()` exists because governance must not add perceptible
 latency to tool execution. If a provider exceeds 100ms, the registry treats it as a
@@ -150,11 +150,11 @@ type RiskLevel = 1 | 2 | 3 | 4 | 5;
  * Coupled risk level + label. Prevents mismatches like { level: 1, label: 'transact' }.
  */
 type RiskClassification =
-  | { level: 1; label: 'read' }
-  | { level: 2; label: 'write' }
-  | { level: 3; label: 'communicate' }
-  | { level: 4; label: 'execute' }
-  | { level: 5; label: 'transact' };
+  | { level: 1; label: "read" }
+  | { level: 2; label: "write" }
+  | { level: 3; label: "communicate" }
+  | { level: 4; label: "execute" }
+  | { level: 5; label: "transact" };
 
 /**
  * A tool call entering the governance pipeline.
@@ -177,7 +177,7 @@ interface ToolCall {
     /** Session ID (e.g., "main", "cron:daily-triage", "channel:design-team"). */
     sessionId?: string;
     /** Session type — providers may apply different policies per session type. */
-    sessionType?: 'main' | 'cron' | 'channel' | 'agent';
+    sessionType?: "main" | "cron" | "channel" | "agent";
   };
 
   /** Host-specific context. Consumers MUST ignore unknown keys. */
@@ -190,17 +190,13 @@ interface ToolCall {
  * Authorization decisions are a discriminated union on the `decision` field.
  * Each variant carries only its valid fields -- invalid states are unrepresentable.
  */
-type AuthorizationDecision =
-  | AllowDecision
-  | DenyDecision
-  | ReviewDecision
-  | ModifyDecision;
+type AuthorizationDecision = AllowDecision | DenyDecision | ReviewDecision | ModifyDecision;
 
 /**
  * Tool call proceeds. Provider may signal the host to gate it.
  */
 interface AllowDecision {
-  decision: 'allow';
+  decision: "allow";
 
   /**
    * Signals the host to gate this tool call through its approval UX.
@@ -222,7 +218,7 @@ interface AllowDecision {
  * Tool call is blocked. Agent is informed.
  */
 interface DenyDecision {
-  decision: 'deny';
+  decision: "deny";
 
   /** Why the tool was blocked. Required for deny decisions. */
   reason: string;
@@ -241,7 +237,7 @@ interface DenyDecision {
  * Tool call is held for human review. Implicitly requires external approval.
  */
 interface ReviewDecision {
-  decision: 'review';
+  decision: "review";
 
   /**
    * Always true for review decisions -- review inherently requires
@@ -264,7 +260,7 @@ interface ReviewDecision {
  * Tool call proceeds with modified arguments.
  */
 interface ModifyDecision {
-  decision: 'modify';
+  decision: "modify";
 
   /** The rewritten arguments. Required for modify decisions. */
   modifiedArguments: Record<string, unknown>;
@@ -430,7 +426,7 @@ Wraps the existing `exec-approvals.json` as a GuardrailProvider, providing a
 migration path for current OC deployments.
 
 ```typescript
-import { readFileSync } from 'node:fs';
+import { readFileSync } from "node:fs";
 
 /**
  * ShellExecProvider -- wraps exec-approvals.json as a GuardrailProvider.
@@ -439,12 +435,12 @@ import { readFileSync } from 'node:fs';
  * mechanisms can be wrapped in the new interface without changing behavior.
  */
 class ShellExecProvider implements GuardrailProvider {
-  readonly name = 'exec-approvals';
+  readonly name = "exec-approvals";
 
   private readonly approvals: Map<string, boolean>;
 
   constructor(execApprovalsPath: string) {
-    const doc = JSON.parse(readFileSync(execApprovalsPath, 'utf-8'));
+    const doc = JSON.parse(readFileSync(execApprovalsPath, "utf-8"));
     this.approvals = new Map();
     for (const entry of doc.tools) {
       this.approvals.set(entry.tool_name, entry.requires_approval);
@@ -463,14 +459,14 @@ class ShellExecProvider implements GuardrailProvider {
     // Unknown tool -> fail-closed (require approval, classified as R5)
     if (requiresApproval === undefined) {
       return {
-        decision: 'allow',
+        decision: "allow",
         requiresExternalApproval: true,
         riskLevel: 5,
       };
     }
 
     return {
-      decision: 'allow',
+      decision: "allow",
       requiresExternalApproval: requiresApproval,
     };
   }
@@ -481,8 +477,8 @@ class ShellExecProvider implements GuardrailProvider {
 
   getCapabilities(): ProviderCapabilities {
     return {
-      description: 'Wraps exec-approvals.json as a GuardrailProvider',
-      version: '1.0.0',
+      description: "Wraps exec-approvals.json as a GuardrailProvider",
+      version: "1.0.0",
       capabilities: {
         riskClassification: false,
         auditTrail: false,
@@ -519,7 +515,7 @@ interface ApprovalRequestEvent {
   schemaVersion: number;
 
   /** Fixed discriminator. */
-  type: 'approval_request';
+  type: "approval_request";
 
   /** Unique ID for correlation with the response. */
   requestId: string;
@@ -584,7 +580,7 @@ interface ApprovalResponseEvent {
   schemaVersion: number;
 
   /** Fixed discriminator. */
-  type: 'approval_response';
+  type: "approval_response";
 
   /** Correlates with ApprovalRequestEvent.requestId. */
   requestId: string;
@@ -595,12 +591,12 @@ interface ApprovalResponseEvent {
   /** The decision. */
   decision: {
     /** Outcome. */
-    status: 'approved' | 'denied' | 'timeout';
+    status: "approved" | "denied" | "timeout";
 
     /** Who decided. */
     decidedBy: {
       /** Human, automated policy, or system timeout. */
-      type: 'user' | 'policy' | 'system';
+      type: "user" | "policy" | "system";
       /** Principal identity (optional). */
       identity?: string;
     };
@@ -628,7 +624,7 @@ interface ApprovalTimeoutPolicy {
   readonly timeoutMs: number;
 
   /** What happens on timeout. */
-  readonly failMode: 'deny' | 'allow';
+  readonly failMode: "deny" | "allow";
 
   /**
    * Risk levels where failMode 'allow' is prohibited.
@@ -647,12 +643,12 @@ interface ApprovalTimeoutPolicy {
 
 The schema is transport-agnostic. Reference mappings for known hosts:
 
-| Host | Transport | Carry Method |
-|------|-----------|-------------|
-| Aether | SSE | New event type `ta` alongside existing `ts`/`tx` |
-| ClawPilot | Electron IPC | `ipcRenderer.send('approval-request', event)` |
-| CLI host | stdio | JSON line on stdout, response JSON on stdin |
-| Custom | WebSocket | `ws.send(JSON.stringify(event))` |
+| Host      | Transport    | Carry Method                                     |
+| --------- | ------------ | ------------------------------------------------ |
+| Aether    | SSE          | New event type `ta` alongside existing `ts`/`tx` |
+| ClawPilot | Electron IPC | `ipcRenderer.send('approval-request', event)`    |
+| CLI host  | stdio        | JSON line on stdout, response JSON on stdin      |
+| Custom    | WebSocket    | `ws.send(JSON.stringify(event))`                 |
 
 ### End-to-End Sequence
 
@@ -707,11 +703,11 @@ real-time event dispatch with batching and buffering.
 ### API
 
 ```typescript
-import { AuditChain } from '@openclaw/audit-chain';
+import { AuditChain } from "@openclaw/audit-chain";
 
 // Create a chain (persisted to JSONL file)
-const chain = await AuditChain.open('./audit/chain.jsonl', {
-  algorithm: 'HMAC-SHA256',    // default
+const chain = await AuditChain.open("./audit/chain.jsonl", {
+  algorithm: "HMAC-SHA256", // default
   secret: process.env.AUDIT_SECRET,
 });
 // Also supports: algorithm: 'Ed25519' with publicKey/privateKey config
@@ -720,10 +716,10 @@ const chain = await AuditChain.open('./audit/chain.jsonl', {
 
 // Append an event
 const entry = await chain.append({
-  type: 'tool_call',
-  tool: 'send-email',
-  decision: 'denied',
-  reason: 'R5 timeout',
+  type: "tool_call",
+  tool: "send-email",
+  decision: "denied",
+  reason: "R5 timeout",
   timestamp: new Date().toISOString(),
 });
 // entry.hash: 'a3f2...', entry.prevHash: '0000...'
@@ -737,17 +733,17 @@ if (!result.intact) {
 }
 
 // Query events
-const denials = await chain.query({ type: 'tool_call', decision: 'denied' });
+const denials = await chain.query({ type: "tool_call", decision: "denied" });
 
 // Export to standard formats (historical chain data)
-const sarif  = await chain.export('sarif');   // SARIF 2.1.0
-const cef    = await chain.export('cef');     // ArcSight CEF
-const ndjson = await chain.export('ndjson');  // Newline-delimited JSON
-const json   = await chain.export('json');    // Flat JSON array
-const syslog = await chain.export('syslog');  // RFC 5424
+const sarif = await chain.export("sarif"); // SARIF 2.1.0
+const cef = await chain.export("cef"); // ArcSight CEF
+const ndjson = await chain.export("ndjson"); // Newline-delimited JSON
+const json = await chain.export("json"); // Flat JSON array
+const syslog = await chain.export("syslog"); // RFC 5424
 
 // Prune old entries (keeps integrity -- inserts tombstone)
-await chain.prune({ olderThan: '30d' });
+await chain.prune({ olderThan: "30d" });
 ```
 
 ### Types
@@ -783,7 +779,7 @@ interface VerifyResult {
 }
 
 /** Shared across audit-chain (export) and siem-emitter (live dispatch). */
-type ExportFormat = 'sarif' | 'cef' | 'json' | 'ndjson' | 'syslog';
+type ExportFormat = "sarif" | "cef" | "json" | "ndjson" | "syslog";
 ```
 
 ### Write-Ahead Log (WAL)
@@ -792,7 +788,7 @@ Crash recovery via WAL ensures no audit events are lost:
 
 ```typescript
 // WAL is transparent -- enabled by default
-const chain = await AuditChain.open('./chain.jsonl', { wal: true });
+const chain = await AuditChain.open("./chain.jsonl", { wal: true });
 
 // If the process crashes mid-append, recovery is automatic on next open
 // WAL is flushed after successful append + fsync
@@ -818,14 +814,14 @@ deployment where the verifier is a separate trust boundary.
 ### API
 
 ```typescript
-import { BudgetMeter } from '@openclaw/budget-meter';
+import { BudgetMeter } from "@openclaw/budget-meter";
 
 const meter = new BudgetMeter({
   maxTokens: 50_000,
   thresholds: [
-    { at: 0.80, action: 'warn' },
-    { at: 0.95, action: 'warn' },
-    { at: 1.00, action: 'throttle' },
+    { at: 0.8, action: "warn" },
+    { at: 0.95, action: "warn" },
+    { at: 1.0, action: "throttle" },
   ],
 });
 
@@ -837,7 +833,7 @@ const status = meter.status();
 // { used: 12400, limit: 50000, percent: 0.248, throttled: false }
 
 // Listen for threshold events
-meter.on('threshold', (event) => {
+meter.on("threshold", (event) => {
   // event: { threshold: 0.80, used: 40200, limit: 50000, action: 'warn' }
 });
 
@@ -864,15 +860,15 @@ interface BudgetConfig {
 }
 
 interface ThresholdConfig {
-  at: number;                  // 0.0 - 1.0
-  action: 'warn' | 'throttle';
+  at: number; // 0.0 - 1.0
+  action: "warn" | "throttle";
 }
 
 interface ThresholdEvent {
   threshold: number;
   used: number;
   limit: number;
-  action: 'warn' | 'throttle';
+  action: "warn" | "throttle";
   timestamp: string;
 }
 
@@ -901,16 +897,16 @@ application startup. This keeps the bridge deterministic and safe for use inside
 ### API
 
 ```typescript
-import { IdentityBridge } from '@openclaw/identity-bridge';
+import { IdentityBridge } from "@openclaw/identity-bridge";
 
 const bridge = new IdentityBridge({
-  provider: 'oidc',
-  issuer: 'https://login.microsoftonline.com/tenant-id/v2.0',
-  signingKeys: preloadedJwks,  // JWKS loaded at app startup, not at runtime
+  provider: "oidc",
+  issuer: "https://login.microsoftonline.com/tenant-id/v2.0",
+  signingKeys: preloadedJwks, // JWKS loaded at app startup, not at runtime
   roleMapping: {
-    'SG-AI-Admins': 'admin',
-    'SG-AI-Devs': 'editor',
-    'SG-AI-Viewers': 'viewer',
+    "SG-AI-Admins": "admin",
+    "SG-AI-Devs": "editor",
+    "SG-AI-Viewers": "viewer",
   },
 });
 
@@ -919,7 +915,7 @@ const identity = await bridge.validate(bearerToken);
 // identity: { sub: '...', roles: ['admin'], groups: ['SG-AI-Admins'] }
 
 // Check RBAC permission
-const allowed = bridge.checkPermission(identity, 'build');
+const allowed = bridge.checkPermission(identity, "build");
 // true (admin has build permission)
 
 // Handle validation failure
@@ -968,21 +964,21 @@ export, see `@openclaw/audit-chain`. Both packages share the `ExportFormat` type
 ### API
 
 ```typescript
-import { SiemEmitter } from '@openclaw/siem-emitter';
+import { SiemEmitter } from "@openclaw/siem-emitter";
 
 const emitter = new SiemEmitter({
-  format: 'cef',           // 'cef' | 'ndjson' | 'syslog' | 'sarif' | 'json'
-  destination: './siem/',
+  format: "cef", // 'cef' | 'ndjson' | 'syslog' | 'sarif' | 'json'
+  destination: "./siem/",
   batchSize: 100,
 });
 
 // Emit a governance event
 await emitter.emit({
-  type: 'tool_blocked',
-  tool: 'send-email',
+  type: "tool_blocked",
+  tool: "send-email",
   risk: 5,
-  reason: 'R5 timeout denial',
-  agent: 'email-drafter',
+  reason: "R5 timeout denial",
+  agent: "email-drafter",
   timestamp: new Date().toISOString(),
 });
 
@@ -990,7 +986,7 @@ await emitter.emit({
 await emitter.flush();
 
 // Handle emit failure
-emitter.on('error', (err) => {
+emitter.on("error", (err) => {
   // err: { event, reason } -- the event that failed to emit and why.
   // Remediation: retry, log to fallback, or alert.
 });
@@ -999,6 +995,7 @@ emitter.on('error', (err) => {
 ### Format Examples
 
 **CEF** (ArcSight Common Event Format):
+
 ```
 CEF:0|OpenClaw|GovernanceAudit|1.0|tool_blocked|Tool Blocked|8|
   src=email-drafter dst=send-email cs1=R5 cs1Label=RiskLevel
@@ -1006,29 +1003,43 @@ CEF:0|OpenClaw|GovernanceAudit|1.0|tool_blocked|Tool Blocked|8|
 ```
 
 **NDJSON** (Newline-Delimited JSON):
+
 ```json
-{"type":"tool_blocked","tool":"send-email","risk":5,"reason":"R5 timeout denial","agent":"email-drafter","timestamp":"2026-04-15T10:30:00Z"}
+{
+  "type": "tool_blocked",
+  "tool": "send-email",
+  "risk": 5,
+  "reason": "R5 timeout denial",
+  "agent": "email-drafter",
+  "timestamp": "2026-04-15T10:30:00Z"
+}
 ```
 
 **Syslog** (RFC 5424):
+
 ```
 <134>1 2026-04-15T10:30:00Z agent email-drafter GovernanceAudit - -
   tool_blocked: send-email (R5) R5 timeout denial
 ```
 
 **SARIF** (Static Analysis Results Interchange Format 2.1.0):
+
 ```json
 {
   "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
   "version": "2.1.0",
-  "runs": [{
-    "tool": { "driver": { "name": "OpenClaw GovernanceAudit", "version": "1.0.0" } },
-    "results": [{
-      "ruleId": "tool_blocked",
-      "level": "error",
-      "message": { "text": "send-email blocked: R5 timeout denial" }
-    }]
-  }]
+  "runs": [
+    {
+      "tool": { "driver": { "name": "OpenClaw GovernanceAudit", "version": "1.0.0" } },
+      "results": [
+        {
+          "ruleId": "tool_blocked",
+          "level": "error",
+          "message": { "text": "send-email blocked: R5 timeout denial" }
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -1043,16 +1054,16 @@ CEF:0|OpenClaw|GovernanceAudit|1.0|tool_blocked|Tool Blocked|8|
 ### API
 
 ```typescript
-import { SecretScanner } from '@openclaw/secret-scanner';
+import { SecretScanner } from "@openclaw/secret-scanner";
 
 const scanner = new SecretScanner({
-  patterns: 'default',
+  patterns: "default",
   entropyThreshold: 4.5,
-  ignoreFiles: ['*.test.ts'],
+  ignoreFiles: ["*.test.ts"],
 });
 
 // Scan workspace files
-const results = await scanner.scan('./workspace/');
+const results = await scanner.scan("./workspace/");
 // results.findings: [
 //   { file: 'TOOLS.md', line: 42, type: 'api_key', severity: 'high' },
 // ]
@@ -1065,22 +1076,22 @@ if (results.findings.length > 0) {
 }
 
 // Check a single string
-const suspicious = scanner.check('sk-ant-api03-abc123...');
+const suspicious = scanner.check("sk-ant-api03-abc123...");
 // { isSecret: true, type: 'api_key', entropy: 5.1 }
 ```
 
 ### Built-in Patterns
 
-| Pattern | Matches | Example |
-|---------|---------|---------|
-| `api_key` | API keys (sk-, pk-, key-) | `sk-ant-api03-...` |
-| `bearer_token` | Bearer/JWT tokens | `eyJhbGciOiJ...` |
-| `aws_key` | AWS access keys | `AKIA...` |
-| `azure_key` | Azure keys and connection strings | `DefaultEndpointsProtocol=...` |
-| `github_token` | GitHub PAT/fine-grained tokens | `ghp_...`, `github_pat_...` |
-| `password` | Password assignments | `password=`, `passwd:` |
-| `private_key` | PEM private keys | `-----BEGIN RSA PRIVATE KEY-----` |
-| `connection_string` | Database connection strings | `mongodb://user:pass@...` |
+| Pattern             | Matches                           | Example                           |
+| ------------------- | --------------------------------- | --------------------------------- |
+| `api_key`           | API keys (sk-, pk-, key-)         | `sk-ant-api03-...`                |
+| `bearer_token`      | Bearer/JWT tokens                 | `eyJhbGciOiJ...`                  |
+| `aws_key`           | AWS access keys                   | `AKIA...`                         |
+| `azure_key`         | Azure keys and connection strings | `DefaultEndpointsProtocol=...`    |
+| `github_token`      | GitHub PAT/fine-grained tokens    | `ghp_...`, `github_pat_...`       |
+| `password`          | Password assignments              | `password=`, `passwd:`            |
+| `private_key`       | PEM private keys                  | `-----BEGIN RSA PRIVATE KEY-----` |
+| `connection_string` | Database connection strings       | `mongodb://user:pass@...`         |
 
 ### Entropy Analysis
 
@@ -1103,15 +1114,15 @@ import {
   createApprovalRequest,
   validateApprovalResponse,
   isTimedOut,
-} from '@openclaw/approval-events';
+} from "@openclaw/approval-events";
 
 // Build a well-formed request from a tool call + authorization decision
 const request = createApprovalRequest({
-  toolCall: { server: 'outlook', tool: 'send-email', arguments: { to: '...' } },
-  decision: { decision: 'allow', requiresExternalApproval: true, riskLevel: 5 },
-  provider: 'claws',
-  ruleId: 'G-CLASS-R5',
-  conversationId: 'conv-123',
+  toolCall: { server: "outlook", tool: "send-email", arguments: { to: "..." } },
+  decision: { decision: "allow", requiresExternalApproval: true, riskLevel: 5 },
+  provider: "claws",
+  ruleId: "G-CLASS-R5",
+  conversationId: "conv-123",
 });
 
 // Validate a response conforms to the schema
@@ -1121,7 +1132,7 @@ const validation = validateApprovalResponse(responseEvent);
 // Check if a pending request has timed out
 const timedOut = isTimedOut(request, {
   timeoutMs: 300_000,
-  failMode: 'deny',
+  failMode: "deny",
   alwaysDenyRiskLevels: [5],
 });
 // { expired: true, failMode: 'deny' }
@@ -1164,24 +1175,24 @@ scheme.
 ### API
 
 ```typescript
-import { parseOcPath, formatOcPath, type OcPath } from '@openclaw/oc-path';
+import { parseOcPath, formatOcPath, type OcPath } from "@openclaw/oc-path";
 
-const path = parseOcPath('oc://TOOLS.md/Tools/send-email/risk');
+const path = parseOcPath("oc://TOOLS.md/Tools/send-email/risk");
 // { file: 'TOOLS.md', section: 'Tools', item: 'send-email', field: 'risk' }
 
-const uri = formatOcPath({ file: 'SOUL.md', section: 'Boundaries' });
+const uri = formatOcPath({ file: "SOUL.md", section: "Boundaries" });
 // 'oc://SOUL.md/Boundaries'
 
 // Session-scoped
-const scoped = parseOcPath('oc://TOOLS.md/Tools/send-email?session=cron:daily');
+const scoped = parseOcPath("oc://TOOLS.md/Tools/send-email?session=cron:daily");
 // { file: 'TOOLS.md', section: 'Tools', item: 'send-email', session: 'cron:daily' }
 
 // Lobster workflow
-const step = parseOcPath('oc://lobster.yaml/steps/triage/tools');
+const step = parseOcPath("oc://lobster.yaml/steps/triage/tools");
 // { file: 'lobster.yaml', section: 'steps', item: 'triage', field: 'tools' }
 
 // Skills
-const skill = parseOcPath('oc://skills/email-drafter/SKILL.md');
+const skill = parseOcPath("oc://skills/email-drafter/SKILL.md");
 // { file: 'skills', item: 'email-drafter', field: 'SKILL.md' }
 ```
 
@@ -1189,6 +1200,7 @@ const skill = parseOcPath('oc://skills/email-drafter/SKILL.md');
 
 The `oc://` scheme is vendor-neutral — it addresses OC workspace structure, not
 claws-specific concepts. Any tool that reads or writes OC workspace files benefits:
+
 - IDE extensions: map `oc://` paths to file:line locations for diagnostics
 - Admin UIs: reference specific settings in error messages
 - Audit systems: record what was changed using canonical paths
@@ -1227,34 +1239,34 @@ whether or not any developer ever installs the claws compiler.
 
 ### Wave 1: Foundation (Weeks 1-4)
 
-| Deliverable | Target |
-|-------------|--------|
-| GuardrailProvider spec PR -> openclaw/openclaw | Week 1 |
+| Deliverable                                      | Target |
+| ------------------------------------------------ | ------ |
+| GuardrailProvider spec PR -> openclaw/openclaw   | Week 1 |
 | Approval Event Schema RFC (companion to spec PR) | Week 1 |
-| `@openclaw/approval-events` | Week 2 |
-| `@openclaw/identity-bridge` | Week 2 |
-| `@openclaw/budget-meter` | Week 3 |
-| `@openclaw/audit-chain` | Week 4 |
+| `@openclaw/approval-events`                      | Week 2 |
+| `@openclaw/identity-bridge`                      | Week 2 |
+| `@openclaw/budget-meter`                         | Week 3 |
+| `@openclaw/audit-chain`                          | Week 4 |
 
 **Gate**: Each package passes its own test suite with >= 90% coverage.
 All packages compile standalone with zero `@craftworks/*` imports.
 
 ### Wave 2: Ecosystem (Weeks 5-8)
 
-| Deliverable | Target |
-|-------------|--------|
-| `@openclaw/siem-emitter` | Week 5 |
-| `@openclaw/secret-scanner` | Week 6 |
+| Deliverable                                        | Target |
+| -------------------------------------------------- | ------ |
+| `@openclaw/siem-emitter`                           | Week 5 |
+| `@openclaw/secret-scanner`                         | Week 6 |
 | Policy templates (SOC2, HIPAA, EU AI Act, Minimal) | Week 7 |
-| Audit chain format spec (docs) | Week 8 |
+| Audit chain format spec (docs)                     | Week 8 |
 
 ### Wave 3: Enterprise (Weeks 9-16)
 
-| Deliverable | Target |
-|-------------|--------|
-| Community feedback integration | Weeks 9-12 |
+| Deliverable                            | Target      |
+| -------------------------------------- | ----------- |
+| Community feedback integration         | Weeks 9-12  |
 | Enterprise extensions (fleet, signing) | Weeks 13-14 |
-| Documentation site contributions | Weeks 15-16 |
+| Documentation site contributions       | Weeks 15-16 |
 
 ### Validation
 
@@ -1272,32 +1284,32 @@ npm run build                    # -> all compile
 
 1. **@openclaw npm scope**: Registration requires OpenClaw foundation agreement.
    Fallback: `@craftworks-oc/` scope.
-   *Context*: Without the `@openclaw/` scope, the packages lose the "official ecosystem" signal.
-   *Option A*: Negotiate scope access before Wave 1. *Option B*: Publish under `@craftworks-oc/` and migrate later.
-   *The community should weigh*: Does the scope matter for adoption, or is the content sufficient?
+   _Context_: Without the `@openclaw/` scope, the packages lose the "official ecosystem" signal.
+   _Option A_: Negotiate scope access before Wave 1. _Option B_: Publish under `@craftworks-oc/` and migrate later.
+   _The community should weigh_: Does the scope matter for adoption, or is the content sufficient?
 
 2. **Tool argument redaction**: Should `ApprovalRequestEvent.toolCall.arguments`
    be required or optional? Hosts may need to redact PII before emitting.
-   *Recommended default*: optional. Hosts that can safely include arguments should; others omit.
+   _Recommended default_: optional. Hosts that can safely include arguments should; others omit.
 
 3. **Batch approval**: "Approve all R3 tools from server X for this session."
-   *Option A*: Include in v1 schema. *Option B*: Defer to v2.
-   *The community should weigh*: Does batch approval create a "click-through fatigue" bypass for R3 tools, or is it a necessary UX improvement?
+   _Option A_: Include in v1 schema. _Option B_: Defer to v2.
+   _The community should weigh_: Does batch approval create a "click-through fatigue" bypass for R3 tools, or is it a necessary UX improvement?
 
 4. **Modify decision in approval**: Should users be able to modify tool arguments
    through the approval UX, or just approve/deny?
-   *Recommended default*: approve/deny only. Modification is a provider concern, not a user UX concern.
+   _Recommended default_: approve/deny only. Modification is a provider concern, not a user UX concern.
 
 5. **i18n for risk reasons**: `risk.reason` is English. Should there be a
    `risk.reasonKey` for localization?
-   *Recommended default*: defer. Reasons are for logs and developer tools, not end-user UX copy.
+   _Recommended default_: defer. Reasons are for logs and developer tools, not end-user UX copy.
 
 6. **Standing approvals**: "Always approve read-file from sharepoint."
-   *Option A*: Add to the approval event schema. *Option B*: Leave as a host-level feature.
-   *The community should weigh*: Standing approvals reduce friction but create a "set and forget" risk surface.
+   _Option A_: Add to the approval event schema. _Option B_: Leave as a host-level feature.
+   _The community should weigh_: Standing approvals reduce friction but create a "set and forget" risk surface.
 
 7. **Telemetry**: Anonymous, opt-in install + daily active workspace counts.
-   *The community should weigh*: Is telemetry in governance packages acceptable, or does it conflict with the security-first positioning?
+   _The community should weigh_: Is telemetry in governance packages acceptable, or does it conflict with the security-first positioning?
 
 ---
 
@@ -1305,6 +1317,6 @@ npm run build                    # -> all compile
 
 ### Amendment — Audit Cross-Linking (§3a)
 
-*Source: `.craft/waves/260416+horus-the-heir+clawc-migration/specs/drafts/CL-11-amendment-audit-cross-linking.md`. Adds explicit audit-entry types: `ProducerEntry` (emitted at generation time by `@bic/openclaw-policy`), `DecisionEntry` (authorization decision with `declaredTier`/`effectiveTier`/`escalationSource`/`failOpenOverridden`), `ApprovalEntry` (companion approval outcome with 8-value `ApprovalInvalidReason` enum). Defines cross-link fields `policyArtifactSha256` + `correlationId` that thread ProducerEntry → DecisionEntry → ApprovalEntry. Defines sequence-counter persistence (`seq-counter.json` append-only, per-providerId/per-snapshotId, resets on snapshotId change). Defines audit-chain corruption invariants with 3 granular invalidReasons: `correlation-mismatch`, `chain-gap`, `hash-mismatch` (see CL-11 §3a and harness `verifyChain` oracle). Defines `ApprovalSink` interface per-adapter (`emit`/`read`/optional `close`) + conformance suite (`defineApprovalSinkConformance` — 6 obligations). Implemented across pulses 41 (snapshot-switch), 43 (audit chain + corruption detection), 61 (conformance suite), 60 (corruption scenarios).*
+_Source: `.craft/waves/260416+horus-the-heir+clawc-migration/specs/drafts/CL-11-amendment-audit-cross-linking.md`. Adds explicit audit-entry types: `ProducerEntry` (emitted at generation time by `@bic/openclaw-policy`), `DecisionEntry` (authorization decision with `declaredTier`/`effectiveTier`/`escalationSource`/`failOpenOverridden`), `ApprovalEntry` (companion approval outcome with 8-value `ApprovalInvalidReason` enum). Defines cross-link fields `policyArtifactSha256` + `correlationId` that thread ProducerEntry → DecisionEntry → ApprovalEntry. Defines sequence-counter persistence (`seq-counter.json` append-only, per-providerId/per-snapshotId, resets on snapshotId change). Defines audit-chain corruption invariants with 3 granular invalidReasons: `correlation-mismatch`, `chain-gap`, `hash-mismatch` (see CL-11 §3a and harness `verifyChain` oracle). Defines `ApprovalSink` interface per-adapter (`emit`/`read`/optional `close`) + conformance suite (`defineApprovalSinkConformance` — 6 obligations). Implemented across pulses 41 (snapshot-switch), 43 (audit chain + corruption detection), 61 (conformance suite), 60 (corruption scenarios)._
 
 Version: CL-11 bumps to v1.3 at deploy.

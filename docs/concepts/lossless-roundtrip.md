@@ -88,6 +88,7 @@ This determinism is part of the trust model. You can inspect the IR (`claws insp
 ## Scenario-Driven Additions
 
 ### From lossless-roundtrip scenarios (32 findings applied)
+
 - Write-allow-list in EMIT phase explicitly enumerates which paths the compiler may create; any write outside the list is a bug
 - Two hash types: raw-byte SHA-256 for lossless verification (proves files unchanged) vs normalized-content hash for IR caching (ensures cross-platform determinism)
 - BOM preservation: UTF-8/UTF-16 BOMs are stripped from the in-memory read buffer but never removed from disk; binary comparison tests verify BOM round-trip

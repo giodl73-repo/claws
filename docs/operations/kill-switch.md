@@ -111,27 +111,28 @@ $ claws audit history --filter kill
 
 ## Kill vs bypass
 
-| | `claws kill` | `CLAWS_BYPASS=1` |
-|---|---|---|
-| **Effect** | Blocks all tool calls | Allows all calls ungoverned |
-| **Use when** | Agent is doing harm | Governance is blocking legitimate work |
-| **Audit** | Records kill + blocked calls | Records bypass + ungoverned calls |
+|              | `claws kill`                 | `CLAWS_BYPASS=1`                       |
+| ------------ | ---------------------------- | -------------------------------------- |
+| **Effect**   | Blocks all tool calls        | Allows all calls ungoverned            |
+| **Use when** | Agent is doing harm          | Governance is blocking legitimate work |
+| **Audit**    | Records kill + blocked calls | Records bypass + ungoverned calls      |
 
 Kill is for incidents. Bypass is for emergencies where governance itself is
 the problem and a policy fix cannot wait.
 
 ## When to use each path
 
-| Scenario | Path |
-|----------|------|
+| Scenario                 | Path               |
+| ------------------------ | ------------------ |
 | Normal incident response | CLI (`claws kill`) |
-| Gateway is hung | KILL file |
-| Automated IR script | OS signal |
-| Gateway is compromised | Sidecar |
+| Gateway is hung          | KILL file          |
+| Automated IR script      | OS signal          |
+| Gateway is compromised   | Sidecar            |
 
 ## Scenario-Driven Additions
 
 ### From fleet-operations scenarios (89 findings applied)
+
 - Kill switch semantics: deny-all, not disable-governance -- killed workspaces block all tool calls and continue recording audit events rather than running ungoverned (P-177)
 - Synchronous kill with per-workspace acknowledgment: fleet kill waits for each workspace to confirm the kill took effect before reporting success
 - Kill partial failure escalation: unreachable workspaces during fleet kill trigger CRITICAL alert with no silent pass (P-178)

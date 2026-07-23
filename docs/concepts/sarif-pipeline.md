@@ -16,12 +16,12 @@ The claws GitHub Action runs governance checks as part of CI/CD pipelines. It pr
 
 ## Pipeline stages
 
-| Stage | Name | SARIF upload | Enforcement |
-|-------|------|-------------|-------------|
-| 0 | Pre-commit | No | Fast check, no upload |
-| 1 | PR check | Yes | Full check + annotations |
-| 2 | CD gate | Yes | Full check + fail on violations + optional artifact signing |
-| 3 | Fleet cron | Yes | Scheduled fleet-wide check |
+| Stage | Name       | SARIF upload | Enforcement                                                 |
+| ----- | ---------- | ------------ | ----------------------------------------------------------- |
+| 0     | Pre-commit | No           | Fast check, no upload                                       |
+| 1     | PR check   | Yes          | Full check + annotations                                    |
+| 2     | CD gate    | Yes          | Full check + fail on violations + optional artifact signing |
+| 3     | Fleet cron | Yes          | Scheduled fleet-wide check                                  |
 
 ---
 
@@ -53,26 +53,26 @@ The `should_block_for_severity` shell function (defined in `claws-action/scripts
 
 ## Action inputs
 
-| Input | Required | Default | Description |
-|-------|----------|---------|-------------|
-| `stage` | Yes | -- | Pipeline stage: 0, 1, 2, or 3 |
-| `format` | Yes | `sarif` | Output format: sarif, json, csv, default |
-| `fail-on` | No | `all` | Severity threshold: critical, high, medium, all |
-| `warn-only` | No | `false` | Report without failing (exit 0 with warnings) |
-| `sign` | No | `false` | Sign artifacts during Stage 2 CD gate |
-| `framework` | No | `''` | Target framework hint (claude-code, cursor, copilot) |
-| `cache` | No | `true` | Enable governance compilation cache |
+| Input       | Required | Default | Description                                          |
+| ----------- | -------- | ------- | ---------------------------------------------------- |
+| `stage`     | Yes      | --      | Pipeline stage: 0, 1, 2, or 3                        |
+| `format`    | Yes      | `sarif` | Output format: sarif, json, csv, default             |
+| `fail-on`   | No       | `all`   | Severity threshold: critical, high, medium, all      |
+| `warn-only` | No       | `false` | Report without failing (exit 0 with warnings)        |
+| `sign`      | No       | `false` | Sign artifacts during Stage 2 CD gate                |
+| `framework` | No       | `''`    | Target framework hint (claude-code, cursor, copilot) |
+| `cache`     | No       | `true`  | Enable governance compilation cache                  |
 
 ---
 
 ## Action outputs
 
-| Output | Description |
-|--------|-------------|
-| `sarif-file` | Path to the generated SARIF file |
-| `violation-count` | Total number of governance violations found |
-| `exit-code` | Exit code from claws (0=clean, 1=violations, 2=bypass, 3=error) |
-| `cache-hit` | Whether a cache hit occurred |
+| Output            | Description                                                     |
+| ----------------- | --------------------------------------------------------------- |
+| `sarif-file`      | Path to the generated SARIF file                                |
+| `violation-count` | Total number of governance violations found                     |
+| `exit-code`       | Exit code from claws (0=clean, 1=violations, 2=bypass, 3=error) |
+| `cache-hit`       | Whether a cache hit occurred                                    |
 
 ---
 
@@ -96,9 +96,9 @@ jobs:
       - name: Run claws governance check
         uses: craftworks/claws-action@v1
         with:
-          stage: '1'
-          format: 'sarif'
-          fail-on: 'high'
+          stage: "1"
+          format: "sarif"
+          fail-on: "high"
 ```
 
 ---
@@ -107,11 +107,11 @@ jobs:
 
 SARIF uses three levels (`error`, `warning`, `note`). The SARIF format cannot distinguish between critical and high -- both map to `error`. The shell function sets both `HAS_CRITICAL` and `HAS_HIGH` to 1 for any `error`-level result, so the `fail-on` threshold treats them equivalently:
 
-| SARIF level | claws severity | Flags set |
-|-------------|---------------|-----------|
-| `error` | critical + high (indistinguishable in SARIF) | `HAS_CRITICAL=1`, `HAS_HIGH=1` |
-| `warning` | medium | `HAS_MEDIUM=1` |
-| `note` | low | (counted in total only) |
+| SARIF level | claws severity                               | Flags set                      |
+| ----------- | -------------------------------------------- | ------------------------------ |
+| `error`     | critical + high (indistinguishable in SARIF) | `HAS_CRITICAL=1`, `HAS_HIGH=1` |
+| `warning`   | medium                                       | `HAS_MEDIUM=1`                 |
+| `note`      | low                                          | (counted in total only)        |
 
 ---
 

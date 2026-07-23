@@ -65,11 +65,11 @@ You'll reach for these when you're managing governance across teams.
 
 ## Who sees what
 
-| Tier | How | Commands | Who it's for |
-|------|-----|----------|-------------|
-| Bare `claws` | Just type `claws` | 4 | First-time user |
-| `--help` | `claws --help` | 18 | Developer, daily use |
-| `--help-all` | `claws --help-all` | 40 | Platform engineer, fleet operator |
+| Tier         | How                | Commands | Who it's for                      |
+| ------------ | ------------------ | -------- | --------------------------------- |
+| Bare `claws` | Just type `claws`  | 4        | First-time user                   |
+| `--help`     | `claws --help`     | 18       | Developer, daily use              |
+| `--help-all` | `claws --help-all` | 40       | Platform engineer, fleet operator |
 
 ## Workspace-aware bare invocation
 

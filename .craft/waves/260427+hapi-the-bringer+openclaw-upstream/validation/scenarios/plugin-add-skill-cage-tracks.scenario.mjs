@@ -4,25 +4,25 @@
  * (manifest-walker discovers it; tracker registers; first observation
  * promotes it).
  */
-export const slug = 'plugin-add-skill-cage-tracks';
-export const description = 'add new skill mid-flight → cage status picks it up automatically';
+export const slug = "plugin-add-skill-cage-tracks";
+export const description = "add new skill mid-flight → cage status picks it up automatically";
 
 export const setup = {
   files: {
-    'AGENTS.md': `# Agent\n## Boundaries\n- none\n`,
+    "AGENTS.md": `# Agent\n## Boundaries\n- none\n`,
   },
 };
 
 export const steps = [
   {
-    name: 'baseline status (no skills yet)',
-    run: ['cage', 'status', '.'],
-    expect: { exitCode: 0, parsed: { 'tracked': 1 } },
+    name: "baseline status (no skills yet)",
+    run: ["cage", "status", "."],
+    expect: { exitCode: 0, parsed: { tracked: 1 } },
   },
   {
-    name: 'operator adds a new skill',
+    name: "operator adds a new skill",
     edit: {
-      'skills/get-weather/SKILL.md': {
+      "skills/get-weather/SKILL.md": {
         set: `---
 name: get-weather
 description: fetches current weather
@@ -37,19 +37,19 @@ Fetches current weather for a location.
     },
   },
   {
-    name: 'cage status picks up the new skill on next walk',
-    run: ['cage', 'status', '.'],
+    name: "cage status picks up the new skill on next walk",
+    run: ["cage", "status", "."],
     expect: {
       exitCode: 0,
-      parsed: { 'tracked': { atLeast: 2 } },
+      parsed: { tracked: { atLeast: 2 } },
     },
   },
   {
-    name: 'observations include the new SKILL.md',
-    run: ['cage', 'list-trackers', '.'],
+    name: "observations include the new SKILL.md",
+    run: ["cage", "list-trackers", "."],
     expect: {
       exitCode: 0,
-      parsed: { 'entries.length': { atLeast: 2 } },
+      parsed: { "entries.length": { atLeast: 2 } },
     },
   },
 ];

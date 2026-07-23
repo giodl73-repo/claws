@@ -12,15 +12,14 @@
  * Paired fixer (optional): `tools/snap-risk-level` snaps R6+ → R5
  * and negative → R0.
  */
-import type { LintRule, LintFinding } from '@openclaw/oc-lint/plugin-sdk';
-import { scanToolHeaders } from './_tools-md-scan.js';
+import type { LintRule, LintFinding } from "@openclaw/oc-lint/plugin-sdk";
+import { scanToolHeaders } from "./_tools-md-scan.js";
 
 export const toolsUnknownRiskLevel: LintRule = {
-  id: 'policy-starter-v0/tools/unknown-risk-level',
-  severity: 'warning',
-  description:
-    'TOOLS.md tool declares an out-of-range `R<n>` risk token (accepted: R0..R5)',
-  appliesTo: 'TOOLS.md',
+  id: "policy-starter-v0/tools/unknown-risk-level",
+  severity: "warning",
+  description: "TOOLS.md tool declares an out-of-range `R<n>` risk token (accepted: R0..R5)",
+  appliesTo: "TOOLS.md",
   check(ctx) {
     const findings: LintFinding[] = [];
     for (const hit of scanToolHeaders(ctx.ast)) {
@@ -33,7 +32,7 @@ export const toolsUnknownRiskLevel: LintRule = {
         message: `tool '${hit.name}' uses out-of-range risk 'R${n}'; accepted range is R0..R5`,
         ocPath: `oc://TOOLS.md/Tools/${hit.name}`,
         line: hit.line,
-        fixHint: n > 5 ? 'snap to R5 (critical)' : 'snap to R0 (lowest)',
+        fixHint: n > 5 ? "snap to R5 (critical)" : "snap to R0 (lowest)",
       });
     }
     return findings;

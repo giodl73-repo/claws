@@ -14,27 +14,27 @@ SOC2 Type I asks: "Are the controls designed correctly?" SOC2 Type II asks: "Did
 
 This distinction matters for AI governance. A governance system that works on the day of the audit is Type I evidence. A governance system that demonstrably worked every day for the past 6 months is Type II evidence. claws's hash-chained audit log provides that temporal dimension.
 
-| Evidence type | What it proves | claws source |
-|--------------|---------------|-------------|
-| Point-in-time | Controls exist today | `claws comply soc2` (current state) |
-| Temporal (6-12 months) | Controls operated continuously | Audit chain history + chain integrity verification |
-| Trend | Controls improved or degraded over time | Audit chain summary: event counts, break points, gaps |
+| Evidence type          | What it proves                          | claws source                                          |
+| ---------------------- | --------------------------------------- | ----------------------------------------------------- |
+| Point-in-time          | Controls exist today                    | `claws comply soc2` (current state)                   |
+| Temporal (6-12 months) | Controls operated continuously          | Audit chain history + chain integrity verification    |
+| Trend                  | Controls improved or degraded over time | Audit chain summary: event counts, break points, gaps |
 
 ---
 
 ## Control mapping
 
-| SOC2 Control | Category | claws Governance Rule(s) | Evidence Source |
-|-------------|----------|------------------------|----------------|
-| CC6.1 | Logical access | G-CLASS, G-PERM, G-A2A-TRUST | Tool classification records + A2A trust group definitions |
-| CC6.2 | Authentication | G-A2A-IDENTITY, G-ELICIT | Agent identity levels (L0-L3) + signed approval token records |
-| CC6.3 | Access authorization | G-CLASS (R1-R5), FE6 | Per-tool risk scoring results + fence pass validation logs |
-| CC6.6 | Access reviews | `claws drift`, `claws pinch --fleet` | Drift detection reports + fleet scan results over time |
-| CC6.8 | Encryption | G-SECRETS, key management | Vault encryption status + key rotation records |
-| CC7.1 | Incident detection | G-OUTPUT, G-INPUT, audit chain | Output guard triggers + input validation events + governance events |
-| CC7.2 | Incident response | `claws kill`, audit export | Kill switch activation records + SIEM export history |
-| CC7.3 | Change management | `claws snap`, `claws diff` | Governance snapshot history + policy diff records |
-| CC8.1 | Monitoring | `claws watch`, `claws drift` | Continuous monitoring data + drift detection history |
+| SOC2 Control | Category             | claws Governance Rule(s)             | Evidence Source                                                     |
+| ------------ | -------------------- | ------------------------------------ | ------------------------------------------------------------------- |
+| CC6.1        | Logical access       | G-CLASS, G-PERM, G-A2A-TRUST         | Tool classification records + A2A trust group definitions           |
+| CC6.2        | Authentication       | G-A2A-IDENTITY, G-ELICIT             | Agent identity levels (L0-L3) + signed approval token records       |
+| CC6.3        | Access authorization | G-CLASS (R1-R5), FE6                 | Per-tool risk scoring results + fence pass validation logs          |
+| CC6.6        | Access reviews       | `claws drift`, `claws pinch --fleet` | Drift detection reports + fleet scan results over time              |
+| CC6.8        | Encryption           | G-SECRETS, key management            | Vault encryption status + key rotation records                      |
+| CC7.1        | Incident detection   | G-OUTPUT, G-INPUT, audit chain       | Output guard triggers + input validation events + governance events |
+| CC7.2        | Incident response    | `claws kill`, audit export           | Kill switch activation records + SIEM export history                |
+| CC7.3        | Change management    | `claws snap`, `claws diff`           | Governance snapshot history + policy diff records                   |
+| CC8.1        | Monitoring           | `claws watch`, `claws drift`         | Continuous monitoring data + drift detection history                |
 
 ---
 
@@ -42,15 +42,15 @@ This distinction matters for AI governance. A governance system that works on th
 
 `claws comply soc2` produces a structured evidence package with these sections:
 
-| Section | Contents |
-|---------|----------|
-| **Header** | Framework version, generation timestamp, claws version, workspace identifier |
-| **Observation period** | Start date, end date (6-12 months). Auditors require a minimum period. |
-| **Workspace context** | Platform (OpenClaw, Cursor, etc.), trust tier, policy version hash |
+| Section                 | Contents                                                                          |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| **Header**              | Framework version, generation timestamp, claws version, workspace identifier      |
+| **Observation period**  | Start date, end date (6-12 months). Auditors require a minimum period.            |
+| **Workspace context**   | Platform (OpenClaw, Cursor, etc.), trust tier, policy version hash                |
 | **Control assessments** | Per-control status: satisfied, partially satisfied, not satisfied, not applicable |
-| **Audit chain summary** | Total events, first/last event timestamps, chain integrity status, break points |
-| **Findings** | Severity-rated issues with remediation guidance and deadlines |
-| **Signature** | Ed25519 or HMAC signature over the entire package |
+| **Audit chain summary** | Total events, first/last event timestamps, chain integrity status, break points   |
+| **Findings**            | Severity-rated issues with remediation guidance and deadlines                     |
+| **Signature**           | Ed25519 or HMAC signature over the entire package                                 |
 
 ---
 
@@ -60,13 +60,13 @@ The audit chain is the backbone of temporal evidence. Every governance decision 
 
 For SOC2 Type II, the evidence package summarizes this chain:
 
-| Metric | What it tells the auditor |
-|--------|--------------------------|
-| Total governance events | Volume of governance activity during the period |
-| Chain integrity | Whether the chain is intact (no gaps, no tampering) |
-| Break points | Timestamps where the chain has gaps (must be explained) |
-| First and last event | Proves governance was active throughout the observation period |
-| Control-specific event counts | How many times each control was exercised |
+| Metric                        | What it tells the auditor                                      |
+| ----------------------------- | -------------------------------------------------------------- |
+| Total governance events       | Volume of governance activity during the period                |
+| Chain integrity               | Whether the chain is intact (no gaps, no tampering)            |
+| Break points                  | Timestamps where the chain has gaps (must be explained)        |
+| First and last event          | Proves governance was active throughout the observation period |
+| Control-specific event counts | How many times each control was exercised                      |
 
 A chain with zero break points and events spanning the full observation period is strong evidence. A chain with gaps requires explanation -- the auditor will want to know why governance was inactive during those windows.
 
@@ -74,11 +74,11 @@ A chain with zero break points and events spanning the full observation period i
 
 ## Verification
 
-| Command | What it verifies |
-|---------|-----------------|
-| `claws comply soc2` | Generates the evidence package |
+| Command                           | What it verifies                                                        |
+| --------------------------------- | ----------------------------------------------------------------------- |
+| `claws comply soc2`               | Generates the evidence package                                          |
 | `claws comply --verify <package>` | Validates: signature intact, timestamp valid, chain integrity confirmed |
-| `claws audit verify` | Walks the full audit chain and checks every link |
+| `claws audit verify`              | Walks the full audit chain and checks every link                        |
 
 Verification is reproducible. Given the same audit chain and the same policy version, `claws comply soc2` generates the same output. The policy version is embedded in the package so evidence can be reproduced against historical policy state.
 
@@ -90,12 +90,12 @@ Verification is reproducible. Given the same audit chain and the same policy ver
 
 The fleet package includes:
 
-| Element | Description |
-|---------|-------------|
-| Per-workspace assessments | Individual control status for each workspace |
-| Aggregate compliance posture | Fleet-wide pass rates per control |
-| Cross-workspace findings | Issues that span multiple workspaces |
-| Fleet drift summary | Workspaces that have drifted from baseline |
+| Element                      | Description                                  |
+| ---------------------------- | -------------------------------------------- |
+| Per-workspace assessments    | Individual control status for each workspace |
+| Aggregate compliance posture | Fleet-wide pass rates per control            |
+| Cross-workspace findings     | Issues that span multiple workspaces         |
+| Fleet drift summary          | Workspaces that have drifted from baseline   |
 
 ---
 
@@ -108,6 +108,7 @@ The evidence package is generated on demand, not assembled manually. It is signe
 ## Scenario-Driven Additions
 
 ### From compliance-evidence scenarios (48 findings applied)
+
 - SOC2 observation period determination with minimum 6-month validation; evidence generation rejects periods shorter than minimum
 - Event-to-control filtering rules: each audit chain event maps to specific SOC2 controls, enabling per-control event counts
 - Broken chain elevated to critical finding with break scope analysis: auditors see which controls were affected during the break window

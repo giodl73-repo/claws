@@ -48,10 +48,10 @@ Stopping at the first error forces the developer into a fix-one-rebuild-fix-anot
 
 Error messages include documentation URLs. These URLs follow a versioning policy:
 
-| URL form | Stability |
-|----------|-----------|
-| `https://claws.dev/docs/errors/{code}` | Permanent per error code |
-| `https://claws.dev/docs/guides/{topic}` | Stable across minor versions |
+| URL form                                 | Stability                           |
+| ---------------------------------------- | ----------------------------------- |
+| `https://claws.dev/docs/errors/{code}`   | Permanent per error code            |
+| `https://claws.dev/docs/guides/{topic}`  | Stable across minor versions        |
 | `https://claws.dev/docs/v{major}/{path}` | Version-pinned for breaking changes |
 
 URLs must not break when claws is upgraded. Error codes are permanent identifiers -- once assigned, an error code always resolves to documentation for that error, even if the error is later removed. Removed errors redirect to a deprecation notice.
@@ -62,19 +62,19 @@ URLs must not break when claws is upgraded. Error codes are permanent identifier
 
 `claws annotate` adds governance annotations to existing skill files. When used as a remediation path, it transforms error messages into fixes:
 
-| Error | Annotate fix |
-|-------|-------------|
+| Error              | Annotate fix                                                 |
+| ------------------ | ------------------------------------------------------------ |
 | Missing risk level | Adds `risk: R3` (default) with comment explaining derivation |
-| Missing OBO flag | Adds `obo: false` with comment if no OBO heuristic matches |
-| Undeclared tool | Adds tool declaration extracted from handler analysis |
+| Missing OBO flag   | Adds `obo: false` with comment if no OBO heuristic matches   |
+| Undeclared tool    | Adds tool declaration extracted from handler analysis        |
 
 The annotate command has defined heuristic accuracy bounds. It does not claim perfect accuracy -- annotations are suggestions that the developer reviews. False-positive and false-negative targets are documented:
 
-| Metric | Target |
-|--------|--------|
-| False-positive rate (incorrect annotation) | < 5% |
-| False-negative rate (missed annotation) | < 10% |
-| Coverage (annotations attempted) | > 90% of governance fields |
+| Metric                                     | Target                     |
+| ------------------------------------------ | -------------------------- |
+| False-positive rate (incorrect annotation) | < 5%                       |
+| False-negative rate (missed annotation)    | < 10%                      |
+| Coverage (annotations attempted)           | > 90% of governance fields |
 
 When annotate cannot determine a value with sufficient confidence, it inserts a `# TODO: review` comment rather than guessing.
 

@@ -8,8 +8,8 @@
  * Per guardrails.md §/siem.
  */
 
-export type { AuditEntry, EmitFormat, SyslogOpts } from './types.js';
+export type { AuditEntry, EmitFormat, SyslogOpts } from "./types.js";
 
-export { toCef, toNdjson, toSyslog } from './formats.js';
+export { toCef, toNdjson, toSyslog } from "./formats.js";
 
-export { emit, emitBatch } from './emitter.js';
+export { emit, emitBatch } from "./emitter.js";

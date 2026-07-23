@@ -29,12 +29,12 @@ for the approval sink, HTTP + SSE for response shaping.
 
 ## HostAdapter methods — aether mapping
 
-| `HostAdapter` method | `AetherAdapter` implementation |
-|---|---|
-| `extractIdentity(req)` | `TenantIsolationMiddleware.dispatch` populates `request.state.tenant_context` from JWT; `validate_conversation_access` validates composite `tenant:user:session` ownership. Returns `AuthorizationContext` with `sessionPrincipal`, `tenantId`, `correlationId`. |
-| `routePolicy(ctx)` | `ApprovalPolicyRegistry.resolve` — union of proto_flag OR registry result, with `container_type_policies['openclaw']` override when `container_type === 'openclaw'`. Returns `PolicyArtifactRef` with snapshot + content hash. |
-| `getApprovalSink(ctx)` | Returns `AetherToolApprovalSink` wrapping `/v1/tool-approval` submit_tool_approval (3-tier local → proxy → queue routing). |
-| `shapeResponse(decision, ctx)` | HTTP 200/202 + SSE `tool_approval` event (for `decision: 'review'`); HTTP 200 + JSON body for allow/deny/modify. |
+| `HostAdapter` method           | `AetherAdapter` implementation                                                                                                                                                                                                                                   |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `extractIdentity(req)`         | `TenantIsolationMiddleware.dispatch` populates `request.state.tenant_context` from JWT; `validate_conversation_access` validates composite `tenant:user:session` ownership. Returns `AuthorizationContext` with `sessionPrincipal`, `tenantId`, `correlationId`. |
+| `routePolicy(ctx)`             | `ApprovalPolicyRegistry.resolve` — union of proto_flag OR registry result, with `container_type_policies['openclaw']` override when `container_type === 'openclaw'`. Returns `PolicyArtifactRef` with snapshot + content hash.                                   |
+| `getApprovalSink(ctx)`         | Returns `AetherToolApprovalSink` wrapping `/v1/tool-approval` submit_tool_approval (3-tier local → proxy → queue routing).                                                                                                                                       |
+| `shapeResponse(decision, ctx)` | HTTP 200/202 + SSE `tool_approval` event (for `decision: 'review'`); HTTP 200 + JSON body for allow/deny/modify.                                                                                                                                                 |
 
 See `testing--host-presets.md` for the matrix model,
 `host-adapter-contract.md` for the interface shared by all four
@@ -164,7 +164,7 @@ interface ToolApprovalSubmission {
   approval_id: string;
   approved: boolean;
   denial_reason?: string;
-  conversation_id: string;   // composite tenant:user:session
+  conversation_id: string; // composite tenant:user:session
   server_name?: string;
   tool_name?: string;
   edited_input?: object;
@@ -172,6 +172,7 @@ interface ToolApprovalSubmission {
 ```
 
 Aether routes this through three tiers:
+
 1. **Local gRPC** (~1ms) — actor on this pod → direct send
 2. **HTTP proxy** (~5-20ms) — actor on another pod → proxy via
    `/internal/tool-approval`
@@ -207,25 +208,23 @@ G-CHAIN) not aether's MIP layer.
 
 ```ts
 const aetherPreset: HostPresetConfig = {
-  name: 'aether',
+  name: "aether",
   decide: {
     providers: [/* GuardrailProvider + FileIngestProvider fixtures */],
-    mergerMode: 'strict-oc7',
+    mergerMode: "strict-oc7",
   },
-  track:         { mode: 'sidecar' },
-  enforceReview: { companionMode: 'aether-sink', signer: 'aether-session-principal' },
-  workspace:     { mount: 'snapshot-RO' },
-  scope:         '@bic/openclaw',
+  track: { mode: "sidecar" },
+  enforceReview: { companionMode: "aether-sink", signer: "aether-session-principal" },
+  workspace: { mount: "snapshot-RO" },
+  scope: "@bic/openclaw",
   aether: {
-    tenantIsolationMiddleware: 'enabled',
-    conversationAuthz: 'require-ownership',
+    tenantIsolationMiddleware: "enabled",
+    conversationAuthz: "require-ownership",
     containerPolicyOverrides: new Map([
-      ['openclaw', [
-        { server: 'filesystem', tool: 'write', requires_approval: true },
-      ]],
+      ["openclaw", [{ server: "filesystem", tool: "write", requires_approval: true }]],
     ]),
-    toolApprovalSink: 'three-tier',
-    compositeIdentityFormat: 'tenant:user:session',
+    toolApprovalSink: "three-tier",
+    compositeIdentityFormat: "tenant:user:session",
   },
 };
 ```

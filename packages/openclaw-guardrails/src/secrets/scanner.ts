@@ -7,9 +7,9 @@
  * NEVER leave the scanner.
  */
 
-import type { ScanOptions, ScanResult, SecretFinding, SecretPattern } from './types.js';
-import { DEFAULT_PATTERNS, matchPatterns } from './patterns.js';
-import { findHighEntropyTokens, shannonEntropy } from './entropy.js';
+import type { ScanOptions, ScanResult, SecretFinding, SecretPattern } from "./types.js";
+import { DEFAULT_PATTERNS, matchPatterns } from "./patterns.js";
+import { findHighEntropyTokens, shannonEntropy } from "./entropy.js";
 
 /** The public scanner contract per guardrails.md §/secrets. */
 export interface SecretScanner {
@@ -19,8 +19,8 @@ export interface SecretScanner {
 
 /** First 4 chars + `***`. `****` for values ≤4 chars. */
 export function maskSecret(value: string): string {
-  if (value.length <= 4) return '****';
-  return value.slice(0, 4) + '***';
+  if (value.length <= 4) return "****";
+  return value.slice(0, 4) + "***";
 }
 
 /**
@@ -42,22 +42,20 @@ export class DefaultSecretScanner implements SecretScanner {
         type: m.type,
         span: { start: m.start, end: m.end },
         preview: maskSecret(m.matched),
-        confidence: m.confidence ?? 'medium',
+        confidence: m.confidence ?? "medium",
         entropy: shannonEntropy(m.matched),
       });
     }
 
     for (const t of findHighEntropyTokens(content, entropyThreshold, minEntropyLength)) {
-      const overlaps = findings.some(
-        (f) => !(t.end <= f.span.start || t.start >= f.span.end),
-      );
+      const overlaps = findings.some((f) => !(t.end <= f.span.start || t.start >= f.span.end));
       if (overlaps) continue;
       findings.push({
-        ruleId: 'entropy',
-        type: 'high-entropy',
+        ruleId: "entropy",
+        type: "high-entropy",
         span: { start: t.start, end: t.end },
         preview: maskSecret(t.token),
-        confidence: 'low',
+        confidence: "low",
         entropy: t.entropy,
       });
     }

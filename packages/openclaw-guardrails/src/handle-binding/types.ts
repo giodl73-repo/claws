@@ -21,11 +21,11 @@
  */
 
 export type InvalidReason =
-  | 'provider-id-mismatch'
-  | 'content-hash-mismatch'
-  | 'sequence-rollback'
-  | 'principal-mismatch'
-  | 'unknown-keyId'
-  | 'ttl-expired'
-  | 'nonce-reuse'
-  | 'signature-mismatch';
+  | "provider-id-mismatch"
+  | "content-hash-mismatch"
+  | "sequence-rollback"
+  | "principal-mismatch"
+  | "unknown-keyId"
+  | "ttl-expired"
+  | "nonce-reuse"
+  | "signature-mismatch";

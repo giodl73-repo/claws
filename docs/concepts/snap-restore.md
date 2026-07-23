@@ -16,12 +16,12 @@ claws snap restore pre-policy-change   # Restore saved state
 
 ## What Gets Restored
 
-| Artifact | Restored |
-|----------|----------|
-| claws.json | Yes |
-| .claws/policies/ | Yes |
-| .claws/compiled/ | Yes (recompiled from restored sources) |
-| .craft/ workspace artifacts | **No** |
+| Artifact                    | Restored                               |
+| --------------------------- | -------------------------------------- |
+| claws.json                  | Yes                                    |
+| .claws/policies/            | Yes                                    |
+| .claws/compiled/            | Yes (recompiled from restored sources) |
+| .craft/ workspace artifacts | **No**                                 |
 
 ## Restore Process
 

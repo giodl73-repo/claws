@@ -21,22 +21,18 @@
  * @module @bic/openclaw-guardrails/policy-runtime/policy-plugin-lkg
  */
 
-import {
-  validatePolicyIR,
-  type LKGStore,
-  type PolicyIR,
-} from '@bic/v2-prototype';
-import { POLICY_IR_PATH } from '@bic/v2-prototype';
+import { validatePolicyIR, type LKGStore, type PolicyIR } from "@bic/v2-prototype";
+import { POLICY_IR_PATH } from "@bic/v2-prototype";
 
-import type { GuardrailProvider } from '../types.js';
-import { toTrustedToolPolicy } from '../openclaw-adapter.js';
+import type { GuardrailProvider } from "../types.js";
+import { toTrustedToolPolicy } from "../openclaw-adapter.js";
 import type {
   UpstreamPluginToolPolicyDecision,
   UpstreamPluginTrustedToolPolicyRegistration,
-} from '../openclaw-adapter.js';
-import { PolicyIrCache } from './cache.js';
+} from "../openclaw-adapter.js";
+import { PolicyIrCache } from "./cache.js";
 
-const TEXT_DECODER = new TextDecoder('utf-8');
+const TEXT_DECODER = new TextDecoder("utf-8");
 
 export interface PolicyPluginLKGOptions {
   /** Identifier for this registered plugin. Defaults to `composedProvider.name`. */
@@ -89,7 +85,7 @@ export function buildPolicyPluginFromLKG(
       const sessionKey =
         (ctx as { sessionKey?: string }).sessionKey ??
         (ctx as { sessionId?: string }).sessionId ??
-        '';
+        "";
       let ir: PolicyIR | undefined = cache.get(sessionKey, fingerprint);
       if (ir === undefined) {
         try {
@@ -115,10 +111,10 @@ function failClosedNoLKG(): UpstreamPluginToolPolicyDecision {
   return {
     block: true,
     blockReason:
-      'policy-plugin (LKG): no last-known-good PolicyIR yet. ' +
-      'The tracker must observe at least one valid write before ' +
-      'evaluation can proceed. See ' +
-      'https://docs.openclaw.ai/plugin-sdk/lkg.',
+      "policy-plugin (LKG): no last-known-good PolicyIR yet. " +
+      "The tracker must observe at least one valid write before " +
+      "evaluation can proceed. See " +
+      "https://docs.openclaw.ai/plugin-sdk/lkg.",
   };
 }
 
@@ -130,10 +126,7 @@ function failClosedLKGLoad(err: unknown): UpstreamPluginToolPolicyDecision {
   };
 }
 
-async function loadFromLKG(
-  lkg: LKGStore,
-  policyIrPath: string,
-): Promise<PolicyIR> {
+async function loadFromLKG(lkg: LKGStore, policyIrPath: string): Promise<PolicyIR> {
   const bytes = await lkg.readLastKnownGood(policyIrPath);
   const text = TEXT_DECODER.decode(bytes);
   const parsed: unknown = JSON.parse(text);
@@ -158,7 +151,7 @@ export function policyIrTracker(absolutePath: string) {
         const message = err instanceof Error ? err.message : String(err);
         return {
           valid: false,
-          issues: [{ path: '', message } as const],
+          issues: [{ path: "", message } as const],
         };
       }
     },

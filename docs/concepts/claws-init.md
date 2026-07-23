@@ -89,14 +89,14 @@ Other templates: `hipaa`, `eu-ai-act`.
 
 You don't tell claws which platform you use. It reads your workspace:
 
-| If it finds | It detects |
-|-------------|-----------|
-| SOUL.md | OpenClaw |
-| .cursorrules | Cursor |
-| CLAUDE.md | Claude Code |
+| If it finds                     | It detects     |
+| ------------------------------- | -------------- |
+| SOUL.md                         | OpenClaw       |
+| .cursorrules                    | Cursor         |
+| CLAUDE.md                       | Claude Code    |
 | .github/copilot-instructions.md | GitHub Copilot |
-| langgraph.json | LangGraph |
-| crewai.yaml | CrewAI |
+| langgraph.json                  | LangGraph      |
+| crewai.yaml                     | CrewAI         |
 
 Override with `"platform": "cursor"` in claws.json if needed.
 

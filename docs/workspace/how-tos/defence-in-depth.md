@@ -10,16 +10,16 @@ bug in one layer is caught by another.
 
 ## Quick reference
 
-| Layer | Where | Catches |
-|-------|-------|---------|
-| **1 · Parser** | `parseOcUri(raw)` | Syntactic vectors (traversal, drive letter, null byte, non-ASCII, BOM, etc.) |
-| **2 · Provider** | `FileIngestProvider.beforeIngest` re-validates `redirectPath` | Provider-forged paths |
-| **3 · Runtime** | `resolveFsPath(ocPath, workspaceRoot)` | Symlink escape, TOCTOU |
+| Layer            | Where                                                         | Catches                                                                      |
+| ---------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **1 · Parser**   | `parseOcUri(raw)`                                             | Syntactic vectors (traversal, drive letter, null byte, non-ASCII, BOM, etc.) |
+| **2 · Provider** | `FileIngestProvider.beforeIngest` re-validates `redirectPath` | Provider-forged paths                                                        |
+| **3 · Runtime**  | `resolveFsPath(ocPath, workspaceRoot)`                        | Symlink escape, TOCTOU                                                       |
 
 ## Pattern: accept an `oc://` from untrusted input
 
 ```ts
-import { parseOcUri, resolveFsPath, OcPathError } from '@bic/openclaw-workspace/path';
+import { parseOcUri, resolveFsPath, OcPathError } from "@bic/openclaw-workspace/path";
 
 function safeOpen(raw: string, workspaceRoot: string): Uint8Array {
   // Layer 1
@@ -42,7 +42,7 @@ function openCached(raw: string, root: string) {
   if (!cache.has(raw)) {
     cache.set(raw, resolveFsPath(parseOcUri(raw), root));
   }
-  return fs.readFileSync(cache.get(raw)!);  // TOCTOU: attacker may have swapped target
+  return fs.readFileSync(cache.get(raw)!); // TOCTOU: attacker may have swapped target
 }
 
 // ✓ CORRECT — re-resolve every time

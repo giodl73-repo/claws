@@ -70,10 +70,7 @@ export interface Snapshot {
 export interface SnapshotStore {
   capture(workspace: WorkspaceId): Promise<SnapshotId>;
   read(snap: SnapshotId, path: SnapshotInternalPath): Promise<Uint8Array>;
-  list(
-    workspace: WorkspaceId,
-    opts?: { limit?: number },
-  ): Promise<readonly Snapshot[]>;
+  list(workspace: WorkspaceId, opts?: { limit?: number }): Promise<readonly Snapshot[]>;
 }
 
 /**
@@ -86,15 +83,15 @@ export interface SnapshotStore {
  * parsed; `cause` is implementation-defined detail.
  */
 export type SnapshotErrorCode =
-  | 'SNAP_NOT_FOUND'
-  | 'SNAP_INVALID_PATH'
-  | 'SNAP_STORE_UNAVAILABLE'
-  | 'SNAP_AUTH_DENIED'
-  | 'SNAP_CAPTURE_FAILED'
-  | 'SNAP_LIMIT_EXCEEDED'
-  | 'SNAP_CHECKSUM_MISMATCH'
-  | 'SNAP_CONTRACT_VIOLATION'
-  | 'SNAP_INTERNAL';
+  | "SNAP_NOT_FOUND"
+  | "SNAP_INVALID_PATH"
+  | "SNAP_STORE_UNAVAILABLE"
+  | "SNAP_AUTH_DENIED"
+  | "SNAP_CAPTURE_FAILED"
+  | "SNAP_LIMIT_EXCEEDED"
+  | "SNAP_CHECKSUM_MISMATCH"
+  | "SNAP_CONTRACT_VIOLATION"
+  | "SNAP_INTERNAL";
 
 export interface SnapshotError {
   readonly code: SnapshotErrorCode;

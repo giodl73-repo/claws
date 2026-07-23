@@ -9,13 +9,13 @@ interface TrustSet {
   readonly version: number;
   readonly keys: ReadonlyArray<TrustKey>;
   readonly loadedAt: number;
-  readonly source: string;   // e.g. "file:///etc/claws/trust-set.json"
+  readonly source: string; // e.g. "file:///etc/claws/trust-set.json"
 }
 
 interface TrustKey {
-  readonly id: string;           // keyId referenced by ApprovalHandle
-  readonly material: string;     // base64-encoded HMAC key
-  readonly principals: ReadonlyArray<string>;  // which approvers this key covers
+  readonly id: string; // keyId referenced by ApprovalHandle
+  readonly material: string; // base64-encoded HMAC key
+  readonly principals: ReadonlyArray<string>; // which approvers this key covers
   readonly notBefore: number;
   readonly notAfter: number;
 }
@@ -44,12 +44,12 @@ for the operator workflow.
 
 ## Reload failure modes
 
-| Mode | Behaviour |
-|------|-----------|
-| File removed mid-watch | Existing set stays active; `TrustReloadEntry { success: false, reason: 'file-missing' }` |
-| Parse error | Existing set stays active; `reason: 'parse-error'` |
-| Schema violation (missing `notAfter`, etc.) | Existing set stays active; `reason: 'schema-invalid'` |
-| All keys expired | New set LOADS (valid schema); every `ApprovalHandle` verification fails with `unknown-key` or `ttl-expired` |
+| Mode                                        | Behaviour                                                                                                   |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| File removed mid-watch                      | Existing set stays active; `TrustReloadEntry { success: false, reason: 'file-missing' }`                    |
+| Parse error                                 | Existing set stays active; `reason: 'parse-error'`                                                          |
+| Schema violation (missing `notAfter`, etc.) | Existing set stays active; `reason: 'schema-invalid'`                                                       |
+| All keys expired                            | New set LOADS (valid schema); every `ApprovalHandle` verification fails with `unknown-key` or `ttl-expired` |
 
 The critical property: a malformed reload NEVER leaves guardrails
 without a trust set. It leaves the PREVIOUS trust set active. This is

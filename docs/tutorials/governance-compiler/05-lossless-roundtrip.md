@@ -21,6 +21,7 @@ claws never modifies your original workspace files. Governance is add-only. This
 claws makes a non-negotiable promise: **your original workspace files are never modified.** Not by `claws init`, not by `claws check`, not by any claws command. If you diff your workspace source files before and after any claws operation, the diff is empty.
 
 This matters because:
+
 - OC workspaces are the developer's source of truth
 - Multiple tools may operate on the same workspace
 - Accidental modification can break the agent's behavior

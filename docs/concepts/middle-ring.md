@@ -23,7 +23,7 @@ The dead man's switch (`claws upgrade`) is the most critical middle ring operati
    IF CRITICAL VIOLATIONS → snap restore pre-upgrade
 ```
 
-Each step has an **explicit per-step error handler**. The dead man's switch never chains commands with `&&` because a failure in any step must route to the correct recovery path, not silently skip subsequent steps. *(Source: three-rings S02-F01, P-163)*
+Each step has an **explicit per-step error handler**. The dead man's switch never chains commands with `&&` because a failure in any step must route to the correct recovery path, not silently skip subsequent steps. _(Source: three-rings S02-F01, P-163)_
 
 ---
 
@@ -31,12 +31,12 @@ Each step has an **explicit per-step error handler**. The dead man's switch neve
 
 `claws doctor --fix` repairs detected governance issues. It operates with **all-or-nothing semantics**:
 
-| Approach | Behavior | Risk |
-|----------|----------|------|
-| **All-or-nothing** (default) | All fixes applied or none | Safe but loses partial progress on failure |
-| **Partial-progress** (opt-in) | Successful fixes kept, failed fixes reported | Requires careful state tracking |
+| Approach                      | Behavior                                     | Risk                                       |
+| ----------------------------- | -------------------------------------------- | ------------------------------------------ |
+| **All-or-nothing** (default)  | All fixes applied or none                    | Safe but loses partial progress on failure |
+| **Partial-progress** (opt-in) | Successful fixes kept, failed fixes reported | Requires careful state tracking            |
 
-The default is all-or-nothing to prevent partial fixes from leaving governance in an inconsistent state. If doctor --fix partially succeeds and then fails, and the operator runs `snap restore`, the successful fixes are reverted too -- losing work (P-164). All-or-nothing avoids this by ensuring restore either undoes everything or nothing. *(Source: three-rings S02-F02)*
+The default is all-or-nothing to prevent partial fixes from leaving governance in an inconsistent state. If doctor --fix partially succeeds and then fails, and the operator runs `snap restore`, the successful fixes are reverted too -- losing work (P-164). All-or-nothing avoids this by ensuring restore either undoes everything or nothing. _(Source: three-rings S02-F02)_
 
 ---
 
@@ -49,7 +49,7 @@ The default is all-or-nothing to prevent partial fixes from leaving governance i
 3. `SKILLS.md` -- skill registry
 4. Up to 6 policy YAML files
 
-Both source files and compiled GovernanceIR are captured as a coherent pair. Restoring IR without source files leaves the workspace in an inconsistent state where the governance engine references files that don't match. *(Source: three-rings S02-F04, snapshot-lifecycle S01-F01, P-186)*
+Both source files and compiled GovernanceIR are captured as a coherent pair. Restoring IR without source files leaves the workspace in an inconsistent state where the governance engine references files that don't match. _(Source: three-rings S02-F04, snapshot-lifecycle S01-F01, P-186)_
 
 ---
 
@@ -57,14 +57,14 @@ Both source files and compiled GovernanceIR are captured as a coherent pair. Res
 
 `claws doctor --post-upgrade` runs after a version change to detect compatibility issues. The trigger is a **version mismatch between the installed claws binary and the workspace's recorded version** -- not an npm lifecycle event:
 
-| Condition | Doctor behavior |
-|-----------|----------------|
-| Same version | Standard diagnostic rule set |
-| Minor version bump | Standard + upgrade-specific checks |
-| Major version bump | Full upgrade diagnostic suite |
+| Condition          | Doctor behavior                                    |
+| ------------------ | -------------------------------------------------- |
+| Same version       | Standard diagnostic rule set                       |
+| Minor version bump | Standard + upgrade-specific checks                 |
+| Major version bump | Full upgrade diagnostic suite                      |
 | Downgrade detected | Warning -- workspace may use newer schema features |
 
-Doctor distinguishes between **routine diagnostics** (standard checks any time) and **upgrade diagnostics** (checks specific to version transitions). The upgrade rule set includes schema migration validation, deprecated field detection, and new-in-version constraint checks. *(Source: three-rings S02-F05, P-165)*
+Doctor distinguishes between **routine diagnostics** (standard checks any time) and **upgrade diagnostics** (checks specific to version transitions). The upgrade rule set includes schema migration validation, deprecated field detection, and new-in-version constraint checks. _(Source: three-rings S02-F05, P-165)_
 
 ---
 
@@ -72,14 +72,14 @@ Doctor distinguishes between **routine diagnostics** (standard checks any time) 
 
 Middle ring operations have a per-operation latency sub-budget:
 
-| Operation | Budget | Rationale |
-|-----------|--------|-----------|
-| `claws check` | 5s | Pre-commit hook; developer waiting |
-| `claws doctor` | 30s | Explicit command; less time-sensitive |
-| `snap save` | 2s | Must be fast enough to not discourage use |
-| `snap restore` | 5s | Recovery operation; speed matters |
+| Operation      | Budget | Rationale                                 |
+| -------------- | ------ | ----------------------------------------- |
+| `claws check`  | 5s     | Pre-commit hook; developer waiting        |
+| `claws doctor` | 30s    | Explicit command; less time-sensitive     |
+| `snap save`    | 2s     | Must be fast enough to not discourage use |
+| `snap restore` | 5s     | Recovery operation; speed matters         |
 
-Operations exceeding their budget emit a performance warning. Budgets are guidelines, not hard kills -- a 6-second check still completes but flags a performance regression. *(Source: three-rings S02-F03)*
+Operations exceeding their budget emit a performance warning. Budgets are guidelines, not hard kills -- a 6-second check still completes but flags a performance regression. _(Source: three-rings S02-F03)_
 
 ---
 
@@ -94,7 +94,7 @@ The pause/resume protocol:
 3. Middle ring completes its operation
 4. Lock released, inner ring resumes and processes the final state
 
-*(Source: three-rings S05-F02, P-168)*
+_(Source: three-rings S05-F02, P-168)_
 
 ---
 

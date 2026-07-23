@@ -9,12 +9,12 @@ Use this skill first when the user asks which OpenClaw profile to load.
 
 ## Routing table
 
-| User intent | Load this skill |
-| --- | --- |
-| "Get my PRs green", "check PRs", "respond to review", "update proof", "file the PR" | `openclaw-pr-loop` |
-| "Find the next issue", "fix an OpenClaw bug", "triage workspace issues", "make a narrow fix" | `openclaw-issue-fixer` |
-| "Use Crabbox", "prove before/after", "WSL repro", "real behavior proof" | `openclaw-crabbox-proof` |
-| "Review this carefully", "what would a maintainer object to", "do code review before filing" | `openclaw-local-review` |
+| User intent                                                                                  | Load this skill          |
+| -------------------------------------------------------------------------------------------- | ------------------------ |
+| "Get my PRs green", "check PRs", "respond to review", "update proof", "file the PR"          | `openclaw-pr-loop`       |
+| "Find the next issue", "fix an OpenClaw bug", "triage workspace issues", "make a narrow fix" | `openclaw-issue-fixer`   |
+| "Use Crabbox", "prove before/after", "WSL repro", "real behavior proof"                      | `openclaw-crabbox-proof` |
+| "Review this carefully", "what would a maintainer object to", "do code review before filing" | `openclaw-local-review`  |
 
 ## Operating rules
 

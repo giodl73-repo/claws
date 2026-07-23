@@ -127,6 +127,7 @@ destroy your backup.
 ## Scenario-Driven Additions
 
 ### From snapshot-lifecycle scenarios (48 findings applied)
+
 - Dead man switch secondary fallback: if snap restore fails (corrupted snapshot, integrity check failure), a secondary recovery path (git stash or redundant copy) prevents total loss
 - Dead man switch abort on critical violations: if the pre-upgrade state has critical governance violations, the switch refuses to proceed -- restoring a broken state is worse than failing the upgrade
 - Snap save captures source files (all 9 workspace files) not just compiled IR, ensuring restore produces a coherent workspace

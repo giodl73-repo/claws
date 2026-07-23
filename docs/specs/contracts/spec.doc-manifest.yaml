@@ -4,294 +4,294 @@ entries:
     type: guide
     path: design/claws/specs/CL-06-platform-ecosystem.md
     atoms:
-    - claws-sdk
+      - claws-sdk
   check-spec:
     type: guide
     path: design/agent/specs/CS-01-cicd-composition.md
     atoms:
-    - check
+      - check
   snap-spec:
     type: guide
     path: design/agent/specs/CS-03-multi-workspace-governance.md
     atoms:
-    - snap
+      - snap
   claws-init-spec:
     type: guide
     path: design/claws/specs/CL-01-cli-surface-schema.md
     atoms:
-    - claws-init
+      - claws-init
   claws-uninstall-spec:
     type: guide
     path: design/claws/specs/CL-01-cli-surface-schema.md
     atoms:
-    - claws-uninstall
+      - claws-uninstall
   progressive-disclosure-spec:
     type: guide
     path: design/agent/specs/CS-02-frontmatter-composition.md
     atoms:
-    - progressive-disclosure
+      - progressive-disclosure
   claws-build-spec:
     type: guide
     path: design/claws/specs/CL-01-cli-surface-schema.md
     atoms:
-    - claws-build
+      - claws-build
   claws-test-spec:
     type: guide
     path: design/claws/specs/CL-07-deep-integration.md
     atoms:
-    - claws-test
+      - claws-test
   claws-publish-spec:
     type: guide
     path: design/claws/specs/CL-05-developer-experience.md
     atoms:
-    - claws-publish
+      - claws-publish
   claws-assess-spec:
     type: guide
     path: design/claws/specs/CL-02-security-model.md
     atoms:
-    - claws-assess
+      - claws-assess
   claws-watch-spec:
     type: guide
     path: design/claws/specs/CL-02-security-model.md
     atoms:
-    - claws-watch
+      - claws-watch
   claws-doctor-spec:
     type: guide
     path: design/claws/specs/CL-01-cli-surface-schema.md
     atoms:
-    - claws-doctor
+      - claws-doctor
   claws-compiler-spec:
     type: guide
     path: design/claws/specs/CL-06-platform-ecosystem.md
     atoms:
-    - claws-compiler
+      - claws-compiler
   governance-ir-spec:
     type: guide
     path: design/claws/specs/CL-01-cli-surface-schema.md
     atoms:
-    - governance-ir
+      - governance-ir
   mechanical-intent-spec:
     type: guide
     path: design/claws/specs/CL-04-compilation-pipeline.md
     atoms:
-    - mechanical-intent
+      - mechanical-intent
   workflow-inversion-spec:
     type: guide
     path: design/claws/specs/CL-04-compilation-pipeline.md
     atoms:
-    - workflow-inversion
+      - workflow-inversion
   three-rings-spec:
     type: guide
     path: design/claws/specs/CL-02-security-model.md
     atoms:
-    - three-rings
+      - three-rings
   skill-kit-spec:
     type: guide
     path: design/claws/specs/CL-05-developer-experience.md
     atoms:
-    - skill-kit
+      - skill-kit
   governance-badge-spec:
     type: guide
     path: design/claws/specs/CL-05-developer-experience.md
     atoms:
-    - governance-badge
+      - governance-badge
   claws-lsp-spec:
     type: guide
     path: design/claws/specs/CL-05-developer-experience.md
     atoms:
-    - claws-lsp
+      - claws-lsp
   error-contract-spec:
     type: guide
     path: design/agent/specs/CS-15-agent-process-model.md
     atoms:
-    - error-contract
+      - error-contract
   tier-adoption-spec:
     type: guide
     path: design/claws/specs/CL-05-developer-experience.md
     atoms:
-    - tier-adoption
+      - tier-adoption
   upstream-contrib-spec:
     type: guide
     path: design/claws/specs/CL-07-deep-integration.md
     atoms:
-    - upstream-contrib
+      - upstream-contrib
   pinch-spec:
     type: guide
     path: design/claws/specs/CL-01-cli-surface-schema.md
     atoms:
-    - pinch
+      - pinch
   lossless-roundtrip-spec:
     type: guide
     path: design/claws/specs/CL-01-cli-surface-schema.md
     atoms:
-    - lossless-roundtrip
+      - lossless-roundtrip
   governance-plugin-spec:
     type: guide
     path: design/claws/specs/CL-01-cli-surface-schema.md
     atoms:
-    - governance-plugin
+      - governance-plugin
   governance-skill-spec:
     type: guide
     path: design/claws/specs/CL-01-cli-surface-schema.md
     atoms:
-    - governance-skill
+      - governance-skill
   defense-in-depth-spec:
     type: guide
     path: design/agent/specs/CS-11-compilation-concurrency.md
     atoms:
-    - defense-in-depth
+      - defense-in-depth
   fail-mode-spec:
     type: guide
     path: design/claws/specs/CL-02-security-model.md
     atoms:
-    - fail-mode
+      - fail-mode
   snap-restore-spec:
     type: guide
     path: design/claws/specs/CL-04-compilation-pipeline.md
     atoms:
-    - snap-restore
+      - snap-restore
   upgrade-lifecycle-spec:
     type: guide
     path: design/works/specs/AD-05-solutions.md
     atoms:
-    - upgrade-lifecycle
+      - upgrade-lifecycle
   incident-response-spec:
     type: guide
     path: design/agent/specs/CS-08-provider-data-classification.md
     atoms:
-    - incident-response
+      - incident-response
   latency-budget-spec:
     type: guide
     path: design/claws/specs/CL-03-runtime-enforcement.md
     atoms:
-    - latency-budget
+      - latency-budget
   tool-classification-spec:
     type: guide
     path: design/agent/specs/CS-09-agentic-safety-evaluation.md
     atoms:
-    - tool-classification
+      - tool-classification
   obo-boundary-spec:
     type: guide
     path: design/claws/specs/CL-02-security-model.md
     atoms:
-    - obo-boundary
+      - obo-boundary
   elicitation-gate-spec:
     type: guide
     path: design/claws/specs/CL-01-cli-surface-schema.md
     atoms:
-    - elicitation-gate
+      - elicitation-gate
   a2a-governance-spec:
     type: guide
     path: design/claws/specs/CL-02-security-model.md
     atoms:
-    - a2a-governance
+      - a2a-governance
   injection-defense-spec:
     type: guide
     path: design/claws/specs/CL-02-security-model.md
     atoms:
-    - injection-defense
+      - injection-defense
   compliance-artifact-spec:
     type: guide
     path: design/claws/specs/CL-01-cli-surface-schema.md
     atoms:
-    - compliance-artifact
+      - compliance-artifact
   key-management-spec:
     type: guide
     path: design/agent/specs/CS-01-cicd-composition.md
     atoms:
-    - key-management
+      - key-management
   kill-switch-spec:
     type: guide
     path: design/agent/specs/CS-07-track-garbage-collection.md
     atoms:
-    - kill-switch
+      - kill-switch
   audit-chain-spec:
     type: guide
     path: design/agent/specs/CS-09-agentic-safety-evaluation.md
     atoms:
-    - audit-chain
+      - audit-chain
   audit-verify-spec:
     type: guide
     path: design/claws/specs/CL-01-cli-surface-schema.md
     atoms:
-    - audit-verify
+      - audit-verify
   siem-export-spec:
     type: guide
     path: design/claws/specs/CL-02-security-model.md
     atoms:
-    - siem-export
+      - siem-export
   claws-json-spec:
     type: guide
     path: design/claws/specs/CL-01-cli-surface-schema.md
     atoms:
-    - claws-json
+      - claws-json
   capability-manifest-spec:
     type: guide
     path: design/claws/specs/CL-04-compilation-pipeline.md
     atoms:
-    - capability-manifest
+      - capability-manifest
   three-engine-model-spec:
     type: guide
     path: design/claws/specs/CL-04-compilation-pipeline.md
     atoms:
-    - three-engine-model
+      - three-engine-model
   cicd-pipeline-spec:
     type: guide
     path: design/claws/specs/CL-05-developer-experience.md
     atoms:
-    - cicd-pipeline
+      - cicd-pipeline
   compliance-soc2-spec:
     type: guide
     path: design/claws/specs/CL-02-security-model.md
     atoms:
-    - compliance-soc2
+      - compliance-soc2
   compliance-hipaa-spec:
     type: guide
     path: design/claws/specs/CL-02-security-model.md
     atoms:
-    - compliance-hipaa
+      - compliance-hipaa
   compliance-eu-ai-act-spec:
     type: guide
     path: design/claws/specs/CL-02-security-model.md
     atoms:
-    - compliance-eu-ai-act
+      - compliance-eu-ai-act
   fleet-doctor-spec:
     type: guide
     path: design/claws/specs/CL-05-developer-experience.md
     atoms:
-    - fleet-doctor
+      - fleet-doctor
   fleet-comply-spec:
     type: guide
     path: design/claws/specs/CL-02-security-model.md
     atoms:
-    - fleet-comply
+      - fleet-comply
   hook-lifecycle-spec:
     type: guide
     path: design/claws/specs/CL-03-runtime-enforcement.md
     atoms:
-    - hook-lifecycle
+      - hook-lifecycle
   three-tier-packages-spec:
     type: guide
     path: design/claws/specs/CL-06-platform-ecosystem.md
     atoms:
-    - three-tier-packages
+      - three-tier-packages
   claws-sift-spec:
     type: guide
     path: design/claws/specs/CL-06-platform-ecosystem.md
     atoms:
-    - claws-sift
+      - claws-sift
   dotnet-for-oc-spec:
     type: guide
     path: design/claws/specs/CL-06-platform-ecosystem.md
     atoms:
-    - dotnet-for-oc
+      - dotnet-for-oc
   governance-host-spec:
     type: guide
     path: design/claws/specs/CL-03-runtime-enforcement.md
     atoms:
-    - governance-host
+      - governance-host
   claws-bypass-spec:
     type: guide
     path: design/claws/specs/CL-03-runtime-enforcement.md
     atoms:
-    - claws-bypass
+      - claws-bypass

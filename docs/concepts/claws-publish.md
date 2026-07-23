@@ -105,11 +105,11 @@ TYPED adds "type-safe." VERIFIED adds "signed, scanned, tested."
 
 ## Any tier can publish
 
-| Tier | What publish checks | Badge |
-|------|-------------------|-------|
-| DECLARED | Frontmatter valid, dependency audit | Risk + OBO + Data |
-| TYPED | + handler matches declarations | + Type-safe |
-| VERIFIED | + full security + signed manifest | + Signed + Scanned |
+| Tier     | What publish checks                 | Badge              |
+| -------- | ----------------------------------- | ------------------ |
+| DECLARED | Frontmatter valid, dependency audit | Risk + OBO + Data  |
+| TYPED    | + handler matches declarations      | + Type-safe        |
+| VERIFIED | + full security + signed manifest   | + Signed + Scanned |
 
 ## claws publish vs clawhub publish
 
@@ -127,6 +127,7 @@ to disable interactive prompts and emit SARIF on failure.
 ## Scenario-Driven Additions
 
 ### From skill-lifecycle scenarios (37 findings applied)
+
 - Publish distinguishes unsigned (no manifest) from invalid-signed (tampered manifest) with different error messages and remediation
 - Fleet-level publish tier requirement: enterprise fleets can mandate minimum governance tier per risk level for published skills
 - Security-relevant warnings (unsigned manifest, tier mismatch) are not suppressible by --quiet

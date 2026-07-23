@@ -17,14 +17,8 @@ export {
   MAX_SNAPSHOTS_PER_SESSION,
   SESSION_IDLE_MS,
   SWEEP_INTERVAL_MS,
-} from './policy-plugin.js';
-export type {
-  PolicyContextWithSnapshot,
-  PolicyPluginOptions,
-} from './policy-plugin.js';
+} from "./policy-plugin.js";
+export type { PolicyContextWithSnapshot, PolicyPluginOptions } from "./policy-plugin.js";
 
-export {
-  buildPolicyPluginFromLKG,
-  policyIrTracker,
-} from './policy-plugin-lkg.js';
-export type { PolicyPluginLKGOptions } from './policy-plugin-lkg.js';
+export { buildPolicyPluginFromLKG, policyIrTracker } from "./policy-plugin-lkg.js";
+export type { PolicyPluginLKGOptions } from "./policy-plugin-lkg.js";

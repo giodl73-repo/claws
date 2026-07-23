@@ -12,11 +12,11 @@ Claude Code is a dual-surface platform. claws emits governance to two targets: `
 
 Claude Code workspaces are detected via the `.claude/` directory and the presence of `CLAUDE.md` or `.claude/settings.json`. Detection checks:
 
-| Marker | Detection role |
-|--------|---------------|
-| `CLAUDE.md` | Primary content surface |
-| `.claude/settings.json` | Structured permission surface |
-| `.claude/` directory | Directory presence (supplementary) |
+| Marker                  | Detection role                     |
+| ----------------------- | ---------------------------------- |
+| `CLAUDE.md`             | Primary content surface            |
+| `.claude/settings.json` | Structured permission surface      |
+| `.claude/` directory    | Directory presence (supplementary) |
 
 When `CLAUDE.md` coexists with `SOUL.md`, both OpenClaw and Claude Code are detected. Multi-platform resolution applies: OpenClaw wins primary selection due to higher enforcement capability.
 
@@ -30,6 +30,7 @@ Governance instructions are injected into `CLAUDE.md` using delimiter-based sect
 
 ```markdown
 <!-- claws governance start -->
+
 [generated governance instructions]
 <!-- claws governance end -->
 ```
@@ -54,10 +55,10 @@ Tool permissions are emitted as structured entries in `.claude/settings.json`. T
 
 Claude Code enforcement is advisory for CLAUDE.md content (the LLM reads but is not bound by instructions) and structural for settings.json (tool restrictions are enforced by the Claude Code harness, not the LLM). This creates a split enforcement model:
 
-| Surface | Enforcement | Strength |
-|---------|-------------|----------|
-| CLAUDE.md | Advisory | LLM may ignore instructions |
-| settings.json | Structural | Harness enforces tool restrictions |
+| Surface       | Enforcement | Strength                           |
+| ------------- | ----------- | ---------------------------------- |
+| CLAUDE.md     | Advisory    | LLM may ignore instructions        |
+| settings.json | Structural  | Harness enforces tool restrictions |
 
 For R4-R5 tools, the settings.json surface is the primary governance mechanism. CLAUDE.md provides supplementary context but should not be relied upon for high-risk enforcement.
 

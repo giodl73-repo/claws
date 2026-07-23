@@ -12,21 +12,21 @@ The registry exists because atoms are cross-cut: a single atom is cited by specs
 
 Every registry row carries exactly 13 fields. Six are preserved from the pre-Horus clawc ATOMS.md; seven are new for the oracle.
 
-| Field              | Meaning                                                                       |
-|--------------------|-------------------------------------------------------------------------------|
-| `id`               | Canonical identifier: `atom:{slug}`                                           |
-| `slug`             | Identifier suffix (no `atom:` prefix), used in filenames + series-ids         |
-| `name`             | Human-readable display name                                                   |
-| `authority`        | Path to the canonical spec/doc that defines this atom                         |
-| `mirrors`          | Paths that must stay byte- or content-equivalent to the authority             |
-| `reuses`           | Atoms this one extends or composes                                            |
-| `spec`             | Governing spec ID(s) — `CL-07`, `CL-13`, `CL-NEW-canonicalizer-byte-identical`|
-| `layer`            | `compiler`, `security`, `runtime`, `cli`, `governance`, `workspace`, `testing`, `ops` |
-| `visibility`       | `public`, `internal`, `private`                                               |
-| `docType`          | `concept`, `process`, `command`, `spec`, `domain`                             |
-| `status`           | `draft`, `stable`, `deprecated` (deprecated carries a `replaces:` pointer)    |
-| `surfaces`         | Required doc surfaces — subset of the 11 (see `concepts--doc-validation.md`)  |
-| `scenario`         | Discriminated union — see next section                                        |
+| Field        | Meaning                                                                               |
+| ------------ | ------------------------------------------------------------------------------------- |
+| `id`         | Canonical identifier: `atom:{slug}`                                                   |
+| `slug`       | Identifier suffix (no `atom:` prefix), used in filenames + series-ids                 |
+| `name`       | Human-readable display name                                                           |
+| `authority`  | Path to the canonical spec/doc that defines this atom                                 |
+| `mirrors`    | Paths that must stay byte- or content-equivalent to the authority                     |
+| `reuses`     | Atoms this one extends or composes                                                    |
+| `spec`       | Governing spec ID(s) — `CL-07`, `CL-13`, `CL-NEW-canonicalizer-byte-identical`        |
+| `layer`      | `compiler`, `security`, `runtime`, `cli`, `governance`, `workspace`, `testing`, `ops` |
+| `visibility` | `public`, `internal`, `private`                                                       |
+| `docType`    | `concept`, `process`, `command`, `spec`, `domain`                                     |
+| `status`     | `draft`, `stable`, `deprecated` (deprecated carries a `replaces:` pointer)            |
+| `surfaces`   | Required doc surfaces — subset of the 11 (see `concepts--doc-validation.md`)          |
+| `scenario`   | Discriminated union — see next section                                                |
 
 ## The `scenario` discriminated union
 
@@ -34,16 +34,16 @@ The `scenario` field is what binds an atom to its behavioural proof. It has two 
 
 ```ts
 type AtomScenario =
-  | { source: 'series'; series: string[] }     // accept-test series IDs
-  | { source: 'unit-test' };                   // exemption; behaviour proved via L0 tests
+  | { source: "series"; series: string[] } // accept-test series IDs
+  | { source: "unit-test" }; // exemption; behaviour proved via L0 tests
 ```
 
 Zod shape:
 
 ```ts
-const AtomScenario = z.discriminatedUnion('source', [
-  z.object({ source: z.literal('series'), series: z.array(z.string()).min(1) }),
-  z.object({ source: z.literal('unit-test') }),
+const AtomScenario = z.discriminatedUnion("source", [
+  z.object({ source: z.literal("series"), series: z.array(z.string()).min(1) }),
+  z.object({ source: z.literal("unit-test") }),
 ]);
 ```
 
@@ -58,6 +58,7 @@ const AtomScenario = z.discriminatedUnion('source', [
 ```
 
 Pin semantics:
+
 - **`draft`** — row exists; authority spec is in `specs/drafts/`. Gates apply doc + scenario obligations but tolerate in-flight drift.
 - **`stable`** — authority spec is in `docs/specs/`. Surface contract + scenario series are complete and passing. This is the default for ported atoms that were stable in clawc.
 - **`deprecated`** — atom retired. Row carries `replaces: atom:{new-slug}` pointing at the successor (or `replaces: null` if nothing took its place). Coverage gates skip deprecated atoms; the row stays in the registry so git log + older PRs still resolve.

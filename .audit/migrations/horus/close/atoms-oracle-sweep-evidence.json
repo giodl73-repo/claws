@@ -18,12 +18,7 @@
     {
       "package": "action",
       "atom_count": 4,
-      "atom_ids": [
-        "atom:AC",
-        "atom:ACS",
-        "atom:ACS/severity-gating",
-        "atom:ACC"
-      ]
+      "atom_ids": ["atom:AC", "atom:ACS", "atom:ACS/severity-gating", "atom:ACC"]
     },
     {
       "package": "cli",
@@ -75,22 +70,12 @@
     {
       "package": "policy",
       "atom_count": 5,
-      "atom_ids": [
-        "atom:PO",
-        "atom:POI",
-        "atom:POI/failmode",
-        "atom:POC",
-        "atom:POC/tool-pattern"
-      ]
+      "atom_ids": ["atom:PO", "atom:POI", "atom:POI/failmode", "atom:POC", "atom:POC/tool-pattern"]
     },
     {
       "package": "repo",
       "atom_count": 3,
-      "atom_ids": [
-        "atom:RB",
-        "atom:RB/scope-flip",
-        "atom:RB/oracle-invariants"
-      ]
+      "atom_ids": ["atom:RB", "atom:RB/scope-flip", "atom:RB/oracle-invariants"]
     },
     {
       "package": "sdk",
@@ -172,11 +157,7 @@
     {
       "package": "upstream",
       "atom_count": 3,
-      "atom_ids": [
-        "atom:UG",
-        "atom:UG/contribution-sequence",
-        "atom:UG/r5-pre-merge-guard"
-      ]
+      "atom_ids": ["atom:UG", "atom:UG/contribution-sequence", "atom:UG/r5-pre-merge-guard"]
     },
     {
       "package": "workspace",

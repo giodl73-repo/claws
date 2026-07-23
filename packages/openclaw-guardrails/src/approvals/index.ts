@@ -13,17 +13,9 @@ export type {
   RiskClassification,
   RiskLevel,
   Sensitivity,
-} from './types.js';
+} from "./types.js";
 
-export {
-  isApprovalRequest,
-  isApprovalResponse,
-  validateTimeoutPolicy,
-} from './guards.js';
+export { isApprovalRequest, isApprovalResponse, validateTimeoutPolicy } from "./guards.js";
 
-export {
-  parseHandle,
-  signHandle,
-  verifyHandle,
-} from './handle.js';
-export type { HandleBinding, ParsedHandle, SignedBinding, VerifyResult } from './handle.js';
+export { parseHandle, signHandle, verifyHandle } from "./handle.js";
+export type { HandleBinding, ParsedHandle, SignedBinding, VerifyResult } from "./handle.js";

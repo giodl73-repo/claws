@@ -6,15 +6,15 @@
  */
 
 export type PatternType =
-  | 'api-key'
-  | 'token'
-  | 'password'
-  | 'private-key'
-  | 'connection-string'
-  | 'high-entropy'
-  | 'jwt';
+  | "api-key"
+  | "token"
+  | "password"
+  | "private-key"
+  | "connection-string"
+  | "high-entropy"
+  | "jwt";
 
-export type Confidence = 'low' | 'medium' | 'high';
+export type Confidence = "low" | "medium" | "high";
 
 export interface SecretPattern {
   id: string;

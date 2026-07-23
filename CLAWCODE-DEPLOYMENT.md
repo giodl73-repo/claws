@@ -4,24 +4,24 @@ A live OpenClaw harness ("ClawCode" technique from `galiniliev/ClawCode`) is dep
 
 ## What's deployed
 
-| Layer | Detail |
-|---|---|
-| Azure subscription | `Visual Studio Enterprise Subscription` (id `148f5576-7098-45db-8258-76228e82ffdd`, tenant `d38cd9ac-c87b-4951-a895-1641af19db40`, account `giodl25@hotmail.com`) |
-| Resource group | `rg-clawcode` |
-| VM | `clawcode-vm`, Ubuntu 24.04, `Standard_D2s_v5`, region `westus2`, public IP **`4.154.18.35`** |
-| SSH | key auth only, key at `~/.ssh/id_rsa` on the Windows host; admin user `azureuser`; NSG opens port 22 to `*` |
-| OpenClaw checkout | `~/openclaw` on the VM, fork `giodl73-repo/openclaw`, branch `substrate/policy` (5 substrate packages: oc-paths, pinch, oc-doctor, lkg, policy) |
-| Gateway | systemd user service `openclaw-gateway.service`, version `2026.5.5`, bind `loopback` on `127.0.0.1:18789`, mode `local`, auth token in `~/.openclaw/openclaw.json` under `gateway.auth.token` |
-| Workspace | `~/.openclaw/workspace/` — `AGENTS.md`, `SOUL.md`, `IDENTITY.md` from ClawCode repo merged with OpenClaw defaults |
-| Worktree root | `~/worktrees/` (per-issue worktrees go here) |
-| Channel | Telegram bot `@SebastianClaw22Bot` (id `8708834350`); group `ClawCode` (id `-1003587100153`); allowlisted user `8676892821` (Gio Della-Libera) |
-| Model provider | Microsoft Foundry / Azure OpenAI |
-| AI Foundry resource | `clawcode-aoai` (kind `AIServices`) in `rg-clawcode`, region **`eastus2`** (westus2 has no OpenAI models), endpoint `https://clawcode-aoai.cognitiveservices.azure.com` |
-| Deployment | `coder` → `gpt-4.1-mini` v=2025-04-14, GlobalStandard SKU, 100K TPM (gpt-5.x/codex models have zero default quota — would need a quota request) |
-| Auth to model | API key via env var `AZURE_OPENAI_API_KEY` in systemd drop-in (`~/.config/systemd/user/openclaw-gateway.service.d/secrets.conf`) |
-| Target repo for agent | `giodl73-repo/clawcode-sandbox` (public TS project with deliberate `sum() returns a-b` bug, issue #1 labeled `agent-fix`) |
-| gh auth on VM | logged in as `giodl73-repo` (token forwarded from Windows host); git identity `ClawCode Agent (giodl73-repo) <giodl25@hotmail.com>` |
-| Bootstrap prompts | `~/clawcode-prompts/05-09-*.md` on VM (already customized: `08-prompt-setup-cron-polling.md` points at `giodl73-repo/clawcode-sandbox` and group `-1003587100153`) |
+| Layer                 | Detail                                                                                                                                                                                        |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Azure subscription    | `Visual Studio Enterprise Subscription` (id `148f5576-7098-45db-8258-76228e82ffdd`, tenant `d38cd9ac-c87b-4951-a895-1641af19db40`, account `giodl25@hotmail.com`)                             |
+| Resource group        | `rg-clawcode`                                                                                                                                                                                 |
+| VM                    | `clawcode-vm`, Ubuntu 24.04, `Standard_D2s_v5`, region `westus2`, public IP **`4.154.18.35`**                                                                                                 |
+| SSH                   | key auth only, key at `~/.ssh/id_rsa` on the Windows host; admin user `azureuser`; NSG opens port 22 to `*`                                                                                   |
+| OpenClaw checkout     | `~/openclaw` on the VM, fork `giodl73-repo/openclaw`, branch `substrate/policy` (5 substrate packages: oc-paths, pinch, oc-doctor, lkg, policy)                                               |
+| Gateway               | systemd user service `openclaw-gateway.service`, version `2026.5.5`, bind `loopback` on `127.0.0.1:18789`, mode `local`, auth token in `~/.openclaw/openclaw.json` under `gateway.auth.token` |
+| Workspace             | `~/.openclaw/workspace/` — `AGENTS.md`, `SOUL.md`, `IDENTITY.md` from ClawCode repo merged with OpenClaw defaults                                                                             |
+| Worktree root         | `~/worktrees/` (per-issue worktrees go here)                                                                                                                                                  |
+| Channel               | Telegram bot `@SebastianClaw22Bot` (id `8708834350`); group `ClawCode` (id `-1003587100153`); allowlisted user `8676892821` (Gio Della-Libera)                                                |
+| Model provider        | Microsoft Foundry / Azure OpenAI                                                                                                                                                              |
+| AI Foundry resource   | `clawcode-aoai` (kind `AIServices`) in `rg-clawcode`, region **`eastus2`** (westus2 has no OpenAI models), endpoint `https://clawcode-aoai.cognitiveservices.azure.com`                       |
+| Deployment            | `coder` → `gpt-4.1-mini` v=2025-04-14, GlobalStandard SKU, 100K TPM (gpt-5.x/codex models have zero default quota — would need a quota request)                                               |
+| Auth to model         | API key via env var `AZURE_OPENAI_API_KEY` in systemd drop-in (`~/.config/systemd/user/openclaw-gateway.service.d/secrets.conf`)                                                              |
+| Target repo for agent | `giodl73-repo/clawcode-sandbox` (public TS project with deliberate `sum() returns a-b` bug, issue #1 labeled `agent-fix`)                                                                     |
+| gh auth on VM         | logged in as `giodl73-repo` (token forwarded from Windows host); git identity `ClawCode Agent (giodl73-repo) <giodl25@hotmail.com>`                                                           |
+| Bootstrap prompts     | `~/clawcode-prompts/05-09-*.md` on VM (already customized: `08-prompt-setup-cron-polling.md` points at `giodl73-repo/clawcode-sandbox` and group `-1003587100153`)                            |
 
 ## Where the secrets live
 
@@ -32,6 +32,7 @@ Not committed anywhere. They're in three places:
 - Bot token also in `~/.bashrc` on the VM (legacy from setup; can be removed)
 
 Rotate via:
+
 - Bot token: BotFather `/revoke` → update VM
 - AOAI key: `az cognitiveservices account keys regenerate -g rg-clawcode -n clawcode-aoai --key-name key1`
 

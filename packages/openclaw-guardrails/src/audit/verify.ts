@@ -4,9 +4,9 @@
  * Uses timing-safe comparison to prevent side-channel attacks.
  */
 
-import { timingSafeEqual } from 'node:crypto';
-import type { AuditEvent, VerifyResult } from './types.js';
-import { computeHmac, GENESIS_HASH } from './chain.js';
+import { timingSafeEqual } from "node:crypto";
+import type { AuditEvent, VerifyResult } from "./types.js";
+import { computeHmac, GENESIS_HASH } from "./chain.js";
 
 function safeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
@@ -45,7 +45,7 @@ export function verifyChain(
 
     const { hash, ...withoutHash } = event;
     const recomputed = computeHmac(
-      withoutHash as Omit<AuditEvent, 'hash'>,
+      withoutHash as Omit<AuditEvent, "hash">,
       event.previousHash,
       hmacKey,
     );

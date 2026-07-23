@@ -9,6 +9,7 @@ The CLAWS_BYPASS=1 escape hatch for disabling governance enforcement in emergenc
 ## When to Use
 
 The bypass is strictly for emergencies:
+
 - Production incident where governance rules block a hotfix
 - Deployment rollback where time-sensitive action is needed
 - Investigation where enforcement interferes with diagnosis

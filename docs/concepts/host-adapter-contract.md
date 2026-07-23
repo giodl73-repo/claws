@@ -15,6 +15,7 @@ from WHAT the plugin decides. Any host that speaks the four interface
 methods can plug in.
 
 Spec authority:
+
 - Interface definition: `CL-07-amendment-file-ingest-provider.md` §1a
   (in `specs/drafts/`, merges to `docs/specs/CL-07.md` at wave close)
 - `ApprovalSink` companion interface: `CL-11-amendment-audit-cross-linking.md`
@@ -60,12 +61,12 @@ The adapter is authoritative here: once it returns a context, the
 plugin trusts identity. If identity can be forged after this method,
 the adapter has a security bug.
 
-| Adapter | Implementation |
-|---|---|
-| `AetherAdapter` | `TenantIsolationMiddleware` + `conversation_authz` middleware chain; identity from JWT |
-| `LobsterAdapter` | `X-Session-Principal` header; single-tenant (`tenantId: null`) |
-| `OpenClawVanillaAdapter` | `os.userInfo().username` or `--principal` CLI flag |
-| `ClawsServiceAdapter` | `X-Principal` header (+ `X-Tenant-Id` when multi-tenant) |
+| Adapter                  | Implementation                                                                         |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `AetherAdapter`          | `TenantIsolationMiddleware` + `conversation_authz` middleware chain; identity from JWT |
+| `LobsterAdapter`         | `X-Session-Principal` header; single-tenant (`tenantId: null`)                         |
+| `OpenClawVanillaAdapter` | `os.userInfo().username` or `--principal` CLI flag                                     |
+| `ClawsServiceAdapter`    | `X-Principal` header (+ `X-Tenant-Id` when multi-tenant)                               |
 
 ### (2) `routePolicy` — which compiled policy applies
 
@@ -78,12 +79,12 @@ Called twice with the same context MUST return the same
 `policyArtifactSha256` unless a snapshot promote has occurred between
 the calls (CL-07 non-uplift rule).
 
-| Adapter | Implementation |
-|---|---|
-| `AetherAdapter` | `ApprovalPolicyRegistry.resolve` — union of proto_flag + registry, with `container_type_policies['openclaw']` override |
-| `LobsterAdapter` | `GET snap/v1/policy/current`; on sidecar-unreachable fallback to on-disk `.openclaw/policy/policy-ir.json` |
-| `OpenClawVanillaAdapter` | Single locally-compiled `.openclaw/policy/policy-ir.json` |
-| `ClawsServiceAdapter` | Local `.claws/policy-ir.json`; multi-tenant mode uses stub lookup table |
+| Adapter                  | Implementation                                                                                                         |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `AetherAdapter`          | `ApprovalPolicyRegistry.resolve` — union of proto_flag + registry, with `container_type_policies['openclaw']` override |
+| `LobsterAdapter`         | `GET snap/v1/policy/current`; on sidecar-unreachable fallback to on-disk `.openclaw/policy/policy-ir.json`             |
+| `OpenClawVanillaAdapter` | Single locally-compiled `.openclaw/policy/policy-ir.json`                                                              |
+| `ClawsServiceAdapter`    | Local `.claws/policy-ir.json`; multi-tenant mode uses stub lookup table                                                |
 
 ### (3) `getApprovalSink` — where decisions + approvals land
 
@@ -96,24 +97,24 @@ Every `ApprovalSink` MUST pass `ApprovalSinkConformance`. The suite
 covers emit ordering, correlation matching, hash-chain integrity,
 idempotency, and shutdown flush.
 
-| Adapter | Sink |
-|---|---|
-| `AetherAdapter` | `AetherToolApprovalSink` (wraps `/v1/tool-approval` + 3-tier routing) |
-| `LobsterAdapter` | `LobsterSupervisorHttpSink` (HMAC POST + local write-behind) |
-| `OpenClawVanillaAdapter` | `OpenClawStdinSink` (stdout JSON + stdin readline; ephemeral) |
-| `ClawsServiceAdapter` | `ClawsServiceJsonlSink` (fsync-append JSONL) |
+| Adapter                  | Sink                                                                  |
+| ------------------------ | --------------------------------------------------------------------- |
+| `AetherAdapter`          | `AetherToolApprovalSink` (wraps `/v1/tool-approval` + 3-tier routing) |
+| `LobsterAdapter`         | `LobsterSupervisorHttpSink` (HMAC POST + local write-behind)          |
+| `OpenClawVanillaAdapter` | `OpenClawStdinSink` (stdout JSON + stdin readline; ephemeral)         |
+| `ClawsServiceAdapter`    | `ClawsServiceJsonlSink` (fsync-append JSONL)                          |
 
 ### (4) `shapeResponse` — how decisions reach the caller
 
 Given the plugin's decision + context, return an `OutgoingResponse`.
 Transport-specific.
 
-| Adapter | Response shape |
-|---|---|
-| `AetherAdapter` | HTTP 200/202 + SSE `tool_approval` event |
-| `LobsterAdapter` | HTTP status + optional `Approval-Redirect` header |
-| `OpenClawVanillaAdapter` | Process stdout (JSON) + exit code (0/1/75) |
-| `ClawsServiceAdapter` | Direct function return (`transport: 'in-process'`) |
+| Adapter                  | Response shape                                     |
+| ------------------------ | -------------------------------------------------- |
+| `AetherAdapter`          | HTTP 200/202 + SSE `tool_approval` event           |
+| `LobsterAdapter`         | HTTP status + optional `Approval-Redirect` header  |
+| `OpenClawVanillaAdapter` | Process stdout (JSON) + exit code (0/1/75)         |
+| `ClawsServiceAdapter`    | Direct function return (`transport: 'in-process'`) |
 
 ## Host obligations
 
@@ -157,7 +158,7 @@ upstream contribution wave. When it ships, third-party OC hosts
 inherit `HostAdapter` + `ApprovalSink` from upstream and plug
 their own adapter implementation into the OC runtime. This is the
 architectural realization of the user's extensibility ask:
-*"someone else can run a different http server for their thing."*
+_"someone else can run a different http server for their thing."_
 
 ## Cross-references
 

@@ -98,7 +98,7 @@ Reference pattern:
 const hookPromise = onSnapshotPromoted(newId, oldId);
 await Promise.race([
   hookPromise,
-  new Promise((_, rej) => setTimeout(() => rej(new Error('hook-timeout')), 10_000)),
+  new Promise((_, rej) => setTimeout(() => rej(new Error("hook-timeout")), 10_000)),
 ]);
 ```
 

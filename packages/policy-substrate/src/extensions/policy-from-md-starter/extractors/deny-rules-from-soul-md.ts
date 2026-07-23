@@ -14,11 +14,11 @@
  * @module @openclaw/policy/extractors/deny-rules-from-soul-md
  */
 
-import { parseOcPath, resolveOcPath } from '@openclaw/oc-path';
-import type { DenyRule } from '../../../plugin-sdk/policy/types.js';
-import type { PolicyExtractorSpec } from '../../../plugin-sdk/policy/api.js';
+import { parseOcPath, resolveOcPath } from "@openclaw/oc-path";
+import type { DenyRule } from "../../../plugin-sdk/policy/types.js";
+import type { PolicyExtractorSpec } from "../../../plugin-sdk/policy/api.js";
 
-const BOUNDARIES_PATH = parseOcPath('oc://SOUL.md/Boundaries');
+const BOUNDARIES_PATH = parseOcPath("oc://SOUL.md/Boundaries");
 
 /**
  * Reduce a free-form boundary statement to a normalized matcher
@@ -31,21 +31,20 @@ function tagFor(reason: string): string {
   const first = reason.split(/[.,;:]/)[0] ?? reason;
   const keywords = first
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, ' ')
+    .replace(/[^a-z0-9\s-]/g, " ")
     .split(/\s+/)
     .filter((w) => w.length > 3)
     .slice(0, 3);
-  return keywords.length > 0 ? `*${keywords.join('*')}*` : '*';
+  return keywords.length > 0 ? `*${keywords.join("*")}*` : "*";
 }
 
 export const denyRulesFromSoulMd: PolicyExtractorSpec<DenyRule> = {
-  id: 'starter-v0/deny-rules/from-soul-md',
-  description:
-    'Extract DenyRule entries from each bullet under SOUL.md ## Boundaries',
-  appliesTo: 'SOUL.md',
-  requires: { sdkVersion: '0.1.0' },
+  id: "starter-v0/deny-rules/from-soul-md",
+  description: "Extract DenyRule entries from each bullet under SOUL.md ## Boundaries",
+  appliesTo: "SOUL.md",
+  requires: { sdkVersion: "0.1.0" },
   extract(ctx) {
-    if (ctx.file.ast.kind !== 'md') return [];
+    if (ctx.file.ast.kind !== "md") return [];
     // Resolve the Boundaries section. The matched node descriptor is
     // `md-block`; we walk back to the AST to read its items because
     // `OcMatch` carries `{kind, descriptor, line}` not the items

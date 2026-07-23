@@ -20,20 +20,21 @@ jobs:
       - uses: craftworks/claws-action@v1
         with:
           command: verify
-          fail-on: warning  # block on warnings, not just errors
+          fail-on: warning # block on warnings, not just errors
 ```
 
 ## Check Levels
 
-| Level | Behavior |
-|-------|----------|
-| `error` | Fail only on errors (default) |
-| `warning` | Fail on warnings and errors |
-| `info` | Fail on any diagnostic |
+| Level     | Behavior                      |
+| --------- | ----------------------------- |
+| `error`   | Fail only on errors (default) |
+| `warning` | Fail on warnings and errors   |
+| `info`    | Fail on any diagnostic        |
 
 ## Output
 
 The action produces:
+
 - GitHub check annotations (inline errors on changed files)
 - Summary table in the PR check output
 - Machine-readable JSON artifact for downstream consumption

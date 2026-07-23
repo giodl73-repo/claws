@@ -14,9 +14,9 @@
  * @module @bic/v2-prototype/policy-ir-runtime
  */
 
-import type { Snapshot, SnapshotId, SnapshotStore } from './snapshot.js';
-import type { PolicyIR } from './policy-ir.js';
-import { POLICY_IR_PATH } from './policy-ir.js';
+import type { Snapshot, SnapshotId, SnapshotStore } from "./snapshot.js";
+import type { PolicyIR } from "./policy-ir.js";
+import { POLICY_IR_PATH } from "./policy-ir.js";
 
 /**
  * Read PolicyIR from a snapshot via the SnapshotStore.
@@ -29,10 +29,7 @@ import { POLICY_IR_PATH } from './policy-ir.js';
  * Caller is expected to fail-closed on any throw per
  * `policy-pre-rfc.md` § "Failure semantics".
  */
-export async function loadPolicyIR(
-  store: SnapshotStore,
-  snap: SnapshotId,
-): Promise<PolicyIR> {
+export async function loadPolicyIR(store: SnapshotStore, snap: SnapshotId): Promise<PolicyIR> {
   const bytes = await store.read(snap, POLICY_IR_PATH);
   const text = new TextDecoder().decode(bytes);
   const parsed = JSON.parse(text) as unknown;
@@ -68,20 +65,20 @@ export function readPolicyIR(snapshot: Snapshot, bodyBytes: Uint8Array): PolicyI
  * @asserts ir is PolicyIR
  */
 export function validatePolicyIR(ir: unknown): asserts ir is PolicyIR {
-  if (typeof ir !== 'object' || ir === null) {
-    throw new Error('PolicyIR must be a non-null object');
+  if (typeof ir !== "object" || ir === null) {
+    throw new Error("PolicyIR must be a non-null object");
   }
   const obj = ir as Record<string, unknown>;
-  for (const key of ['version', 'policyId', 'generatedAt', 'generatedFrom', 'tools', 'denyRules']) {
+  for (const key of ["version", "policyId", "generatedAt", "generatedFrom", "tools", "denyRules"]) {
     if (!(key in obj)) {
       throw new Error(`PolicyIR missing required field: ${key}`);
     }
   }
   if (!Array.isArray(obj.tools)) {
-    throw new Error('PolicyIR.tools must be an array');
+    throw new Error("PolicyIR.tools must be an array");
   }
   if (!Array.isArray(obj.denyRules)) {
-    throw new Error('PolicyIR.denyRules must be an array');
+    throw new Error("PolicyIR.denyRules must be an array");
   }
   // Hash round-trip is downstream-injected; see docstring above.
 }

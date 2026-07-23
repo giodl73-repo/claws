@@ -15,7 +15,9 @@ governance:
   obo: none
   data: PUBLIC
 ---
+
 # Weather Lookup
+
 Get the current weather for any city.
 ```
 
@@ -43,19 +45,21 @@ npm install @bic/claws-skill-kit
 ```
 
 ```typescript
-import { skill, audit } from '@bic/claws-skill-kit';
+import { skill, audit } from "@bic/claws-skill-kit";
 
 class WeatherHandler {
-  @audit('lookup')
+  @audit("lookup")
   async handle(ctx) {
-    const forecast = await ctx.tools.fetchWeather(ctx.input.get('city'));
-    return { city: ctx.input.get('city'), forecast };
+    const forecast = await ctx.tools.fetchWeather(ctx.input.get("city"));
+    return { city: ctx.input.get("city"), forecast };
   }
 }
 
 export default skill({
-  name: 'weather-lookup',
-  risk: 'R2', obo: 'none', data: 'PUBLIC',
+  name: "weather-lookup",
+  risk: "R2",
+  obo: "none",
+  data: "PUBLIC",
   handler: WeatherHandler,
 });
 ```
@@ -109,12 +113,12 @@ R1-R2, TYPED for R3, VERIFIED for R4-R5.
 
 ## Which tier should I use?
 
-| Situation | Tier | Why |
-|-----------|------|-----|
-| Hobby skill, low risk | DECLARED | 3 lines, done |
-| Production skill, medium risk | TYPED | Type safety catches real bugs |
-| Enterprise or OBO skill | VERIFIED | Signed manifests, generated tests |
-| Existing skill, want visibility | DECLARED | Zero dependencies, 2 minutes |
+| Situation                       | Tier     | Why                               |
+| ------------------------------- | -------- | --------------------------------- |
+| Hobby skill, low risk           | DECLARED | 3 lines, done                     |
+| Production skill, medium risk   | TYPED    | Type safety catches real bugs     |
+| Enterprise or OBO skill         | VERIFIED | Signed manifests, generated tests |
+| Existing skill, want visibility | DECLARED | Zero dependencies, 2 minutes      |
 
 Most skills will stay DECLARED. That's fine -- Tier 1 is designed to feel
 complete, not like a stepping stone.
@@ -122,6 +126,7 @@ complete, not like a stepping stone.
 ## Scenario-Driven Additions
 
 ### From skill-lifecycle scenarios (37 findings applied)
+
 - Tier detection is from workspace state (handler analysis, manifest presence) not stored metadata -- tier is recomputed each time
 - Prompt-only skill tier ceiling: skills without a handler (SKILL.md-only) can reach DECLARED but skip TYPED and VERIFIED
 - Enterprise tier-per-risk enforcement: fleet policies can mandate VERIFIED for R4-R5 skills and TYPED for R3

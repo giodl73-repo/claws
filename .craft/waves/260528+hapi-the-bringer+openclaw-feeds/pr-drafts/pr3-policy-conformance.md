@@ -21,10 +21,10 @@ This is config/catalog conformance, not broad runtime enforcement:
       "sources": {
         "require": ["company-approved"],
         "requireIntegrity": true,
-        "requireAttestation": true
-      }
-    }
-  }
+        "requireAttestation": true,
+      },
+    },
+  },
 }
 ```
 
@@ -36,10 +36,10 @@ This is config/catalog conformance, not broad runtime enforcement:
     "feeds": {
       "installPolicy": {
         "mode": "enforce",
-        "requireApproval": true
-      }
-    }
-  }
+        "requireApproval": true,
+      },
+    },
+  },
 }
 ```
 

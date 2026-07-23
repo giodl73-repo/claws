@@ -20,20 +20,20 @@ OWASP Agentic Top 10 lists Excessive Agency (#1) and Tool Misuse (#4) as the two
 
 ## FOR-user vs AS-user
 
-| Action | Category | Gate required? | Why |
-|--------|----------|----------------|-----|
-| Read email | FOR-user | No | Observation only. No external effect. |
-| Search the web | FOR-user | No | Read-only information retrieval. |
-| Draft a response | FOR-user | No | Internal preparation. Nothing leaves the workspace. |
-| Summarize a document | FOR-user | No | Analysis of existing data. |
-| Query a database (read) | FOR-user | No | Read access within existing permissions. |
-| Ask another agent for information | FOR-user | No | Internal coordination. |
-| **Send an email** | **AS-user** | **Yes** | Message leaves the workspace under the user's identity. |
-| **Post to Slack or Teams** | **AS-user** | **Yes** | Public-facing communication as the user. |
-| **Process a payment** | **AS-user** | **Yes** | Financial transaction on behalf of the user. |
-| **Delete files** | **AS-user** | **Yes** | Irreversible change to the user's environment. |
-| **Call an API with user credentials** | **AS-user** | **Yes** | Third-party action under the user's authority. |
-| **Ask another agent to act as the user** | **AS-user** | **Yes** | Delegation of impersonation authority. |
+| Action                                   | Category    | Gate required? | Why                                                     |
+| ---------------------------------------- | ----------- | -------------- | ------------------------------------------------------- |
+| Read email                               | FOR-user    | No             | Observation only. No external effect.                   |
+| Search the web                           | FOR-user    | No             | Read-only information retrieval.                        |
+| Draft a response                         | FOR-user    | No             | Internal preparation. Nothing leaves the workspace.     |
+| Summarize a document                     | FOR-user    | No             | Analysis of existing data.                              |
+| Query a database (read)                  | FOR-user    | No             | Read access within existing permissions.                |
+| Ask another agent for information        | FOR-user    | No             | Internal coordination.                                  |
+| **Send an email**                        | **AS-user** | **Yes**        | Message leaves the workspace under the user's identity. |
+| **Post to Slack or Teams**               | **AS-user** | **Yes**        | Public-facing communication as the user.                |
+| **Process a payment**                    | **AS-user** | **Yes**        | Financial transaction on behalf of the user.            |
+| **Delete files**                         | **AS-user** | **Yes**        | Irreversible change to the user's environment.          |
+| **Call an API with user credentials**    | **AS-user** | **Yes**        | Third-party action under the user's authority.          |
+| **Ask another agent to act as the user** | **AS-user** | **Yes**        | Delegation of impersonation authority.                  |
 
 The reasonable-person test makes this intuitive for auditors and board members. You do not need to understand risk classification or governance rules. You need only ask: would this person expect to be asked first?
 
@@ -60,7 +60,7 @@ classification:
       reason: "generates PDF for review, does not send"
 ```
 
-Without an override, OBO detection uses behavioral heuristics (credential forwarding, external API calls with user identity). Overrides are audited and appear in `claws pinch` output. *(Source: CL-02 Amendments A1, A3)*
+Without an override, OBO detection uses behavioral heuristics (credential forwarding, external API calls with user identity). Overrides are audited and appear in `claws pinch` output. _(Source: CL-02 Amendments A1, A3)_
 
 ---
 
@@ -68,12 +68,12 @@ Without an override, OBO detection uses behavioral heuristics (credential forwar
 
 The OBO boundary operates on a deny-default principle. This means:
 
-| Condition | Result |
-|-----------|--------|
-| User approves within timeout | Action proceeds. Token signed. |
-| User explicitly denies | Action blocked. Reason recorded. |
-| User does not respond (timeout) | **Action blocked.** Inaction equals denial. |
-| Governance system crashes | **Action blocked.** Fail-closed for R5 tools. |
+| Condition                          | Result                                            |
+| ---------------------------------- | ------------------------------------------------- |
+| User approves within timeout       | Action proceeds. Token signed.                    |
+| User explicitly denies             | Action blocked. Reason recorded.                  |
+| User does not respond (timeout)    | **Action blocked.** Inaction equals denial.       |
+| Governance system crashes          | **Action blocked.** Fail-closed for R5 tools.     |
 | Another agent forwards the request | **Action blocked.** No transitive OBO delegation. |
 
 Deny-default is the only safe posture for impersonation actions. The alternative -- defaulting to approve on timeout -- means the user can be impersonated while asleep, in a meeting, or on vacation. That is the opposite of governance.
@@ -82,13 +82,13 @@ Deny-default is the only safe posture for impersonation actions. The alternative
 
 ## Regulatory alignment
 
-| Framework | Relevant requirement | How OBO addresses it |
-|-----------|---------------------|---------------------|
-| SOC2 Type II | CC6.1 Logical access, CC6.2 Auth mechanisms | OBO gates enforce human approval before agent impersonation |
-| HIPAA Security Rule | 164.312(a)(1) Access control | PHI-touching tools require explicit approval before agent action |
-| EU AI Act | Article 14 Human oversight | OBO gates provide the "ability to intervene" required for high-risk systems |
-| OWASP Agentic | #1 Excessive Agency, #4 Tool Misuse | OBO boundary limits agent capabilities to what humans explicitly authorize |
-| NIST AI RMF | GOVERN 1.3, MAP 2.3 | Human-in-the-loop controls documented and enforceable |
+| Framework           | Relevant requirement                        | How OBO addresses it                                                        |
+| ------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
+| SOC2 Type II        | CC6.1 Logical access, CC6.2 Auth mechanisms | OBO gates enforce human approval before agent impersonation                 |
+| HIPAA Security Rule | 164.312(a)(1) Access control                | PHI-touching tools require explicit approval before agent action            |
+| EU AI Act           | Article 14 Human oversight                  | OBO gates provide the "ability to intervene" required for high-risk systems |
+| OWASP Agentic       | #1 Excessive Agency, #4 Tool Misuse         | OBO boundary limits agent capabilities to what humans explicitly authorize  |
+| NIST AI RMF         | GOVERN 1.3, MAP 2.3                         | Human-in-the-loop controls documented and enforceable                       |
 
 ---
 
@@ -101,6 +101,7 @@ An agent has the same access as an employee. It can read what the employee reads
 ## Scenario-Driven Additions
 
 ### From obo-elicitation scenarios (68 findings applied)
+
 - Standing approval: structured pre-authorization in USER.md frontmatter with conditions (time-bound, scope-limited, tool-specific) and 90-day expiry default
 - Conditional classification: some tools are R5/OBO only in certain contexts (e.g., DM vs public channel); context_parameters in TOOLS.md enable per-invocation classification
 - Multi-tool approval mode: serialized (one prompt per tool) vs batched (single prompt listing all tools) with per-tool individual tokens and correlation ID

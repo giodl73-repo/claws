@@ -17,13 +17,13 @@ claws auto-classifies every tool in your workspace by risk level during `claws b
 }
 ```
 
-| Risk | Meaning | Fail mode |
-|------|---------|-----------|
-| R1 | Read-only, no side effects | Open (allow on error) |
-| R2 | Write to local workspace | Open |
-| R3 | External communication, user-visible | Closed (block on error) |
-| R4 | Financial, PII, or privileged | Closed |
-| R5 | System admin, irreversible | Closed (non-configurable) |
+| Risk | Meaning                              | Fail mode                 |
+| ---- | ------------------------------------ | ------------------------- |
+| R1   | Read-only, no side effects           | Open (allow on error)     |
+| R2   | Write to local workspace             | Open                      |
+| R3   | External communication, user-visible | Closed (block on error)   |
+| R4   | Financial, PII, or privileged        | Closed                    |
+| R5   | System admin, irreversible           | Closed (non-configurable) |
 
 R5 fail-closed is non-negotiable. The compiler refuses to emit R5 fail-open under any configuration.
 

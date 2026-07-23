@@ -9,11 +9,11 @@ Spec: **CL-13 v1.7 §Validation** (3-pass regex amendment).
 
 ## What each pass catches
 
-| Pass | Pattern | Scope | Rationale |
-|------|---------|-------|-----------|
-| 1. Source residue | `@craftworks/(clawc-\|agent-sdk\|compiler-sdk\|craftworks-sdk)` | All tracked files (minus allowlist) | Any live import of the craftworks scope is an escaped migration artifact. |
-| 2. Cross-scope leak | `@bic/clawc-*` | `packages/openclaw-*/src/**` + `packages/openclaw-*/package.json` `dependencies` | OpenClaw packages must not depend on clawc-* in production code. `devDependencies` is carved out (test-only deps never ship). |
-| 3. Allowlist enforcement | `@bic/openclaw-{name}` | All tracked files | The `openclaw` scope is a closed set: `workspace`, `guardrails`, `policy`, `snap`. Unknown names fail. |
+| Pass                     | Pattern                                                         | Scope                                                                            | Rationale                                                                                                                     |
+| ------------------------ | --------------------------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| 1. Source residue        | `@craftworks/(clawc-\|agent-sdk\|compiler-sdk\|craftworks-sdk)` | All tracked files (minus allowlist)                                              | Any live import of the craftworks scope is an escaped migration artifact.                                                     |
+| 2. Cross-scope leak      | `@bic/clawc-*`                                                  | `packages/openclaw-*/src/**` + `packages/openclaw-*/package.json` `dependencies` | OpenClaw packages must not depend on clawc-* in production code. `devDependencies` is carved out (test-only deps never ship). |
+| 3. Allowlist enforcement | `@bic/openclaw-{name}`                                          | All tracked files                                                                | The `openclaw` scope is a closed set: `workspace`, `guardrails`, `policy`, `snap`. Unknown names fail.                        |
 
 ## What to do on violation
 

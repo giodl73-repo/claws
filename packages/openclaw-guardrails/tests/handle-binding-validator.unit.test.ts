@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { createHmac, randomBytes } from 'node:crypto';
+import { describe, expect, it } from "vitest";
+import { createHmac, randomBytes } from "node:crypto";
 import {
   EVALUATION_ORDER,
   validateHandle,
@@ -7,7 +7,7 @@ import {
   type InvalidReason,
   type ValidationContext,
   type ValidationDeps,
-} from '../src/handle-binding/index.js';
+} from "../src/handle-binding/index.js";
 
 /**
  * The 7 mutable field positions (excluding the signature pre-check) in the
@@ -15,13 +15,13 @@ import {
  * property test in scenario #12.
  */
 const FIELD_ORDER: ReadonlyArray<{ name: string; reason: InvalidReason }> = [
-  { name: 'providerId', reason: 'provider-id-mismatch' },
-  { name: 'contentHash', reason: 'content-hash-mismatch' },
-  { name: 'sequenceNumber', reason: 'sequence-rollback' },
-  { name: 'approverPrincipal', reason: 'principal-mismatch' },
-  { name: 'keyId', reason: 'unknown-keyId' },
-  { name: 'ttl', reason: 'ttl-expired' },
-  { name: 'nonce', reason: 'nonce-reuse' },
+  { name: "providerId", reason: "provider-id-mismatch" },
+  { name: "contentHash", reason: "content-hash-mismatch" },
+  { name: "sequenceNumber", reason: "sequence-rollback" },
+  { name: "approverPrincipal", reason: "principal-mismatch" },
+  { name: "keyId", reason: "unknown-keyId" },
+  { name: "ttl", reason: "ttl-expired" },
+  { name: "nonce", reason: "nonce-reuse" },
 ];
 
 interface Harness {
@@ -33,26 +33,25 @@ interface Harness {
 }
 
 function sign(payload: Uint8Array, keyId: string, key: Buffer): string {
-  const mac = createHmac('sha256', key).update(payload).digest('hex');
+  const mac = createHmac("sha256", key).update(payload).digest("hex");
   return `${keyId}.${mac}`;
 }
 
 function buildHarness(
-  overrides: Partial<{ breakField: (typeof FIELD_ORDER)[number]['name'] }> = {},
+  overrides: Partial<{ breakField: (typeof FIELD_ORDER)[number]["name"] }> = {},
 ): Harness {
-  const trustedKeyId = 'k_trusted';
+  const trustedKeyId = "k_trusted";
   const key = randomBytes(32);
-  const keyLookup = (kid: string): Buffer | undefined =>
-    kid === trustedKeyId ? key : undefined;
+  const keyLookup = (kid: string): Buffer | undefined => (kid === trustedKeyId ? key : undefined);
 
   const baseFields = {
-    providerId: 'provider-a',
-    contentHash: 'sha256-abc',
+    providerId: "provider-a",
+    contentHash: "sha256-abc",
     sequenceNumber: 10,
-    approverPrincipal: 'user@tenant',
+    approverPrincipal: "user@tenant",
     keyId: trustedKeyId,
     ttl: 10_000,
-    nonce: 'nonce-1',
+    nonce: "nonce-1",
   };
   const payload = new TextEncoder().encode(JSON.stringify(baseFields));
   const signature = sign(payload, trustedKeyId, key);
@@ -64,11 +63,11 @@ function buildHarness(
   };
 
   const ctx: ValidationContext = {
-    expectedProviderId: 'provider-a',
-    canonicalInvocationHash: 'sha256-abc',
-    expectedApproverPrincipal: 'user@tenant',
+    expectedProviderId: "provider-a",
+    canonicalInvocationHash: "sha256-abc",
+    expectedApproverPrincipal: "user@tenant",
     sequenceHighWaterMark: 9,
-    nonceScope: 'scenario-1',
+    nonceScope: "scenario-1",
   };
 
   const nowMs = 5_000;
@@ -95,25 +94,25 @@ function buildHarness(
  */
 function breakField(h: Harness, fieldName: string): void {
   switch (fieldName) {
-    case 'providerId':
-      h.ctx = { ...h.ctx, expectedProviderId: 'provider-z' };
+    case "providerId":
+      h.ctx = { ...h.ctx, expectedProviderId: "provider-z" };
       return;
-    case 'contentHash':
-      h.ctx = { ...h.ctx, canonicalInvocationHash: 'sha256-other' };
+    case "contentHash":
+      h.ctx = { ...h.ctx, canonicalInvocationHash: "sha256-other" };
       return;
-    case 'sequenceNumber':
+    case "sequenceNumber":
       h.ctx = { ...h.ctx, sequenceHighWaterMark: 100 };
       return;
-    case 'approverPrincipal':
-      h.ctx = { ...h.ctx, expectedApproverPrincipal: 'else@tenant' };
+    case "approverPrincipal":
+      h.ctx = { ...h.ctx, expectedApproverPrincipal: "else@tenant" };
       return;
-    case 'keyId':
-      h.handle = { ...h.handle, keyId: 'k_other' };
+    case "keyId":
+      h.handle = { ...h.handle, keyId: "k_other" };
       return;
-    case 'ttl':
+    case "ttl":
       h.handle = { ...h.handle, ttl: h.nowMs - 1 };
       return;
-    case 'nonce':
+    case "nonce":
       h.seenNonces.add(h.handle.nonce);
       return;
     default:
@@ -121,99 +120,99 @@ function breakField(h: Harness, fieldName: string): void {
   }
 }
 
-describe('handle-binding validator (pulse 49)', () => {
-  it('accepts a fully correct handle', () => {
+describe("handle-binding validator (pulse 49)", () => {
+  it("accepts a fully correct handle", () => {
     const { handle, ctx, deps } = buildHarness();
     expect(validateHandle(handle, ctx, deps)).toEqual({ ok: true });
   });
 
-  it('rejects providerId mismatch alone', () => {
-    const { handle, ctx, deps } = buildHarness({ breakField: 'providerId' });
+  it("rejects providerId mismatch alone", () => {
+    const { handle, ctx, deps } = buildHarness({ breakField: "providerId" });
     expect(validateHandle(handle, ctx, deps)).toEqual({
       ok: false,
-      invalidReason: 'provider-id-mismatch',
+      invalidReason: "provider-id-mismatch",
     });
   });
 
-  it('rejects contentHash differing from canonicalInvocationHash', () => {
-    const { handle, ctx, deps } = buildHarness({ breakField: 'contentHash' });
+  it("rejects contentHash differing from canonicalInvocationHash", () => {
+    const { handle, ctx, deps } = buildHarness({ breakField: "contentHash" });
     expect(validateHandle(handle, ctx, deps)).toEqual({
       ok: false,
-      invalidReason: 'content-hash-mismatch',
+      invalidReason: "content-hash-mismatch",
     });
   });
 
-  it('rejects sequenceNumber at or below high-water mark', () => {
-    const { handle, ctx, deps } = buildHarness({ breakField: 'sequenceNumber' });
+  it("rejects sequenceNumber at or below high-water mark", () => {
+    const { handle, ctx, deps } = buildHarness({ breakField: "sequenceNumber" });
     expect(validateHandle(handle, ctx, deps)).toEqual({
       ok: false,
-      invalidReason: 'sequence-rollback',
+      invalidReason: "sequence-rollback",
     });
   });
 
-  it('rejects approverPrincipal not matching expected', () => {
-    const { handle, ctx, deps } = buildHarness({ breakField: 'approverPrincipal' });
+  it("rejects approverPrincipal not matching expected", () => {
+    const { handle, ctx, deps } = buildHarness({ breakField: "approverPrincipal" });
     expect(validateHandle(handle, ctx, deps)).toEqual({
       ok: false,
-      invalidReason: 'principal-mismatch',
+      invalidReason: "principal-mismatch",
     });
   });
 
-  it('rejects keyId not in trust set', () => {
-    const { handle, ctx, deps } = buildHarness({ breakField: 'keyId' });
+  it("rejects keyId not in trust set", () => {
+    const { handle, ctx, deps } = buildHarness({ breakField: "keyId" });
     expect(validateHandle(handle, ctx, deps)).toEqual({
       ok: false,
-      invalidReason: 'unknown-keyId',
+      invalidReason: "unknown-keyId",
     });
   });
 
-  it('rejects ttl expired (clock >= handle.ttl)', () => {
-    const { handle, ctx, deps } = buildHarness({ breakField: 'ttl' });
+  it("rejects ttl expired (clock >= handle.ttl)", () => {
+    const { handle, ctx, deps } = buildHarness({ breakField: "ttl" });
     expect(validateHandle(handle, ctx, deps)).toEqual({
       ok: false,
-      invalidReason: 'ttl-expired',
+      invalidReason: "ttl-expired",
     });
   });
 
-  it('rejects nonce reuse within scope', () => {
-    const { handle, ctx, deps } = buildHarness({ breakField: 'nonce' });
+  it("rejects nonce reuse within scope", () => {
+    const { handle, ctx, deps } = buildHarness({ breakField: "nonce" });
     expect(validateHandle(handle, ctx, deps)).toEqual({
       ok: false,
-      invalidReason: 'nonce-reuse',
+      invalidReason: "nonce-reuse",
     });
   });
 
-  it('interaction: providerId + contentHash wrong → providerId wins (first in order)', () => {
-    const h = buildHarness({ breakField: 'providerId' });
-    breakField(h, 'contentHash');
+  it("interaction: providerId + contentHash wrong → providerId wins (first in order)", () => {
+    const h = buildHarness({ breakField: "providerId" });
+    breakField(h, "contentHash");
     expect(validateHandle(h.handle, h.ctx, h.deps)).toEqual({
       ok: false,
-      invalidReason: 'provider-id-mismatch',
+      invalidReason: "provider-id-mismatch",
     });
   });
 
-  it('interaction: contentHash + ttl wrong → contentHash wins (first in order)', () => {
-    const h = buildHarness({ breakField: 'contentHash' });
-    breakField(h, 'ttl');
+  it("interaction: contentHash + ttl wrong → contentHash wins (first in order)", () => {
+    const h = buildHarness({ breakField: "contentHash" });
+    breakField(h, "ttl");
     expect(validateHandle(h.handle, h.ctx, h.deps)).toEqual({
       ok: false,
-      invalidReason: 'content-hash-mismatch',
+      invalidReason: "content-hash-mismatch",
     });
   });
 
-  it('signature pre-check: malformed signature short-circuits before any field', () => {
-    const { handle, ctx, deps } = buildHarness({ breakField: 'providerId' });
+  it("signature pre-check: malformed signature short-circuits before any field", () => {
+    const { handle, ctx, deps } = buildHarness({ breakField: "providerId" });
     const badHandle: ApprovalHandle = {
       ...handle,
       signature: `${handle.keyId}.deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef`,
     };
     expect(validateHandle(badHandle, ctx, deps)).toEqual({
       ok: false,
-      invalidReason: 'signature-mismatch',
+      invalidReason: "signature-mismatch",
     });
   });
 
-  it('exhaustive-order property: for every 2-pair (i, j) with i < j, first-failing wins', () => {
+  it("exhaustive-order property: for every 2-pair (i, j) with i < j, first-failing wins", () => {
     const allPairs: Array<[number, number]> = [];
     for (let i = 0; i < FIELD_ORDER.length; i++) {
       for (let j = i + 1; j < FIELD_ORDER.length; j++) {
@@ -232,16 +231,16 @@ describe('handle-binding validator (pulse 49)', () => {
     }
   });
 
-  it('EVALUATION_ORDER is exported and matches the documented 8-step order', () => {
+  it("EVALUATION_ORDER is exported and matches the documented 8-step order", () => {
     expect(EVALUATION_ORDER).toEqual([
-      'signature',
-      'provider-id',
-      'content-hash',
-      'sequence-number',
-      'approver-principal',
-      'key-id',
-      'ttl',
-      'nonce',
+      "signature",
+      "provider-id",
+      "content-hash",
+      "sequence-number",
+      "approver-principal",
+      "key-id",
+      "ttl",
+      "nonce",
     ]);
   });
 });

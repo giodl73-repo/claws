@@ -19,4 +19,4 @@
  * @module @openclaw/policy
  */
 
-export * from './plugin-sdk/policy/index.js';
+export * from "./plugin-sdk/policy/index.js";

@@ -9,14 +9,14 @@ specific caller, invocation, and time window:
 
 ```ts
 interface ApprovalHandle {
-  readonly providerId: string;          // 1. which GuardrailProvider
-  readonly contentHash: string;         // 2. sha256 over canonicalized args
-  readonly sequenceNumber: number;      // 3. per-chain monotonic
-  readonly approverPrincipal: string;   // 4. who can approve
-  readonly keyId: string;               // 5. HMAC key identifier
-  readonly ttl: number;                 // 6. absolute epoch ms
-  readonly nonce: string;               // 7. 32-byte base64url, one-shot
-  readonly signature: string;           // HMAC-SHA256 over 1..7
+  readonly providerId: string; // 1. which GuardrailProvider
+  readonly contentHash: string; // 2. sha256 over canonicalized args
+  readonly sequenceNumber: number; // 3. per-chain monotonic
+  readonly approverPrincipal: string; // 4. who can approve
+  readonly keyId: string; // 5. HMAC key identifier
+  readonly ttl: number; // 6. absolute epoch ms
+  readonly nonce: string; // 7. 32-byte base64url, one-shot
+  readonly signature: string; // HMAC-SHA256 over 1..7
 }
 ```
 
@@ -25,16 +25,16 @@ interface ApprovalHandle {
 On redemption, the runtime MUST validate ALL SEVEN fields BEFORE
 accepting the associated `ApprovalEntry`:
 
-| # | Check | Failure code |
-|---|-------|--------------|
-| 1 | `providerId` matches the provider that emitted the handle | `provider-mismatch` |
-| 2 | `contentHash` matches `sha256(canonicalize(currentArgs))` | `content-tampered` |
-| 3 | `sequenceNumber` matches the decision's sequence | `sequence-drift` |
-| 4 | `approverPrincipal` matches the responding principal | `approver-mismatch` |
-| 5 | `keyId` resolves to an active trust-set key | `unknown-key` |
-| 6 | `host.now() <= ttl` | `ttl-expired` |
-| 7 | `nonce` has NOT been consumed | `nonce-replay` |
-| — | HMAC signature verifies under the resolved key | `signature-invalid` |
+| #   | Check                                                     | Failure code        |
+| --- | --------------------------------------------------------- | ------------------- |
+| 1   | `providerId` matches the provider that emitted the handle | `provider-mismatch` |
+| 2   | `contentHash` matches `sha256(canonicalize(currentArgs))` | `content-tampered`  |
+| 3   | `sequenceNumber` matches the decision's sequence          | `sequence-drift`    |
+| 4   | `approverPrincipal` matches the responding principal      | `approver-mismatch` |
+| 5   | `keyId` resolves to an active trust-set key               | `unknown-key`       |
+| 6   | `host.now() <= ttl`                                       | `ttl-expired`       |
+| 7   | `nonce` has NOT been consumed                             | `nonce-replay`      |
+| —   | HMAC signature verifies under the resolved key            | `signature-invalid` |
 
 ## First-failing order
 

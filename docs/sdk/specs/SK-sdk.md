@@ -24,26 +24,26 @@ package exists. Sub-atoms like `atom:SKC` nest under SK.
 
 ## Exported subpaths
 
-| Subpath | Exports | See |
-|---------|---------|-----|
-| `/api` | Stable public API facade | [SKA](./SKA-public-api.md) |
-| `/compile` | `compileGovernanceIR`, 29 G-rule registry | [SKC](./SKC-compiler-internals.md) |
-| `/fleet` | `FleetClient`, inheritance resolution | [SKF](./SKF-fleet-runtime.md) |
-| `/relax` | `RelaxEngine`, time-bound waivers | [SKR](./SKR-relax-engine.md) |
-| `/compliance` | `emitSOC2`, `emitHIPAA`, `emitEUAIAct` | internal |
-| `/siem` | `SplunkSink`, `SentinelSink`, `DatadogSink` | internal |
-| `/press` | `emitSarif`, `emitJunit`, `emitCIComments` | internal |
+| Subpath       | Exports                                     | See                                |
+| ------------- | ------------------------------------------- | ---------------------------------- |
+| `/api`        | Stable public API facade                    | [SKA](./SKA-public-api.md)         |
+| `/compile`    | `compileGovernanceIR`, 29 G-rule registry   | [SKC](./SKC-compiler-internals.md) |
+| `/fleet`      | `FleetClient`, inheritance resolution       | [SKF](./SKF-fleet-runtime.md)      |
+| `/relax`      | `RelaxEngine`, time-bound waivers           | [SKR](./SKR-relax-engine.md)       |
+| `/compliance` | `emitSOC2`, `emitHIPAA`, `emitEUAIAct`      | internal                           |
+| `/siem`       | `SplunkSink`, `SentinelSink`, `DatadogSink` | internal                           |
+| `/press`      | `emitSarif`, `emitJunit`, `emitCIComments`  | internal                           |
 
 ## Sub-spec index
 
-| Code | File | Authority over |
-|------|------|----------------|
-| **SKA** | [SKA-public-api.md](./SKA-public-api.md) | Stable public-API surface, facade pattern, minor/major rules |
-| **SKG** | [SKG-graduation.md](./SKG-graduation.md) | Promotion criteria for incubating → graduated features |
-| **SKI** | [SKI-subpath-imports.md](./SKI-subpath-imports.md) | Allowed import forms; no-barrel rule |
-| **SKC** | [SKC-compiler-internals.md](./SKC-compiler-internals.md) | GovernanceIR, 29 G-rules, incremental cache |
-| **SKF** | [SKF-fleet-runtime.md](./SKF-fleet-runtime.md) | Fleet client + inheritance resolution |
-| **SKR** | [SKR-relax-engine.md](./SKR-relax-engine.md) | Time-bound relaxations + approver-chain |
+| Code    | File                                                     | Authority over                                               |
+| ------- | -------------------------------------------------------- | ------------------------------------------------------------ |
+| **SKA** | [SKA-public-api.md](./SKA-public-api.md)                 | Stable public-API surface, facade pattern, minor/major rules |
+| **SKG** | [SKG-graduation.md](./SKG-graduation.md)                 | Promotion criteria for incubating → graduated features       |
+| **SKI** | [SKI-subpath-imports.md](./SKI-subpath-imports.md)       | Allowed import forms; no-barrel rule                         |
+| **SKC** | [SKC-compiler-internals.md](./SKC-compiler-internals.md) | GovernanceIR, 29 G-rules, incremental cache                  |
+| **SKF** | [SKF-fleet-runtime.md](./SKF-fleet-runtime.md)           | Fleet client + inheritance resolution                        |
+| **SKR** | [SKR-relax-engine.md](./SKR-relax-engine.md)             | Time-bound relaxations + approver-chain                      |
 
 ## Stability contract
 

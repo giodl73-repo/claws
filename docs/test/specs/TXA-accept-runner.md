@@ -70,10 +70,15 @@ covers: [atom:WSP/rejection-vectors]
 # SC-01 · WSP traversal rejection
 
 ## Setup
+
 ...
+
 ## Input
+
 ...
+
 ## Expected
+
 ...
 ```
 

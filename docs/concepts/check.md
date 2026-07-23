@@ -81,12 +81,12 @@ claws check --staged --quiet
 
 ## Quick reference
 
-| Command | When to use it |
-|---------|---------------|
-| `claws check` | Quick check, any time |
-| `claws check --fix` | Auto-fix what can be fixed |
-| `claws check --staged` | Pre-commit hook |
-| `claws check --watch` | Live feedback while editing |
-| `claws check --strict` | CI, zero-tolerance mode |
+| Command                | When to use it              |
+| ---------------------- | --------------------------- |
+| `claws check`          | Quick check, any time       |
+| `claws check --fix`    | Auto-fix what can be fixed  |
+| `claws check --staged` | Pre-commit hook             |
+| `claws check --watch`  | Live feedback while editing |
+| `claws check --strict` | CI, zero-tolerance mode     |
 
 Check runs in under a second. Run it constantly.

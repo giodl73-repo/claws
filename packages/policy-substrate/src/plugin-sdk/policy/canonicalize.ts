@@ -15,35 +15,33 @@
  * @module @openclaw/plugin-sdk/policy/canonicalize
  */
 
-import { createHash } from 'node:crypto';
-import type { PolicyIR } from './types.js';
+import { createHash } from "node:crypto";
+import type { PolicyIR } from "./types.js";
 
 /**
  * Canonicalize an arbitrary JSON-shaped value per RFC 8785. Returns
  * a UTF-8 string ready for hashing.
  */
 export function canonicalize(value: unknown): string {
-  if (value === null) return 'null';
-  if (typeof value === 'boolean') return value ? 'true' : 'false';
-  if (typeof value === 'number') return canonicalizeNumber(value);
-  if (typeof value === 'string') return JSON.stringify(value);
+  if (value === null) return "null";
+  if (typeof value === "boolean") return value ? "true" : "false";
+  if (typeof value === "number") return canonicalizeNumber(value);
+  if (typeof value === "string") return JSON.stringify(value);
   if (Array.isArray(value)) {
     const items = value.map((v) => canonicalize(v));
-    return '[' + items.join(',') + ']';
+    return "[" + items.join(",") + "]";
   }
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     const obj = value as Record<string, unknown>;
     // RFC 8785 §3.2.3: members in lexical (Unicode) sort order of
     // their keys. JS sort with default comparator is codepoint-based.
     const keys = Object.keys(obj).sort();
     const parts = keys
       .filter((k) => obj[k] !== undefined)
-      .map((k) => JSON.stringify(k) + ':' + canonicalize(obj[k]));
-    return '{' + parts.join(',') + '}';
+      .map((k) => JSON.stringify(k) + ":" + canonicalize(obj[k]));
+    return "{" + parts.join(",") + "}";
   }
-  throw new TypeError(
-    `canonicalize: unsupported value type (${typeof value})`,
-  );
+  throw new TypeError(`canonicalize: unsupported value type (${typeof value})`);
 }
 
 /**
@@ -70,9 +68,9 @@ function canonicalizeNumber(n: number): string {
  * `policyId` field itself (you cannot include a hash inside its own
  * input). Returns lowercase hex sha256.
  */
-export function computePolicyId(ir: Omit<PolicyIR, 'policyId'>): string {
+export function computePolicyId(ir: Omit<PolicyIR, "policyId">): string {
   const canonical = canonicalize(ir);
-  return createHash('sha256').update(canonical, 'utf-8').digest('hex');
+  return createHash("sha256").update(canonical, "utf-8").digest("hex");
 }
 
 /**
@@ -96,5 +94,5 @@ export function computePolicyShapeHash(ir: PolicyIR): string {
     denyRules: ir.denyRules,
   };
   const canonical = canonicalize(shape);
-  return createHash('sha256').update(canonical, 'utf-8').digest('hex');
+  return createHash("sha256").update(canonical, "utf-8").digest("hex");
 }

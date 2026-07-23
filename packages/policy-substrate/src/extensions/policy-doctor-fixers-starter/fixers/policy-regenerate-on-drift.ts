@@ -29,38 +29,38 @@ import {
   parseYaml,
   type OcAst,
   type OcKind,
-} from '@openclaw/oc-path';
-import type { OcPathFixerSpec } from '@openclaw/oc-doctor/plugin-sdk';
+} from "@openclaw/oc-path";
+import type { OcPathFixerSpec } from "@openclaw/oc-doctor/plugin-sdk";
 import {
   computePolicyShapeHash,
   getPolicyGenerator,
   type PolicyExtractFile,
   type PolicyIR,
-} from '../../../plugin-sdk/policy/index.js';
+} from "../../../plugin-sdk/policy/index.js";
 
 // Importing the starter pack registers the `md` generator.
-import '../../policy-from-md-starter/generator.js';
-import type { MdGeneratorInput } from '../../policy-from-md-starter/generator.js';
+import "../../policy-from-md-starter/generator.js";
+import type { MdGeneratorInput } from "../../policy-from-md-starter/generator.js";
 
-const GENERATOR_ID = 'md';
+const GENERATOR_ID = "md";
 
 function inferKind(name: string): OcKind | null {
-  if (name.endsWith('.md')) return 'md';
-  if (name.endsWith('.jsonc') || name.endsWith('.json')) return 'jsonc';
-  if (name.endsWith('.jsonl')) return 'jsonl';
-  if (name.endsWith('.yaml') || name.endsWith('.yml')) return 'yaml';
+  if (name.endsWith(".md")) return "md";
+  if (name.endsWith(".jsonc") || name.endsWith(".json")) return "jsonc";
+  if (name.endsWith(".jsonl")) return "jsonl";
+  if (name.endsWith(".yaml") || name.endsWith(".yml")) return "yaml";
   return null;
 }
 
 function parseForKind(kind: OcKind, raw: string): OcAst {
   switch (kind) {
-    case 'md':
+    case "md":
       return parseMd(raw).ast;
-    case 'jsonc':
+    case "jsonc":
       return parseJsonc(raw).ast;
-    case 'jsonl':
+    case "jsonl":
       return parseJsonl(raw).ast;
-    case 'yaml':
+    case "yaml":
       return parseYaml(raw).ast;
   }
 }
@@ -92,7 +92,7 @@ async function regenerateIR(
   // Synthetic anchor — drift detection compares SHAPE hash, which
   // excludes generatedFrom; the anchor only flows into provenance.
   const anchor = {
-    hash: '0'.repeat(64),
+    hash: "0".repeat(64),
     bytes: files.reduce((n, f) => n + f.raw.length, 0),
     observedAt: new Date().toISOString(),
   };
@@ -104,16 +104,16 @@ async function regenerateIR(
 }
 
 export const policyRegenerateOnDrift: OcPathFixerSpec = {
-  id: 'policy-starter-v0/policy/regenerate-on-drift',
+  id: "policy-starter-v0/policy/regenerate-on-drift",
   description:
-    'Regenerate policy.jsonc from sources when its shape hash drifts from what the generator would produce',
-  severity: 'error',
+    "Regenerate policy.jsonc from sources when its shape hash drifts from what the generator would produce",
+  severity: "error",
   // Regenerative — wrong regen on a security-sensitive artifact can
   // produce a fail-closed policy that locks out tools across the
   // fleet. Hosts MUST gate this behind explicit operator opt-in
   // (e.g., `--fix-regenerative`).
-  tier: 'regenerative',
-  appliesTo: 'policy.jsonc',
+  tier: "regenerative",
+  appliesTo: "policy.jsonc",
 
   async detect({ raw, siblingFiles }) {
     if (siblingFiles === undefined) return [];
@@ -131,11 +131,11 @@ export const policyRegenerateOnDrift: OcPathFixerSpec = {
     return [
       {
         match: {
-          path: parseOcPath('oc://policy.jsonc'),
-          match: { kind: 'insertion-point' as const, container: 'jsonc-object' as const, line: 1 },
+          path: parseOcPath("oc://policy.jsonc"),
+          match: { kind: "insertion-point" as const, container: "jsonc-object" as const, line: 1 },
         },
         message: `policy.jsonc shape (${onDiskShape.slice(0, 8)}…) drifts from regenerated (${regenShape.slice(0, 8)}…)`,
-        fixHint: 'regenerate policy.jsonc from sources',
+        fixHint: "regenerate policy.jsonc from sources",
       },
     ];
   },
@@ -144,6 +144,6 @@ export const policyRegenerateOnDrift: OcPathFixerSpec = {
     if (siblingFiles === undefined) return raw;
     const regenerated = await regenerateIR(siblingFiles);
     if (regenerated === null) return raw;
-    return JSON.stringify(regenerated, null, 2) + '\n';
+    return JSON.stringify(regenerated, null, 2) + "\n";
   },
 };

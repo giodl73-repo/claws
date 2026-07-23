@@ -12,21 +12,21 @@
  *   node scripts/diff-runs.mjs                         # what changed since last snapshot?
  *   node scripts/diff-runs.mjs --save-snapshot         # accept the new state as baseline
  */
-import { readdir, readFile, mkdir, cp, rm } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { readdir, readFile, mkdir, cp, rm } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = dirname(here);
 
-const CURRENT = join(root, 'results-openclaw');
-const SNAPSHOT = join(root, '.snapshots', 'last');
+const CURRENT = join(root, "results-openclaw");
+const SNAPSHOT = join(root, ".snapshots", "last");
 
 async function readJsonOrNull(path) {
   if (!existsSync(path)) return null;
   try {
-    return JSON.parse(await readFile(path, 'utf8'));
+    return JSON.parse(await readFile(path, "utf8"));
   } catch {
     return null;
   }
@@ -37,15 +37,19 @@ function summarize(payload) {
   if (payload.skipped) return `skipped(${payload.skipped})`;
   const p = payload.parsed;
   if (!p) return `exit=${payload.exitCode}`;
-  if ('walkedFiles' in p) return `walked=${p.walkedFiles} tracked=${p.tracked} observed=${p.observed}`;
-  if ('filesLinted' in p) return `linted=${p.filesLinted} findings=${p.diagnostics?.length ?? 0}`;
-  if ('filesProcessed' in p) return `processed=${p.filesProcessed} tools=${p.tools ?? 0} deny=${p.denyRules ?? 0}`;
-  if ('drift' in p) {
+  if ("walkedFiles" in p)
+    return `walked=${p.walkedFiles} tracked=${p.tracked} observed=${p.observed}`;
+  if ("filesLinted" in p) return `linted=${p.filesLinted} findings=${p.diagnostics?.length ?? 0}`;
+  if ("filesProcessed" in p)
+    return `processed=${p.filesProcessed} tools=${p.tools ?? 0} deny=${p.denyRules ?? 0}`;
+  if ("drift" in p) {
     const d = p.drift;
-    return d.drifted ? `drift ${d.onDiskShape?.slice(0, 8)}->${d.regeneratedShape?.slice(0, 8)}` : 'in-sync';
+    return d.drifted
+      ? `drift ${d.onDiskShape?.slice(0, 8)}->${d.regeneratedShape?.slice(0, 8)}`
+      : "in-sync";
   }
-  if ('valid' in p) return p.valid ? 'valid' : `invalid:${p.error ?? '?'}`;
-  return 'present';
+  if ("valid" in p) return p.valid ? "valid" : `invalid:${p.error ?? "?"}`;
+  return "present";
 }
 
 async function diffOne(a, b) {
@@ -57,8 +61,10 @@ async function diffOne(a, b) {
     const aDir = join(a, slug);
     const bDir = join(b, slug);
     const tools = new Set();
-    if (existsSync(aDir)) for (const f of await readdir(aDir)) if (f.endsWith('.json')) tools.add(f.slice(0, -5));
-    if (existsSync(bDir)) for (const f of await readdir(bDir)) if (f.endsWith('.json')) tools.add(f.slice(0, -5));
+    if (existsSync(aDir))
+      for (const f of await readdir(aDir)) if (f.endsWith(".json")) tools.add(f.slice(0, -5));
+    if (existsSync(bDir))
+      for (const f of await readdir(bDir)) if (f.endsWith(".json")) tools.add(f.slice(0, -5));
     const changes = [];
     for (const tool of [...tools].sort()) {
       const ax = await readJsonOrNull(join(aDir, `${tool}.json`));
@@ -66,7 +72,7 @@ async function diffOne(a, b) {
       const aSum = summarize(ax);
       const bSum = summarize(bx);
       if (aSum !== bSum) {
-        changes.push(`    ${tool}: ${aSum ?? '(missing)'} → ${bSum ?? '(missing)'}`);
+        changes.push(`    ${tool}: ${aSum ?? "(missing)"} → ${bSum ?? "(missing)"}`);
       }
     }
     if (changes.length > 0) {
@@ -79,7 +85,7 @@ async function diffOne(a, b) {
 
 const args = process.argv.slice(2);
 
-if (args.includes('--save-snapshot')) {
+if (args.includes("--save-snapshot")) {
   if (!existsSync(CURRENT)) {
     console.error(`no current run to snapshot at ${CURRENT}`);
     process.exit(2);
@@ -91,7 +97,7 @@ if (args.includes('--save-snapshot')) {
   process.exit(0);
 }
 
-const positional = args.filter((a) => !a.startsWith('-'));
+const positional = args.filter((a) => !a.startsWith("-"));
 const a = positional[0] ?? SNAPSHOT;
 const b = positional[1] ?? CURRENT;
 
@@ -106,8 +112,10 @@ if (!existsSync(b)) {
 
 const lines = await diffOne(a, b);
 if (lines.length === 0) {
-  console.log('no changes since last snapshot');
+  console.log("no changes since last snapshot");
 } else {
-  console.log(`changes since last snapshot (${lines.filter((l) => !l.startsWith(' ')).length} fixture(s)):`);
-  console.log(lines.join('\n'));
+  console.log(
+    `changes since last snapshot (${lines.filter((l) => !l.startsWith(" ")).length} fixture(s)):`,
+  );
+  console.log(lines.join("\n"));
 }

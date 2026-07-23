@@ -14,19 +14,19 @@
  * extractor's last-writer-wins) so the IR doesn't change shape;
  * operators who disagree edit the file by hand.
  */
-import type { LintRule, LintFinding } from '@openclaw/oc-lint/plugin-sdk';
-import { scanToolHeaders } from './_tools-md-scan.js';
+import type { LintRule, LintFinding } from "@openclaw/oc-lint/plugin-sdk";
+import { scanToolHeaders } from "./_tools-md-scan.js";
 
 export const toolsDuplicateToolId: LintRule = {
-  id: 'policy-starter-v0/tools/duplicate-tool-id',
-  severity: 'warning',
-  description: 'TOOLS.md declares the same `### name` tool id more than once',
-  appliesTo: 'TOOLS.md',
+  id: "policy-starter-v0/tools/duplicate-tool-id",
+  severity: "warning",
+  description: "TOOLS.md declares the same `### name` tool id more than once",
+  appliesTo: "TOOLS.md",
   check(ctx) {
     const seen = new Map<string, number>(); // name → first-seen line
     const findings: LintFinding[] = [];
     for (const hit of scanToolHeaders(ctx.ast)) {
-      if (hit.name === '') continue;
+      if (hit.name === "") continue;
       const prev = seen.get(hit.name);
       if (prev === undefined) {
         seen.set(hit.name, hit.line);
@@ -36,7 +36,7 @@ export const toolsDuplicateToolId: LintRule = {
         message: `tool '${hit.name}' declared more than once (first at line ${prev}); extractor's last-writer-wins drops the earlier declaration`,
         ocPath: `oc://TOOLS.md/Tools/${hit.name}`,
         line: hit.line,
-        fixHint: 'keep one declaration; rename the other or remove it',
+        fixHint: "keep one declaration; rename the other or remove it",
       });
     }
     return findings;

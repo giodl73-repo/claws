@@ -13,23 +13,24 @@ to act on it.
 
 ## Phases at a glance
 
-| Phase | Trigger | Output |
-|-------|---------|--------|
-| 1. Inbound | channel adapter parses | `MessageContext` |
-| 2. Claim gates | `inbound_claim`, `before_dispatch` | optional short-circuit |
-| 3. Active memory | blocking sub-agent | `NONE` or fact summary |
-| 4. Context assembly | `context-engine.assemble()` | `messages[]` + `systemPromptAddition` |
-| 5. Prompt build | `before_model_resolve` + `before_prompt_build` | final prompt |
-| 6. LLM call | provider plugin `streamFn` | tokens |
-| 7. Tool calls | `before_tool_call` + `resolveExecTarget` | host or sandbox exec |
-| 8. Finalize | `before_agent_finalize`, `tool_result_persist`, `before_message_write` | session state |
-| 9. Outbound | `message_sending`, `reply_dispatch` | channel adapter outbound |
+| Phase               | Trigger                                                                | Output                                |
+| ------------------- | ---------------------------------------------------------------------- | ------------------------------------- |
+| 1. Inbound          | channel adapter parses                                                 | `MessageContext`                      |
+| 2. Claim gates      | `inbound_claim`, `before_dispatch`                                     | optional short-circuit                |
+| 3. Active memory    | blocking sub-agent                                                     | `NONE` or fact summary                |
+| 4. Context assembly | `context-engine.assemble()`                                            | `messages[]` + `systemPromptAddition` |
+| 5. Prompt build     | `before_model_resolve` + `before_prompt_build`                         | final prompt                          |
+| 6. LLM call         | provider plugin `streamFn`                                             | tokens                                |
+| 7. Tool calls       | `before_tool_call` + `resolveExecTarget`                               | host or sandbox exec                  |
+| 8. Finalize         | `before_agent_finalize`, `tool_result_persist`, `before_message_write` | session state                         |
+| 9. Outbound         | `message_sending`, `reply_dispatch`                                    | channel adapter outbound              |
 
 ---
 
 ## Hook firings in order
 
 <!-- proof:compiled from="proof:tree kind=taxonomy" uri="" -->
+
 ```taxonomy
 A chat turn
 ├── 1 Channel inbound: parse, auth, ack reaction
@@ -46,6 +47,7 @@ A chat turn
 ├── 12 Outbound: message_sending cancel-sticky, reply_dispatch claiming
 └── 13 Channel outbound: chunk to 4096 chars, render entities, sendMessage
 ```
+
 <!-- /proof:compiled -->
 
 ---
@@ -55,11 +57,11 @@ A chat turn
 The eleven firings split into three behavior classes. Knowing which is
 which prevents wrong-tool-for-the-job mistakes.
 
-| Class | Hooks | Behavior |
-|-------|-------|----------|
-| Claiming | `inbound_claim`, `before_dispatch`, `before_agent_reply`, `reply_dispatch` | first plugin returning `handled=true` wins, remaining plugins skipped |
-| Modifying | `before_model_resolve`, `before_prompt_build`, `agent_turn_prepare`, `before_agent_finalize`, `before_tool_call`, `message_sending`, `subagent_spawning`, `subagent_delivery_target` | sequential merge with hook-specific rules |
-| Observing | `message_received`, `model_call_*`, `llm_input`, `llm_output`, `after_tool_call`, `session_*`, `before/after_compaction`, `agent_end`, `subagent_spawned`, `subagent_ended`, `gateway_*`, `cron_changed`, `message_sent` | parallel fire-and-forget |
+| Class     | Hooks                                                                                                                                                                                                                    | Behavior                                                              |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| Claiming  | `inbound_claim`, `before_dispatch`, `before_agent_reply`, `reply_dispatch`                                                                                                                                               | first plugin returning `handled=true` wins, remaining plugins skipped |
+| Modifying | `before_model_resolve`, `before_prompt_build`, `agent_turn_prepare`, `before_agent_finalize`, `before_tool_call`, `message_sending`, `subagent_spawning`, `subagent_delivery_target`                                     | sequential merge with hook-specific rules                             |
+| Observing | `message_received`, `model_call_*`, `llm_input`, `llm_output`, `after_tool_call`, `session_*`, `before/after_compaction`, `agent_end`, `subagent_spawned`, `subagent_ended`, `gateway_*`, `cron_changed`, `message_sent` | parallel fire-and-forget                                              |
 
 ---
 
@@ -69,9 +71,9 @@ Two hooks are **synchronous-only** and run on the JSONL session-write hot
 path. They must not return a promise. The runner does not await — a
 returned promise is logged (fail-open) or thrown (fail-closed).
 
-| Hook | Where it fires |
-|------|----------------|
-| `tool_result_persist` | before tool result is written to session JSONL |
+| Hook                   | Where it fires                                 |
+| ---------------------- | ---------------------------------------------- |
+| `tool_result_persist`  | before tool result is written to session JSONL |
 | `before_message_write` | before any message is written to session JSONL |
 
 Returning `await ...` from these hooks is the most common audit mistake.
@@ -82,6 +84,7 @@ The handler keeps running; the result is lost.
 ## Tool execution decision
 
 <!-- proof:compiled from="proof:tree kind=taxonomy" uri="" -->
+
 ```taxonomy
 resolveExecTarget()
 ├── Inputs: configuredTarget, requestedTarget, elevatedRequested, sandboxAvailable
@@ -91,6 +94,7 @@ resolveExecTarget()
 ├── Step 4: if auto, sandbox if available else gateway
 └── Output: configuredTarget, selectedTarget, effectiveHost
 ```
+
 <!-- /proof:compiled -->
 
 Cite: `src/agents/bash-tools.exec-runtime.ts:235-282`. Sandbox vs host vs
@@ -100,11 +104,11 @@ node is decided **per invocation**, not per plugin or per session.
 
 ## Trust transitions
 
-| Where | Trust on emitted events |
-|-------|-------------------------|
-| Core runtime emitters (harness, model call, run lifecycle) | `metadata.trusted: true` |
-| Sandbox-emitted (subprocess output, exec result) | `metadata.trusted: false` |
-| Plugin-emitted via `emitDiagnosticEvent()` | `metadata.trusted: false` |
+| Where                                                      | Trust on emitted events   |
+| ---------------------------------------------------------- | ------------------------- |
+| Core runtime emitters (harness, model call, run lifecycle) | `metadata.trusted: true`  |
+| Sandbox-emitted (subprocess output, exec result)           | `metadata.trusted: false` |
+| Plugin-emitted via `emitDiagnosticEvent()`                 | `metadata.trusted: false` |
 
 Consumers gate on the boundary. See [05 Trust boundary](05-trust-boundary.md).
 

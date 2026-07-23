@@ -35,16 +35,16 @@ The config shape is nearly identical:
 
 ```typescript
 // Our package:
-import { IdentityBridge } from '@openclaw/identity-bridge';
+import { IdentityBridge } from "@openclaw/identity-bridge";
 
 const bridge = new IdentityBridge({
-  provider: 'oidc',
-  issuer: 'https://login.microsoftonline.com/{tenantId}/v2.0',
-  signingKeys: preloadedJwks,  // pre-loaded at startup, no runtime fetching
+  provider: "oidc",
+  issuer: "https://login.microsoftonline.com/{tenantId}/v2.0",
+  signingKeys: preloadedJwks, // pre-loaded at startup, no runtime fetching
   roleMapping: {
-    'admin': 'admin',
-    'user': 'editor',
-    'viewer': 'viewer',
+    admin: "admin",
+    user: "editor",
+    viewer: "viewer",
   },
 });
 
@@ -67,26 +67,30 @@ export to 5 formats (SARIF, CEF, NDJSON, JSON, syslog).
 Your `AuditLogger` could wrap our chain:
 
 ```typescript
-import { AuditChain } from '@openclaw/audit-chain';
+import { AuditChain } from "@openclaw/audit-chain";
 
-const chain = await AuditChain.open('./audit/gateway-audit.jsonl', {
-  algorithm: 'HMAC-SHA256',
+const chain = await AuditChain.open("./audit/gateway-audit.jsonl", {
+  algorithm: "HMAC-SHA256",
   secret: process.env.AUDIT_SECRET,
 });
 
 // Every RPC dispatch:
 await chain.append({
-  type: action, category, userId, tenantId,
+  type: action,
+  category,
+  userId,
+  tenantId,
   actor: { clientId, deviceId, clientIp },
   resource: { type: resourceType, id: resourceId },
-  result, details,
+  result,
+  details,
 });
 
 // tenant.audit.query handler:
-const events = await chain.query({ category: 'policy', userId });
+const events = await chain.query({ category: "policy", userId });
 
 // tenant.audit.export handler:
-const exported = await chain.export('ndjson'); // or 'sarif', 'cef', 'json', 'syslog'
+const exported = await chain.export("ndjson"); // or 'sarif', 'cef', 'json', 'syslog'
 ```
 
 Your `AuditEvent` type and ours are compatible — you add your fields (`tenantId`,
@@ -192,18 +196,18 @@ declarations + data labels. Not immediate — flagging for future convergence.
 
 ## Timeline
 
-| Our Wave 1 (wks 1-4) | Your Workstream | Serve API Layer |
-|----------------------|-----------------|-----------------|
-| GuardrailProvider spec PR | WS-4 (tool policy) | Layer 1: `/api/oc/TOOLS.md`, Layer 2: `/api/chunks/connections/*` |
-| @openclaw/identity-bridge | WS-1 (OIDC auth) | — (standalone package) |
-| @openclaw/audit-chain | WS-6 (audit log) | — (standalone package) |
-| @openclaw/approval-events | WS-8 (local tools) | Layer 3: `/api/sessions/:id` |
-| @openclaw/oc-path | — (shared addressing) | Layer 1: `oc://` URI scheme for `/api/oc/{path}` |
+| Our Wave 1 (wks 1-4)      | Your Workstream       | Serve API Layer                                                   |
+| ------------------------- | --------------------- | ----------------------------------------------------------------- |
+| GuardrailProvider spec PR | WS-4 (tool policy)    | Layer 1: `/api/oc/TOOLS.md`, Layer 2: `/api/chunks/connections/*` |
+| @openclaw/identity-bridge | WS-1 (OIDC auth)      | — (standalone package)                                            |
+| @openclaw/audit-chain     | WS-6 (audit log)      | — (standalone package)                                            |
+| @openclaw/approval-events | WS-8 (local tools)    | Layer 3: `/api/sessions/:id`                                      |
+| @openclaw/oc-path         | — (shared addressing) | Layer 1: `oc://` URI scheme for `/api/oc/{path}`                  |
 
-| Our Wave 2 (wks 5-8) | Your Workstream | Serve API Layer |
-|----------------------|-----------------|-----------------|
+| Our Wave 2 (wks 5-8)     | Your Workstream     | Serve API Layer        |
+| ------------------------ | ------------------- | ---------------------- |
 | @openclaw/secret-scanner | WS-11 (CI security) | — (standalone package) |
-| @openclaw/siem-emitter | WS-6 (audit export) | — (standalone package) |
+| @openclaw/siem-emitter   | WS-6 (audit export) | — (standalone package) |
 
 If your WS-1 or WS-6 are starting soon, let us know — we can prioritize those
 packages.

@@ -12,8 +12,8 @@
  * @module @bic/openclaw-lkg-git/git-lkg-store
  */
 
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import type {
   LKGEntry,
   LKGFingerprint,
@@ -21,17 +21,17 @@ import type {
   LKGStore,
   LKGTracker,
   ValidationIssue,
-} from '@bic/v2-prototype';
-import { LKGErrorImpl } from '@bic/v2-prototype';
+} from "@bic/v2-prototype";
+import { LKGErrorImpl } from "@bic/v2-prototype";
 
-import { git, gitBinary } from './git-cmd.js';
+import { git, gitBinary } from "./git-cmd.js";
 
 export interface AuditRecord {
   readonly ts: string;
-  readonly source: 'lkg-git';
-  readonly event: 'observe';
+  readonly source: "lkg-git";
+  readonly event: "observe";
   readonly trackerPath: string;
-  readonly outcome: LKGObservation['outcome'];
+  readonly outcome: LKGObservation["outcome"];
   readonly current: LKGFingerprint | null;
   readonly lastKnownGood: LKGFingerprint | null;
   readonly clobberedPath: string | null;
@@ -81,15 +81,12 @@ interface RegisteredTracker<T = unknown> {
   cachedEntry: LKGEntry;
 }
 
-function makeSuspiciousSignature(
-  current: LKGFingerprint,
-  reasons: readonly string[],
-): string {
-  return `${current.hash}:${[...reasons].sort().join(',')}`;
+function makeSuspiciousSignature(current: LKGFingerprint, reasons: readonly string[]): string {
+  return `${current.hash}:${[...reasons].sort().join(",")}`;
 }
 
 function clobberedPathFor(target: string, observedAt: string): string {
-  const safe = observedAt.replaceAll(':', '-').replaceAll('.', '-');
+  const safe = observedAt.replaceAll(":", "-").replaceAll(".", "-");
   return `${target}.clobbered.${safe}`;
 }
 
@@ -111,8 +108,8 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
 
   async function gitConfig() {
     return {
-      'user.name': opts.authorship.name,
-      'user.email': opts.authorship.email,
+      "user.name": opts.authorship.name,
+      "user.email": opts.authorship.email,
     };
   }
 
@@ -126,7 +123,7 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
     const reg = trackers.get(normalized);
     if (reg === undefined) {
       throw new LKGErrorImpl(
-        'LKG_TRACKER_PATH_INVALID',
+        "LKG_TRACKER_PATH_INVALID",
         `No tracker registered for path: ${normalized}`,
       );
     }
@@ -135,22 +132,25 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
 
   /** Read the blob sha for a path at HEAD, or null if not tracked. */
   async function blobShaAtHead(relPath: string): Promise<string | null> {
-    const result = await git(['ls-tree', '-r', 'HEAD', '--', relPath], {
+    const result = await git(["ls-tree", "-r", "HEAD", "--", relPath], {
       cwd: repoRoot,
       tolerateNonZero: true,
     });
     if (result.exitCode !== 0) return null;
-    const line = result.stdout.split('\n').find((l) => l.trim().length > 0);
+    const line = result.stdout.split("\n").find((l) => l.trim().length > 0);
     if (line === undefined) return null;
     // Format: <mode> <type> <sha>\t<path>
-    const parts = line.split('\t')[0]?.split(/\s+/);
+    const parts = line.split("\t")[0]?.split(/\s+/);
     return parts?.[2] ?? null;
   }
 
-  async function fingerprintFromHead(relPath: string, observedAt: string): Promise<LKGFingerprint | null> {
+  async function fingerprintFromHead(
+    relPath: string,
+    observedAt: string,
+  ): Promise<LKGFingerprint | null> {
     const sha = await blobShaAtHead(relPath);
     if (sha === null) return null;
-    const sizeResult = await git(['cat-file', '-s', sha], { cwd: repoRoot });
+    const sizeResult = await git(["cat-file", "-s", sha], { cwd: repoRoot });
     const bytes = parseInt(sizeResult.stdout.trim(), 10);
     return {
       hash: sha,
@@ -175,14 +175,14 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
     // Compute the blob sha that *would* result from `git hash-object`
     // — this is the canonical content-address even if we haven't
     // committed yet.
-    const result = await git(['hash-object', '--', relPath], {
+    const result = await git(["hash-object", "--", relPath], {
       cwd: repoRoot,
       tolerateNonZero: true,
     });
     const sha = result.stdout.trim();
     return {
       hash: sha,
-      bytes: Buffer.byteLength(raw, 'utf-8'),
+      bytes: Buffer.byteLength(raw, "utf-8"),
       mtimeMs: null,
       ctimeMs: null,
       dev: null,
@@ -198,7 +198,7 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
   async function isTrackedAndUnchanged(relPath: string): Promise<boolean> {
     // `git diff --quiet HEAD -- <path>` exits 0 when no diff, 1 when diff.
     // Returns true if file content equals HEAD's version.
-    const result = await git(['diff', '--quiet', 'HEAD', '--', relPath], {
+    const result = await git(["diff", "--quiet", "HEAD", "--", relPath], {
       cwd: repoRoot,
       tolerateNonZero: true,
     });
@@ -206,7 +206,7 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
   }
 
   async function isGitIgnored(relPath: string): Promise<boolean> {
-    const result = await git(['check-ignore', '-q', '--', relPath], {
+    const result = await git(["check-ignore", "-q", "--", relPath], {
       cwd: repoRoot,
       tolerateNonZero: true,
     });
@@ -215,13 +215,21 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
 
   async function emitAudit(record: AuditRecord): Promise<void> {
     if (onAudit !== undefined) {
-      try { await onAudit(record); } catch { /* ignore */ }
+      try {
+        await onAudit(record);
+      } catch {
+        /* ignore */
+      }
     }
   }
 
   async function emitRecoveryNotice(notice: RecoveryNotice): Promise<void> {
     if (onRecoveryNotice !== undefined) {
-      try { await onRecoveryNotice(notice); } catch { /* ignore */ }
+      try {
+        await onRecoveryNotice(notice);
+      } catch {
+        /* ignore */
+      }
     }
   }
 
@@ -229,15 +237,15 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
     reg: RegisteredTracker,
     fingerprint: LKGFingerprint,
   ): Promise<string> {
-    await gitInRepo(['add', '--', reg.relPath]);
+    await gitInRepo(["add", "--", reg.relPath]);
     const message = `lkg(promote): ${reg.tracker.path} @${fingerprint.hash}`;
     // `commit -- <relPath>` commits ONLY that path even if other paths
     // are pre-staged in the index. Without the path arg, an LKG promote
     // would sweep arbitrary staged work into the LKG commit — unsafe
     // for shared repos or multi-agent workflows.
-    const commitResult = await gitInRepo(['commit', '-m', message, '--', reg.relPath]);
+    const commitResult = await gitInRepo(["commit", "-m", message, "--", reg.relPath]);
     void commitResult;
-    const headResult = await gitInRepo(['rev-parse', 'HEAD']);
+    const headResult = await gitInRepo(["rev-parse", "HEAD"]);
     return headResult.stdout.trim();
   }
 
@@ -250,7 +258,7 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
     if (lkgFingerprint === null) return null; // no LKG yet
     const clobberedPath = clobberedPathFor(reg.tracker.path, observedAt);
     await fs.writeFile(clobberedPath, rawBeforeRecover);
-    await gitInRepo(['checkout', 'HEAD', '--', reg.relPath]);
+    await gitInRepo(["checkout", "HEAD", "--", reg.relPath]);
     reg.lastObservedSuspiciousSignature = null;
     reg.cachedEntry = { lastKnownGood: lkgFingerprint, lastPromotedGood: lkgFingerprint };
     return { clobberedPath, restoredFrom: lkgFingerprint };
@@ -261,26 +269,26 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
       const normalized = path.normalize(tracker.path);
       if (!path.isAbsolute(normalized)) {
         throw new LKGErrorImpl(
-          'LKG_TRACKER_PATH_INVALID',
+          "LKG_TRACKER_PATH_INVALID",
           `Tracker path must be absolute: ${tracker.path}`,
         );
       }
       const rel = path.relative(repoRoot, normalized);
-      if (rel.startsWith('..') || path.isAbsolute(rel)) {
+      if (rel.startsWith("..") || path.isAbsolute(rel)) {
         throw new LKGErrorImpl(
-          'LKG_TRACKER_PATH_INVALID',
+          "LKG_TRACKER_PATH_INVALID",
           `Tracker path must be inside repoRoot ${repoRoot}: ${normalized}`,
         );
       }
       if (trackers.has(normalized)) {
         throw new LKGErrorImpl(
-          'LKG_TRACKER_PATH_COLLISION',
+          "LKG_TRACKER_PATH_COLLISION",
           `Tracker already registered for path: ${normalized}`,
         );
       }
       trackers.set(normalized, {
         tracker: tracker as LKGTracker<unknown>,
-        relPath: rel.replaceAll(path.sep, '/'),
+        relPath: rel.replaceAll(path.sep, "/"),
         lastObservedSuspiciousSignature: null,
         cachedEntry: {},
       });
@@ -293,14 +301,14 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
       // Check gitignore at observe time (cheap; catches misconfigs).
       if (await isGitIgnored(reg.relPath)) {
         const issues: ValidationIssue[] = [
-          { path: '', message: `path is gitignored: ${reg.relPath}`, code: 'gitignored' },
+          { path: "", message: `path is gitignored: ${reg.relPath}`, code: "gitignored" },
         ];
         await emitAudit({
           ts: observedAt,
-          source: 'lkg-git',
-          event: 'observe',
+          source: "lkg-git",
+          event: "observe",
           trackerPath: reg.tracker.path,
-          outcome: 'failed',
+          outcome: "failed",
           current: null,
           lastKnownGood: null,
           clobberedPath: null,
@@ -308,23 +316,23 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
           issues,
           commitSha: null,
         });
-        return { outcome: 'failed', reason: 'gitignored', issues };
+        return { outcome: "failed", reason: "gitignored", issues };
       }
 
       // Read working-tree bytes.
       let raw: string;
       try {
-        raw = await fs.readFile(reg.tracker.path, 'utf-8');
+        raw = await fs.readFile(reg.tracker.path, "utf-8");
       } catch (err) {
         const issues: ValidationIssue[] = [
-          { path: '', message: `read failed: ${(err as Error).message}`, code: 'read-failed' },
+          { path: "", message: `read failed: ${(err as Error).message}`, code: "read-failed" },
         ];
         await emitAudit({
           ts: observedAt,
-          source: 'lkg-git',
-          event: 'observe',
+          source: "lkg-git",
+          event: "observe",
           trackerPath: reg.tracker.path,
-          outcome: 'failed',
+          outcome: "failed",
           current: null,
           lastKnownGood: null,
           clobberedPath: null,
@@ -332,7 +340,7 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
           issues,
           commitSha: null,
         });
-        return { outcome: 'failed', reason: 'read-failed', issues };
+        return { outcome: "failed", reason: "read-failed", issues };
       }
 
       const lkgFingerprint = await fingerprintFromHead(reg.relPath, observedAt);
@@ -344,7 +352,7 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
         parsed = (reg.tracker as LKGTracker<unknown>).parse(raw);
       } catch (err) {
         const issues: ValidationIssue[] = [
-          { path: '', message: `parse failed: ${(err as Error).message}`, code: 'unparseable' },
+          { path: "", message: `parse failed: ${(err as Error).message}`, code: "unparseable" },
         ];
         const skip =
           reg.tracker.shouldRecover !== undefined &&
@@ -352,10 +360,10 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
         if (skip) {
           await emitAudit({
             ts: observedAt,
-            source: 'lkg-git',
-            event: 'observe',
+            source: "lkg-git",
+            event: "observe",
             trackerPath: reg.tracker.path,
-            outcome: 'skipped',
+            outcome: "skipped",
             current: currentFingerprint,
             lastKnownGood: lkgFingerprint,
             clobberedPath: null,
@@ -363,16 +371,16 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
             issues,
             commitSha: null,
           });
-          return { outcome: 'skipped', reason: 'tracker-shouldRecover-false', issues };
+          return { outcome: "skipped", reason: "tracker-shouldRecover-false", issues };
         }
         const recovery = await recoverFromHead(reg, raw, observedAt);
         if (recovery === null) {
           await emitAudit({
             ts: observedAt,
-            source: 'lkg-git',
-            event: 'observe',
+            source: "lkg-git",
+            event: "observe",
             trackerPath: reg.tracker.path,
-            outcome: 'skipped',
+            outcome: "skipped",
             current: currentFingerprint,
             lastKnownGood: null,
             clobberedPath: null,
@@ -380,31 +388,31 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
             issues,
             commitSha: null,
           });
-          return { outcome: 'skipped', reason: 'no-lkg-available', issues };
+          return { outcome: "skipped", reason: "no-lkg-available", issues };
         }
         await emitAudit({
           ts: observedAt,
-          source: 'lkg-git',
-          event: 'observe',
+          source: "lkg-git",
+          event: "observe",
           trackerPath: reg.tracker.path,
-          outcome: 'recovered',
+          outcome: "recovered",
           current: currentFingerprint,
           lastKnownGood: recovery.restoredFrom,
           clobberedPath: recovery.clobberedPath,
-          suspicious: ['unparseable'],
+          suspicious: ["unparseable"],
           issues,
           commitSha: null,
         });
         await emitRecoveryNotice({
           ts: observedAt,
           trackerPath: reg.tracker.path,
-          reason: 'unparseable',
+          reason: "unparseable",
           clobberedPath: recovery.clobberedPath,
           restoredFrom: recovery.restoredFrom,
         });
         return {
-          outcome: 'recovered',
-          reason: 'unparseable',
+          outcome: "recovered",
+          reason: "unparseable",
           clobberedPath: recovery.clobberedPath,
           restoredFrom: recovery.restoredFrom,
         };
@@ -433,10 +441,10 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
           reg.cachedEntry = { lastKnownGood: lkgFingerprint, lastPromotedGood: lkgFingerprint };
           await emitAudit({
             ts: observedAt,
-            source: 'lkg-git',
-            event: 'observe',
+            source: "lkg-git",
+            event: "observe",
             trackerPath: reg.tracker.path,
-            outcome: 'valid',
+            outcome: "valid",
             current: currentFingerprint,
             lastKnownGood: lkgFingerprint,
             clobberedPath: null,
@@ -444,18 +452,21 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
             issues: [],
             commitSha: null,
           });
-          return { outcome: 'valid', fingerprint: currentFingerprint };
+          return { outcome: "valid", fingerprint: currentFingerprint };
         }
         const commitSha = await commitPromote(reg, currentFingerprint);
         const newHeadFingerprint =
           (await fingerprintFromHead(reg.relPath, observedAt)) ?? currentFingerprint;
-        reg.cachedEntry = { lastKnownGood: newHeadFingerprint, lastPromotedGood: newHeadFingerprint };
+        reg.cachedEntry = {
+          lastKnownGood: newHeadFingerprint,
+          lastPromotedGood: newHeadFingerprint,
+        };
         await emitAudit({
           ts: observedAt,
-          source: 'lkg-git',
-          event: 'observe',
+          source: "lkg-git",
+          event: "observe",
           trackerPath: reg.tracker.path,
-          outcome: 'promoted',
+          outcome: "promoted",
           current: newHeadFingerprint,
           lastKnownGood: newHeadFingerprint,
           clobberedPath: null,
@@ -463,7 +474,7 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
           issues: [],
           commitSha,
         });
-        return { outcome: 'promoted', fingerprint: newHeadFingerprint };
+        return { outcome: "promoted", fingerprint: newHeadFingerprint };
       }
 
       // Valid but suspicious.
@@ -473,10 +484,10 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
           reg.cachedEntry = { lastKnownGood: lkgFingerprint, lastPromotedGood: lkgFingerprint };
           await emitAudit({
             ts: observedAt,
-            source: 'lkg-git',
-            event: 'observe',
+            source: "lkg-git",
+            event: "observe",
             trackerPath: reg.tracker.path,
-            outcome: 'valid',
+            outcome: "valid",
             current: currentFingerprint,
             lastKnownGood: lkgFingerprint,
             clobberedPath: null,
@@ -484,17 +495,17 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
             issues: [],
             commitSha: null,
           });
-          return { outcome: 'valid', fingerprint: currentFingerprint };
+          return { outcome: "valid", fingerprint: currentFingerprint };
         }
         reg.lastObservedSuspiciousSignature = sig;
         const recovery = await recoverFromHead(reg, raw, observedAt);
         if (recovery === null) {
           await emitAudit({
             ts: observedAt,
-            source: 'lkg-git',
-            event: 'observe',
+            source: "lkg-git",
+            event: "observe",
             trackerPath: reg.tracker.path,
-            outcome: 'skipped',
+            outcome: "skipped",
             current: currentFingerprint,
             lastKnownGood: null,
             clobberedPath: null,
@@ -502,14 +513,14 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
             issues: [],
             commitSha: null,
           });
-          return { outcome: 'skipped', reason: 'no-lkg-available', issues: [] };
+          return { outcome: "skipped", reason: "no-lkg-available", issues: [] };
         }
         await emitAudit({
           ts: observedAt,
-          source: 'lkg-git',
-          event: 'observe',
+          source: "lkg-git",
+          event: "observe",
           trackerPath: reg.tracker.path,
-          outcome: 'recovered',
+          outcome: "recovered",
           current: currentFingerprint,
           lastKnownGood: recovery.restoredFrom,
           clobberedPath: recovery.clobberedPath,
@@ -520,13 +531,13 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
         await emitRecoveryNotice({
           ts: observedAt,
           trackerPath: reg.tracker.path,
-          reason: `suspicious:${suspicious.join(',')}`,
+          reason: `suspicious:${suspicious.join(",")}`,
           clobberedPath: recovery.clobberedPath,
           restoredFrom: recovery.restoredFrom,
         });
         return {
-          outcome: 'recovered',
-          reason: `suspicious:${suspicious.join(',')}`,
+          outcome: "recovered",
+          reason: `suspicious:${suspicious.join(",")}`,
           clobberedPath: recovery.clobberedPath,
           restoredFrom: recovery.restoredFrom,
         };
@@ -542,10 +553,10 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
       if (skip) {
         await emitAudit({
           ts: observedAt,
-          source: 'lkg-git',
-          event: 'observe',
+          source: "lkg-git",
+          event: "observe",
           trackerPath: reg.tracker.path,
-          outcome: 'skipped',
+          outcome: "skipped",
           current: currentFingerprint,
           lastKnownGood: lkgFingerprint,
           clobberedPath: null,
@@ -554,8 +565,8 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
           commitSha: null,
         });
         return {
-          outcome: 'skipped',
-          reason: 'plugin-local-invalidity',
+          outcome: "skipped",
+          reason: "plugin-local-invalidity",
           issues: validation.issues,
         };
       }
@@ -564,10 +575,10 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
       if (recovery === null) {
         await emitAudit({
           ts: observedAt,
-          source: 'lkg-git',
-          event: 'observe',
+          source: "lkg-git",
+          event: "observe",
           trackerPath: reg.tracker.path,
-          outcome: 'skipped',
+          outcome: "skipped",
           current: currentFingerprint,
           lastKnownGood: null,
           clobberedPath: null,
@@ -576,17 +587,17 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
           commitSha: null,
         });
         return {
-          outcome: 'skipped',
-          reason: 'no-lkg-available',
+          outcome: "skipped",
+          reason: "no-lkg-available",
           issues: validation.issues,
         };
       }
       await emitAudit({
         ts: observedAt,
-        source: 'lkg-git',
-        event: 'observe',
+        source: "lkg-git",
+        event: "observe",
         trackerPath: reg.tracker.path,
-        outcome: 'recovered',
+        outcome: "recovered",
         current: currentFingerprint,
         lastKnownGood: recovery.restoredFrom,
         clobberedPath: recovery.clobberedPath,
@@ -597,13 +608,13 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
       await emitRecoveryNotice({
         ts: observedAt,
         trackerPath: reg.tracker.path,
-        reason: 'invalid',
+        reason: "invalid",
         clobberedPath: recovery.clobberedPath,
         restoredFrom: recovery.restoredFrom,
       });
       return {
-        outcome: 'recovered',
-        reason: 'invalid',
+        outcome: "recovered",
+        reason: "invalid",
         clobberedPath: recovery.clobberedPath,
         restoredFrom: recovery.restoredFrom,
       };
@@ -611,13 +622,13 @@ export function gitLKGStore(opts: GitLKGStoreOptions): LKGStore {
 
     async readLastKnownGood(filePath: string): Promise<Uint8Array> {
       const reg = lookup(filePath);
-      const result = await gitBinary(['show', `HEAD:${reg.relPath}`], {
+      const result = await gitBinary(["show", `HEAD:${reg.relPath}`], {
         cwd: repoRoot,
         tolerateNonZero: true,
       });
       if (result.exitCode !== 0) {
         throw new LKGErrorImpl(
-          'LKG_STORE_UNAVAILABLE',
+          "LKG_STORE_UNAVAILABLE",
           `LKG not yet established (no HEAD blob for ${reg.relPath}): ${result.stderr.trim()}`,
         );
       }

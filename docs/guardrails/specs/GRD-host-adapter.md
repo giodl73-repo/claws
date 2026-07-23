@@ -48,12 +48,12 @@ format as stdout/stderr. For MCP: wrap in an MCP response envelope.
 
 ## 4 concrete adapters
 
-| Adapter | Host | Shape |
-|---------|------|-------|
-| `OpenClawAdapter` | OpenClaw core (direct in-process) | in-process hook flow |
-| `LobsterAdapter` | Lobster editor MCP | MCP over stdio |
-| `AetherAdapter` | Aether (Workday-level gateway) | HTTPS / gRPC gateway |
-| `ClawsServiceAdapter` | claws-service (standalone HTTP) | HTTP + SSE |
+| Adapter               | Host                              | Shape                |
+| --------------------- | --------------------------------- | -------------------- |
+| `OpenClawAdapter`     | OpenClaw core (direct in-process) | in-process hook flow |
+| `LobsterAdapter`      | Lobster editor MCP                | MCP over stdio       |
+| `AetherAdapter`       | Aether (Workday-level gateway)    | HTTPS / gRPC gateway |
+| `ClawsServiceAdapter` | claws-service (standalone HTTP)   | HTTP + SSE           |
 
 Each is covered by scenario series in [../scenarios/GRD/](../scenarios/GRD/).
 

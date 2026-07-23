@@ -27,7 +27,7 @@ startedAt: "2026-04-27T18:30:00Z"
 
 plans:
   - claws-openclaw-upstream
-  - claws-workspace-lint  # sister plan added 2026-04-28; ships JSONC lint surface in @openclaw/workspace/lint as part of PR-1
+  - claws-workspace-lint # sister plan added 2026-04-28; ships JSONC lint surface in @openclaw/workspace/lint as part of PR-1
 
 preset: claws
 preset_note: |
@@ -67,7 +67,7 @@ planning:
   l3_acceptance_target: 8
   acceptance_series: [bot-preempt, governance, adapter, oc4, pkg-invariants, compliance]
   acceptance_fixtures_target: 41
-  hc_block_findings_resolved: 4   # F-17, F-22, F-26, F-38 — all routed to specific PRs
+  hc_block_findings_resolved: 4 # F-17, F-22, F-26, F-38 — all routed to specific PRs
   notes: |
     12 pulses written, 5 checkpoint plans generated.
 
@@ -287,7 +287,15 @@ checkpoints:
     review:
       r1:
         date: "2026-04-28"
-        reviewers: [claws:gateway-eng, claws:compliance, claws:claws-release-eng, claws:claws-repo-steward, architect, testing]
+        reviewers:
+          [
+            claws:gateway-eng,
+            claws:compliance,
+            claws:claws-release-eng,
+            claws:claws-repo-steward,
+            architect,
+            testing,
+          ]
         verdict: REQUEST-CHANGES
         gated_by: claws:claws-repo-steward
         block_count: 7
@@ -296,10 +304,10 @@ checkpoints:
         consolidated: panels/cp-1/R1-consolidated.md
       r2:
         date: "2026-04-28"
-        reviewers: [claws:claws-release-eng, claws:claws-repo-steward, testing]  # 3 with R1 BLOCKers re-spawned
-        verdict: APPROVE-WITH-WARNINGS  # consolidated; release-eng still APPROVE-WITH-WARNINGS due to 4 housekeeping notes (since fixed)
+        reviewers: [claws:claws-release-eng, claws:claws-repo-steward, testing] # 3 with R1 BLOCKers re-spawned
+        verdict: APPROVE-WITH-WARNINGS # consolidated; release-eng still APPROVE-WITH-WARNINGS due to 4 housekeeping notes (since fixed)
         block_count: 0
-        warn_count: 0  # 4 housekeeping notes from R2 immediately addressed in same session
+        warn_count: 0 # 4 housekeeping notes from R2 immediately addressed in same session
         consolidated: panels/cp-1/R2-consolidated.md
     deliverables:
       - docs/upstream/guides/adapter-audits.md (20.3KB; closes F-38 HC-BLOCK + F-45 HC-WARN)
@@ -315,7 +323,7 @@ checkpoints:
       - .craft/plans/claws-workspace-lint.md (sister plan)
   cp-2:
     slug: wave-a-workspace-foothold
-    status: ready  # cp-1 closed; cp-2 dispatch unblocked 2026-04-28
+    status: ready # cp-1 closed; cp-2 dispatch unblocked 2026-04-28
     description: |
       Single upstream PR after the 2026-04-28 merge of former PR-2 into
       PR-1: PR-1 ships @openclaw/workspace + replaceConfigFile lossless
@@ -330,7 +338,7 @@ checkpoints:
     addresses_headlines: [H1]
     depends_on: [cp-1]
     dispatch_plan:
-      ordering: single  # one upstream PR; following sub-waves pair-up
+      ordering: single # one upstream PR; following sub-waves pair-up
       sequence:
         - step: 0a
           action: |
@@ -429,8 +437,8 @@ checkpoints:
 constraints:
   upstream_repo: github.com/openclaw/openclaw
   upstream_head_pinned: 5e8cc1d9c
-  upstream_pr_cap: 10  # auto-close if exceeded by author
-  pr_open_concurrency: 2  # match upstream's two-open-at-a-time culture
+  upstream_pr_cap: 10 # auto-close if exceeded by author
+  pr_open_concurrency: 2 # match upstream's two-open-at-a-time culture
   reviewer_trio:
     - "greptile-apps[bot]"
     - "copilot-pull-request-reviewer[bot]"
@@ -462,7 +470,7 @@ references:
     - snap-commands.md
   upstream_clone: "C:\\src\\openclaw-core"
   internal_spec: docs/upstream/specs/UG-upstream.md
-  predecessor_plan: claws-upstream-contrib  # Implemented; this wave is its contribute-upstream successor
+  predecessor_plan: claws-upstream-contrib # Implemented; this wave is its contribute-upstream successor
 
 related:
   predecessor_plan: claws-upstream-contrib

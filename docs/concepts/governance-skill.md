@@ -22,11 +22,11 @@ The governance skill is loaded like any other skill. The agent sees it as domain
 
 ## When to Use
 
-| Scenario | Level | Mechanism |
-|----------|-------|-----------|
-| "Prefer encrypted connections" | L1 | Governance SKILL.md |
-| "Warn on PII without approval" | L2 | Guard gate (warning) |
-| "Block tool calls without T2" | L3 | Guard gate (error) |
+| Scenario                       | Level | Mechanism            |
+| ------------------------------ | ----- | -------------------- |
+| "Prefer encrypted connections" | L1    | Governance SKILL.md  |
+| "Warn on PII without approval" | L2    | Guard gate (warning) |
+| "Block tool calls without T2"  | L3    | Guard gate (error)   |
 
 Governance skills are appropriate when you want to influence agent behavior without hard-blocking it. They complement, not replace, gate-based enforcement.
 

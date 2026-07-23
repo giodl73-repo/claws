@@ -2,18 +2,18 @@
  * @bic/openclaw-guardrails/siem — Format-dispatching emitters.
  */
 
-import type { AuditEntry } from '../audit/types.js';
-import type { EmitFormat } from './types.js';
-import { toCef, toNdjson, toSyslog, type SyslogOpts } from './formats.js';
+import type { AuditEntry } from "../audit/types.js";
+import type { EmitFormat } from "./types.js";
+import { toCef, toNdjson, toSyslog, type SyslogOpts } from "./formats.js";
 
 /** Serialize a single AuditEntry in the requested format. */
 export function emit(entry: AuditEntry, format: EmitFormat, opts?: SyslogOpts): string {
   switch (format) {
-    case 'cef':
+    case "cef":
       return toCef(entry);
-    case 'ndjson':
+    case "ndjson":
       return toNdjson(entry);
-    case 'syslog':
+    case "syslog":
       return toSyslog(entry, opts);
     /* c8 ignore start */
     default: {
@@ -32,5 +32,5 @@ export function emitBatch(
 ): string {
   const lines: string[] = [];
   for (const e of entries) lines.push(emit(e, format, opts));
-  return lines.join('\n');
+  return lines.join("\n");
 }

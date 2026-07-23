@@ -2,11 +2,24 @@
   "name": "@bic/openclaw-lkg",
   "version": "0.1.0",
   "description": "Last-known-good (LKG) tracker — generalized factor-out of openclaw-core's config-LKG mechanism (issue #70528, commit af56926e2fc4). Pluggable per-file recovery: promote-on-validate, restore-on-invalid, audit, recovery notice.",
+  "keywords": [
+    "bic",
+    "last-known-good",
+    "lkg",
+    "openclaw",
+    "recovery",
+    "tracker"
+  ],
   "license": "MIT",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -18,21 +31,10 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
-  },
-  "engines": {
-    "node": ">=20.0.0"
-  },
-  "peerDependencies": {
-    "@bic/v2-prototype": "*"
   },
   "devDependencies": {
     "@bic/v2-prototype": "*",
@@ -40,12 +42,10 @@
     "typescript": "^5.7.0",
     "vitest": "^3.1.1"
   },
-  "keywords": [
-    "openclaw",
-    "lkg",
-    "last-known-good",
-    "recovery",
-    "tracker",
-    "bic"
-  ]
+  "peerDependencies": {
+    "@bic/v2-prototype": "*"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
 }

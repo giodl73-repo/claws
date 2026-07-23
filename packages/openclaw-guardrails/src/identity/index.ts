@@ -15,7 +15,7 @@ export type {
   TokenPayload,
   ValidationConfig,
   ValidationResult,
-} from './types.js';
+} from "./types.js";
 
 export {
   createIdentityBridge,
@@ -26,8 +26,8 @@ export {
   revokePrincipal,
   validateOidc,
   validateSaml,
-} from './bridge.js';
-export type { IdentityBridgeConfig, RevocationCache } from './bridge.js';
+} from "./bridge.js";
+export type { IdentityBridgeConfig, RevocationCache } from "./bridge.js";
 
 export {
   addRole,
@@ -36,5 +36,5 @@ export {
   createRoleStore,
   mapGroup,
   resolveRoles,
-} from './rbac.js';
-export type { RoleStore } from './rbac.js';
+} from "./rbac.js";
+export type { RoleStore } from "./rbac.js";

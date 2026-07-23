@@ -17,22 +17,22 @@ downstream of `security` (for threat model) and no other package.
 
 Subpath exports from `@bic/openclaw-workspace`:
 
-| Subpath | What it exports |
-|---------|-----------------|
-| `/ast` | `WorkspaceAST`, 9 bootstrap file-node types, traversal API — see [WSA-ast.md](./WSA-ast.md) |
-| `/path` | `OcPath` parser, `parseOcUri`, `normalizeOcPath` — see [WSP-path.md](./WSP-path.md) |
-| `/canonicalize` | RFC 8785 JCS — see [WSC-canonicalize.md](./WSC-canonicalize.md) |
-| `/emit` | `emit(ast): Record<string, Uint8Array>` — see [WSE-emitter.md](./WSE-emitter.md) |
-| `/parse` | `parse(files): WorkspaceAST` |
+| Subpath         | What it exports                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------- |
+| `/ast`          | `WorkspaceAST`, 9 bootstrap file-node types, traversal API — see [WSA-ast.md](./WSA-ast.md) |
+| `/path`         | `OcPath` parser, `parseOcUri`, `normalizeOcPath` — see [WSP-path.md](./WSP-path.md)         |
+| `/canonicalize` | RFC 8785 JCS — see [WSC-canonicalize.md](./WSC-canonicalize.md)                             |
+| `/emit`         | `emit(ast): Record<string, Uint8Array>` — see [WSE-emitter.md](./WSE-emitter.md)            |
+| `/parse`        | `parse(files): WorkspaceAST`                                                                |
 
 ## Sub-spec index
 
-| Code | File | Authority over |
-|------|------|----------------|
-| **WSP** | [WSP-path.md](./WSP-path.md) | `oc://` URI grammar, 12 rejection vectors, byte-equality |
+| Code    | File                                         | Authority over                                                |
+| ------- | -------------------------------------------- | ------------------------------------------------------------- |
+| **WSP** | [WSP-path.md](./WSP-path.md)                 | `oc://` URI grammar, 12 rejection vectors, byte-equality      |
 | **WSC** | [WSC-canonicalize.md](./WSC-canonicalize.md) | RFC 8785 JCS, algorithm version, cross-platform byte-identity |
-| **WSA** | [WSA-ast.md](./WSA-ast.md) | 9 bootstrap file node types, traversal API |
-| **WSE** | [WSE-emitter.md](./WSE-emitter.md) | Lossless round-trip, add-only architecture |
+| **WSA** | [WSA-ast.md](./WSA-ast.md)                   | 9 bootstrap file node types, traversal API                    |
+| **WSE** | [WSE-emitter.md](./WSE-emitter.md)           | Lossless round-trip, add-only architecture                    |
 
 ## Stability contract
 

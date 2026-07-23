@@ -25,11 +25,11 @@ User-level config (`~/.claws/config.json`) overrides defaults. System-level conf
 
 claws organizes its 40 commands into three tiers of progressive disclosure (4 / 18 / 40):
 
-| Tier | Commands | Audience |
-|------|----------|----------|
-| Starter (4) | `init`, `build`, `check`, `watch` | First-time users |
-| Standard (18) | + `snap`, `doctor`, `publish`, `scan`, `broadcast`, etc. | Regular users |
-| Full (40) | + `assess`, `comply`, `forensic`, `key`, `token`, etc. | Power users and operators |
+| Tier          | Commands                                                 | Audience                  |
+| ------------- | -------------------------------------------------------- | ------------------------- |
+| Starter (4)   | `init`, `build`, `check`, `watch`                        | First-time users          |
+| Standard (18) | + `snap`, `doctor`, `publish`, `scan`, `broadcast`, etc. | Regular users             |
+| Full (40)     | + `assess`, `comply`, `forensic`, `key`, `token`, etc.   | Power users and operators |
 
 Configure visible tier:
 

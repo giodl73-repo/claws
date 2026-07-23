@@ -72,12 +72,12 @@ Use this area for <scope>.
 ## Active Notes
 
 | Area | File |
-| --- | --- |
+| ---- | ---- |
 
 ## Active Work
 
 | Repo | PR / Issue | Branch | Status | Purpose |
-| --- | --- | --- | --- | --- |
+| ---- | ---------- | ------ | ------ | ------- |
 
 ## Related Areas
 

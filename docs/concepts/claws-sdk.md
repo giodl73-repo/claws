@@ -9,16 +9,16 @@ The governance SDK -- a sibling to craftworks-sdk that provides programmatic acc
 ## SDK Surface
 
 ```typescript
-import { compile, verify, assess } from '@bic/claws-sdk';
+import { compile, verify, assess } from "@bic/claws-sdk";
 
 // Compile governance
-const result = await compile({ workspace: '/path/to/workspace' });
+const result = await compile({ workspace: "/path/to/workspace" });
 
 // Verify compliance
-const report = await verify({ workspace: '/path/to/workspace', framework: 'soc2' });
+const report = await verify({ workspace: "/path/to/workspace", framework: "soc2" });
 
 // Assess risk
-const risk = await assess({ workspace: '/path/to/workspace' });
+const risk = await assess({ workspace: "/path/to/workspace" });
 ```
 
 ## Architecture

@@ -5,13 +5,13 @@ self-contained task you can complete in minutes.
 
 ## Guides
 
-| Guide | What you do |
-|-------|-------------|
-| [Initialize a workspace](initialize-workspace.md) | Run `claws init` to bootstrap governance in an existing agent workspace |
-| [Run your first build](first-build.md) | Run `claws build` and interpret the compiled artifacts and diagnostics |
+| Guide                                               | What you do                                                                  |
+| --------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [Initialize a workspace](initialize-workspace.md)   | Run `claws init` to bootstrap governance in an existing agent workspace      |
+| [Run your first build](first-build.md)              | Run `claws build` and interpret the compiled artifacts and diagnostics       |
 | [Write a governance rule](write-governance-rule.md) | Create a custom policy rule with severity, scope, and three-ring composition |
-| [Publish a governance skill](publish-skill.md) | Package a governed skill, test it, and publish to ClawHub |
-| [Set up three-ring security](three-ring-setup.md) | Configure inner, middle, and outer ring governance enforcement |
+| [Publish a governance skill](publish-skill.md)      | Package a governed skill, test it, and publish to ClawHub                    |
+| [Set up three-ring security](three-ring-setup.md)   | Configure inner, middle, and outer ring governance enforcement               |
 
 ## Prerequisites
 

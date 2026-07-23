@@ -4,10 +4,10 @@ This repo is the **proposal / governance / craft-artifacts workspace** for the b
 
 It is not a code repo. Code lives elsewhere:
 
-| Code | Where |
-|------|-------|
-| `lobster_web` (the web app) | [`bic/lobster`](https://microsoft.ghe.com/bic/lobster) |
-| `openclaw-*` packages, runtime | [`bic/aether`](https://microsoft.ghe.com/bic/aether) (the upstream openclaw runtime) |
+| Code                                                                                        | Where                                                                                                          |
+| ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `lobster_web` (the web app)                                                                 | [`bic/lobster`](https://microsoft.ghe.com/bic/lobster)                                                         |
+| `openclaw-*` packages, runtime                                                              | [`bic/aether`](https://microsoft.ghe.com/bic/aether) (the upstream openclaw runtime)                           |
 | Earlier in-claws prototypes (`packages/{claws-*, openclaw-*, v2-prototype, openclaw-lkg*}`) | Preserved in git history at `d0bcf7fb` (the hapi-the-bringer wave tip, immediately before this cleanup commit) |
 
 ## What's here

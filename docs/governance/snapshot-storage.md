@@ -12,12 +12,12 @@ Snapshot storage manages retention, pruning, and lifecycle of saved snapshots. W
 
 Each workspace has a configurable maximum snapshot count and total size:
 
-| Setting | Default | Purpose |
-|---------|---------|---------|
-| `snap.maxCount` | 20 | Maximum number of snapshots retained |
-| `snap.maxSizeMB` | 500 | Maximum total storage in megabytes |
+| Setting          | Default | Purpose                              |
+| ---------------- | ------- | ------------------------------------ |
+| `snap.maxCount`  | 20      | Maximum number of snapshots retained |
+| `snap.maxSizeMB` | 500     | Maximum total storage in megabytes   |
 
-When either limit is exceeded, auto-pruning activates. Limits are configurable in `claws.json`. Fleet templates can set minimum retention floors (workspaces cannot set limits below the fleet minimum). *(Source: snapshot-lifecycle S05-F01)*
+When either limit is exceeded, auto-pruning activates. Limits are configurable in `claws.json`. Fleet templates can set minimum retention floors (workspaces cannot set limits below the fleet minimum). _(Source: snapshot-lifecycle S05-F01)_
 
 ---
 
@@ -33,7 +33,7 @@ Storage limit reached (20/20 snapshots).
 Snapshot "daily-check" saved (18/20 snapshots).
 ```
 
-Auto-pruning runs synchronously during save. The `--no-prune` flag skips pruning and fails if limits are exceeded, useful when operators want manual control. *(Source: snapshot-lifecycle S05-F02)*
+Auto-pruning runs synchronously during save. The `--no-prune` flag skips pruning and fails if limits are exceeded, useful when operators want manual control. _(Source: snapshot-lifecycle S05-F02)_
 
 ---
 
@@ -41,13 +41,13 @@ Auto-pruning runs synchronously during save. The `--no-prune` flag skips pruning
 
 Certain snapshots are exempt from auto-pruning:
 
-| Category | Protection reason | How tagged |
-|----------|------------------|-----------|
-| **Fleet baseline** | Active drift comparison target | Promoted via `snap promote` |
-| **Active dead man switch** | In-progress upgrade safety net | Created by `claws upgrade` |
-| **User-pinned** | Operator explicitly marked as keep | `snap pin <name>` |
+| Category                   | Protection reason                  | How tagged                  |
+| -------------------------- | ---------------------------------- | --------------------------- |
+| **Fleet baseline**         | Active drift comparison target     | Promoted via `snap promote` |
+| **Active dead man switch** | In-progress upgrade safety net     | Created by `claws upgrade`  |
+| **User-pinned**            | Operator explicitly marked as keep | `snap pin <name>`           |
 
-Protected snapshots are never pruned automatically. If all snapshots are protected and the limit is reached, `snap save` fails with an error explaining that manual unpinning or limit increase is needed. *(Source: snapshot-lifecycle S05-F03, P-193)*
+Protected snapshots are never pruned automatically. If all snapshots are protected and the limit is reached, `snap save` fails with an error explaining that manual unpinning or limit increase is needed. _(Source: snapshot-lifecycle S05-F03, P-193)_
 
 ---
 
@@ -59,7 +59,7 @@ When multiple snapshots are eligible for pruning, the order is deterministic:
 2. **LRU**: Least recently accessed pruned first (requires access tracking)
 3. **Time-bucketed**: Keep at most N per time bucket (e.g., 1 per day, 1 per week)
 
-The pruning policy is configurable via `snap.prunePolicy`. FIFO is the default because it is simplest to reason about and predict. *(Source: snapshot-lifecycle S05-F04)*
+The pruning policy is configurable via `snap.prunePolicy`. FIFO is the default because it is simplest to reason about and predict. _(Source: snapshot-lifecycle S05-F04)_
 
 ---
 
@@ -78,7 +78,7 @@ Fleet templates can enforce minimum retention across all workspaces:
 }
 ```
 
-A workspace cannot set retention below the fleet minimum. This ensures fleet baselines and compliance evidence are retained even in workspaces that aggressively prune. *(Source: snapshot-lifecycle S05-F05)*
+A workspace cannot set retention below the fleet minimum. This ensures fleet baselines and compliance evidence are retained even in workspaces that aggressively prune. _(Source: snapshot-lifecycle S05-F05)_
 
 ---
 
@@ -90,7 +90,7 @@ When `snap promote` triggers a baseline change, the new baseline must be fully e
 2. Mark old baseline as unprotected (if retention policy allows)
 3. Auto-prune may now remove old baseline
 
-Without this ordering, pruning could remove the old baseline before the new one is confirmed, leaving the fleet with no drift comparison target. *(Source: snapshot-lifecycle S05-F06, P-194)*
+Without this ordering, pruning could remove the old baseline before the new one is confirmed, leaving the fleet with no drift comparison target. _(Source: snapshot-lifecycle S05-F06, P-194)_
 
 ---
 
@@ -106,7 +106,7 @@ ci-run-20260410   2026-04-10T08:00:00  11MB    no          2nd
 fleet-baseline    2026-04-08T10:00:00  12MB    baseline    never
 ```
 
-The `Next-Prune` column shows the pruning order so operators can predict which snapshots will be removed on the next auto-prune event. *(Source: snapshot-lifecycle S05-F07)*
+The `Next-Prune` column shows the pruning order so operators can predict which snapshots will be removed on the next auto-prune event. _(Source: snapshot-lifecycle S05-F07)_
 
 ---
 

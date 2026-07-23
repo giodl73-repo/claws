@@ -16,13 +16,15 @@ differently.
 
 ```ts
 interface HostPresetConfig {
-  name: 'openclaw' | 'lobster' | 'aether';
-  decide:        { providers: ProviderSpec[]; mergerMode: 'oc-native' | 'strict-oc7' };
-  track:         { mode: 'off' | 'local-dir' | 'sidecar' | 'multi-tenant' };
-  enforceReview: { companionMode: 'cli-stdin' | 'supervisor-http' | 'tenant-admin';
-                   signer: 'local-dev' | 'cowork-supervisor' | 'tenant-admin' };
-  workspace:     { mount: 'local-dir' | 'container-RO' | 'snapshot-RO' };
-  scope:         '@bic/openclaw' | '@openclaw';
+  name: "openclaw" | "lobster" | "aether";
+  decide: { providers: ProviderSpec[]; mergerMode: "oc-native" | "strict-oc7" };
+  track: { mode: "off" | "local-dir" | "sidecar" | "multi-tenant" };
+  enforceReview: {
+    companionMode: "cli-stdin" | "supervisor-http" | "tenant-admin";
+    signer: "local-dev" | "cowork-supervisor" | "tenant-admin";
+  };
+  workspace: { mount: "local-dir" | "container-RO" | "snapshot-RO" };
+  scope: "@bic/openclaw" | "@openclaw";
 }
 ```
 
@@ -63,17 +65,17 @@ Each layer is separable. That is the structural claim the sim must prove.
 
 Each preset is a **different combination of enabled layers + host shape**:
 
-| Preset   | Layers      | Workspace mount | Companion mode      | Tenancy                |
-|----------|-------------|-----------------|---------------------|------------------------|
-| openclaw | **1 + 3**   | `local-dir`     | `cli-stdin`         | single (proof: no snap)|
-| lobster  | **1 + 2 + 3** | `container-RO` | `supervisor-http`   | single, sidecar snap   |
-| aether   | **1 + 2 + 3** | `snapshot-RO`  | `tenant-admin`      | multi (**host-layer**) |
+| Preset   | Layers        | Workspace mount | Companion mode    | Tenancy                 |
+| -------- | ------------- | --------------- | ----------------- | ----------------------- |
+| openclaw | **1 + 3**     | `local-dir`     | `cli-stdin`       | single (proof: no snap) |
+| lobster  | **1 + 2 + 3** | `container-RO`  | `supervisor-http` | single, sidecar snap    |
+| aether   | **1 + 2 + 3** | `snapshot-RO`   | `tenant-admin`    | multi (**host-layer**)  |
 
 **openclaw** proves the no-snap / zero-Microsoft-infra case — a single tenant
 with a local `.openclaw/policy/` directory. **lobster** proves the
 single-tenant container-per-workspace pattern with a sidecar snap. **aether**
 proves host-layer multi-tenancy, where snap stays tenancy-blind per proposal
-§5.9 and the aether *host* owns the tenant boundary.
+§5.9 and the aether _host_ owns the tenant boundary.
 
 If one preset is deleted, the fidelity claim collapses. If a fourth is added,
 some other layer combination must be at stake. See `host-presets--openclaw.md`,

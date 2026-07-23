@@ -17,7 +17,7 @@
  * @module @bic/v2-prototype/hook-types-extension
  */
 
-import type { SnapshotId } from './snapshot.js';
+import type { SnapshotId } from "./snapshot.js";
 
 /**
  * Extension to upstream's existing `PluginHookToolContext`. The

@@ -2,6 +2,10 @@
   "name": "@bic/v2-prototype",
   "version": "0.1.0",
   "description": "Temporary local-fork of v2 upstream openclaw contract types — replace with @openclaw/plugin-sdk subpaths once upstream lands. See .craft/out/proposals/{snap-pre-rfc,policy-pre-rfc}.md.",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -32,15 +36,8 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist",
-    "README.md"
-  ],
   "publishConfig": {
     "access": "restricted"
-  },
-  "engines": {
-    "node": ">=22"
   },
   "scripts": {
     "test": "vitest run",
@@ -54,5 +51,8 @@
     "@bic/openclaw-snap": "*",
     "typescript": "^5.7.0",
     "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

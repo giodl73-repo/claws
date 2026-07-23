@@ -30,12 +30,12 @@ message: "Plaintext API key detected in tool arguments. Use a secrets reference 
 
 Choose the severity that matches the rule's impact:
 
-| Severity | Meaning | Check behavior | Runtime behavior |
-|----------|---------|---------------|-----------------|
+| Severity   | Meaning                          | Check behavior         | Runtime behavior     |
+| ---------- | -------------------------------- | ---------------------- | -------------------- |
 | `critical` | Security or compliance violation | Red, blocks `--strict` | Blocks the tool call |
-| `high` | Significant governance gap | Red, blocks `--strict` | Blocks the tool call |
-| `medium` | Governance improvement needed | Yellow, warning | Logged, not blocked |
-| `low` | Advisory recommendation | Dim, informational | Logged, not blocked |
+| `high`     | Significant governance gap       | Red, blocks `--strict` | Blocks the tool call |
+| `medium`   | Governance improvement needed    | Yellow, warning        | Logged, not blocked  |
+| `low`      | Advisory recommendation          | Dim, informational     | Logged, not blocked  |
 
 Rules with `critical` or `high` severity produce violations that fail CI when running `claws check --strict`.
 
@@ -43,13 +43,13 @@ Rules with `critical` or `high` severity produce violations that fail CI when ru
 
 The `scope` field determines where the rule is evaluated:
 
-| Scope | What it checks | Ring |
-|-------|---------------|------|
-| `tool-call` | Tool call arguments before execution | Inner + middle |
-| `output` | Tool call return values | Middle |
-| `delegation` | Agent-to-agent trust boundaries | Middle |
-| `workspace` | Static workspace configuration | Middle |
-| `fleet` | Cross-workspace compliance | Outer |
+| Scope        | What it checks                       | Ring           |
+| ------------ | ------------------------------------ | -------------- |
+| `tool-call`  | Tool call arguments before execution | Inner + middle |
+| `output`     | Tool call return values              | Middle         |
+| `delegation` | Agent-to-agent trust boundaries      | Middle         |
+| `workspace`  | Static workspace configuration       | Middle         |
+| `fleet`      | Cross-workspace compliance           | Outer          |
 
 A `tool-call` scope rule runs in both the inner ring (real-time, on file save) and the middle ring (on `claws check`). A `fleet` scope rule runs only during outer ring operations like `claws scan`.
 

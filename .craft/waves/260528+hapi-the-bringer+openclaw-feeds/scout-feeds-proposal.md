@@ -31,11 +31,11 @@ OpenClaw.
 
 There are three intended operating modes:
 
-| Mode | Where it runs | Who uses it | What it does |
-|---|---|---|---|
-| Local admin CLI | Operator laptop, CI job, or admin workstation | Platform/admin users | Imports source metadata, searches it, builds curated feeds, verifies feeds, and publishes feed artifacts. |
-| Lobster-hosted feed service | Lobster control plane | Lobster platform and tenant admins | Stores root indexes, tenant rules, and materialized tenant feeds; serves authenticated feed documents to clients. |
-| Client consumption | OpenClaw, Aether, oc-harness, or another runtime | End users indirectly through their client | Reads an approved feed, verifies attestation, searches approved entries, and compares installed packages to approved updates. |
+| Mode                        | Where it runs                                    | Who uses it                               | What it does                                                                                                                  |
+| --------------------------- | ------------------------------------------------ | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Local admin CLI             | Operator laptop, CI job, or admin workstation    | Platform/admin users                      | Imports source metadata, searches it, builds curated feeds, verifies feeds, and publishes feed artifacts.                     |
+| Lobster-hosted feed service | Lobster control plane                            | Lobster platform and tenant admins        | Stores root indexes, tenant rules, and materialized tenant feeds; serves authenticated feed documents to clients.             |
+| Client consumption          | OpenClaw, Aether, oc-harness, or another runtime | End users indirectly through their client | Reads an approved feed, verifies attestation, searches approved entries, and compares installed packages to approved updates. |
 
 Ordinary OpenClaw users should not have to run Scout to get work done. In a
 managed Lobster deployment, they use their normal OpenClaw or Aether client.
@@ -119,13 +119,13 @@ Scout root index
 
 Scout separates package supply from feed governance:
 
-| Role | Examples | Responsibility |
-|---|---|---|
-| Package producer | Skill authors, plugin authors, Microsoft connector teams | Create package artifacts and source metadata. |
-| Source supplier | ClawHub, MOS3, npm/package registries, internal registries, static feeds | Expose package metadata and artifact coordinates. |
-| Feed curator | Lobster ops, tenant admin, enterprise governance team, local operator | Choose which source entries are allowed, denied, pinned, or deprecated. |
-| Feed provider | Local `scout feed publish`, Lobster endpoint, static blob/CDN host | Serve curated feed documents with attestation and cache metadata. |
-| Feed consumer | OpenClaw, Aether, Lobster runtime, oc-harness, local scripts | Read, verify, search, and use approved package metadata. |
+| Role             | Examples                                                                 | Responsibility                                                          |
+| ---------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Package producer | Skill authors, plugin authors, Microsoft connector teams                 | Create package artifacts and source metadata.                           |
+| Source supplier  | ClawHub, MOS3, npm/package registries, internal registries, static feeds | Expose package metadata and artifact coordinates.                       |
+| Feed curator     | Lobster ops, tenant admin, enterprise governance team, local operator    | Choose which source entries are allowed, denied, pinned, or deprecated. |
+| Feed provider    | Local `scout feed publish`, Lobster endpoint, static blob/CDN host       | Serve curated feed documents with attestation and cache metadata.       |
+| Feed consumer    | OpenClaw, Aether, Lobster runtime, oc-harness, local scripts             | Read, verify, search, and use approved package metadata.                |
 
 ## Feed contract
 
@@ -137,7 +137,7 @@ The V1 feed document should be small and deterministic:
   "feedId": "lobster-approved",
   "scope": {
     "kind": "tenant",
-    "tenantIdHash": "sha256:..."
+    "tenantIdHash": "sha256:...",
   },
   "generatedAt": "2026-05-29T00:00:00.000Z",
   "sourceRevision": "clawhub-snapshot:2026-05-29",
@@ -152,19 +152,19 @@ The V1 feed document should be small and deterministic:
       "source": {
         "registry": "clawhub",
         "package": "openclaw-calendar-helper",
-        "url": "https://example.invalid/catalog/calendar-helper"
+        "url": "https://example.invalid/catalog/calendar-helper",
       },
       "artifactHash": "sha256:...",
       "updatedAt": "2026-05-29T00:00:00.000Z",
       "metadata": {
-        "governance.state": "approved"
-      }
-    }
+        "governance.state": "approved",
+      },
+    },
   ],
   "attestation": {
     "algorithm": "sha256",
-    "hash": "..."
-  }
+    "hash": "...",
+  },
 }
 ```
 
@@ -197,8 +197,8 @@ Example tenant rule file:
   "allow": ["calendar-helper", "docs-summarizer"],
   "deny": ["unapproved-shell-runner"],
   "pins": {
-    "calendar-helper": "1.2.0"
-  }
+    "calendar-helper": "1.2.0",
+  },
 }
 ```
 
@@ -287,28 +287,28 @@ clients search, install, or update from that feed
 Catalog state should be file-backed first and durable in hosted Lobster mode.
 Expected states:
 
-| State | Meaning |
-|---|---|
-| `submitted` | Candidate was added by source import, admin submit, or automation. |
-| `validated` | Required normalized metadata and source coordinates are present. |
-| `approved` | Entry can appear in an approved feed. |
-| `rejected` | Entry was reviewed and should not appear in an approved feed. |
-| `denied` | Entry is explicitly blocked even if present in a baseline feed. |
-| `pinned` | Entry is approved only at a specific version. |
-| `deprecated` | Entry remains visible for transition but should not be newly adopted. |
-| `update_available` | Upstream source changed and needs tenant review. |
+| State              | Meaning                                                               |
+| ------------------ | --------------------------------------------------------------------- |
+| `submitted`        | Candidate was added by source import, admin submit, or automation.    |
+| `validated`        | Required normalized metadata and source coordinates are present.      |
+| `approved`         | Entry can appear in an approved feed.                                 |
+| `rejected`         | Entry was reviewed and should not appear in an approved feed.         |
+| `denied`           | Entry is explicitly blocked even if present in a baseline feed.       |
+| `pinned`           | Entry is approved only at a specific version.                         |
+| `deprecated`       | Entry remains visible for transition but should not be newly adopted. |
+| `update_available` | Upstream source changed and needs tenant review.                      |
 
 ## Source adapters
 
 Adapters normalize source-specific metadata into the feed contract.
 
-| Adapter | Role |
-|---|---|
-| Static Scout feed | V1 tests, offline proof, local bootstrap. |
-| ClawHub | Public skill/plugin catalog source. |
-| MOS3 | Microsoft marketplace/source adapter for `AgentSkills` and `AgentConnectors`. |
-| npm/package registry | Later package metadata source for plugin artifacts. |
-| Internal feed URL | Enterprise or Lobster-curated metadata source. |
+| Adapter              | Role                                                                          |
+| -------------------- | ----------------------------------------------------------------------------- |
+| Static Scout feed    | V1 tests, offline proof, local bootstrap.                                     |
+| ClawHub              | Public skill/plugin catalog source.                                           |
+| MOS3                 | Microsoft marketplace/source adapter for `AgentSkills` and `AgentConnectors`. |
+| npm/package registry | Later package metadata source for plugin artifacts.                           |
+| Internal feed URL    | Enterprise or Lobster-curated metadata source.                                |
 
 Sources are additive. A source that cannot provide an optional field leaves it
 empty rather than blocking import.
@@ -316,15 +316,15 @@ empty rather than blocking import.
 MOS3-specific fields should live in metadata or source coordinates, not in the
 generic feed shape:
 
-| Metadata key | Meaning |
-|---|---|
-| `mos3.titleId` | MOS3 title id. |
-| `mos3.appId` | MOS app id when available. |
+| Metadata key              | Meaning                                       |
+| ------------------------- | --------------------------------------------- |
+| `mos3.titleId`            | MOS3 title id.                                |
+| `mos3.appId`              | MOS app id when available.                    |
 | `mos3.acquisitionContext` | `user`, `tenant`, or source-provided context. |
-| `mos3.elementType` | `AgentSkills` or `AgentConnectors`. |
-| `mos3.blobPath` | Public skill blob path when present. |
-| `mos3.authReferenceId` | Connector auth reference id when present. |
-| `mos3.environment` | MOS3 environment/source host label. |
+| `mos3.elementType`        | `AgentSkills` or `AgentConnectors`.           |
+| `mos3.blobPath`           | Public skill blob path when present.          |
+| `mos3.authReferenceId`    | Connector auth reference id when present.     |
+| `mos3.environment`        | MOS3 environment/source host label.           |
 
 ## Hosted Lobster mode
 

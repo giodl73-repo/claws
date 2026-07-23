@@ -35,36 +35,36 @@ mkdir -p plugins/my-governance/
 Create the plugin entry point at `plugins/my-governance/index.ts`:
 
 ```typescript
-import type { GovernanceIR, Finding, Plugin } from '@claws/sdk';
+import type { GovernanceIR, Finding, Plugin } from "@claws/sdk";
 
 const plugin: Plugin = {
-  name: 'my-governance',
-  version: '1.0.0',
+  name: "my-governance",
+  version: "1.0.0",
   rules: [
     {
-      id: 'G-CUSTOM-NAMING',
-      description: 'Agent names must use kebab-case',
-      severity: 'medium',
+      id: "G-CUSTOM-NAMING",
+      description: "Agent names must use kebab-case",
+      severity: "medium",
       evaluate(ir: GovernanceIR): Finding[] {
         const findings: Finding[] = [];
 
         for (const agent of ir.agents) {
-          if (agent.name !== agent.name.toLowerCase().replace(/\s+/g, '-')) {
+          if (agent.name !== agent.name.toLowerCase().replace(/\s+/g, "-")) {
             findings.push({
-              rule: 'G-CUSTOM-NAMING',
-              severity: 'medium',
-              file: 'AGENTS.md',
+              rule: "G-CUSTOM-NAMING",
+              severity: "medium",
+              file: "AGENTS.md",
               line: agent.location.line,
               message: `Agent "${agent.name}" is not kebab-case`,
-              fix: `Rename to "${agent.name.toLowerCase().replace(/\s+/g, '-')}"`
+              fix: `Rename to "${agent.name.toLowerCase().replace(/\s+/g, "-")}"`,
             });
           }
         }
 
         return findings;
-      }
-    }
-  ]
+      },
+    },
+  ],
 };
 
 export default plugin;
@@ -93,6 +93,7 @@ Create an agent with a non-kebab-case name in `AGENTS.md`:
 
 ```markdown
 ## Data Processor
+
 - **Role**: data processing
 - **Trust**: T1
 ```
@@ -124,8 +125,8 @@ Plugins can also hook into the enforcement lifecycle:
 
 ```typescript
 const plugin: Plugin = {
-  name: 'my-governance',
-  version: '1.0.0',
+  name: "my-governance",
+  version: "1.0.0",
   rules: [/* ... */],
 
   hooks: {
@@ -140,8 +141,8 @@ const plugin: Plugin = {
     onPostCheck(findings: Finding[]): Finding[] {
       // Called after rule evaluation -- can filter or annotate findings
       return findings;
-    }
-  }
+    },
+  },
 };
 ```
 

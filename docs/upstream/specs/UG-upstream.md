@@ -8,13 +8,13 @@ The `@bic/openclaw-*` packages are **incubated internally**, then
 contributed to `@openclaw/*` once the contract is stable. The
 roadmap:
 
-| Package | Incubation status | Target upstream | Target milestone |
-|---------|-------------------|-----------------|------------------|
-| `@bic/openclaw-workspace` | Alpha (Horus wave) | `@openclaw/workspace` | v0.2 stable |
-| `@bic/openclaw-guardrails` | Alpha (Horus wave) | `@openclaw/guardrails` | v0.2 stable |
-| `@bic/openclaw-policy` | Alpha (Horus wave) | `@openclaw/policy` | v0.2 stable |
-| `@bic/openclaw-snap` | Alpha (Horus wave) | `@openclaw/snap` | v0.2 stable |
-| `@bic/openclaw-lsp` | Alpha (Horus wave) | `@openclaw/lsp` | v0.2 stable |
+| Package                    | Incubation status  | Target upstream        | Target milestone |
+| -------------------------- | ------------------ | ---------------------- | ---------------- |
+| `@bic/openclaw-workspace`  | Alpha (Horus wave) | `@openclaw/workspace`  | v0.2 stable      |
+| `@bic/openclaw-guardrails` | Alpha (Horus wave) | `@openclaw/guardrails` | v0.2 stable      |
+| `@bic/openclaw-policy`     | Alpha (Horus wave) | `@openclaw/policy`     | v0.2 stable      |
+| `@bic/openclaw-snap`       | Alpha (Horus wave) | `@openclaw/snap`       | v0.2 stable      |
+| `@bic/openclaw-lsp`        | Alpha (Horus wave) | `@openclaw/lsp`        | v0.2 stable      |
 
 Each package graduates independently when: (a) its public surface has
 been stable for one wave, (b) the reference adapter suite (4 host

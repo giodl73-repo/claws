@@ -12,14 +12,14 @@ specific approvers."
 
 ```ts
 interface RelaxWaiver {
-  readonly id: string;                // UUID
-  readonly ruleCode: string;          // e.g. 'G-24'
+  readonly id: string; // UUID
+  readonly ruleCode: string; // e.g. 'G-24'
   readonly workspaceId: string;
-  readonly findingSignature: string;  // stable hash of the finding
-  readonly notBefore: number;         // epoch ms
+  readonly findingSignature: string; // stable hash of the finding
+  readonly notBefore: number; // epoch ms
   readonly notAfter: number;
   readonly approvers: ReadonlyArray<ApproverSignature>;
-  readonly reason: string;            // operator-provided justification
+  readonly reason: string; // operator-provided justification
   readonly signedAt: number;
 }
 ```

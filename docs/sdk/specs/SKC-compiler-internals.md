@@ -10,12 +10,12 @@ governance decision table:
 
 ```ts
 interface GovernanceIR {
-  readonly workspaceHash: string;       // sha256(canonical workspace bytes)
+  readonly workspaceHash: string; // sha256(canonical workspace bytes)
   readonly tools: ReadonlyMap<string, ToolEntry>;
   readonly sensitivity: ReadonlyMap<string, SensitivityLabel>;
   readonly providers: ReadonlyArray<ProviderConfig>;
-  readonly rules: RuleFindings;         // findings from 29 G-rules
-  readonly canonicalBytes: Uint8Array;  // RFC 8785 JCS canonicalized
+  readonly rules: RuleFindings; // findings from 29 G-rules
+  readonly canonicalBytes: Uint8Array; // RFC 8785 JCS canonicalized
   readonly emittedAt: number;
   readonly canonicalizerVersion: 1;
 }

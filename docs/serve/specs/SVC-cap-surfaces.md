@@ -11,18 +11,18 @@ capability.
 
 Capability vocabulary:
 
-| Capability | Grants |
-|------------|--------|
-| `workspace:read` | `/workspace/*`, `/policy/*` GET |
-| `workspace:write` | (unused — workspace is read-only via API) |
-| `policy:run` | `POST /policy/validate`, `/policy/generate` |
-| `snap:read` | `/snap/current`, `/snap/list`, `/snap/{id}`, `/snap/healthz`, `/snap/events` |
-| `snap:promote` | `POST /snap/promote` |
-| `snap:rollback` | `POST /snap/rollback` |
-| `audit:read` | `/audit/chain`, `/audit/verify`, `/audit/events` |
-| `audit:export` | `POST /audit/export` |
-| `approval:sign` | `POST /approvals/{handleId}/respond` |
-| `fleet:admin` | `POST /fleet/reload` |
+| Capability        | Grants                                                                       |
+| ----------------- | ---------------------------------------------------------------------------- |
+| `workspace:read`  | `/workspace/*`, `/policy/*` GET                                              |
+| `workspace:write` | (unused — workspace is read-only via API)                                    |
+| `policy:run`      | `POST /policy/validate`, `/policy/generate`                                  |
+| `snap:read`       | `/snap/current`, `/snap/list`, `/snap/{id}`, `/snap/healthz`, `/snap/events` |
+| `snap:promote`    | `POST /snap/promote`                                                         |
+| `snap:rollback`   | `POST /snap/rollback`                                                        |
+| `audit:read`      | `/audit/chain`, `/audit/verify`, `/audit/events`                             |
+| `audit:export`    | `POST /audit/export`                                                         |
+| `approval:sign`   | `POST /approvals/{handleId}/respond`                                         |
+| `fleet:admin`     | `POST /fleet/reload`                                                         |
 
 ## Trust escalation
 

@@ -12,35 +12,35 @@
  * edit by hand; this fixer is for the common case where the duplicate
  * is leftover from a copy-paste.
  */
-import { parseOcPath } from '@openclaw/oc-path';
-import type { OcPathFixerSpec } from '@openclaw/oc-doctor/plugin-sdk';
-import { scanToolHeaders } from './_tools-md-scan.js';
+import { parseOcPath } from "@openclaw/oc-path";
+import type { OcPathFixerSpec } from "@openclaw/oc-doctor/plugin-sdk";
+import { scanToolHeaders } from "./_tools-md-scan.js";
 
 export const toolsDedupeToolId: OcPathFixerSpec = {
-  id: 'policy-starter-v0/tools/dedupe-tool-id',
-  description: 'Remove earlier duplicate `### name` declarations, keeping the last',
-  severity: 'warning',
-  appliesTo: 'TOOLS.md',
+  id: "policy-starter-v0/tools/dedupe-tool-id",
+  description: "Remove earlier duplicate `### name` declarations, keeping the last",
+  severity: "warning",
+  appliesTo: "TOOLS.md",
 
   detect({ ast }) {
-    if (ast.kind !== 'md') return [];
+    if (ast.kind !== "md") return [];
     const hits = scanToolHeaders(ast);
     const lastByName = new Map<string, number>(); // name → line of LAST occurrence
     for (const h of hits) {
-      if (h.name !== '') lastByName.set(h.name, h.line);
+      if (h.name !== "") lastByName.set(h.name, h.line);
     }
     const findings = [];
     for (const h of hits) {
-      if (h.name === '') continue;
+      if (h.name === "") continue;
       const lastLine = lastByName.get(h.name);
       if (lastLine === undefined || lastLine === h.line) continue; // this IS the last
       findings.push({
         match: {
           path: parseOcPath(`oc://TOOLS.md/Tools/${h.name}`),
           match: {
-            kind: 'leaf' as const,
+            kind: "leaf" as const,
             valueText: h.name,
-            leafType: 'string' as const,
+            leafType: "string" as const,
             line: h.line,
           },
         },
@@ -52,7 +52,7 @@ export const toolsDedupeToolId: OcPathFixerSpec = {
   },
 
   fix({ raw, ast, match }) {
-    if (ast.kind !== 'md') return raw;
+    if (ast.kind !== "md") return raw;
     const hits = scanToolHeaders(ast);
     const target = hits.find((h) => h.line === match.match.line);
     if (target === undefined) return raw;
@@ -61,13 +61,13 @@ export const toolsDedupeToolId: OcPathFixerSpec = {
     if (!hasLater) return raw; // already deduped or this is the last copy
     // Remove the H3 block from `### name ...` (target.line) up to but
     // not including the next `###` / `##` heading or end of file.
-    const eol = raw.includes('\r\n') ? '\r\n' : '\n';
+    const eol = raw.includes("\r\n") ? "\r\n" : "\n";
     const lines = raw.split(eol);
     const startIdx = target.line - 1;
     let endIdx = lines.length;
     for (let i = startIdx + 1; i < lines.length; i++) {
       const l = lines[i]!;
-      if (l.startsWith('### ') || l.startsWith('## ')) {
+      if (l.startsWith("### ") || l.startsWith("## ")) {
         endIdx = i;
         break;
       }

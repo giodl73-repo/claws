@@ -28,11 +28,11 @@ claws packages are organized into three tiers:
   @craftworks/*     Internal toolchain (not in OC output)
 ```
 
-| Tier | Scope | Published by | Trust | Cost |
-|------|-------|-------------|-------|------|
-| `@openclaw/*` | Contributed packages | Community | Peer-reviewed | Free |
-| `@claws/*` | Shared libraries | claws team | Signed releases | Free |
-| `@craftworks/*` | Internal toolchain | Craftworks | Internal only | Licensed |
+| Tier            | Scope                | Published by | Trust           | Cost     |
+| --------------- | -------------------- | ------------ | --------------- | -------- |
+| `@openclaw/*`   | Contributed packages | Community    | Peer-reviewed   | Free     |
+| `@claws/*`      | Shared libraries     | claws team   | Signed releases | Free     |
+| `@craftworks/*` | Internal toolchain   | Craftworks   | Internal only   | Licensed |
 
 The key rule: **@craftworks/ never appears in generated code.** Everything claws emits uses @openclaw/ or @claws/ packages. This means OC developers can read and understand the generated code without knowing anything about craftworks internals.
 
@@ -78,14 +78,14 @@ claws add @openclaw/web-search
 
 claws provides 11+ shared libraries that serve as the standard library for OpenClaw agents:
 
-| Library | Purpose | Package |
-|---------|---------|---------|
-| Input sanitizer | Validate and clean user input | @claws/input-sanitizer |
-| Output validator | Check agent output format | @claws/output-validator |
-| Trust manager | OBO delegation enforcement | @claws/trust-manager |
-| Budget tracker | Token consumption tracking | @claws/budget-tracker |
-| Audit logger | Structured audit trail | @claws/audit-logger |
-| Risk classifier | Tool risk classification | @claws/risk-classifier |
+| Library          | Purpose                       | Package                 |
+| ---------------- | ----------------------------- | ----------------------- |
+| Input sanitizer  | Validate and clean user input | @claws/input-sanitizer  |
+| Output validator | Check agent output format     | @claws/output-validator |
+| Trust manager    | OBO delegation enforcement    | @claws/trust-manager    |
+| Budget tracker   | Token consumption tracking    | @claws/budget-tracker   |
+| Audit logger     | Structured audit trail        | @claws/audit-logger     |
+| Risk classifier  | Tool risk classification      | @claws/risk-classifier  |
 
 These libraries handle cross-cutting concerns that every agent workspace needs. Like .NET provides System.IO and System.Security for C# apps, @claws packages provide governance primitives for OC agents.
 

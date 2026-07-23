@@ -8,7 +8,7 @@
  * `/siem` per-entry formatting.
  */
 
-import type { AuditEntry } from '../audit/types.js';
+import type { AuditEntry } from "../audit/types.js";
 
 /** Syslog formatting options. */
 export interface SyslogOpts {
@@ -22,44 +22,44 @@ export interface SyslogOpts {
 // CEF (ArcSight)
 // ---------------------------------------------------------------------------
 
-const OUTCOME_TO_CEF_SEVERITY: Record<AuditEntry['outcome'], number> = {
+const OUTCOME_TO_CEF_SEVERITY: Record<AuditEntry["outcome"], number> = {
   success: 3,
   pending: 5,
   failed: 8,
 };
 
 function escapeHeader(value: string): string {
-  return value.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
+  return value.replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
 }
 
 function escapeExtension(value: string): string {
-  return value.replace(/\\/g, '\\\\').replace(/=/g, '\\=').replace(/\n/g, '\\n');
+  return value.replace(/\\/g, "\\\\").replace(/=/g, "\\=").replace(/\n/g, "\\n");
 }
 
 /** Canonical CEF serializer. Product: `guardrails-audit`. */
 export function toCef(entry: AuditEntry): string {
   const severity = OUTCOME_TO_CEF_SEVERITY[entry.outcome];
   const header = [
-    'CEF:0',
-    escapeHeader('OpenClaw'),
-    escapeHeader('guardrails-audit'),
-    escapeHeader('0.1.0'),
+    "CEF:0",
+    escapeHeader("OpenClaw"),
+    escapeHeader("guardrails-audit"),
+    escapeHeader("0.1.0"),
     escapeHeader(entry.action),
     escapeHeader(`${entry.action} on ${entry.target}`),
     String(severity),
-  ].join('|');
+  ].join("|");
 
   const extensions: string[] = [
     `rt=${escapeExtension(entry.timestamp)}`,
     `src=${escapeExtension(entry.source)}`,
     `dst=${escapeExtension(entry.target)}`,
     `cs1=${escapeExtension(entry.scope)}`,
-    `cs1Label=${escapeExtension('scope')}`,
+    `cs1Label=${escapeExtension("scope")}`,
     `outcome=${escapeExtension(entry.outcome)}`,
     `cs2=${escapeExtension(entry.hash)}`,
-    `cs2Label=${escapeExtension('hash')}`,
+    `cs2Label=${escapeExtension("hash")}`,
     `cs3=${escapeExtension(entry.id)}`,
-    `cs3Label=${escapeExtension('eventId')}`,
+    `cs3Label=${escapeExtension("eventId")}`,
   ];
 
   if (entry.actor !== undefined) {
@@ -69,7 +69,7 @@ export function toCef(entry: AuditEntry): string {
     extensions.push(`msg=${escapeExtension(entry.reason)}`);
   }
 
-  return `${header} ${extensions.join(' ')}`;
+  return `${header} ${extensions.join(" ")}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -85,7 +85,7 @@ export function toNdjson(entry: AuditEntry): string {
 // Syslog (RFC 5424)
 // ---------------------------------------------------------------------------
 
-const OUTCOME_TO_SYSLOG_SEVERITY: Record<AuditEntry['outcome'], number> = {
+const OUTCOME_TO_SYSLOG_SEVERITY: Record<AuditEntry["outcome"], number> = {
   success: 6,
   pending: 4,
   failed: 3,
@@ -97,9 +97,9 @@ const SYSLOG_FACILITY = 10;
 export function toSyslog(entry: AuditEntry, opts?: SyslogOpts): string {
   const severity = OUTCOME_TO_SYSLOG_SEVERITY[entry.outcome];
   const priority = SYSLOG_FACILITY * 8 + severity;
-  const hostname = opts?.hostname ?? '-';
-  const appName = opts?.appName ?? 'openclaw-audit';
-  const procId = '-';
+  const hostname = opts?.hostname ?? "-";
+  const appName = opts?.appName ?? "openclaw-audit";
+  const procId = "-";
   const msgId = entry.action;
   const sdParams = [
     `id="${entry.id}"`,
@@ -112,8 +112,8 @@ export function toSyslog(entry: AuditEntry, opts?: SyslogOpts): string {
   if (entry.actor !== undefined) {
     sdParams.push(`actor="${entry.actor}"`);
   }
-  const sd = `[audit@0 ${sdParams.join(' ')}]`;
-  const msg = `${entry.action} on ${entry.target} by ${entry.actor ?? 'system'}`;
+  const sd = `[audit@0 ${sdParams.join(" ")}]`;
+  const msg = `${entry.action} on ${entry.target} by ${entry.actor ?? "system"}`;
 
   return `<${priority}>1 ${entry.timestamp} ${hostname} ${appName} ${procId} ${msgId} ${sd} ${msg}`;
 }

@@ -15,8 +15,8 @@ export type {
   RiskLevel,
   Sensitivity,
   ToolSpec,
-} from './types.js';
-export { POLICY_PATH } from './types.js';
+} from "./types.js";
+export { POLICY_PATH } from "./types.js";
 
 export {
   SDK_VERSION,
@@ -26,33 +26,25 @@ export {
   type PolicyExtractorContext,
   type PolicyExtractorSpec,
   type RunExtractorsOptions,
-} from './api.js';
+} from "./api.js";
 
-export {
-  canonicalize,
-  computePolicyId,
-  computePolicyShapeHash,
-} from './canonicalize.js';
+export { canonicalize, computePolicyId, computePolicyShapeHash } from "./canonicalize.js";
 
-export {
-  POLICY_IR_VERSION,
-  buildPolicyIR,
-  type BuildPolicyIROptions,
-} from './build.js';
+export { POLICY_IR_VERSION, buildPolicyIR, type BuildPolicyIROptions } from "./build.js";
 
 export {
   approvalListFor,
   evaluateDecision,
   type ApprovalRequirement,
   type ToolCallInput,
-} from './runtime.js';
+} from "./runtime.js";
 
 export {
   getPolicyGenerator,
   listPolicyGenerators,
   registerPolicyGenerator,
   type PolicyGeneratorSpec,
-} from './registry.js';
+} from "./registry.js";
 
 export {
   loadPolicyIRFromFile,
@@ -63,6 +55,6 @@ export {
   type PolicyToolEvent,
   type PolicyTrustedToolPolicyOptions,
   type PolicyTrustedToolRegistration,
-} from './adapter.js';
+} from "./adapter.js";
 
-export type { WorkspacePolicyConfig } from './workspace-config.js';
+export type { WorkspacePolicyConfig } from "./workspace-config.js";

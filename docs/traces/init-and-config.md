@@ -62,6 +62,7 @@ After init, the workspace has governance. It may be permissive (no deny rules, n
 ```
 
 Key fields:
+
 - **target**: which platform the compiled plugin targets (claude-code, cursor, langchain, etc.)
 - **pinch.budget**: token budget for the compressed SKILL.md
 - **enforcement.level**: minimal (L1 only), standard (L1-L4), enterprise (L1-L5 with sidecar)

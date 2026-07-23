@@ -16,6 +16,7 @@ Chain integrity proof for the CGR audit trail.
 ```
 
 For each record:
+
 1. Recompute HMAC from record data + previous seal
 2. Compare computed HMAC to stored seal
 3. Verify Ed25519 signature (if signed record)

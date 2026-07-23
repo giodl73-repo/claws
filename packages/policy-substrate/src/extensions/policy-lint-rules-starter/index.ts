@@ -23,15 +23,15 @@
  * @module @openclaw/policy/lint-rules-starter
  */
 
-import type { LintRule } from '@openclaw/oc-lint/plugin-sdk';
-import { registerLintRule } from '@openclaw/oc-lint/plugin-sdk';
+import type { LintRule } from "@openclaw/oc-lint/plugin-sdk";
+import { registerLintRule } from "@openclaw/oc-lint/plugin-sdk";
 
-import { toolsDuplicateToolId } from './rules/tools-duplicate-tool-id.js';
-import { toolsIrreversibleLowRiskMismatch } from './rules/tools-irreversible-low-risk-mismatch.js';
-import { toolsLegacySensitivitySyntax } from './rules/tools-legacy-sensitivity-syntax.js';
-import { toolsMissingRiskLevel } from './rules/tools-missing-risk-level.js';
-import { toolsUnknownRiskLevel } from './rules/tools-unknown-risk-level.js';
-import { toolsUnknownSensitivityToken } from './rules/tools-unknown-sensitivity-token.js';
+import { toolsDuplicateToolId } from "./rules/tools-duplicate-tool-id.js";
+import { toolsIrreversibleLowRiskMismatch } from "./rules/tools-irreversible-low-risk-mismatch.js";
+import { toolsLegacySensitivitySyntax } from "./rules/tools-legacy-sensitivity-syntax.js";
+import { toolsMissingRiskLevel } from "./rules/tools-missing-risk-level.js";
+import { toolsUnknownRiskLevel } from "./rules/tools-unknown-risk-level.js";
+import { toolsUnknownSensitivityToken } from "./rules/tools-unknown-sensitivity-token.js";
 
 export const POLICY_STARTER_RULES_V0: readonly LintRule[] = [
   toolsLegacySensitivitySyntax,

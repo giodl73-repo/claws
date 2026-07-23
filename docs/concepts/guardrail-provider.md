@@ -34,12 +34,12 @@ The decision types (`AllowDecision`, `DenyDecision`, `ReviewDecision`, `ModifyDe
 
 Decisions are a discriminated union on the `decision` field. Each variant carries only its valid fields -- invalid states are unrepresentable.
 
-| Decision | Meaning | Key fields |
-|----------|---------|------------|
-| `allow` | Tool call proceeds | `requiresExternalApproval?`, `riskLevel?` |
-| `deny` | Tool call is blocked | `reason` (required), `ruleId?` |
-| `review` | Held for human review | `requiresExternalApproval: true` (always) |
-| `modify` | Proceeds with changed arguments | `modifiedArguments` (required) |
+| Decision | Meaning                         | Key fields                                |
+| -------- | ------------------------------- | ----------------------------------------- |
+| `allow`  | Tool call proceeds              | `requiresExternalApproval?`, `riskLevel?` |
+| `deny`   | Tool call is blocked            | `reason` (required), `ruleId?`            |
+| `review` | Held for human review           | `requiresExternalApproval: true` (always) |
+| `modify` | Proceeds with changed arguments | `modifiedArguments` (required)            |
 
 ---
 
@@ -64,14 +64,15 @@ deny (3) > review (2) > modify (1) > allow (0)
 
 When multiple providers return different decisions:
 
-| Scenario | Result |
-|----------|--------|
-| Any deny | **deny** wins (first deny's reason used) |
-| No deny, any review | **review** wins |
+| Scenario                   | Result                                         |
+| -------------------------- | ---------------------------------------------- |
+| Any deny                   | **deny** wins (first deny's reason used)       |
+| No deny, any review        | **review** wins                                |
 | No deny/review, any modify | **modify** wins (last modify's arguments used) |
-| All allow | **allow** |
+| All allow                  | **allow**                                      |
 
 Additional composition rules:
+
 - **R5 enforcement**: if ANY provider reports risk level 5, `requiresExternalApproval` is forced to `true`. This is enforced by the registry, not individual providers.
 - **requiresExternalApproval** is OR'd across all providers.
 - **Empty registry**: returns allow with a console WARNING, alerting operators to missing configuration.
@@ -103,15 +104,15 @@ The OpenClaw governance spec defines the `ToolCall` input that providers receive
 
 ## Key types
 
-| Type | Module | Purpose |
-|------|--------|---------|
-| `AuthorizationDecision` | `claws-sdk/governance/guardrail-types` | Discriminated union (allow/deny/review/modify) |
-| `RiskLevel` | `claws-sdk/governance/guardrail-types` | Numeric risk levels 1-5 |
-| `AllowDecision` | `claws-sdk/governance/guardrail-types` | Tool call proceeds |
-| `DenyDecision` | `claws-sdk/governance/guardrail-types` | Tool call blocked |
-| `ReviewDecision` | `claws-sdk/governance/guardrail-types` | Held for human review |
-| `ModifyDecision` | `claws-sdk/governance/guardrail-types` | Proceeds with changed arguments |
-| `FailMode` / `FailModeConfig` | `claws-sdk/governance/guardrail-types` | Per-risk-level fail behavior |
+| Type                          | Module                                 | Purpose                                        |
+| ----------------------------- | -------------------------------------- | ---------------------------------------------- |
+| `AuthorizationDecision`       | `claws-sdk/governance/guardrail-types` | Discriminated union (allow/deny/review/modify) |
+| `RiskLevel`                   | `claws-sdk/governance/guardrail-types` | Numeric risk levels 1-5                        |
+| `AllowDecision`               | `claws-sdk/governance/guardrail-types` | Tool call proceeds                             |
+| `DenyDecision`                | `claws-sdk/governance/guardrail-types` | Tool call blocked                              |
+| `ReviewDecision`              | `claws-sdk/governance/guardrail-types` | Held for human review                          |
+| `ModifyDecision`              | `claws-sdk/governance/guardrail-types` | Proceeds with changed arguments                |
+| `FailMode` / `FailModeConfig` | `claws-sdk/governance/guardrail-types` | Per-risk-level fail behavior                   |
 
 > `GuardrailProvider` (interface), `ProviderRegistryImpl`, and `ShellExecProvider` are defined in the OpenClaw governance specification but not yet implemented as classes in claws-sdk.
 

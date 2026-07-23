@@ -86,9 +86,9 @@ action. Code actions appear as one-click fixes in the editor.
 // packages/openclaw-lsp/src/actions/g-24-fix.ts
 export function fixG24(doc: TextDocument, finding: Finding): CodeAction {
   return {
-    title: 'Change fail-mode to closed',
+    title: "Change fail-mode to closed",
     kind: CodeActionKind.QuickFix,
-    edit: { changes: { [doc.uri]: [{ range, newText: '<!-- fail-mode:closed -->' }] } },
+    edit: { changes: { [doc.uri]: [{ range, newText: "<!-- fail-mode:closed -->" }] } },
   };
 }
 ```

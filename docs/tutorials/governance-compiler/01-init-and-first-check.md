@@ -52,12 +52,12 @@ claws creates 16 files and modifies 3 existing files. Every modified file is bac
 
 claws installs four layers, each catching what the previous misses:
 
-| Layer | Mechanism | When it runs | What it catches |
-|-------|-----------|-------------|-----------------|
-| L1 | Governance skill | Agent asks for advice | Soft guidance, best practices |
-| L2 | Plugin pre-hook | Before tool execution | Policy violations, tool blocking |
-| L3 | Plugin post-hook | After tool execution | Output validation, audit logging |
-| L4 | exec-approvals | When L2/L3 unavailable | Fallback allowlist enforcement |
+| Layer | Mechanism        | When it runs           | What it catches                  |
+| ----- | ---------------- | ---------------------- | -------------------------------- |
+| L1    | Governance skill | Agent asks for advice  | Soft guidance, best practices    |
+| L2    | Plugin pre-hook  | Before tool execution  | Policy violations, tool blocking |
+| L3    | Plugin post-hook | After tool execution   | Output validation, audit logging |
+| L4    | exec-approvals   | When L2/L3 unavailable | Fallback allowlist enforcement   |
 
 L1 is advisory -- the agent can ignore it. L2 and L3 are enforcement -- the plugin intercepts tool calls. L4 is the backup gate for environments where plugins aren't supported.
 
@@ -85,6 +85,7 @@ Add a tool without proper classification. Edit `TOOLS.md` to add:
 
 ```markdown
 ## external-api
+
 - **URL**: https://api.example.com
 - **Method**: POST
 ```
@@ -129,6 +130,7 @@ Add the risk classification to fix the violation:
 
 ```markdown
 ## external-api
+
 - **URL**: https://api.example.com
 - **Method**: POST
 - **Risk**: medium

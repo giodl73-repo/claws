@@ -21,10 +21,10 @@ export interface NonceScope {
 
 /** Fields recorded on an LRU-bound eviction from a nonce scope. */
 export interface NonceEvictionEntry {
-  readonly type: 'nonce-eviction';
+  readonly type: "nonce-eviction";
   readonly scope: NonceScope;
   readonly evictedCount: number;
-  readonly reason: 'lru-bound-exceeded';
+  readonly reason: "lru-bound-exceeded";
   readonly timestamp: number;
 }
 
@@ -32,23 +32,21 @@ export interface NonceEvictionEntry {
 export type NonceEvictionSink = (entry: NonceEvictionEntry) => void;
 
 /** Discriminator literal for the entry type — used by union narrowing at emit/export sites. */
-export const NONCE_EVICTION_TYPE = 'nonce-eviction' as const;
+export const NONCE_EVICTION_TYPE = "nonce-eviction" as const;
 
 /** The only reason nonces are evicted in the current implementation. */
-export const NONCE_EVICTION_REASON = 'lru-bound-exceeded' as const;
+export const NONCE_EVICTION_REASON = "lru-bound-exceeded" as const;
 
 /** Structural type guard — validates the shape of an incoming audit entry. */
-export function isNonceEvictionEntry(
-  value: unknown,
-): value is NonceEvictionEntry {
-  if (value === null || typeof value !== 'object') return false;
+export function isNonceEvictionEntry(value: unknown): value is NonceEvictionEntry {
+  if (value === null || typeof value !== "object") return false;
   const v = value as Record<string, unknown>;
-  if (v['type'] !== NONCE_EVICTION_TYPE) return false;
-  if (typeof v['evictedCount'] !== 'number') return false;
-  if (v['reason'] !== NONCE_EVICTION_REASON) return false;
-  if (typeof v['timestamp'] !== 'number') return false;
-  const scope = v['scope'];
-  if (scope === null || typeof scope !== 'object') return false;
+  if (v["type"] !== NONCE_EVICTION_TYPE) return false;
+  if (typeof v["evictedCount"] !== "number") return false;
+  if (v["reason"] !== NONCE_EVICTION_REASON) return false;
+  if (typeof v["timestamp"] !== "number") return false;
+  const scope = v["scope"];
+  if (scope === null || typeof scope !== "object") return false;
   const s = scope as Record<string, unknown>;
-  return typeof s['keyId'] === 'string' && typeof s['snapshotId'] === 'string';
+  return typeof s["keyId"] === "string" && typeof s["snapshotId"] === "string";
 }

@@ -15,11 +15,11 @@ JetBrains, Lobster, Aether) connect to the language server and get:
 
 ## Sub-spec index
 
-| Code | File | Authority over |
-|------|------|----------------|
-| **LSP** | [LSP-protocol.md](./LSP-protocol.md) | LSP 3.17 compliance, capability set, initialize/shutdown |
-| **LSB** | [LSB-governance-badge.md](./LSB-governance-badge.md) | Badge states, demotion conditions, editor UI wiring |
-| **LSE** | [LSE-error-contract.md](./LSE-error-contract.md) | Error message shape (WHAT + HOW + WHERE), localization |
+| Code    | File                                                 | Authority over                                           |
+| ------- | ---------------------------------------------------- | -------------------------------------------------------- |
+| **LSP** | [LSP-protocol.md](./LSP-protocol.md)                 | LSP 3.17 compliance, capability set, initialize/shutdown |
+| **LSB** | [LSB-governance-badge.md](./LSB-governance-badge.md) | Badge states, demotion conditions, editor UI wiring      |
+| **LSE** | [LSE-error-contract.md](./LSE-error-contract.md)     | Error message shape (WHAT + HOW + WHERE), localization   |
 
 ## Stability
 

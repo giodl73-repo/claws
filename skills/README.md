@@ -6,13 +6,13 @@ directory.
 
 ## Available skills
 
-| Skill | Use when |
-| --- | --- |
-| `openclaw-agent-router` | You want help choosing the right OpenClaw skill/profile for the current task. |
-| `openclaw-pr-loop` | You need to keep active PRs green, respond to reviews, update proof, or file a PR. |
-| `openclaw-issue-fixer` | You want to find or fix the next OpenClaw issue from triage through PR. |
-| `openclaw-crabbox-proof` | You need WSL/Crabbox before-and-after evidence for an OpenClaw fix. |
-| `openclaw-local-review` | You want a careful maintainer-style review before pushing or opening a PR. |
+| Skill                    | Use when                                                                           |
+| ------------------------ | ---------------------------------------------------------------------------------- |
+| `openclaw-agent-router`  | You want help choosing the right OpenClaw skill/profile for the current task.      |
+| `openclaw-pr-loop`       | You need to keep active PRs green, respond to reviews, update proof, or file a PR. |
+| `openclaw-issue-fixer`   | You want to find or fix the next OpenClaw issue from triage through PR.            |
+| `openclaw-crabbox-proof` | You need WSL/Crabbox before-and-after evidence for an OpenClaw fix.                |
+| `openclaw-local-review`  | You want a careful maintainer-style review before pushing or opening a PR.         |
 
 ## Starter prompts
 

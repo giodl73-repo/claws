@@ -68,7 +68,7 @@ EU AI Act Article 6 / Annex III Assessment:
     ✓ System identified as AI to users
     ✓ Capabilities and limitations documented
     ✗ MISSING: Human oversight mechanism documented
-    
+
   Recommended: Add human-oversight section to SOUL.md
 ```
 

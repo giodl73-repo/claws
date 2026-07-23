@@ -22,7 +22,7 @@ manifest.json:
     governance.ir: { hash: "sha256:q7r8s9t0..." }
 ```
 
-On restore, each file's hash is recomputed and compared. A mismatch indicates corruption (bit rot, incomplete write, disk error). *(Source: snapshot-lifecycle S06-F01, P-195)*
+On restore, each file's hash is recomputed and compared. A mismatch indicates corruption (bit rot, incomplete write, disk error). _(Source: snapshot-lifecycle S06-F01, P-195)_
 
 ---
 
@@ -36,7 +36,7 @@ manifest.json:
   signature: "hmac-sha256:u1v2w3x4..."
 ```
 
-Signing detects **tamper** -- if someone modifies a file and updates its hash to match, the manifest signature will not verify because the attacker does not have the signing key. This distinguishes between accidental corruption (hash mismatch) and intentional tampering (signature mismatch). *(Source: snapshot-lifecycle S06-F02)*
+Signing detects **tamper** -- if someone modifies a file and updates its hash to match, the manifest signature will not verify because the attacker does not have the signing key. This distinguishes between accidental corruption (hash mismatch) and intentional tampering (signature mismatch). _(Source: snapshot-lifecycle S06-F02)_
 
 ---
 
@@ -44,9 +44,9 @@ Signing detects **tamper** -- if someone modifies a file and updates its hash to
 
 The two-layer verification serves different threat models:
 
-| Check | Detects | Threat |
-|-------|---------|--------|
-| SHA-256 hash | File corruption | Disk error, incomplete write, bit rot |
+| Check                 | Detects            | Threat                                      |
+| --------------------- | ------------------ | ------------------------------------------- |
+| SHA-256 hash          | File corruption    | Disk error, incomplete write, bit rot       |
 | HMAC-SHA256 signature | Manifest tampering | Malicious modification of snapshot contents |
 
 When verification fails, the error message indicates which layer failed so operators can assess severity:
@@ -54,7 +54,7 @@ When verification fails, the error message indicates which layer failed so opera
 - Hash mismatch: likely accidental, re-save from current state
 - Signature mismatch: potentially malicious, investigate before proceeding
 
-*(Source: snapshot-lifecycle S06-F09, note-deferred but distinction documented)*
+_(Source: snapshot-lifecycle S06-F09, note-deferred but distinction documented)_
 
 ---
 
@@ -67,7 +67,7 @@ Immediately after `snap save` writes all files, a read-after-write verification 
 3. Compute hashes and compare against manifest
 4. If mismatch, abort save and report storage error
 
-This catches filesystem-level issues (silent write failures, filesystem corruption, disk full with partial write) at save time rather than discovering them at restore time when recovery options are limited. *(Source: snapshot-lifecycle S06-F07)*
+This catches filesystem-level issues (silent write failures, filesystem corruption, disk full with partial write) at save time rather than discovering them at restore time when recovery options are limited. _(Source: snapshot-lifecycle S06-F07)_
 
 ---
 
@@ -87,20 +87,20 @@ Verifying snapshot "pre-upgrade"...
 Snapshot integrity: VERIFIED
 ```
 
-This is useful for periodic health checks, pre-restore validation, and audit evidence that snapshots remain intact. Verify reads files but modifies nothing. *(Source: snapshot-lifecycle S06-F08)*
+This is useful for periodic health checks, pre-restore validation, and audit evidence that snapshots remain intact. Verify reads files but modifies nothing. _(Source: snapshot-lifecycle S06-F08)_
 
 ---
 
 ## Mandatory vs Optional Verification
 
-| Operation | Integrity check | Rationale |
-|-----------|----------------|-----------|
-| `snap restore` | **Mandatory** | Overwriting workspace files with corrupt data is catastrophic |
-| `snap promote` | **Mandatory** | Fleet baseline must be verified before distribution |
-| `snap diff` | Optional | Diff is read-only; corruption shows as nonsensical output |
-| `snap list` | Not performed | List reads metadata only, not file content |
+| Operation      | Integrity check | Rationale                                                     |
+| -------------- | --------------- | ------------------------------------------------------------- |
+| `snap restore` | **Mandatory**   | Overwriting workspace files with corrupt data is catastrophic |
+| `snap promote` | **Mandatory**   | Fleet baseline must be verified before distribution           |
+| `snap diff`    | Optional        | Diff is read-only; corruption shows as nonsensical output     |
+| `snap list`    | Not performed   | List reads metadata only, not file content                    |
 
-Mandatory verification cannot be skipped, even with `--force`. *(Source: snapshot-lifecycle S06-F04, S06-F06)*
+Mandatory verification cannot be skipped, even with `--force`. _(Source: snapshot-lifecycle S06-F04, S06-F06)_
 
 ---
 
@@ -113,7 +113,7 @@ If the dead man's switch attempts to restore a corrupt snapshot (upgrade failed,
 3. If no redundant copy, attempt git-based recovery
 4. If all fail, halt with clear error and manual recovery instructions
 
-This two-deep fallback ensures that a single point of corruption does not leave the workspace unrecoverable. *(Source: snapshot-lifecycle S04-F09, P-196)*
+This two-deep fallback ensures that a single point of corruption does not leave the workspace unrecoverable. _(Source: snapshot-lifecycle S04-F09, P-196)_
 
 ---
 

@@ -12,8 +12,9 @@
  * This is what bic/aether#14526 was asking for. The scenario locks the
  * happy path end-to-end.
  */
-export const slug = 'upgrade-pre-upgrade-rollback';
-export const description = 'pin pre-upgrade label → simulate upgrade → rollback restores known-good';
+export const slug = "upgrade-pre-upgrade-rollback";
+export const description =
+  "pin pre-upgrade label → simulate upgrade → rollback restores known-good";
 
 const PRE = `{
   "version": "0.1.0",
@@ -40,38 +41,38 @@ const POST_WS = `{ "lint": { "skip": ["new-pack/renamed-rule"] } }
 
 export const setup = {
   files: {
-    'AGENTS.md': `# Agent\n## Boundaries\n- pre-upgrade-only\n`,
-    'gateway.jsonc': PRE,
-    'workspace.json': PRE_WS,
+    "AGENTS.md": `# Agent\n## Boundaries\n- pre-upgrade-only\n`,
+    "gateway.jsonc": PRE,
+    "workspace.json": PRE_WS,
   },
 };
 
 export const steps = [
   {
-    name: 'pre-upgrade promote --label pre-upgrade-2026-05-05',
-    run: ['cage', 'promote', '--label', 'pre-upgrade-2026-05-05', '.'],
-    expect: { exitCode: 0, ok: true, parsed: { label: 'pre-upgrade-2026-05-05' } },
+    name: "pre-upgrade promote --label pre-upgrade-2026-05-05",
+    run: ["cage", "promote", "--label", "pre-upgrade-2026-05-05", "."],
+    expect: { exitCode: 0, ok: true, parsed: { label: "pre-upgrade-2026-05-05" } },
   },
   {
-    name: 'simulate upgrade: new gateway entries + renamed skip',
+    name: "simulate upgrade: new gateway entries + renamed skip",
     edit: {
-      'gateway.jsonc': { set: POST },
-      'workspace.json': { set: POST_WS },
-      'AGENTS.md': { append: '\n\n(post-upgrade content)\n' },
+      "gateway.jsonc": { set: POST },
+      "workspace.json": { set: POST_WS },
+      "AGENTS.md": { append: "\n\n(post-upgrade content)\n" },
     },
   },
   {
-    name: 'sanity: post-upgrade bytes are on disk',
-    file: { 'gateway.jsonc': { contains: 'new-plugin-name' } },
+    name: "sanity: post-upgrade bytes are on disk",
+    file: { "gateway.jsonc": { contains: "new-plugin-name" } },
   },
   {
-    name: 'upgrade was bad; operator rolls back',
-    run: ['cage', 'rollback', '--label', 'pre-upgrade-2026-05-05', '.'],
+    name: "upgrade was bad; operator rolls back",
+    run: ["cage", "rollback", "--label", "pre-upgrade-2026-05-05", "."],
     expect: { exitCode: 0, ok: true },
   },
   {
-    name: 'gateway.jsonc restored to pre-upgrade state',
-    file: { 'gateway.jsonc': { contains: 'old-plugin', notContains: 'new-plugin-name' } },
+    name: "gateway.jsonc restored to pre-upgrade state",
+    file: { "gateway.jsonc": { contains: "old-plugin", notContains: "new-plugin-name" } },
   },
   {
     // workspace.json is NOT a canonical openclaw role — the substrate
@@ -79,11 +80,11 @@ export const steps = [
     // doesn't restore it. Real-world implication: operators MUST also
     // version-control workspace.json themselves; LKG won't save them.
     // Documented finding F-023.
-    name: 'F-023: workspace.json NOT restored (not a canonical tracker)',
-    file: { 'workspace.json': { contains: 'new-pack' } },
+    name: "F-023: workspace.json NOT restored (not a canonical tracker)",
+    file: { "workspace.json": { contains: "new-pack" } },
   },
   {
-    name: 'AGENTS.md restored (no post-upgrade append)',
-    file: { 'AGENTS.md': { notContains: 'post-upgrade content' } },
+    name: "AGENTS.md restored (no post-upgrade append)",
+    file: { "AGENTS.md": { notContains: "post-upgrade content" } },
   },
 ];

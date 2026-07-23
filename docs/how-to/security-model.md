@@ -6,13 +6,13 @@ Set up tool classification, OBO boundaries, elicitation gates, defense-in-depth,
 
 Every tool in a workspace has a risk classification from R1 (lowest) to R5 (highest):
 
-| Risk | Examples | Default fail mode |
-|------|----------|-------------------|
-| R1 | Read, Glob, Grep | Open |
-| R2 | Edit, Write | Open |
-| R3 | Bash (non-destructive) | Warn |
-| R4 | Bash (destructive), network | Closed |
-| R5 | Admin, secrets access | Closed (non-configurable) |
+| Risk | Examples                    | Default fail mode         |
+| ---- | --------------------------- | ------------------------- |
+| R1   | Read, Glob, Grep            | Open                      |
+| R2   | Edit, Write                 | Open                      |
+| R3   | Bash (non-destructive)      | Warn                      |
+| R4   | Bash (destructive), network | Closed                    |
+| R5   | Admin, secrets access       | Closed (non-configurable) |
 
 Configure tool classifications in `claws.json`:
 

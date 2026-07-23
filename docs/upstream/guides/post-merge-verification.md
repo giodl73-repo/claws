@@ -19,7 +19,7 @@ companion_to:
 
 Runbook for confirming H1–H5 validation criteria against `openclaw/openclaw`
 trunk after each contribution-wave PR merges. Per `R1-consolidated W2`:
-the plan declares "MERGED at openclaw/openclaw" but doesn't specify *how*
+the plan declares "MERGED at openclaw/openclaw" but doesn't specify _how_
 verification runs. This guide closes that gap with copy-paste-able commands.
 
 ## §1 When to run

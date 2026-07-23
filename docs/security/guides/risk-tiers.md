@@ -34,10 +34,12 @@ Example:
 
 ```markdown
 ## summarize-private-messages
+
 <!-- risk:R1 -->
 
 ### args_from
-- source: read-private-messages   # declared R3
+
+- source: read-private-messages # declared R3
 ```
 
 Compile-time effective tier: R3. The runtime treats every call as R3

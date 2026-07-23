@@ -43,18 +43,21 @@ Real: snap HTTP, generated plugin bytes, policy IR + audit manifest, 20-verb `cl
 Six method groups. Plans 5 and 6 consume this surface — they never extend it.
 
 **State accessors**: `snapPort`, `policyDir`, `scope`.
+
 ```ts
-const h = await startHarness({ layers, providers, fixture: 'allow-r1-public' });
+const h = await startHarness({ layers, providers, fixture: "allow-r1-public" });
 console.log(h.snapPort); // 52341 (or null if layers.track === 'off')
 ```
 
 **Execution**: `invokeTool`, `ingestFile`.
+
 ```ts
-const result = await h.invokeTool('send-email', { to: 'x@y.z', body: 'hi' });
-expect(result.decision).toBe('review');
+const result = await h.invokeTool("send-email", { to: "x@y.z", body: "hi" });
+expect(result.decision).toBe("review");
 ```
 
 **Observability**: `getAuditChain`, `getSnapshots`, `getCurrentSnapshotId`, `verifyAuditChain`.
+
 ```ts
 const chain = h.getAuditChain();
 const verdict = await h.verifyAuditChain();
@@ -62,18 +65,21 @@ expect(verdict.ok).toBe(true);
 ```
 
 **State transitions**: `promote`. Fires `provider.onSnapshotPromoted` on every registered provider.
+
 ```ts
 await h.promote(draftSnapshotId);
 ```
 
 **Layer control**: `snap.kill()`, `snap.restart()` for sidecar-crash scenarios.
+
 ```ts
-await h.snap.kill();           // L2-off simulated mid-scenario
-const r = await h.invokeTool('read-inbox', {}); // decide-layer still works
+await h.snap.kill(); // L2-off simulated mid-scenario
+const r = await h.invokeTool("read-inbox", {}); // decide-layer still works
 await h.snap.restart();
 ```
 
 **Lifecycle**: `teardown()`. Returns a `TeardownReport` written to `.teardown-reports/`.
+
 ```ts
 const report = await h.teardown();
 expect(report.residuals).toHaveLength(0);
@@ -86,7 +92,7 @@ The harness wires the three-layer composition (DECIDE / TRACK / ENFORCE+REVIEW) 
 ```ts
 interface LayerConfig {
   decide: boolean;
-  track: 'off' | 'local-dir' | 'sidecar' | 'multi-tenant';
+  track: "off" | "local-dir" | "sidecar" | "multi-tenant";
   enforceReview: boolean;
 }
 ```
@@ -100,25 +106,27 @@ Preset dispatch: plan 6 constructs one `LayerConfig` per host preset — `opencl
 Minimal `.e2e.test.ts` file:
 
 ```ts
-import { describe, it, expect, afterEach } from 'vitest';
-import { startHarness, type Harness } from '../harness';
-import { guardrailProvider } from '../providers/example-guardrail';
+import { describe, it, expect, afterEach } from "vitest";
+import { startHarness, type Harness } from "../harness";
+import { guardrailProvider } from "../providers/example-guardrail";
 
-describe('allow-r1-public', () => {
+describe("allow-r1-public", () => {
   let h: Harness;
 
-  afterEach(async () => { await h.teardown(); });
+  afterEach(async () => {
+    await h.teardown();
+  });
 
-  it('allows R1 tool with PUBLIC data', async () => {
+  it("allows R1 tool with PUBLIC data", async () => {
     h = await startHarness({
-      layers: { decide: true, track: 'local-dir', enforceReview: true },
-      providers: [{ kind: 'guardrail', providerId: 'example', impl: guardrailProvider }],
-      fixture: 'allow-r1-public',
+      layers: { decide: true, track: "local-dir", enforceReview: true },
+      providers: [{ kind: "guardrail", providerId: "example", impl: guardrailProvider }],
+      fixture: "allow-r1-public",
     });
 
-    const result = await h.invokeTool('read-inbox', {});
+    const result = await h.invokeTool("read-inbox", {});
 
-    expect(result.decision).toBe('allow');
+    expect(result.decision).toBe("allow");
     expect((await h.verifyAuditChain()).ok).toBe(true);
   });
 });
@@ -141,8 +149,10 @@ allow-r1-public/
 `fixture-copier.ts` refuses to copy a fixture that already contains `.openclaw/policy/` (unclean source). The per-scenario tmp copy is where `generate` writes; the source stays pristine.
 
 Example `TOOLS.md` entry for `allow-r1-public`:
+
 ```markdown
 ## read-inbox
+
 - riskTier: R1
 - sensitivity: PUBLIC
 - failOpen: true
