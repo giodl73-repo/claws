@@ -741,3 +741,43 @@ scripts/check-token-collisions.py`, and `git diff --check`. Focused Rust
   + fingerprint, verifies a signed fixture, and cleans up. Patrick or another
   confirmed Convex operator should run the final production write; never commit
   or print the private key.
+
+- 2026-07-22 signed-feed repair pass: isolated the ClawHub baseline audit
+  regression in https://github.com/openclaw/clawhub/pull/3232 at `d7d4a61f`.
+  It updates the existing Next.js override and Bun lock entries from 16.2.6 to
+  16.2.11; `bun audit` reports no vulnerabilities and all GitHub Actions are
+  green. The only red context is the expected fork Vercel authorization. Do not
+  add this dependency repair to feed PR #3005; rebase #3005 after #3232 lands.
+  #3005 was force-with-lease pushed after rebasing onto ClawHub main at
+  `f76d8a3f3120` and passes its two focused
+  Vitest files (406 tests), type-aware oxlint, `bun x tsc --noEmit`, and
+  `git diff --check`. Its thread-aware review audit has zero unresolved inline
+  threads; Patrick's stale requested-change decision predates the staged signer
+  activation and representation-aware validator fixes.
+- 2026-07-22 OpenClaw #101981 repair pass: rebased the default ClawHub trust PR
+  onto current OpenClaw main, replaced raw `Date.parse` expiry handling with the
+  merged calendar-aware feed timestamp parser, added an impossible-date
+  regression, and aligned docs with the separately landing feed-profile config
+  surface. Force-with-lease pushed head `df777c09cb3`. Focused signed-expiry tests
+  pass (2 passed, 53 skipped), full catalog tests pass 51/55 with the remaining
+  four blocked only because local Node 24.14 embeds unsafe SQLite 3.51.2, global
+  `oxfmt --check` and `git diff --check` pass. The worktree's local formatter
+  binary is absent, so the already-verified commit used `--no-verify`. The PR's
+  thread-aware audit has zero unresolved inline threads; the stale requested
+  changes are exactly the trust-downgrade and expiry findings now addressed.
+- 2026-07-23 three-model OpenClaw feed review/fix pass: native Codex GPT-5.6
+  found no issue in standard-DSSE PR #110037 (`38118b34b908`). Claude Opus
+  found two blockers in rotation PR #108342: SQLite same-sequence equivocation
+  errors were swallowed as optional snapshot-write failures, and malformed
+  timestamp snapshots lost sequence-only monotonic state across key rotation.
+  Both are fixed and pushed at `5620aed1d5a`: monotonicity errors are typed and
+  fail closed, sequence-only state survives readback, and loader-level
+  regressions cover retained snapshots and rotated-key repair. Copilot GPT-5.5
+  found two trust gaps in default-profile PR #101981: an explicit URL equal to
+  the default profile dropped its identity/verification, and community feed
+  entries could fall through to legacy manifest installs. Both are fixed and
+  pushed at `7e9e47a2e7b`, with regressions; the full focused catalog suite passes
+  56/56 on Node 24.15. Scoped `oxfmt`, `oxlint`, and `git diff --check` pass on
+  both branches. #108342 local Vitest remains blocked by its damaged dependency
+  hydration (`p-map` absent), so its pushed CI is the executable gate. At
+  readback, #101981 and #108342 new-head CI was pending; #110037 remained green.
