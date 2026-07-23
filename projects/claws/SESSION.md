@@ -34,11 +34,14 @@
   dry-runs pass, the native feed safety suite passes 5/5 with two expected
   skips, and exact-head feed/artifact output passes real OpenClaw dry-run for
   all three starters.
-- Whole-Claw registry validation was deterministic/local rather than a
-  production Convex write; production ClawHub was used for skill dependencies.
-  Suspicious incident-response skill archives were rejected without override.
-  Skill removal leaves only canonical empty ClawHub lockfiles in retained
-  workspace shells, matching the conservative preview. Full evidence is in
+- Proved the complete authenticated whole-Claw registry path against isolated
+  local Convex on the exact #3092 head: official-organization token publish,
+  staged checks/finalization, registry search, hosted feed publication, exact
+  artifact integrity, safe extraction, and real WSL OpenClaw
+  preview/apply/status/remove with empty final provenance. Production Convex
+  was not modified. Suspicious incident-response skill archives were rejected
+  without override, and retained workspace shells contain only canonical empty
+  ClawHub lockfiles. Full evidence is in
   `starter-claws-clawhub-validation-2026-07-23.md`.
 
 ### 2026-07-23 merged-main lifecycle validation and cron removal repair
