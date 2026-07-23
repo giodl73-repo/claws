@@ -38,8 +38,11 @@
   `codex review --commit HEAD` reported no actionable regressions after one
   accepted duplicate-profile finding was fixed.
 - RFC addendum [#48](https://github.com/openclaw/rfcs/pull/48) and both sidecars
-  carry the same canonical contract and policy at signed head `32de46d4b35`.
-  Both OpenClaw and RFC PRs remain draft.
+  carry the same canonical contract and policy. Signed head `6b9c2fce99c8`
+  additionally records the non-blocking post-merge roadmap: first-party pilots,
+  authoring and publication, explicit graduation, then a separate portability
+  proposal and evidence-driven lifecycle expansion. Both OpenClaw and RFC PRs
+  remain draft.
 - ClawHub PRs [#3089](https://github.com/openclaw/clawhub/pull/3089)-[#3092](https://github.com/openclaw/clawhub/pull/3092)
   were updated and restacked at signed heads `2d86bd8d973c`, `027fdf45c332`,
   `b5a4f58c2147`, and `a7e0b2d86c66`. PR1 owns the source and generated schema;
