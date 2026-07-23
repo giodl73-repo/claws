@@ -22,6 +22,18 @@
 
 ## Current Session
 
+### 2026-07-22 portable agent settings PR restacked
+
+- OpenClaw [#112773](https://github.com/openclaw/openclaw/pull/112773) was
+  automatically closed when stacked base #111391 merged and its branch was
+  deleted. Recreated the old base ref temporarily, reopened the PR, retargeted
+  it to `main`, and removed the temporary ref.
+- Replayed only the portable-agent-settings commit onto current `main` and
+  force-pushed signed head `f67124c7ec0`. The corrected draft PR is open and
+  mergeable at 9 files, 347 additions, and 15 deletions. Focused schema,
+  export, and capability tests pass (69 tests); GitHub reports the commit
+  signature as verified. RFC #48 remains open and draft.
+
 ### 2026-07-22 Control UI follow-up authored
 
 - Opened draft OpenClaw PR
