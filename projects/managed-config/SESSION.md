@@ -342,3 +342,26 @@
 - The sidecar does not expand implementation scope: no reload, writes, provenance, role semantics, remote sources, or Fleet command changes.
 - RFC branch was rebased and force-with-lease pushed at eaeeb56f8843d7dd826b32843f5a49a8d30ff89f.
 - Existing RFC draft PR #34 was updated in place to call out the implementer-facing spec.
+
+## 2026-07-22 - Current-main refresh and reviewer response
+
+- OpenClaw implementation PR #107026 was explicitly replayed as its 15 managed-config commits onto current `openclaw/openclaw:main` at `3c25222fb4ad5c87a2f17372528f80e7cf3dce2d`.
+- Current OpenClaw head is `8119dd221ffbbfd7acda083bc32bbd4fbeaa36cb`; the branch was force-with-lease pushed to `giodl73-repo:user/giodl/managed-config-upstream`.
+- Rebase conflicts were adapted to current-main CLI bootstrap, Gateway request-context, reload, and path-scoped persistence owners rather than restoring obsolete July structure.
+- ClawSweeper has no contributor-facing correctness finding, marks proof sufficient, and rates the implementation diamond lobster. The remaining decision is explicit maintainer sponsorship of the permanent opt-in CLI and immutable startup contract.
+- PR #107026 body and response now distinguish the historical 63-test/live-Gateway proof from exact-head proof. Focused, broad, fresh-state, and existing-state validation remain pending on `8119dd221ff` and are not claimed yet.
+- RFC PR #34 was rebased onto `openclaw/rfcs:main` at `13819ef73d3ae980b362e2a88ccb3cba90faa21d`; current RFC head is `481116b135790390da82a519e03f84ad7ad770b8`.
+- RFC #34 received a reviewer response recording that the contract did not expand and that the remaining RFC-to-implementation acceptance is a human configuration/security ownership decision.
+- The fork's `giodl/lobster:main` was fast-forwarded from `cd3554e32b` to current `bic/lobster:main` at `4254a82b7cde712e0407520dac9e1b518ac12b64`.
+- Lobster draft PR #12 was reauthored across the current library entrypoint and centralized Gateway preparation lifecycle, then force-with-lease pushed at `e766e17935bf28c3c4234d91e1113a25250998a4`.
+- Lobster remains a six-file fork-only adapter. Its body now points to OpenClaw PR #107026 and RFC #34 and labels all prior review/format evidence as historical; exact-head Rust formatting, tests, Clippy, and integration validation remain pending.
+- The damaged obsolete Windows worktree `C:\src\openclaw-managed-config-slice1` still shows widespread uncommitted deletions and was intentionally left untouched. The clean OpenClaw PR worktree is `/root/src/openclaw-managed-config-slice1` in WSL.
++
+
+## 2026-07-23 Three-agent review repair
+
+- RFC PR 34 head is `8046ab416426e9ab5e4a6140a12fe9ede60c75bf`. The RFC now makes the V1 sidecar normative, distinguishes source preparation from final validation, requires full-process restart/replacement, splits core and host conformance, adds bounded-policy vectors, and avoids calling historical proof exact-head conformance.
+- OpenClaw PR 107026 head is `129822922d9cd73fec1b608c16d16eefde6622ac`. The branch was replayed onto upstream `d8325da46df`, preserves upstream transactional write conflicts beside layered read-only guards, and repairs the exact-head type/runtime/format failures found by review. Upstream main advanced again immediately after publication, so the PR currently reports `BEHIND`, not a resolved exact-current-main proof.
+- Lobster fork PR 12 head is `be8e2acdd911b04dd577c8bac839808e5a1efd45`. Adoption now requires `LOBSTER_OPENCLAW_MANAGED_CONFIG_ENABLED=true` plus CLI capability. It captures operator state before seeding, completes plugin/remote projections before materialization, derives the operator delta from the pre-seed capture, sanitizes immutable inputs in memory, publishes a private per-generation file set, caches CLI capability, and keeps a healthy warm Gateway running when re-projection fails.
+- PR bodies for all three PRs were updated with the current heads, corrected lifecycle semantics, explicit pending-validation language, and the Lobster global/tenant/operator example.
+- No local tests, formatting, Clippy, image startup, or refreshed lifecycle proof were run during this repair pass. Required next evidence is current-head OpenClaw CI/core-conformance mapping and canonical Unix Lobster validation plus exact-head image/process proof.
