@@ -370,7 +370,7 @@
 
 - OpenClaw PR 107026 is published at `409fab999c4095c5b24a8d7ac23d495659738666`.
 - Repaired the CI-only snapshot-type import, removed internal/test-only exports, regenerated the docs map, and replaced the final filter-plus-first-result lint violation with `find`.
-- Local exact-head proof passes `pnpm tsgo`, both dead-export scans, 101 focused tests, and targeted Oxlint with zero warnings or errors. The preceding GitHub head passed production/test types, docs, build artifacts, config and Gateway boundaries, security shards, QA smoke, and real behavior proof; CI for the final lint-only head is running.
+- Local exact-head proof passes `pnpm tsgo`, both dead-export scans, 101 focused tests, and targeted Oxlint with zero warnings or errors. Exact-head GitHub type, lint, docs, build-artifact, config and Gateway boundary, security, QA smoke, dependency, and real-behavior gates pass; CodeQL concluded neutral.
 - RFC PR 34 remains a clean, mergeable draft at `8046ab416426e9ab5e4a6140a12fe9ede60c75bf`. ClawSweeper reports no contributor-facing repair and leaves the core ownership/security contract as the maintainer decision.
 - Lobster fork PR 12 is published at `0d37e2a34b45e660ecbc12fbfea41a32b3ca8125`. `just openclaw-container-fmt-check` passes and the focused WSL Cargo lane passes all four managed-config tests with zero failures.
 - Canonical exact-head ClawSweeper re-reviews were requested for both public OpenClaw PRs. Lobster remains fork-only; no upstream Lobster PR was created.
