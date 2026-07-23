@@ -4,12 +4,14 @@
 
 **Last agent:** Codex
 
-**Current focus:** Land owner review on the complete three-PR OpenClaw Portable evidence stack:
+**Current focus:** Repair the accepted three-model review findings on the three-PR OpenClaw Portable evidence stack:
 recovery points in PR 112385, final capture in PR 112865, and restored admission
 in PR 112896. No additional OpenClaw implementation PR is needed for the current
 Portable merge sequence. Full scale-to-zero still needs a later bounded host
 wake/scheduler adapter after the Lobster owner/caller work is ready. RFC PR 46
-and all three OpenClaw PRs are now ready for review. Vincent and the relevant
+and all three OpenClaw PRs remain open for review, but the 2026-07-23
+three-model pass found two medium implementation defects, one medium
+RFC/implementation evidence gap, and one low PR-body overstatement. Vincent and the relevant
 state owners still need to accept the inventory, protection,
 acceptance-byte-set, restored-admission, and destruction-authority contracts.
 
@@ -61,7 +63,7 @@ startup closes work admission before database preflight, reconciles the
 canonical scheduler and required owners, verifies readiness for the same
 accepted identity, and opens admission exactly once. It adds no public config,
 generic lifecycle hook, host wake scheduler, ingress mechanism, or destruction
-authority. The incremental slice is 1,411 additions and 4 deletions across 11
+authority. The incremental slice is 1,407 additions and 4 deletions across 12
 files; GitHub displays the full three-PR stack while the base PR remains open.
 
 Lobster [PR 5481](https://microsoft.ghe.com/bic/lobster/pull/5481), branch
@@ -71,7 +73,13 @@ cross-language acceptance-set identity, permanent atomic-store contract,
 idempotent replay, conflict quarantine, and fail-closed validation. It has no
 production store, Redis authority, Gateway caller, or destruction API.
 
-**Review gate:** Maintainers must accept the sidecar ownership boundaries,
+**Review gate:** The independent GPT-5.6-Sol, Claude Opus 4.7, and GPT-5.5
+review is recorded in `reviews/2026-07-23-three-model/README.md`. Before asking
+owners to merge, fix the final-capture post-intent disposition, translate
+malformed durable JSON into typed quarantine, remove the PR 112896 portable
+overstatement, and decide whether to add stable owner-issued readiness receipts
+or narrow the RFC to the bounded generation-bound evidence implemented today.
+Maintainers must then accept the sidecar ownership boundaries,
 especially the authoritative selected-agent inventory and owner-authored
 portability receipt, before the ready-for-review implementation stack merges.
 The pre-rebase combined head passed production and core-test typechecks. After
