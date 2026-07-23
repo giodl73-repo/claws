@@ -42,4 +42,10 @@ Copy this shape into `projects/<area>/SESSION.md`.
 
 ## Open Threads
 
-- 
+-
+
+## Session Checkpoints
+
+Detailed session handoffs live in `sessions/` and are created with
+`.agents/skills/project-session/scripts/checkpoint-session.mjs`. Keep this file
+as the concise canonical resume snapshot.

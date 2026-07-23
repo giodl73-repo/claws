@@ -1,6 +1,6 @@
 ---
 name: project-session
-description: Use when starting, resuming, loading, or updating a claws-hapi project session such as policy, doctor, feeds, admin, context-budget, oc-path, clawpilot, bugs, or PR watcher. Reads CONTEXT.md, projects/<area>/SESSION.md, and the project README before acting.
+description: Use when starting, resuming, loading, or updating a claws-hapi project session such as policy, doctor, feeds, admin, context-budget, oc-path, clawpilot, bugs, or PR watcher. Reads CONTEXT.md, the selected project SESSION.md, and its README before acting.
 ---
 
 # Project Session
@@ -8,22 +8,21 @@ description: Use when starting, resuming, loading, or updating a claws-hapi proj
 Use this skill when the user asks to start, resume, load, continue, or update a
 project area in `claws-hapi`.
 
-## Project Map
+## Project Discovery
 
-| User phrase | Area | Session file |
-| --- | --- | --- |
-| policy | `policy` | `projects/policy/SESSION.md` |
-| doctor | `doctor` | `projects/doctor/SESSION.md` |
-| feeds | `feeds` | `projects/feeds/SESSION.md` |
-| admin | `admin` | `projects/admin/SESSION.md` |
-| context budget, context-budget | `context-budget` | `projects/context-budget/SESSION.md` |
-| oc-path, oc path | `oc-path` | `projects/oc-path/SESSION.md` |
-| clawpilot, claw pilot | `clawpilot` | `projects/clawpilot/SESSION.md` |
-| bugs, bugfix | `bugs` | `projects/bugs/SESSION.md` |
-| pr watcher, pr loop, prs | `prs` | `projects/prs/SESSION.md` |
-| managed config, managed configuration | `managed-config` | `projects/managed-config/SESSION.md` |
-| hosted integration, duplex transport, host providers | `hosted-integration` | `projects/hosted-integration/SESSION.md` |
-| state continuity, runtime state continuity, synced | `state-continuity` | `projects/state-continuity/SESSION.md` |
+Treat every directory matching `projects/*/SESSION.md` as a project area. Do
+not maintain a hard-coded area list in this skill; it becomes stale as projects
+are added. Resolve ordinary spacing variants to the directory slug, for example
+`context budget` to `context-budget`, `oc path` to `oc-path`, and `pr loop` to
+`pr-loop`.
+
+List current areas when the requested name is ambiguous:
+
+```powershell
+Get-ChildItem projects -Directory |
+  Where-Object { Test-Path (Join-Path $_.FullName 'SESSION.md') } |
+  Select-Object -ExpandProperty Name
+```
 
 If the user names an area that does not exist, use `project-creator` if they are
 asking to create it. Otherwise report that no project session file exists.
@@ -72,7 +71,10 @@ Then continue with the user's requested work if they asked for action.
 
 ## Update Session
 
-At the end of meaningful work, update `projects/<area>/SESSION.md` with:
+At the end of meaningful work:
+
+1. Update the concise resume state in `projects/<area>/SESSION.md` only when a
+   canonical fact changed. Keep these fields current where the file uses them:
 
 - `Last updated`
 - `Last agent`
@@ -82,8 +84,24 @@ At the end of meaningful work, update `projects/<area>/SESSION.md` with:
 - blocking question
 - open threads
 
-Keep updates factual and short. Do not rewrite the whole session file unless the
-area changed materially.
+2. Record the detailed, immutable handoff with the bundled helper:
+
+   ```powershell
+   node .agents/skills/project-session/scripts/checkpoint-session.mjs `
+     --area <area> `
+     --focus "<work performed>" `
+     --result "<verified outcome>" `
+     --next "<next action>"
+   ```
+
+   Add `--branch`, `--dirty`, or `--blocker` when they carry useful resume
+   state. Use `--dry-run` to preview. The helper creates a unique file under
+   `projects/<area>/sessions/` and refuses to overwrite an existing checkpoint.
+
+Keep both updates factual and short. Do not paste a long chronological journal
+at the top of `SESSION.md`, and do not rewrite the whole file unless the area
+changed materially. A checkpoint complements the resume snapshot; it does not
+replace a necessary canonical-state update.
 
 ## Guardrails
 
@@ -91,5 +109,6 @@ area changed materially.
 - Treat `.craft/waves/` as archive/source material.
 - Do not prototype OpenClaw or Lobster implementation code in `claws-hapi`.
 - Do not overwrite unrelated user changes.
+- Never put credentials, tokens, private logs, or raw user data in a checkpoint.
 - For PR status, proof, ClawSweeper, or branch hygiene, use the PR watcher
   session and relevant PR-loop skills.
