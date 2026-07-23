@@ -288,6 +288,10 @@
   prompt, docs, policy, drift, and search suites. A final all-slice invocation
   in the secondary worktree stalled before emitting results and exited without
   leaving a Vitest process; it is not counted as proof.
+- Hosted foundation CI then found two Oxc `no-map-spread` errors in conditional
+  metadata construction. The implementation now uses the repository's existing
+  `Object.assign` pattern; changed-file Oxc/Oxfmt and all 32 focused foundation
+  tests pass. Fresh CI and ClawSweeper reviews are running on the heads above.
 
 ## 2026-07-10 Upstream Commands Follow-Ups
 
