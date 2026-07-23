@@ -432,6 +432,18 @@
   direction and first exemplar. Record this as tacit stakeholder approval, not
   formal GitHub approval; RFC #42 remains draft until its review/merge state is
   explicitly changed.
+- September 1 delivery forecast (2026-07-22): RFC head
+  `6353740a02342aa57cbabb3c14569b8fdee39fc6` assigns all 47 projected registry
+  entries exactly once across 16 dependency-safe packages from July 22 through
+  September 1. The target cadence is about three completed packages per full
+  week, with at most three active implementation packages. Packages reuse the
+  shared per-repository authoring, disposition, and trusted-refresh machinery;
+  they are not one PR each and do not create one gate per slice. Product
+  completion counts only landed entries, source-proven deletions, or current
+  conforming owner-pipeline evidence. Drafts, open generated follow-ups, and
+  schedule-only deferrals do not count. RFC #42's body points at this exact
+  head, Patrick remains the primary stack reviewer, and a ClawSweeper re-review
+  was requested in comment `5053996993`.
 
 ## Resume Checklist
 

@@ -175,7 +175,7 @@ after its named owner contract exists.
 
 **Repo:** `openclaw/openclaw`
 
-**Fork draft PR:** [giodl73-repo/openclaw#152](https://github.com/giodl73-repo/openclaw/pull/152)
+**Draft PR:** [openclaw/openclaw#112865](https://github.com/openclaw/openclaw/pull/112865)
 
 **Branch:** `user/giodl/rfc-0013-final-capture`
 
@@ -318,7 +318,7 @@ target.
 
 **Current-source limit:** Plex has no synchronous destroy capability, ACA is a
 disabled scaffold, the replacement branch has no production
-`gateway.suspend.*` caller, and fork PR 152's final closed-state capture has no
+`gateway.suspend.*` caller, and PR 112865's final closed-state capture has no
 live Lobster caller/adopter. This PR must not claim those production paths.
 
 ### PR 3E-A: Lobster final-capture adopter
@@ -331,7 +331,7 @@ live Lobster caller/adopter. This PR must not claim those production paths.
 
 **Head:** `58d8a63ec9`
 
-**Depends on:** PR 3D and OpenClaw fork PR 152 (or a promoted image pin with
+**Depends on:** PR 3D and OpenClaw PR 112865 (or a promoted image pin with
 both `backup capture-final` and `gateway.suspend.prepare`)
 
 **Purpose:** expose one fixed, boot-bound adapter operation that closes
@@ -471,7 +471,7 @@ transaction.
 
 Keep PRs 1, 2, 2B, and 3A-3D draft while their reviews run. PR 3D's source audit
 is recorded in `pr3d-source-audit-2026-07-22.md`. Final owner capture now exists
-in fork draft PR 152, but a live Lobster caller and live generation-scoped
+in draft PR 112865, but a live Lobster caller and live generation-scoped
 provider remover remain missing. Obtain those seams before PR 3E; do not
 simulate them with advisory Redis state or unsupported Plex lifecycle
 vocabulary. Do not add a read-then-delete destruction check, new Gateway pause

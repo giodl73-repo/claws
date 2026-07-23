@@ -4,11 +4,11 @@
 
 **Last agent:** Codex
 
-**Current focus:** Review replacement PRs 3A-3D, final-capture PR 152, and the
+**Current focus:** Review replacement PRs 3A-3D, final-capture PR 112865, and the
 Lobster final-capture adopter in fork PR 28. The owner operation and live
 Gateway-side adopter now exist; obtain a generation-scoped provider remover
 before authoring PR 3E-B or wiring PR 3D to production. RFC PR 46, OpenClaw PR
-112385, fork PR 152, Lobster PR 5481, and fork PR 28 remain draft. Keep every
+112385, OpenClaw PR 112865, Lobster PR 5481, and fork PR 28 remain draft. Keep every
 implementation PR draft until Vincent and the relevant state owners accept the
 inventory, protection, acceptance-byte-set, and destruction-authority
 contracts.
@@ -18,10 +18,16 @@ OpenClaw PR 105718, and `openclaw backup sqlite` remain authoritative for
 SQLite capture, verification, and fresh-target restore.
 
 **Active RFC work:** [openclaw/rfcs#46](https://github.com/openclaw/rfcs/pull/46),
-branch `user/giodl/rfc-0013-continuity-sidecars`, commit `0e64ad58c67`, stacked
+branch `user/giodl/rfc-0013-continuity-sidecars`, commit `e75fa002b69`, stacked
 on RFC PR 20. It binds a closed owner-selected component inventory, keeps
-ordinary snapshots host-protected, and defines a deterministic logical
-acceptance byte set.
+ordinary snapshots host-protected, defines a deterministic logical acceptance
+byte set, and links OpenClaw PR 112385 plus PR 112865 as non-normative
+implementation evidence for owner review. The RFC and live PR body now lead
+with the safe scale-to-zero motivation, managed-host failure classes, industry
+compute-lifecycle baseline, observable outcomes, and explicit separation
+between the OpenClaw application-consistency layer and host-owned wake. Ready-
+to-file public and private umbrella issue text is in
+`issue-drafts-2026-07-22.md`; neither issue has been filed.
 
 **Draft implementation work:** OpenClaw
 [PR 112385](https://github.com/openclaw/openclaw/pull/112385), branch
@@ -34,8 +40,8 @@ closed value-free obligation vocabulary, marks ordinary composition
 identities. It adds no CLI, plugin, storage, lifecycle, or restored-start
 surface.
 
-OpenClaw fork draft
-[PR 152](https://github.com/giodl73-repo/openclaw/pull/152), branch
+OpenClaw draft
+[PR 112865](https://github.com/openclaw/openclaw/pull/112865), branch
 `user/giodl/rfc-0013-final-capture`, commit `1ee5956dc02`, is stacked on PR 112385. Its hidden offline operation durably binds host-supplied closure
 evidence to real global and selected-agent snapshots, the canonical aggregate,
 and a full acceptance inventory. Exact response-loss replay returns the same
@@ -65,7 +71,7 @@ production provider binding. Final owner capture is now provided by fork PR
 152; live Gateway quiescence, ingress fencing, the Lobster caller, and provider
 deletion were split rather than overstated. Fork PR 28 now adds the fixed live
 final-capture adopter, irreversible admission fence, Gateway suspension and
-clean-stop reconciliation, strict PR 152 invocation/response binding, and
+clean-stop reconciliation, strict PR 112865 invocation/response binding, and
 same-request replay. Provider deletion remains deferred to PR 3E-B because
 current Lobster source has no live generation-scoped remover. PRs 3B-3E-A do
 not use Redis as irreversible
