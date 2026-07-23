@@ -22,6 +22,35 @@
 
 ## Current Session
 
+### 2026-07-22 Control UI follow-up authored
+
+- Opened draft OpenClaw PR
+  [#112808](https://github.com/openclaw/openclaw/pull/112808) for the first
+  Control UI slice at signed head `228e30b89c4`: secret-safe Claw inventory,
+  status, doctor findings, and managed/referenced provenance. It remains
+  read-only and is hidden unless the Gateway advertises both Claw read methods.
+- Opened draft OpenClaw PR
+  [#112828](https://github.com/openclaw/openclaw/pull/112828) for the second
+  slice at signed head `6fcbb106107`, stacked on #112808. It adds ClawHub
+  search/exact-release detail and canonical add/update/remove preview/apply.
+  Browser payloads exclude manifests, source paths, config values, file
+  contents, cron prompts, and raw diagnostics. Apply methods require
+  `operator.admin`, use the control-plane write budget, rebuild the canonical
+  CLI plan, and verify a UI token bound to the full internal plan digest.
+- #112828 reuses the existing ClawHub trust gate, exact artifact digest checks,
+  fs-safe extraction, lifecycle planners/executors, and retained-by-default
+  referenced cleanup. Preview persists no source; apply caches the verified
+  exact source under OpenClaw state for provenance and later update.
+- Focused proof passes: 24 lifecycle/Gateway/UI unit tests and two real Chromium
+  responsive tests at 375x812 and 1440x900. UI/source typecheck, i18n verify,
+  format, lint, and diff checks pass. The standalone `test/tsconfig.json` is not
+  a valid linked-worktree check because its `rootDir=test` pulls repository and
+  extension sources outside the root. Final unsandboxed `codex review
+  --uncommitted` reported no actionable correctness findings.
+- RFC addendum [#48](https://github.com/openclaw/rfcs/pull/48) now links both UI
+  PRs and records the final artifact, integrity, scope, and cleanup policy at
+  signed head `bea0bcca99a`.
+
 ### 2026-07-21 final OpenClaw stack readiness audit
 
 - Live state at audit time: RFC #27 and all twelve current OpenClaw Claws PRs
