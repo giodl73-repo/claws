@@ -22,6 +22,25 @@
 
 ## Current Session
 
+### 2026-07-23 starter Claws and ClawHub final-branch validation
+
+- Validated incident-response, finance-analyst, and customer-support starter
+  packages through the real OpenClaw inspect/preview/apply/status/remove
+  lifecycle in an isolated WSL profile. Finance and support installed real
+  production ClawHub skills; incident created and removed a real Gateway cron.
+  Final Claws status is empty.
+- Validated the exact public head `a7e0b2d86c66` of ClawHub
+  [#3092](https://github.com/openclaw/clawhub/pull/3092): all three publication
+  dry-runs pass, the native feed safety suite passes 5/5 with two expected
+  skips, and exact-head feed/artifact output passes real OpenClaw dry-run for
+  all three starters.
+- Whole-Claw registry validation was deterministic/local rather than a
+  production Convex write; production ClawHub was used for skill dependencies.
+  Suspicious incident-response skill archives were rejected without override.
+  Skill removal leaves only canonical empty ClawHub lockfiles in retained
+  workspace shells, matching the conservative preview. Full evidence is in
+  `starter-claws-clawhub-validation-2026-07-23.md`.
+
 ### 2026-07-23 merged-main lifecycle validation and cron removal repair
 
 - Validated merged Claws main at `f3b4f9cfa208` in isolated WSL profiles:
