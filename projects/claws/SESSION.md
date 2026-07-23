@@ -22,6 +22,35 @@
 
 ## Current Session
 
+### 2026-07-22 portable agent settings three-model repair closeout
+
+- OpenClaw [#112773](https://github.com/openclaw/openclaw/pull/112773)
+  now uses the canonical per-agent `memory.search` shape everywhere, with no
+  experimental `memorySearch` alias. Add, export, update classification, docs,
+  types, and focused tests agree at signed head `33605d4b0df`.
+- The update planner now resolves inherited profiles and filesystem defaults,
+  compares the `full` wildcard as a capability superset, classifies
+  `alsoAllow` additions/removals correctly, treats removal of effective
+  workspace confinement as an escalation, and does not emit a duplicate
+  profile change when only `alsoAllow` changes.
+- Focused OpenClaw proof passes 73 tests, production core/UI/extension
+  typechecks, Oxlint with zero findings, and `git diff --check`. Final
+  `codex review --commit HEAD` reported no actionable regressions after one
+  accepted duplicate-profile finding was fixed.
+- RFC addendum [#48](https://github.com/openclaw/rfcs/pull/48) and both sidecars
+  carry the same canonical contract and policy at signed head `32de46d4b35`.
+  Both OpenClaw and RFC PRs remain draft.
+- ClawHub PRs [#3089](https://github.com/openclaw/clawhub/pull/3089)-[#3092](https://github.com/openclaw/clawhub/pull/3092)
+  were updated and restacked at signed heads `2d86bd8d973c`, `027fdf45c332`,
+  `b5a4f58c2147`, and `a7e0b2d86c66`. PR1 owns the source and generated schema;
+  PR2 owns the publication copy and CLAW.md fixture. The final bridge passes
+  36/36 tests against OpenClaw head `33605d4b0df`.
+- Current ClawHub CI failures are external to this patch: `pr-gates` stops in
+  the repository's `bun audit` on nine newly reported Next.js advisories before
+  project checks run, downstream jobs mirror that failure, and Vercel still
+  requires fork authorization. Do not add unrelated audit ignores to this
+  stack; rerun after ClawHub main updates its dependency policy.
+
 ### 2026-07-22 portable agent settings PR restacked
 
 - OpenClaw [#112773](https://github.com/openclaw/openclaw/pull/112773) was
