@@ -64,7 +64,8 @@
   valid; exact-current-head remote proof is blocked on Crabbox authentication.
 - Blocking question: GitHub CI is settling on the refreshed heads. The native
   i18n inventory required by current OpenClaw `main` is regenerated in the
-  readiness stack, and local baseline plus verification now pass.
+  readiness stack; native i18n and dependency-guard checks now pass on both
+  exact implementation heads.
 
 ## Resume Checklist
 
