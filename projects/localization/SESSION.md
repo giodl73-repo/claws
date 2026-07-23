@@ -444,6 +444,50 @@
   schedule-only deferrals do not count. RFC #42's body points at this exact
   head, Patrick remains the primary stack reviewer, and a ClawSweeper re-review
   was requested in comment `5053996993`.
+- PK0 exact-head refresh (2026-07-22): the dependency chain is now F01
+  [#111541](https://github.com/openclaw/openclaw/pull/111541)
+  `8db13b6a306c0559a6a627143058cf349ecdfe74` -> F03
+  [#111543](https://github.com/openclaw/openclaw/pull/111543)
+  `0842d2a659b19db4eb767c1fdd5c9c2255860b49` -> G45/G46
+  [#112784](https://github.com/openclaw/openclaw/pull/112784)
+  `b2f01940080aee32775a02e15941e605970351d0` -> G47
+  [#112801](https://github.com/openclaw/openclaw/pull/112801)
+  `24b0d243d9fccb706bbbb12fcfd2396ba2ab3c8c`. All four branches were rebased
+  in order with guarded force-with-lease pushes and remain draft. Patrick is
+  requested on every PR; no Patrick review has landed yet.
+- PK0 refreshed proof: F01 passed 78 focused tests and the full monorepo build.
+  F03 passed the full documentation gate and explicit glossary comparison. The
+  17-file exemplar passed 23 focused tests, clean and fail-to-repair catalog
+  checks, direct and hosted actionlint, the full documentation gate, and the
+  full monorepo build. The seven-file G47 delta passed the live registry check,
+  14 focused tests, the two-case new-source fail-to-fix proof, actionlint, and
+  the full documentation gate. GitHub reported no failed checks on any exact
+  head at reconciliation time; broad CI remains intentionally skipped for the
+  draft fork PRs.
+- Proof boundary: Blacksmith Testbox rejected the authenticated organization
+  and brokered AWS Crabbox returned HTTP 401, so exact-head code proof used the
+  documented trusted-source WSL-local fallback. The aggregate workflow checker
+  could not bootstrap Zizmor because this WSL image lacks Python `venv`; direct
+  actionlint and hosted Workflow Sanity passed. The credentialed G45/G46
+  translation-and-publication run remains a supervised post-merge acceptance
+  gate because provider and write credentials are deliberately unavailable to
+  pull-request code. Do not start the next owner package if that first trusted
+  run fails.
+- Exact-head re-review comments: F01 `5054099468`, F03 `5054166140`, G45/G46
+  `5054255188`, and G47 `5054279577`.
+- Full original runtime-stack refresh (2026-07-22): final topology inspection
+  found F02/F04/F05 still based on the superseded F01 commit, so their unchanged
+  owner deltas were also rebased onto exact F01 `8db13b6a306`. F02
+  [#111542](https://github.com/openclaw/openclaw/pull/111542) is now
+  `644cde0069b0662b54420098e642db286f322ef1`; 4 adapter and 202 updater tests
+  pass. F04 [#111544](https://github.com/openclaw/openclaw/pull/111544) is now
+  `70bacd6a553853c9880eaa050b37d85e71eab72d`; 61 focused and all 22 PTY tests
+  pass. F05 [#111545](https://github.com/openclaw/openclaw/pull/111545) is now
+  `55dd8249e94f77431fc107e1504a36aaf5b0b773`; 110 focused tests, the Gateway
+  protocol declaration build, and Control UI source verification pass. All
+  changed-file format and diff checks pass. Guarded force-with-lease pushes and
+  exact-head PR-body refreshes completed; re-review comments are F02
+  `5054343634`, F04 `5054348376`, and F05 `5054351044`.
 
 ## Resume Checklist
 
