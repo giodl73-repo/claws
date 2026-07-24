@@ -27,8 +27,8 @@ RFC: [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33), file
 
 Real upstream draft:
 [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018),
-head `17b34f792d8`. It contains the four slices below as four commits and no
-Hosting Profile implementation.
+head `e49485d1c79`. It contains fifteen readiness-only commits and no Hosting
+Profile implementation.
 
 RFC 0018 and its PR body identify this upstream draft as the primary
 implementation to review. The fork PRs below are commit-level review aids, not
@@ -67,10 +67,10 @@ for PR 104018 and not one PR per condition.
 
 The runtime activation integrity bucket is implemented for review in
 [fork PR 153](https://github.com/giodl73-repo/openclaw/pull/153), branch
-`user/giodl/readiness-activation-integrity`, at `bb72c66cef8`. It is based
-directly on readiness head `c1919669c3f` and adds selectable
+`user/giodl/readiness-activation-integrity`, at `8a2fe6ce123`. It is based
+directly on readiness head `e49485d1c79` and adds selectable
 `ConfigCurrent`, `ModelRouteReady`, and `SecretsReady` conditions plus
-quarantine-aware `PluginsLoaded` evidence. The focused closeout passes 227
+quarantine-aware `PluginsLoaded` evidence. The focused closeout passes 237
 assertions, type-aware lint, formatting, and diff checks; the final independent
 review reports no actionable findings.
 
@@ -83,8 +83,7 @@ required.
 
 ### Upgrade Compatibility
 
-Before publishing the follow-on condition PRs, tighten PR 104018 so the new
-canonical evaluator is opt-in at the Gateway boundary:
+PR 104018 now makes the canonical evaluator opt-in at the Gateway boundary:
 
 - when `gateway.readiness` is absent, `/ready` and `/readyz` use the exact
   legacy readiness path and cannot become unavailable because an extended
@@ -96,7 +95,9 @@ canonical evaluator is opt-in at the Gateway boundary:
 This is an upgrade-safety rule, not a second readiness design. The legacy
 checker remains the source of Gateway startup, drain, and channel readiness;
 the opt-in evaluator projects and extends those facts for operators that choose
-the new contract.
+the new contract. Standard Hosting Profile selection is also an explicit opt-in
+so profiles selected by config, environment, or startup argument always evaluate
+their named conditions.
 
 ## Hosting Profile Stack
 
@@ -104,7 +105,7 @@ RFC: [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37), file
 `rfcs/0023-standard-hosting-profiles.md`, head `a61b57d8e67a`.
 
 Primary implementation: [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765),
-head `f54affa3983`, stacked directly on readiness head `17b34f792d8` from PR 104018.
+head `b787a1e39e1`, stacked directly on readiness head `e49485d1c79` from PR 104018.
 [Fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94) provides a
 clean profile-only comparison while the upstream aggregate diff contains both
 layers.
@@ -116,11 +117,9 @@ layers.
 | `11322a977f6` | [PR 42](https://github.com/giodl73-repo/openclaw/pull/42) | Runtime activation identity.                  |
 | `2f8defb707c` | [PR 21](https://github.com/giodl73-repo/openclaw/pull/21) | Packaged release conformance.                 |
 
-The real upstream stack contains eight profile-only commits. After restacking,
-their heads are `642bed18093`, `b9121934a7f`, `2b10b218279`, `81f787820da`,
-`05bbe94f8d5`, `ab612666315`, `630684819c8`, and `f54affa3983`. The final commit
-makes profile activation explicitly opt-in and proves the unprofiled upgrade
-baseline.
+The real upstream stack contains twenty profile-only commits. Its final commit
+explicitly makes profile selection enable canonical evaluation while preserving
+the unprofiled legacy readiness path.
 
 PR 107765 is the real upstream implementation request. The four smaller fork
 PRs expose the profile commits as review aids and are not separate landing
@@ -138,7 +137,8 @@ Lobster, doctor, or policy part of the runtime readiness path.
 - Required `False` or `Unknown` conditions fail readiness.
 - Every provider is bounded; timeout and error become stable `Unknown` results.
 - `/healthz` remains shallow liveness.
-- `/ready`, `/readyz`, health, status, and CLI project the same canonical result.
+- Once configured or profile-selected, `/ready`, `/readyz`, health, status, and
+  CLI project the same canonical result.
 - Probe intervals, retries, start periods, and timeouts belong in the host
   manifest, not profile definitions.
 - Doctor may later recommend fixes, but readiness cannot depend on doctor or an
@@ -148,9 +148,9 @@ Lobster, doctor, or policy part of the runtime readiness path.
 
 Current readiness proof supersedes the older detailed snapshot below:
 
-- PR 104018 exact head: `17b34f792d8`, based on main `4e78d91c0f9`.
-- 211 assertions pass across all 19 changed test files; format, type-aware lint,
-  diff, SDK surface/API, and the full package build pass.
+- PR 104018 exact head: `e49485d1c79`. Its opt-in compatibility amendment
+  passes 130 focused assertions and live endpoint proof; type-aware lint,
+  formatting, and diff checks pass.
 - Most recent package-installed behavior proof, on pre-rebase readiness head
   `89d8607aab9f`, used image
   `sha256:8add3c4f8ce2f1a444a735c43f19eac4ee0212778123fb883ff8f9f785a9fd0d`
@@ -159,12 +159,12 @@ Current readiness proof supersedes the older detailed snapshot below:
 - The 54-phase published upgrade lane passed on patch-equivalent proved head
   `e5f5e97332e5`; the final rebase changed only the SDK budget relative to the
   readiness patch. Exact-head Codex review is clean and ClawSweeper is queued.
-- PR 107765 exact head is `f54affa3983`, directly stacked on readiness head
-  `17b34f792d8`. Profiles are opt-in; an unprofiled Gateway keeps the RFC 0018
+- PR 107765 exact head is `b787a1e39e1`, directly stacked on readiness head
+  `e49485d1c79`. Profiles are opt-in; an unprofiled Gateway keeps the legacy
   baseline and adds no `ProfileSelected` or `WorkspaceWritable` requirement.
-  273 focused assertions and all static checks pass. The unrelated
-  `sessions.abort` timeout reproduces on the exact readiness base; the
-  order-sensitive workspace-plugin assertion passes directly on both heads.
+  The expanded profile run passes 277 assertions and the focused post-fix run
+  passes 113. Three broad Gateway failures reproduce on the exact readiness
+  base and are not profile regressions.
   The exact package-installed matrix passes all unprofiled/profile transitions
   with image
   `sha256:20d507b613b346e1165add88234eb00390ea6d1b086970dd3589dd3f41654175`.

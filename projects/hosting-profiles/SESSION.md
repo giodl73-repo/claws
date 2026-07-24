@@ -42,11 +42,11 @@
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `c1919669c3f4d76842ce289ae26df3447320b8ac` in fourteen commits, rebased on
+  at `e49485d1c79f7f15d16b8bcc48f99a5dda0675c0` in fifteen commits, rebased on
   OpenClaw `main` `b8a47b2338442d1d8a32e4a28057f7688919e600`. The dependent
   upstream profile implementation is
   [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765)
-  at `40b5b2e59d936236a15ebaecca2bfc8c87e715c1` in nineteen profile-only
+  at `b787a1e39e1e787ab89ce3ea581f452d63c951c1` in twenty profile-only
   commits stacked on the exact readiness head. The stack includes the
   discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
   cross-link, and docs navigation. [Fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
@@ -56,12 +56,13 @@
   hosting-profiles project files from this session should be committed. Both
   implementation worktrees and both RFC worktrees are clean at their pushed
   heads.
-- Validation: focused post-fix suites pass 78 readiness assertions and 139
-  profile/tooling assertions, plus targeted recovery tests. Type-aware lint,
-  production TypeScript, unused-export scans, formatting, and diff checks pass.
-  Three independent final reviews report Approve / Ship / Approve; evidence is
-  under `reviews/2026-07-23-three-model/`. Earlier Docker/package proof remains
-  valid; exact-current-head remote proof is blocked on Crabbox authentication.
+- Validation: the opt-in foundation amendment passes 130 focused assertions;
+  activation PR 153 passes 237; the rebased profile stack passes 277 in the
+  expanded profile run and 113 in its focused post-fix run. Type-aware lint,
+  formatting, and diff checks pass. Three broad Gateway failures reproduce on
+  the exact foundation base and are not profile regressions. Independent final
+  reviews are clean. Earlier Docker/package proof remains valid;
+  exact-current-head remote proof is blocked on Crabbox authentication.
 - Blocking question: GitHub CI is settling on the refreshed heads. The native
   i18n inventory required by current OpenClaw `main` is regenerated in the
   readiness stack; native i18n and dependency-guard checks now pass on both
@@ -122,8 +123,8 @@
 
 - 2026-07-23: Started the first follow-on condition bucket on branch
   `user/giodl/readiness-activation-integrity`, based directly on readiness PR
-  104018 head `c1919669c3f`. The implementation is committed at
-  `bb72c66cef8` and published as
+  104018 head `e49485d1c79`. The implementation is committed at
+  `8a2fe6ce123` and published as
   [fork PR 153](https://github.com/giodl73-repo/openclaw/pull/153). It adds selectable
   `ConfigCurrent`, `ModelRouteReady`, and `SecretsReady` criteria and extends
   `PluginsLoaded` to include configured plugins quarantined before activation.
@@ -131,18 +132,18 @@
   snapshots; they do not reload config, acquire credentials, call a model, or
   probe the network. Route-scoped model-auth evidence is produced by the
   existing off-main-thread warmer, with incomplete discovery represented as
-  `Unknown`. Type-aware lint, formatting, diff checks, and 227 focused
+  `Unknown`. Type-aware lint, formatting, diff checks, and 237 focused
   readiness, provider-auth, health, and Gateway assertions pass. The final
   independent review reports no actionable findings after preserving the
   existing provider-auth repair sidecar and hardening malformed worker output.
-- 2026-07-23: The implementation audit found an upgrade-safety improvement for
-  PR 104018. Although its canonical evaluator preserves the legacy lifecycle
-  result, it currently wraps every `/ready` call even when no readiness config
-  exists, so an evaluator failure could create a new `503`. Before publishing
-  follow-on criteria, make canonical evaluation opt-in by the presence of
-  `gateway.readiness`; absent that section, retain the exact legacy endpoint
-  path. Configured criteria and profiles can then deliberately opt into the
-  richer contract without changing existing deployments.
+- 2026-07-23: Implemented the upgrade-safety amendment in PR 104018 at
+  `e49485d1c79`. When `gateway.readiness` is absent, `/ready` and `/readyz`
+  use only the legacy Gateway checker; presence of the section opts into the
+  bounded canonical evaluator. Live endpoint coverage proves both modes.
+  Activation PR 153 was rebased to `8a2fe6ce123`. Hosting Profiles PR 107765
+  was rebased to `b787a1e39e1`; profile selection itself explicitly enables
+  canonical evaluation so environment and startup-argument profiles retain
+  profile conditions and failure attribution.
 
 - 2026-07-23: Added an owner-based follow-on condition adoption plan to RFC
   0018 and its live PR body.
