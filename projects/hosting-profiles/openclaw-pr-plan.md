@@ -65,12 +65,38 @@ for PR 104018 and not one PR per condition.
 | State and background services | `StateReady`, `RestoreComplete`, `DeliveryRuntimeReady`, `SchedulerReady` | Observe state activation, restore fencing, delivery runtime, and scheduler lifecycle. Historical failures remain diagnostics or advisories. |
 | Hosted dependencies | `EgressReady`, `ManagedConfigApplied`, `HostBindingsReady` | Hosted integration owners use the same provider contract; Lobster/OCC policy and tenant decisions remain downstream. |
 
+The runtime activation integrity bucket is implemented for review in
+[fork PR 153](https://github.com/giodl73-repo/openclaw/pull/153), branch
+`user/giodl/readiness-activation-integrity`, at `bb72c66cef8`. It is based
+directly on readiness head `c1919669c3f` and adds selectable
+`ConfigCurrent`, `ModelRouteReady`, and `SecretsReady` conditions plus
+quarantine-aware `PluginsLoaded` evidence. The focused closeout passes 227
+assertions, type-aware lint, formatting, and diff checks; the final independent
+review reports no actionable findings.
+
 Each bucket should land as one coherent owner-adoption PR when its source facts
 are ready. Every PR must prove bounded evaluation, redaction, generation
 replacement, failure/recovery transitions, and agreement across HTTP, RPC,
 health, status, and CLI. New criteria are selectable or advisory by default;
 only explicit operator selection or a separately accepted profile makes them
 required.
+
+### Upgrade Compatibility
+
+Before publishing the follow-on condition PRs, tighten PR 104018 so the new
+canonical evaluator is opt-in at the Gateway boundary:
+
+- when `gateway.readiness` is absent, `/ready` and `/readyz` use the exact
+  legacy readiness path and cannot become unavailable because an extended
+  evaluator fails or times out;
+- presence of `gateway.readiness` opts into canonical condition evaluation;
+- newly registered or built-in criteria do no work until selected;
+- only entries in `requiredCriteria` extend the blocking decision.
+
+This is an upgrade-safety rule, not a second readiness design. The legacy
+checker remains the source of Gateway startup, drain, and channel readiness;
+the opt-in evaluator projects and extends those facts for operators that choose
+the new contract.
 
 ## Hosting Profile Stack
 

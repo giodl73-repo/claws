@@ -120,6 +120,30 @@
 
 ## Implementation Notes
 
+- 2026-07-23: Started the first follow-on condition bucket on branch
+  `user/giodl/readiness-activation-integrity`, based directly on readiness PR
+  104018 head `c1919669c3f`. The implementation is committed at
+  `bb72c66cef8` and published as
+  [fork PR 153](https://github.com/giodl73-repo/openclaw/pull/153). It adds selectable
+  `ConfigCurrent`, `ModelRouteReady`, and `SecretsReady` criteria and extends
+  `PluginsLoaded` to include configured plugins quarantined before activation.
+  The criteria inspect only active config, model/auth, secret-owner, and plugin
+  snapshots; they do not reload config, acquire credentials, call a model, or
+  probe the network. Route-scoped model-auth evidence is produced by the
+  existing off-main-thread warmer, with incomplete discovery represented as
+  `Unknown`. Type-aware lint, formatting, diff checks, and 227 focused
+  readiness, provider-auth, health, and Gateway assertions pass. The final
+  independent review reports no actionable findings after preserving the
+  existing provider-auth repair sidecar and hardening malformed worker output.
+- 2026-07-23: The implementation audit found an upgrade-safety improvement for
+  PR 104018. Although its canonical evaluator preserves the legacy lifecycle
+  result, it currently wraps every `/ready` call even when no readiness config
+  exists, so an evaluator failure could create a new `503`. Before publishing
+  follow-on criteria, make canonical evaluation opt-in by the presence of
+  `gateway.readiness`; absent that section, retain the exact legacy endpoint
+  path. Configured criteria and profiles can then deliberately opt into the
+  richer contract without changing existing deployments.
+
 - 2026-07-23: Added an owner-based follow-on condition adoption plan to RFC
   0018 and its live PR body.
   - Four coherent PR buckets cover runtime activation integrity, agent
