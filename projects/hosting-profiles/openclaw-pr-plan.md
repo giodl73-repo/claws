@@ -63,7 +63,7 @@ for PR 104018 and not one PR per condition.
 | Runtime activation integrity | `SecretsReady`, `ModelRouteReady`, `ConfigCurrent`, stronger `PluginsLoaded` | Consume activation-pinned secret, model, config, and plugin snapshots. No credential acquisition, model calls, reload, or repair in `/ready`. |
 | Agent execution capabilities | `ContextEngineReady`, `ToolCatalogReady`, `McpRuntimeReady`, `SandboxReady`/`HarnessReady` | Selected capability owners publish bounded observations. Optional capability failures remain advisory unless selected. |
 | State and background services | `StateReady`, `DeliveryRuntimeReady`, `SchedulerReady`; `RestoreComplete` deferred | Observe state activation, delivery runtime ownership, scheduler lifecycle, and startup recovery. A future restore condition requires an owner-produced restore generation and admission fence. |
-| Hosted dependencies | `EgressReady`, `ManagedConfigApplied`, `HostBindingsReady` | Hosted integration owners use the same provider contract; Lobster/OCC policy and tenant decisions remain downstream. |
+| Hosted dependencies | `HostBindingsReady`; `EgressReady` and `ManagedConfigApplied` deferred | Consume RFC 0020 host-binding owner evidence through the same readiness selection contract. Lobster/OCC policy and tenant decisions remain downstream. |
 
 The runtime activation integrity bucket is implemented for review in
 [fork PR 153](https://github.com/giodl73-repo/openclaw/pull/153), branch
@@ -99,6 +99,21 @@ source-test typechecks, type-aware lint, formatting, and diff checks. The final
 independent review reports no actionable correctness findings. `RestoreComplete`
 remains deferred until OpenClaw owns a generic restore generation and admission
 fence.
+
+The hosted-dependencies composition is implemented for review in
+[fork PR 156](https://github.com/giodl73-repo/openclaw/pull/156), branch
+`user/giodl/readiness-hosted-dependencies`, at `32de8d0d942`. It is stacked on
+an explicit composition of the RFC 0018 readiness foundation and RFC 0020 host
+integration package 3. The selectable `openclaw.host-bindings-ready` criterion
+projects the active bundle plus owner-published generation evidence into the
+canonical `HostBindingsReady` condition. Required bindings fail closed for
+missing, incompatible, unresolved, stale, degraded, or unavailable state;
+optional failures do not block. Evaluation is synchronous, in-memory, and
+bounded before projection. The closeout passes 19 focused unit assertions, 69
+Gateway readiness assertions, lint, formatting, diff checks, and Codex review.
+Generic `EgressReady` remains deferred to concrete dispatcher/traffic-policy
+owners, and `ManagedConfigApplied` remains deferred until Managed Config
+publishes an authoritative applied/effective generation.
 
 Each bucket should land as one coherent owner-adoption PR when its source facts
 are ready. Every PR must prove bounded evaluation, redaction, generation

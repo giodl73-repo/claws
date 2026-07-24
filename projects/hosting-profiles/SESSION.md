@@ -1098,3 +1098,24 @@ getReadiness()).hosting` field. PR 18 head `c423b77720` now statically
   - Published heads after CI baseline repair: RFC 0018 `9e87932863c`,
     readiness `c1919669c3f`, RFC 0023 `98b0713d271`, and profiles
     `40b5b2e59d9`.
+- 2026-07-24: Implemented the fourth readiness evidence package as a real
+  RFC 0018 plus RFC 0020 composition.
+  - Synthetic composition branch
+    `user/giodl/hosted-integration-readiness-composition` replays the exact
+    readiness foundation through `c21cf2903f4` over hosted-integration package
+    3 without reviving superseded config or plugin API modules.
+  - [Fork PR 156](https://github.com/giodl73-repo/openclaw/pull/156), branch
+    `user/giodl/readiness-hosted-dependencies`, head `32de8d0d942`, adds the
+    selectable `openclaw.host-bindings-ready` criterion and canonical
+    `HostBindingsReady` condition.
+  - Required bindings fail closed from existing bundle and owner-generation
+    evidence. Optional degraded bindings remain non-blocking. The evaluator is
+    observational, in-memory, and rejects oversized inventories before status
+    projection.
+  - `EgressReady` is deferred to concrete dispatcher/traffic-policy owners;
+    `ManagedConfigApplied` is deferred until Managed Config publishes an
+    authoritative applied/effective generation.
+  - Verification: 19 focused unit assertions, 69 Gateway readiness assertions,
+    changed-file Oxlint/Oxfmt/diff checks, and clean Codex review. Broad core
+    typing remains blocked by inherited `packages/net-policy` dependency/type
+    errors outside this patch.
