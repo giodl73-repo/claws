@@ -20,8 +20,8 @@
 
 - Last updated: 2026-07-24
 - Last agent: Copilot
-- Current focus: Drive the first independently droppable patches upstream,
-  starting with explicit tool-less Automation runs.
+- Current focus: Avoid duplicate upstream work, track active canonical fixes,
+  and move to the next independently droppable patch.
 - Active branch / PR: OpenClaw `user/giodl/cron-toolless-run-guard`, PR #113403;
   Lobster PR #5402 remains the patch-set baseline.
 - Known dirty state: `claws-hapi` contains unrelated user changes; only the new
@@ -60,6 +60,23 @@
   Current `main` has migrated to Teams SDK 2.0.14, which owns reactive
   threading/quoting semantics. Reassess 0009 together with 0014 and file only
   a current-SDK behavior gap backed by real Teams proof.
+- Patch 0007 already has exact issue #102376 and PR #102379 from Galin Iliev.
+  The PR covers mentions, quoted replies, forwards, and debounced batches; its
+  current head `df0b712fccc8d67dcad5a3462b5259d69c3d465c` is dirty and still has
+  maintainer feedback. Do not open the prepared focused mention-only duplicate.
+- Exploratory worktree `/root/src/openclaw-msteams-mentions` remains dirty with
+  an uncommitted mention-only implementation and passing focused tests; retain
+  it only as comparison material for PR #102379.
+- Patch 0006's generic behavior is already stronger on current `main`: merged
+  PR #110357 durably journals Teams activities by `activity.id`, suppresses
+  redelivery after completion, and replays safely after restart. PR #111249
+  subsequently shared the ingress monitor across channels. Drop patch 0006
+  once the pinned OpenClaw release includes merge
+  `4e0cc187a21cca36d1887998c101c6b9baf926be`.
+- Patch 0010 conflicts with the intentional fail-closed delivery policy from
+  PR #91685 and the status split in PR #105215. Upstream already offers
+  explicit `delivery.bestEffort: true`; treat Lobster's different default as
+  downstream policy rather than a generic OpenClaw bug.
 - Compare patch 0015 with issue #77298 and PR #96174 before proposing terminal
   status semantics.
 - PR #113403 fixes explicit `toolsAllow: []`; PR #95605 remains a distinct raw
@@ -67,6 +84,8 @@
 - Use Omar Shahine's draft RFC 0026 (`openclaw/rfcs#50`) for user-facing
   "Automations" terminology, while keeping authorization, publication, and
   execution-fencing contracts as separate technical proposals.
+- Next comparison candidate: assess patch 0015's `skipped` restart status
+  against issue #77298 and PR #96174's proposed `failed` status.
 
 ## Session Checkpoints
 

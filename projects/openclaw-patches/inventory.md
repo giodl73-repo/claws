@@ -35,10 +35,10 @@ those remain separate upstream fixes or contract proposals.
 | `0003-msteams-native-runtime-entrypoints` | Upstream fix | Issue #102365; merged PR #102366, merge `68dcfe633d85acdb38cdc102de806f2c7141cd6f` | **Upstream landed** | Drop when the pinned OpenClaw release contains the merge |
 | `0004-secrets-fast-path-keyless-webiq` | Upstream fix | Issue #107154 and open PR #107155, owned by Galin Iliev | **Active upstream PR** | Do not duplicate; track PR #107155 and drop after release inclusion |
 | `0005-msteams-streaming-prefix-delta` | Upstream fix | Issue #102356; merged PR #102357, merge `787ed383f5579420871bc86e0abb3437448c15a9` | **Upstream landed** | Drop when the pinned OpenClaw release contains the merge |
-| `0006-msteams-delivery-id-dedupe` | Lobster, with extractable generic behavior | No matching delivery-id/activity-id dedupe thread found | Downstream / split candidate | Keep Lobster header handling; evaluate generic activity-id webhook idempotency separately |
-| `0007-msteams-normalize-quoted-forward` | Upstream fix | Merged PR #51647 covers HTML reply extraction only; no matching mention/entity/forward normalization issue found | **Partial overlap** | Diff current `main`; split remaining mention, quoted-entity, and forwarded-message gaps into the smallest issue set |
+| `0006-msteams-delivery-id-dedupe` | Upstream fix | Merged PR #110357 durably admits Teams activities by `activity.id`, rejects in-flight/completed redeliveries, and survives restart; PR #111249 moved the mechanism into the shared ingress monitor | **Upstream landed** | Drop the Lobster patch when the pinned release contains merge `4e0cc187a21cca36d1887998c101c6b9baf926be`; the Lobster delivery header is no longer needed for generic dedupe |
+| `0007-msteams-normalize-quoted-forward` | Upstream fix | Open issue #102376 and PR #102379 cover mention, quoted-reply, forward, and debounce normalization; merged PR #51647 covers HTML reply extraction | **Existing upstream PR** | Do not duplicate Galin's active PR; track its current `DIRTY` head and unresolved maintainer feedback, then drop the matching Lobster patch after release inclusion |
 | `0009-msteams-threaded-replies` | Upstream fix | Current `main` already keeps reactive channel/group replies in context through Teams SDK `reply()`; SDK 2.0.14 documents `send()` as thread-preserving and `reply()` as adding a quote, while streaming is 1:1-only | **Reassess after SDK migration** | Do not file the old `replyToId` design; compare with 0014 and split only a verified quote/context gap |
-| `0010-cron-delivery-target-optional` | Upstream fix | No matching bare-announce delivery-target issue found; merged PR #92318 is related delivery-proof work | **Issue needed** | Reproduce successful turn becoming `delivery-target` error and file |
+| `0010-cron-delivery-target-optional` | Lobster | Issue #91613 and merged PR #91685 deliberately fail closed for ambiguous keyless implicit delivery; merged PR #105215 preserves successful execution status but keeps `delivery-target` fatal; explicit `delivery.bestEffort: true` already exists | **Downstream policy conflict** | Do not upstream the patch unchanged; keep Lobster's default only if its operator policy intentionally accepts best-effort implicit delivery |
 | `0011-cron-toolless-run-guard` | Upstream fix | Scout-marked issue #113402 and PR #113403; real Gateway/Automation proof passed on Testbox `tbx_01kyb3f4sd4c1850yhjcnn1yfw`; PR #95605 covers the distinct raw `modelRun` case | **Upstream PR open; proof posted** | Track re-review/CI and drop after a release contains the fix |
 | `0013-msteams-brokered-multiplayer-route` | Lobster | No generic equivalent expected | Downstream | Keep with Lobster multiplayer admission, routing, and completion lease |
 | `0014-msteams-quoted-replies` | Upstream fix | PR #51647 is inbound context only; Teams SDK 2.0.14 now provides first-class `reply()`, `quote()`, and `addQuote()` APIs, superseding the patch's older wire-level approach | **Reassess against SDK APIs** | Prove the desired reactive/proactive quote policy on current `main`; use SDK-native APIs rather than porting the patch |
@@ -58,14 +58,13 @@ those remain separate upstream fixes or contract proposals.
 | Direct upstream fixes/features | 10 |
 | Generic upstream contracts | 4 |
 | Lobster-owned patches | 6 |
-| Already landed upstream | 2 |
-| Exact existing open issue | 1 |
+| Already landed upstream | 3 |
+| Exact existing open issue | 2 |
 | Existing related discussion requiring comparison | 2 |
-| Upstream issue gaps after bounded search | 9 |
+| Upstream issue gaps after bounded search | 7 |
 
 The issue-gap count includes contract proposals and excludes Lobster-only
-patches. Patch 0007 may become more than one narrowly owned issue after the
-current-main diff.
+patches.
 
 ## Historical Drop
 
@@ -75,9 +74,9 @@ the patch. It is not part of the 20 active files.
 
 ## Search Evidence
 
-- Gitcrawl database was current as of `2026-07-24T18:30:01Z`, but contained
-  only 84 threads and returned no patch-specific search results.
-- Live GitHub title/body searches were therefore used for the initial bounded
-  discovery.
+- Gitcrawl database was current as of `2026-07-24T21:29:54Z`, but its bounded
+  searches did not find the Teams normalization thread.
+- Live GitHub title/body searches found exact issue #102376 and PR #102379 for
+  patch 0007.
 - Exact code-symbol searches found the already-landed patches 0003 and 0005.
 - All links and states must be rechecked live before issue or PR mutation.

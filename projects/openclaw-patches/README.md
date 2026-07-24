@@ -16,10 +16,12 @@ contracts into `openclaw/openclaw`.
 | ---- | ---------- | ------ | ------ | ------- |
 | `bic/lobster` | PR #5402 | `promoteclaw/openclaw-2026.7.1` | Draft | Current 20-patch OpenClaw 2026.7.1 carry set |
 | `openclaw/openclaw` | Issue #107154 | — | Open | Keyless WebIQ secrets fast path |
+| `openclaw/openclaw` | Issue #102376 / PR #102379 | `bug-052-msteams-inbound-normalize` | Open, dirty | Teams inbound mention, quote, forward, and debounce normalization |
 | `openclaw/openclaw` | Issue #113402 / PR #113403 | `user/giodl/cron-toolless-run-guard` | Open | Explicit tool-less Automation runs |
 | `openclaw/openclaw` | Issue #77298 | — | Open | Cron restart interruption health semantics |
 | `openclaw/openclaw` | PR #102366 | — | Merged | Native CJS plugin runtime entrypoints |
 | `openclaw/openclaw` | PR #102357 | — | Merged | Teams streaming whitespace-collapse fix |
+| `openclaw/openclaw` | PR #110357 | — | Merged | Durable Teams ingress and `activity.id` redelivery dedupe |
 | `openclaw/rfcs` | PR #50 / RFC 0026 | — | Draft | Automations terminology and configurable feature naming |
 
 ## Workflow
