@@ -34,9 +34,11 @@ contracts into `openclaw/openclaw`.
    surface.
 5. Prefer one upstream issue and one focused PR per independently droppable
    patch.
-6. For Lobster policy patches, upstream only the generic extension contract;
+6. Add a visible `Scout patch provenance` banner naming the Lobster patch to
+   every upstream issue and PR produced by this project.
+7. For Lobster policy patches, upstream only the generic extension contract;
    keep runtime policy and Microsoft-specific trust decisions downstream.
-7. When an upstream fix ships in a released OpenClaw tag, remove the Lobster
+8. When an upstream fix ships in a released OpenClaw tag, remove the Lobster
    patch during the next PromoteClaw audit.
 
 ## Related Areas
