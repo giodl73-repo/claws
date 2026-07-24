@@ -28,6 +28,7 @@ tools.
 | Hosted Integration                  | `projects/hosted-integration/README.md`              |
 | Runtime State Continuity            | `projects/state-continuity/README.md`                |
 | PromoteClaw                         | `projects/promoteclaw/README.md`                     |
+| OpenClaw patch upstreaming          | `projects/openclaw-patches/README.md`                |
 | TypeClaw                            | `projects/typeclaw/README.md`                        |
 | Memory work                         | `projects/memory/README.md`                          |
 | Mail work                           | `projects/mail/README.md`                            |
@@ -66,6 +67,7 @@ Common session files:
 - `projects/hosted-integration/SESSION.md`
 - `projects/state-continuity/SESSION.md`
 - `projects/promoteclaw/SESSION.md`
+- `projects/openclaw-patches/SESSION.md`
 - `projects/typeclaw/SESSION.md`
 - `projects/claws-review-bot/SESSION.md`
 - `projects/oc-path/SESSION.md`
@@ -168,6 +170,8 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
   dirty/synced status, fencing, restore, and Lobster persistence deletion.
 - PromoteClaw: regular Lobster OpenClaw version promotion from Galin's
   quarantine-cleared LTS feed, including patch carry-forward/drop validation.
+- OpenClaw patch upstreaming: inventory Lobster-carried source patches, locate
+  related upstream issues and PRs, and extract generic fixes or host contracts.
 - TypeClaw: OpenClaw TypeScript native / TS7 evaluation, benchmarks,
   compatibility findings, and feedback suitable for OpenClaw or Microsoft TS
   owners.
