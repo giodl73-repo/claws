@@ -1,110 +1,134 @@
-# Portable Claws Follow-up PR Plan
+# Standalone Claws CLI PR Plan
 
-This track turns the experimental OpenClaw Claw package into a readable,
-harness-neutral format without replacing the lifecycle implementation already
-owned by OpenClaw. It follows RFC 0016 and its open addendum in RFC PR #48.
+This track builds the harness-neutral command Patrick described:
 
-## Product Thesis
+```bash
+npx claws <claw> --agent openclaw
+```
 
-The smallest useful Claw is one `CLAW.md` that a person can understand. YAML
-frontmatter declares portable composition; the Markdown body is the normative
-agent prompt. A richer package may add conventional workspace files and
-harness-specific profiles.
+It targets the Claw package and profile model merged through OpenClaw PR
+#112773. It does not change the current `CLAW.md` body semantics. The format may
+evolve later through its RFC and versioned adapter contract without requiring
+the standalone CLI to own a second lifecycle implementation.
 
-OpenClaw maps the package deterministically:
+## Boundaries
 
-| Portable package content | OpenClaw destination |
-| --- | --- |
-| `CLAW.md` frontmatter | Agent identity and portable resource declarations |
-| `CLAW.md` Markdown body | `SOUL.md` |
-| `AGENTS.md`, `TOOLS.md`, `HEARTBEAT.md`, and other declared workspace files | Same canonical workspace destination |
-| `profiles/openclaw.yml` | Package-local OpenClaw adapter input; never copied as ordinary host config |
+The standalone CLI owns:
 
-A package must not declare a second `SOUL.md` when `CLAW.md` has a body. Apply,
-update, status, doctor, remove, and export continue to use the harness's native
-lifecycle and provenance implementation.
+- source and exact-version resolution;
+- artifact download and integrity verification;
+- portable package validation and normalized inspection;
+- harness selection and adapter dispatch;
+- stable cross-harness command and outcome conventions.
+
+Each harness adapter owns or delegates:
+
+- host policy and capability consent;
+- credentials and local prerequisites;
+- planning and mutation;
+- provenance, update, status, doctor, and removal;
+- harness-specific profiles and configuration.
+
+The OpenClaw adapter must invoke the merged `openclaw claws` lifecycle rather
+than importing private OpenClaw modules or recreating its ownership rules.
 
 ## Ordered PR Track
 
-### 0. RFC and specifications - `openclaw/rfcs` PR #48
+### 0. Repository and package setup - Foundation task
 
-- Make the Markdown body normative portable agent instructions.
-- Define deterministic body-to-`SOUL.md` materialization and export round trip.
-- Define the duplicate-`SOUL.md` rejection rule and package integrity behavior.
-- Separate portable conformance from OpenClaw lifecycle and profile behavior.
-- Record the standalone CLI, launch repository, and adapter sequence below.
+- Create `openclaw/claws` with the OpenClaw security and contribution baseline.
+- Create the public `@openclaw/claws` npm package with required 2FA and trusted
+  publishing.
+- In parallel, request a voluntary transfer of the occupied unscoped `claws`
+  package. The scoped package is the guaranteed path and the transfer does not
+  block implementation.
 
-### 1. Portable body adapter - `openclaw/openclaw`
+### 1. CLI core and inspect - `openclaw/claws`
 
-- Parse the body as a bounded UTF-8 prompt and expose it in inspect/dry-run.
-- Materialize it through the existing managed workspace-file planner as
-  `SOUL.md`; do not add a second write or ownership implementation.
-- Reject body plus declared `SOUL.md` ambiguity before mutation.
-- Export the managed, unchanged `SOUL.md` as the canonical body and prove
-  export/add/update/remove round trip.
-- Keep the entire surface behind `OPENCLAW_EXPERIMENTAL_CLAWS=1`.
+- Add the executable, argument parser, typed result envelope, and adapter API.
+- Accept a local package path and an exact ClawHub package coordinate.
+- Resolve immutable artifact bytes, verify the advertised digest, extract with
+  bounded path-safe rules, and inspect the current merged Claw schema.
+- Implement `claws <claw> --agent openclaw --dry-run` command parsing without
+  mutation; the OpenClaw adapter may initially report that execution support is
+  not installed.
+- Add shared fixtures for valid packages, malformed manifests, unsafe archives,
+  unsupported schema versions, and unknown adapters.
 
-### 2. Registry alignment - `openclaw/clawhub` PRs #3089 and #3090
+### 2. OpenClaw preview adapter - `openclaw/claws`
 
-- Share fixtures for normative body parsing, size limits, and duplicate
-  `SOUL.md` rejection.
-- Validate exact body bytes as part of the immutable package artifact.
-- Keep publication and every public read surface behind
-  `CLAWHUB_EXPERIMENTAL_CLAWS=1`.
-- Complete this before enabling the ClawHub experiment for users.
+- Discover a compatible installed `openclaw` executable and its experimental
+  Claws capability.
+- Pass the verified local package to canonical `openclaw claws inspect` and
+  `openclaw claws add --dry-run --json` commands.
+- Normalize only the cross-harness outcome envelope; preserve the complete
+  harness-native plan for user review.
+- Forward exit, blocker, and diagnostic outcomes without interpreting
+  OpenClaw's private provenance or ownership state.
+- Prove local-path and real ClawHub artifacts on Linux, macOS, and Windows.
 
-### 3. Reference CLI foundation - new `openclaw/claws` repository
+### 3. OpenClaw apply delegation - `openclaw/claws`
 
-- Publish a real package as `@openclaw/claws` while the Foundation separately
-  pursues voluntary transfer of the occupied unscoped `claws` npm package.
-- Add a harness-neutral package reader, validator, normalized inspect output,
-  conformance fixtures, and an adapter interface.
-- Implement `npx @openclaw/claws <claw> --agent openclaw --dry-run` first.
-- Do not own credentials, host policy, provenance, or mutation semantics.
+- Add explicit confirmation and delegate mutation to canonical
+  `openclaw claws add --yes` with the reviewed plan-integrity value.
+- Never broaden consent, retry an uncertain mutation automatically, or claim
+  rollback beyond the harness result.
+- Stream human output and return stable machine-readable wrapper outcomes.
+- Prove preview-to-apply integrity invalidation, successful apply, partial
+  outcome propagation, and a clean status/remove round trip through OpenClaw.
 
-### 4. OpenClaw execution adapter - `openclaw/claws`
+### 4. npm distribution and launch proof - `openclaw/claws`
 
-- Resolve an exact local or registry Claw artifact and verify its integrity.
-- Delegate preview and apply to the installed OpenClaw CLI.
-- Demonstrate `npx claws <claw> --agent openclaw` if the unscoped package
-  transfer succeeds; retain the scoped command as the guaranteed path.
-- Define adapter conformance using observable plans and outcomes rather than
-  OpenClaw internal APIs.
+- Publish `@openclaw/claws` through npm trusted publishing with provenance.
+- Prove the clean-machine command:
+
+  ```bash
+  npx @openclaw/claws <claw> --agent openclaw --dry-run
+  ```
+
+- If the unscoped transfer succeeds, publish the same signed CLI as `claws` and
+  prove `npx claws <claw> --agent openclaw`.
+- Document version compatibility, telemetry boundaries, update behavior, and
+  the fact that OpenClaw remains experimental-gated until graduation.
 
 ### 5. Launch collection - new `openclaw/awesome-claws` repository
 
-- Seed the repository with the three validated starter Claws: incident
-  response, financial analysis, and customer support.
-- Require package validation, secret scanning, exact dependency versions, and
-  OpenClaw dry-run proof in CI.
-- Link each Claw to its exact ClawHub release when publication is enabled.
-- Treat GitHub as the readable contribution and curation surface; ClawHub
-  remains the immutable publication, search, and telemetry surface.
+- Seed incident-response, financial-analyst, and customer-support Claws.
+- Validate every contribution with the released reference CLI, secret scanning,
+  exact dependency checks, and OpenClaw dry-run proof.
+- Link exact ClawHub releases after the ClawHub experiment is enabled.
+- Use GitHub for readable curation and contributions; retain ClawHub for
+  immutable publication, discovery, moderation, and telemetry.
 
-### 6. Additional harness adapter - separate follow-up
+### 6. Hermes adapter - separate follow-up
 
-- Add `--agent hermes` only with Hermes-owner participation and conformance
-  fixtures proving the portable subset.
-- Keep harness-specific translation in the adapter; do not add Hermes fields
-  to the portable core merely to complete a demo.
+- Define the adapter with Hermes owners using the same package fixtures and
+  outcome envelope.
+- Add `--agent hermes` only after real preview/apply proof.
+- Keep translation in the adapter; evolve `CLAW.md` separately when evidence
+  shows the current portable subset is insufficient.
 
 ## Dependencies
 
 ```mermaid
 flowchart LR
-  RFC["RFC #48 + specs"] --> OC["OpenClaw body adapter"]
-  RFC --> CH["ClawHub validation alignment"]
-  RFC --> CLI["openclaw/claws validator"]
-  OC --> CLIAdapter["OpenClaw CLI adapter"]
-  CH --> CLIAdapter
-  CLI --> CLIAdapter
-  CLIAdapter --> Awesome["openclaw/awesome-claws"]
-  CLIAdapter --> Hermes["Hermes adapter follow-up"]
+  Current["Merged OpenClaw Claw model"] --> Core["CLI core + inspect"]
+  ClawHub["Gated ClawHub APIs"] --> Core
+  Core --> Preview["OpenClaw preview adapter"]
+  Preview --> Apply["OpenClaw apply delegation"]
+  Apply --> Publish["npm distribution proof"]
+  Publish --> Awesome["openclaw/awesome-claws"]
+  Publish --> Hermes["Hermes adapter follow-up"]
 ```
 
-## Launch Gate
+## Decisions Deferred
 
-Public launch requires the OpenClaw body round trip, ClawHub disabled/enabled
-proof, the reference validator, one real OpenClaw command path, and maintained
-starter Claws. The unscoped npm transfer, Hermes adapter, and removal of either
-experimental gate are not launch blockers.
+- Whether the `CLAW.md` body remains documentation, becomes `SOUL.md`, or gains
+  another portable prompt mapping.
+- Whether executable task sections belong in the root document or a separate
+  automation format.
+- The unscoped npm package transfer and `agentclaws.io` domain ownership.
+- Stable v1 graduation and removal of OpenClaw or ClawHub experimental gates.
+
+These decisions can revise the versioned package reader and adapters later;
+they do not block proving the standalone CLI against today's merged model.
