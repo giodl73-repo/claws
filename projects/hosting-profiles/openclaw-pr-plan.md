@@ -23,11 +23,11 @@ decision.
 ## Readiness Stack
 
 RFC: [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33), file
-`rfcs/0018-readiness-conditions-and-providers.md`, head `826b73156eaa`.
+`rfcs/0018-readiness-conditions-and-providers.md`, head `cf7231c71ff4`.
 
 Real upstream draft:
 [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018),
-head `e49485d1c79`. It contains fifteen readiness-only commits and no Hosting
+head `c21cf2903f4`. It contains fourteen readiness-only commits and no Hosting
 Profile implementation.
 
 RFC 0018 and its PR body identify this upstream draft as the primary
@@ -67,8 +67,8 @@ for PR 104018 and not one PR per condition.
 
 The runtime activation integrity bucket is implemented for review in
 [fork PR 153](https://github.com/giodl73-repo/openclaw/pull/153), branch
-`user/giodl/readiness-activation-integrity`, at `8a2fe6ce123`. It is based
-directly on readiness head `e49485d1c79` and adds selectable
+`user/giodl/readiness-activation-integrity`, at `9b32107ef39`. It is based
+directly on readiness head `c21cf2903f4` and adds selectable
 `ConfigCurrent`, `ModelRouteReady`, and `SecretsReady` conditions plus
 quarantine-aware `PluginsLoaded` evidence. The focused closeout passes 237
 assertions, type-aware lint, formatting, and diff checks; the final independent
@@ -102,10 +102,10 @@ their named conditions.
 ## Hosting Profile Stack
 
 RFC: [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37), file
-`rfcs/0023-standard-hosting-profiles.md`, head `a61b57d8e67a`.
+`rfcs/0023-standard-hosting-profiles.md`, head `98b0713d2710`.
 
 Primary implementation: [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765),
-head `b787a1e39e1`, stacked directly on readiness head `e49485d1c79` from PR 104018.
+head `baaaa1af50d`, stacked directly on readiness head `c21cf2903f4` from PR 104018.
 [Fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94) provides a
 clean profile-only comparison while the upstream aggregate diff contains both
 layers.
@@ -117,9 +117,10 @@ layers.
 | `11322a977f6` | [PR 42](https://github.com/giodl73-repo/openclaw/pull/42) | Runtime activation identity.                  |
 | `2f8defb707c` | [PR 21](https://github.com/giodl73-repo/openclaw/pull/21) | Packaged release conformance.                 |
 
-The real upstream stack contains twenty profile-only commits. Its final commit
-explicitly makes profile selection enable canonical evaluation while preserving
-the unprofiled legacy readiness path.
+The real upstream stack contains twenty-one profile-only commits. Its final two
+commits make profile selection enable canonical evaluation while preserving the
+unprofiled legacy readiness path, then make the Docker conformance client assert
+that boundary directly.
 
 PR 107765 is the real upstream implementation request. The four smaller fork
 PRs expose the profile commits as review aids and are not separate landing
@@ -148,8 +149,8 @@ Lobster, doctor, or policy part of the runtime readiness path.
 
 Current readiness proof supersedes the older detailed snapshot below:
 
-- PR 104018 exact head: `e49485d1c79`. Its opt-in compatibility amendment
-  passes 130 focused assertions and live endpoint proof; type-aware lint,
+- PR 104018 exact head: `c21cf2903f4`. Its opt-in compatibility amendment
+  passes 154 focused assertions and live endpoint proof; type-aware lint,
   formatting, and diff checks pass.
 - Most recent package-installed behavior proof, on pre-rebase readiness head
   `89d8607aab9f`, used image
@@ -159,12 +160,13 @@ Current readiness proof supersedes the older detailed snapshot below:
 - The 54-phase published upgrade lane passed on patch-equivalent proved head
   `e5f5e97332e5`; the final rebase changed only the SDK budget relative to the
   readiness patch. Exact-head Codex review is clean and ClawSweeper is queued.
-- PR 107765 exact head is `b787a1e39e1`, directly stacked on readiness head
-  `e49485d1c79`. Profiles are opt-in; an unprofiled Gateway keeps the legacy
+- PR 107765 exact head is `baaaa1af50d`, directly stacked on readiness head
+  `c21cf2903f4`. Profiles are opt-in; an unprofiled Gateway keeps the legacy
   baseline and adds no `ProfileSelected` or `WorkspaceWritable` requirement.
-  The expanded profile run passes 277 assertions and the focused post-fix run
-  passes 113. Three broad Gateway failures reproduce on the exact readiness
-  base and are not profile regressions.
+  The changed-file run passes 361 assertions; its only failure is an unrelated
+  archive test that cannot spawn the missing local `zip` executable. The
+  focused post-fix run passes 113. Three broad Gateway failures reproduce on
+  the exact readiness base and are not profile regressions.
   The exact package-installed matrix passes all unprofiled/profile transitions
   with image
   `sha256:20d507b613b346e1165add88234eb00390ea6d1b086970dd3589dd3f41654175`.

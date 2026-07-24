@@ -29,24 +29,24 @@
 
 ## Current Session
 
-- Last updated: 2026-07-23
+- Last updated: 2026-07-24
 - Last agent: Codex
 - Current focus: Readiness and Standard Hosting Profiles are split into two
   independently reviewable RFCs and implementation stacks.
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `826b73156eaaf88023672fd4affb1134c6b9dcf0` and includes
+  `cf7231c71ff4c026811672ab8a22d7b2a5aab265` and includes
   `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
   `98b0713d271031d9ad78e9bb1845ff36c972d002` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `e49485d1c79f7f15d16b8bcc48f99a5dda0675c0` in fifteen commits, rebased on
-  OpenClaw `main` `b8a47b2338442d1d8a32e4a28057f7688919e600`. The dependent
+  at `c21cf2903f482c8f59aa3fe82af7b65ddb09cd4e` in fourteen commits, rebased on
+  OpenClaw `main` `8d67c40939be`. The dependent
   upstream profile implementation is
   [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765)
-  at `b787a1e39e1e787ab89ce3ea581f452d63c951c1` in twenty profile-only
+  at `baaaa1af50dbe838fa3639a93cc73e3dfbc3b941` in twenty-one profile-only
   commits stacked on the exact readiness head. The stack includes the
   discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
   cross-link, and docs navigation. [Fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
@@ -56,17 +56,20 @@
   hosting-profiles project files from this session should be committed. Both
   implementation worktrees and both RFC worktrees are clean at their pushed
   heads.
-- Validation: the opt-in foundation amendment passes 130 focused assertions;
-  activation PR 153 passes 237; the rebased profile stack passes 277 in the
-  expanded profile run and 113 in its focused post-fix run. Type-aware lint,
-  formatting, and diff checks pass. Three broad Gateway failures reproduce on
-  the exact foundation base and are not profile regressions. Independent final
-  reviews are clean. Earlier Docker/package proof remains valid;
-  exact-current-head remote proof is blocked on Crabbox authentication.
-- Blocking question: GitHub CI is settling on the refreshed heads. The native
-  i18n inventory required by current OpenClaw `main` is regenerated in the
-  readiness stack; native i18n and dependency-guard checks now pass on both
-  exact implementation heads.
+- Validation: the opt-in foundation amendment passes 154 focused assertions;
+  activation PR 153 passes 237; the profile changed-file run passes 361 of 362
+  assertions, with only a missing local `zip` executable blocking an unrelated
+  archive test, and its focused post-fix run passes 113. Type-aware lint,
+  formatting, generated protocol, docs-map, native-i18n, and diff checks pass.
+  Three broad Gateway failures reproduce on the exact foundation base and are
+  not profile regressions. Independent final reviews are clean. Earlier
+  Docker/package proof remains valid; exact-current-head Docker and Android
+  execution are unavailable in this WSL environment.
+- Blocking question: Most GitHub CI is still settling. Both upstream stacks
+  pass `check-dependencies`; their shared `actionlint` failure is current-main
+  `.github/workflows/pr-ci-sweeper.yml` at lines 42 and 48. Neither stack has a
+  `.github` diff, so this is tracked as base CI noise rather than readiness or
+  profile work.
 
 ## Resume Checklist
 
@@ -120,6 +123,22 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-24: Refreshed the complete readiness/profile stack onto OpenClaw
+  `main` `8d67c40939be`. PR 104018 is `c21cf2903f4`, activation PR 153 is
+  `9b32107ef39`, and profile PR 107765 is `baaaa1af50d`; range-diff proves the
+  final one-commit base refresh did not alter any patch. Rebase conflicts at
+  the append-only Gateway method registry and generated Android enum retained
+  both new upstream session methods and the `ready` method. Independent review
+  found and fixed one profile proof regression: the unprofiled Docker scenario
+  now asserts legacy Gateway conditions and the absence of canonical-only
+  conditions. The current Knip gate also prompted removal of a test-only public
+  export; canonical tests now use the configured entrypoint. RFC 0018 and all
+  live PR bodies are aligned to the new heads. Both upstream dependency checks
+  now pass. The remaining shared `actionlint` failure is caused by current
+  `main` commit `8d67c40939be`: zizmor rejects the full-grant GitHub App tokens
+  in `pr-ci-sweeper.yml`; the readiness/profile branches do not modify
+  `.github`.
 
 - 2026-07-23: Started the first follow-on condition bucket on branch
   `user/giodl/readiness-activation-integrity`, based directly on readiness PR
