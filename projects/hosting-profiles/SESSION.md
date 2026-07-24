@@ -32,12 +32,13 @@
 - Last updated: 2026-07-24
 - Last agent: Codex
 - Current focus: All four optional owner-adoption buckets over the readiness
-  foundation are complete fork evidence slices. Hosted dependencies now
-  composes RFC 0020 bundle selectors and owner evidence through RFC 0018.
+  foundation are complete fork evidence slices. State/background PR 155 now
+  includes bounded session-store durability; skill readiness remains deferred
+  until its owner exposes a bounded activation snapshot.
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `e61239b5ad413e17f7dce6e1954afbbb34943bbd` and includes
+  `720167e74bd8a0c6dfe381f48f0f276d6f64c344` and includes
   `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
   `98b0713d271031d9ad78e9bb1845ff36c972d002` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
@@ -56,16 +57,18 @@
   [activation PR 153](https://github.com/giodl73-repo/openclaw/pull/153) and
   [agent execution capabilities PR 154](https://github.com/giodl73-repo/openclaw/pull/154),
   plus [state/background services PR 155](https://github.com/giodl73-repo/openclaw/pull/155)
+  at `5cb5a656e74` with selectable `SessionStorageReady`,
   and [host bindings PR 156](https://github.com/giodl73-repo/openclaw/pull/156)
   at `9c6ceb9016a`.
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
   hosting-profiles project files from this session should be committed. Both
   implementation worktrees and both RFC worktrees are clean at their pushed
-  heads. RFC 0018 is `e61239b5ad4`; RFC 0020 is `ebf8ea8af55`.
+  heads. RFC 0018 is `720167e74bd`; RFC 0020 is `ebf8ea8af55`.
 - Validation: the opt-in foundation amendment passes 154 focused assertions;
   activation PR 153 passes 237; capability PR 154 passes 14 focused assertions,
-  state/background PR 155 passes 145 focused assertions, and host bindings PR
-  156 passes 142 focused assertions with real `/ready` recovery proof. The
+  state/background PR 155 passes its prior 145-assertion owner closeout plus
+  current 56-assertion readiness and 38-assertion Gateway suites. Host bindings
+  PR 156 passes 142 focused assertions with real `/ready` recovery proof. The
   owner packages pass their recorded focused lint, formatting, diff, and
   independent-review gates; the profile changed-file run passes 361 of 362
   assertions, with only a missing local `zip` executable blocking an unrelated

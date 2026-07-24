@@ -61,8 +61,8 @@ for PR 104018 and not one PR per condition.
 | PR bucket | Conditions in scope | Boundary |
 | --- | --- | --- |
 | Runtime activation integrity | `SecretsReady`, `ModelRouteReady`, `ConfigCurrent`, stronger `PluginsLoaded` | Consume activation-pinned secret, model, config, and plugin snapshots. No credential acquisition, model calls, reload, or repair in `/ready`. |
-| Agent execution capabilities | `ContextEngineReady`, `ToolCatalogReady`, `McpRuntimeReady`, `SandboxReady`/`HarnessReady` | Selected capability owners publish bounded observations. Optional capability failures remain advisory unless selected. |
-| State and background services | `StateReady`, `DeliveryRuntimeReady`, `SchedulerReady`; `RestoreComplete` deferred | Observe state activation, delivery runtime ownership, scheduler lifecycle, and startup recovery. A future restore condition requires an owner-produced restore generation and admission fence. |
+| Agent execution capabilities | `ContextEngineReady`, `ToolCatalogReady`, `McpRuntimeReady`, `SandboxReady`/`HarnessReady`; `SkillsReady` deferred | Selected capability owners publish bounded observations. Optional capability failures remain advisory unless selected. Skill activation needs a bounded owner snapshot; rebuilding the current skill inventory in readiness is not acceptable. |
+| State and background services | `StateReady`, `SessionStorageReady`, `DeliveryRuntimeReady`, `SchedulerReady`; `RestoreComplete` deferred | Observe state activation, bounded session-store durability, delivery runtime ownership, scheduler lifecycle, and startup recovery. A future restore condition requires an owner-produced restore generation and admission fence. |
 | Hosted dependencies | `HostBindingsReady`; `EgressReady` and `ManagedConfigApplied` deferred | Consume RFC 0020 host-binding owner evidence through the same readiness selection contract. Lobster/OCC policy and tenant decisions remain downstream. |
 
 The runtime activation integrity bucket is implemented for review in
@@ -86,19 +86,26 @@ tool, instantiate an engine, or call a model. The closeout passes 14 focused
 assertions, production and source-test typechecks, type-aware lint, formatting,
 and diff checks. Independent review found and fixed default-agent-only MCP
 evidence, then returned no actionable correctness findings.
+`SkillsReady` remains deferred: source proof measured the current cold skill
+inventory path at 9.0 seconds for a workspace snapshot and 17.5 seconds through
+full status. The skills owner must first publish a bounded activation snapshot
+or index that readiness can consume without rebuilding inventory.
 
 The state and background services bucket is implemented for review in
 [fork PR 155](https://github.com/giodl73-repo/openclaw/pull/155), branch
-`user/giodl/readiness-state-background-services`, at `dcf5bdba0d0`. It is
+`user/giodl/readiness-state-background-services`, at `5cb5a656e74`. It is
 based directly on readiness head `c21cf2903f4` and adds selectable
-`StateReady`, `DeliveryRuntimeReady`, and `SchedulerReady` conditions. Owners
-publish synchronous process-local snapshots, so readiness does not open
-SQLite, install delivery recovery, import or start cron, scan queues, or run
-recovery. The closeout passes 145 focused assertions, production and
-source-test typechecks, type-aware lint, formatting, and diff checks. The final
-independent review reports no actionable correctness findings. `RestoreComplete`
-remains deferred until OpenClaw owns a generic restore generation and admission
-fence.
+`StateReady`, `SessionStorageReady`, `DeliveryRuntimeReady`, and
+`SchedulerReady` conditions. Lifecycle owners publish synchronous process-local
+snapshots. The explicitly selected storage criterion performs a bounded
+write/fsync/unlink probe over the resolved state and per-agent session-store
+parents, with a one-second deadline, capped targets and concurrency, cached
+same-generation results, stale-generation rejection, and redacted failures.
+The latest focused runs pass 56 readiness assertions and 38 Gateway
+readiness/HTTP assertions; type-aware lint, formatting, and diff checks pass.
+The final independent review reports no actionable correctness findings.
+`RestoreComplete` remains deferred until OpenClaw owns a generic restore
+generation and admission fence.
 
 The hosted-dependencies composition is implemented for review in
 [fork PR 156](https://github.com/giodl73-repo/openclaw/pull/156), branch
