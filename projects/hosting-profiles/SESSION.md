@@ -31,28 +31,32 @@
 
 - Last updated: 2026-07-24
 - Last agent: Codex
-- Current focus: All four optional owner-adoption buckets over the readiness
-  foundation are complete fork evidence slices. State/background PR 155 now
-  includes bounded session-store durability; skill readiness remains deferred
-  until its owner exposes a bounded activation snapshot.
+- Current focus: Runtime activation, agent execution, and state/service
+  readiness criteria are consolidated as one upstream owner-adoption PR. The
+  Hosting Profiles stack is restacked on that exact aggregate and composes the
+  owner criteria into one shared serving baseline plus profile-specific facts.
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `720167e74bd8a0c6dfe381f48f0f276d6f64c344` and includes
+  `bb4d65a` and includes
   `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
-  `98b0713d271031d9ad78e9bb1845ff36c972d002` and includes
+  `8179d5c` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
   at `c21cf2903f482c8f59aa3fe82af7b65ddb09cd4e` in fourteen commits, rebased on
   OpenClaw `main` `8d67c40939be`. The dependent
-  upstream profile implementation is
-  [openclaw/openclaw#107765](https://github.com/openclaw/openclaw/pull/107765)
-  at `baaaa1af50dbe838fa3639a93cc73e3dfbc3b941` in twenty-one profile-only
-  commits stacked on the exact readiness head. The stack includes the
+  core-owner implementation is
+  [openclaw/openclaw#113421](https://github.com/openclaw/openclaw/pull/113421)
+  at `afe095353783dbb093b509a852c3fe855d28f07e`, based on the exact readiness
+  head. The dependent profile implementation is
+  [openclaw/openclaw#113422](https://github.com/openclaw/openclaw/pull/113422)
+  at `fcf4100bdcb3b882faa0e815a8b83b9e136ed6a3`, stacked on the core-owner
+  head. The stack includes the
   discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
-  cross-link, and docs navigation. [Fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
-  provides the clean profile-only comparison. Exact review slices are
+  cross-link, and docs navigation. [Fork PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
+  provides the exact profile-only comparison. Superseded PR 107765 is closed
+  without force-pushing its history. Exact review slices are
   recorded in `openclaw-pr-plan.md`. Follow-on readiness evidence is in
   [activation PR 153](https://github.com/giodl73-repo/openclaw/pull/153) and
   [agent execution capabilities PR 154](https://github.com/giodl73-repo/openclaw/pull/154),
@@ -62,29 +66,17 @@
   at `9c6ceb9016a`.
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
   hosting-profiles project files from this session should be committed. Both
-  implementation worktrees and both RFC worktrees are clean at their pushed
-  heads. RFC 0018 is `720167e74bd`; RFC 0020 is `ebf8ea8af55`.
-- Validation: the opt-in foundation amendment passes 154 focused assertions;
-  activation PR 153 passes 237; capability PR 154 passes 14 focused assertions,
-  state/background PR 155 passes its prior 145-assertion owner closeout plus
-  current 56-assertion readiness and 38-assertion Gateway suites. Host bindings
-  PR 156 passes 142 focused assertions with real `/ready` recovery proof. The
-  owner packages pass their recorded focused lint, formatting, diff, and
-  independent-review gates; the profile changed-file run passes 361 of 362
-  assertions, with only a missing local `zip` executable blocking an unrelated
-  archive test, and its focused post-fix run passes 113. Type-aware lint,
-  formatting, generated protocol, docs-map, native-i18n, and diff checks pass.
-  Three broad Gateway failures reproduce on the exact foundation base and are
-  not profile regressions. Independent final reviews are clean. Earlier
-  Docker/package proof remains valid; exact-current-head Docker and Android
-  execution are unavailable in this WSL environment.
-- Blocking question: Most GitHub CI is still settling. Both upstream stacks
-  pass `check-dependencies`; their shared `actionlint` failure is current-main
-  `.github/workflows/pr-ci-sweeper.yml` at lines 42 and 48. Neither stack has a
-  `.github` diff, so this is tracked as base CI noise rather than readiness or
-  profile work. Fork PRs 154 and 155 have the same base failure; their
-  `auto-response` and `label` jobs also lack the upstream-only GitHub App
-  private key.
+  implementation branches and both RFC branches are clean at pushed heads.
+- Validation: PR 113421 passes 164 focused assertions across 12 files,
+  type-aware lint across 31 changed TypeScript files, and diff checks. PR
+  113422's final Codex review reports no actionable issues and reran 74
+  assertions across seven files. Focused schema-help, readiness, Gateway, CLI,
+  and Docker-plan tests pass; formatting and lint are clean. Package build and
+  tarball integrity pass. Three broad Gateway failures reproduce on the exact
+  readiness base and are not profile regressions.
+- Blocking question: exact-head package-installed Docker scenario execution
+  remains the profile landing gate. Docker Desktop's Linux engine did not
+  become ready locally, so no exact-head container success is claimed.
 
 ## Resume Checklist
 
@@ -138,6 +130,22 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-24: Consolidated and published the owner-adoption/profile stack.
+  - Opened upstream draft PR 113421 at `afe09535378` as the single merge unit
+    for fork review slices 153-155. The 33-file diff is +2,573/-21 and keeps all
+    criteria inert until selected.
+  - Restacked Hosting Profiles on that exact head, added the shared required
+    serving baseline and advisory state/service observations, and opened
+    upstream draft PR 113422 at `fcf4100bdcb`. Fork PR 157 is the exact
+    profile-only comparison (+2,275/-32 across 45 files).
+  - Closed stale upstream PR 107765 as superseded rather than force-pushing its
+    non-ancestor history.
+  - Independent review found and fixed missing `hosting.profile` schema help
+    metadata and a Docker proof assertion that incorrectly treated plugin
+    activation as advisory under a selected profile. Final review is clean.
+  - Updated RFC 0018 and its sidecar at `bb4d65a`; updated RFC 0023 and its
+    sidecar at `8179d5c`; refreshed both RFC PR bodies with the new stack.
 
 - 2026-07-24: Refreshed the complete readiness/profile stack onto OpenClaw
   `main` `8d67c40939be`. PR 104018 is `c21cf2903f4`, activation PR 153 is
