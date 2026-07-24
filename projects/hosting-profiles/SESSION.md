@@ -36,7 +36,7 @@
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `bf783ba317fabc6cd87ac79cb652209ca62e6a48` and includes
+  `826b73156eaaf88023672fd4affb1134c6b9dcf0` and includes
   `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
   `98b0713d271031d9ad78e9bb1845ff36c972d002` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real

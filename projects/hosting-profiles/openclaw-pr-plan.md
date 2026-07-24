@@ -23,7 +23,7 @@ decision.
 ## Readiness Stack
 
 RFC: [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33), file
-`rfcs/0018-readiness-conditions-and-providers.md`, head `bf783ba317fa`.
+`rfcs/0018-readiness-conditions-and-providers.md`, head `826b73156eaa`.
 
 Real upstream draft:
 [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018),
