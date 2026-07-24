@@ -102,18 +102,19 @@ fence.
 
 The hosted-dependencies composition is implemented for review in
 [fork PR 156](https://github.com/giodl73-repo/openclaw/pull/156), branch
-`user/giodl/readiness-hosted-dependencies`, at `32de8d0d942`. It is stacked on
+`user/giodl/readiness-hosted-dependencies`, at `9c6ceb9016a`. It is stacked on
 an explicit composition of the RFC 0018 readiness foundation and RFC 0020 host
 integration package 3. The selectable `openclaw.host-bindings-ready` criterion
-projects the active bundle plus owner-published generation evidence into the
-canonical `HostBindingsReady` condition. Required bindings fail closed for
-missing, incompatible, unresolved, stale, degraded, or unavailable state;
-optional failures do not block. Evaluation is synchronous, in-memory, and
-bounded before projection. The closeout passes 19 focused unit assertions, 69
-Gateway readiness assertions, lint, formatting, diff checks, and Codex review.
-Generic `EgressReady` remains deferred to concrete dispatcher/traffic-policy
-owners, and `ManagedConfigApplied` remains deferred until Managed Config
-publishes an authoritative applied/effective generation.
+resolves bundle-declared canonical selectors through the active core/plugin
+catalog and adds them as advisory detail. Required contributions fail the
+aggregate for missing or stale owner evidence and absent, `False`, or `Unknown`
+declared criteria; optional failures do not block. Status and Doctor identify
+unresolved selectors, recursion is prohibited, and manifests are capped at 64
+unique selectors. The closeout passes 142 focused assertions, including real
+`/ready` `200 -> 503 -> 200` generation failure and recovery, plus lint,
+formatting, diff checks, and clean Codex review. `EgressReady`,
+`ManagedConfigApplied`, and `RestoreComplete` remain deferred until their
+owners publish authoritative facts.
 
 Each bucket should land as one coherent owner-adoption PR when its source facts
 are ready. Every PR must prove bounded evaluation, redaction, generation

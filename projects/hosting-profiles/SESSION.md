@@ -31,14 +31,13 @@
 
 - Last updated: 2026-07-24
 - Last agent: Codex
-- Current focus: Build the four optional owner-adoption buckets over the
-  readiness foundation. Runtime activation integrity, agent execution
-  capabilities, and state/background services are complete fork evidence
-  slices; hosted dependencies is next.
+- Current focus: All four optional owner-adoption buckets over the readiness
+  foundation are complete fork evidence slices. Hosted dependencies now
+  composes RFC 0020 bundle selectors and owner evidence through RFC 0018.
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `6c9c9d7e3418` and includes
+  `e61239b5ad413e17f7dce6e1954afbbb34943bbd` and includes
   `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
   `98b0713d271031d9ad78e9bb1845ff36c972d002` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
@@ -56,17 +55,19 @@
   recorded in `openclaw-pr-plan.md`. Follow-on readiness evidence is in
   [activation PR 153](https://github.com/giodl73-repo/openclaw/pull/153) and
   [agent execution capabilities PR 154](https://github.com/giodl73-repo/openclaw/pull/154),
-  plus [state/background services PR 155](https://github.com/giodl73-repo/openclaw/pull/155).
+  plus [state/background services PR 155](https://github.com/giodl73-repo/openclaw/pull/155)
+  and [host bindings PR 156](https://github.com/giodl73-repo/openclaw/pull/156)
+  at `9c6ceb9016a`.
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
   hosting-profiles project files from this session should be committed. Both
   implementation worktrees and both RFC worktrees are clean at their pushed
-  heads. State/background PR 155 is committed at `dcf5bdba0d0` and the RFC
-  0018 evidence update is committed at `6c9c9d7e3418`.
+  heads. RFC 0018 is `e61239b5ad4`; RFC 0020 is `ebf8ea8af55`.
 - Validation: the opt-in foundation amendment passes 154 focused assertions;
   activation PR 153 passes 237; capability PR 154 passes 14 focused assertions,
-  and state/background PR 155 passes 145 focused assertions. Both follow-on
-  packages pass production and source-test typechecks, type-aware lint,
-  formatting, and diff checks; the profile changed-file run passes 361 of 362
+  state/background PR 155 passes 145 focused assertions, and host bindings PR
+  156 passes 142 focused assertions with real `/ready` recovery proof. The
+  owner packages pass their recorded focused lint, formatting, diff, and
+  independent-review gates; the profile changed-file run passes 361 of 362
   assertions, with only a missing local `zip` executable blocking an unrelated
   archive test, and its focused post-fix run passes 113. Type-aware lint,
   formatting, generated protocol, docs-map, native-i18n, and diff checks pass.
@@ -1105,17 +1106,19 @@ getReadiness()).hosting` field. PR 18 head `c423b77720` now statically
     readiness foundation through `c21cf2903f4` over hosted-integration package
     3 without reviving superseded config or plugin API modules.
   - [Fork PR 156](https://github.com/giodl73-repo/openclaw/pull/156), branch
-    `user/giodl/readiness-hosted-dependencies`, head `32de8d0d942`, adds the
-    selectable `openclaw.host-bindings-ready` criterion and canonical
-    `HostBindingsReady` condition.
-  - Required bindings fail closed from existing bundle and owner-generation
-    evidence. Optional degraded bindings remain non-blocking. The evaluator is
-    observational, in-memory, and rejects oversized inventories before status
-    projection.
-  - `EgressReady` is deferred to concrete dispatcher/traffic-policy owners;
-    `ManagedConfigApplied` is deferred until Managed Config publishes an
-    authoritative applied/effective generation.
-  - Verification: 19 focused unit assertions, 69 Gateway readiness assertions,
-    changed-file Oxlint/Oxfmt/diff checks, and clean Codex review. Broad core
+    `user/giodl/readiness-hosted-dependencies`, head `9c6ceb9016a`, resolves
+    bundle-declared canonical selectors through the active readiness catalog.
+  - Selecting `openclaw.host-bindings-ready` adds referenced conditions as
+    advisory detail. Required contributions fail the aggregate for missing or
+    stale owner evidence and absent, `False`, or `Unknown` criteria. Status and
+    Doctor identify unresolved selectors; recursion and more than 64 unique
+    selectors are rejected.
+  - `EgressReady`, `ManagedConfigApplied`, and `RestoreComplete` remain deferred
+    until their owners publish authoritative facts.
+  - Verification: 142 focused assertions including real `/ready`
+    `200 -> 503 -> 200` recovery, changed-file Oxlint/Oxfmt/diff checks, and
+    clean Codex review. Broad core
     typing remains blocked by inherited `packages/net-policy` dependency/type
     errors outside this patch.
+  - RFC 0018 is updated at `e61239b5ad4`; RFC 0020 and its five normative
+    sidecars are published at `ebf8ea8af55` on fork RFC PR 2.
