@@ -55,7 +55,8 @@
 - PR #113403 now has real embedded Automation proof from Blacksmith Testbox
   `tbx_01kyb3f4sd4c1850yhjcnn1yfw`: inherited `tools.allow: ["read"]`,
   Automation `toolsAllow: []`, successful model request with zero provider
-  tools, and successful completion. `@clawsweeper re-review` was requested.
+  tools, and successful completion. The ClawSweeper re-review started but did
+  not complete before its review lease expired; unstick this first.
 - Patch 0009 should not be upstreamed as its old `replyToId` interceptor.
   Current `main` has migrated to Teams SDK 2.0.14, which owns reactive
   threading/quoting semantics. Reassess 0009 together with 0014 and file only
@@ -89,6 +90,8 @@
   execution-fencing contracts as separate technical proposals.
 - Next implementation candidate after owner feedback: patch 0015 if `skipped`
   is accepted; otherwise move to the next owner-independent fix.
+- `status-report.md` is the executive 20-patch portfolio view. Keep it aligned
+  with `inventory.md` when dispositions or live upstream states change.
 
 ## Session Checkpoints
 

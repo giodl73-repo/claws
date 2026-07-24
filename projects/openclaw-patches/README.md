@@ -8,6 +8,7 @@ contracts into `openclaw/openclaw`.
 
 | Area | File |
 | ---- | ---- |
+| Executive 20-patch status and next actions | `status-report.md` |
 | Patch inventory and upstream disposition | `inventory.md` |
 
 ## Active Work

@@ -1,7 +1,7 @@
 # Lobster OpenClaw Patch Inventory
 
 Baseline: Lobster PR #5402 at
-`c05c4654cf594cb953b56e65e3eb4e5c33fd0d59`, carrying 20 patch files against
+`b85499b5575a0757e13827634741a91ab64eab61`, carrying 20 patch files against
 OpenClaw `v2026.7.1`.
 
 Classification:
