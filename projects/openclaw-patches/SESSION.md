@@ -77,15 +77,18 @@
   PR #91685 and the status split in PR #105215. Upstream already offers
   explicit `delivery.bestEffort: true`; treat Lobster's different default as
   downstream policy rather than a generic OpenClaw bug.
-- Compare patch 0015 with issue #77298 and PR #96174 before proposing terminal
-  status semantics.
+- Patch 0015 is now marked on canonical issue #77298 with Scout provenance and
+  the exact downstream semantics in comment #5075284093. PR #96174 solves a
+  separate task-ledger `lost` versus `failed` timestamp problem. Do not author
+  patch 0015 until maintainers choose existing `skipped` or a new public
+  `interrupted` status.
 - PR #113403 fixes explicit `toolsAllow: []`; PR #95605 remains a distinct raw
   `modelRun` case.
 - Use Omar Shahine's draft RFC 0026 (`openclaw/rfcs#50`) for user-facing
   "Automations" terminology, while keeping authorization, publication, and
   execution-fencing contracts as separate technical proposals.
-- Next comparison candidate: assess patch 0015's `skipped` restart status
-  against issue #77298 and PR #96174's proposed `failed` status.
+- Next implementation candidate after owner feedback: patch 0015 if `skipped`
+  is accepted; otherwise move to the next owner-independent fix.
 
 ## Session Checkpoints
 
