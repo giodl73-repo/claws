@@ -23,7 +23,7 @@ decision.
 ## Readiness Stack
 
 RFC: [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33), file
-`rfcs/0018-readiness-conditions-and-providers.md`, head `cf7231c71ff4`.
+`rfcs/0018-readiness-conditions-and-providers.md`, head `6c9c9d7e3418`.
 
 Real upstream draft:
 [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018),
@@ -62,7 +62,7 @@ for PR 104018 and not one PR per condition.
 | --- | --- | --- |
 | Runtime activation integrity | `SecretsReady`, `ModelRouteReady`, `ConfigCurrent`, stronger `PluginsLoaded` | Consume activation-pinned secret, model, config, and plugin snapshots. No credential acquisition, model calls, reload, or repair in `/ready`. |
 | Agent execution capabilities | `ContextEngineReady`, `ToolCatalogReady`, `McpRuntimeReady`, `SandboxReady`/`HarnessReady` | Selected capability owners publish bounded observations. Optional capability failures remain advisory unless selected. |
-| State and background services | `StateReady`, `RestoreComplete`, `DeliveryRuntimeReady`, `SchedulerReady` | Observe state activation, restore fencing, delivery runtime, and scheduler lifecycle. Historical failures remain diagnostics or advisories. |
+| State and background services | `StateReady`, `DeliveryRuntimeReady`, `SchedulerReady`; `RestoreComplete` deferred | Observe state activation, delivery runtime ownership, scheduler lifecycle, and startup recovery. A future restore condition requires an owner-produced restore generation and admission fence. |
 | Hosted dependencies | `EgressReady`, `ManagedConfigApplied`, `HostBindingsReady` | Hosted integration owners use the same provider contract; Lobster/OCC policy and tenant decisions remain downstream. |
 
 The runtime activation integrity bucket is implemented for review in
@@ -86,6 +86,19 @@ tool, instantiate an engine, or call a model. The closeout passes 14 focused
 assertions, production and source-test typechecks, type-aware lint, formatting,
 and diff checks. Independent review found and fixed default-agent-only MCP
 evidence, then returned no actionable correctness findings.
+
+The state and background services bucket is implemented for review in
+[fork PR 155](https://github.com/giodl73-repo/openclaw/pull/155), branch
+`user/giodl/readiness-state-background-services`, at `dcf5bdba0d0`. It is
+based directly on readiness head `c21cf2903f4` and adds selectable
+`StateReady`, `DeliveryRuntimeReady`, and `SchedulerReady` conditions. Owners
+publish synchronous process-local snapshots, so readiness does not open
+SQLite, install delivery recovery, import or start cron, scan queues, or run
+recovery. The closeout passes 145 focused assertions, production and
+source-test typechecks, type-aware lint, formatting, and diff checks. The final
+independent review reports no actionable correctness findings. `RestoreComplete`
+remains deferred until OpenClaw owns a generic restore generation and admission
+fence.
 
 Each bucket should land as one coherent owner-adoption PR when its source facts
 are ready. Every PR must prove bounded evaluation, redaction, generation
