@@ -23,7 +23,7 @@ decision.
 ## Readiness Stack
 
 RFC: [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33), file
-`rfcs/0018-readiness-conditions-and-providers.md`, head `90ee87424b1f`.
+`rfcs/0018-readiness-conditions-and-providers.md`, head `bf783ba317fa`.
 
 Real upstream draft:
 [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018),
@@ -51,6 +51,26 @@ gateway: {
   },
 }
 ```
+
+## Follow-On Condition Buckets
+
+RFC 0018 now groups condition adoption by the subsystem that owns the runtime
+fact. These are follow-on PRs over the readiness foundation, not prerequisites
+for PR 104018 and not one PR per condition.
+
+| PR bucket | Conditions in scope | Boundary |
+| --- | --- | --- |
+| Runtime activation integrity | `SecretsReady`, `ModelRouteReady`, `ConfigCurrent`, stronger `PluginsLoaded` | Consume activation-pinned secret, model, config, and plugin snapshots. No credential acquisition, model calls, reload, or repair in `/ready`. |
+| Agent execution capabilities | `ContextEngineReady`, `ToolCatalogReady`, `McpRuntimeReady`, `SandboxReady`/`HarnessReady` | Selected capability owners publish bounded observations. Optional capability failures remain advisory unless selected. |
+| State and background services | `StateReady`, `RestoreComplete`, `DeliveryRuntimeReady`, `SchedulerReady` | Observe state activation, restore fencing, delivery runtime, and scheduler lifecycle. Historical failures remain diagnostics or advisories. |
+| Hosted dependencies | `EgressReady`, `ManagedConfigApplied`, `HostBindingsReady` | Hosted integration owners use the same provider contract; Lobster/OCC policy and tenant decisions remain downstream. |
+
+Each bucket should land as one coherent owner-adoption PR when its source facts
+are ready. Every PR must prove bounded evaluation, redaction, generation
+replacement, failure/recovery transitions, and agreement across HTTP, RPC,
+health, status, and CLI. New criteria are selectable or advisory by default;
+only explicit operator selection or a separately accepted profile makes them
+required.
 
 ## Hosting Profile Stack
 

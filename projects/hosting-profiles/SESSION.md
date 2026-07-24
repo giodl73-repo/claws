@@ -36,7 +36,7 @@
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `9e87932863c6a561853430e0a419d7484914d145` and includes
+  `bf783ba317fabc6cd87ac79cb652209ca62e6a48` and includes
   `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
   `98b0713d271031d9ad78e9bb1845ff36c972d002` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
@@ -119,6 +119,19 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-23: Added an owner-based follow-on condition adoption plan to RFC
+  0018 and its live PR body.
+  - Four coherent PR buckets cover runtime activation integrity, agent
+    execution capabilities, state/background services, and hosted
+    dependencies instead of proposing one PR per condition.
+  - New criteria remain selectable or advisory by default and must consume
+    bounded, redacted activation snapshots. Readiness evaluation must not
+    perform model calls, credential acquisition, reload, repair, restore,
+    migration, queue draining, or unbounded network discovery.
+  - RFC head is `bf783ba317fabc6cd87ac79cb652209ca62e6a48`; the source branch and
+    [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33) body are
+    updated.
 
 - 2026-07-23: Completed independent three-model review of RFC 0018, RFC 0023,
   both normative sidecar specs, and both exact implementation diffs.
