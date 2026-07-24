@@ -1,4 +1,4 @@
-# Auditable Skills: maintainer brief
+# Skill Memory: maintainer brief
 
 ## The short version
 
@@ -7,16 +7,16 @@ send replacement inventory, authorize a refund, or pay an invoice. The durable
 fact that the work completed often remains buried in transcript prose or a
 tool-specific system.
 
-Auditable Skills proposes one small OpenClaw primitive: a trusted tool can
-attach a typed outcome receipt to a successful result. OpenClaw records the
+Skill Memory proposes one small OpenClaw primitive: a trusted tool can attach a
+typed completed-work fact to a successful result. OpenClaw records the
 execution facts it already knows and lets an authorized operator or later agent
-get, list, and count the retained outcomes.
+get, list, and count what was remembered.
 
 ```ts
 return {
   content: [{ type: "text", text: "Refund approved." }],
   details: {},
-  receipts: [
+  memories: [
     {
       type: "refund.approved",
       subject: { type: "invoice", id: "INV-2048" },
@@ -43,25 +43,25 @@ storage framework.
 
 ## What we proved
 
-The fork prototype recorded nine outcomes across three customer email threads
+The fork prototype recorded nine facts across three customer email threads
 and two agents. After the recording process exited, fresh processes:
 
-- counted three `case.opened` and two `case.resolved` outcomes;
+- counted three `case.opened` and two `case.resolved` entries;
 - listed both resolved cases with exact agent, session, run, tool, and tool-call
   correlation;
 - recovered an `inventory.sent` tracking number from the originating thread;
-- retrieved a full `refund.approved` receipt by ID, including authorization
+- retrieved a full `refund.approved` memory by ID, including authorization
   code `RFND-AUTH-7721` from the deterministic fixture.
 
-Receipt recording is bounded to 16 candidates per tool result, prepared before
-the SQLite write lock, committed as one atomic batch, and contained so a receipt
+Memory recording is bounded to 16 candidates per tool result, prepared before
+the SQLite write lock, committed as one atomic batch, and contained so a memory
 store failure cannot rewrite a completed tool result.
 
 ## What it deliberately is not
 
-Receipt Core is not a CRM, payment ledger, workflow engine, compliance
+Skill Memory Core is not a CRM, payment ledger, workflow engine, compliance
 attestation, or authoritative case-state machine. It does not infer an
-unresolved queue from a missing `case.resolved` receipt. The channel, CRM, or a
+unresolved queue from a missing `case.resolved` memory. The channel, CRM, or a
 future workflow consumer still owns that projection.
 
 The initial implementation is single-host SQLite. Multi-host storage,
@@ -70,21 +70,21 @@ not hidden claims in the first proposal.
 
 ## Natural path forward
 
-If Receipt Core proves useful, it creates clean stepping stones:
+If Skill Memory Core proves useful, it creates clean stepping stones:
 
-1. portable `SKILL.md` declarations for intended outcomes;
+1. portable `SKILL.md` declarations for the fact types a skill may remember;
 2. exact managed skill and child-run identity;
 3. honest run-level token and cost accounting;
 4. caller-owned budget decisions;
 5. workflow orchestration for a concrete consumer.
 
-None of those later steps is required to adopt receipts, and lack of demand is
+None of those later steps is required to adopt memories, and lack of demand is
 a valid stopping point.
 
 ## Review material
 
-- [RFC 0022: Auditable Skills](https://github.com/giodl73-repo/rfcs/pull/6)
-- [OpenClaw Receipt Core prototype](https://github.com/giodl73-repo/openclaw/pull/97)
+- [RFC 0022: Skill Memory](https://github.com/giodl73-repo/rfcs/pull/6)
+- [OpenClaw Skill Memory Core prototype](https://github.com/giodl73-repo/openclaw/pull/97)
 
 Both are draft, mergeable, fork-only proposals. Nothing has been opened or
 merged upstream.
@@ -93,8 +93,8 @@ merged upstream.
 
 The first question is intentionally narrow:
 
-> Should a durable, typed outcome from a successful trusted tool be a core
+> Should a durable, typed fact from a successful trusted tool be a core
 > OpenClaw resource that later agents and operators can retrieve and count?
 
-If yes, the next conversation is the Receipt Core contract and landing shape.
+If yes, the next conversation is the Skill Memory Core contract and landing shape.
 Managed skills, token budgets, and orchestration can remain later decisions.

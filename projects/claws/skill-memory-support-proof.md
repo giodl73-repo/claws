@@ -1,19 +1,19 @@
-# Auditable Skills support-case proof
+# Skill Memory support-case proof
 
 Proved 2026-07-18 against OpenClaw fork PR #97 head `f04293c9153b` on
 Windows with Node.js 22.22.3.
 
 ## Question
 
-Can an OpenClaw support agent leave durable, searchable business outcomes for
+Can an OpenClaw support agent leave durable, searchable completed-work facts for
 several email threads and recover concrete evidence after the recording process
 has exited, without adding a CRM object model?
 
 ## Fixture
 
-The source harness passed successful trusted-tool receipt candidates through
-`collectToolAuditReceipts` and persisted the accepted batches through
-`recordAuditReceiptBatch` into the default database beneath a temporary
+The source harness passed successful trusted-tool memory candidates through
+`collectToolSkillMemory` and persisted the accepted batches through
+`recordSkillMemoryBatch` into the default database beneath a temporary
 `OPENCLAW_STATE_DIR`.
 
 - Alice, `CAS-1042`: `case.opened`, `customer.verified`, `case.resolved`.
@@ -23,13 +23,13 @@ The source harness passed successful trusted-tool receipt candidates through
 - Carol, `CAS-4096`: `case.opened`, `inventory.sent`. The inventory evidence
   included tracking number `TRACK-4096`; no `case.resolved` was recorded.
 
-The fixture recorded nine receipts across three stable email-thread session
+The fixture recorded nine memories across three stable email-thread session
 keys. The seed process then exited.
 
 ## Fresh-process queries
 
-Separate Node processes invoked the real `receiptsCommand` query layer against
-the retained `receipts.sqlite`.
+Separate Node processes invoked the real `memoriesCommand` query layer against
+the retained `skill-memory.sqlite`.
 
 ```text
 case.opened --count   -> 3
@@ -45,7 +45,7 @@ inventory.sent order:ORD-4096 trackingNumber=TRACK-4096
 case.opened    case:CAS-4096
 ```
 
-Getting Bob's refund receipt by its harness-owned receipt ID returned:
+Getting Bob's refund memory by its harness-owned memory ID returned:
 
 ```json
 {
@@ -70,10 +70,10 @@ payment system.
 
 ## Boundary learned
 
-Receipt Core answers which outcomes were recorded and preserves the evidence
+Skill Memory Core answers which facts were remembered and preserves the evidence
 and originating thread. It does not maintain an authoritative case lifecycle
 or expose an `unresolved` query. In this fixture, the operator can see three
-opened cases and two resolved outcomes and correlate the remaining case, but a
+opened cases and two resolved entries and correlate the remaining case, but a
 real unresolved queue still belongs to the source channel or a CRM/workflow
 consumer. This is a useful scope boundary, not a reason to add case state to
-Receipt Core.
+Skill Memory Core.
