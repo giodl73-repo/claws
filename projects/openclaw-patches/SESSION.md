@@ -52,6 +52,10 @@
   Lobster-approved release, then drop patches 0003 and 0005.
 - Do not duplicate issue #107154 / PR #107155; Galin owns the active WebIQ fix.
 - Watch OpenClaw issue #113402 and PR #113403 for review and CI.
+- PR #113403 now has real embedded Automation proof from Blacksmith Testbox
+  `tbx_01kyb3f4sd4c1850yhjcnn1yfw`: inherited `tools.allow: ["read"]`,
+  Automation `toolsAllow: []`, successful model request with zero provider
+  tools, and successful completion. `@clawsweeper re-review` was requested.
 - Compare patch 0015 with issue #77298 and PR #96174 before proposing terminal
   status semantics.
 - PR #113403 fixes explicit `toolsAllow: []`; PR #95605 remains a distinct raw
