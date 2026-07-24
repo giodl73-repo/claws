@@ -74,6 +74,19 @@ quarantine-aware `PluginsLoaded` evidence. The focused closeout passes 237
 assertions, type-aware lint, formatting, and diff checks; the final independent
 review reports no actionable findings.
 
+The agent execution capabilities bucket is implemented for review in
+[fork PR 154](https://github.com/giodl73-repo/openclaw/pull/154), branch
+`user/giodl/readiness-agent-execution-capabilities`, at `45b2ae87ac3`. It is
+also based directly on readiness head `c21cf2903f4` and adds selectable
+`ContextEngineReady`, `ToolCatalogReady`, `McpRuntimeReady`, `SandboxReady`,
+and `HarnessReady` conditions. MCP definitions are captured for every
+configured agent when the Gateway accepts the runtime configuration; the
+readiness request itself does not connect to MCP, start a sandbox, invoke a
+tool, instantiate an engine, or call a model. The closeout passes 14 focused
+assertions, production and source-test typechecks, type-aware lint, formatting,
+and diff checks. Independent review found and fixed default-agent-only MCP
+evidence, then returned no actionable correctness findings.
+
 Each bucket should land as one coherent owner-adoption PR when its source facts
 are ready. Every PR must prove bounded evaluation, redaction, generation
 replacement, failure/recovery transitions, and agreement across HTTP, RPC,

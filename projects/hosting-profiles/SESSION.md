@@ -31,12 +31,14 @@
 
 - Last updated: 2026-07-24
 - Last agent: Codex
-- Current focus: Readiness and Standard Hosting Profiles are split into two
-  independently reviewable RFCs and implementation stacks.
+- Current focus: Build the four optional owner-adoption buckets over the
+  readiness foundation. Runtime activation integrity and agent execution
+  capabilities are complete fork evidence slices; state/background services
+  is next.
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `cf7231c71ff4c026811672ab8a22d7b2a5aab265` and includes
+  `34afb0015e5e7d43f7ec4e21138ad6f4b45c6712` and includes
   `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
   `98b0713d271031d9ad78e9bb1845ff36c972d002` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
@@ -51,13 +53,18 @@
   discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
   cross-link, and docs navigation. [Fork PR 94](https://github.com/giodl73-repo/openclaw/pull/94)
   provides the clean profile-only comparison. Exact review slices are
-  recorded in `openclaw-pr-plan.md`.
+  recorded in `openclaw-pr-plan.md`. Follow-on readiness evidence is in
+  [activation PR 153](https://github.com/giodl73-repo/openclaw/pull/153) and
+  [agent execution capabilities PR 154](https://github.com/giodl73-repo/openclaw/pull/154).
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
   hosting-profiles project files from this session should be committed. Both
   implementation worktrees and both RFC worktrees are clean at their pushed
-  heads.
+  heads. Capability PR 154 is committed at `45b2ae87ac3` and the RFC 0018
+  evidence update is committed at `34afb0015e`.
 - Validation: the opt-in foundation amendment passes 154 focused assertions;
-  activation PR 153 passes 237; the profile changed-file run passes 361 of 362
+  activation PR 153 passes 237; capability PR 154 passes 14 focused assertions,
+  production and source-test typechecks, type-aware lint, formatting, and diff
+  checks; the profile changed-file run passes 361 of 362
   assertions, with only a missing local `zip` executable blocking an unrelated
   archive test, and its focused post-fix run passes 113. Type-aware lint,
   formatting, generated protocol, docs-map, native-i18n, and diff checks pass.
@@ -69,7 +76,8 @@
   pass `check-dependencies`; their shared `actionlint` failure is current-main
   `.github/workflows/pr-ci-sweeper.yml` at lines 42 and 48. Neither stack has a
   `.github` diff, so this is tracked as base CI noise rather than readiness or
-  profile work.
+  profile work. Fork PR 154 has the same base failure; its `auto-response` and
+  `label` jobs also lack the upstream-only GitHub App private key.
 
 ## Resume Checklist
 
