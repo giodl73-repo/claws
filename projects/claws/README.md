@@ -22,6 +22,7 @@ Claws are not feeds and not raw workspace templates:
 | Auditable Skills support-case proof        | `auditable-skills-support-proof.md`    |
 | Auditable Skills maintainer brief          | `auditable-skills-maintainer-brief.md` |
 | Auditable Skills fork PR bodies            | `auditable-skills-pr-bodies/`          |
+| Portable Claws follow-up PR plan            | `portable-standard-pr-plan.md`         |
 
 ## M5 Rendezvous Commitment
 
