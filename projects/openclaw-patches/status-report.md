@@ -90,4 +90,3 @@ host/plugin/runtime surfaces.
    then split accepted contracts into individual RFCs/issues.
 6. During the next PromoteClaw bump, verify release inclusion and remove
    patches `0003`, `0005`, and `0006`.
-
