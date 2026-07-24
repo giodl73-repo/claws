@@ -56,6 +56,10 @@
   `tbx_01kyb3f4sd4c1850yhjcnn1yfw`: inherited `tools.allow: ["read"]`,
   Automation `toolsAllow: []`, successful model request with zero provider
   tools, and successful completion. `@clawsweeper re-review` was requested.
+- Patch 0009 should not be upstreamed as its old `replyToId` interceptor.
+  Current `main` has migrated to Teams SDK 2.0.14, which owns reactive
+  threading/quoting semantics. Reassess 0009 together with 0014 and file only
+  a current-SDK behavior gap backed by real Teams proof.
 - Compare patch 0015 with issue #77298 and PR #96174 before proposing terminal
   status semantics.
 - PR #113403 fixes explicit `toolsAllow: []`; PR #95605 remains a distinct raw
