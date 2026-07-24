@@ -38,9 +38,9 @@
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `bb4d65a` and includes
+  `443c53c` and includes
   `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
-  `8179d5c` and includes
+  `a4085df` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
@@ -48,10 +48,10 @@
   OpenClaw `main` `8d67c40939be`. The dependent
   core-owner implementation is
   [openclaw/openclaw#113421](https://github.com/openclaw/openclaw/pull/113421)
-  at `afe095353783dbb093b509a852c3fe855d28f07e`, based on the exact readiness
+  at `43ff72e958fe1d575adc1ebfcc235a2488a62283`, based on the exact readiness
   head. The dependent profile implementation is
   [openclaw/openclaw#113422](https://github.com/openclaw/openclaw/pull/113422)
-  at `fcf4100bdcb3b882faa0e815a8b83b9e136ed6a3`, stacked on the core-owner
+  at `cb55b4d82cfb24a7a2765789e071f2c0daa289cd`, stacked on the core-owner
   head. The stack includes the
   discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
   cross-link, and docs navigation. [Fork PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
@@ -67,13 +67,12 @@
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
   hosting-profiles project files from this session should be committed. Both
   implementation branches and both RFC branches are clean at pushed heads.
-- Validation: PR 113421 passes 164 focused assertions across 12 files,
-  type-aware lint across 31 changed TypeScript files, and diff checks. PR
-  113422's final Codex review reports no actionable issues and reran 74
-  assertions across seven files. Focused schema-help, readiness, Gateway, CLI,
-  and Docker-plan tests pass; formatting and lint are clean. Package build and
-  tarball integrity pass. Three broad Gateway failures reproduce on the exact
-  readiness base and are not profile regressions.
+- Validation: PR 113421's focused readiness, Gateway, and Policy plugin suites,
+  type-aware lint, formatting, diff checks, and final Codex review pass. PR
+  113422 passes 129 merged criterion/profile assertions and all 70 Gateway CLI
+  option tests; final Codex review reports no actionable issues and reran 126
+  focused tests. Package build and tarball integrity pass. `check:changed` is
+  blocked locally by a Blacksmith organization-auth mismatch.
 - Blocking question: exact-head package-installed Docker scenario execution
   remains the profile landing gate. Docker Desktop's Linux engine did not
   become ready locally, so no exact-head container success is claimed.
@@ -130,6 +129,21 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-24: Added the final canonical-selector and plugin-provider example.
+  - PR 113421 now exposes `openclaw.plugins-loaded` and
+    `openclaw.event-loop-healthy` over existing canonical facts. Selected facts
+    remain explicit `Unknown` conditions if their producer cannot complete.
+  - The bundled Policy plugin registers `plugin.policy.conformant`, reuses its
+    existing evaluator, and is inert until selected. The documented default is
+    advisory; operators may promote it to required.
+  - Hosting Profiles now select `openclaw.plugins-loaded` as required and
+    `openclaw.event-loop-healthy` as advisory through the ordinary selector
+    mechanism; the profile-only `pluginsRequired` path was removed.
+  - Codex review found and fixed CLI activation environment leakage across
+    in-process Gateway runs. The final profile review is clean.
+  - Updated implementation PRs 113421/113422, fork PR 157, RFC PRs 33/37, and
+    both normative sidecars at the exact heads recorded above.
 
 - 2026-07-24: Consolidated and published the owner-adoption/profile stack.
   - Opened upstream draft PR 113421 at `afe09535378` as the single merge unit
