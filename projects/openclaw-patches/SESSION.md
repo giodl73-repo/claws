@@ -20,10 +20,10 @@
 
 - Last updated: 2026-07-24
 - Last agent: Copilot
-- Current focus: Inventory the 20 patches carried by Lobster PR #5402 and map
-  each upstreamable behavior to an existing issue/PR or a justified new issue.
-- Active branch / PR: Lobster PR #5402,
-  `promoteclaw/openclaw-2026.7.1`
+- Current focus: Drive the first independently droppable patches upstream,
+  starting with explicit tool-less Automation runs.
+- Active branch / PR: OpenClaw `user/giodl/cron-toolless-run-guard`, PR #113403;
+  Lobster PR #5402 remains the patch-set baseline.
 - Known dirty state: `claws-hapi` contains unrelated user changes; only the new
   project files and project-index additions belong to this work.
 - Blocking question: none
@@ -50,14 +50,17 @@
 
 - Confirm whether OpenClaw PR #102366 and PR #102357 are present in the next
   Lobster-approved release, then drop patches 0003 and 0005.
-- Prepare the current-main proof and focused PR for issue #107154.
+- Do not duplicate issue #107154 / PR #107155; Galin owns the active WebIQ fix.
+- Watch OpenClaw issue #113402 and PR #113403 for review and CI.
 - Compare patch 0015 with issue #77298 and PR #96174 before proposing terminal
   status semantics.
-- Prove and file the exact `toolsAllow: []` cron guard bug; PR #95605 is related
-  but covers raw `modelRun`, not deliberately tool-less cron runs.
+- PR #113403 fixes explicit `toolsAllow: []`; PR #95605 remains a distinct raw
+  `modelRun` case.
+- Use Omar Shahine's draft RFC 0026 (`openclaw/rfcs#50`) for user-facing
+  "Automations" terminology, while keeping authorization, publication, and
+  execution-fencing contracts as separate technical proposals.
 
 ## Session Checkpoints
 
 Detailed session handoffs belong in `sessions/`. Keep this file as the concise
 canonical resume snapshot.
-
