@@ -1,0 +1,7 @@
+{
+  "name": "@example/unsafe-claw",
+  "version": "1.0.0",
+  "openclaw": {
+    "claw": "../CLAW.md"
+  }
+}
