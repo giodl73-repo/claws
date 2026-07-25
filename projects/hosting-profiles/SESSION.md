@@ -72,14 +72,16 @@
   A current-head focused run passed 91 readiness/profile assertions. Two suites
   could not import locally because the configured package feed lacks newly
   pinned dependencies, so fresh upstream CI is authoritative for full
-  hydration. PR 104018's exact-head `check-lint` job is green; the remaining
-  matrix jobs are in progress. One broad CLI shard has a single timeout in the
-  pre-existing `--help` process-exit test after 3,377 passing assertions; rerun
-  it after the parent workflow completes. Earlier package build, tarball
-  integrity, and focused behavior proof remain recorded in the PR bodies.
+  hydration. PR 104018's exact-head CI matrix is green: the one broad CLI shard
+  that timed out in the pre-existing `--help` process-exit test passed on its
+  isolated rerun, leaving 92 passing and 30 intentionally skipped checks with
+  no failures. Earlier package build, tarball integrity, and focused behavior
+  proof remain recorded in the PR bodies.
 - Blocking question: exact-head package-installed Docker scenario execution
   remains the profile landing gate. Docker Desktop's Linux engine did not
-  become ready locally, so no exact-head container success is claimed.
+  become ready locally. Delegated Blacksmith Testbox requires login and direct
+  AWS Crabbox returns coordinator `401 unauthorized`; neither remote attempt
+  allocated a provider id, so no exact-head container success is claimed.
 
 ## Resume Checklist
 
@@ -143,6 +145,22 @@
   RFC PR 33 is `e8683d3`; RFC PR 37 is `ed1ff53`. All implementation and RFC
   bodies now point to these heads, all branches are mergeable, and fresh
   ClawSweeper reviews were requested.
+
+- 2026-07-25: Closed exact-head foundation CI after the refresh. The isolated
+  rerun of CLI shard `checks-node-compact-small-7` passed, so PR 104018 now has
+  92 passing and 30 intentionally skipped checks with no pending or failed
+  checks. Fresh ClawSweeper reviews remain active for implementation PRs
+  104018, 113421, and 113422 and RFC PRs 33 and 37.
+
+- 2026-07-25: Recovered the five fresh ClawSweeper reports from their
+  successful exact-review workflow artifacts while durable comment publication
+  remained queued. Every exact-head report says `patch is correct` with no
+  review comments. PR 104018 has sufficient live proof; RFC PRs 33 and 37 need
+  no runtime proof. PR 113421 still requests inspectable running-Gateway
+  failure/recovery evidence, and PR 113422 still requests the package-installed
+  Docker profile matrix. Local Docker is unavailable, Blacksmith is logged
+  out, and direct AWS Crabbox returned `401 unauthorized`; no remote lease was
+  allocated and no proof claim was added.
 
 - 2026-07-24: Added the final canonical-selector and plugin-provider example.
   - PR 113421 now exposes `openclaw.plugins-loaded` and

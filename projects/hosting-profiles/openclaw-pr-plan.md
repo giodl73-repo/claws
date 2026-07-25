@@ -129,6 +129,12 @@ intentionally not configured.
 
 ## Validation State
 
+- Fresh exact-head ClawSweeper artifacts report `patch is correct` with no
+  review findings for implementation PRs 104018, 113421, and 113422 and RFC
+  PRs 33 and 37. GitHub comment publication is delayed behind the durable
+  publication queue; the successful run artifacts are the current verdicts.
+- PR 104018's full exact-head CI matrix is green: 92 checks pass and 30 are
+  intentionally skipped. Its one broad CLI timeout passed on isolated rerun.
 - Final profile Codex review reports no actionable correctness issues and
   reran 126 focused profile, readiness, and CLI tests.
 - The merged criterion slice passes 129 assertions; all 70 Gateway CLI option
@@ -143,6 +149,11 @@ intentionally not configured.
 - Exact-head Docker scenario execution is still required. Docker Desktop's
   Linux engine did not become available locally, so no exact-head container
   success is claimed.
+- Remote proof is also blocked on this device: delegated Blacksmith Testbox
+  requires `blacksmith auth login`, and direct AWS Crabbox rejects lease
+  creation with coordinator `401 unauthorized`. Neither attempt allocated a
+  Testbox or Crabbox lease. Run the exact PR 113422 package matrix from an
+  authenticated machine and attach its provider/run id and redacted output.
 - Three broad `gateway.test.ts` failures reproduce on the readiness base: one
   reload timing assertion and two stale `agents.list` fixtures.
 
