@@ -33,17 +33,25 @@
   `RFC 0022: Skill Memory`; the RFC source and v1 sidecar are now
   `0022-skill-memory.md` and `skill-memory-v1-spec.md` at pushed head
   `203101b`.
-- Restacked the six OpenClaw proof PRs without compatibility aliases because
-  the fork-only API has not shipped. Public titles and bodies now tell one
-  story: remember completed work, associate managed runs, recall results,
+- Restacked the six OpenClaw proof PRs onto fork `main` `59640bad2` and adapted
+  the core slice to current config modularization. Public titles and bodies tell
+  one story: remember completed work, associate managed runs, recall results,
   retain exact-run usage, make caller-owned token decisions, and centralize
-  managed dispatch. Focused Linux proof passes 174 tests on the cumulative
-  stack plus the generated config baseline and `git diff --check`.
-- OpenClaw #97 is at `3985b35d`; downstream heads are #98 `36d5120f`, #100
-  `ed4390b1`, #109 `b844b072`, #113 `ba73d2ef`, and #114 `5f6683c5`. PR #97
-  conflicts with the fork's much newer `main` in three generated/config files;
-  #98 through #114 are mergeable. The POC was not expanded into unrelated
-  modernization work.
+  managed dispatch.
+- Current OpenClaw heads are #97 `5584af5e7`, #98 `f78049388`, #100
+  `a86371fb7`, #109 `fc6161f02`, #113 `4f5da2fbc`, and #114 `b461715f1`.
+  All six draft PRs are live and mergeable. The compatibility branch used as
+  #113's stacked base also points to #109's exact head.
+- Linux proof passes 380 core tests, 182 managed-run tests, 48 result tests,
+  346 exact-usage tests, 12 budget tests, 137 dispatch tests, 22 focused
+  post-review regressions, and the complete `check:test-types` gate. The tested
+  WSL tree and final Windows branch tree both resolve to
+  `3b8b304c97c7fc245375b66c1f67a5101088895a`.
+- Code review found and fixed terminal-result forwarding, managed identity
+  correlation, result pagination, optional CLI tool-call IDs, and a strict
+  indexing error. Two subsequent Codex review attempts stalled without a
+  verdict; no new finding was emitted. GitHub code checks are green; only the
+  fork-only `label` and `auto-response` automation jobs fail.
 - Recast the disabled-by-default Lobster proof as plugin `skill-memory` at
   commit `7c79a99af`. `authorize_return`, `skill_memory_recall`, and
   `skill_memory_count` share configurable `skill-memory.sqlite`; all 7 focused
