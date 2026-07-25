@@ -29,7 +29,7 @@
 
 ## Current Session
 
-- Last updated: 2026-07-24
+- Last updated: 2026-07-25
 - Last agent: Codex
 - Current focus: Runtime activation, agent execution, and state/service
   readiness criteria are consolidated as one upstream owner-adoption PR. The
@@ -38,20 +38,20 @@
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `443c53c` and includes
+  `e8683d3` and includes
   `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
-  `a4085df` and includes
+  `ed1ff53` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `c21cf2903f482c8f59aa3fe82af7b65ddb09cd4e` in fourteen commits, rebased on
-  OpenClaw `main` `8d67c40939be`. The dependent
+  at `5861bcd70c6ac06c55715ff82ddbfacb212779c8` in fifteen commits, rebased on
+  OpenClaw `main` `f6e8446e55ee`. The dependent
   core-owner implementation is
   [openclaw/openclaw#113421](https://github.com/openclaw/openclaw/pull/113421)
-  at `43ff72e958fe1d575adc1ebfcc235a2488a62283`, based on the exact readiness
+  at `ce9ef81b24d66b6144835a88fc081b0c8def7687`, based on the exact readiness
   head. The dependent profile implementation is
   [openclaw/openclaw#113422](https://github.com/openclaw/openclaw/pull/113422)
-  at `cb55b4d82cfb24a7a2765789e071f2c0daa289cd`, stacked on the core-owner
+  at `17149d7ecf1595c31b8a9a1ac56c5f77baa1efdb`, stacked on the core-owner
   head. The stack includes the
   discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
   cross-link, and docs navigation. [Fork PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
@@ -67,12 +67,16 @@
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
   hosting-profiles project files from this session should be committed. Both
   implementation branches and both RFC branches are clean at pushed heads.
-- Validation: PR 113421's focused readiness, Gateway, and Policy plugin suites,
-  type-aware lint, formatting, diff checks, and final Codex review pass. PR
-  113422 passes 129 merged criterion/profile assertions and all 70 Gateway CLI
-  option tests; final Codex review reports no actionable issues and reran 126
-  focused tests. Package build and tarball integrity pass. `check:changed` is
-  blocked locally by a Blacksmith organization-auth mismatch.
+- Validation: every changed TypeScript file in the final three-layer stack
+  passes Oxlint and formatting; `git diff --check` passes at each exact head.
+  A current-head focused run passed 91 readiness/profile assertions. Two suites
+  could not import locally because the configured package feed lacks newly
+  pinned dependencies, so fresh upstream CI is authoritative for full
+  hydration. PR 104018's exact-head `check-lint` job is green; the remaining
+  matrix jobs are in progress. One broad CLI shard has a single timeout in the
+  pre-existing `--help` process-exit test after 3,377 passing assertions; rerun
+  it after the parent workflow completes. Earlier package build, tarball
+  integrity, and focused behavior proof remain recorded in the PR bodies.
 - Blocking question: exact-head package-installed Docker scenario execution
   remains the profile landing gate. Docker Desktop's Linux engine did not
   become ready locally, so no exact-head container success is claimed.
@@ -129,6 +133,16 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-25: Refreshed the full readiness/profile stack on OpenClaw `main`
+  `f6e8446e55ee`. The rebase moved readiness integration into the current split
+  Gateway owners, preserved the stack by range comparison, and fixed a real
+  `max-lines` lint regression in `server-startup-finish.ts` by moving profile
+  selection into the readiness runtime helper. Final heads are PR 104018
+  `5861bcd70c6a`, PR 113421 `ce9ef81b24d6`, and PR 113422 `17149d7ecf15`.
+  RFC PR 33 is `e8683d3`; RFC PR 37 is `ed1ff53`. All implementation and RFC
+  bodies now point to these heads, all branches are mergeable, and fresh
+  ClawSweeper reviews were requested.
 
 - 2026-07-24: Added the final canonical-selector and plugin-provider example.
   - PR 113421 now exposes `openclaw.plugins-loaded` and

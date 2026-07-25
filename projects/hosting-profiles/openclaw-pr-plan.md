@@ -21,11 +21,11 @@ RFC 0023: Standard Hosting Profiles
 
 RFC: [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33), files
 `rfcs/0018-readiness-conditions-and-providers.md` and
-`rfcs/0018/readiness-v1-spec.md`, head `443c53c`.
+`rfcs/0018/readiness-v1-spec.md`, head `e8683d3`.
 
 Primary framework implementation:
 [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018),
-head `c21cf2903f4`. It contains fourteen readiness-only commits and no Hosting
+head `5861bcd70c6a`. It contains fifteen readiness-only commits and no Hosting
 Profile implementation.
 
 The compatibility boundary is the presence of `gateway.readiness`:
@@ -56,8 +56,8 @@ review aids for canonical conditions, workspace, providers, and CLI.
 
 The owner adoption is one upstream follow-on merge unit:
 [openclaw/openclaw#113421](https://github.com/openclaw/openclaw/pull/113421),
-branch `user/giodl/readiness-core-owner-adoption`, head `43ff72e958f`, based
-exactly on PR 104018 head `c21cf2903f4`.
+branch `user/giodl/readiness-core-owner-adoption`, head `ce9ef81b24d6`, based
+exactly on PR 104018 head `5861bcd70c6a`.
 
 | Owner area | Selectable conditions | Review slice |
 | --- | --- | --- |
@@ -66,7 +66,7 @@ exactly on PR 104018 head `c21cf2903f4`.
 | State and services | `StateReady`, `SessionStorageReady`, `DeliveryRuntimeReady`, `SchedulerReady` | [PR 155](https://github.com/giodl73-repo/openclaw/pull/155) |
 
 PRs 153-155 are review slices, not separate upstream landing requests. The
-combined upstream diff is 39 files, 2,932 insertions, and 27 deletions. It adds
+combined upstream diff is 41 files, 2,941 insertions, and 37 deletions. It adds
 direct selectors for the existing canonical plugin/event-loop facts and the
 bundled Policy plugin's `plugin.policy.conformant` provider as a concrete
 advisory example. Focused readiness, Gateway, and Policy tests, type-aware lint,
@@ -91,14 +91,14 @@ RFC 0020 and is not part of PR 113421.
 
 RFC: [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37), files
 `rfcs/0023-standard-hosting-profiles.md` and
-`rfcs/0023/hosting-profile-v1-spec.md`, head `a4085df`.
+`rfcs/0023/hosting-profile-v1-spec.md`, head `ed1ff53`.
 
 Primary implementation:
 [openclaw/openclaw#113422](https://github.com/openclaw/openclaw/pull/113422),
 branch `user/giodl/standard-hosting-profiles-owner-adoption`, exact head
-`cb55b4d82cf`. It is stacked on core-condition head `43ff72e958f`.
+`17149d7ecf15`. It is stacked on core-condition head `ce9ef81b24d6`.
 [Fork PR 157](https://github.com/giodl73-repo/openclaw/pull/157) is the exact
-profile-only comparison: 45 files, 2,402 insertions, and 54 deletions.
+profile-only comparison: 48 files, 2,372 insertions, and 54 deletions.
 
 PR 113422 supersedes closed PR 107765. The branch replacement avoided a
 force-push and preserves the old review history.
@@ -135,6 +135,8 @@ intentionally not configured.
   tests pass, including back-to-back activation-flag isolation.
 - Focused readiness, Gateway, config-help, CLI, and Docker-plan suites pass.
 - Type-aware lint, formatting, syntax, and diff checks pass.
+- Current-head focused validation passes 91 readiness/profile assertions;
+  upstream CI supplies the complete dependency hydration unavailable locally.
 - Review fixes added required config help/labels and corrected the Docker
   profile proof to require successful plugin activation.
 - Package build and package-tarball integrity pass.
@@ -151,7 +153,7 @@ intentionally not configured.
    for smaller source-area comparisons.
 3. Decide RFC 0023's four-profile support catalog.
 4. Refresh package-installed Docker proof for exact profile head
-   `cb55b4d82cf`.
+   `17149d7ecf15`.
 5. Land PR 113422 after both readiness dependencies.
 
 ## Contract Rules
