@@ -31,7 +31,7 @@ those remain separate upstream fixes or contract proposals.
 | Patch | Classification | Upstream discovery | Status | Next action |
 | ----- | -------------- | ------------------ | ------ | ----------- |
 | `0001-msteams-brokered-auth` | Lobster | No generic externally authenticated Teams transport found | Downstream | Keep; later assess whether a narrow authenticated-host transport contract is useful upstream |
-| `0002-msteams-brokered-benchmark-range` | Lobster | No matching thread found | Downstream | Keep with Lobster DNS sinkhole and egress-proxy design |
+| `0002-msteams-brokered-benchmark-range` | Upstream fix | Issue #107163 and open PR #107164, owned by Galin Iliev, add a Teams-local hostname-scoped RFC2544 policy | **Active upstream PR** | Do not duplicate; track PR #107164 and drop after release inclusion and accepted host-proxy proof |
 | `0003-msteams-native-runtime-entrypoints` | Upstream fix | Issue #102365; merged PR #102366, merge `68dcfe633d85acdb38cdc102de806f2c7141cd6f` | **Upstream landed** | Drop when the pinned OpenClaw release contains the merge |
 | `0004-secrets-fast-path-keyless-webiq` | Upstream fix | Issue #107154 and open PR #107155, owned by Galin Iliev | **Active upstream PR** | Do not duplicate; track PR #107155 and drop after release inclusion |
 | `0005-msteams-streaming-prefix-delta` | Upstream fix | Issue #102356; merged PR #102357, merge `787ed383f5579420871bc86e0abb3437448c15a9` | **Upstream landed** | Drop when the pinned OpenClaw release contains the merge |
@@ -44,27 +44,27 @@ those remain separate upstream fixes or contract proposals.
 | `0014-msteams-quoted-replies` | Upstream fix | PR #51647 is inbound context only; Teams SDK 2.0.14 now provides first-class `reply()`, `quote()`, and `addQuote()` APIs, superseding the patch's older wire-level approach | **Reassess against SDK APIs** | Prove the desired reactive/proactive quote policy on current `main`; use SDK-native APIs rather than porting the patch |
 | `0015-cron-gateway-restart-interrupt-skipped` | Upstream fix | Open issue #77298 exactly matches counter/health pollution; Scout provenance and the downstream `skipped` semantics were posted in comment #5075284093; PR #96174 is distinct task-ledger `lost` versus `failed` recovery | **Owner decision needed** | Wait for agreement on reusing existing `skipped` versus adding public `interrupted`; then author the narrow `ops.ts` and restart-catchup test change |
 | `0016-msteams-brokered-file-download` | Lobster | No generic direct-token gap; behavior depends on Lobster delegated-auth proxy | Downstream | Keep while brokered Teams remains host-owned |
-| `0017-msteams-suppress-brokered-approval-prompt` | Upstream contract | No matching `externally-brokered` approval-surface thread found | **Issue needed; owner confirmation** | Propose a generic externally rendered approval surface, excluding Lobster UI policy |
-| `0018-cron-hook-job-identity` | Upstream contract | No matching persisted cron job/revision/run hook identity thread found | **Issue needed; owner confirmation** | Define the minimal hook-correlation contract and split it from preapproval policy |
+| `0017-msteams-suppress-brokered-approval-prompt` | Upstream contract | Scout-marked issue #113444 | **Issue filed; owner confirmation** | Confirm the generic external approval-presentation ownership contract before coding |
+| `0018-cron-hook-job-identity` | Upstream contract | Scout-marked issue #113441; issue #50291 is related observability work | **Issue filed; owner confirmation** | Confirm the immutable Automation job/run/revision hook identity contract before coding |
 | `0019-cron-passport-execution-fence` | Lobster | No generic Passport ownership concept expected | Downstream | Keep regional ownership and duplicate-execution policy in Lobster |
-| `0019-cron-preapproval-creation` | Upstream contract | No matching staged host-authorized cron publication thread found | **Issue needed; owner confirmation** | Propose opaque staged-publication/finalization seam without Lobster approval schema |
-| `0020-cron-nested-tool-authorization` | Upstream contract | No matching `before_tool_operation` resolved pre-effect hook found | **Issue needed; owner confirmation** | Specify resolved operation identity and ordering for exec, nodes, MCP, and plugin tools |
-| `0020-personality-extra-system-prompt` | Upstream fix | No matching `sessions.create` persisted `extraSystemPrompt` issue found; existing prompt issues cover other paths | **Issue needed; public-surface review** | Confirm desired session API contract and file after owner review |
+| `0019-cron-preapproval-creation` | Upstream contract | Scout-marked issue #113443 | **Issue filed; owner confirmation** | Confirm the opaque staged-publication/finalization seam before coding |
+| `0020-cron-nested-tool-authorization` | Upstream contract | Scout-marked issue #113440; issues #13364 and #110986 cover different top-level hook concerns | **Issue filed; owner confirmation** | Confirm operation taxonomy and owner coverage for exec, nodes, MCP, and plugin tools |
+| `0020-personality-extra-system-prompt` | Upstream fix | Scout-marked issue #113442; issue #80329 is related operator context but not persisted prompt state | **Issue filed; public-surface review** | Decide prompt precedence, inheritance, authorization, and mutability before coding |
 
 ## Totals
 
 | Disposition | Count |
 | ----------- | ----: |
-| Direct upstream fixes/features | 10 |
+| Direct upstream fixes/features | 11 |
 | Generic upstream contracts | 4 |
-| Lobster-owned patches | 6 |
+| Lobster-owned patches | 5 |
 | Already landed upstream | 3 |
-| Exact existing open issue | 2 |
+| Open issue awaiting decision or implementation | 6 |
 | Existing related discussion requiring comparison | 2 |
-| Upstream issue gaps after bounded search | 7 |
+| Conditional issue gaps after bounded search | 2 |
 
-The issue-gap count includes contract proposals and excludes Lobster-only
-patches.
+The two remaining issue gaps are patches `0009` and `0014`; file only if
+current Teams SDK behavior proof confirms a remaining gap.
 
 ## Historical Drop
 
@@ -78,5 +78,7 @@ the patch. It is not part of the 20 active files.
   searches did not find the Teams normalization thread.
 - Live GitHub title/body searches found exact issue #102376 and PR #102379 for
   patch 0007.
+- Live verification found exact issue #107163 and PR #107164 for patch 0002;
+  the focused Teams-local fix supersedes a second Scout PR for hosted package 1.
 - Exact code-symbol searches found the already-landed patches 0003 and 0005.
 - All links and states must be rechecked live before issue or PR mutation.

@@ -20,12 +20,13 @@
 
 - Last updated: 2026-07-24
 - Last agent: Copilot
-- Current focus: Avoid duplicate upstream work, track active canonical fixes,
-  and move to the next independently droppable patch.
+- Current focus: Drive owner decisions on the five newly filed Scout contract
+  issues and move accepted contracts into focused upstream PRs.
 - Active branch / PR: OpenClaw `user/giodl/cron-toolless-run-guard`, PR #113403;
   Lobster PR #5402 remains the patch-set baseline.
-- Known dirty state: `claws-hapi` contains unrelated user changes; only the new
-  project files and project-index additions belong to this work.
+- Known dirty state: `claws-hapi` contains unrelated user changes. Only the
+  OpenClaw patch project reports and checkpoints belong to this work; all other
+  dirty files must remain untouched.
 - Blocking question: none
 
 ## Resume Checklist
@@ -83,6 +84,12 @@
   separate task-ledger `lost` versus `failed` timestamp problem. Do not author
   patch 0015 until maintainers choose existing `skipped` or a new public
   `interrupted` status.
+- The five remaining known issue gaps are filed with Scout provenance:
+  #113440 nested operation authorization, #113441 Automation hook identity,
+  #113442 persisted session prompt, #113443 staged Automation publication, and
+  #113444 external approval presentation ownership.
+- `team-report-2026-07-24.md` is the team-facing list of all filed issues,
+  filed PRs, and 6 planned plus 2 conditional PRs.
 - PR #113403 fixes explicit `toolsAllow: []`; PR #95605 remains a distinct raw
   `modelRun` case.
 - Use Omar Shahine's draft RFC 0026 (`openclaw/rfcs#50`) for user-facing
@@ -90,6 +97,12 @@
   execution-fencing contracts as separate technical proposals.
 - Next implementation candidate after owner feedback: patch 0015 if `skipped`
   is accepted; otherwise move to the next owner-independent fix.
+- Hosted-integration package 1 is not a Scout patch PR candidate. Current
+  OpenClaw `main` already has evolved guarded-fetch proxy/dispatcher seams, and
+  exact patch 0002 issue #107163 / PR #107164 owns the Teams RFC2544 fix.
+  Package 1 does not make a carried patch droppable; keep its portable
+  `network-guard/v1` contract in the hosted-integration owner/RFC lane unless
+  network/security owners explicitly request that broader boundary.
 - `status-report.md` is the executive 20-patch portfolio view. Keep it aligned
   with `inventory.md` when dispositions or live upstream states change.
 
