@@ -31,34 +31,33 @@
 
 - Last updated: 2026-07-25
 - Last agent: Codex
-- Current focus: Runtime activation, agent execution, and state/service
-  readiness criteria are consolidated as one upstream owner-adoption PR. The
-  Hosting Profiles stack is restacked on that exact aggregate and composes the
-  owner criteria into one shared serving baseline plus profile-specific facts.
+- Current focus: RFC 0018 now has a shared readiness subject identity package.
+  Core owners, plugins, Hosting Profiles, and node mode all report through that
+  facility; the former profile-only runtime/incarnation envelope is removed.
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `e8683d3` and includes
-  `rfcs/0018/readiness-v1-spec.md`; RFC 0023 is at
-  `ed1ff53` and includes
+  `1e19203` and includes the readiness and subject sidecars; RFC 0023 is at
+  `c72dd05` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `5861bcd70c6ac06c55715ff82ddbfacb212779c8` in fifteen commits, rebased on
-  OpenClaw `main` `f6e8446e55ee`. The dependent
+  at `13b0acaa00f3` in sixteen commits. Fork
+  [PR 161](https://github.com/giodl73-repo/openclaw/pull/161) isolates the
+  subject-identity commit for review. The dependent
   core-owner implementation is
   [openclaw/openclaw#113421](https://github.com/openclaw/openclaw/pull/113421)
-  at `ce9ef81b24d66b6144835a88fc081b0c8def7687`, based on the exact readiness
+  at `dbd540b18a0b`, based on the exact readiness
   head. The dependent profile implementation is
   [openclaw/openclaw#113422](https://github.com/openclaw/openclaw/pull/113422)
-  at `17149d7ecf1595c31b8a9a1ac56c5f77baa1efdb`, stacked on the core-owner
+  at `b58e109a11e2`, stacked on the core-owner
   head. The stack includes the
   discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
   cross-link, and docs navigation. [Fork PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
   provides the exact profile-only comparison. Superseded PR 107765 is closed
   without force-pushing its history. Exact review slices are
   recorded in `openclaw-pr-plan.md`. Follow-on readiness evidence is in
-  [activation PR 153](https://github.com/giodl73-repo/openclaw/pull/153) and
+  [startup-dependency PR 153](https://github.com/giodl73-repo/openclaw/pull/153) and
   [agent execution capabilities PR 154](https://github.com/giodl73-repo/openclaw/pull/154),
   plus [state/background services PR 155](https://github.com/giodl73-repo/openclaw/pull/155)
   at `5cb5a656e74` with selectable `SessionStorageReady`,
@@ -67,16 +66,13 @@
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
   hosting-profiles project files from this session should be committed. Both
   implementation branches and both RFC branches are clean at pushed heads.
-- Validation: every changed TypeScript file in the final three-layer stack
-  passes Oxlint and formatting; `git diff --check` passes at each exact head.
-  A current-head focused run passed 91 readiness/profile assertions. Two suites
-  could not import locally because the configured package feed lacks newly
-  pinned dependencies, so fresh upstream CI is authoritative for full
-  hydration. PR 104018's exact-head CI matrix is green: the one broad CLI shard
-  that timed out in the pre-existing `--help` process-exit test passed on its
-  isolated rerun, leaving 92 passing and 30 intentionally skipped checks with
-  no failures. Earlier package build, tarball integrity, and focused behavior
-  proof remain recorded in the PR bodies.
+- Validation: 152 focused Gateway, readiness, profile, node-mode, subject,
+  session-storage, Policy, selector, and CLI assertions pass on the integrated
+  tree. Oxlint, formatting, and `git diff --check` pass. Full-repo typecheck
+  exceeded two minutes without output after its concrete fixture errors were
+  fixed; focused suites compile. Codex review found and fixed profile argument
+  provenance and a stale contribution-shape assertion. Earlier package build
+  and tarball integrity proof remain recorded in PR 113422.
 - Blocking question: exact-head package-installed Docker scenario execution
   remains the profile landing gate. Docker Desktop's Linux engine did not
   become ready locally. Delegated Blacksmith Testbox requires login and direct
