@@ -14,9 +14,11 @@
     "prepublishOnly": "node -e \"throw new Error('Standalone Claws CLI publication is disabled during incubation.')\""
   },
   "devDependencies": {
+    "@clack/prompts": "1.7.0",
     "@claws/reference-private": "workspace:*",
     "@openclaw/fs-safe": "0.4.7",
     "jszip": "3.10.1",
+    "picocolors": "1.1.1",
     "tar": "7.5.20",
     "yaml": "2.9.0"
   }

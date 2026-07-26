@@ -7,6 +7,14 @@ import { createClawPackage, type CreateClawOptions } from "./create.js";
 import { CliError } from "./errors.js";
 import { inspectClawSource } from "./source-providers.js";
 import {
+  defaultTerminalUi,
+  formatClawSummary,
+  formatHarnessPlan,
+  TUI_CANCELLED,
+  type TerminalUi,
+  withSpinner,
+} from "./tui.js";
+import {
   CLI_VERSION,
   INCUBATION_STABILITY,
   OUTCOME_SCHEMA_VERSION,
@@ -19,8 +27,9 @@ import {
 const usage = `Standalone Claw CLI incubator
 
 Usage:
-  claws-dev create <output> --id <agent-id> --name <name> --description <text> --soul <SOUL.md> [options]
+  claws-dev create [output] [--id <agent-id> --name <name> --description <text> --soul <SOUL.md>] [options]
   claws-dev inspect <source> [--json]
+  claws-dev <source> --agent openclaw
   claws-dev <source> --agent openclaw --dry-run [--json]
   claws-dev <source> --agent openclaw --yes --plan-integrity <digest> [--json]
 
@@ -34,6 +43,10 @@ Create options:
   --skill <local-skill-directory|clawhub:package@version> (repeatable)
   --plugin <clawhub:package@version> (repeatable)
   --package <package-name> --version <exact-version>
+
+In a terminal, the default command previews the host plan and asks before apply.
+Missing create identity options are prompted. Explicit execution flags retain
+their non-interactive output contract.
 
 Set OPENCLAW_EXPERIMENTAL_CLAWS=1 to enable this experimental command.`;
 
@@ -133,10 +146,19 @@ export async function runCli(
     io?: Io;
     env?: NodeJS.ProcessEnv;
     dependencies?: Dependencies;
+    interactive?: boolean;
+    ui?: TerminalUi;
   } = {},
 ): Promise<number> {
   const io = options.io ?? { stdout: process.stdout, stderr: process.stderr };
   const env = options.env ?? process.env;
+  const explicitExecution = argv.includes("--dry-run") || argv.includes("--yes");
+  const interactive =
+    !argv.includes("--json") &&
+    !explicitExecution &&
+    (options.interactive ??
+      (options.io === undefined && process.stdin.isTTY === true && process.stdout.isTTY === true));
+  const ui = options.ui ?? defaultTerminalUi;
   if (argv.length === 1 && (argv[0] === "--help" || argv[0] === "-h")) {
     io.stdout.write(`${usage}\n`);
     return 0;
@@ -203,14 +225,47 @@ export async function runCli(
         },
       });
       json = parsed.values.json === true;
-      const output = parsed.positionals[0];
+      if (parsed.positionals.length > 1) {
+        throw new CliError({
+          code: "invalid_create_arguments",
+          phase: "arguments",
+          message: "create accepts only one output directory.",
+        });
+      }
+      let output = parsed.positionals[0];
+      let agentId = parsed.values.id;
+      let name = parsed.values.name;
+      let description = parsed.values.description;
+      let soulPath = parsed.values.soul;
+      if (interactive) {
+        ui.intro();
+        const prompt = async (
+          current: string | undefined,
+          message: string,
+          placeholder: string,
+        ): Promise<string> => {
+          const value = current ?? (await ui.text({ message, placeholder }));
+          if (value === TUI_CANCELLED) {
+            throw TUI_CANCELLED;
+          }
+          return value;
+        };
+        output = await prompt(output, "Where should the Claw be created?", "./my-claw");
+        agentId = await prompt(agentId, "Agent id", "financial-analyst");
+        name = await prompt(name, "Agent name", "Financial Analyst");
+        description = await prompt(
+          description,
+          "What does this agent do?",
+          "Analyzes companies from primary sources.",
+        );
+        soulPath = await prompt(soulPath, "Portable persona file", "./SOUL.md");
+      }
       if (
         !output ||
-        parsed.positionals.length !== 1 ||
-        typeof parsed.values.id !== "string" ||
-        typeof parsed.values.name !== "string" ||
-        typeof parsed.values.description !== "string" ||
-        typeof parsed.values.soul !== "string"
+        typeof agentId !== "string" ||
+        typeof name !== "string" ||
+        typeof description !== "string" ||
+        typeof soulPath !== "string"
       ) {
         throw new CliError({
           code: "invalid_create_arguments",
@@ -220,12 +275,12 @@ export async function runCli(
         });
       }
       const create = dependencies.create ?? createClawPackage;
-      const claw = await create({
+      const createOptions = {
         output,
-        agentId: parsed.values.id,
-        name: parsed.values.name,
-        description: parsed.values.description,
-        soulPath: parsed.values.soul,
+        agentId,
+        name,
+        description,
+        soulPath,
         ...(typeof parsed.values.agents === "string" ? { agentsPath: parsed.values.agents } : {}),
         ...(typeof parsed.values.package === "string"
           ? { packageName: parsed.values.package }
@@ -233,10 +288,28 @@ export async function runCli(
         ...(typeof parsed.values.version === "string" ? { version: parsed.values.version } : {}),
         ...(parsed.values.skill ? { skills: parsed.values.skill } : {}),
         ...(parsed.values.plugin ? { plugins: parsed.values.plugin } : {}),
-      });
+      } satisfies CreateClawOptions;
+      const claw = interactive
+        ? await withSpinner(ui, "Constructing Claw…", "Claw package validated", () =>
+            create(createOptions),
+          )
+        : await create(createOptions);
       outcome = success("create", claw);
+      if (interactive) {
+        ui.note(formatClawSummary(claw), "Claw Created");
+        ui.outro(`Created ${claw.source.packageName}@${claw.source.packageVersion}`);
+        return 0;
+      }
     } catch (error) {
+      if (interactive && error === TUI_CANCELLED) {
+        ui.cancel("Claw creation cancelled");
+        return 0;
+      }
       outcome = failure("create", error);
+    }
+    if (interactive && !outcome.ok) {
+      ui.cancel(renderHuman(outcome));
+      return 2;
     }
     const output = json ? JSON.stringify(outcome, null, 2) : renderHuman(outcome);
     (outcome.ok ? io.stdout : io.stderr).write(`${output}\n`);
@@ -273,6 +346,7 @@ export async function runCli(
   }
 
   let outcome: CliOutcome;
+  let activeOperation: "create" | "inspect" | "preview" | "apply" = operation;
   try {
     const source = parsed.positionals[0];
     if (!source || parsed.positionals.length !== 1) {
@@ -295,8 +369,20 @@ export async function runCli(
           message: "inspect does not accept --agent or --dry-run.",
         });
       }
-      const claw = await dependencies.inspect(source);
+      if (interactive) {
+        ui.intro();
+      }
+      const claw = interactive
+        ? await withSpinner(ui, "Inspecting Claw…", "Claw package validated", () =>
+            dependencies.inspect(source),
+          )
+        : await dependencies.inspect(source);
       outcome = success("inspect", claw);
+      if (interactive) {
+        ui.note(formatClawSummary(claw), "Claw Package");
+        ui.outro("Inspection complete");
+        return 0;
+      }
     } else {
       const harness = parsed.values.agent;
       if (typeof harness !== "string" || harness.length === 0) {
@@ -308,9 +394,10 @@ export async function runCli(
       }
       const dryRun = parsed.values["dry-run"] === true;
       const yes = parsed.values.yes === true;
+      const interactiveApply = interactive && !dryRun && !yes;
       const planIntegrity = parsed.values["plan-integrity"];
       const consentPlanIntegrity = typeof planIntegrity === "string" ? planIntegrity : undefined;
-      if (dryRun === yes) {
+      if (!interactiveApply && dryRun === yes) {
         throw new CliError({
           code: "operation_required",
           phase: "arguments",
@@ -331,13 +418,73 @@ export async function runCli(
           message: "Apply requires --plan-integrity from the exact dry-run plan.",
         });
       }
-      const claw = await dependencies.inspect(source);
-      outcome = dryRun
-        ? success("preview", claw, await dependencies.preview(harness, claw))
-        : success("apply", claw, await dependencies.apply(harness, claw, consentPlanIntegrity!));
+      if (interactive) {
+        ui.intro();
+      }
+      const claw = interactive
+        ? await withSpinner(ui, "Resolving Claw…", "Claw package validated", () =>
+            dependencies.inspect(source),
+          )
+        : await dependencies.inspect(source);
+      if (interactive) {
+        ui.note(formatClawSummary(claw), "Claw Package");
+      }
+      if (dryRun || interactiveApply) {
+        activeOperation = "preview";
+        const preview = interactive
+          ? await withSpinner(ui, "Preparing host plan…", "Host plan ready", () =>
+              dependencies.preview(harness, claw),
+            )
+          : await dependencies.preview(harness, claw);
+        outcome = success("preview", claw, preview);
+        if (interactive) {
+          ui.note(formatHarnessPlan(preview.outcome), `${harness} Apply Plan`);
+        }
+        if (dryRun) {
+          if (interactive) {
+            const integrity = harnessPlanIntegrity(outcome);
+            ui.outro(integrity ? `Preview complete · ${integrity}` : "Preview complete");
+            return 0;
+          }
+        } else {
+          const integrity = harnessPlanIntegrity(outcome);
+          if (!integrity) {
+            throw new CliError({
+              code: "adapter_plan_integrity_missing",
+              phase: "adapter",
+              message: "The harness preview did not return a consent plan integrity.",
+              path: harness,
+            });
+          }
+          const confirmed = await ui.confirm(`Apply this Claw to ${harness}?`);
+          if (confirmed === TUI_CANCELLED || !confirmed) {
+            ui.cancel("No changes applied");
+            return 0;
+          }
+          activeOperation = "apply";
+          const applied = await withSpinner(ui, "Applying Claw…", "Claw applied", () =>
+            dependencies.apply(harness, claw, integrity),
+          );
+          outcome = success("apply", claw, applied);
+          ui.outro(`${claw.summary.agent.name ?? claw.summary.agent.id} is ready`);
+          return 0;
+        }
+      } else {
+        activeOperation = "apply";
+        outcome = success(
+          "apply",
+          claw,
+          await dependencies.apply(harness, claw, consentPlanIntegrity!),
+        );
+      }
     }
   } catch (error) {
-    outcome = failure(operation, error);
+    outcome = failure(activeOperation, error);
+  }
+
+  if (interactive && !outcome.ok) {
+    ui.cancel(renderHuman(outcome));
+    return outcome.diagnostics[0]?.phase === "adapter" ? 3 : 2;
   }
 
   const output = parsed.values.json ? JSON.stringify(outcome, null, 2) : renderHuman(outcome);

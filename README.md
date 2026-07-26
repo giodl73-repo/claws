@@ -9,6 +9,8 @@ approve a release identity.
 pnpm install
 pnpm build
 pnpm proof:pack
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create ./financial-analyst --id financial-analyst --name "Financial Analyst" --description "Analyzes companies from primary sources." --soul ./SOUL.md --skill ./.agents/skills/research --plugin clawhub:@publisher/sec-filings@1.0.0
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --dry-run
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --yes --plan-integrity sha256:<reviewed-digest>
@@ -24,6 +26,18 @@ npx <name> <claw> --agent openclaw
 
 `<name>` remains unresolved until the Foundation selects or secures the npm
 identity.
+
+In an interactive terminal, the short apply form resolves and summarizes the
+Claw, displays the complete host-native preview, asks for confirmation, and
+applies with that exact plan integrity. `create` prompts for omitted required
+values. The terminal presentation follows the compact intro, phase spinner,
+summary, and confirmation patterns of the
+[vercel-labs/skills CLI](https://github.com/vercel-labs/skills); it does not
+adopt that project's resolver or installation semantics.
+
+Explicit `--dry-run` and `--yes --plan-integrity` commands preserve the existing
+text interface. `--json` and non-TTY execution are always non-interactive, so
+automation must continue to choose preview or apply explicitly.
 
 ## Repository Boundary
 

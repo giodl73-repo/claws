@@ -4,12 +4,20 @@ This experimental package implements the harness-neutral Claws command without
 selecting or publishing its final npm identity.
 
 ```bash
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create ./financial-analyst --id financial-analyst --name "Financial Analyst" --description "Analyzes companies." --soul ./SOUL.md --skill ./.agents/skills/research --plugin clawhub:@publisher/sec-filings@1.0.0
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --dry-run
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --yes --plan-integrity sha256:<reviewed-digest>
 CLAWHUB_REGISTRY_URL=https://registry.example OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- clawhub:@publisher/claw@1.0.0 --agent openclaw --dry-run
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- github:publisher/awesome-claws@0123456789abcdef0123456789abcdef01234567#claws/financial-analyst --agent openclaw --dry-run
 ```
+
+The short apply command is guided only when stdin and stdout are terminals: it
+shows the package and host plan, asks for confirmation, then forwards the exact
+preview integrity to the harness. Interactive `create` prompts for omitted
+required inputs. `--json`, non-TTY execution, and explicit `--dry-run` or
+`--yes --plan-integrity` retain the existing non-interactive contract.
 
 The CLI validates local package bytes with the independent reference parser.
 The OpenClaw adapter delegates through the public `openclaw claws add` process

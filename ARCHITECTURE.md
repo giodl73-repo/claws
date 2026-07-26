@@ -54,8 +54,11 @@ useful component catalogs; they are not registries of complete Claw packages.
 
 ## Incubation Limits
 
-- `create` is intentionally non-interactive and only builds a new directory; it
-  never applies the result.
+- Interactive presentation is a CLI-client concern. It may collect construction
+  inputs and confirm the exact harness-native preview, but it cannot reinterpret
+  the package, plan, consent digest, or host policy.
+- `create` only builds a new directory and never applies the result. In a TTY it
+  may prompt for omitted required values; JSON and non-TTY use remain explicit.
 - Direct skills.sh, LobeHub, browse.sh, and Git importers are not implemented.
   Use their own tooling to place a skill locally, then pass that directory to
   `--skill`.
