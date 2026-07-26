@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { pathToFileURL } from "node:url";
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { applyWithHarness, previewWithHarness } from "./adapters.js";
 import { CliError } from "./errors.js";
@@ -252,7 +253,18 @@ export async function runCli(
   return outcome.ok ? 0 : outcome.diagnostics[0]?.phase === "adapter" ? 3 : 2;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+const invokedAsMain = (() => {
+  if (!process.argv[1]) {
+    return false;
+  }
+  try {
+    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+})();
+
+if (invokedAsMain) {
   if (process.argv.length <= 2) {
     process.stderr.write(`${usage}\n`);
     process.exitCode = 2;

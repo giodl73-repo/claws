@@ -33,3 +33,9 @@ protecting recently active operations.
 A timed-out apply is an uncertain host outcome and is never retried
 automatically. Check `openclaw claws status` for partial provenance before any
 follow-up action.
+
+The repository-level `pnpm proof:pack` command proves the exact bundled
+artifact through an offline isolated install and the installed `claws-dev` bin.
+When `OPENCLAW_CLI_ENTRY` is set, it also delegates a real OpenClaw dry-run.
+That lane uses disposable OpenClaw state. The private CLI emits no telemetry
+and has no self-update behavior.

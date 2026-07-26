@@ -18,4 +18,15 @@ describe("standalone Claw CLI publication guard", () => {
     expect(manifest.publishConfig).toBeUndefined();
     expect(manifest.scripts?.prepublishOnly).toContain("publication is disabled");
   });
+
+  it("keeps the packed-artifact proof repository-owned and non-publishing", async () => {
+    const rootManifest = JSON.parse(await readFile(resolve("package.json"), "utf8")) as {
+      scripts?: Record<string, string>;
+    };
+    const proof = rootManifest.scripts?.["proof:pack"];
+
+    expect(proof).toContain("pnpm build");
+    expect(proof).toContain("scripts/prove-packed-cli.mjs");
+    expect(proof).not.toMatch(/publish|registry/);
+  });
 });

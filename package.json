@@ -9,7 +9,8 @@
     "claws-dev": "node packages/cli/dist/cli.mjs",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
-    "lint": "oxlint --deny-warnings packages",
+    "lint": "oxlint --deny-warnings packages scripts",
+    "proof:pack": "pnpm build && node scripts/prove-packed-cli.mjs",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

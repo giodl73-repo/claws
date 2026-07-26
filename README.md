@@ -7,6 +7,7 @@ on the unscoped `claws` npm name.
 ```bash
 pnpm install
 pnpm build
+pnpm proof:pack
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --dry-run
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --yes --plan-integrity sha256:<reviewed-digest>
 CLAWHUB_REGISTRY_URL=https://registry.example OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- clawhub:@publisher/claw@1.0.0 --agent openclaw --dry-run
@@ -60,3 +61,22 @@ active operations.
 The adapter never retries a timed-out apply. OpenClaw may have recorded partial
 progress, so inspect `openclaw claws status` before deciding whether to resume
 or remove it.
+
+## Private Distribution Proof
+
+`pnpm proof:pack` builds the bundled CLI, packs it without lifecycle scripts,
+checks that the tarball contains only package metadata, its README, and bundled
+runtime modules, installs it offline into an isolated prefix, and executes the
+installed `claws-dev` binary. It proves both the disabled experimental gate and
+successful local-package inspection. Set `OPENCLAW_CLI_ENTRY` to additionally
+prove a real OpenClaw dry-run through the packed binary. That optional lane
+uses disposable home, state, and config paths and does not read or migrate the
+operator's normal OpenClaw state.
+
+The incubation artifact requires Node.js 22.22.3 or newer and an OpenClaw build
+that provides the experimental `openclaw claws add --json` contract. A
+configured OpenClaw entry runs with the CLI's Node executable, which must also
+satisfy that OpenClaw build's supported Node range. The CLI
+collects no telemetry and does not update itself; installation and updates
+remain the eventual package manager's responsibility. No registry publication,
+final package name, or stable compatibility promise is made by this proof.
