@@ -22,13 +22,41 @@
 
 ## Current Session
 
+### 2026-07-26 Awesome Claws repository review handoff
+
+- Removed the shipping-tree review briefs (`REVIEW.md` and `ROLE-REVIEW.md`)
+  from `C:\src\awesome-claws-private-prototype`. The role-review conclusions
+  remain recorded in this private coordination session rather than in the
+  proposed public catalog.
+- Reworked the repository to match current OpenClaw ecosystem conventions: a
+  task-oriented root README, contribution guide, OpenClaw Foundation MIT
+  license, private security reporting policy, focused issue/PR templates, and
+  pinned-action validation workflow. The OpenClaw maintainer handbook confirms
+  that creation of a new organization repository still requires admin
+  approval; no remote or publication action was taken.
+- Each generated starter now has a package README. Portable identity content
+  moved from a `workspace/SOUL.md` sidecar into the `CLAW.md` body, which current
+  OpenClaw maps to managed `SOUL.md`; `workspace/AGENTS.md` remains the operating
+  workflow. Package names use the non-publishable `@awesome-claws/<id>` shape.
+- Default `npm run check` is self-contained for CI, while `npm run inspect`
+  retains the optional standalone reference-CLI proof. Validation requires the
+  original 15 baseline starters but permits future catalog additions.
+- Local proof passes `npm run check`, standalone inspection of all 15 packages,
+  YAML parsing of all GitHub configuration, and `git diff --check`. Final
+  `codex review --uncommitted` completed with no correctness findings. A fresh
+  current-OpenClaw build/proof was blocked because the configured Microsoft npm
+  proxy does not carry pinned `pnpm@11.15.1`; the earlier five-package real
+  planner proof remains historical evidence, not a fresh result for this edit.
+- The maintainer-review candidate is clean on local `main` at signed commit
+  `0fbf2578194d`; it still has no Git remote.
+
 ### 2026-07-26 starter catalog role review complete
 
 - Reviewed all 15 private starter Claws through the `.craft/roles/claws`
   founder, new-hire, power-user, skill-author, CISO, compliance,
-  repository-steward, and maintainer-reviewer lenses. The durable rubric,
-  baseline scores, findings, and remediation are in the catalog's
-  `ROLE-REVIEW.md`.
+  repository-steward, and maintainer-reviewer lenses. The rubric, findings,
+  and remediation are retained in this private coordination history; the
+  standalone review brief was intentionally removed from the catalog.
 - Every starter now defines its target setting, focused intake, realistic
   example, domain-specific authority/privacy boundaries, concrete deliverables,
   and observable completion criteria. The generated instructions remain plain,
@@ -38,9 +66,9 @@
   ecosystem-specific examples, missing reproducibility artifacts, recruiting
   accommodation privacy, and three semantic completion contradictions. Final
   role re-review has no product blocker; final Codex review is clean.
-- `C:\src\awesome-claws-private-prototype` is clean at signed commit
-  `2159e243ec8d`. Exact validation enforces all 15 reviewed identities and their
-  quality minima. All 15 pass standalone inspection; five representative
+- At that checkpoint, `C:\src\awesome-claws-private-prototype` was clean at
+  signed commit `2159e243ec8d`. Validation enforced all 15 baseline identities
+  and their quality minima. All 15 passed standalone inspection; five representative
   starters return ready, four-action, non-mutating real OpenClaw plans.
 - The repository still has no remote and no public namespace or publication
   action was taken.
