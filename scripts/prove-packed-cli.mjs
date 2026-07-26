@@ -8,6 +8,7 @@ const repositoryRoot = resolve(import.meta.dirname, "..");
 const invocationRoot = process.cwd();
 const packageRoot = join(repositoryRoot, "packages", "cli");
 const fixtureRoot = join(packageRoot, "test", "fixtures", "valid");
+const openClawFixtureRoot = join(packageRoot, "test", "fixtures", "openclaw-basic");
 const proofRoot = await mkdtemp(join(tmpdir(), "claws-packed-cli-proof-"));
 const packRoot = join(proofRoot, "pack");
 const installRoot = join(proofRoot, "install");
@@ -140,6 +141,16 @@ try {
     ),
   );
 
+  const help = runInstalledBin(["--help"], { ...process.env, OPENCLAW_EXPERIMENTAL_CLAWS: "0" });
+  requireExit(help, 0, "packed CLI help");
+  assert(help.stdout.includes("Usage:"), "The packed CLI exposes ungated help.");
+  const version = runInstalledBin(["--version"], {
+    ...process.env,
+    OPENCLAW_EXPERIMENTAL_CLAWS: "0",
+  });
+  requireExit(version, 0, "packed CLI version");
+  assert(version.stdout.trim() === "0.0.0-private", "The packed CLI reports its package version.");
+
   const gated = runInstalledBin(["inspect", fixtureRoot, "--json"], {
     ...process.env,
     OPENCLAW_EXPERIMENTAL_CLAWS: "0",
@@ -167,15 +178,18 @@ try {
   if (process.env.OPENCLAW_CLI_ENTRY) {
     await mkdir(openClawHome);
     await mkdir(openClawStateRoot);
-    const preview = runInstalledBin([fixtureRoot, "--agent", "openclaw", "--dry-run", "--json"], {
-      ...process.env,
-      HOME: openClawHome,
-      OPENCLAW_CONFIG_PATH: join(openClawStateRoot, "openclaw.json"),
-      OPENCLAW_CLI_ENTRY: resolve(invocationRoot, process.env.OPENCLAW_CLI_ENTRY),
-      OPENCLAW_EXPERIMENTAL_CLAWS: "1",
-      OPENCLAW_HOME: openClawStateRoot,
-      OPENCLAW_STATE_DIR: openClawStateRoot,
-    });
+    const preview = runInstalledBin(
+      [openClawFixtureRoot, "--agent", "openclaw", "--dry-run", "--json"],
+      {
+        ...process.env,
+        HOME: openClawHome,
+        OPENCLAW_CONFIG_PATH: join(openClawStateRoot, "openclaw.json"),
+        OPENCLAW_CLI_ENTRY: resolve(invocationRoot, process.env.OPENCLAW_CLI_ENTRY),
+        OPENCLAW_EXPERIMENTAL_CLAWS: "1",
+        OPENCLAW_HOME: openClawStateRoot,
+        OPENCLAW_STATE_DIR: openClawStateRoot,
+      },
+    );
     requireExit(preview, 0, "packed CLI OpenClaw preview");
     const previewOutcome = parseJson(preview.stdout, "packed CLI OpenClaw preview");
     assert(previewOutcome.ok === true, "The packed CLI delegates an OpenClaw preview.");

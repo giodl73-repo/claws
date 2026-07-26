@@ -1,6 +1,7 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import {
+  access,
   lstat,
   mkdir,
   mkdtemp,
@@ -14,12 +15,12 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { delimiter, dirname, join, resolve } from "node:path";
 import { CliError } from "./errors.js";
 import type { LocalClawPackage } from "./types.js";
 
 const MAX_ADAPTER_OUTPUT_BYTES = 4 * 1024 * 1024;
-const ADAPTER_PREVIEW_TIMEOUT_MS = 2 * 60 * 1000;
+const ADAPTER_PREVIEW_TIMEOUT_MS = 5 * 60 * 1000;
 const ADAPTER_APPLY_TIMEOUT_MS = 10 * 60 * 1000;
 const ADAPTER_KILL_GRACE_MS = 5 * 1000;
 const SNAPSHOT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -49,6 +50,8 @@ export type AdapterRuntime = {
     env: NodeJS.ProcessEnv,
     cwd?: string,
     timeoutMs?: number,
+    windowsVerbatimArguments?: boolean,
+    mutationMayBePartial?: boolean,
   ): Promise<ProcessResult>;
 };
 
@@ -90,6 +93,8 @@ export function runAdapterProcess(
   env: NodeJS.ProcessEnv,
   cwd?: string,
   timeoutMs = ADAPTER_PREVIEW_TIMEOUT_MS,
+  windowsVerbatimArguments = false,
+  mutationMayBePartial = false,
 ): Promise<ProcessResult> {
   return new Promise((resolveResult, reject) => {
     const child = spawn(command, args, {
@@ -99,6 +104,7 @@ export function runAdapterProcess(
       shell: false,
       stdio: ["ignore", "pipe", "pipe"],
       windowsHide: true,
+      windowsVerbatimArguments,
     });
     const stdout: Buffer[] = [];
     const stderr: Buffer[] = [];
@@ -111,7 +117,7 @@ export function runAdapterProcess(
     const timeoutError = new CliError({
       code: "adapter_timeout",
       phase: "adapter",
-      message: `Harness command exceeded ${timeoutMs} milliseconds. Inspect harness status before retrying because mutation may be partial.`,
+      message: `Harness command exceeded ${timeoutMs} milliseconds.${mutationMayBePartial ? " Inspect harness status before retrying because mutation may be partial." : " The preview did not permit mutation."}`,
     });
     const timeout = setTimeout(() => terminate(timeoutError), timeoutMs);
     timeout.unref();
@@ -172,8 +178,16 @@ export function runAdapterProcess(
 }
 
 const defaultRuntime: AdapterRuntime = {
-  run(command, args, env, cwd, timeoutMs) {
-    return runAdapterProcess(command, args, env, cwd, timeoutMs);
+  run(command, args, env, cwd, timeoutMs, windowsVerbatimArguments, mutationMayBePartial) {
+    return runAdapterProcess(
+      command,
+      args,
+      env,
+      cwd,
+      timeoutMs,
+      windowsVerbatimArguments,
+      mutationMayBePartial,
+    );
   },
 };
 
@@ -486,26 +500,120 @@ async function materializeStableSnapshot(claw: LocalClawPackage): Promise<string
   }
 }
 
-async function resolveOpenClawInvocation(env: NodeJS.ProcessEnv): Promise<{
+type OpenClawInvocation = {
   command: string;
-  prefix: string[];
   cwd?: string;
-}> {
+  windowsVerbatimArguments?: boolean;
+  prepare(operationArgs: string[]): { args: string[]; env?: NodeJS.ProcessEnv };
+};
+
+function windowsCommandInvocation(
+  command: string,
+  args: string[],
+): { args: string[]; env: NodeJS.ProcessEnv } {
+  const values = [command, ...args];
+  if (
+    values.some(
+      (value) =>
+        value.includes('"') || value.includes("\r") || value.includes("\n") || value.includes("\0"),
+    )
+  ) {
+    throw new CliError({
+      code: "unsafe_openclaw_invocation",
+      phase: "adapter",
+      message:
+        "OpenClaw invocation paths and arguments may not contain quotes or control characters.",
+    });
+  }
+  const keys = values.map((_, index) => `OPENCLAW_CLAWS_ARG_${index}`);
+  const commandLine = keys.map((key) => `"%${key}%"`).join(" ");
+  return {
+    args: ["/d", "/s", "/c", `"${commandLine}"`],
+    env: Object.fromEntries(keys.map((key, index) => [key, values[index]])),
+  };
+}
+
+async function findWindowsOpenClawShim(env: NodeJS.ProcessEnv): Promise<string | undefined> {
+  const pathValue = env.PATH ?? env.Path ?? env.path;
+  if (!pathValue) {
+    return undefined;
+  }
+  for (const directory of pathValue.split(delimiter).filter(Boolean)) {
+    for (const name of ["openclaw.exe", "openclaw.cmd"]) {
+      const candidate = join(directory.replace(/^"|"$/g, ""), name);
+      if (
+        await access(candidate)
+          .then(() => true)
+          .catch(() => false)
+      ) {
+        return realpath(candidate);
+      }
+    }
+  }
+  return undefined;
+}
+
+async function resolveOpenClawInvocation(env: NodeJS.ProcessEnv): Promise<OpenClawInvocation> {
   const configured = env.OPENCLAW_CLI_ENTRY?.trim();
   if (configured) {
     const entry = resolve(configured);
-    return { command: process.execPath, prefix: [entry], cwd: dirname(entry) };
+    return {
+      command: process.execPath,
+      cwd: dirname(entry),
+      prepare: (operationArgs) => ({ args: [entry, ...operationArgs] }),
+    };
   }
   if (process.platform === "win32") {
-    throw new CliError({
-      code: "openclaw_entry_required",
+    const shim = await findWindowsOpenClawShim(env);
+    if (!shim) {
+      throw new CliError({
+        code: "openclaw_not_found",
+        phase: "adapter",
+        message:
+          "Could not find OpenClaw on PATH. Install OpenClaw or set OPENCLAW_CLI_ENTRY to openclaw.mjs.",
+        path: "openclaw",
+      });
+    }
+    if (shim.toLowerCase().endsWith(".exe")) {
+      return { command: shim, prepare: (operationArgs) => ({ args: operationArgs }) };
+    }
+    const command = env.ComSpec ?? process.env.ComSpec ?? "cmd.exe";
+    return {
+      command,
+      windowsVerbatimArguments: true,
+      prepare: (operationArgs) => windowsCommandInvocation(shim, operationArgs),
+    };
+  }
+  return { command: "openclaw", prepare: (operationArgs) => ({ args: operationArgs }) };
+}
+
+function nonJsonOpenClawError(result: ProcessResult): CliError | undefined {
+  const output = `${result.stderr}\n${result.stdout}`;
+  if (/Node\.js .* is required \(current:/i.test(output)) {
+    return new CliError({
+      code: "incompatible_openclaw_runtime",
       phase: "adapter",
-      message:
-        "Set OPENCLAW_CLI_ENTRY to the installed openclaw.mjs path during Windows incubation.",
+      message: "The current Node.js runtime does not satisfy this OpenClaw build.",
       path: "openclaw",
     });
   }
-  return { command: "openclaw", prefix: [] };
+  if (/unknown command[^\n]*claws|command[^\n]*claws[^\n]*(?:unknown|not found)/i.test(output)) {
+    return new CliError({
+      code: "openclaw_claws_unsupported",
+      phase: "adapter",
+      message: "The installed OpenClaw build does not provide the experimental Claws CLI.",
+      path: "openclaw",
+    });
+  }
+  if (/OpenClaw config is invalid/i.test(output)) {
+    return new CliError({
+      code: "openclaw_config_invalid",
+      phase: "adapter",
+      message: "OpenClaw rejected its local configuration. Run openclaw config validate.",
+      path: "openclaw",
+    });
+  }
+  return undefined;
 }
 
 export async function previewWithHarness(
@@ -578,12 +686,16 @@ async function delegateOpenClawAdd(params: {
   try {
     const operationArgs =
       mode === "preview" ? ["--dry-run"] : ["--yes", "--plan-integrity", planIntegrity ?? ""];
+    const openClawArgs = ["claws", "add", snapshotRoot, ...operationArgs, "--json"];
+    const prepared = invocation.prepare(openClawArgs);
     result = await runtime.run(
       invocation.command,
-      [...invocation.prefix, "claws", "add", snapshotRoot, ...operationArgs, "--json"],
-      { ...env, OPENCLAW_EXPERIMENTAL_CLAWS: "1" },
+      prepared.args,
+      { ...env, ...prepared.env, OPENCLAW_EXPERIMENTAL_CLAWS: "1" },
       invocation.cwd,
       mode === "apply" ? ADAPTER_APPLY_TIMEOUT_MS : ADAPTER_PREVIEW_TIMEOUT_MS,
+      invocation.windowsVerbatimArguments,
+      mode === "apply",
     );
   } catch (error) {
     if (error instanceof CliError) {
@@ -600,6 +712,10 @@ async function delegateOpenClawAdd(params: {
   try {
     outcome = JSON.parse(result.stdout);
   } catch {
+    const recognized = nonJsonOpenClawError(result);
+    if (recognized) {
+      throw recognized;
+    }
     throw new CliError({
       code: "invalid_adapter_output",
       phase: "adapter",

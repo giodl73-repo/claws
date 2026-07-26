@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
-import { access, readFile, rm, utimes } from "node:fs/promises";
-import { resolve } from "node:path";
+import { access, mkdir, mkdtemp, readFile, rm, utimes, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   applyWithHarness,
@@ -61,7 +62,7 @@ describe("standalone harness adapters", () => {
     await expect(access(delegatedRoot!)).resolves.toBeUndefined();
     expect(env?.OPENCLAW_EXPERIMENTAL_CLAWS).toBe("1");
     expect(cwd).toBe(resolve("test"));
-    expect(timeoutMs).toBe(120_000);
+    expect(timeoutMs).toBe(300_000);
   });
 
   it("delegates consented OpenClaw apply with exact plan integrity", async () => {
@@ -215,6 +216,111 @@ describe("standalone harness adapters", () => {
     });
   });
 
+  it.each([
+    [
+      "openclaw: Node.js >=24.15.0 <25 is required (current: v24.14.0).",
+      "incompatible_openclaw_runtime",
+    ],
+    ["error: unknown command 'claws'", "openclaw_claws_unsupported"],
+    ["OpenClaw config is invalid", "openclaw_config_invalid"],
+  ])("classifies non-JSON OpenClaw failures: %s", async (stderr, code) => {
+    const claw = await inspectLocalPackage(validFixture);
+    const run = vi.fn<AdapterRuntime["run"]>().mockResolvedValue({
+      exitCode: 1,
+      stdout: "",
+      stderr,
+    });
+
+    await expect(previewWithHarness("openclaw", claw, { run })).rejects.toMatchObject({
+      diagnostics: [{ code, phase: "adapter" }],
+    });
+  });
+
+  it.runIf(process.platform === "win32")(
+    "discovers an installed OpenClaw command shim on Windows PATH",
+    async () => {
+      const root = await mkdtemp(join(tmpdir(), "claws-openclaw-shim-test-"));
+      const shim = join(root, "openclaw.cmd");
+      await writeFile(shim, "@exit /b 0\r\n", "utf8");
+      const claw = await inspectLocalPackage(validFixture);
+      const run = vi.fn<AdapterRuntime["run"]>().mockResolvedValue({
+        exitCode: 0,
+        stdout: "{}",
+        stderr: "",
+      });
+
+      try {
+        await previewWithHarness(
+          "openclaw",
+          claw,
+          { run },
+          {
+            Path: root,
+            ComSpec: "C:\\Windows\\System32\\cmd.exe",
+          },
+        );
+
+        const [command, args, childEnv, , , windowsVerbatimArguments] = run.mock.calls[0] ?? [];
+        expect(command).toBe("C:\\Windows\\System32\\cmd.exe");
+        expect(args?.slice(0, 3)).toEqual(["/d", "/s", "/c"]);
+        expect(args?.[3]).toContain('"%OPENCLAW_CLAWS_ARG_0%"');
+        expect(childEnv?.OPENCLAW_CLAWS_ARG_0).toBe(shim);
+        expect(childEnv?.OPENCLAW_CLAWS_ARG_1).toBe("claws");
+        expect(childEnv?.OPENCLAW_CLAWS_ARG_2).toBe("add");
+        expect(windowsVerbatimArguments).toBe(true);
+      } finally {
+        await rm(root, { recursive: true, force: true });
+      }
+    },
+  );
+
+  it.runIf(process.platform === "win32")(
+    "preserves percent signs while executing an installed Windows command shim",
+    async () => {
+      const parent = await mkdtemp(join(tmpdir(), "claws-openclaw-percent-test-"));
+      const root = join(parent, "percent-%CLAW_TEST_EXPANDED%");
+      await mkdir(root);
+      const shim = join(root, "openclaw.cmd");
+      await writeFile(shim, "@echo {}\r\n", "utf8");
+      const claw = await inspectLocalPackage(validFixture);
+
+      try {
+        await expect(
+          previewWithHarness("openclaw", claw, undefined, {
+            Path: root,
+            ComSpec: "C:\\Windows\\System32\\cmd.exe",
+            CLAW_TEST_EXPANDED: "corrupted",
+          }),
+        ).resolves.toMatchObject({ outcome: {} });
+      } finally {
+        await rm(parent, { recursive: true, force: true });
+      }
+    },
+  );
+
+  it.runIf(process.platform === "win32")(
+    "rejects quotes before invoking a Windows command shim",
+    async () => {
+      const root = await mkdtemp(join(tmpdir(), "claws-openclaw-quote-test-"));
+      const shim = join(root, "openclaw.cmd");
+      await writeFile(shim, "@echo {}\r\n", "utf8");
+      const claw = await inspectLocalPackage(validFixture);
+
+      try {
+        await expect(
+          applyWithHarness("openclaw", claw, 'x" & echo injected & rem "', undefined, {
+            Path: root,
+            ComSpec: "C:\\Windows\\System32\\cmd.exe",
+          }),
+        ).rejects.toMatchObject({
+          diagnostics: [{ code: "unsafe_openclaw_invocation", phase: "adapter" }],
+        });
+      } finally {
+        await rm(root, { recursive: true, force: true });
+      }
+    },
+  );
+
   it("preserves a partial harness-native apply outcome", async () => {
     const claw = await inspectLocalPackage(validFixture);
     const outcome = {
@@ -278,6 +384,32 @@ describe("standalone harness adapters", () => {
       ),
     ).rejects.toMatchObject({
       diagnostics: [{ code: "adapter_timeout", phase: "adapter" }],
+    });
+  });
+
+  it("distinguishes non-mutating preview timeouts from uncertain apply timeouts", async () => {
+    const preview = runAdapterProcess(
+      process.execPath,
+      ["-e", "setInterval(() => {}, 1_000)"],
+      process.env,
+      undefined,
+      50,
+    );
+    const apply = runAdapterProcess(
+      process.execPath,
+      ["-e", "setInterval(() => {}, 1_000)"],
+      process.env,
+      undefined,
+      50,
+      false,
+      true,
+    );
+
+    await expect(preview).rejects.toMatchObject({
+      diagnostics: [{ message: expect.stringContaining("preview did not permit mutation") }],
+    });
+    await expect(apply).rejects.toMatchObject({
+      diagnostics: [{ message: expect.stringContaining("mutation may be partial") }],
     });
   });
 });

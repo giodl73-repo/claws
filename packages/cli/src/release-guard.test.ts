@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { CLI_VERSION } from "./types.js";
 
 describe("standalone Claw CLI publication guard", () => {
   it("remains private, dependency-free, and protected from publication", async () => {
@@ -13,7 +14,7 @@ describe("standalone Claw CLI publication guard", () => {
     };
 
     expect(manifest.private).toBe(true);
-    expect(manifest.version).toBe("0.0.0-private");
+    expect(manifest.version).toBe(CLI_VERSION);
     expect(manifest.dependencies).toBeUndefined();
     expect(manifest.publishConfig).toBeUndefined();
     expect(manifest.scripts?.prepublishOnly).toContain("publication is disabled");
@@ -28,5 +29,6 @@ describe("standalone Claw CLI publication guard", () => {
     expect(proof).toContain("pnpm build");
     expect(proof).toContain("scripts/prove-packed-cli.mjs");
     expect(proof).not.toMatch(/publish|registry/);
+    expect(rootManifest.scripts?.["proof:private"]).toBe("pnpm check && pnpm proof:pack");
   });
 });

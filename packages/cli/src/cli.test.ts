@@ -29,6 +29,21 @@ function output() {
 }
 
 describe("standalone Claw CLI", () => {
+  it.each([
+    ["--help", "Usage:"],
+    ["-h", "Usage:"],
+    ["--version", "0.0.0-private"],
+    ["-v", "0.0.0-private"],
+  ])("returns ungated %s output", async (flag, expected) => {
+    const capture = output();
+
+    const exitCode = await runCli([flag], { io: capture.io, env: {} });
+
+    expect(exitCode).toBe(0);
+    expect(capture.read().stdout).toContain(expected);
+    expect(capture.read().stderr).toBe("");
+  });
+
   it("is unavailable without the existing experimental Claws gate", async () => {
     const capture = output();
     const exitCode = await runCli(["inspect", validFixture, "--json"], {

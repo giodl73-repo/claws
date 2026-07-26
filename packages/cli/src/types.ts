@@ -2,6 +2,7 @@ import type { ClawManifest } from "@claws/reference-private";
 
 export const OUTCOME_SCHEMA_VERSION = "claw.cliOutcome.v0" as const;
 export const INCUBATION_STABILITY = "private-incubation" as const;
+export const CLI_VERSION = "0.0.0-private" as const;
 
 export type CliDiagnostic = {
   code: string;

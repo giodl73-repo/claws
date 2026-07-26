@@ -6,6 +6,7 @@ import { applyWithHarness, previewWithHarness } from "./adapters.js";
 import { CliError } from "./errors.js";
 import { inspectClawSource } from "./remote-source.js";
 import {
+  CLI_VERSION,
   INCUBATION_STABILITY,
   OUTCOME_SCHEMA_VERSION,
   type CliOutcome,
@@ -123,6 +124,14 @@ export async function runCli(
 ): Promise<number> {
   const io = options.io ?? { stdout: process.stdout, stderr: process.stderr };
   const env = options.env ?? process.env;
+  if (argv.length === 1 && (argv[0] === "--help" || argv[0] === "-h")) {
+    io.stdout.write(`${usage}\n`);
+    return 0;
+  }
+  if (argv.length === 1 && (argv[0] === "--version" || argv[0] === "-v")) {
+    io.stdout.write(`${CLI_VERSION}\n`);
+    return 0;
+  }
   const dependencies = options.dependencies ?? {
     inspect: (source: string) => inspectClawSource(source, { env }),
     preview: (harness: string, claw: LocalClawPackage) =>

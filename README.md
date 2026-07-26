@@ -80,3 +80,7 @@ satisfy that OpenClaw build's supported Node range. The CLI
 collects no telemetry and does not update itself; installation and updates
 remain the eventual package manager's responsibility. No registry publication,
 final package name, or stable compatibility promise is made by this proof.
+
+Run `pnpm proof:private` for the complete private readiness gate. The concise
+architecture, evidence, and public-incubation decision brief is in
+[`PRIVATE-REVIEW.md`](PRIVATE-REVIEW.md).

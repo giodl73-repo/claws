@@ -39,3 +39,8 @@ artifact through an offline isolated install and the installed `claws-dev` bin.
 When `OPENCLAW_CLI_ENTRY` is set, it also delegates a real OpenClaw dry-run.
 That lane uses disposable OpenClaw state. The private CLI emits no telemetry
 and has no self-update behavior.
+
+`--help` and `--version` are available without the experimental gate. On
+Windows, the adapter can discover the installed `openclaw.cmd` from `PATH`;
+`OPENCLAW_CLI_ENTRY` remains available for development checkouts and explicit
+host selection.
