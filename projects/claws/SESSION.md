@@ -22,6 +22,29 @@
 
 ## Current Session
 
+### 2026-07-26 guided standalone CLI terminal workflow
+
+- Implemented Patrick's requested TUI polish in the private standalone CLI,
+  using `@clack/prompts` and `picocolors` with interaction patterns inspired by
+  `vercel-labs/skills`: branded intro, phase spinners, package/plan summaries,
+  confirmation, cancellation, and completion output.
+- The short TTY command now performs resolve -> host preview -> explicit
+  confirmation -> apply and forwards the exact preview `planIntegrity` to the
+  harness. Interactive `create` prompts for omitted required inputs. The UI is
+  presentation-only; source providers, the portable parser, harness policy,
+  consent validation, and mutation ownership are unchanged.
+- JSON, non-TTY execution, and explicit `--dry-run` or
+  `--yes --plan-integrity` retain their existing non-interactive contracts. A
+  declined or canceled confirmation exits successfully without invoking apply.
+- Private `giodl73-repo/claws` main is clean at signed commit `5bac7b9799c2`.
+  Local `pnpm check` passed 79 tests with one intentional Windows symlink skip;
+  `pnpm proof:pack` passed isolated packed-bin proof. `codex review
+  --uncommitted` returned no actionable finding. GitHub Validate run
+  `30221359755` passed a fresh frozen-lockfile install and full check suite.
+- No npm package was registered or published, no repository was made public,
+  and no resolver, provider, adapter, or public package-name decision was
+  added by this slice.
+
 ### 2026-07-26 standalone source-provider and construction model
 
 - Redesigned the private standalone CLI around three independent extension
