@@ -29,15 +29,16 @@
 
 ## Current Session
 
-- Last updated: 2026-07-25
+- Last updated: 2026-07-26
 - Last agent: Codex
-- Current focus: RFC 0018 now has a shared readiness subject identity package.
-  Core owners, plugins, Hosting Profiles, and node mode all report through that
-  facility; the former profile-only runtime/incarnation envelope is removed.
+- Current focus: RFC 0018 now has a shared readiness subject identity package
+  and a non-normative platform comparison. The comparison validates the
+  replacement/revision model and makes atomic observation binding normative.
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `a4e5fbe` and includes the readiness and subject sidecars; RFC 0023 is at
+  `1cbb2de` and includes the readiness, subject, and platform-comparison
+  sidecars; RFC 0023 is at
   `a9ef2e6` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is

@@ -21,11 +21,12 @@
 
 ## Current Session
 
-- Last updated: 2026-07-21.
-- Last agent: Copilot.
-- Current focus: reviewed fork drafts #145-#150 remain frozen evidence
-  snapshots. Runtime LLM usage owner selection now routes through existing
-  upstream PR #107937 rather than a duplicate promotion.
+- Last updated: 2026-07-26.
+- Last agent: Codex.
+- Current focus: RFC 0025 now adopts RFC 0018's canonical readiness result,
+  subject identity, lifetime, and platform-comparison boundaries as its
+  current-state owner contract. Signals remains a projection, not a second
+  readiness evaluator or history store.
 - Active branch / PR: fork draft
   [giodl73-repo/openclaw#150](https://github.com/giodl73-repo/openclaw/pull/150),
   head `user/giodl/signals-runtime-llm-usage` at `06ed6cb65ba`, stacked on fork
@@ -39,7 +40,8 @@
   `0ac31a744a5`, which is stacked on fork draft
   [#145](https://github.com/giodl73-repo/openclaw/pull/145) at
   `381c85fea31cb3d79ea08bce99e948939b49de53`. Local RFC branch
-  `user/giodl/rfc-0025-signals` remains unpushed.
+  `user/giodl/rfc-0025-signals` remains intentionally unpushed at `eef292e`,
+  two commits ahead of `origin/main`.
 - Contributor PR:
   [openclaw/openclaw#111065](https://github.com/openclaw/openclaw/pull/111065)
   is logging-only again at `917815b6049364b51497dbb7a4c519eccef42c71`.

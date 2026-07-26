@@ -52,6 +52,11 @@ keep container-only implementation details in the host.
 | Compact upstream PR series for the RFC and first implementation slices         | `openclaw-pr-plan.md`                   |
 | Live GitHub evidence for readiness demand and extensibility boundaries         | `github-readiness-demand-2026-07-10.md` |
 
+RFC 0018 also carries the non-normative
+`rfcs/0018/readiness-platform-comparison.md` sidecar. It compares the contract
+with Kubernetes, Docker, systemd, ASP.NET Core, Spring Boot, and OpenTelemetry,
+then separates required v1 guarantees from host-owned and deferred behavior.
+
 ## Active Work
 
 | Repo                  | PR / Issue                                                                             | Branch                                             | Status   | Purpose                                                                                           |

@@ -57,6 +57,11 @@ framework.
 | Exporter health owner-decision audit                   | `slice-9-exporter-health-deferred.md`             |
 | Session export conformance owner-decision audit        | `slice-10-session-export-conformance-deferred.md` |
 
+RFC 0025 treats RFC 0018 readiness as an adopted current-state owner contract.
+Its telemetry projections preserve subject replacement versus revision,
+incomplete-evaluation semantics, and bounded cardinality; they do not create a
+second readiness history or evaluator.
+
 ## Active Work
 
 | Repo                    | PR / Issue                                                                                                                  | Branch                                           | Status                                                                | Purpose                                                                                                           |
