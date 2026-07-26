@@ -1,8 +1,9 @@
-# Claws CLI Incubator
+# Claws CLI
 
-Private standalone repository for the harness-neutral Claws command and
-reference parser. It has no public remote, no publishable package, and no claim
-on the unscoped `claws` npm name.
+Experimental harness-neutral command and reference parser for portable Claw
+packages. The repository does not claim or publish the unscoped `claws` npm
+name; package and executable names remain development-only until maintainers
+approve a release identity.
 
 ```bash
 pnpm install
@@ -62,7 +63,7 @@ The adapter never retries a timed-out apply. OpenClaw may have recorded partial
 progress, so inspect `openclaw claws status` before deciding whether to resume
 or remove it.
 
-## Private Distribution Proof
+## Distribution proof
 
 `pnpm proof:pack` builds the bundled CLI, packs it without lifecycle scripts,
 checks that the tarball contains only package metadata, its README, and bundled
@@ -73,7 +74,7 @@ prove a real OpenClaw dry-run through the packed binary. That optional lane
 uses disposable home, state, and config paths and does not read or migrate the
 operator's normal OpenClaw state.
 
-The incubation artifact requires Node.js 22.22.3 or newer and an OpenClaw build
+The development artifact requires Node.js 22.22.3 or newer and an OpenClaw build
 that provides the experimental `openclaw claws add --json` contract. A
 configured OpenClaw entry runs with the CLI's Node executable, which must also
 satisfy that OpenClaw build's supported Node range. The CLI
@@ -81,6 +82,6 @@ collects no telemetry and does not update itself; installation and updates
 remain the eventual package manager's responsibility. No registry publication,
 final package name, or stable compatibility promise is made by this proof.
 
-Run `pnpm proof:private` for the complete private readiness gate. The concise
-architecture, evidence, and public-incubation decision brief is in
-[`PRIVATE-REVIEW.md`](PRIVATE-REVIEW.md).
+Run `pnpm proof:private` for the complete readiness gate. See
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for development guidance and
+[`SECURITY.md`](SECURITY.md) for private vulnerability reporting.

@@ -1,6 +1,6 @@
-# Standalone Claws CLI Incubator
+# Claws CLI
 
-This private package proves the future harness-neutral Claws command without
+This experimental package implements the harness-neutral Claws command without
 selecting or publishing its final npm identity.
 
 ```bash
@@ -37,7 +37,7 @@ follow-up action.
 The repository-level `pnpm proof:pack` command proves the exact bundled
 artifact through an offline isolated install and the installed `claws-dev` bin.
 When `OPENCLAW_CLI_ENTRY` is set, it also delegates a real OpenClaw dry-run.
-That lane uses disposable OpenClaw state. The private CLI emits no telemetry
+That lane uses disposable OpenClaw state. The CLI emits no telemetry
 and has no self-update behavior.
 
 `--help` and `--version` are available without the experimental gate. On
