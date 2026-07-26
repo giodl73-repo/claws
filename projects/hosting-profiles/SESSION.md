@@ -37,20 +37,20 @@
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `5a4bb64` and includes the readiness and subject sidecars; RFC 0023 is at
-  `25701d7` and includes
+  `189075c` and includes the readiness and subject sidecars; RFC 0023 is at
+  `f922b89` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `c65456659cfd` in eighteen commits. Fork
+  at `ca05a31a9b73` in eighteen commits. Fork
   [PR 161](https://github.com/giodl73-repo/openclaw/pull/161) isolates the
-  subject-identity commit at `0cae27ea4a48` for review. The dependent
+  subject-identity commit at `1cd0cd98f282` for review. The dependent
   core-owner implementation is
   [openclaw/openclaw#113421](https://github.com/openclaw/openclaw/pull/113421)
-  at `2b32ecce5745`, based on the exact readiness
+  at `0baf0be2c17e`, based on the exact readiness
   head. The dependent profile implementation is
   [openclaw/openclaw#113422](https://github.com/openclaw/openclaw/pull/113422)
-  at `810a9fe7dfbe`, stacked on the core-owner
+  at `a601aaab42bf`, stacked on the core-owner
   head. The stack includes the
   discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
   cross-link, and docs navigation. [Fork PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
@@ -66,12 +66,16 @@
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
   hosting-profiles project files from this session should be committed. Both
   implementation branches and both RFC branches are clean at pushed heads.
-- Validation: the stack is rebased onto OpenClaw `main` `8b9314b7e632`, and
+- Validation: the stack is rebased onto OpenClaw `main` `1eff642cd2d4`, and
   `git range-diff` preserves all implementation patches. The direct subject
   suite passes 9 assertions; the Plugin SDK generator/check and diff checks
   pass. The prior integrated tree passed 152 focused Gateway, readiness,
   profile, node-mode, subject, session-storage, Policy, selector, and CLI
-  assertions. Oxlint, formatting, and `git diff --check` pass. Full-repo typecheck
+  assertions. Current upstream CI passes production types, test types, lint,
+  and the selected architecture boundaries. A final unused helper export found
+  by Knip is now private, and the Plugin SDK baseline regenerates cleanly on the
+  current base; fresh CI is running for that corrected head. Oxlint, formatting,
+  and `git diff --check` pass. Full-repo typecheck
   exceeded two minutes without output after its concrete fixture errors were
   fixed; focused suites compile. Codex review found and fixed profile argument
   provenance and a stale contribution-shape assertion. Earlier package build
