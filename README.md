@@ -8,6 +8,7 @@ on the unscoped `claws` npm name.
 pnpm install
 pnpm build
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --dry-run
+CLAWHUB_REGISTRY_URL=https://registry.example OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- clawhub:@publisher/claw@1.0.0 --agent openclaw --dry-run
 ```
 
 The intended future command shape remains:
@@ -32,7 +33,12 @@ identity.
 
 ## Current Scope
 
-The current slice supports local package inspection and OpenClaw dry-run
-preview through an immutable verified snapshot. Remote ClawHub resolution,
-apply, lifecycle dispatch, final naming, publication, and other harness
-adapters are deferred.
+The current slice supports local package inspection and exact ClawHub package
+coordinates. ClawHub resolution verifies the official experimental feed,
+downloaded artifact digest, archive limits, extracted package identity, and
+portable manifest before OpenClaw receives an immutable dry-run snapshot.
+`CLAWHUB_REGISTRY_URL` is required until the experimental feed is deployed. It
+must select an HTTPS registry or a loopback HTTP development registry; artifact
+downloads remain pinned to that origin.
+Apply, lifecycle dispatch, final naming, publication, and other harness
+adapters remain deferred.

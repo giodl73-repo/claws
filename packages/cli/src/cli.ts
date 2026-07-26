@@ -3,7 +3,7 @@ import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { previewWithHarness } from "./adapters.js";
 import { CliError } from "./errors.js";
-import { inspectLocalPackage } from "./source.js";
+import { inspectClawSource } from "./remote-source.js";
 import {
   INCUBATION_STABILITY,
   OUTCOME_SCHEMA_VERSION,
@@ -16,8 +16,12 @@ import {
 const usage = `Standalone Claw CLI incubator
 
 Usage:
-  claws-dev inspect <local-package> [--json]
-  claws-dev <local-package> --agent openclaw --dry-run [--json]
+  claws-dev inspect <source> [--json]
+  claws-dev <source> --agent openclaw --dry-run [--json]
+
+Sources:
+  ./local-package
+  clawhub:<package>@<exact-version>
 
 Set OPENCLAW_EXPERIMENTAL_CLAWS=1 to enable this private command.`;
 
@@ -29,11 +33,6 @@ type Io = {
 type Dependencies = {
   inspect(source: string): Promise<LocalClawPackage>;
   preview(harness: string, claw: LocalClawPackage): Promise<{ id: string; outcome: unknown }>;
-};
-
-const defaultDependencies: Dependencies = {
-  inspect: inspectLocalPackage,
-  preview: previewWithHarness,
 };
 
 function isExperimentalEnabled(env: NodeJS.ProcessEnv): boolean {
@@ -90,6 +89,9 @@ function renderHuman(outcome: CliOutcome): string {
     `agent: ${outcome.claw.agent.id}`,
     `portable prompt: ${outcome.claw.hasPortablePrompt ? "yes" : "no"}`,
     `integrity: ${outcome.package.integrity}`,
+    ...(outcome.package.kind === "clawhub-package"
+      ? [`artifact integrity: ${outcome.package.artifactIntegrity}`]
+      : []),
     ...(outcome.harness ? [`harness preview: ${outcome.harness.id}`] : []),
   ].join("\n");
 }
@@ -104,7 +106,10 @@ export async function runCli(
 ): Promise<number> {
   const io = options.io ?? { stdout: process.stdout, stderr: process.stderr };
   const env = options.env ?? process.env;
-  const dependencies = options.dependencies ?? defaultDependencies;
+  const dependencies = options.dependencies ?? {
+    inspect: (source: string) => inspectClawSource(source, { env }),
+    preview: previewWithHarness,
+  };
   const inspectCommand = argv[0] === "inspect";
   const operation = inspectCommand ? "inspect" : "preview";
   const args = inspectCommand ? argv.slice(1) : argv;
@@ -159,7 +164,7 @@ export async function runCli(
       throw new CliError({
         code: "invalid_arguments",
         phase: "arguments",
-        message: "Provide exactly one local Claw package directory.",
+        message: "Provide exactly one local package or exact ClawHub coordinate.",
       });
     }
     const claw = await dependencies.inspect(source);

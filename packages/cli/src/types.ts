@@ -10,16 +10,31 @@ export type CliDiagnostic = {
   path?: string;
 };
 
+export type ClawPackageSource =
+  | {
+      kind: "local-package";
+      path: string;
+      packageName: string;
+      packageVersion: string;
+      integrity: string;
+      byteLength: number;
+      fileCount: number;
+    }
+  | {
+      kind: "clawhub-package";
+      ref: string;
+      registry: string;
+      packageName: string;
+      packageVersion: string;
+      integrity: string;
+      artifactIntegrity: string;
+      artifactKind: "legacy-zip" | "npm-pack";
+      byteLength: number;
+      fileCount: number;
+    };
+
 export type LocalClawPackage = {
-  source: {
-    kind: "local-package";
-    path: string;
-    packageName: string;
-    packageVersion: string;
-    integrity: string;
-    byteLength: number;
-    fileCount: number;
-  };
+  source: ClawPackageSource;
   manifest: ClawManifest;
   manifestPath: string;
   payload: Array<{ path: string; bytes: Buffer }>;

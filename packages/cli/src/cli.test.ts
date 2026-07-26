@@ -62,6 +62,25 @@ describe("standalone Claw CLI", () => {
     expect(capture.read().stdout).not.toContain("Review incoming incidents");
   });
 
+  it("passes the runner environment to remote source inspection", async () => {
+    const capture = output();
+    const exitCode = await runCli(
+      ["inspect", "clawhub:@example/incident-triage-claw@1.0.0", "--json"],
+      {
+        io: capture.io,
+        env: {
+          OPENCLAW_EXPERIMENTAL_CLAWS: "1",
+          CLAWHUB_REGISTRY_URL: "http://127.0.0.1:9",
+        },
+      },
+    );
+
+    expect(exitCode).toBe(2);
+    expect(JSON.parse(capture.read().stderr)).toMatchObject({
+      diagnostics: [{ code: "clawhub_request_failed" }],
+    });
+  });
+
   it("dispatches dry-run preview through the selected adapter", async () => {
     const capture = output();
     const preview = vi.fn().mockResolvedValue({ id: "openclaw", outcome: { dryRun: true } });

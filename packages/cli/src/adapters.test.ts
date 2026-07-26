@@ -49,7 +49,9 @@ describe("standalone harness adapters", () => {
       "--dry-run",
       "--json",
     ]);
-    expect(delegatedRoot).not.toBe(claw.source.path);
+    expect(delegatedRoot).not.toBe(
+      claw.source.kind === "local-package" ? claw.source.path : undefined,
+    );
     await expect(access(delegatedRoot!)).rejects.toThrow();
     expect(env?.OPENCLAW_EXPERIMENTAL_CLAWS).toBe("1");
     expect(cwd).toBe(resolve("test"));
