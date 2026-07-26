@@ -32,7 +32,9 @@
 - Last updated: 2026-07-26
 - Last agent: Codex
 - Current focus: exact package-installed proof is complete for RFC 0018
-  readiness identity and RFC 0023 Standard Hosting Profiles.
+  readiness identity and RFC 0023 Standard Hosting Profiles. The first
+  follow-up runtime facility, semantic readiness transition watching, is
+  published as fork PR 167 from the exact RFC 0018 implementation head.
 - Published heads: RFC 0018
   [PR 33](https://github.com/openclaw/rfcs/pull/33) at `59aeff2e407f`;
   readiness [PR 104018](https://github.com/openclaw/openclaw/pull/104018) at
@@ -89,6 +91,15 @@
 
 ## Open Threads
 
+- Review and promote fork PR 167 after the RFC 0018 foundation shape is
+  accepted. It adds transition-aware `openclaw ready --watch` while preserving
+  one-shot behavior and profile independence.
+- Keep condition/provider inspection and startup wait under RFC 0018; keep
+  profile inspection, validation, conformance artifacts, and release gates
+  under RFC 0023.
+- Integrate readiness evidence into existing Doctor, telemetry, support-bundle,
+  and update owners instead of creating parallel subsystems.
+
 - Update implementation PR 23 to add provider descriptions/enumeration and
   document the read-only, idempotent, cancellation-aware execution contract.
 - Amend PR 17 before upstream promotion so existing Gateway startup, drain,
@@ -114,6 +125,28 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-26: Published the first readiness runtime-operations facility.
+  - Fork [PR 167](https://github.com/giodl73-repo/openclaw/pull/167) at
+    `94de0cf33f5b` is one commit directly above readiness foundation head
+    `6dce3555a511`.
+  - `openclaw ready --watch` emits an initial snapshot and semantic transitions
+    only; JSON mode is versioned JSON Lines. Polls are sequential, have a 250
+    ms floor, retain per-call timeout, and cancel the active RPC on signals.
+  - Diffing keys conditions by `(subjectRef, type)`, keys subjects by `ref`,
+    reports producer and lifetime replacement, and ignores timestamp churn.
+  - Watch survives not-ready and unavailable states. Human output includes the
+    outage error on availability loss and the full canonical result on
+    recovery, including recovered-but-degraded state.
+  - 52 focused assertions, type-aware lint, formatting, and diff checks pass.
+    Final `codex review --uncommitted` reports no actionable defects after two
+    accepted P2 output fixes.
+  - Full local lockfile hydration was blocked by a Microsoft package-proxy 404
+    for `@agentclientprotocol/sdk@1.3.0`; the ready test used a test-only alias
+    to a matching checked-out fs-safe build. No dependency changes were made.
+  - RFC 0018 and PR 33 now name runtime operator facilities and link PR 167.
+    RFC 0023 and PR 37 now separately own profile inspection, validation,
+    conformance artifacts, and release gates.
 
 - 2026-07-25: Refreshed the full readiness/profile stack on OpenClaw `main`
   `f6e8446e55ee`. The rebase moved readiness integration into the current split

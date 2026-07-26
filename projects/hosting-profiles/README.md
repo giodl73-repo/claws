@@ -66,6 +66,7 @@ then separates required v1 guarantees from host-owned and deferred behavior.
 | openclaw/rfcs         | [RFC 0018 / PR 33](https://github.com/openclaw/rfcs/pull/33)                           | `user/giodl/standard-hosting-profiles-ready-check` | Review   | Define readiness conditions/providers, direct operator selection, canonical projections, and CLI. |
 | openclaw/rfcs         | [RFC 0023 / PR 37](https://github.com/openclaw/rfcs/pull/37)                           | `user/giodl/rfc-0023-standard-hosting-profiles`    | Review   | Define standard, release-tested hosting profile presets over RFC 0018.                            |
 | openclaw/openclaw     | [Readiness PR 104018](https://github.com/openclaw/openclaw/pull/104018)                | `user/giodl/readiness-profiles-upstream`           | Review   | Eighteen-commit opt-in readiness framework with shared subject identity.                           |
+| giodl73-repo/openclaw | [Readiness watch PR 167](https://github.com/giodl73-repo/openclaw/pull/167)            | `user/giodl/readiness-operations`                  | Draft    | Follow-up runtime facility: bounded semantic transition watch over the canonical result.           |
 | openclaw/openclaw     | [Core criteria PR 113421](https://github.com/openclaw/openclaw/pull/113421)            | `user/giodl/readiness-core-owner-adoption`         | Review   | One follow-on merge unit for startup, execution, state, storage, delivery, and scheduler facts.    |
 | openclaw/openclaw     | [Hosting Profiles PR 113422](https://github.com/openclaw/openclaw/pull/113422)         | `user/giodl/standard-hosting-profiles-owner-adoption` | Review | Restacked RFC 0023 implementation; depends on PRs 104018 and 113421.                                |
 | giodl73-repo/openclaw | [Readiness PRs 17, 22, 23, 27](https://github.com/giodl73-repo/openclaw/pulls)         | readiness-only stack                               | Draft    | Modernize Gateway readiness without requiring profiles.                                           |
@@ -109,6 +110,11 @@ the generic contract.
 RFC 0018 is the readiness acceptance decision. RFC 0023 depends on it but is a
 separate product/support decision. The old combined project draft is not the
 normative source for either RFC.
+
+The contract-to-facility roadmap is tracked in
+[`readiness-facilities.md`](readiness-facilities.md). It separates runtime
+operations owned by RFC 0018, profile conformance owned by RFC 0023, and
+integrations into the existing Doctor, telemetry, support, and update surfaces.
 
 The 2026-07-23 three-model review is complete at exact heads `c1919669c3f`
 (readiness) and `40b5b2e59d9` (profiles). Architecture and maintainer reviews
