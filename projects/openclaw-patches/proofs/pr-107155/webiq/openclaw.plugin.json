@@ -1,0 +1,23 @@
+{
+  "id": "webiq",
+  "activation": {
+    "onStartup": true
+  },
+  "contracts": {
+    "webSearchProviders": ["webiq"]
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "webSearch": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "omitAuth": { "type": "boolean" },
+          "apiKey": { "type": ["string", "object"] }
+        }
+      }
+    }
+  }
+}

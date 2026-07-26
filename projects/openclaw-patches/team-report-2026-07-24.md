@@ -1,19 +1,19 @@
 # Scout Patch Upstream Report
 
-Date: 2026-07-24
+Date: 2026-07-26
 
-Source: Lobster PR #5402 carries 20 OpenClaw patches against `v2026.7.1`.
+Source: Lobster PR #5402 carries 21 OpenClaw patches against `v2026.7.1`.
 Every issue created by this effort includes a **Scout patch provenance** banner.
 
 ## Portfolio
 
 | Disposition | Count |
 | --- | ---: |
-| Generic upstream fixes/contracts | 15 |
+| Generic upstream fixes/contracts | 16 |
 | Lobster-owned integration/policy | 5 |
-| **Total** | **20** |
+| **Total** | **21** |
 
-Of the 15 upstream candidates, 3 have landed, 4 have active PRs, 6 now have
+Of the 16 upstream candidates, 4 have landed, 4 have active PRs, 6 now have
 open issues awaiting an owner decision or implementation, and 2 Teams patches
 still require current-SDK behavior proof before filing.
 
@@ -45,9 +45,10 @@ refactor in PR #111249, without a Scout-filed issue.
 | `0003` | #102366 | Merged | Drop after release inclusion |
 | `0005` | #102357 | Merged | Drop after release inclusion |
 | `0006` | #110357 / #111249 | Merged | Drop after release inclusion |
-| `0004` | #107155 | Open | Galin-owned; track, do not duplicate |
-| `0007` | #102379 | Open | Galin-owned; refresh branch and resolve maintainer feedback |
-| `0011` | [#113403](https://github.com/openclaw/openclaw/pull/113403) | Open | Scout-authored; real Testbox proof posted; ClawSweeper review must be unstuck |
+| `0004` | #107155 | Open | Galin-owned; CI/proof green; owner manifest-contract decision requested in comment #5083443038, then current-main rebuild |
+| `0007` | #102379 | Open | Galin-owned; code/CI green; real Teams tenant proof and current-main refresh still needed |
+| `0011` | [#113403](https://github.com/openclaw/openclaw/pull/113403) | Ready for maintainer look | Scout-authored; no findings; proof sufficient; Peter assigned for policy/security-boundary decision |
+| `0021` | #105801 | Merged | Unified bundled catalogs already make the Teams channel entry eligible for official-install trust; drop after release inclusion |
 
 PR #96174 is related to patch `0015`, but solves a distinct task-ledger
 `lost`-versus-`failed` timestamp problem. It is not the planned patch `0015`
@@ -84,10 +85,12 @@ routing, delivery, or execution policy:
 
 ## Immediate Team Actions
 
-1. Unstick ClawSweeper review on PR #113403.
+1. Get Peter's inherited-allowlist policy decision on PR #113403; if accepted,
+   rebase and refresh focused Automation proof.
 2. Get the `skipped` versus `interrupted` decision on issue #77298.
 3. Triage owner feedback on issues #113440–#113444 and select the first
    contract PR.
-4. Ask Galin for status on PRs #107164, #107155, and #102379.
-5. Verify release inclusion of PRs #102366, #102357, and #110357 during the
-   next PromoteClaw bump, then remove the corresponding Lobster patches.
+4. Galin is on vacation: keep his three PRs stable. Use the time for owner
+   decisions and proof preparation; do not churn or duplicate them.
+5. Verify release inclusion of PRs #102366, #102357, #110357, and #105801
+   during the next PromoteClaw bump, then remove the corresponding Lobster patches.

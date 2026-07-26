@@ -1,7 +1,7 @@
 # Lobster OpenClaw Patch Inventory
 
 Baseline: Lobster PR #5402 at
-`b85499b5575a0757e13827634741a91ab64eab61`, carrying 20 patch files against
+`f807270d0b90cf2515bd82f257213f74f9338f5c`, carrying 21 patch files against
 OpenClaw `v2026.7.1`.
 
 Classification:
@@ -31,15 +31,15 @@ those remain separate upstream fixes or contract proposals.
 | Patch | Classification | Upstream discovery | Status | Next action |
 | ----- | -------------- | ------------------ | ------ | ----------- |
 | `0001-msteams-brokered-auth` | Lobster | No generic externally authenticated Teams transport found | Downstream | Keep; later assess whether a narrow authenticated-host transport contract is useful upstream |
-| `0002-msteams-brokered-benchmark-range` | Upstream fix | Issue #107163 and open PR #107164, owned by Galin Iliev, add a Teams-local hostname-scoped RFC2544 policy | **Active upstream PR** | Do not duplicate; track PR #107164 and drop after release inclusion and accepted host-proxy proof |
+| `0002-msteams-brokered-benchmark-range` | Upstream fix | Issue #107163 and open PR #107164, owned by Galin Iliev, add a Teams-local hostname-scoped RFC2544 policy | **Active upstream PR; green, proof needed** | Head `371e707170b2` is Codex-clean and all GitHub gates pass; collect real RFC2544 DNS/proxy allowed-host and blocked-host proof, then refresh from current `main` (4,057 commits behind at 2026-07-26 recheck) |
 | `0003-msteams-native-runtime-entrypoints` | Upstream fix | Issue #102365; merged PR #102366, merge `68dcfe633d85acdb38cdc102de806f2c7141cd6f` | **Upstream landed** | Drop when the pinned OpenClaw release contains the merge |
-| `0004-secrets-fast-path-keyless-webiq` | Upstream fix | Issue #107154 and open PR #107155, owned by Galin Iliev | **Active upstream PR** | Do not duplicate; track PR #107155 and drop after release inclusion |
+| `0004-secrets-fast-path-keyless-webiq` | Upstream fix | Issue #107154 and open PR #107155, owned by Galin Iliev | **Active upstream PR; generic contract decision needed** | Head `ff85c33c553d` supports Lobster's unrelated plugin allow/load entries, all 23 focused Linux tests and all GitHub gates pass, and real gateway startup proves 0 resolver imports for keyless versus 2 for the credential-bearing control; exact-head review marks proof sufficient but has one P1 finding against deriving secrets-bypass eligibility from opaque plugin config. Owner choice between conditional manifest metadata and the conservative resolver was posted in comment #5083443038; rebuild on current `main` after a decision (4,057 commits behind) |
 | `0005-msteams-streaming-prefix-delta` | Upstream fix | Issue #102356; merged PR #102357, merge `787ed383f5579420871bc86e0abb3437448c15a9` | **Upstream landed** | Drop when the pinned OpenClaw release contains the merge |
 | `0006-msteams-delivery-id-dedupe` | Upstream fix | Merged PR #110357 durably admits Teams activities by `activity.id`, rejects in-flight/completed redeliveries, and survives restart; PR #111249 moved the mechanism into the shared ingress monitor | **Upstream landed** | Drop the Lobster patch when the pinned release contains merge `4e0cc187a21cca36d1887998c101c6b9baf926be`; the Lobster delivery header is no longer needed for generic dedupe |
-| `0007-msteams-normalize-quoted-forward` | Upstream fix | Open issue #102376 and PR #102379 cover mention, quoted-reply, forward, and debounce normalization; merged PR #51647 covers HTML reply extraction | **Existing upstream PR** | Do not duplicate Galin's active PR; track its current `DIRTY` head and unresolved maintainer feedback, then drop the matching Lobster patch after release inclusion |
+| `0007-msteams-normalize-quoted-forward` | Upstream fix | Open issue #102376 and PR #102379 cover mention, quoted-reply, forward, debounce, and authored-format normalization; merged PR #51647 covers HTML reply extraction | **Existing upstream PR; code/CI green, proof needed** | Head `0fc04b3cbd2a` has nested quoted-reply, multi-quote, mention-order, DM Graph-ID, debounce, authored-format, CI-regression, and max-lines fixes; all 48 GitHub checks pass, including required `openclaw/ci-gate`; gather real Teams tenant proof, then refresh from current `main` (152 commits behind at recheck) |
 | `0009-msteams-threaded-replies` | Upstream fix | Current `main` already keeps reactive channel/group replies in context through Teams SDK `reply()`; SDK 2.0.14 documents `send()` as thread-preserving and `reply()` as adding a quote, while streaming is 1:1-only | **Reassess after SDK migration** | Do not file the old `replyToId` design; compare with 0014 and split only a verified quote/context gap |
 | `0010-cron-delivery-target-optional` | Lobster | Issue #91613 and merged PR #91685 deliberately fail closed for ambiguous keyless implicit delivery; merged PR #105215 preserves successful execution status but keeps `delivery-target` fatal; explicit `delivery.bestEffort: true` already exists | **Downstream policy conflict** | Do not upstream the patch unchanged; keep Lobster's default only if its operator policy intentionally accepts best-effort implicit delivery |
-| `0011-cron-toolless-run-guard` | Upstream fix | Scout-marked issue #113402 and PR #113403; real Gateway/Automation proof passed on Testbox `tbx_01kyb3f4sd4c1850yhjcnn1yfw`; PR #95605 covers the distinct raw `modelRun` case | **Upstream PR open; proof posted** | Track re-review/CI and drop after a release contains the fix |
+| `0011-cron-toolless-run-guard` | Upstream fix | Scout-marked issue #113402 and PR #113403; real Gateway/Automation proof passed on Testbox `tbx_01kyb3f4sd4c1850yhjcnn1yfw`; ClawSweeper found no actionable findings and marked proof sufficient / ready for maintainer look; PR #95605 covers the distinct raw `modelRun` case | **Maintainer decision pending** | Peter is assigned; wait for confirmation of the inherited-allowlist boundary, then rebase from current `main` (419 commits behind at recheck), refresh focused proof, and drop after a release contains the fix |
 | `0013-msteams-brokered-multiplayer-route` | Lobster | No generic equivalent expected | Downstream | Keep with Lobster multiplayer admission, routing, and completion lease |
 | `0014-msteams-quoted-replies` | Upstream fix | PR #51647 is inbound context only; Teams SDK 2.0.14 now provides first-class `reply()`, `quote()`, and `addQuote()` APIs, superseding the patch's older wire-level approach | **Reassess against SDK APIs** | Prove the desired reactive/proactive quote policy on current `main`; use SDK-native APIs rather than porting the patch |
 | `0015-cron-gateway-restart-interrupt-skipped` | Upstream fix | Open issue #77298 exactly matches counter/health pollution; Scout provenance and the downstream `skipped` semantics were posted in comment #5075284093; PR #96174 is distinct task-ledger `lost` versus `failed` recovery | **Owner decision needed** | Wait for agreement on reusing existing `skipped` versus adding public `interrupted`; then author the narrow `ops.ts` and restart-catchup test change |
@@ -50,15 +50,16 @@ those remain separate upstream fixes or contract proposals.
 | `0019-cron-preapproval-creation` | Upstream contract | Scout-marked issue #113443 | **Issue filed; owner confirmation** | Confirm the opaque staged-publication/finalization seam before coding |
 | `0020-cron-nested-tool-authorization` | Upstream contract | Scout-marked issue #113440; issues #13364 and #110986 cover different top-level hook concerns | **Issue filed; owner confirmation** | Confirm operation taxonomy and owner coverage for exec, nodes, MCP, and plugin tools |
 | `0020-personality-extra-system-prompt` | Upstream fix | Scout-marked issue #113442; issue #80329 is related operator context but not persisted prompt state | **Issue filed; public-surface review** | Decide prompt precedence, inheritance, authorization, and mutability before coding |
+| `0021-msteams-official-trust` | Upstream fix | Merged PR #105801, merge `6aca7ca48f76e2110b6f431a42de8c0430a8e19b`, unified the bundled channel, provider, and plugin catalogs; the existing Teams channel entry now participates in official-install trust | **Upstream landed** | Drop when the pinned OpenClaw release contains the merge; verified present in `v2026.7.2-beta.1` and later betas, absent from `v2026.7.1` |
 
 ## Totals
 
 | Disposition | Count |
 | ----------- | ----: |
-| Direct upstream fixes/features | 11 |
+| Direct upstream fixes/features | 12 |
 | Generic upstream contracts | 4 |
 | Lobster-owned patches | 5 |
-| Already landed upstream | 3 |
+| Already landed upstream | 4 |
 | Open issue awaiting decision or implementation | 6 |
 | Existing related discussion requiring comparison | 2 |
 | Conditional issue gaps after bounded search | 2 |
@@ -70,7 +71,7 @@ current Teams SDK behavior proof confirms a remaining gap.
 
 `0012-msteams-text-attachment-context.patch` was removed during the 2026.7.1
 promotion because current upstream attachment-preservation behavior overlaps
-the patch. It is not part of the 20 active files.
+the patch. It is not part of the 21 active files.
 
 ## Search Evidence
 
@@ -81,4 +82,8 @@ the patch. It is not part of the 20 active files.
 - Live verification found exact issue #107163 and PR #107164 for patch 0002;
   the focused Teams-local fix supersedes a second Scout PR for hosted package 1.
 - Exact code-symbol searches found the already-landed patches 0003 and 0005.
+- Current-main source proof for patch 0021 found that PR #105801 introduced
+  `BUNDLED_OFFICIAL_EXTERNAL_PLUGIN_CATALOGS`, which loads the channel catalog's
+  existing `@openclaw/msteams` entry into official-install trust resolution.
+  Gitcrawl and live GitHub searches found no separate exact issue or PR.
 - All links and states must be rechecked live before issue or PR mutation.
