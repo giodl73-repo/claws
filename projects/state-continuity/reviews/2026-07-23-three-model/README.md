@@ -52,8 +52,25 @@ OpenClaw PRs 112385, 112865, and 112896 at these exact heads:
 
 ## Disposition
 
-PR 112385 is clean. Repair findings 1, 3, and 4 directly. Finding 2 needs one
-explicit owner decision: add stable owner-issued receipts now, or narrow the
-draft RFC and implementation claims to bounded generation-bound evidence and
-leave richer owner receipts to their semantic owners.
+PR 112385 was clean. Findings 1, 3, and 4 required direct repairs. For finding
+2, the implementation direction is the bounded option: stable,
+generation-bound reconciliation/readiness evidence now, with richer
+owner-authored receipts left to their semantic owners.
 
+## 2026-07-26 resolution
+
+All four accepted findings are resolved on the rebased stack:
+
+- post-intent capture and verification failures quarantine;
+- durable JSON parse failures become typed quarantine conflicts;
+- scheduler/readiness identities bind versioned normalized outcomes, the exact
+  restore receipt, recovery point, acceptance set, and destination generation;
+- the RFC and PR bodies consistently call ordinary output `host-protected`.
+
+Current heads are RFC `d03c85097f0`, recovery points `ad5c177c782`, final
+capture `7ed3c77c1d8`, and restored admission `c3637461bb7`. A real
+source-CLI/Gateway lifecycle proof on runtime head `a71c2d3a244` captured and
+restored two current-schema SQLite owners, observed admission held, committed
+one readiness record, and observed admission release. The final child head
+differs only by deleting a forbidden max-lines suppression and passes the
+max-lines ratchet.
