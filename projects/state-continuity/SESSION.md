@@ -16,8 +16,12 @@ operation intent, result, startup, and readiness records now share one
 operation-scoped SQLite recovery journal. The RFC and all PR bodies carry real
 source-CLI/Gateway proof. No additional OpenClaw implementation PR is needed
 for this merge sequence. Full scale-to-zero still needs the bounded host
-wake/scheduler adapter after the Lobster owner/caller work is ready. Vincent
-and the relevant state owners still need to accept the authoritative
+wake/scheduler adapter after the Lobster owner/caller work is ready. RFC 0013,
+RFC PR 46, issue 114145, and `rfc-0013-follow-on-pr-plan.md` now describe three
+deferred evidence slices: an OpenClaw semantic wake receipt, host/Scout wake
+authority and cause coalescing, and readiness-gated retained delivery with
+crash replay. These must not be folded into the current three OpenClaw PRs.
+Vincent and the relevant state owners still need to accept the authoritative
 selected-agent inventory, host closure-evidence trust boundary, recovery-
 journal lifecycle, and core-versus-host restored-admission boundary.
 
@@ -26,7 +30,7 @@ OpenClaw PR 105718, and `openclaw backup sqlite` remain authoritative for
 SQLite capture, verification, and fresh-target restore.
 
 **Active RFC work:** [openclaw/rfcs#46](https://github.com/openclaw/rfcs/pull/46), ready for review,
-branch `user/giodl/rfc-0013-continuity-sidecars`, commit `7674bf60774`, stacked
+branch `user/giodl/rfc-0013-continuity-sidecars`, commit `0b3027acb82`, stacked
 on RFC PR 20. It binds a closed owner-selected component inventory, keeps
 ordinary snapshots host-protected, defines a deterministic logical acceptance
 byte set, and links OpenClaw PRs 112385, 112865, and 112896 as non-normative
@@ -40,6 +44,11 @@ recovery work. They state that PRs 112385, 112865, and 112896 are one bounded
 implementation, not a required decomposition; maintainers may choose a smaller
 or different seam that satisfies issue 114145. The public umbrella is filed;
 the private umbrella remains a draft in `issue-drafts-2026-07-22.md`.
+The RFC and public issue now also specify autonomous cron wake and retained
+Teams/API delivery: OpenClaw owns the semantic deadline and reconciliation;
+the host owns retained ingress, alarms, wake coalescing, compute, and delivery
+replay. Wake callers cannot select recovery points, generations, or readiness,
+and central lifecycle records contain no payloads or credentials.
 
 **Implementation work ready for review:** OpenClaw
 [PR 112385](https://github.com/openclaw/openclaw/pull/112385), branch

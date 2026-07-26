@@ -420,19 +420,75 @@ Phase B
 All journals and persistent operation paths are scoped by stable request
 identity. Contradictory replay quarantines.
 
-## Deferred Phase 2: Elastic Wake
+## Phase 2: Cron And Retained-Ingress Wake
 
-Do not include Elastic wake in the first replacement series. After PR 5 proves
-Portable crash replay, add one separate sidecar and implementation pair for:
+Do not fold wake orchestration into OpenClaw PRs 112385, 112865, or 112896.
+Those PRs prove the smaller recovery transaction. After their ownership split
+is accepted, use these bounded follow-on evidence slices:
 
-- retained Teams/API work;
-- semantic cron wake registration;
-- coalesced `EnsureRuntimeReady`;
-- readiness-gated delivery;
-- absent-compute quarantine.
+### PR 6A: OpenClaw semantic wake registration
 
-This prevents scale-to-zero policy from obscuring the smaller recovery
-transaction.
+**Repo:** `openclaw/openclaw`
+
+**Depends on:** final capture and restored admission
+
+**Purpose:** emit one owner-authored semantic wake receipt bound to the exact
+accepted recovery point and scheduler evidence. The receipt contains a nullable
+`nextRequiredAt` and bounded reason class without job names, cron expressions,
+prompts, payloads, credentials, or artifact locations.
+
+Produce the authoritative receipt at final capture and after restored
+reconciliation. Do not require a host callback for every live cron mutation.
+
+**Reuse:** the cron owner's existing `nextWakeAtMs`, startup catch-up,
+missed-run reconciliation, and duplicate suppression. The host may subtract
+cold-start lead time but cannot reinterpret cron or invoke due work.
+
+**Evidence slice:** no-deadline state, one future cron deadline, a mutation
+racing final capture, exact replay, and a restored reconciliation that produces
+the next owner-authored receipt.
+
+### PR 6B: Host/Scout wake authority and coalescing
+
+**Repo:** host implementation; the public RFC remains product-neutral
+
+**Depends on:** PR 6A, durable acceptance, revocable sleep authority, and one
+generation-scoped ensure-runtime-ready path
+
+**Purpose:** atomically accept the recovery point, wake receipt, and sleep
+authority; durably retain Teams/API work before acknowledging it; schedule the
+semantic deadline; revoke sleep on a new cause; and coalesce Teams, API, cron,
+and operator causes into one idempotent provisioning operation.
+
+Wake callers supply only previously retained cause identities. They cannot
+choose the accepted recovery point or destination generation and cannot supply
+readiness. Central lifecycle records contain no retained payload or credential.
+
+**Keep owner-controlled:** Teams payloads and acknowledgement, host alarms,
+placement, compute lifecycle, cold-start lead, and delivery retries.
+
+**Evidence slice:** a Teams cause racing destruction, a deadline with no
+resident process, concurrent causes joining one destination generation, and
+unknown provisioning retaining every cause.
+
+### PR 6C: Readiness-gated delivery and crash replay
+
+**Repo:** host implementation
+
+**Depends on:** PR 6B and OpenClaw restored-admission evidence
+
+**Purpose:** consume the exact restored-admission readiness identity before
+each owner delivers retained work, preserve independent delivery and
+acknowledgement state, and replay the same winning generation after host exit.
+
+**Evidence slice:** one retained Teams message and one cron deadline share one
+cold start; OpenClaw reconciles scheduler state before admission; the host
+crashes after restored-ready but before completion; restart reuses the same
+destination and delivers/acknowledges each cause exactly through its owner.
+
+PRs 6B and 6C may be combined if the atomic authority, retained-delivery, and
+crash-replay gates remain independently testable. This is a review topology,
+not a required implementation decomposition.
 
 ## Old-To-New Mapping
 
