@@ -6,7 +6,11 @@
 
 **Current focus:** Obtain owner review for RFC PR 46 and the complete three-PR
 OpenClaw evidence stack: recovery points in PR 112385, final capture in PR
-112865, and restored admission in PR 112896. The accepted three-model findings
+112865, and restored admission in PR 112896. Public umbrella issue
+[openclaw/openclaw#114145](https://github.com/openclaw/openclaw/issues/114145)
+now centralizes the scale-to-zero outcome, operator evidence, competitor
+baseline, Microsoft Scout host boundary, and alternate-solution invitation.
+The accepted three-model findings
 and the later ClawSweeper JSON-sidecar policy finding are fixed. Durable
 operation intent, result, startup, and readiness records now share one
 operation-scoped SQLite recovery journal. The RFC and all PR bodies carry real
@@ -22,17 +26,20 @@ OpenClaw PR 105718, and `openclaw backup sqlite` remain authoritative for
 SQLite capture, verification, and fresh-target restore.
 
 **Active RFC work:** [openclaw/rfcs#46](https://github.com/openclaw/rfcs/pull/46), ready for review,
-branch `user/giodl/rfc-0013-continuity-sidecars`, commit `58081d5fdea`, stacked
+branch `user/giodl/rfc-0013-continuity-sidecars`, commit `7674bf60774`, stacked
 on RFC PR 20. It binds a closed owner-selected component inventory, keeps
 ordinary snapshots host-protected, defines a deterministic logical acceptance
 byte set, and links OpenClaw PRs 112385, 112865, and 112896 as non-normative
-implementation evidence for owner review. The
-RFC and live PR body now lead
+implementation evidence for owner review. The RFC and live PR body now lead
 with the safe scale-to-zero motivation, managed-host failure classes, industry
 compute-lifecycle baseline, observable outcomes, and explicit separation
-between the OpenClaw application-consistency layer and host-owned wake. Ready-
-to-file public and private umbrella issue text is in
-`issue-drafts-2026-07-22.md`; neither issue has been filed.
+between the OpenClaw application-consistency layer and host-owned wake. They
+credit Vincent's snapshot and suspension-validation work, Peter's cooperative
+suspension work, and Josh Lehman's SQLite session/transcript and restart-
+recovery work. They state that PRs 112385, 112865, and 112896 are one bounded
+implementation, not a required decomposition; maintainers may choose a smaller
+or different seam that satisfies issue 114145. The public umbrella is filed;
+the private umbrella remains a draft in `issue-drafts-2026-07-22.md`.
 
 **Implementation work ready for review:** OpenClaw
 [PR 112385](https://github.com/openclaw/openclaw/pull/112385), branch
@@ -71,6 +78,10 @@ mechanism, or destruction authority. The exclusive slices are 929 changed LOC
 for PR 112385, 961 for PR 112865, and 1,545 for PR 112896. GitHub displays
 cumulative diffs of 929, 1,890, and 3,435 changed LOC because all three upstream
 PRs target `main` while their fork branches preserve ancestry.
+All three live PR bodies now link issue 114145, cite only the operator issues
+relevant to their slice without claiming to close them, credit the existing
+Vincent/Peter/Josh foundations they compose, and carry the current exact-head
+96-test proof rather than stale pre-review hashes.
 
 Lobster [PR 5481](https://microsoft.ghe.com/bic/lobster/pull/5481), branch
 `user/giodl/rfc-0013-host-acceptance-contract`, commit `c313f37c49e`, is the
