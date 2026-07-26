@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { realpath, stat } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import {
+  conflictsWithClawPath,
   isCanonicalClawHubPackageName,
   isExactSemVer,
   isSafeClawRelativePath,
@@ -286,6 +287,23 @@ export async function inspectLocalPackage(input: string): Promise<LocalClawPacka
       })),
     );
   }
+  const hasPortablePrompt = markdown.body.length > 0;
+  const workspaceTargets = new Set([
+    ...Object.keys(parsed.manifest.workspace.bootstrapFiles).map(portableClawPathKey),
+    ...parsed.manifest.workspace.files.map((entry) => portableClawPathKey(entry.path)),
+  ]);
+  if (
+    hasPortablePrompt &&
+    conflictsWithClawPath(workspaceTargets, portableClawPathKey("SOUL.md"))
+  ) {
+    throw new CliError({
+      code: "claw_body_soul_conflict",
+      phase: "package",
+      message:
+        "CLAW.md body content and an explicit SOUL.md workspace declaration cannot both be present.",
+      path: "$.workspace",
+    });
+  }
   const profilePath = parsed.manifest.metadata?.["openclaw.config"];
   if (
     profilePath !== undefined &&
@@ -363,7 +381,6 @@ export async function inspectLocalPackage(input: string): Promise<LocalClawPacka
     );
   }
   const files = [...fileByPath.values()];
-  const hasPortablePrompt = markdown.body.length > 0;
   const bootstrapFiles = Object.keys(parsed.manifest.workspace.bootstrapFiles);
   if (hasPortablePrompt && !bootstrapFiles.includes("SOUL.md")) {
     bootstrapFiles.push("SOUL.md");

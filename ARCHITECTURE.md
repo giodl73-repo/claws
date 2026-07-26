@@ -47,6 +47,8 @@ useful component catalogs; they are not registries of complete Claw packages.
 - Construction copies local skill bytes into the output package. Later changes
   to the source directory cannot silently alter that package.
 - The portable parser accepts no provider-specific behavior.
+- A non-empty `CLAW.md` body is the portable agent prompt. It is mutually
+  exclusive with an explicit workspace target that conflicts with `SOUL.md`.
 - The harness remains authoritative for capability disclosure, consent,
   mutation, provenance, and removal.
 - Mutable catalog aliases such as `latest` may help discovery, but must resolve

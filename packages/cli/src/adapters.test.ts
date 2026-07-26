@@ -13,7 +13,6 @@ import { inspectLocalPackage } from "./source.js";
 
 const validFixture = resolve("packages", "cli", "test", "fixtures", "valid");
 const bodyOnlyFixture = resolve("packages", "cli", "test", "fixtures", "body-only");
-const promptWithSoulFixture = resolve("packages", "cli", "test", "fixtures", "portable-minimal");
 
 describe("standalone harness adapters", () => {
   beforeEach(() => {
@@ -356,21 +355,6 @@ describe("standalone harness adapters", () => {
     await expect(previewWithHarness("openclaw", claw, { run })).resolves.toEqual({
       id: "openclaw",
       outcome: { dryRun: true },
-    });
-    expect(run).toHaveBeenCalledOnce();
-  });
-
-  it("delegates portable prompts with a declared SOUL.md for host conflict validation", async () => {
-    const claw = await inspectLocalPackage(promptWithSoulFixture);
-    const run = vi.fn<AdapterRuntime["run"]>().mockResolvedValue({
-      exitCode: 1,
-      stdout: JSON.stringify({ code: "portable_prompt_conflict" }),
-      stderr: "",
-    });
-
-    await expect(previewWithHarness("openclaw", claw, { run })).rejects.toMatchObject({
-      diagnostics: [{ code: "adapter_preview_failed", phase: "adapter" }],
-      harness: { id: "openclaw", outcome: { code: "portable_prompt_conflict" } },
     });
     expect(run).toHaveBeenCalledOnce();
   });

@@ -29,7 +29,9 @@ or reproduce OpenClaw consent, mutation, provenance, or removal policy.
 selected local skill directories, and exact ClawHub skill/plugin dependencies.
 Local skill bytes are copied beneath `components/skills` and mapped into the
 agent workspace. The command does not mutate a harness or overwrite an existing
-destination.
+destination. The `SOUL.md` input is embedded as the generated `CLAW.md` body;
+packages cannot combine a non-empty body with an explicit workspace declaration
+that overlaps `SOUL.md`.
 
 Exact `clawhub:<package>@<version>` sources resolve through the official
 experimental Claws feed. The CLI binds feed package/version/integrity to

@@ -59,6 +59,13 @@ the package; this also provides a bounded bridge from skills installed by tools
 such as the [skills.sh CLI](https://github.com/vercel-labs/skills). Construction
 does not apply the result and never overwrites an existing destination.
 
+Construction imports the selected `SOUL.md` content into the Markdown body of
+the generated `CLAW.md`; it does not emit a second `SOUL.md` sidecar. A
+non-empty `CLAW.md` body is the portable agent prompt and conflicts with any
+explicit workspace declaration overlapping `SOUL.md`, matching the experimental
+OpenClaw contract proposed in
+[openclaw/openclaw#113454](https://github.com/openclaw/openclaw/pull/113454).
+
 Complete Claws resolve from local directories, exact ClawHub package
 coordinates, or GitHub repositories pinned to exact 40-character commits.
 ClawHub resolution verifies the official experimental feed,

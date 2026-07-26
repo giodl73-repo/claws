@@ -258,7 +258,7 @@ export async function runCli(
           "What does this agent do?",
           "Analyzes companies from primary sources.",
         );
-        soulPath = await prompt(soulPath, "Portable persona file", "./SOUL.md");
+        soulPath = await prompt(soulPath, "Existing SOUL.md to embed in CLAW.md", "./SOUL.md");
       }
       if (
         !output ||

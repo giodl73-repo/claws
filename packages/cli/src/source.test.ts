@@ -134,4 +134,16 @@ describe("standalone local Claw package inspection", () => {
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  it("rejects competing CLAW.md body and SOUL.md sources", async () => {
+    await expect(inspectLocalPackage(fixture("portable-minimal"))).rejects.toMatchObject({
+      diagnostics: [
+        {
+          code: "claw_body_soul_conflict",
+          phase: "package",
+          path: "$.workspace",
+        },
+      ],
+    });
+  });
 });
