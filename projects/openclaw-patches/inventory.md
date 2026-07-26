@@ -1,7 +1,7 @@
 # Lobster OpenClaw Patch Inventory
 
 Baseline: Lobster PR #5402 at
-`c05c4654cf594cb953b56e65e3eb4e5c33fd0d59`, carrying 20 patch files against
+`b85499b5575a0757e13827634741a91ab64eab61`, carrying 20 patch files against
 OpenClaw `v2026.7.1`.
 
 Classification:
@@ -31,41 +31,40 @@ those remain separate upstream fixes or contract proposals.
 | Patch | Classification | Upstream discovery | Status | Next action |
 | ----- | -------------- | ------------------ | ------ | ----------- |
 | `0001-msteams-brokered-auth` | Lobster | No generic externally authenticated Teams transport found | Downstream | Keep; later assess whether a narrow authenticated-host transport contract is useful upstream |
-| `0002-msteams-brokered-benchmark-range` | Lobster | No matching thread found | Downstream | Keep with Lobster DNS sinkhole and egress-proxy design |
+| `0002-msteams-brokered-benchmark-range` | Upstream fix | Issue #107163 and open PR #107164, owned by Galin Iliev, add a Teams-local hostname-scoped RFC2544 policy | **Active upstream PR** | Do not duplicate; track PR #107164 and drop after release inclusion and accepted host-proxy proof |
 | `0003-msteams-native-runtime-entrypoints` | Upstream fix | Issue #102365; merged PR #102366, merge `68dcfe633d85acdb38cdc102de806f2c7141cd6f` | **Upstream landed** | Drop when the pinned OpenClaw release contains the merge |
 | `0004-secrets-fast-path-keyless-webiq` | Upstream fix | Issue #107154 and open PR #107155, owned by Galin Iliev | **Active upstream PR** | Do not duplicate; track PR #107155 and drop after release inclusion |
 | `0005-msteams-streaming-prefix-delta` | Upstream fix | Issue #102356; merged PR #102357, merge `787ed383f5579420871bc86e0abb3437448c15a9` | **Upstream landed** | Drop when the pinned OpenClaw release contains the merge |
-| `0006-msteams-delivery-id-dedupe` | Lobster, with extractable generic behavior | No matching delivery-id/activity-id dedupe thread found | Downstream / split candidate | Keep Lobster header handling; evaluate generic activity-id webhook idempotency separately |
-| `0007-msteams-normalize-quoted-forward` | Upstream fix | Merged PR #51647 covers HTML reply extraction only; no matching mention/entity/forward normalization issue found | **Partial overlap** | Diff current `main`; split remaining mention, quoted-entity, and forwarded-message gaps into the smallest issue set |
-| `0009-msteams-threaded-replies` | Upstream fix | No matching `replyToId` outbound threading issue or PR found | **Issue needed** | Prove current behavior and file a focused Teams threading issue |
-| `0010-cron-delivery-target-optional` | Upstream fix | No matching bare-announce delivery-target issue found; merged PR #92318 is related delivery-proof work | **Issue needed** | Reproduce successful turn becoming `delivery-target` error and file |
-| `0011-cron-toolless-run-guard` | Upstream fix | Scout-marked issue #113402 and PR #113403; PR #95605 covers the distinct raw `modelRun` case | **Upstream PR open** | Track review/CI and drop after a release contains the fix |
+| `0006-msteams-delivery-id-dedupe` | Upstream fix | Merged PR #110357 durably admits Teams activities by `activity.id`, rejects in-flight/completed redeliveries, and survives restart; PR #111249 moved the mechanism into the shared ingress monitor | **Upstream landed** | Drop the Lobster patch when the pinned release contains merge `4e0cc187a21cca36d1887998c101c6b9baf926be`; the Lobster delivery header is no longer needed for generic dedupe |
+| `0007-msteams-normalize-quoted-forward` | Upstream fix | Open issue #102376 and PR #102379 cover mention, quoted-reply, forward, and debounce normalization; merged PR #51647 covers HTML reply extraction | **Existing upstream PR** | Do not duplicate Galin's active PR; track its current `DIRTY` head and unresolved maintainer feedback, then drop the matching Lobster patch after release inclusion |
+| `0009-msteams-threaded-replies` | Upstream fix | Current `main` already keeps reactive channel/group replies in context through Teams SDK `reply()`; SDK 2.0.14 documents `send()` as thread-preserving and `reply()` as adding a quote, while streaming is 1:1-only | **Reassess after SDK migration** | Do not file the old `replyToId` design; compare with 0014 and split only a verified quote/context gap |
+| `0010-cron-delivery-target-optional` | Lobster | Issue #91613 and merged PR #91685 deliberately fail closed for ambiguous keyless implicit delivery; merged PR #105215 preserves successful execution status but keeps `delivery-target` fatal; explicit `delivery.bestEffort: true` already exists | **Downstream policy conflict** | Do not upstream the patch unchanged; keep Lobster's default only if its operator policy intentionally accepts best-effort implicit delivery |
+| `0011-cron-toolless-run-guard` | Upstream fix | Scout-marked issue #113402 and PR #113403; real Gateway/Automation proof passed on Testbox `tbx_01kyb3f4sd4c1850yhjcnn1yfw`; PR #95605 covers the distinct raw `modelRun` case | **Upstream PR open; proof posted** | Track re-review/CI and drop after a release contains the fix |
 | `0013-msteams-brokered-multiplayer-route` | Lobster | No generic equivalent expected | Downstream | Keep with Lobster multiplayer admission, routing, and completion lease |
-| `0014-msteams-quoted-replies` | Upstream fix | PR #51647 is inbound context only; no outbound quote-mirroring issue found | **Issue needed** | Prove outbound wire behavior and file separately from inbound normalization |
-| `0015-cron-gateway-restart-interrupt-skipped` | Upstream fix | Open issue #77298 matches counter/health concern; open PR #96174 proposes `failed` rather than `lost` | **Existing discussion** | Compare `skipped` versus `failed` semantics and add evidence to the canonical issue before coding |
+| `0014-msteams-quoted-replies` | Upstream fix | PR #51647 is inbound context only; Teams SDK 2.0.14 now provides first-class `reply()`, `quote()`, and `addQuote()` APIs, superseding the patch's older wire-level approach | **Reassess against SDK APIs** | Prove the desired reactive/proactive quote policy on current `main`; use SDK-native APIs rather than porting the patch |
+| `0015-cron-gateway-restart-interrupt-skipped` | Upstream fix | Open issue #77298 exactly matches counter/health pollution; Scout provenance and the downstream `skipped` semantics were posted in comment #5075284093; PR #96174 is distinct task-ledger `lost` versus `failed` recovery | **Owner decision needed** | Wait for agreement on reusing existing `skipped` versus adding public `interrupted`; then author the narrow `ops.ts` and restart-catchup test change |
 | `0016-msteams-brokered-file-download` | Lobster | No generic direct-token gap; behavior depends on Lobster delegated-auth proxy | Downstream | Keep while brokered Teams remains host-owned |
-| `0017-msteams-suppress-brokered-approval-prompt` | Upstream contract | No matching `externally-brokered` approval-surface thread found | **Issue needed; owner confirmation** | Propose a generic externally rendered approval surface, excluding Lobster UI policy |
-| `0018-cron-hook-job-identity` | Upstream contract | No matching persisted cron job/revision/run hook identity thread found | **Issue needed; owner confirmation** | Define the minimal hook-correlation contract and split it from preapproval policy |
+| `0017-msteams-suppress-brokered-approval-prompt` | Upstream contract | Scout-marked issue #113444 | **Issue filed; owner confirmation** | Confirm the generic external approval-presentation ownership contract before coding |
+| `0018-cron-hook-job-identity` | Upstream contract | Scout-marked issue #113441; issue #50291 is related observability work | **Issue filed; owner confirmation** | Confirm the immutable Automation job/run/revision hook identity contract before coding |
 | `0019-cron-passport-execution-fence` | Lobster | No generic Passport ownership concept expected | Downstream | Keep regional ownership and duplicate-execution policy in Lobster |
-| `0019-cron-preapproval-creation` | Upstream contract | No matching staged host-authorized cron publication thread found | **Issue needed; owner confirmation** | Propose opaque staged-publication/finalization seam without Lobster approval schema |
-| `0020-cron-nested-tool-authorization` | Upstream contract | No matching `before_tool_operation` resolved pre-effect hook found | **Issue needed; owner confirmation** | Specify resolved operation identity and ordering for exec, nodes, MCP, and plugin tools |
-| `0020-personality-extra-system-prompt` | Upstream fix | No matching `sessions.create` persisted `extraSystemPrompt` issue found; existing prompt issues cover other paths | **Issue needed; public-surface review** | Confirm desired session API contract and file after owner review |
+| `0019-cron-preapproval-creation` | Upstream contract | Scout-marked issue #113443 | **Issue filed; owner confirmation** | Confirm the opaque staged-publication/finalization seam before coding |
+| `0020-cron-nested-tool-authorization` | Upstream contract | Scout-marked issue #113440; issues #13364 and #110986 cover different top-level hook concerns | **Issue filed; owner confirmation** | Confirm operation taxonomy and owner coverage for exec, nodes, MCP, and plugin tools |
+| `0020-personality-extra-system-prompt` | Upstream fix | Scout-marked issue #113442; issue #80329 is related operator context but not persisted prompt state | **Issue filed; public-surface review** | Decide prompt precedence, inheritance, authorization, and mutability before coding |
 
 ## Totals
 
 | Disposition | Count |
 | ----------- | ----: |
-| Direct upstream fixes/features | 10 |
+| Direct upstream fixes/features | 11 |
 | Generic upstream contracts | 4 |
-| Lobster-owned patches | 6 |
-| Already landed upstream | 2 |
-| Exact existing open issue | 1 |
+| Lobster-owned patches | 5 |
+| Already landed upstream | 3 |
+| Open issue awaiting decision or implementation | 6 |
 | Existing related discussion requiring comparison | 2 |
-| Upstream issue gaps after bounded search | 9 |
+| Conditional issue gaps after bounded search | 2 |
 
-The issue-gap count includes contract proposals and excludes Lobster-only
-patches. Patch 0007 may become more than one narrowly owned issue after the
-current-main diff.
+The two remaining issue gaps are patches `0009` and `0014`; file only if
+current Teams SDK behavior proof confirms a remaining gap.
 
 ## Historical Drop
 
@@ -75,9 +74,11 @@ the patch. It is not part of the 20 active files.
 
 ## Search Evidence
 
-- Gitcrawl database was current as of `2026-07-24T18:30:01Z`, but contained
-  only 84 threads and returned no patch-specific search results.
-- Live GitHub title/body searches were therefore used for the initial bounded
-  discovery.
+- Gitcrawl database was current as of `2026-07-24T21:29:54Z`, but its bounded
+  searches did not find the Teams normalization thread.
+- Live GitHub title/body searches found exact issue #102376 and PR #102379 for
+  patch 0007.
+- Live verification found exact issue #107163 and PR #107164 for patch 0002;
+  the focused Teams-local fix supersedes a second Scout PR for hosted package 1.
 - Exact code-symbol searches found the already-landed patches 0003 and 0005.
 - All links and states must be rechecked live before issue or PR mutation.
