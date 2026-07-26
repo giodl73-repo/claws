@@ -22,6 +22,29 @@
 
 ## Current Session
 
+### 2026-07-26 PR #113454 final Codex review
+
+- Ran `codex review --base origin/main` on exact PR head
+  `423cb8a15d53c708c031f0cd78c27a2f97a5408e` after refreshing current main.
+  It reported one P1: schema-v1 previously allowed a descriptive CLAW.md body
+  alongside an explicit SOUL.md sidecar, while this PR intentionally makes the
+  body executable prompt content and rejects that combination.
+- Accepted the compatibility observation as real, but it is the already-known
+  experimental contract decision rather than a newly found implementation
+  defect. Patrick/user direction supports the new body-to-SOUL contract; the
+  PR still needs that intentional break stated explicitly for maintainer
+  approval.
+- Manual review found no additional actionable issue across reader, add-plan,
+  workspace apply/provenance, update, and export. The body is bounded, included
+  in aggregate limits, consent-hashed, re-read from CLAW.md at mutation time,
+  and exported with sidecar fallback for whitespace, non-UTF-8, or oversized
+  SOUL content.
+- `git diff --check origin/main...HEAD` passed and `git merge-tree --write-tree
+  origin/main HEAD` produced a clean merge tree. Focused local Vitest did not
+  execute because Windows Node 24.14 is below the repository minimum and pnpm
+  correctly refused to purge the existing dependency tree noninteractively;
+  exact-head hosted `openclaw/ci-gate` remains green.
+
 ### 2026-07-26 CLAW.md prompt-body consumer baseline
 
 - Live OpenClaw PR #113454 `feat(claws): materialize CLAW.md prompts` remains
