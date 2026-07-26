@@ -22,6 +22,36 @@
 
 ## Current Session
 
+### 2026-07-26 standalone source-provider and construction model
+
+- Redesigned the private standalone CLI around three independent extension
+  points: component importers construct a package, source providers resolve a
+  complete immutable Claw, and harness adapters preview/apply through host
+  policy. Documented the contract in `ARCHITECTURE.md`.
+- Added complete-Claw providers for local directories, exact ClawHub versions,
+  and GitHub repositories pinned to exact 40-character commits. GitHub archive
+  redirects are restricted to codeload, auth is not forwarded, and archive plus
+  package integrity are recorded.
+- Added experimental `claws-dev create`: it composes a non-empty `SOUL.md`,
+  optional `AGENTS.md`, repeated vendored local skills, and exact ClawHub
+  skill/plugin dependencies into a validated package. The README demonstrates
+  selecting a public skills.sh skill and constructing a Claw from it.
+- Construction enforces file/count/aggregate bounds during I/O, rejects unsafe
+  skill entries, reserves destinations atomically without overwrite, and does
+  not mutate a harness. Vendored workspace skills are included in summaries.
+- Removed the stale standalone-adapter rejection of CLAW.md body prompts;
+  current OpenClaw owns SOUL mapping and conflict validation.
+- Four Codex review passes found and fixed Windows drive-relative routing,
+  whitespace-only personas, post-read resource checks, dangling destination
+  handling, and a POSIX no-clobber race. Final review found no actionable issue.
+- Private `giodl73-repo/claws` main is clean at signed commit `457dbfd9bf91`.
+  Final `pnpm check` passed 72 tests with one Windows symlink test skipped;
+  packed-binary proof passed. Real create and inspect passed with a vendored
+  OpenClaw docs skill. Current-host preview is blocked locally because the
+  available OpenClaw build requires Node 24.15+ and this host has 24.14.
+- GitHub Validate run `30214845654` was queued at handoff. No npm publication,
+  public repository, direct skills.sh importer, or Hermes adapter was created.
+
 ### 2026-07-26 private GitHub review repositories created
 
 - Created private `giodl73-repo/claws` at
