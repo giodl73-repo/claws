@@ -781,3 +781,122 @@ scripts/check-token-collisions.py`, and `git diff --check`. Focused Rust
   both branches. #108342 local Vitest remains blocked by its damaged dependency
   hydration (`p-map` absent), so its pushed CI is the executable gate. At
   readback, #101981 and #108342 new-head CI was pending; #110037 remained green.
+- 2026-07-23 maintainer feed-policy decisions: Gio approved (1) standard DSSE
+  for all live feed responses, with the pre-standard 2026.7.2 beta envelope
+  retained only for persisted snapshot reads and removed after feeds maintainers
+  validate the supported population has migrated; (2) #108342's fail-closed
+  key-rotation/monotonicity semantics; and (3) staged `feedId` compatibility for
+  existing custom signed profiles, a diagnostic-only Doctor path that never
+  invents identity, and a separate proof-backed production-key activation PR.
+  #110037 now enforces decision 1 at `8b9daf430ff`: live beta and all mixed
+  envelopes fail, persisted beta snapshots remain readable. Node 24.15 focused
+  proof passed 10 envelope + 46 catalog tests; type-aware oxlint, oxfmt, diff
+  checks, and final `codex review --uncommitted` are clean. PR body records the
+  owner/removal policy. No PR was merged; #110037 is currently behind main and
+  must go through maintainer review/prepare/merge before landing.
+- 2026-07-23 #110037 landed: `fix(feeds): accept standard DSSE envelopes`
+  merged at 2026-07-23T20:40:25Z by `giodl73-repo`; merge commit
+  `03c9b2276214affc4e74e28fc4ba7f7a99043d10`, source head
+  `f8a928eb792b8abc66dc4f7a5dc85055f614013f`. #108342 is next in the
+  OpenClaw stack, but is now `CONFLICTING`/`DIRTY` against main because both
+  PRs touch the hosted catalog path. Its prior lone red OpenGrep check was
+  infrastructure-only (base commit unavailable). Required next action: rebase
+  #108342 onto current main, resolve in favor of #110037's standard-live/
+  beta-snapshot policy plus #108342's typed monotonicity and rotation fixes,
+  rerun the catalog/SQLite proof, push with an exact lease, then use the
+  maintainer prepare/merge workflow. #101981 remains after #108342.
+- 2026-07-23 #108342 restacked after #110037: a normal rebase was aborted at
+  its first conflict because rewritten/divergent ancestry attempted to replay
+  2,471 unrelated commits. Rebuilt safely by cherry-picking only the PR's three
+  authored commits onto OpenClaw main `8a2b2b35f50`, resolving the two catalog
+  conflicts to retain standard-DSSE live feeds, beta-envelope persisted
+  snapshots, and persisted signed monotonic state. Exact-lease force push moved
+  the PR from `5620aed1d5a` to `30f064289f5`. Node 24.15 proof passes 10/10
+  envelope tests and 50/50 catalog/real-SQLite tests; scoped oxfmt, type-aware
+  oxlint, diff checks, and `codex review --base upstream/main` are clean. PR is
+  non-draft, mergeable, proof-sufficient, and ready for maintainer look; new
+  CI started with 6 pass, 19 pending, and no failures at readback. No merge was
+  performed.
+- 2026-07-23 #108342 second Codex review: exact local and live PR heads both
+  `30f064289f5`; `codex review --base upstream/main` using GPT-5.6 Sol found no
+  actionable regression. It specifically confirmed key-rotation monotonicity,
+  same-sequence equivocation rejection, and malformed-timestamp repair. The
+  review sandbox could not rerun the focused suite because its heavy-check lock
+  path was read-only; the immediately preceding host run remains green at 10/10
+  envelope and 50/50 catalog/SQLite tests. Live CI readback: 81 pass, 36
+  skipped, zero failures; PR mergeable, though `main` advanced three unrelated
+  commits during review and GitHub reports `UNSTABLE`. No code or PR state was
+  changed by this review.
+- 2026-07-23 #108342 landed: merged by `giodl73-repo` at
+  2026-07-23T21:58:11Z as `bd48b7b26bb4e568506f3d757acce28016fc9122`
+  from reviewed head `30f064289f5`. The last of the three OpenClaw feed PRs is
+  draft #101981, `feat: bind signed ClawHub default feed trust`, currently at
+  `7e9e47a2e7b` and conflicting with main with stale `CHANGES_REQUESTED` state.
+  It must be restacked over merged #110037/#108342 and adjusted to the approved
+  staged custom-profile `feedId` compatibility policy before landing; actual
+  production-key activation remains a separate proof-backed follow-up.
+- 2026-07-23 #101981 ready-for-review restack: rebuilt the PR's five authored
+  commits on merged OpenClaw main `bd48b7b26bb`, then added the approved staged
+  compatibility behavior and trust-boundary review fixes. Built-in
+  `clawhub-public` remains identity-bound; legacy custom signed profiles without
+  `feedId` remain signature-verified through both configured and explicit-URL
+  paths. Schema-v2 entries now lose install authority at parse time unless they
+  carry the complete `available` + `official` pair, so later catalog overlays
+  cannot restore it. Exact-lease force push moved the PR from `7e9e47a2e7b` to
+  `51552f0ee4f`. Node 24.15 proof passes 10/10 envelope and 64/64 catalog/SQLite
+  tests; type-aware oxlint, oxfmt, diff checks, and final
+  `codex review --base upstream/main` are clean. The PR body now records the
+  rollout policy and separate production-key activation boundary; Patrick and
+  ClawSweeper were asked to re-review. PR remains draft with stale
+  `CHANGES_REQUESTED` until that review arrives; CI was in progress at readback.
+- 2026-07-23 live feeds-pipeline readback: OpenClaw #101981 advanced to
+  `4edff30ca53`, is non-draft and mergeable but behind main, with Patrick's old
+  `CHANGES_REQUESTED` and a fresh ClawSweeper re-review pending. Its only two
+  red checks are the unrelated main iOS release-plan routing test and aggregate
+  CI gate; feed-specific proof is green. ClawHub dependency repair #3232 is
+  open with 26 successful checks and no failures. ClawHub signer #3005 remains
+  open at `f76d8a3f312`; its six red contexts all mirror one Next.js audit
+  failure addressed by #3232. Current #3005 preserves unsigned JSON and selects
+  DSSE through `Accept`, so the old canonical representation concern is fixed;
+  after #3232 lands, restack #3005, refresh review, and prove the signed endpoint.
+  Lobster marketplace split #5424 remains open/mergeable but blocked by the
+  same-QueryClient false-to-true coverage request and required-check failures.
+  Permanent personal-feeds ECS enable still requires MOS3 personal-upload
+  permission plus successful 301 publish, exact id/version readback, reload
+  persistence, and cleanup.
+- 2026-07-23 dormant-signing producer stack organized: ClawHub #3005 is the
+  merge-safe signer foundation at `1527bb41`; missing/malformed production
+  signing config preserves the unsigned response, while explicit DSSE requests
+  fail closed until later activation. The remaining producer branches were
+  restacked and exact-lease pushed as #3149 `98a57338` (durable distribution
+  state), #3160 `ab0eb54a` (paged signed query/change transport), and #3163
+  `408f26e0` (sharded snapshots). PR bodies now carry exact incremental ranges
+  and activation-independent review order. #3005, #3149, and #3160 are ready
+  with Patrick requested; #3163 intentionally remains the final draft. A final
+  Codex review found one shard-only `featuredAt` parity gap; fixed with atomic
+  validation parity and regression coverage, with 82 focused Vitest tests
+  green. #3232 was closed as superseded by merged #3234. OpenClaw #101981 may
+  land in parallel before activation; consumer #110250 remains draft until the
+  producer stack and #101981 land, then needs one clean rebase. Keys, Convex
+  secret activation, and live signed proof are explicitly post-merge operator
+  work, not review dependencies.
+- 2026-07-26 ClawHub producer stack prepared without merging or activation:
+  exact-lease restacks are #3005 `15b8dfba` (dormant signing), #3149
+  `ce757dc3` (durable state), #3160 `428b4fa2` (paged query/delta), and draft
+  #3163 `dec15870` (sharded snapshots). #3163's final Codex review is clean
+  after fixing bounded collection, byte-aware atomic routing,
+  locale-independent signed ordering, chronological expiry checks, strict
+  RFC3339 publication validation, public discriminated typing, and Claw
+  projection parity. The post-fix proof passes 122 tests across 13 feed suites
+  plus root/schema TypeScript and targeted lint/format/diff checks. The current
+  ClawHub service ceiling is explicitly 10,000 entries and 8 MiB of collected
+  entry bytes per feed; the 1,000,000-entry root bound is future streaming
+  protocol headroom. All four PRs are open and mergeable; #3149/#3160 are
+  substantive-CI green except external Vercel authorization, #3163 remains
+  draft with its aggregate `pr-gates` coordinator still running at readback,
+  and #3005 has stale `CHANGES_REQUESTED` state despite addressing Patrick's
+  two findings. Patrick and ClawSweeper were asked to re-review the current
+  #3005 head. PR bodies now record current incremental ranges, proof, and
+  honest scale limits. No PR was merged, no production key was installed, and
+  no signing/ECS switch was activated. Next review order remains #3005 ->
+  #3149 -> #3160 -> #3163; first close #3005 re-review and #3163 CI.
