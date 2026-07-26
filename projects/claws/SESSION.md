@@ -22,6 +22,29 @@
 
 ## Current Session
 
+### 2026-07-26 starter catalog role review complete
+
+- Reviewed all 15 private starter Claws through the `.craft/roles/claws`
+  founder, new-hire, power-user, skill-author, CISO, compliance,
+  repository-steward, and maintainer-reviewer lenses. The durable rubric,
+  baseline scores, findings, and remediation are in the catalog's
+  `ROLE-REVIEW.md`.
+- Every starter now defines its target setting, focused intake, realistic
+  example, domain-specific authority/privacy boundaries, concrete deliverables,
+  and observable completion criteria. The generated instructions remain plain,
+  compact Markdown with no fabricated dependencies or hidden actions.
+- Independent review found and fixed sensitive-data persistence ambiguity,
+  incident action/communication approval, compliance evidence provenance,
+  ecosystem-specific examples, missing reproducibility artifacts, recruiting
+  accommodation privacy, and three semantic completion contradictions. Final
+  role re-review has no product blocker; final Codex review is clean.
+- `C:\src\awesome-claws-private-prototype` is clean at signed commit
+  `2159e243ec8d`. Exact validation enforces all 15 reviewed identities and their
+  quality minima. All 15 pass standalone inspection; five representative
+  starters return ready, four-action, non-mutating real OpenClaw plans.
+- The repository still has no remote and no public namespace or publication
+  action was taken.
+
 ### 2026-07-26 private CLI readiness and broad catalog complete
 
 - The standalone private CLI is clean on `main` at signed commit
@@ -35,7 +58,7 @@
   dependency reinstall was not offline because the local pnpm store lacks
   `hookable@6.1.1`; do not describe that cache-dependent lane as current proof.
 - A separate local collection now lives at
-  `C:\src\awesome-claws-private-prototype`, clean on `main` at signed root
+  `C:\src\awesome-claws-private-prototype`, established on `main` at signed root
   commit `6e206f321658`. It contains 15 generated, role-specific Claw packages,
   not only the original three. All 15 pass exact-tree, private/no-remote,
   secret-pattern, and standalone reference inspection checks.

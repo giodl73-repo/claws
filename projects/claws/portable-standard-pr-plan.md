@@ -160,10 +160,17 @@ npm-pack archives, and revalidates package identity before adapter dispatch.
   immutable publication, discovery, moderation, and telemetry.
 
 Private evidence lives at `C:\src\awesome-claws-private-prototype` at signed
-commit `6e206f321658`. All 15 packages pass independent reference inspection and
+commit `2159e243ec8d`. All 15 packages pass independent reference inspection and
 exact generated-tree checks; five representative categories also return ready,
 non-mutating plans from real OpenClaw. The repository has no remote and makes
 no public namespace claim.
+
+The catalog also carries a durable eight-role quality review. Every starter now
+has a target setting, focused intake, realistic example, domain-specific
+authority and privacy boundaries, concrete deliverables, and observable
+completion criteria. Validation enforces the exact reviewed set and those
+quality minima; independent role re-review and final Codex review have no
+remaining blocker.
 
 ### 6. Hermes adapter - separate follow-up
 
