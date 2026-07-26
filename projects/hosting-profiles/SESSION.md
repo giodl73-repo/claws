@@ -37,20 +37,20 @@
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `e129954` and includes the readiness and subject sidecars; RFC 0023 is at
-  `9799dcd` and includes
+  `5a4bb64` and includes the readiness and subject sidecars; RFC 0023 is at
+  `25701d7` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `e5834f2a18e7` in seventeen commits. Fork
+  at `c65456659cfd` in eighteen commits. Fork
   [PR 161](https://github.com/giodl73-repo/openclaw/pull/161) isolates the
-  subject-identity commit for review. The dependent
+  subject-identity commit at `0cae27ea4a48` for review. The dependent
   core-owner implementation is
   [openclaw/openclaw#113421](https://github.com/openclaw/openclaw/pull/113421)
-  at `24970fe0ee47`, based on the exact readiness
+  at `2b32ecce5745`, based on the exact readiness
   head. The dependent profile implementation is
   [openclaw/openclaw#113422](https://github.com/openclaw/openclaw/pull/113422)
-  at `fdbaef42e87e`, stacked on the core-owner
+  at `810a9fe7dfbe`, stacked on the core-owner
   head. The stack includes the
   discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
   cross-link, and docs navigation. [Fork PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
@@ -66,9 +66,12 @@
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
   hosting-profiles project files from this session should be committed. Both
   implementation branches and both RFC branches are clean at pushed heads.
-- Validation: 152 focused Gateway, readiness, profile, node-mode, subject,
-  session-storage, Policy, selector, and CLI assertions pass on the integrated
-  tree. Oxlint, formatting, and `git diff --check` pass. Full-repo typecheck
+- Validation: the stack is rebased onto OpenClaw `main` `8b9314b7e632`, and
+  `git range-diff` preserves all implementation patches. The direct subject
+  suite passes 9 assertions; the Plugin SDK generator/check and diff checks
+  pass. The prior integrated tree passed 152 focused Gateway, readiness,
+  profile, node-mode, subject, session-storage, Policy, selector, and CLI
+  assertions. Oxlint, formatting, and `git diff --check` pass. Full-repo typecheck
   exceeded two minutes without output after its concrete fixture errors were
   fixed; focused suites compile. Codex review found and fixed profile argument
   provenance and a stale contribution-shape assertion. Earlier package build
