@@ -426,33 +426,42 @@ Do not fold wake orchestration into OpenClaw PRs 112385, 112865, or 112896.
 Those PRs prove the smaller recovery transaction. After their ownership split
 is accepted, use these bounded follow-on evidence slices:
 
-### PR 6A: OpenClaw semantic wake registration
+### PR 6A: Host/Scout durable cron projection
 
-**Repo:** `openclaw/openclaw`
+**Repo:** host implementation; the public RFC remains product-neutral
 
-**Depends on:** final capture and restored admission
+**Depends on:** OpenClaw PRs 103647 and 104368, final capture, restored
+admission, and permanent host acceptance
 
-**Purpose:** emit one owner-authored semantic wake receipt bound to the exact
-accepted recovery point and scheduler evidence. The receipt contains a nullable
-`nextRequiredAt` and bounded reason class without job names, cron expressions,
-prompts, payloads, credentials, or artifact locations.
+**Purpose:** implement OpenClaw's documented safe external cron projection.
+Adopt the exact scheduler only from `cron_reconciled`, treat post-commit
+`cron_changed: scheduled` as coalescible reread hints, and make `replaceAll`
+return only after the host durably accepts the complete wake set. Atomically
+bind the accepted projection revision, final recovery point, and revocable
+sleep authority.
 
-Produce the authoritative receipt at final capture and after restored
-reconciliation. Do not require a host callback for every live cron mutation.
+**Reuse:** Peter's existing cron hooks and cancellation model, tracked root
+work under `gateway.suspend.*`, the cron owner's existing `nextWakeAtMs`, and
+restored startup reconciliation. Do not add a second OpenClaw scheduler, wake
+API, continuous per-mutation host callback, or core payload store.
 
-**Reuse:** the cron owner's existing `nextWakeAtMs`, startup catch-up,
-missed-run reconciliation, and duplicate suppression. The host may subtract
-cold-start lead time but cannot reinterpret cron or invoke due work.
+**Evidence slice:** disabled/no-deadline state, one future deadline, a committed
+schedule mutation racing suspension, stale projection cancellation, exact
+durable replacement, and restored reconciliation accepted before admission.
 
-**Evidence slice:** no-deadline state, one future cron deadline, a mutation
-racing final capture, exact replay, and a restored reconciliation that produces
-the next owner-authored receipt.
+**Current fork evidence:**
+[giodl/lobster#38](https://microsoft.ghe.com/giodl/lobster/pull/38)
+is a 199-line draft stacked on fork PR 28. It content-addresses the complete
+projection summary, binds its monotonic revision into final acceptance and
+destruction authority, and advances the permanent authority schema to v2.
+It deliberately does not yet claim all of PR 6A: atomic permanent `replaceAll`
+adoption and rehydration of the existing Redis scheduler remain the next slice.
 
 ### PR 6B: Host/Scout wake authority and coalescing
 
 **Repo:** host implementation; the public RFC remains product-neutral
 
-**Depends on:** PR 6A, durable acceptance, revocable sleep authority, and one
+**Depends on:** PR 6A, revocable sleep authority, and one
 generation-scoped ensure-runtime-ready path
 
 **Purpose:** atomically accept the recovery point, wake receipt, and sleep
@@ -489,6 +498,11 @@ destination and delivers/acknowledges each cause exactly through its owner.
 PRs 6B and 6C may be combined if the atomic authority, retained-delivery, and
 crash-replay gates remain independently testable. This is a review topology,
 not a required implementation decomposition.
+
+Do not open another OpenClaw PR by default. If the end-to-end host proof exposes
+an invariant the shipped hooks and suspension result cannot express, author the
+smallest extension of those existing owner seams and document the exact failed
+proof first.
 
 ## Old-To-New Mapping
 

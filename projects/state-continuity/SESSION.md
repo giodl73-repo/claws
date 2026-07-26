@@ -1170,6 +1170,9 @@ SafeToDestroy`, exact-source-worker and source-runtime-generation binding,
 20. Author the live Lobster final-capture caller/adopter and a generation-scoped
     provider remover before PR 3E; do not move Gateway, ingress-fence, provider,
     acceptance, or destruction ownership into OpenClaw fork PR 152.
+21. Complete PR 6A after fork PR 38 by adding permanent atomic `replaceAll`
+    adoption from Peter's shipped cron projection hooks and rehydrating the
+    existing Redis scheduler; do not add another OpenClaw scheduler or wake API.
 
 ## Resume Order
 
@@ -1287,3 +1290,39 @@ SafeToDestroy`, exact-source-worker and source-runtime-generation binding,
   gates and has no attached fork checks or review comments yet.
 - Do not wire PR 3D to `ContainerHost` until a live provider exposes a reviewed,
   idempotent remover for one exact source generation.
+
+## 2026-07-26 — Peter-pattern audit and durable wake authority
+
+- Audited current OpenClaw `main`, including Peter's cooperative suspension
+  PR 103618, post-commit cron change hints in PR 103647, lifecycle-owned
+  reconciliation cancellation in PR 104368, restored-startup reconciliation,
+  and later SQLite/restart/catch-up cron work. The consistent ownership pattern
+  is OpenClaw-authoritative SQLite state plus tracked lifecycle projections,
+  not a host-control wake RPC or a second scheduler.
+- Corrected RFC PR 46 and umbrella issue 114145 to reuse those shipped seams.
+  RFC source head is `561a299`; both public bodies now link the host evidence
+  and state that another OpenClaw PR is not expected by default.
+- Audited Lobster's production cron path. Gateway WS `cron.list`, the multi-pod
+  Redis scheduler, managed cold start, routing, retries, in-flight recovery, and
+  cold-wake E2E already exist. Redis is explicitly reconstructable state, so
+  the remaining continuity gap is permanent projection acceptance before the
+  last source generation may be removed.
+- Published fork-only draft
+  [giodl/lobster#38](https://microsoft.ghe.com/giodl/lobster/pull/38), branch
+  `user/giodl/rfc-0013-durable-wake-projection`, commit `3558244775`, stacked
+  on fork PR 28. The 199-line change content-addresses a complete cron snapshot
+  digest, monotonic projection revision, observation time, job count, and
+  optional earliest wake; final acceptance fingerprints it, conflicts
+  quarantine, and destruction authority names the exact projection.
+- The final-handoff authority advances to schema/key v2 so earlier authority
+  cannot be misread as projection-aware. Review also corrected future-deadline
+  validation to use the projection observation time, preserving later exact
+  replay after the scheduled time passes.
+- Verification: `just cargo check --lib`, `just cargo fmt`, and diff checks
+  pass. Native Windows unit-test compilation is blocked by the inherited MIP
+  test-only `windows_sys` failure; Ubuntu WSL is blocked at the private Lobster
+  Cargo registry token. The draft records both limitations.
+- PR 38 is only the authority-contract half of PR 6A. Next implement permanent
+  atomic `replaceAll` adoption and recovery of the existing Redis wake mirror;
+  then prove suspension/mutation races before moving to retained Teams/API
+  causes and shared cold-start coalescing.
