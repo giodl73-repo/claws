@@ -21,11 +21,11 @@ RFC 0023: Standard Hosting Profiles
 
 RFC: [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33), files
 `rfcs/0018-readiness-conditions-and-providers.md` and
-`rfcs/0018/readiness-v1-spec.md` plus the subject sidecar, head `0c8543e`.
+`rfcs/0018/readiness-v1-spec.md` plus the subject sidecar, head `e129954`.
 
 Primary framework implementation:
 [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018),
-head `ddadb96d0f64`. It contains sixteen readiness-only commits and no Hosting
+head `e5834f2a18e7`. It contains seventeen readiness-only commits and no Hosting
 Profile implementation.
 
 The compatibility boundary is the presence of `gateway.readiness`:
@@ -57,8 +57,8 @@ review aids for canonical conditions, workspace, providers, CLI, and subjects.
 
 The owner adoption is one upstream follow-on merge unit:
 [openclaw/openclaw#113421](https://github.com/openclaw/openclaw/pull/113421),
-branch `user/giodl/readiness-core-owner-adoption`, head `822d5a20d959`, based
-exactly on PR 104018 head `ddadb96d0f64`.
+branch `user/giodl/readiness-core-owner-adoption`, head `24970fe0ee47`, based
+exactly on PR 104018 head `e5834f2a18e7`.
 
 | Owner area | Selectable conditions | Review slice |
 | --- | --- | --- |
@@ -92,12 +92,12 @@ RFC 0020 and is not part of PR 113421.
 
 RFC: [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37), files
 `rfcs/0023-standard-hosting-profiles.md` and
-`rfcs/0023/hosting-profile-v1-spec.md`, head `8be4743`.
+`rfcs/0023/hosting-profile-v1-spec.md`, head `9799dcd`.
 
 Primary implementation:
 [openclaw/openclaw#113422](https://github.com/openclaw/openclaw/pull/113422),
 branch `user/giodl/standard-hosting-profiles-owner-adoption`, exact head
-`39d77d139e38`. It is stacked on core-condition head `822d5a20d959`.
+`fdbaef42e87e`. It is stacked on core-condition head `24970fe0ee47`.
 [Fork PR 157](https://github.com/giodl73-repo/openclaw/pull/157) is the exact
 profile-only comparison: 44 files, 2,015 insertions, and 56 deletions.
 
@@ -165,7 +165,7 @@ intentionally not configured.
    for smaller source-area comparisons.
 3. Decide RFC 0023's four-profile support catalog.
 4. Refresh package-installed Docker proof for exact profile head
-   `39d77d139e38`.
+   `fdbaef42e87e`.
 5. Land PR 113422 after both readiness dependencies.
 
 ## Contract Rules

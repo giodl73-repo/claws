@@ -37,20 +37,20 @@
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `0c8543e` and includes the readiness and subject sidecars; RFC 0023 is at
-  `8be4743` and includes
+  `e129954` and includes the readiness and subject sidecars; RFC 0023 is at
+  `9799dcd` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `ddadb96d0f64` in sixteen commits. Fork
+  at `e5834f2a18e7` in seventeen commits. Fork
   [PR 161](https://github.com/giodl73-repo/openclaw/pull/161) isolates the
   subject-identity commit for review. The dependent
   core-owner implementation is
   [openclaw/openclaw#113421](https://github.com/openclaw/openclaw/pull/113421)
-  at `822d5a20d959`, based on the exact readiness
+  at `24970fe0ee47`, based on the exact readiness
   head. The dependent profile implementation is
   [openclaw/openclaw#113422](https://github.com/openclaw/openclaw/pull/113422)
-  at `39d77d139e38`, stacked on the core-owner
+  at `fdbaef42e87e`, stacked on the core-owner
   head. The stack includes the
   discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
   cross-link, and docs navigation. [Fork PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
