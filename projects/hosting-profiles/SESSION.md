@@ -31,63 +31,36 @@
 
 - Last updated: 2026-07-26
 - Last agent: Codex
-- Current focus: RFC 0018 now has a shared readiness subject identity package
-  and a non-normative platform comparison. The comparison validates the
-  replacement/revision model and makes atomic observation binding normative.
-- Active branch / PR: RFC 0018 is
-  [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
-  [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `1cbb2de` and includes the readiness, subject, and platform-comparison
-  sidecars; RFC 0023 is at
-  `a9ef2e6` and includes
-  `rfcs/0023/hosting-profile-v1-spec.md`. The real
-  readiness-only implementation is
-  [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `28ad0cf76fa9` in eighteen commits. Fork
-  [PR 161](https://github.com/giodl73-repo/openclaw/pull/161) isolates the
-  subject-identity commit at `71aac7fb0fd2` for review. The dependent
-  core-owner implementation is
-  [openclaw/openclaw#113421](https://github.com/openclaw/openclaw/pull/113421)
-  at `debd3a56a098`, based on the exact readiness
-  head. The dependent profile implementation is
-  [openclaw/openclaw#113422](https://github.com/openclaw/openclaw/pull/113422)
-  at `812d61a2b473`, stacked on the core-owner
-  head. The stack includes the
-  discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
-  cross-link, and docs navigation. [Fork PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
-  provides the exact profile-only comparison. Superseded PR 107765 is closed
-  without force-pushing its history. Exact review slices are
-  recorded in `openclaw-pr-plan.md`. Follow-on readiness evidence is in
-  [startup-dependency PR 153](https://github.com/giodl73-repo/openclaw/pull/153) and
-  [agent execution capabilities PR 154](https://github.com/giodl73-repo/openclaw/pull/154),
-  plus [state/background services PR 155](https://github.com/giodl73-repo/openclaw/pull/155)
-  at `5cb5a656e74` with selectable `SessionStorageReady`,
-  and [host bindings PR 156](https://github.com/giodl73-repo/openclaw/pull/156)
-  at `9c6ceb9016a`.
+- Current focus: exact package-installed proof is complete for RFC 0018
+  readiness identity and RFC 0023 Standard Hosting Profiles.
+- Published heads: RFC 0018
+  [PR 33](https://github.com/openclaw/rfcs/pull/33) at `59aeff2e407f`;
+  readiness [PR 104018](https://github.com/openclaw/openclaw/pull/104018) at
+  `6dce3555a511`; core-owner
+  [PR 113421](https://github.com/openclaw/openclaw/pull/113421) at
+  `9cc02c5d89c`; RFC 0023
+  [PR 37](https://github.com/openclaw/rfcs/pull/37) at `4c0b274e1b43`; and
+  profiles [PR 113422](https://github.com/openclaw/openclaw/pull/113422) at
+  `e9c1988c5e59`. Fork [PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
+  is the exact profile-only comparison. All five review surfaces are
+  non-draft.
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
   hosting-profiles project files from this session should be committed. Both
   implementation branches and both RFC branches are clean at pushed heads.
-- Validation: the stack is rebased onto OpenClaw `main` `d1aec7d65f41`, and
-  `git range-diff` preserves all implementation patches. The direct subject
-  suite passes 9 assertions; the Plugin SDK generator/check and diff checks
-  pass. The prior integrated tree passed 152 focused Gateway, readiness,
-  profile, node-mode, subject, session-storage, Policy, selector, and CLI
-  assertions. Current upstream CI passes production types, test types, lint,
-  QA smoke, security checks, test shards, and the selected architecture
-  boundaries. A final unused helper export found by Knip is now private. The
-  Plugin SDK baseline regenerates cleanly at the branch base, but upstream
-  changed the same aggregate SDK module again before GitHub's synthetic merge;
-  that moving-base manifest check is the sole current red gate. Oxlint,
-  formatting, and `git diff --check` pass. Full-repo typecheck
-  exceeded two minutes without output after its concrete fixture errors were
-  fixed; focused suites compile. Codex review found and fixed profile argument
-  provenance and a stale contribution-shape assertion. Earlier package build
-  and tarball integrity proof remain recorded in PR 113422.
-- Blocking question: exact-head package-installed Docker scenario execution
-  remains the profile landing gate. Docker Desktop's Linux engine did not
-  become ready locally. Delegated Blacksmith Testbox requires login and direct
-  AWS Crabbox returns coordinator `401 unauthorized`; neither remote attempt
-  allocated a provider id, so no exact-head container success is claimed.
+- Validation: 120 focused readiness, profile, selection, and Gateway
+  assertions pass with formatting, type-aware lint, shell syntax, and diff
+  checks. [GitHub Actions run 30214165737](https://github.com/giodl73-repo/openclaw/actions/runs/30214165737)
+  passes the exact `e9c1988c5e59` package and immutable no-push Docker image.
+  It proves unprofiled compatibility, all four profiles, expected `503`
+  failures, node approval to `200`, workspace `200 -> 503 -> 200`, stable
+  repeated polls, and same-host restart with renewed process/Gateway IDs.
+- Proof-driven fixes: Gateway auth/readiness initialization ordering; default
+  legacy context-engine recognition; required plugin projection; missing
+  standard profile selectors; transition workload correlation; stopped
+  container diagnostics; and restart-stable workspace ownership.
+- Provider attribution: proof ran on GitHub-hosted Actions. Direct AWS Crabbox
+  returned `401`; Blacksmith Testbox did not allocate a provider ID because of
+  organization/login access. Do not describe this run as Crabbox or Testbox.
 
 ## Resume Checklist
 
