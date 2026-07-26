@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import { previewWithHarness } from "./adapters.js";
+import { applyWithHarness, previewWithHarness } from "./adapters.js";
 import { CliError } from "./errors.js";
 import { inspectClawSource } from "./remote-source.js";
 import {
@@ -18,6 +18,7 @@ const usage = `Standalone Claw CLI incubator
 Usage:
   claws-dev inspect <source> [--json]
   claws-dev <source> --agent openclaw --dry-run [--json]
+  claws-dev <source> --agent openclaw --yes --plan-integrity <digest> [--json]
 
 Sources:
   ./local-package
@@ -33,6 +34,11 @@ type Io = {
 type Dependencies = {
   inspect(source: string): Promise<LocalClawPackage>;
   preview(harness: string, claw: LocalClawPackage): Promise<{ id: string; outcome: unknown }>;
+  apply(
+    harness: string,
+    claw: LocalClawPackage,
+    planIntegrity: string,
+  ): Promise<{ id: string; outcome: unknown }>;
 };
 
 function isExperimentalEnabled(env: NodeJS.ProcessEnv): boolean {
@@ -40,7 +46,7 @@ function isExperimentalEnabled(env: NodeJS.ProcessEnv): boolean {
   return value === "1" || value === "true";
 }
 
-function failure(operation: "inspect" | "preview", error: unknown): FailureOutcome {
+function failure(operation: "inspect" | "preview" | "apply", error: unknown): FailureOutcome {
   const diagnostics =
     error instanceof CliError
       ? error.diagnostics
@@ -62,7 +68,7 @@ function failure(operation: "inspect" | "preview", error: unknown): FailureOutco
 }
 
 function success(
-  operation: "inspect" | "preview",
+  operation: "inspect" | "preview" | "apply",
   claw: LocalClawPackage,
   harness?: { id: string; outcome: unknown },
 ): SuccessOutcome {
@@ -76,6 +82,15 @@ function success(
     ...(harness ? { harness } : {}),
     diagnostics: [],
   };
+}
+
+function harnessPlanIntegrity(outcome: SuccessOutcome): string | undefined {
+  const native = outcome.harness?.outcome;
+  if (!native || typeof native !== "object" || Array.isArray(native)) {
+    return undefined;
+  }
+  const value = (native as Record<string, unknown>).planIntegrity;
+  return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
 function renderHuman(outcome: CliOutcome): string {
@@ -92,7 +107,8 @@ function renderHuman(outcome: CliOutcome): string {
     ...(outcome.package.kind === "clawhub-package"
       ? [`artifact integrity: ${outcome.package.artifactIntegrity}`]
       : []),
-    ...(outcome.harness ? [`harness preview: ${outcome.harness.id}`] : []),
+    ...(outcome.harness ? [`harness ${outcome.operation}: ${outcome.harness.id}`] : []),
+    ...(harnessPlanIntegrity(outcome) ? [`plan integrity: ${harnessPlanIntegrity(outcome)}`] : []),
   ].join("\n");
 }
 
@@ -108,10 +124,14 @@ export async function runCli(
   const env = options.env ?? process.env;
   const dependencies = options.dependencies ?? {
     inspect: (source: string) => inspectClawSource(source, { env }),
-    preview: previewWithHarness,
+    preview: (harness: string, claw: LocalClawPackage) =>
+      previewWithHarness(harness, claw, undefined, env),
+    apply: (harness: string, claw: LocalClawPackage, planIntegrity: string) =>
+      applyWithHarness(harness, claw, planIntegrity, undefined, env),
   };
   const inspectCommand = argv[0] === "inspect";
-  const operation = inspectCommand ? "inspect" : "preview";
+  const requestedApply = !inspectCommand && argv.includes("--yes");
+  const operation = inspectCommand ? "inspect" : requestedApply ? "apply" : "preview";
   const args = inspectCommand ? argv.slice(1) : argv;
 
   if (!isExperimentalEnabled(env)) {
@@ -139,6 +159,8 @@ export async function runCli(
       options: {
         agent: { type: "string" },
         "dry-run": { type: "boolean", default: false },
+        yes: { type: "boolean", default: false },
+        "plan-integrity": { type: "string" },
         json: { type: "boolean", default: false },
       },
     });
@@ -167,15 +189,20 @@ export async function runCli(
         message: "Provide exactly one local package or exact ClawHub coordinate.",
       });
     }
-    const claw = await dependencies.inspect(source);
     if (inspectCommand) {
-      if (parsed.values.agent !== undefined || parsed.values["dry-run"] === true) {
+      if (
+        parsed.values.agent !== undefined ||
+        parsed.values["dry-run"] === true ||
+        parsed.values.yes === true ||
+        parsed.values["plan-integrity"] !== undefined
+      ) {
         throw new CliError({
           code: "invalid_arguments",
           phase: "arguments",
           message: "inspect does not accept --agent or --dry-run.",
         });
       }
+      const claw = await dependencies.inspect(source);
       outcome = success("inspect", claw);
     } else {
       const harness = parsed.values.agent;
@@ -186,14 +213,35 @@ export async function runCli(
           message: "Preview requires --agent <harness>.",
         });
       }
-      if (parsed.values["dry-run"] !== true) {
+      const dryRun = parsed.values["dry-run"] === true;
+      const yes = parsed.values.yes === true;
+      const planIntegrity = parsed.values["plan-integrity"];
+      const consentPlanIntegrity = typeof planIntegrity === "string" ? planIntegrity : undefined;
+      if (dryRun === yes) {
         throw new CliError({
-          code: "dry_run_required",
+          code: "operation_required",
           phase: "arguments",
-          message: "The incubation CLI supports harness delegation only with --dry-run.",
+          message: "Choose exactly one operation: --dry-run to preview or --yes to apply.",
         });
       }
-      outcome = success("preview", claw, await dependencies.preview(harness, claw));
+      if (dryRun && planIntegrity !== undefined) {
+        throw new CliError({
+          code: "unexpected_plan_integrity",
+          phase: "arguments",
+          message: "--plan-integrity is accepted only with --yes.",
+        });
+      }
+      if (yes && !consentPlanIntegrity) {
+        throw new CliError({
+          code: "plan_integrity_required",
+          phase: "arguments",
+          message: "Apply requires --plan-integrity from the exact dry-run plan.",
+        });
+      }
+      const claw = await dependencies.inspect(source);
+      outcome = dryRun
+        ? success("preview", claw, await dependencies.preview(harness, claw))
+        : success("apply", claw, await dependencies.apply(harness, claw, consentPlanIntegrity!));
     }
   } catch (error) {
     outcome = failure(operation, error);

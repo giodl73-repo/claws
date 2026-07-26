@@ -54,7 +54,7 @@ export type LocalClawPackage = {
 type OutcomeBase = {
   schemaVersion: typeof OUTCOME_SCHEMA_VERSION;
   stability: typeof INCUBATION_STABILITY;
-  operation: "inspect" | "preview";
+  operation: "inspect" | "preview" | "apply";
 };
 
 export type SuccessOutcome = OutcomeBase & {

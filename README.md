@@ -8,6 +8,7 @@ on the unscoped `claws` npm name.
 pnpm install
 pnpm build
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --dry-run
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --yes --plan-integrity sha256:<reviewed-digest>
 CLAWHUB_REGISTRY_URL=https://registry.example OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- clawhub:@publisher/claw@1.0.0 --agent openclaw --dry-run
 ```
 
@@ -36,9 +37,26 @@ identity.
 The current slice supports local package inspection and exact ClawHub package
 coordinates. ClawHub resolution verifies the official experimental feed,
 downloaded artifact digest, archive limits, extracted package identity, and
-portable manifest before OpenClaw receives an immutable dry-run snapshot.
+portable manifest before OpenClaw receives an immutable snapshot.
 `CLAWHUB_REGISTRY_URL` is required until the experimental feed is deployed. It
 must select an HTTPS registry or a loopback HTTP development registry; artifact
 downloads remain pinned to that origin.
-Apply, lifecycle dispatch, final naming, publication, and other harness
-adapters remain deferred.
+
+Preview returns OpenClaw's complete native plan and its `planIntegrity` value.
+Apply requires explicit `--yes` plus that exact value. The adapter re-resolves
+and snapshots the package, then delegates to `openclaw claws add --yes
+--plan-integrity`; OpenClaw recomputes the plan and rejects stale consent before
+mutation. Broader lifecycle dispatch, final naming, publication, and other
+harness adapters remain deferred.
+
+Because OpenClaw binds local development plans to the absolute package path,
+the adapter atomically materializes each exact package integrity at a private,
+content-addressed OS-temporary path. The immutable snapshot is reused across
+preview and apply so the reviewed host digest remains valid; OpenClaw still
+revalidates every byte before mutation. Snapshots expire after 24 hours, and
+the cache is capped at 16 snapshots or 512 MiB while protecting recently
+active operations.
+
+The adapter never retries a timed-out apply. OpenClaw may have recorded partial
+progress, so inspect `openclaw claws status` before deciding whether to resume
+or remove it.
