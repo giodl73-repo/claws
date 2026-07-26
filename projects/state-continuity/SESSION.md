@@ -4,23 +4,25 @@
 
 **Last agent:** Codex
 
-**Current focus:** Land owner review for RFC PR 46 and the three-PR OpenClaw
-evidence stack: recovery points in PR 112385, final capture in PR 112865, and
-restored admission in PR 112896. The accepted three-model findings are fixed,
-all branches are rebased onto 2026-07-26 `main`, the RFC and PR bodies carry
-real source-CLI/Gateway proof, and fresh ClawSweeper reviews are running. No
-additional OpenClaw implementation PR is needed for this merge sequence. Full
-scale-to-zero still needs the bounded host wake/scheduler adapter after the
-Lobster owner/caller work is ready. Vincent and the relevant state owners still
-need to accept the inventory, protection, acceptance-byte-set,
-restored-admission, and destruction-authority contracts.
+**Current focus:** Obtain owner review for RFC PR 46 and the complete three-PR
+OpenClaw evidence stack: recovery points in PR 112385, final capture in PR
+112865, and restored admission in PR 112896. The accepted three-model findings
+and the later ClawSweeper JSON-sidecar policy finding are fixed. Durable
+operation intent, result, startup, and readiness records now share one
+operation-scoped SQLite recovery journal. The RFC and all PR bodies carry real
+source-CLI/Gateway proof. No additional OpenClaw implementation PR is needed
+for this merge sequence. Full scale-to-zero still needs the bounded host
+wake/scheduler adapter after the Lobster owner/caller work is ready. Vincent
+and the relevant state owners still need to accept the authoritative
+selected-agent inventory, host closure-evidence trust boundary, recovery-
+journal lifecycle, and core-versus-host restored-admission boundary.
 
 **Parent project:** [`projects/snapshot`](../snapshot/README.md). RFC 0013,
 OpenClaw PR 105718, and `openclaw backup sqlite` remain authoritative for
 SQLite capture, verification, and fresh-target restore.
 
 **Active RFC work:** [openclaw/rfcs#46](https://github.com/openclaw/rfcs/pull/46), ready for review,
-branch `user/giodl/rfc-0013-continuity-sidecars`, commit `d03c85097f0`, stacked
+branch `user/giodl/rfc-0013-continuity-sidecars`, commit `58081d5fdea`, stacked
 on RFC PR 20. It binds a closed owner-selected component inventory, keeps
 ordinary snapshots host-protected, defines a deterministic logical acceptance
 byte set, and links OpenClaw PRs 112385, 112865, and 112896 as non-normative
@@ -45,28 +47,30 @@ surface.
 
 OpenClaw
 [PR 112865](https://github.com/openclaw/openclaw/pull/112865), branch
-`user/giodl/rfc-0013-final-capture`, commit `7ed3c77c1d8`, is stacked on PR 112385. Its hidden offline operation durably binds host-supplied closure
+`user/giodl/rfc-0013-final-capture`, commit `882e73ea88a`, is stacked on PR
+112385. Its hidden offline operation durably binds host-supplied closure
 evidence to real global and selected-agent snapshots, the canonical aggregate,
-and a full acceptance inventory. Exact response-loss replay returns the same
-committed result; changed requests, partial intent, invalid inventories, and
-tampered bytes quarantine or fail closed. It does not suspend or stop Gateway,
-fence ingress, publish, accept, claim credential-free portability, or authorize
-destruction.
+and a full acceptance inventory. Intent and committed result are stored in the
+operation-scoped SQLite recovery journal. Exact response-loss replay returns
+the same committed result; changed requests, partial intent, invalid
+inventories, and tampered bytes quarantine or fail closed. It does not suspend
+or stop Gateway, fence ingress, publish, accept, claim credential-free
+portability, or authorize destruction.
 
 OpenClaw
 [PR 112896](https://github.com/openclaw/openclaw/pull/112896), branch
-`user/giodl/rfc-0013-restored-admission`, commit `c3637461bb7`, is stacked on
+`user/giodl/rfc-0013-restored-admission`, commit `bee013ddaada`, is stacked on
 PR 112865. Its hidden strict-stdin operation verifies the accepted recovery
-point before mutation, restores only into fresh canonical SQLite targets,
-durably journals exact replay, and emits a private startup descriptor. Gateway
-startup closes work admission before database preflight, reconciles the
-canonical scheduler and required owners, verifies readiness for the same
-accepted identity, and opens admission exactly once. It adds no public config,
-generic lifecycle hook, host wake scheduler, ingress mechanism, or destruction
-authority. The exclusive slices are 929 LOC for PR 112385, 821 LOC for PR
-112865, and 1,524 LOC for PR 112896. GitHub displays cumulative diffs of 929,
-1,750, and 3,273 LOC because all three upstream PRs target `main` while their
-fork branches preserve ancestry.
+point before mutation, restores only into fresh canonical SQLite targets, and
+stores replay, startup, and readiness records in the same operation-scoped
+SQLite recovery journal. Gateway startup closes work admission before database
+preflight, reconciles the canonical scheduler and required owners, verifies
+readiness for the same accepted identity, and opens admission exactly once. It
+adds no public config, generic lifecycle hook, host wake scheduler, ingress
+mechanism, or destruction authority. The exclusive slices are 929 changed LOC
+for PR 112385, 961 for PR 112865, and 1,545 for PR 112896. GitHub displays
+cumulative diffs of 929, 1,890, and 3,435 changed LOC because all three upstream
+PRs target `main` while their fork branches preserve ancestry.
 
 Lobster [PR 5481](https://microsoft.ghe.com/bic/lobster/pull/5481), branch
 `user/giodl/rfc-0013-host-acceptance-contract`, commit `c313f37c49e`, is the
@@ -77,19 +81,29 @@ production store, Redis authority, Gateway caller, or destruction API.
 
 **Review gate:** The independent GPT-5.6-Sol, Claude Opus 4.7, and GPT-5.5
 review is recorded in `reviews/2026-07-23-three-model/README.md`. All accepted
-findings are repaired: post-intent capture failure quarantines, malformed
-durable JSON enters typed quarantine, mutable scheduler/status objects are no
-longer hashed as owner evidence, and the RFC/PRs describe stable
-generation-bound evidence without claiming credential-free portability. A
-real Ubuntu 24.04 WSL proof invoked both hidden source CLI commands against
-current-schema global and `main` SQLite owners, observed Gateway admission held
-during restored startup, committed one ready record, and observed admission
-release. The focused matrix passed 101 tests. PR 112385 is CI-clean; PR 112865
-has an unrelated timed-out secrets shard rerunning; PR 112896 is rerunning CI
-after its max-lines ratchet repair. Fresh ClawSweeper reviews are in progress.
-Maintainers must still accept the sidecar ownership boundaries, especially the
-authoritative selected-agent inventory and owner-authored portability receipt,
-before merge.
+findings are repaired: post-intent capture failure quarantines, mutable
+scheduler/status objects are no longer hashed as owner evidence, the RFC/PRs
+describe stable generation-bound evidence without claiming credential-free
+portability, and OpenClaw-owned durable recovery records use SQLite rather than
+JSON sidecars. A real Ubuntu 24.04 WSL proof invoked both hidden source CLI
+commands against current-schema global and `main` SQLite owners, observed
+Gateway admission held during restored startup, committed the `intent`,
+`result`, `startup`, and `ready` rows, observed admission release, and shut the
+Gateway down cleanly. That complete proof was repeated successfully on exact
+child head `bee013ddaada`. The final focused matrix passed 96 tests; production
+types, targeted lint/formatting, Kysely guardrails, and the max-lines ratchet
+also pass. PR 112385 is CI-clean. On PRs 112865 and 112896 every broad CI job
+except `checks-node-compact-small-11` passes; that shard failed identically on
+the original run and two isolated reruns because unrelated
+`src/secrets/runtime.auth-migration-isolation.test.ts` hit its 120-second
+timeout after 709 tests passed. Do not change recovery code for this correlated
+upstream flake. ClawSweeper's exact-head reviews report no actionable code
+findings on either PR and rate the exact-head terminal proof sufficient.
+Maintainers must
+still accept the authoritative selected-agent inventory, host closure-evidence
+trust boundary, journal retention/migration/repair ownership, and whether
+restored admission belongs in OpenClaw core; ingress, wake, placement, and
+destruction remain host-owned.
 
 **Latest drafts:** Lobster fork PR 25 uses existing `BlobClient` ETag CAS to make
 PR 3A's acceptance/replay/quarantine decisions permanent across process, pod,
