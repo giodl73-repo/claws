@@ -32,6 +32,20 @@ export type ClawPackageSource =
       artifactKind: "legacy-zip" | "npm-pack";
       byteLength: number;
       fileCount: number;
+    }
+  | {
+      kind: "github-package";
+      ref: string;
+      repository: string;
+      commit: string;
+      packagePath: string;
+      packageName: string;
+      packageVersion: string;
+      integrity: string;
+      artifactIntegrity: string;
+      artifactKind: "github-tarball";
+      byteLength: number;
+      fileCount: number;
     };
 
 export type LocalClawPackage = {
@@ -55,7 +69,7 @@ export type LocalClawPackage = {
 type OutcomeBase = {
   schemaVersion: typeof OUTCOME_SCHEMA_VERSION;
   stability: typeof INCUBATION_STABILITY;
-  operation: "inspect" | "preview" | "apply";
+  operation: "create" | "inspect" | "preview" | "apply";
 };
 
 export type SuccessOutcome = OutcomeBase & {

@@ -96,6 +96,53 @@ describe("standalone Claw CLI", () => {
     });
   });
 
+  it("dispatches Claw construction without invoking a harness", async () => {
+    const capture = output();
+    const create = vi.fn().mockResolvedValue(await inspectLocalPackage(validFixture));
+    const inspect = vi.fn();
+    const preview = vi.fn();
+    const apply = vi.fn();
+    const exitCode = await runCli(
+      [
+        "create",
+        "./new-claw",
+        "--id",
+        "analyst",
+        "--name",
+        "Analyst",
+        "--description",
+        "Analyzes evidence.",
+        "--soul",
+        "./SOUL.md",
+        "--skill",
+        "./skills/research",
+        "--plugin",
+        "clawhub:@example/plugin@1.0.0",
+        "--json",
+      ],
+      {
+        io: capture.io,
+        env: { OPENCLAW_EXPERIMENTAL_CLAWS: "1" },
+        dependencies: { create, inspect, preview, apply },
+      },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(create).toHaveBeenCalledWith({
+      output: "./new-claw",
+      agentId: "analyst",
+      name: "Analyst",
+      description: "Analyzes evidence.",
+      soulPath: "./SOUL.md",
+      skills: ["./skills/research"],
+      plugins: ["clawhub:@example/plugin@1.0.0"],
+    });
+    expect(inspect).not.toHaveBeenCalled();
+    expect(preview).not.toHaveBeenCalled();
+    expect(apply).not.toHaveBeenCalled();
+    expect(JSON.parse(capture.read().stdout)).toMatchObject({ operation: "create", ok: true });
+  });
+
   it("dispatches dry-run preview through the selected adapter", async () => {
     const capture = output();
     const preview = vi.fn().mockResolvedValue({ id: "openclaw", outcome: { dryRun: true } });

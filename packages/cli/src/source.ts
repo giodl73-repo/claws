@@ -371,6 +371,12 @@ export async function inspectLocalPackage(input: string): Promise<LocalClawPacka
   const sortedBootstrapFiles = bootstrapFiles.toSorted((left, right) =>
     Buffer.compare(Buffer.from(left), Buffer.from(right)),
   );
+  const vendoredSkillNames = new Set(
+    parsed.manifest.workspace.files.flatMap((entry) => {
+      const match = /^skills\/([^/]+)\/SKILL\.md$/i.exec(entry.path);
+      return match ? [match[1]!.toLowerCase()] : [];
+    }),
+  );
   return {
     source: {
       kind: "local-package",
@@ -394,7 +400,9 @@ export async function inspectLocalPackage(input: string): Promise<LocalClawPacka
       },
       bootstrapFiles: sortedBootstrapFiles,
       workspaceFileCount: parsed.manifest.workspace.files.length,
-      skillCount: parsed.manifest.packages.filter((entry) => entry.kind === "skill").length,
+      skillCount:
+        vendoredSkillNames.size +
+        parsed.manifest.packages.filter((entry) => entry.kind === "skill").length,
       pluginCount: parsed.manifest.packages.filter((entry) => entry.kind === "plugin").length,
       mcpServerCount: Object.keys(parsed.manifest.mcpServers).length,
       cronJobCount: parsed.manifest.cronJobs.length,

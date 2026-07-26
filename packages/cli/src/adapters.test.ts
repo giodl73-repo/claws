@@ -342,24 +342,37 @@ describe("standalone harness adapters", () => {
     });
   });
 
-  it("rejects body-only prompts until the OpenClaw adapter supports them", async () => {
+  it("delegates a portable CLAW.md body for OpenClaw to map to SOUL.md", async () => {
     const claw = await inspectLocalPackage(bodyOnlyFixture);
-    const run = vi.fn<AdapterRuntime["run"]>();
-
-    await expect(previewWithHarness("openclaw", claw, { run })).rejects.toMatchObject({
-      diagnostics: [{ code: "openclaw_portable_prompt_unsupported", phase: "adapter" }],
+    let delegatedRoot: string | undefined;
+    const run = vi.fn<AdapterRuntime["run"]>().mockImplementation(async (_command, args) => {
+      delegatedRoot = args[3];
+      await expect(readFile(resolve(delegatedRoot!, "CLAW.md"), "utf8")).resolves.toContain(
+        "Provide concise, evidence-backed assistance.",
+      );
+      return { exitCode: 0, stdout: JSON.stringify({ dryRun: true }), stderr: "" };
     });
-    expect(run).not.toHaveBeenCalled();
+
+    await expect(previewWithHarness("openclaw", claw, { run })).resolves.toEqual({
+      id: "openclaw",
+      outcome: { dryRun: true },
+    });
+    expect(run).toHaveBeenCalledOnce();
   });
 
-  it("rejects portable prompts even when the package declares SOUL.md", async () => {
+  it("delegates portable prompts with a declared SOUL.md for host conflict validation", async () => {
     const claw = await inspectLocalPackage(promptWithSoulFixture);
-    const run = vi.fn<AdapterRuntime["run"]>();
+    const run = vi.fn<AdapterRuntime["run"]>().mockResolvedValue({
+      exitCode: 1,
+      stdout: JSON.stringify({ code: "portable_prompt_conflict" }),
+      stderr: "",
+    });
 
     await expect(previewWithHarness("openclaw", claw, { run })).rejects.toMatchObject({
-      diagnostics: [{ code: "openclaw_portable_prompt_unsupported", phase: "adapter" }],
+      diagnostics: [{ code: "adapter_preview_failed", phase: "adapter" }],
+      harness: { id: "openclaw", outcome: { code: "portable_prompt_conflict" } },
     });
-    expect(run).not.toHaveBeenCalled();
+    expect(run).toHaveBeenCalledOnce();
   });
 
   it("classifies process launch failures as adapter failures", async () => {

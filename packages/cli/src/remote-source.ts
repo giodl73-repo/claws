@@ -372,7 +372,7 @@ async function findExtractedPackageRoot(extractDir: string): Promise<string> {
   );
 }
 
-async function resolveRemotePackage(
+export async function resolveClawHubSource(
   coordinate: ExactClawHubCoordinate,
   options: RemoteSourceOptions,
 ): Promise<LocalClawPackage> {
@@ -475,12 +475,4 @@ async function resolveRemotePackage(
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
-}
-
-export async function inspectClawSource(
-  input: string,
-  options: RemoteSourceOptions = {},
-): Promise<LocalClawPackage> {
-  const coordinate = parseExactClawHubCoordinate(input);
-  return coordinate ? resolveRemotePackage(coordinate, options) : inspectLocalPackage(input);
 }

@@ -9,9 +9,11 @@ approve a release identity.
 pnpm install
 pnpm build
 pnpm proof:pack
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create ./financial-analyst --id financial-analyst --name "Financial Analyst" --description "Analyzes companies from primary sources." --soul ./SOUL.md --skill ./.agents/skills/research --plugin clawhub:@publisher/sec-filings@1.0.0
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --dry-run
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --yes --plan-integrity sha256:<reviewed-digest>
 CLAWHUB_REGISTRY_URL=https://registry.example OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- clawhub:@publisher/claw@1.0.0 --agent openclaw --dry-run
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- github:publisher/awesome-claws@0123456789abcdef0123456789abcdef01234567#claws/financial-analyst --agent openclaw --dry-run
 ```
 
 The intended future command shape remains:
@@ -27,8 +29,9 @@ identity.
 
 - `packages/reference` owns portable manifest parsing, types, and portability
   rules. It imports no harness implementation.
-- `packages/cli` owns local source inspection, integrity, adapter dispatch, and
-  cross-harness outcome conventions.
+- `packages/cli` owns source inspection, integrity, construction, adapter
+  dispatch, and cross-harness outcome conventions. Complete-Claw source
+  providers and harness adapters are separate contracts.
 - The OpenClaw adapter invokes `openclaw claws ... --json` as an external
   process. It does not import OpenClaw code or recreate host policy.
 - OpenClaw revalidates packages at its own trust boundary and continues to own
@@ -36,13 +39,22 @@ identity.
 
 ## Current Scope
 
-The current slice supports local package inspection and exact ClawHub package
-coordinates. ClawHub resolution verifies the official experimental feed,
+The current slice constructs a Claw from persona files, local skills, and exact
+ClawHub skill/plugin dependencies. Local skill directories are vendored into
+the package; this also provides a bounded bridge from skills installed by tools
+such as the [skills.sh CLI](https://github.com/vercel-labs/skills). Construction
+does not apply the result and never overwrites an existing destination.
+
+Complete Claws resolve from local directories, exact ClawHub package
+coordinates, or GitHub repositories pinned to exact 40-character commits.
+ClawHub resolution verifies the official experimental feed,
 downloaded artifact digest, archive limits, extracted package identity, and
 portable manifest before OpenClaw receives an immutable snapshot.
 `CLAWHUB_REGISTRY_URL` is required until the experimental feed is deployed. It
 must select an HTTPS registry or a loopback HTTP development registry; artifact
-downloads remain pinned to that origin.
+downloads remain pinned to that origin. GitHub resolution accepts redirects
+only from the API to GitHub's codeload origin and records both archive and
+package integrity.
 
 Preview returns OpenClaw's complete native plan and its `planIntegrity` value.
 Apply requires explicit `--yes` plus that exact value. The adapter re-resolves
@@ -50,6 +62,30 @@ and snapshots the package, then delegates to `openclaw claws add --yes
 --plan-integrity`; OpenClaw recomputes the plan and rejects stale consent before
 mutation. Broader lifecycle dispatch, final naming, publication, and other
 harness adapters remain deferred.
+
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the source-provider, component
+importer, and harness-adapter boundaries. Public skill catalogs are component
+sources rather than complete-Claw registries.
+
+## Construct From Public Skills
+
+The current bridge uses the public skills CLI as the component resolver, then
+vendors the selected directory into a Claw:
+
+```bash
+npx skills add vercel-labs/agent-skills --skill web-design-guidelines --agent universal --copy
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create ./web-reviewer \
+  --id web-reviewer \
+  --name "Web Reviewer" \
+  --description "Reviews web interfaces against established guidance." \
+  --soul ./SOUL.md \
+  --skill ./.agents/skills/web-design-guidelines
+```
+
+Repeat `--skill` to compose a set and use exact
+`--plugin clawhub:<package>@<version>` coordinates for plugin dependencies. A
+future direct skills.sh importer can collapse the two commands while retaining
+the same vendored-byte and integrity model.
 
 Because OpenClaw binds local development plans to the absolute package path,
 the adapter atomically materializes each exact package integrity at a private,

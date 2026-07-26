@@ -3,8 +3,9 @@ import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { applyWithHarness, previewWithHarness } from "./adapters.js";
+import { createClawPackage, type CreateClawOptions } from "./create.js";
 import { CliError } from "./errors.js";
-import { inspectClawSource } from "./remote-source.js";
+import { inspectClawSource } from "./source-providers.js";
 import {
   CLI_VERSION,
   INCUBATION_STABILITY,
@@ -18,6 +19,7 @@ import {
 const usage = `Standalone Claw CLI incubator
 
 Usage:
+  claws-dev create <output> --id <agent-id> --name <name> --description <text> --soul <SOUL.md> [options]
   claws-dev inspect <source> [--json]
   claws-dev <source> --agent openclaw --dry-run [--json]
   claws-dev <source> --agent openclaw --yes --plan-integrity <digest> [--json]
@@ -25,8 +27,15 @@ Usage:
 Sources:
   ./local-package
   clawhub:<package>@<exact-version>
+  github:<owner>/<repo>@<40-character-commit>[#package/path]
 
-Set OPENCLAW_EXPERIMENTAL_CLAWS=1 to enable this private command.`;
+Create options:
+  --agents <AGENTS.md>
+  --skill <local-skill-directory|clawhub:package@version> (repeatable)
+  --plugin <clawhub:package@version> (repeatable)
+  --package <package-name> --version <exact-version>
+
+Set OPENCLAW_EXPERIMENTAL_CLAWS=1 to enable this experimental command.`;
 
 type Io = {
   stdout: Pick<NodeJS.WriteStream, "write">;
@@ -34,6 +43,7 @@ type Io = {
 };
 
 type Dependencies = {
+  create?(options: CreateClawOptions): Promise<LocalClawPackage>;
   inspect(source: string): Promise<LocalClawPackage>;
   preview(harness: string, claw: LocalClawPackage): Promise<{ id: string; outcome: unknown }>;
   apply(
@@ -48,7 +58,10 @@ function isExperimentalEnabled(env: NodeJS.ProcessEnv): boolean {
   return value === "1" || value === "true";
 }
 
-function failure(operation: "inspect" | "preview" | "apply", error: unknown): FailureOutcome {
+function failure(
+  operation: "create" | "inspect" | "preview" | "apply",
+  error: unknown,
+): FailureOutcome {
   const diagnostics =
     error instanceof CliError
       ? error.diagnostics
@@ -70,7 +83,7 @@ function failure(operation: "inspect" | "preview" | "apply", error: unknown): Fa
 }
 
 function success(
-  operation: "inspect" | "preview" | "apply",
+  operation: "create" | "inspect" | "preview" | "apply",
   claw: LocalClawPackage,
   harness?: { id: string; outcome: unknown },
 ): SuccessOutcome {
@@ -106,7 +119,7 @@ function renderHuman(outcome: CliOutcome): string {
     `agent: ${outcome.claw.agent.id}`,
     `portable prompt: ${outcome.claw.hasPortablePrompt ? "yes" : "no"}`,
     `integrity: ${outcome.package.integrity}`,
-    ...(outcome.package.kind === "clawhub-package"
+    ...("artifactIntegrity" in outcome.package
       ? [`artifact integrity: ${outcome.package.artifactIntegrity}`]
       : []),
     ...(outcome.harness ? [`harness ${outcome.operation}: ${outcome.harness.id}`] : []),
@@ -133,16 +146,24 @@ export async function runCli(
     return 0;
   }
   const dependencies = options.dependencies ?? {
+    create: (createOptions: CreateClawOptions) => createClawPackage(createOptions),
     inspect: (source: string) => inspectClawSource(source, { env }),
     preview: (harness: string, claw: LocalClawPackage) =>
       previewWithHarness(harness, claw, undefined, env),
     apply: (harness: string, claw: LocalClawPackage, planIntegrity: string) =>
       applyWithHarness(harness, claw, planIntegrity, undefined, env),
   };
+  const createCommand = argv[0] === "create";
   const inspectCommand = argv[0] === "inspect";
   const requestedApply = !inspectCommand && argv.includes("--yes");
-  const operation = inspectCommand ? "inspect" : requestedApply ? "apply" : "preview";
-  const args = inspectCommand ? argv.slice(1) : argv;
+  const operation = createCommand
+    ? "create"
+    : inspectCommand
+      ? "inspect"
+      : requestedApply
+        ? "apply"
+        : "preview";
+  const args = createCommand || inspectCommand ? argv.slice(1) : argv;
 
   if (!isExperimentalEnabled(env)) {
     const outcome = failure(
@@ -158,6 +179,68 @@ export async function runCli(
       `${argv.includes("--json") ? JSON.stringify(outcome, null, 2) : renderHuman(outcome)}\n`,
     );
     return 2;
+  }
+
+  if (createCommand) {
+    let outcome: CliOutcome;
+    let json = argv.includes("--json");
+    try {
+      const parsed = parseArgs({
+        args,
+        allowPositionals: true,
+        strict: true,
+        options: {
+          id: { type: "string" },
+          name: { type: "string" },
+          description: { type: "string" },
+          soul: { type: "string" },
+          agents: { type: "string" },
+          package: { type: "string" },
+          version: { type: "string" },
+          skill: { type: "string", multiple: true },
+          plugin: { type: "string", multiple: true },
+          json: { type: "boolean", default: false },
+        },
+      });
+      json = parsed.values.json === true;
+      const output = parsed.positionals[0];
+      if (
+        !output ||
+        parsed.positionals.length !== 1 ||
+        typeof parsed.values.id !== "string" ||
+        typeof parsed.values.name !== "string" ||
+        typeof parsed.values.description !== "string" ||
+        typeof parsed.values.soul !== "string"
+      ) {
+        throw new CliError({
+          code: "invalid_create_arguments",
+          phase: "arguments",
+          message:
+            "create requires one output directory plus --id, --name, --description, and --soul.",
+        });
+      }
+      const create = dependencies.create ?? createClawPackage;
+      const claw = await create({
+        output,
+        agentId: parsed.values.id,
+        name: parsed.values.name,
+        description: parsed.values.description,
+        soulPath: parsed.values.soul,
+        ...(typeof parsed.values.agents === "string" ? { agentsPath: parsed.values.agents } : {}),
+        ...(typeof parsed.values.package === "string"
+          ? { packageName: parsed.values.package }
+          : {}),
+        ...(typeof parsed.values.version === "string" ? { version: parsed.values.version } : {}),
+        ...(parsed.values.skill ? { skills: parsed.values.skill } : {}),
+        ...(parsed.values.plugin ? { plugins: parsed.values.plugin } : {}),
+      });
+      outcome = success("create", claw);
+    } catch (error) {
+      outcome = failure("create", error);
+    }
+    const output = json ? JSON.stringify(outcome, null, 2) : renderHuman(outcome);
+    (outcome.ok ? io.stdout : io.stderr).write(`${output}\n`);
+    return outcome.ok ? 0 : 2;
   }
 
   let parsed: ReturnType<typeof parseArgs>;
@@ -196,7 +279,7 @@ export async function runCli(
       throw new CliError({
         code: "invalid_arguments",
         phase: "arguments",
-        message: "Provide exactly one local package or exact ClawHub coordinate.",
+        message: "Provide exactly one local package or exact remote Claw coordinate.",
       });
     }
     if (inspectCommand) {

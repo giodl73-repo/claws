@@ -659,15 +659,6 @@ async function delegateOpenClawAdd(params: {
       path: harness,
     });
   }
-  if (claw.summary.hasPortablePrompt) {
-    throw new CliError({
-      code: "openclaw_portable_prompt_unsupported",
-      phase: "adapter",
-      message:
-        "This OpenClaw adapter cannot delegate a CLAW.md body until OpenClaw maps it to SOUL.md.",
-      path: "CLAW.md",
-    });
-  }
   const invocation = await resolveOpenClawInvocation(env);
   let snapshotRoot: string;
   try {

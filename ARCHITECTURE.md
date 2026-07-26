@@ -1,0 +1,66 @@
+# Architecture
+
+Claws separates portable composition from transport and execution. A source
+provider obtains one immutable Claw package. The reference parser validates the
+same package format regardless of its source. A harness adapter then asks the
+selected host to preview or apply it under that host's own policy.
+
+```text
+component sources                 complete-Claw sources
+-----------------                 ---------------------
+local SKILL.md ----\              local directory -----\
+skills.sh / Git ----> create ---> Claw package ---------> reference parser
+exact packages -----/              ClawHub coordinate --/         |
+                                   GitHub commit -------/          v
+                                                          harness adapter
+                                                         /               \
+                                                   OpenClaw          future Hermes
+```
+
+These are deliberately independent extension points:
+
+1. **Component importers** select material used to construct a Claw. The
+   current `create` command vendors local skill directories and records exact
+   ClawHub skill or plugin dependencies. A skill installed with the
+   [skills.sh CLI](https://github.com/vercel-labs/skills) can therefore be
+   selected as a local directory. Direct skills.sh and other catalog importers
+   can be added later by resolving and vendoring the selected bytes.
+2. **Source providers** resolve complete Claw coordinates. Built-ins cover a
+   local directory, an exact ClawHub package version, and a GitHub repository at
+   an exact 40-character commit. A provider returns verified package bytes and
+   provenance; it cannot change parsing, consent, or mutation policy.
+3. **Harness adapters** translate a validated package into a host-native plan.
+   OpenClaw is the first adapter. Hermes or another harness can implement the
+   same boundary without importing OpenClaw or changing the portable parser.
+
+The distinction follows existing ecosystems. The skills.sh CLI resolves skills
+from Git repositories and local paths. The
+[Hermes Skills System](https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/features/skills.md)
+exposes multiple discovery sources, including skills.sh, GitHub taps, ClawHub,
+LobeHub, and browse.sh, while keeping installation in its own host. Those are
+useful component catalogs; they are not registries of complete Claw packages.
+
+## Trust Contract
+
+- Remote complete-Claw coordinates are immutable: exact semantic versions with
+  verified ClawHub integrity, or exact Git commit hashes with archive integrity.
+- Construction copies local skill bytes into the output package. Later changes
+  to the source directory cannot silently alter that package.
+- The portable parser accepts no provider-specific behavior.
+- The harness remains authoritative for capability disclosure, consent,
+  mutation, provenance, and removal.
+- Mutable catalog aliases such as `latest` may help discovery, but must resolve
+  to immutable bytes before preview and must not cross the consent boundary.
+
+## Incubation Limits
+
+- `create` is intentionally non-interactive and only builds a new directory; it
+  never applies the result.
+- Direct skills.sh, LobeHub, browse.sh, and Git importers are not implemented.
+  Use their own tooling to place a skill locally, then pass that directory to
+  `--skill`.
+- Referenced skill and plugin dependencies currently use exact ClawHub package
+  coordinates because that is the dependency source supported by schema v1.
+- GitHub is currently a complete-Claw transport, not a general dependency
+  declaration inside `CLAW.md`.
+- OpenClaw is the only executable harness adapter in this repository.

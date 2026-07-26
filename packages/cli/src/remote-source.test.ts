@@ -5,7 +5,8 @@ import { join, resolve } from "node:path";
 import JSZip from "jszip";
 import { create as createTar } from "tar";
 import { describe, expect, it, vi } from "vitest";
-import { inspectClawSource, parseExactClawHubCoordinate } from "./remote-source.js";
+import { parseExactClawHubCoordinate } from "./remote-source.js";
+import { inspectClawSource } from "./source-providers.js";
 
 const registry = "https://registry.example";
 const coordinate = "clawhub:@example/incident-triage-claw@1.0.0";
