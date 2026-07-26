@@ -72,10 +72,12 @@
   pass. The prior integrated tree passed 152 focused Gateway, readiness,
   profile, node-mode, subject, session-storage, Policy, selector, and CLI
   assertions. Current upstream CI passes production types, test types, lint,
-  and the selected architecture boundaries. A final unused helper export found
-  by Knip is now private, and the Plugin SDK baseline regenerates cleanly on the
-  current base; fresh CI is running for that corrected head. Oxlint, formatting,
-  and `git diff --check` pass. Full-repo typecheck
+  QA smoke, security checks, test shards, and the selected architecture
+  boundaries. A final unused helper export found by Knip is now private. The
+  Plugin SDK baseline regenerates cleanly at the branch base, but upstream
+  changed the same aggregate SDK module again before GitHub's synthetic merge;
+  that moving-base manifest check is the sole current red gate. Oxlint,
+  formatting, and `git diff --check` pass. Full-repo typecheck
   exceeded two minutes without output after its concrete fixture errors were
   fixed; focused suites compile. Codex review found and fixed profile argument
   provenance and a stale contribution-shape assertion. Earlier package build
