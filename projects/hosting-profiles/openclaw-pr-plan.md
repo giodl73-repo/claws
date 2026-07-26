@@ -21,11 +21,11 @@ RFC 0023: Standard Hosting Profiles
 
 RFC: [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33), files
 `rfcs/0018-readiness-conditions-and-providers.md` and
-`rfcs/0018/readiness-v1-spec.md` plus the subject sidecar, head `189075c`.
+`rfcs/0018/readiness-v1-spec.md` plus the subject sidecar, head `a4e5fbe`.
 
 Primary framework implementation:
 [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018),
-head `ca05a31a9b73`. It contains eighteen readiness-only commits and no Hosting
+head `28ad0cf76fa9`. It contains eighteen readiness-only commits and no Hosting
 Profile implementation.
 
 The compatibility boundary is the presence of `gateway.readiness`:
@@ -50,7 +50,7 @@ Historical fork slices [17](https://github.com/giodl73-repo/openclaw/pull/17),
 [22](https://github.com/giodl73-repo/openclaw/pull/22),
 [23](https://github.com/giodl73-repo/openclaw/pull/23), and
 [27](https://github.com/giodl73-repo/openclaw/pull/27), and
-[161](https://github.com/giodl73-repo/openclaw/pull/161) at `1cd0cd98f282`
+[161](https://github.com/giodl73-repo/openclaw/pull/161) at `71aac7fb0fd2`
 remain commit-level review aids for canonical conditions, workspace, providers,
 CLI, and subjects.
 
@@ -58,8 +58,8 @@ CLI, and subjects.
 
 The owner adoption is one upstream follow-on merge unit:
 [openclaw/openclaw#113421](https://github.com/openclaw/openclaw/pull/113421),
-branch `user/giodl/readiness-core-owner-adoption`, head `0baf0be2c17e`, based
-exactly on PR 104018 head `ca05a31a9b73`.
+branch `user/giodl/readiness-core-owner-adoption`, head `debd3a56a098`, based
+exactly on PR 104018 head `28ad0cf76fa9`.
 
 | Owner area | Selectable conditions | Review slice |
 | --- | --- | --- |
@@ -93,12 +93,12 @@ RFC 0020 and is not part of PR 113421.
 
 RFC: [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37), files
 `rfcs/0023-standard-hosting-profiles.md` and
-`rfcs/0023/hosting-profile-v1-spec.md`, head `f922b89`.
+`rfcs/0023/hosting-profile-v1-spec.md`, head `a9ef2e6`.
 
 Primary implementation:
 [openclaw/openclaw#113422](https://github.com/openclaw/openclaw/pull/113422),
 branch `user/giodl/standard-hosting-profiles-owner-adoption`, exact head
-`a601aaab42bf`. It is stacked on core-condition head `0baf0be2c17e`.
+`812d61a2b473`. It is stacked on core-condition head `debd3a56a098`.
 [Fork PR 157](https://github.com/giodl73-repo/openclaw/pull/157) is the exact
 profile-only comparison: 44 files, 2,015 insertions, and 56 deletions.
 
@@ -167,7 +167,7 @@ intentionally not configured.
    for smaller source-area comparisons.
 3. Decide RFC 0023's four-profile support catalog.
 4. Refresh package-installed Docker proof for exact profile head
-   `a601aaab42bf`.
+   `812d61a2b473`.
 5. Land PR 113422 after both readiness dependencies.
 
 ## Contract Rules

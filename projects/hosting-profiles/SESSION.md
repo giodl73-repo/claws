@@ -37,20 +37,20 @@
 - Active branch / PR: RFC 0018 is
   [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33). RFC 0023 is
   [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37). RFC 0018 is at
-  `189075c` and includes the readiness and subject sidecars; RFC 0023 is at
-  `f922b89` and includes
+  `a4e5fbe` and includes the readiness and subject sidecars; RFC 0023 is at
+  `a9ef2e6` and includes
   `rfcs/0023/hosting-profile-v1-spec.md`. The real
   readiness-only implementation is
   [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018)
-  at `ca05a31a9b73` in eighteen commits. Fork
+  at `28ad0cf76fa9` in eighteen commits. Fork
   [PR 161](https://github.com/giodl73-repo/openclaw/pull/161) isolates the
-  subject-identity commit at `1cd0cd98f282` for review. The dependent
+  subject-identity commit at `71aac7fb0fd2` for review. The dependent
   core-owner implementation is
   [openclaw/openclaw#113421](https://github.com/openclaw/openclaw/pull/113421)
-  at `0baf0be2c17e`, based on the exact readiness
+  at `debd3a56a098`, based on the exact readiness
   head. The dependent profile implementation is
   [openclaw/openclaw#113422](https://github.com/openclaw/openclaw/pull/113422)
-  at `a601aaab42bf`, stacked on the core-owner
+  at `812d61a2b473`, stacked on the core-owner
   head. The stack includes the
   discoverable `docs/gateway/hosting-profiles.md` guide, config reference, CLI
   cross-link, and docs navigation. [Fork PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
@@ -66,7 +66,7 @@
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
   hosting-profiles project files from this session should be committed. Both
   implementation branches and both RFC branches are clean at pushed heads.
-- Validation: the stack is rebased onto OpenClaw `main` `1eff642cd2d4`, and
+- Validation: the stack is rebased onto OpenClaw `main` `d1aec7d65f41`, and
   `git range-diff` preserves all implementation patches. The direct subject
   suite passes 9 assertions; the Plugin SDK generator/check and diff checks
   pass. The prior integrated tree passed 152 focused Gateway, readiness,
