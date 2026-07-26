@@ -1,17 +1,16 @@
 {
   "compilerOptions": {
-    "declaration": true,
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "noEmit": true,
     "noUncheckedIndexedAccess": true,
-    "outDir": "dist",
-    "rootDir": ".",
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2023",
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "test/**/*.ts"]
+  "include": ["packages/**/*.ts"]
 }

@@ -1,0 +1,21 @@
+{
+  "name": "@claws/cli-private",
+  "version": "0.0.0-private",
+  "private": true,
+  "bin": {
+    "claws-dev": "dist/cli.mjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "node ../../node_modules/tsdown/dist/run.mjs --config tsdown.config.ts",
+    "prepublishOnly": "node -e \"throw new Error('Standalone Claws CLI publication is disabled during incubation.')\""
+  },
+  "devDependencies": {
+    "@claws/reference-private": "workspace:*",
+    "@openclaw/fs-safe": "0.4.7",
+    "yaml": "2.9.0"
+  }
+}

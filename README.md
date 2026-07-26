@@ -1,34 +1,38 @@
-# Standalone Claw CLI Prototype
+# Claws CLI Incubator
 
-Private evidence slice for a harness-neutral Claw command. This repository has
-no public remote, no publishable package, no `bin` name, and no claim on the
-unscoped `claws` npm package.
+Private standalone repository for the harness-neutral Claws command and
+reference parser. It has no public remote, no publishable package, and no claim
+on the unscoped `claws` npm name.
 
-The current slice validates and inspects a local Claw package without invoking
-a harness or mutating local state:
-
-```powershell
-npm install
-npm run build
-node dist/src/cli.js inspect test/fixtures/valid --json
+```bash
+pnpm install
+pnpm build
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --dry-run
 ```
 
 The intended future command shape remains:
 
 ```text
-npx <name> <claw> --agent openclaw --dry-run
+npx <name> <claw> --agent openclaw
 ```
 
-`<name>` is deliberately unresolved. The package and executable names will be
-selected before any public repository or npm publication is created.
+`<name>` remains unresolved until the Foundation selects or secures the npm
+identity.
 
-## Ownership Boundary
+## Repository Boundary
 
-The standalone layer owns portable source resolution, integrity, package
-validation, inspection, and adapter dispatch. Harnesses continue to own policy,
-consent, mutation, provenance, status, update, doctor, and removal.
+- `packages/reference` owns portable manifest parsing, types, and portability
+  rules. It imports no harness implementation.
+- `packages/cli` owns local source inspection, integrity, adapter dispatch, and
+  cross-harness outcome conventions.
+- The OpenClaw adapter invokes `openclaw claws ... --json` as an external
+  process. It does not import OpenClaw code or recreate host policy.
+- OpenClaw revalidates packages at its own trust boundary and continues to own
+  consent, mutation, provenance, update, status, doctor, and removal.
 
-The prototype temporarily consumes ClawHub's private schema package through a
-local `file:` dependency. This avoids a third validator while proving the CLI
-shape. It must be replaced by a separately versioned portable reference-spec
-package before distribution.
+## Current Scope
+
+The current slice supports local package inspection and OpenClaw dry-run
+preview through an immutable verified snapshot. Remote ClawHub resolution,
+apply, lifecycle dispatch, final naming, publication, and other harness
+adapters are deferred.

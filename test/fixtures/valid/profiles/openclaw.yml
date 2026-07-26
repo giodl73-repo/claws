@@ -1,7 +1,0 @@
-schemaVersion: 1
-agent:
-  tools:
-    profile: coding
-    alsoAllow: [cron]
-    fs:
-      workspaceOnly: true
