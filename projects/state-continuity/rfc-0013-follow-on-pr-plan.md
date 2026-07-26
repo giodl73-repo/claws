@@ -451,11 +451,16 @@ durable replacement, and restored reconciliation accepted before admission.
 
 **Current fork evidence:**
 [giodl/lobster#38](https://microsoft.ghe.com/giodl/lobster/pull/38)
-is a 199-line draft stacked on fork PR 28. It content-addresses the complete
+is a compact draft stacked on fork PR 28. It content-addresses the complete
 projection summary, binds its monotonic revision into final acceptance and
 destruction authority, and advances the permanent authority schema to v2.
-It deliberately does not yet claim all of PR 6A: atomic permanent `replaceAll`
-adoption and rehydration of the existing Redis scheduler remain the next slice.
+Stacked [giodl/lobster#39](https://microsoft.ghe.com/giodl/lobster/pull/39)
+adds atomic permanent `replaceAll`, stale-writer supersession, canonical digest
+construction from the live Gateway cron inventory, and recovery into the
+existing Redis scheduler. It is 828 additions across seven files, including
+286 lines of focused tests/fixtures. The remaining PR 6A proof is live wiring
+from Peter's shipped OpenClaw hooks into that journal plus the due-at-recovery
+runtime-readiness boundary.
 
 ### PR 6B: Host/Scout wake authority and coalescing
 

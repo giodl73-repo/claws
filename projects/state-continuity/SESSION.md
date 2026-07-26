@@ -1326,3 +1326,30 @@ SafeToDestroy`, exact-source-worker and source-runtime-generation binding,
   atomic `replaceAll` adoption and recovery of the existing Redis wake mirror;
   then prove suspension/mutation races before moving to retained Teams/API
   causes and shared cold-start coalescing.
+
+## 2026-07-26 — Permanent wake projection replacement and recovery
+
+- Published fork-only draft
+  [giodl/lobster#39](https://microsoft.ghe.com/giodl/lobster/pull/39), branch
+  `user/giodl/rfc-0013-wake-projection-store`, commit `3080b08351`, stacked on
+  fork PR 38. Its reviewer-facing diff is 828 additions across seven files.
+- The live Gateway cron inventory now constructs a canonical digest over
+  sorted `{jobId, enabled, nextRunAtMs}` facts. The permanent Azure Blob CAS
+  journal stores only bounded owner/receipt state, advances revisions
+  monotonically, replays identical replacements, and returns the winner to
+  stale writers so they must reread OpenClaw.
+- Recovery reuses Lobster's existing Redis `SchedulerService`; empty
+  projections clear it, future deadlines restore it, and already-due deadlines
+  return `Due` without manufacturing a later time. Corrupt permanent state
+  fails before Redis is touched.
+- Fixed PR 38's focused destruction-binding test to inspect the actual accepted
+  authorization rather than asking its intentionally persistence-free memory
+  store to perform a lifecycle transition. PR 38 head is now `14426ed63a`.
+- Verification: format and diff checks, `just cargo check --lib`, strict
+  `just cargo clippy --lib -- -D warnings`, and six focused
+  `wake_projection` tests pass. Local-only native-Windows test compilation
+  scaffolding was removed before commit.
+- RFC PR 46 source head `9eed5eb`, its PR body, and umbrella issue 114145 now
+  link both PRs 38 and 39. They state plainly that live OpenClaw hook-to-journal
+  wiring remains before PR 6A is complete; Teams/API retained causes and shared
+  wake coalescing remain PRs 6B/6C.
