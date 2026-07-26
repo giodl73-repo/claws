@@ -22,6 +22,36 @@
 
 ## Current Session
 
+### 2026-07-26 CLAW.md prompt-body consumer baseline
+
+- Live OpenClaw PR #113454 `feat(claws): materialize CLAW.md prompts` remains
+  open, ready, and mergeable at head `423cb8a15d53c708c031f0cd78c27a2f97a5408e`.
+  Its prior CI suite is green, but the branch is behind current `main`, has no
+  human approval, and ClawSweeper still requests a maintainer decision on the
+  experimental schema-v1 behavior plus persistent add/update/export proof.
+- Adopted the proposed contract in private `giodl73-repo/claws`: a nonempty
+  `CLAW.md` body is the portable prompt materialized by OpenClaw as managed
+  `SOUL.md`, and it cannot coexist with an exact, ancestor, or descendant
+  workspace target for `SOUL.md`. Signed main commit
+  `de5b6f3d18d52d96274b4fdcc23a026f0b7a693c`; `pnpm check` passed 79 tests
+  with one intentional skip, packed-bin proof passed, and final Codex review
+  found no actionable issue.
+- Adopted the same contract across all 15 private
+  `giodl73-repo/awesome-claws` examples and its catalog validator. Validation
+  now parses YAML structurally, requires a nonempty body, and rejects portable
+  path aliases or conflicts with `SOUL.md`. Signed main commits
+  `3352c3cae0aa577f8e4346c33164b50e55314866` and
+  `bbb65726957fce3c560032283b18a4a1f02fb325`; GitHub Validate run
+  `30223795215` passed.
+- A direct persistent proof against the PR branch is still outstanding. The
+  Windows checkout lacks built `dist/entry.js`; WSL correctly refused to reuse
+  its Windows `node_modules`, and the existing Linux OpenClaw checkout is not a
+  clean proof surface. Do not count the private parser/catalog checks as the
+  ClawSweeper-requested host lifecycle proof.
+- Recommended next step: explicitly document the intentional experimental
+  compatibility choice, refresh #113454 onto current `main`, run real
+  add/update/export proof, then request ClawSweeper and human re-review.
+
 ### 2026-07-26 guided standalone CLI terminal workflow
 
 - Implemented Patrick's requested TUI polish in the private standalone CLI,
