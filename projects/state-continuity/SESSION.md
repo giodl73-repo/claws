@@ -1353,3 +1353,10 @@ SafeToDestroy`, exact-source-worker and source-runtime-generation binding,
   link both PRs 38 and 39. They state plainly that live OpenClaw hook-to-journal
   wiring remains before PR 6A is complete; Teams/API retained causes and shared
   wake coalescing remain PRs 6B/6C.
+- The next-source audit found that Peter's `cron_reconciled`/`cron_changed`
+  seams are plugin API hooks, not Gateway WS events. The correct live adapter is
+  a baked in-container Lobster plugin using the documented single-flight loop
+  against a bounded authenticated host endpoint. That endpoint needs explicit
+  abort/supersession authority because transport disconnect alone cannot prove
+  a stale server-side write did not commit; do not add invented cron events to
+  Lobster's Rust Gateway WS client.

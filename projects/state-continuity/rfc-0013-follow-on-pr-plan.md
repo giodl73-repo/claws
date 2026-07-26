@@ -462,6 +462,15 @@ existing Redis scheduler. It is 828 additions across seven files, including
 from Peter's shipped OpenClaw hooks into that journal plus the due-at-recovery
 runtime-readiness boundary.
 
+The hook audit fixes the live topology: `cron_reconciled` and `cron_changed`
+are plugin API observations, not Gateway WS events. The adapter should therefore
+be a small baked in-container Lobster plugin implementing OpenClaw's documented
+single-flight/coalescing loop and calling one bounded authenticated host
+projection endpoint. The host endpoint must make reconciliation cancellation
+and supersession authoritative; a dropped HTTP connection alone cannot prove
+that an already-dispatched stale write did not commit. Do not emulate these
+hooks in the Rust Gateway WS client.
+
 ### PR 6B: Host/Scout wake authority and coalescing
 
 **Repo:** host implementation; the public RFC remains product-neutral
