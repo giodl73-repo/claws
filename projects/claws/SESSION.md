@@ -22,6 +22,23 @@
 
 ## Current Session
 
+### 2026-07-26 private GitHub review repositories created
+
+- Created private `giodl73-repo/claws` at
+  `https://github.com/giodl73-repo/claws` and pushed signed, GitHub-verified
+  `main` head `0a8c86ccc8a7`. Before creation, removed `PRIVATE-REVIEW.md`,
+  replaced private-incubator documentation with user/contributor/security
+  documentation, and added pinned-action CI. `pnpm check` passed all 58 tests,
+  packed offline proof passed, final Codex review found no actionable issue,
+  and the first GitHub `Validate` run `30212507530` succeeded.
+- Created private `giodl73-repo/awesome-claws` at
+  `https://github.com/giodl73-repo/awesome-claws` and pushed signed,
+  GitHub-verified `main` head `0fbf2578194d`. Its first GitHub `Validate` run
+  `30212514264` succeeded.
+- Both repositories remain private and all npm packages remain `private: true`;
+  no npm publication, public launch, or OpenClaw organization repository was
+  created. Patrick needs explicit collaborator access to view the links.
+
 ### 2026-07-26 Awesome Claws repository review handoff
 
 - Removed the shipping-tree review briefs (`REVIEW.md` and `ROLE-REVIEW.md`)
