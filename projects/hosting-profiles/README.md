@@ -72,6 +72,7 @@ then separates required v1 guarantees from host-owned and deferred behavior.
 | giodl73-repo/openclaw | [Affected subjects PR 172](https://github.com/giodl73-repo/openclaw/pull/172)           | `user/giodl/readiness-affected-subjects`           | Draft    | Human lifetime and generation context for subjects behind non-passing conditions.                 |
 | openclaw/openclaw     | [Core criteria PR 113421](https://github.com/openclaw/openclaw/pull/113421)            | `user/giodl/readiness-core-owner-adoption`         | Review   | One follow-on merge unit for startup, execution, state, storage, delivery, and scheduler facts.    |
 | openclaw/openclaw     | [Hosting Profiles PR 113422](https://github.com/openclaw/openclaw/pull/113422)         | `user/giodl/standard-hosting-profiles-owner-adoption` | Review | Restacked RFC 0023 implementation; depends on PRs 104018 and 113421.                                |
+| openclaw/openclaw     | [Profile tooling PR 114636](https://github.com/openclaw/openclaw/pull/114636)          | `user/giodl/hosting-profile-conformance-artifact` | Review | Combined catalog inspection, live validation, and package release evidence after PR 113422.         |
 | giodl73-repo/openclaw | [Profile catalog PR 173](https://github.com/giodl73-repo/openclaw/pull/173)            | `user/giodl/hosting-profile-catalog`                | Draft    | Inert list/inspect facility for shipped profile definitions and selected readiness criteria.       |
 | giodl73-repo/openclaw | [Profile validation PR 174](https://github.com/giodl73-repo/openclaw/pull/174)         | `user/giodl/hosting-profile-validate`               | Draft    | Fail-closed live conformance and readiness validation over one canonical Gateway result.           |
 | giodl73-repo/openclaw | [Release conformance PR 176](https://github.com/giodl73-repo/openclaw/pull/176)       | `user/giodl/hosting-profile-conformance-artifact`   | Draft    | Package-installed 13-state release gate and portable conformance artifact.                          |
@@ -102,6 +103,9 @@ Fork [PR 174](https://github.com/giodl73-repo/openclaw/pull/174) adds live
 profile validation at exact head `64cc6b4e8cd9`. It separates structural
 conformance from current readiness and embeds the canonical Gateway evidence.
 PR 176 exercises that exact validator ancestor in every package scenario.
+The three fork facilities are consolidated for upstream review in
+[OpenClaw PR 114636](https://github.com/openclaw/openclaw/pull/114636) at exact
+head `890d042267c`.
 
 ## Scope
 

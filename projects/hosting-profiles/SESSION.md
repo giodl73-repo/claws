@@ -34,7 +34,9 @@
 - Current focus: exact package-installed proof is complete for RFC 0018
   readiness identity and RFC 0023 Standard Hosting Profiles. The release
   conformance facility is fork PR 176: it runs the packaged validator through
-  13 states and retains one versioned, independently checked artifact.
+  13 states and retains one versioned, independently checked artifact. Upstream
+  PR 114636 combines catalog inspection, live validation, and release evidence
+  as one ordered RFC 0023 review unit.
   Semantic transition watching is published as fork PR 167, and the second runtime
   facility, active criterion catalog list/inspect, is fork PR 169 stacked on it.
   The third facility, bounded `openclaw ready --wait`, is fork PR 171 stacked
@@ -54,7 +56,9 @@
   `7350b4cd744`; RFC 0023
   [PR 37](https://github.com/openclaw/rfcs/pull/37) at `ea2c578`; and
   profiles [PR 113422](https://github.com/openclaw/openclaw/pull/113422) at
-  `b8d9808e1922`. Fork [PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
+  `b8d9808e1922`; and profile tooling
+  [PR 114636](https://github.com/openclaw/openclaw/pull/114636) at
+  `890d042267c`. Fork [PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
   is the exact profile-only comparison. All five review surfaces are
   non-draft.
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
@@ -160,6 +164,9 @@
 
 - 2026-07-27: Published package-installed Standard Hosting Profile release
   conformance as fork PR 176.
+  - Combined fork PRs 173, 174, and 176 into review-ready upstream PR 114636.
+    RFC 0023 source and PR body link the combined landing unit while retaining
+    the fork PRs as smaller comparison views.
   - The lane invokes the packaged live validator for 13 stable states and
     retains expected/observed profile, conformance, readiness, command exit,
     findings, canonical evidence, package version, and immutable image ID.
