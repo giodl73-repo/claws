@@ -150,6 +150,21 @@ immutable implementation parent in
 The final Codex review is clean after adding the independent deadline that
 prevents pre-request setup from stalling the host startup gate.
 
+## Published Fourth Slice
+
+Fork [PR 172](https://github.com/giodl73-repo/openclaw/pull/172) completes the
+human diagnostic projection on top of PR 171 at exact implementation head
+`3010730e9f6a`. When a condition is `False` or `Unknown`, `openclaw ready`
+reports the existing kind, lifetime ID, generation, and parent reference for
+its primary and related subjects.
+
+This is derived entirely from the canonical identity package. It adds no
+evaluator, RPC, config, or JSON schema; healthy human output and machine output
+remain unchanged. Formatting, 61 focused assertions, and type-aware lint pass
+against the immutable implementation parent in
+[run 30268030672](https://github.com/giodl73-repo/openclaw/actions/runs/30268030672).
+The final Codex review reports no actionable findings.
+
 ## Deferred
 
 - Streaming readiness over a new Gateway protocol. Polling is sufficient for

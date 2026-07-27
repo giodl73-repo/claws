@@ -36,9 +36,11 @@
   transition watching is published as fork PR 167, and the second runtime
   facility, active criterion catalog list/inspect, is fork PR 169 stacked on it.
   The third facility, bounded `openclaw ready --wait`, is fork PR 171 stacked
-  on PR 169 with immutable exact-head proof.
+  on PR 169 with immutable exact-head proof. The fourth facility, affected
+  subject lifetime explanation, is fork PR 172 stacked on PR 171 with
+  immutable exact-head proof.
 - Published heads: RFC 0018
-  [PR 33](https://github.com/openclaw/rfcs/pull/33) at `6e50eb4`;
+  [PR 33](https://github.com/openclaw/rfcs/pull/33) at `5728ffe`;
   readiness [PR 104018](https://github.com/openclaw/openclaw/pull/104018) at
   `6dce3555a511`; core-owner
   [PR 113421](https://github.com/openclaw/openclaw/pull/113421) at
@@ -128,6 +130,19 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-27: Published affected-subject lifetime explanation as the fourth
+  RFC 0018 operator facility.
+  - [Fork PR 172](https://github.com/giodl73-repo/openclaw/pull/172), branch
+    `user/giodl/readiness-affected-subjects`, exact head `3010730e9f6a`, adds
+    existing kind, lifetime ID, generation, and parent context for primary and
+    related subjects behind non-`True` conditions.
+  - Healthy human output, canonical JSON, exit behavior, legacy results, and
+    the evaluator remain unchanged.
+  - Formatting, 61 focused assertions, and type-aware lint pass against the
+    immutable implementation parent in [run 30268030672](https://github.com/giodl73-repo/openclaw/actions/runs/30268030672).
+    Final Codex review reports no actionable findings.
+  - RFC 0018 and its sidecar specify the projection at RFC head `5728ffe`.
 
 - 2026-07-27: Published bounded startup wait as the third RFC 0018 operator
   facility.
