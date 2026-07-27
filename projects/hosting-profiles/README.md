@@ -82,12 +82,12 @@ then separates required v1 guarantees from host-owned and deferred behavior.
 | giodl73-repo/openclaw | [Capability PR 154](https://github.com/giodl73-repo/openclaw/pull/154)                | `user/giodl/readiness-agent-execution-capabilities` | Draft   | Second follow-on owner bucket: context engine, tools, MCP, sandbox, and harness evidence; skills await a bounded owner snapshot. |
 | giodl73-repo/openclaw | [State/background PR 155](https://github.com/giodl73-repo/openclaw/pull/155)          | `user/giodl/readiness-state-background-services`    | Draft   | Third follow-on owner bucket: state database, session-store durability, delivery runtime, and scheduler lifecycle evidence. |
 | giodl73-repo/openclaw | [Host bindings PR 156](https://github.com/giodl73-repo/openclaw/pull/156)              | `user/giodl/readiness-hosted-dependencies`           | Draft   | Fourth bucket: resolve bundle selectors through RFC 0018 and fail the selected aggregate closed.    |
-| giodl73-repo/openclaw | [Profile comparison PR 157](https://github.com/giodl73-repo/openclaw/pull/157)         | `user/giodl/standard-hosting-profiles-owner-adoption` | Review | Exact profile-only comparison against core criteria head `7350b4cd744`.                              |
+| giodl73-repo/openclaw | [Profile comparison PR 157](https://github.com/giodl73-repo/openclaw/pull/157)         | `user/giodl/standard-hosting-profiles-owner-adoption` | Review | Exact profile-only comparison against core criteria head `c1d7f394f86`.                              |
 | giodl73-repo/openclaw | [Profile review slices 18, 19, 42, 21](https://github.com/giodl73-repo/openclaw/pulls) | profile review slices                              | Draft    | Historical commit-level review aids; upstream PR 107765 is superseded by PR 113422.                |
 
-Exact package-installed conformance passes over profile head `b8d9808e1922`
-and release-artifact head `890d042267c` in
-[GitHub Actions run 30281595193](https://github.com/giodl73-repo/openclaw/actions/runs/30281595193).
+Exact package-installed conformance passes over profile head `18c42a7f26a`
+and release-artifact head `123bae7b876` in
+[GitHub Actions run 30289122192](https://github.com/giodl73-repo/openclaw/actions/runs/30289122192).
 The immutable Docker matrix covers 13 states across unprofiled compatibility,
 all four profiles, failure and recovery paths, node approval, repeated-poll
 identity, and host-stable/process-and-Gateway-renewing container restart
@@ -95,17 +95,17 @@ behavior. It independently verifies and uploads one versioned artifact.
 
 The first RFC 0023 operator facility is profile catalog inspection. Fork
 [PR 173](https://github.com/giodl73-repo/openclaw/pull/173) exposes immutable
-`hosting profiles list|inspect` descriptors at exact head `afaf7d1269af`.
+`hosting profiles list|inspect` descriptors at exact head `f9e6b219418`.
 The complete package proof runs its focused catalog checks at that exact
 ancestor.
 
 Fork [PR 174](https://github.com/giodl73-repo/openclaw/pull/174) adds live
-profile validation at exact head `64cc6b4e8cd9`. It separates structural
+profile validation at exact head `0f59b726de9`. It separates structural
 conformance from current readiness and embeds the canonical Gateway evidence.
 PR 176 exercises that exact validator ancestor in every package scenario.
 The three fork facilities are consolidated for upstream review in
 [OpenClaw PR 114636](https://github.com/openclaw/openclaw/pull/114636) at exact
-head `890d042267c`.
+head `123bae7b876`.
 
 ## Scope
 

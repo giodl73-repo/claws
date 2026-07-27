@@ -51,53 +51,55 @@
 - Published heads: RFC 0018
   [PR 33](https://github.com/openclaw/rfcs/pull/33) at `5728ffe`;
   readiness [PR 104018](https://github.com/openclaw/openclaw/pull/104018) at
-  `59b02212b1f`; core-owner
+  `2f131c6e220`; core-owner
   [PR 113421](https://github.com/openclaw/openclaw/pull/113421) at
-  `7350b4cd744`; RFC 0023
-  [PR 37](https://github.com/openclaw/rfcs/pull/37) at `ea2c578`; and
+  `c1d7f394f86`; RFC 0023
+  [PR 37](https://github.com/openclaw/rfcs/pull/37) at `41b3857`; and
   profiles [PR 113422](https://github.com/openclaw/openclaw/pull/113422) at
-  `b8d9808e1922`; and profile tooling
+  `18c42a7f26a`; and profile tooling
   [PR 114636](https://github.com/openclaw/openclaw/pull/114636) at
-  `890d042267c`. Fork [PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
+  `123bae7b876`. Fork [PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
   is the exact profile-only comparison. All five review surfaces are
   non-draft.
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
   hosting-profiles project files from this session should be committed. Both
   implementation branches and both RFC branches are clean at pushed heads.
-- Validation: [GitHub Actions run 30281595193](https://github.com/giodl73-repo/openclaw/actions/runs/30281595193)
-  passes the exact PR 176 head over profile head `b8d9808e1922`. It builds the
+- Validation: [GitHub Actions run 30289122192](https://github.com/giodl73-repo/openclaw/actions/runs/30289122192)
+  passes the exact PR 176 head over profile head `18c42a7f26a`. It builds the
   package/image, exercises 13 states, independently validates every canonical
   result and expectation, and uploads a `13/13` conformance artifact. Local
-  closeout passes 54 focused artifact/plan assertions, formatting, lint, shell
+  closeout passes 59 focused artifact/plan/seed assertions, formatting, lint, shell
   and Node syntax, and diff checks. Final Codex review reports no actionable
   regression.
 - Proof-driven fixes: Gateway auth/readiness initialization ordering; default
   legacy context-engine recognition; required plugin projection; missing
   standard profile selectors; transition workload correlation; stopped
   container diagnostics; restart-stable workspace ownership; and shared
-  Gateway RPC readiness wiring.
+  Gateway RPC readiness wiring. The rebased proof also binds candidate package
+  digests into immutable test images and explicitly seeds the tested model route
+  instead of inheriting a moving default catalog.
 - Provider attribution: proof ran on GitHub-hosted Actions. Direct AWS Crabbox
   returned `401`; Blacksmith Testbox did not allocate a provider ID because of
   organization/login access. Do not describe this run as Crabbox or Testbox.
 
 - RFC 0023 catalog facility: [fork PR 173](https://github.com/giodl73-repo/openclaw/pull/173)
-  at `afaf7d1269af` adds inert `openclaw hosting profiles list|inspect` with
+  at `f9e6b219418` adds inert `openclaw hosting profiles list|inspect` with
   versioned JSON descriptors. The complete PR 176 package proof runs its
   focused checks at this exact ancestor. RFC 0023 and its sidecar define the
-  contract at `ea2c578`.
+  contract at `41b3857`.
 
 - RFC 0023 validation facility: [fork PR 174](https://github.com/giodl73-repo/openclaw/pull/174)
-  at `64cc6b4e8cd9` adds `openclaw hosting profiles validate [profile]` over
+  at `0f59b726de9` adds `openclaw hosting profiles validate [profile]` over
   one canonical `ready` result. It reports structural `conformant` separately
   from serving `ready` and fails closed on unavailable, malformed, mismatched,
   or incomplete evidence. The complete PR 176 package proof exercises this
   exact validator ancestor through all 13 states. RFC 0023 specifies the
-  contract at `ea2c578`.
+  contract at `41b3857`.
 
 - RFC 0023 release facility: [fork PR 176](https://github.com/giodl73-repo/openclaw/pull/176)
-  at `890d042267c` adds `pnpm test:docker:hosting-profiles` and the versioned
-  package/image conformance artifact. Proof branch head `d46eb6f5390` verifies
-  the immutable parent and uploads the passing artifact in run `30281595193`.
+  at `123bae7b876` adds `pnpm test:docker:hosting-profiles` and the versioned
+  package/image conformance artifact. Proof branch head `679cb8ca0dd` verifies
+  the immutable parent and uploads the passing artifact in run `30289122192`.
 
 ## Resume Checklist
 
@@ -175,11 +177,11 @@
     scenario set is complete.
   - The first proof found that `/readyz` received the evaluator while Gateway
     RPC did not. The existing later-operations fix and live regression test
-    were promoted into PR 104018 at `59b02212b1f`; PRs 113421, 113422, 173,
+    were promoted into PR 104018 at `2f131c6e220`; PRs 113421, 113422, 173,
     174, and 176 were restacked over it.
-  - Run `30281595193` passes all checks and all 13 package states. Final Codex
+  - Run `30289122192` passes all checks and all 13 package states. Final Codex
     review of PR 176 against PR 174 reports no actionable regression.
-  - RFC 0023 and its normative sidecar now specify the artifact at `ea2c578`.
+  - RFC 0023 and its normative sidecar now specify the artifact at `41b3857`.
 
 - 2026-07-27: Published live Standard Hosting Profile validation as the second
   RFC 0023 operator facility.
