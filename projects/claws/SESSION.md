@@ -22,6 +22,26 @@
 
 ## Current Session
 
+### 2026-07-27 integrated Awesome Claws examples
+
+- Enriched four starters in private `giodl73-repo/awesome-claws`: incident
+  response declares an isolated daily cron; financial analyst and customer
+  support declare exact production ClawHub skills; software maintainer declares
+  the official Diffs plugin, filtered GitHub OAuth MCP, and a package-local
+  OpenClaw coding profile with workspace-only filesystem access.
+- Added generated capability disclosure and boundaries plus schema-aligned
+  validation for exact SemVer, MCP filters, OpenClaw profiles, Croner expressions,
+  IANA timezones, and cron delivery. Unchanged base starter output remains stable.
+- Signed private-main commit `7e87c09a520d310509ec66a682729914887d11e2`
+  is pushed. `npm run check`, standalone inspection of all 15 packages, and
+  final `codex review --uncommitted` pass; Codex reported no actionable issue.
+- Disposable WSL proof against the post-agent-settings OpenClaw build passed six
+  representative dry-runs. OpenClaw trust-resolved both production skills and
+  `@openclaw/diffs@2026.7.1`; GitHub MCP remained non-mutating and correctly
+  reported OAuth as its only readiness prerequisite. No package was applied,
+  published, or made public.
+- GitHub Validate run `30279375393` passed on the pushed commit.
+
 ### 2026-07-27 private repository launch-readiness audit
 
 - Rechecked private `giodl73-repo/claws` and `giodl73-repo/awesome-claws`.
