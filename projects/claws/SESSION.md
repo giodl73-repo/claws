@@ -22,6 +22,33 @@
 
 ## Current Session
 
+### 2026-07-27 private repository launch-readiness audit
+
+- Rechecked private `giodl73-repo/claws` and `giodl73-repo/awesome-claws`.
+  Both local main branches are clean and aligned with origin; latest GitHub
+  Validate runs pass. Patrick-Erichsen has push access to both repositories.
+- The repositories are safe incubators: publication remains blocked, packages
+  are private, actions are SHA-pinned, licenses/contribution/security docs are
+  present, and the packed CLI proof passes. Neither repository has branch
+  protection/rulesets, topics, Dependabot alerts, or vulnerability alerts;
+  establish those when transferring to the OpenClaw organization rather than
+  treating the current personal-repo settings as launch posture.
+- Public distribution remains an owner decision. The unscoped npm package
+  `claws` is occupied by an unrelated 2014 HTTP debugging tool, so the desired
+  `npx claws` command requires a transfer/ownership conversation or a different
+  package identity. Do not publish the incubator packages opportunistically.
+- Two product-contract items should be resolved before calling the format a
+  harness-neutral public standard: package discovery still uses the
+  OpenClaw-specific `package.json.openclaw.claw` entry, and OpenClaw is the only
+  executable harness adapter. Root `CLAW.md` discovery/generic package metadata
+  and a second adapter/conformance consumer are the strongest portability
+  proofs.
+- The 15 Awesome Claws are a useful safe baseline but intentionally install no
+  packages, MCP servers, or scheduled work. Before public promotion, add a few
+  reviewed integrated examples that demonstrate those capabilities and run a
+  real resolve -> preview -> apply -> status/update -> remove/export proof
+  against a released OpenClaw plus the deployed ClawHub provider.
+
 ### 2026-07-26 PR #113454 final Codex review
 
 - Ran `codex review --base origin/main` on exact PR head
