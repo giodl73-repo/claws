@@ -40,13 +40,15 @@
   subject lifetime explanation, is fork PR 172 stacked on PR 171 with
   immutable exact-head proof. RFC 0023 catalog discovery is now fork PR 173,
   based directly on the profile implementation and proven at its exact head.
+  Live profile validation is fork PR 174 stacked on that catalog, with
+  immutable exact-head proof and fail-closed canonical evidence validation.
 - Published heads: RFC 0018
   [PR 33](https://github.com/openclaw/rfcs/pull/33) at `5728ffe`;
   readiness [PR 104018](https://github.com/openclaw/openclaw/pull/104018) at
   `6dce3555a511`; core-owner
   [PR 113421](https://github.com/openclaw/openclaw/pull/113421) at
   `9cc02c5d89c`; RFC 0023
-  [PR 37](https://github.com/openclaw/rfcs/pull/37) at `32eb81a`; and
+  [PR 37](https://github.com/openclaw/rfcs/pull/37) at `d82ecbc`; and
   profiles [PR 113422](https://github.com/openclaw/openclaw/pull/113422) at
   `e9c1988c5e59`. Fork [PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
   is the exact profile-only comparison. All five review surfaces are
@@ -75,6 +77,15 @@
   passes immutable-parent verification, formatting, 35 focused assertions,
   type-aware lint, and core type checking. RFC 0023 and its sidecar define the
   contract at `32eb81a`.
+
+- RFC 0023 validation facility: [fork PR 174](https://github.com/giodl73-repo/openclaw/pull/174)
+  at `84227d246d00` adds `openclaw hosting profiles validate [profile]` over
+  one canonical `ready` result. It reports structural `conformant` separately
+  from serving `ready` and fails closed on unavailable, malformed, mismatched,
+  or incomplete evidence. [Run 30275850209](https://github.com/giodl73-repo/openclaw/actions/runs/30275850209)
+  passes immutable-parent verification, formatting, 51 focused assertions,
+  type-aware lint, and core types. RFC 0023 specifies the contract at
+  `d82ecbc`.
 
 ## Resume Checklist
 
@@ -138,6 +149,21 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-27: Published live Standard Hosting Profile validation as the second
+  RFC 0023 operator facility.
+  - [Fork PR 174](https://github.com/giodl73-repo/openclaw/pull/174), branch
+    `user/giodl/hosting-profile-validate`, exact head `84227d246d00`, validates
+    optional expected identity, profile version, condition coverage, and live
+    readiness through one canonical Gateway result.
+  - The versioned artifact embeds the source readiness evidence. A conformant
+    but non-ready profile remains distinguishable; either false state exits
+    nonzero.
+  - Codex review prompted complete schema validation, exact runtime profile IDs,
+    and forced non-ready output for malformed evidence. Final review is clean.
+  - [Run 30275850209](https://github.com/giodl73-repo/openclaw/actions/runs/30275850209)
+    passes formatting, 51 focused assertions, type-aware lint, and core types.
+    RFC 0023 and its sidecar specify validation at `d82ecbc`.
 
 - 2026-07-27: Published Standard Hosting Profile catalog inspection as the
   first RFC 0023 operator facility.

@@ -29,11 +29,13 @@ A profile provides a reproducible support subset: OpenClaw names the posture, re
 
 Docker, Kubernetes, systemd, OCC, and downstream hosts continue to consume ordinary `/readyz`. Profiles observe effective state; they do not generate or repair config, add Lobster/OCC resources, encode scheduler policy, or initiate subsystems.
 
-## Catalog Discovery
+## Operator Inspection And Validation
 
 The built-in catalog is directly inspectable through `openclaw hosting profiles list|inspect`, including versioned JSON descriptors for profile-owned conditions and required/advisory readiness criteria. These commands are local and inert: they do not load config or plugins, contact a Gateway, evaluate readiness, or guess which profile is active.
 
 [Fork PR 173](https://github.com/giodl73-repo/openclaw/pull/173) implements this first operator facility at exact head `99449434cb4c`. Its [exact-head proof](https://github.com/giodl73-repo/openclaw/actions/runs/30273004269) passes formatting, 35 focused assertions, type-aware lint, and core type checking. Runtime condition names are tested against the catalog so support inventory cannot drift from evaluation.
+
+[Fork PR 174](https://github.com/giodl73-repo/openclaw/pull/174) adds `hosting profiles validate [profile]` at exact head `84227d246d00`. It calls canonical readiness once, validates exact active identity, version, and profile-condition coverage, and reports `conformant` separately from `ready`. It fails closed on unavailable or malformed evidence and never runs a second evaluator.
 
 ## Implementation Evidence
 
@@ -54,4 +56,4 @@ This RFC does not promise custom profile inheritance, host assertions, immutable
 2. Land reusable owner observations in PR 113421.
 3. Decide whether the four named postures are the right initial support catalog.
 4. Land PR 113422 with its exact-head packaged conformance evidence.
-5. Land catalog inspection independently; live validation and portable conformance artifacts remain follow-ups.
+5. Land catalog inspection and live validation independently; portable release-conformance artifacts remain a follow-up.

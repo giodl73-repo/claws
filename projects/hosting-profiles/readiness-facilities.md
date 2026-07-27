@@ -183,6 +183,25 @@ passes immutable-parent verification, formatting, 35 focused assertions,
 type-aware lint, and core type checking. The final Codex review reports no
 actionable findings.
 
+## Published RFC 0023 Validation Slice
+
+Fork [PR 174](https://github.com/giodl73-repo/openclaw/pull/174) implements live
+profile validation on top of catalog PR 173. At exact head `84227d246d00`,
+`openclaw hosting profiles validate [profile]` calls canonical readiness once
+and verifies exact active identity, readiness and profile contract versions,
+and one required row for every profile-owned condition.
+
+The versioned JSON artifact reports structural `conformant` separately from
+serving `ready` and embeds the source readiness result. Both false states exit
+nonzero. Gateway errors, malformed results, profile mismatches, and missing,
+duplicate, or non-required profile conditions fail closed without invoking a
+second evaluator.
+
+[Run 30275850209](https://github.com/giodl73-repo/openclaw/actions/runs/30275850209)
+passes immutable-parent verification, formatting, 51 focused assertions,
+type-aware lint, and core type checking. Codex review prompted three accepted
+resilience fixes and the final review reports no actionable correctness defects.
+
 ## Deferred
 
 - Streaming readiness over a new Gateway protocol. Polling is sufficient for
