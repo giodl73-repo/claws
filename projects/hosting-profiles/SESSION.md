@@ -38,14 +38,15 @@
   The third facility, bounded `openclaw ready --wait`, is fork PR 171 stacked
   on PR 169 with immutable exact-head proof. The fourth facility, affected
   subject lifetime explanation, is fork PR 172 stacked on PR 171 with
-  immutable exact-head proof.
+  immutable exact-head proof. RFC 0023 catalog discovery is now fork PR 173,
+  based directly on the profile implementation and proven at its exact head.
 - Published heads: RFC 0018
   [PR 33](https://github.com/openclaw/rfcs/pull/33) at `5728ffe`;
   readiness [PR 104018](https://github.com/openclaw/openclaw/pull/104018) at
   `6dce3555a511`; core-owner
   [PR 113421](https://github.com/openclaw/openclaw/pull/113421) at
   `9cc02c5d89c`; RFC 0023
-  [PR 37](https://github.com/openclaw/rfcs/pull/37) at `4c0b274e1b43`; and
+  [PR 37](https://github.com/openclaw/rfcs/pull/37) at `32eb81a`; and
   profiles [PR 113422](https://github.com/openclaw/openclaw/pull/113422) at
   `e9c1988c5e59`. Fork [PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
   is the exact profile-only comparison. All five review surfaces are
@@ -67,6 +68,13 @@
 - Provider attribution: proof ran on GitHub-hosted Actions. Direct AWS Crabbox
   returned `401`; Blacksmith Testbox did not allocate a provider ID because of
   organization/login access. Do not describe this run as Crabbox or Testbox.
+
+- RFC 0023 catalog facility: [fork PR 173](https://github.com/giodl73-repo/openclaw/pull/173)
+  at `99449434cb4c` adds inert `openclaw hosting profiles list|inspect` with
+  versioned JSON descriptors. [Run 30273004269](https://github.com/giodl73-repo/openclaw/actions/runs/30273004269)
+  passes immutable-parent verification, formatting, 35 focused assertions,
+  type-aware lint, and core type checking. RFC 0023 and its sidecar define the
+  contract at `32eb81a`.
 
 ## Resume Checklist
 
@@ -130,6 +138,21 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-27: Published Standard Hosting Profile catalog inspection as the
+  first RFC 0023 operator facility.
+  - [Fork PR 173](https://github.com/giodl73-repo/openclaw/pull/173), branch
+    `user/giodl/hosting-profile-catalog`, exact head `99449434cb4c`, exports
+    immutable profile descriptors and adds local `hosting profiles
+    list|inspect` commands with human and versioned JSON output.
+  - The commands do not load config or plugins, contact a Gateway, evaluate
+    readiness, infer active selection, or mutate state. Runtime condition names
+    are tested against the catalog definitions.
+  - Formatting, 35 focused assertions, type-aware lint, and core types pass in
+    [run 30273004269](https://github.com/giodl73-repo/openclaw/actions/runs/30273004269).
+    Final Codex review reports no actionable findings.
+  - RFC 0023 and its normative sidecar specify the catalog at RFC head
+    `32eb81a`.
 
 - 2026-07-27: Published affected-subject lifetime explanation as the fourth
   RFC 0018 operator facility.

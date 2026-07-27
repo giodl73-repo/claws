@@ -72,6 +72,7 @@ then separates required v1 guarantees from host-owned and deferred behavior.
 | giodl73-repo/openclaw | [Affected subjects PR 172](https://github.com/giodl73-repo/openclaw/pull/172)           | `user/giodl/readiness-affected-subjects`           | Draft    | Human lifetime and generation context for subjects behind non-passing conditions.                 |
 | openclaw/openclaw     | [Core criteria PR 113421](https://github.com/openclaw/openclaw/pull/113421)            | `user/giodl/readiness-core-owner-adoption`         | Review   | One follow-on merge unit for startup, execution, state, storage, delivery, and scheduler facts.    |
 | openclaw/openclaw     | [Hosting Profiles PR 113422](https://github.com/openclaw/openclaw/pull/113422)         | `user/giodl/standard-hosting-profiles-owner-adoption` | Review | Restacked RFC 0023 implementation; depends on PRs 104018 and 113421.                                |
+| giodl73-repo/openclaw | [Profile catalog PR 173](https://github.com/giodl73-repo/openclaw/pull/173)            | `user/giodl/hosting-profile-catalog`                | Draft    | Inert list/inspect facility for shipped profile definitions and selected readiness criteria.       |
 | giodl73-repo/openclaw | [Readiness PRs 17, 22, 23, 27](https://github.com/giodl73-repo/openclaw/pulls)         | readiness-only stack                               | Draft    | Modernize Gateway readiness without requiring profiles.                                           |
 | giodl73-repo/openclaw | [Subject identity PR 161](https://github.com/giodl73-repo/openclaw/pull/161)           | `user/giodl/readiness-subject-identity`             | Draft    | Exact one-commit review slice for producer and condition subject identity.                         |
 | giodl73-repo/openclaw | [Activation PR 153](https://github.com/giodl73-repo/openclaw/pull/153)                | `user/giodl/readiness-activation-integrity`        | Draft    | First follow-on owner bucket: config, model-route, secret, and plugin activation evidence.         |
@@ -86,6 +87,12 @@ Exact package-installed conformance passes at profile head `e9c1988c5e59` in
 The immutable Docker matrix covers unprofiled compatibility, all four profiles,
 failure and recovery paths, node approval, repeated-poll identity, and
 host-stable/process-and-Gateway-renewing container restart behavior.
+
+The first RFC 0023 operator facility is profile catalog inspection. Fork
+[PR 173](https://github.com/giodl73-repo/openclaw/pull/173) exposes immutable
+`hosting profiles list|inspect` descriptors at exact head `99449434cb4c`.
+[Run 30273004269](https://github.com/giodl73-repo/openclaw/actions/runs/30273004269)
+passes formatting, 35 focused assertions, type-aware lint, and core types.
 
 ## Scope
 

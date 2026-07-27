@@ -52,7 +52,7 @@ modify a hosting profile.
 
 ### 3. Validate profiles
 
-- Add `hosting profile list` and `hosting profile inspect` over built-in profile
+- Add `hosting profiles list` and `hosting profiles inspect` over built-in profile
   definitions.
 - Add `hosting profile validate` against effective configuration and the live
   canonical readiness result.
@@ -164,6 +164,24 @@ remain unchanged. Formatting, 61 focused assertions, and type-aware lint pass
 against the immutable implementation parent in
 [run 30268030672](https://github.com/giodl73-repo/openclaw/actions/runs/30268030672).
 The final Codex review reports no actionable findings.
+
+## Published RFC 0023 Catalog Slice
+
+Fork [PR 173](https://github.com/giodl73-repo/openclaw/pull/173) implements the
+first profile facility directly on profile implementation head `e9c1988c5e59`.
+At exact head `99449434cb4c`, `openclaw hosting profiles list|inspect` exposes
+immutable standard-profile descriptors with human output and versioned JSON.
+
+The descriptor contains profile-owned conditions plus required and advisory
+RFC 0018 criteria. A test compares those condition names with the runtime
+condition builder, preventing the release/support catalog from drifting from
+evaluation. Inspection stays local and inert; active selection and runtime
+truth remain canonical Gateway readiness data.
+
+[Run 30273004269](https://github.com/giodl73-repo/openclaw/actions/runs/30273004269)
+passes immutable-parent verification, formatting, 35 focused assertions,
+type-aware lint, and core type checking. The final Codex review reports no
+actionable findings.
 
 ## Deferred
 
