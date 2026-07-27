@@ -35,8 +35,10 @@
   readiness identity and RFC 0023 Standard Hosting Profiles. Semantic
   transition watching is published as fork PR 167, and the second runtime
   facility, active criterion catalog list/inspect, is fork PR 169 stacked on it.
+  The third facility, bounded `openclaw ready --wait`, is fork PR 171 stacked
+  on PR 169 with immutable exact-head proof.
 - Published heads: RFC 0018
-  [PR 33](https://github.com/openclaw/rfcs/pull/33) at `24dcd76be622`;
+  [PR 33](https://github.com/openclaw/rfcs/pull/33) at `6e50eb4`;
   readiness [PR 104018](https://github.com/openclaw/openclaw/pull/104018) at
   `6dce3555a511`; core-owner
   [PR 113421](https://github.com/openclaw/openclaw/pull/113421) at
@@ -126,6 +128,21 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-27: Published bounded startup wait as the third RFC 0018 operator
+  facility.
+  - [Fork PR 171](https://github.com/giodl73-repo/openclaw/pull/171), branch
+    `user/giodl/readiness-startup-wait`, exact head `5201c5558cd7`, adds
+    `openclaw ready --wait [duration]` over the canonical `ready` RPC.
+  - Polls are sequential and non-overlapping. The total deadline includes
+    config, credential, TLS, connection, and RPC setup; each request timeout is
+    capped by the remaining budget. Only the final observation is emitted.
+  - A future launcher-specific `gateway start --wait-ready` may delegate to the
+    command, but does not own a second evaluator or deadline model.
+  - Formatting, 59 focused assertions, and type-aware lint pass against the
+    immutable implementation parent in [run 30246240331](https://github.com/giodl73-repo/openclaw/actions/runs/30246240331).
+    Final Codex review is clean after fixing a setup-phase deadline gap.
+  - RFC 0018 and its sidecar specify the contract at RFC head `6e50eb4`.
 
 - 2026-07-27: Published the second readiness runtime-operations facility.
   - Fork [PR 169](https://github.com/giodl73-repo/openclaw/pull/169) at

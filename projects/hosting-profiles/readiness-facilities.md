@@ -43,8 +43,11 @@ modify a hosting profile.
 
 - Add read-only condition/provider list and inspect commands over one active
   config/plugin-registry snapshot. Enumeration never invokes providers.
-- Add a bounded `gateway start --wait-ready` convenience over the same result;
-  do not create a second startup-health evaluator.
+- Add `openclaw ready --wait [duration]` as the host-agnostic bounded startup
+  gate over the canonical result. Docker, Kubernetes, systemd, OCC, and other
+  launchers can invoke it after startup without owning another evaluator.
+- A future `gateway start --wait-ready` shorthand may delegate to this command;
+  it must not define another deadline or readiness model.
 - Add concise reason and subject-lifetime explanations to human output.
 
 ### 3. Validate profiles
@@ -126,6 +129,26 @@ and passes formatting and type-aware lint in
 [run 30227102643](https://github.com/giodl73-repo/openclaw/actions/runs/30227102643)
 at exact implementation head `e0a826996730`. That proof found and fixed the
 initial missing lazy-handler route before publication.
+
+## Published Third Slice
+
+Fork [PR 171](https://github.com/giodl73-repo/openclaw/pull/171) implements the
+bounded startup-wait slice on top of PR 169 at exact implementation head
+`5201c5558cd7`. `openclaw ready --wait [duration]` repeatedly invokes the
+canonical `ready` RPC until it succeeds or the total startup budget expires.
+
+Attempts are sequential and non-overlapping. The outer deadline covers local
+config, credential, TLS, connection, and RPC setup as well as the request
+itself; each request timeout is capped by the remaining total budget. The
+command emits only the final observation, preserves canonical result JSON when
+one was observed, and returns structured `GatewayReadinessTimeout` output when
+the Gateway was never reachable. `--watch` and `--wait` are mutually exclusive.
+
+Formatting, 59 focused assertions, and type-aware lint pass against the
+immutable implementation parent in
+[run 30246240331](https://github.com/giodl73-repo/openclaw/actions/runs/30246240331).
+The final Codex review is clean after adding the independent deadline that
+prevents pre-request setup from stalling the host startup gate.
 
 ## Deferred
 

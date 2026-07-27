@@ -40,7 +40,8 @@ Owner criteria observe existing snapshots. Readiness does not make model calls, 
 
 - [Fork PR 167](https://github.com/giodl73-repo/openclaw/pull/167) adds `openclaw ready --watch`: bounded semantic transitions, unavailable/not-ready recovery, and subject-lifetime replacement without changing one-shot behavior. [Exact-head tests and package-installed Docker proof](https://github.com/giodl73-repo/openclaw/actions/runs/30224900928) pass.
 - [Fork PR 169](https://github.com/giodl73-repo/openclaw/pull/169) adds the inert `readiness.catalog` RPC and `openclaw ready criteria list|inspect`. It reports selectable core/plugin ownership, current selection, and selected-but-missing IDs from one activation-pinned snapshot without invoking providers. [Exact-head tests, formatting, and type-aware lint](https://github.com/giodl73-repo/openclaw/actions/runs/30227102643) pass.
-- Bounded startup wait remains a later convenience. Doctor, telemetry, support bundles, and updates consume readiness evidence through their existing owners.
+- [Fork PR 171](https://github.com/giodl73-repo/openclaw/pull/171) adds `openclaw ready --wait [duration]` as a host-agnostic bounded startup gate over the canonical `ready` RPC. Attempts are sequential, the total deadline covers local setup and RPC work, and only the final observation is emitted. [Exact-head tests, formatting, and type-aware lint](https://github.com/giodl73-repo/openclaw/actions/runs/30246240331) pass.
+- Doctor, telemetry, support bundles, and updates consume readiness evidence through their existing owners.
 
 ## Package Proof
 
