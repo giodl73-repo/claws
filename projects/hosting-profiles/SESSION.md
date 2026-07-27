@@ -29,14 +29,14 @@
 
 ## Current Session
 
-- Last updated: 2026-07-26
+- Last updated: 2026-07-27
 - Last agent: Codex
 - Current focus: exact package-installed proof is complete for RFC 0018
-  readiness identity and RFC 0023 Standard Hosting Profiles. The first
-  follow-up runtime facility, semantic readiness transition watching, is
-  published as fork PR 167 from the exact RFC 0018 implementation head.
+  readiness identity and RFC 0023 Standard Hosting Profiles. Semantic
+  transition watching is published as fork PR 167, and the second runtime
+  facility, active criterion catalog list/inspect, is fork PR 169 stacked on it.
 - Published heads: RFC 0018
-  [PR 33](https://github.com/openclaw/rfcs/pull/33) at `59aeff2e407f`;
+  [PR 33](https://github.com/openclaw/rfcs/pull/33) at `24dcd76be622`;
   readiness [PR 104018](https://github.com/openclaw/openclaw/pull/104018) at
   `6dce3555a511`; core-owner
   [PR 113421](https://github.com/openclaw/openclaw/pull/113421) at
@@ -91,9 +91,10 @@
 
 ## Open Threads
 
-- Review and promote fork PR 167 after the RFC 0018 foundation shape is
-  accepted. It adds transition-aware `openclaw ready --watch` while preserving
-  one-shot behavior and profile independence.
+- Review and promote fork PRs 167 and 169 after the RFC 0018 foundation shape
+  is accepted. They add transition-aware `openclaw ready --watch` and inert
+  criterion catalog list/inspect while preserving one-shot behavior and profile
+  independence.
 - Keep condition/provider inspection and startup wait under RFC 0018; keep
   profile inspection, validation, conformance artifacts, and release gates
   under RFC 0023.
@@ -125,6 +126,27 @@
 - Use the same horizontal layering in proposal diagrams so each step shows simplification without changing the control-plane/data-plane invariant.
 
 ## Implementation Notes
+
+- 2026-07-27: Published the second readiness runtime-operations facility.
+  - Fork [PR 169](https://github.com/giodl73-repo/openclaw/pull/169) at
+    `e0a826996730` stacks one commit on PR 167 and exposes the read-only
+    `readiness.catalog` RPC plus `openclaw ready criteria list|inspect`.
+  - The catalog reads one activation-pinned config/plugin-registry snapshot,
+    reports core/plugin ownership and current selection, preserves selected
+    missing IDs as `registered: false`, and never invokes providers.
+  - 78 focused local assertions pass. An expanded 82-assertion clean CI lane,
+    including authenticated live-Gateway RPC, formatting, and type-aware lint,
+    passes in [run 30227102643](https://github.com/giodl73-repo/openclaw/actions/runs/30227102643).
+  - Clean proof found and fixed a missing lazy health-handler route for the new
+    RPC, a mutable catalog sort, and a Gateway startup-file lint regression.
+  - Independent Codex review reports no accepted actionable issue. Its sole P2
+    named `extensions/codex/index.ts`, which is absent from the 16-file stack
+    diff, and was rejected as an out-of-scope GitHub-fallback review artifact.
+    Local full hydration remains blocked by the Microsoft package-proxy 404 for
+    `@agentclientprotocol/sdk@1.3.0`; no dependency changes were made.
+  - PR 167 is now `3d59eebb8ea2`; exact-head clean tests and the package-installed
+    Docker transition proof pass in
+    [run 30224900928](https://github.com/giodl73-repo/openclaw/actions/runs/30224900928).
 
 - 2026-07-26: Published the first readiness runtime-operations facility.
   - Fork [PR 167](https://github.com/giodl73-repo/openclaw/pull/167) at
