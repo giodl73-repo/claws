@@ -49,21 +49,23 @@
   fixed missing Gateway RPC readiness wiring in foundational PR 104018, then
   the complete profile stack was restacked over the repaired head.
 - Published heads: RFC 0018
-  [PR 33](https://github.com/openclaw/rfcs/pull/33) at `5728ffe`;
+  [PR 33](https://github.com/openclaw/rfcs/pull/33) at `fae4ea1`;
   readiness [PR 104018](https://github.com/openclaw/openclaw/pull/104018) at
   `2f131c6e220`; core-owner
   [PR 113421](https://github.com/openclaw/openclaw/pull/113421) at
   `c1d7f394f86`; RFC 0023
-  [PR 37](https://github.com/openclaw/rfcs/pull/37) at `41b3857`; and
+  [PR 37](https://github.com/openclaw/rfcs/pull/37) at `e931e8d`; and
   profiles [PR 113422](https://github.com/openclaw/openclaw/pull/113422) at
   `18c42a7f26a`; and profile tooling
   [PR 114636](https://github.com/openclaw/openclaw/pull/114636) at
   `123bae7b876`. Fork [PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
-  is the exact profile-only comparison. All five review surfaces are
+  is the exact profile-only comparison. All six upstream review surfaces are
   non-draft.
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
   hosting-profiles project files from this session should be committed. Both
-  implementation branches and both RFC branches are clean at pushed heads.
+  RFC branches are clean at pushed heads. All four upstream implementation PRs
+  currently conflict with the latest `main` and require a coordinated restack
+  before merge review.
 - Validation: [GitHub Actions run 30289122192](https://github.com/giodl73-repo/openclaw/actions/runs/30289122192)
   passes the exact PR 176 head over profile head `18c42a7f26a`. It builds the
   package/image, exercises 13 states, independently validates every canonical
@@ -86,7 +88,7 @@
   at `f9e6b219418` adds inert `openclaw hosting profiles list|inspect` with
   versioned JSON descriptors. The complete PR 176 package proof runs its
   focused checks at this exact ancestor. RFC 0023 and its sidecar define the
-  contract at `41b3857`.
+  contract at `e931e8d`.
 
 - RFC 0023 validation facility: [fork PR 174](https://github.com/giodl73-repo/openclaw/pull/174)
   at `0f59b726de9` adds `openclaw hosting profiles validate [profile]` over
@@ -94,7 +96,7 @@
   from serving `ready` and fails closed on unavailable, malformed, mismatched,
   or incomplete evidence. The complete PR 176 package proof exercises this
   exact validator ancestor through all 13 states. RFC 0023 specifies the
-  contract at `41b3857`.
+  contract at `e931e8d`.
 
 - RFC 0023 release facility: [fork PR 176](https://github.com/giodl73-repo/openclaw/pull/176)
   at `123bae7b876` adds `pnpm test:docker:hosting-profiles` and the versioned
