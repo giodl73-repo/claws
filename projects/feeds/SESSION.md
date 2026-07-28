@@ -1,8 +1,8 @@
 # 2026-07-28 ClawHub following inbox and feed-ready activity
 
 - Refreshed and force-pushed the ClawHub account/following stack onto current
-  `main` without merging it: #2948 is now `8f11aca0`, #2950 is `5b36e411`, and
-  #2958 is `09d200ac`. The orthogonal publisher-state draft #2949 is refreshed
+  `main` without merging it: #2948 is now `8f11aca0`, #2950 is `fc85d7d2`, and
+  #2958 is `5705ced4`. The orthogonal publisher-state draft #2949 is refreshed
   at `a9e7c22b`.
 - #2950 is now a private authenticated follow graph only. The abandoned public
   followers/following surface was removed; `all` / `none` remains a reversible
@@ -14,7 +14,7 @@
   a 50-skill repository release plus one unrelated plugin release. The same API
   exposes explicit `following` and `inbox` projections: Following includes all
   follows, while Inbox excludes muted publishers.
-- Opened draft ClawHub PR #3293 at `b0bff2d9` for the private Inbox UI and
+- Opened draft ClawHub PR #3293 at `8e9b378c` for the private Inbox UI and
   account state. It uses one monotonic seen-through frontier per user, grouped
   previews with on-demand expansion, mark-all-read, mute/unmute, unfollow, and
   an account-menu entry. Muted publishers remain followed and can later appear
@@ -25,8 +25,14 @@
   string-key selection; targeted type-aware lint and the grouped activity test
   pass. Fresh lower-stack CI also exposed and fixed a missing generated
   `clawhub-schema` top-level account-feed export in #2948 and one formatting
-  drift in #2950. All downstream branches were restacked and pushed with exact
-  leases; fresh exact-head gates are running.
+  drift in #2950. The first full #2950 coverage run then caught two stale test
+  helper names from the restack; those now reuse the existing plural helper.
+  #3293's first type-build also exposed an old borrowed TanStack generator;
+  regenerating with the locked `1.167.21` version reduced the route-tree change
+  from a whole-file rewrite to the expected 21-line Inbox addition and restored
+  the Start router type footer. All downstream branches were restacked and
+  pushed with exact leases. #2948's exact-head required GitHub Actions gate is
+  green; fresh gates for #2950/#2958/#3293 are queued.
 - The PR branches are commit-stacked but must keep `main` as their GitHub base:
   GitHub cannot select a branch in the contributor fork as the base of an
   `openclaw/clawhub` PR. PR bodies now state the dependency order explicitly:
