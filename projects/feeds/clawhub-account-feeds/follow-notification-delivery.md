@@ -9,6 +9,9 @@ control over noise and preserving auditability.
 
 - ClawHub emits notification events when followed publishers publish or update
   skills and plugins.
+- The first signed-in surface is a private, in-app following inbox. A future
+  chronological personal feed is a second projection over the same activity
+  events and publication groups, not a separate store.
 - Users can choose notification preferences for followed publishers.
 - Users can mute, unsubscribe, or disable notification classes.
 - Missed events can be replayed or backfilled from bounded event history.
@@ -26,7 +29,8 @@ Suggested event sources:
 
 ## Delivery Rules
 
-- Coalesce high-frequency publisher updates.
+- Coalesce high-frequency publisher updates by stable publication batch while
+  preserving the granular per-artifact events for expansion, audit, and replay.
 - Rate-limit fanout for spam or compromised publishers.
 - Avoid sending install-like calls to action.
 - Link notifications to review/profile surfaces.
@@ -51,7 +55,6 @@ Suggested event sources:
 
 ## Open Questions
 
-- What notification channel ships first: in-app, email, webhook, or feed-only?
 - How much event history should ClawHub retain for replay/backfill?
 - Should users choose per-publisher preferences or global defaults first?
 - What abuse threshold should pause notification fanout for a publisher?

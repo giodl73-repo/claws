@@ -1,3 +1,39 @@
+# 2026-07-28 ClawHub following inbox and feed-ready activity
+
+- Refreshed and force-pushed the ClawHub account/following stack onto current
+  `main` without merging it: #2948 is now `5b4f9d8e`, #2950 is `fb78bcec`, and
+  #2958 is `0c7c669d`. The orthogonal publisher-state draft #2949 is refreshed
+  at `a9e7c22b`.
+- #2950 is now a private authenticated follow graph only. The abandoned public
+  followers/following surface was removed; `all` / `none` remains a reversible
+  delivery preference, and both account and publisher deletion clean edges in
+  bounded resumable batches.
+- #2958 is now backend-only grouped publisher activity. Granular skill/plugin
+  events remain the source of truth, while repository commit or publish actor
+  revision supplies a stable batch key. A proof fixture produces two groups for
+  a 50-skill repository release plus one unrelated plugin release. The same API
+  exposes explicit `following` and `inbox` projections: Following includes all
+  follows, while Inbox excludes muted publishers.
+- Opened draft ClawHub PR #3293 at `97ef643a` for the private Inbox UI and
+  account state. It uses one monotonic seen-through frontier per user, grouped
+  previews with on-demand expansion, mark-all-read, mute/unmute, unfollow, and
+  an account-menu entry. Muted publishers remain followed and can later appear
+  in a chronological Following page. Focused validation passes 98 tests; no
+  errors from this slice remain in TypeScript.
+- The PR branches are commit-stacked but must keep `main` as their GitHub base:
+  GitHub cannot select a branch in the contributor fork as the base of an
+  `openclaw/clawhub` PR. PR bodies now state the dependency order explicitly:
+  #2948 -> #2950 -> #2958 -> #3293.
+- #2948 has no unresolved inline review threads after the rewrite. Patrick's
+  old-head changes-requested review remains visible, and ClawSweeper still
+  requires redacted live HTTP proof for publisher detail, first page,
+  continuation, and stale-cursor rejection plus maintainer acceptance of the
+  unsigned public API contract. Do not describe #2948 as merge-ready until
+  that proof and decision are supplied.
+- #3171 remains parked as the separate OpenClaw-installed/watched item inbox
+  prototype; it is not the ClawHub following inbox and should not be folded into
+  this series.
+
 # 2026-07-27 MOS3 Builder metadata and expert handoff
 
 - Opened draft Lobster PR #5947 at `d2d2a82fe9` from
