@@ -1,5 +1,21 @@
 # 2026-07-28 ClawHub following inbox and feed-ready activity
 
+- Live HTTP proof for #2948 exposed a real Convex-only failure that mocks and
+  prior CI did not catch: one mutation attempted multiple paginated queries.
+  Replaced those source scans with bounded `take(limit + 1)` reads that fail
+  closed when completeness cannot be proven, added the 401-row capacity
+  regression, and pushed exact head `2172b6ba`. Focused proof passes 16 tests,
+  full TypeScript, targeted lint/format, clean WSL autoreview, and a disposable
+  real Convex run. The PR body now shows detail and first-page 200s,
+  continuation identity/revision continuity, a real revision advance from 1 to
+  2, and old-cursor 409 with `Cache-Control: no-store`. Patrick and
+  ClawSweeper were asked to re-review; the stale requested-change decision and
+  explicit unsigned-public-contract ownership question remain.
+- Restacked and exact-lease pushed the dependent account series over that fix:
+  #2950 is `86849e9a`, #2958 is `0ad61f1c`, and draft #3293 is `cdf35e20`.
+  The cumulative top passes 34 focused tests, full TypeScript, targeted
+  type-aware lint, formatting, and diff checks. Fresh GitHub CI is running; no
+  PR was merged.
 - Refreshed and force-pushed the ClawHub account/following stack onto current
   `main` without merging it: #2948 is now `8f11aca0`, #2950 is `fc85d7d2`, and
   #2958 is `5705ced4`. The orthogonal publisher-state draft #2949 is refreshed
