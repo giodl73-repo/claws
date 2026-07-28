@@ -2,7 +2,7 @@
 
 - Refreshed and force-pushed the ClawHub account/following stack onto current
   `main` without merging it: #2948 is now `5b4f9d8e`, #2950 is `fb78bcec`, and
-  #2958 is `0c7c669d`. The orthogonal publisher-state draft #2949 is refreshed
+  #2958 is `db50decb`. The orthogonal publisher-state draft #2949 is refreshed
   at `a9e7c22b`.
 - #2950 is now a private authenticated follow graph only. The abandoned public
   followers/following surface was removed; `all` / `none` remains a reversible
@@ -14,12 +14,16 @@
   a 50-skill repository release plus one unrelated plugin release. The same API
   exposes explicit `following` and `inbox` projections: Following includes all
   follows, while Inbox excludes muted publishers.
-- Opened draft ClawHub PR #3293 at `97ef643a` for the private Inbox UI and
+- Opened draft ClawHub PR #3293 at `453ebb4a` for the private Inbox UI and
   account state. It uses one monotonic seen-through frontier per user, grouped
   previews with on-demand expansion, mark-all-read, mute/unmute, unfollow, and
   an account-menu entry. Muted publishers remain followed and can later appear
   in a chronological Following page. Focused validation passes 98 tests; no
   errors from this slice remain in TypeScript.
+- The first #3293 CI run exposed one type-aware lint error in #2958's test-only
+  sort helper. Commit `db50decb` replaces implicit object coercion with explicit
+  string-key selection; targeted type-aware lint and the grouped activity test
+  pass, and #2958/#3293 were restacked and pushed with exact leases.
 - The PR branches are commit-stacked but must keep `main` as their GitHub base:
   GitHub cannot select a branch in the contributor fork as the base of an
   `openclaw/clawhub` PR. PR bodies now state the dependency order explicitly:
