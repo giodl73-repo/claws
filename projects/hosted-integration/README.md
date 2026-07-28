@@ -39,8 +39,9 @@ rollback authority, and a named downstream deletion target.
 | Area                                                             | File                                                                             |
 | ---------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | Current session and resume state                                 | `SESSION.md`                                                                     |
+| Canonical fork disposition and landing queue                     | `landing-ledger-2026-07-27.md`                                                   |
 | Reviewer-facing decision and sales package                       | `decision-package.md`                                                            |
-| Five-PR fork review stack                                        | `fork-review-stack.md`                                                           |
+| Historical five-package fork review stack                        | `fork-review-stack.md`                                                           |
 | Corrected source audit and ownership model                       | `source-audit-2026-07-11.md`                                                     |
 | Internal and external comparison matrix                          | `comparison-matrix.md`                                                           |
 | Runtime/operator/security/simplicity review                      | `role-review-2026-07-11.md`                                                      |
@@ -67,6 +68,15 @@ rollback authority, and a named downstream deletion target.
 | Area 3: host wiring and composition                              | `area-3-host-wiring-composition.md`                                              |
 | Area 4: carrier options                                          | `area-4-carrier-options.md`                                                      |
 | Area 4 provider-dispatch reverse carrier                         | `area-4-provider-dispatch-reverse-carrier.md`                                    |
+| Reverse-carrier contract FACES review                            | `reverse-carrier-contract-review-2026-07-26.md`                                  |
+| Reverse-carrier session admission FACES review                   | `reverse-carrier-session-admission-review-2026-07-27.md`                         |
+| Read-only status inventory FACES review                          | `status-inventory-review-2026-07-26.md`                                          |
+| Lobster live status adopter review                               | `status-inventory-lobster-live-review-2026-07-26.md`                             |
+| Doctor inventory FACES review                                    | `doctor-inventory-review-2026-07-27.md`                                          |
+| Canonical profile runtime inventory FACES review                  | `profile-runtime-inventory-review-2026-07-27.md`                                 |
+| Lobster canonical runtime inventory adopter review                | `profile-runtime-inventory-lobster-review-2026-07-27.md`                         |
+| Lobster live Doctor adopter review                                | `doctor-inventory-lobster-live-review-2026-07-27.md`                             |
+| Lobster reverse-carrier conformance review                       | `reverse-carrier-lobster-conformance-review-2026-07-26.md`                       |
 | Cross-area ownership, lifecycle, and migration synthesis         | `four-area-architecture.md`                                                      |
 | Overarching `.craft/roles` validation                            | `overarching-role-review-2026-07-11.md`                                          |
 | Bundle-centered final role review                                | `bundle-centered-role-review-2026-07-11.md`                                      |
@@ -83,8 +93,8 @@ rollback authority, and a named downstream deletion target.
 | Repo                | PR                                                       | Branch                               | Status           | Purpose                                                                                             |
 | ------------------- | -------------------------------------------------------- | ------------------------------------ | ---------------- | --------------------------------------------------------------------------------------------------- |
 | `giodl73-repo/rfcs` | [Fork PR 2](https://github.com/giodl73-repo/rfcs/pull/2) | `user/giodl/rfc-duplex-transport`    | Draft, fork-only | RFC 0020 now leads with native attachments, owner contracts, and optional hosted physical dispatch. |
-| `bic/lobster`       | TBD                                                      | `user/giodl/layering-contract-audit` | Evidence         | Map existing host behavior onto reusable upstream factorings.                                       |
-| `openclaw/openclaw` | TBD                                                      | New isolated worktree                | Discovery        | Audit provider/secret seams and shared peer-invocation extraction.                                  |
+| `openclaw/openclaw` | [Landing ledger](landing-ledger-2026-07-27.md)             | O1 and O4 upstream drafts; remaining fork sources | Drafts | O1 and O4 are filed as issue-linked upstream drafts; promote later packages only after their named prerequisites and explicit authorization. |
+| `giodl/lobster`     | [Landing ledger](landing-ledger-2026-07-27.md#lobster-landing-ledger) | External plugin/adopter sources | Draft, fork-only | Replay the inactive plugin and adopter implementation only after matching OpenClaw contracts merge and ship. |
 
 ## Delivery Gates
 
