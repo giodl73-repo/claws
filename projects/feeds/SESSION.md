@@ -18,9 +18,9 @@
   found a test-table union that required the impossible intersection of the
   follower and publisher cleanup arguments; `b7696499` makes that dispatch
   explicit. The corrected aggregate gates pass on all three PRs. #2958 and
-  #3293 are fully green except expected fork Vercel authorization; #2950 has
-  only one unusually slow independent browser shard still running. No PR was
-  merged.
+  #3293 are fully green except expected fork Vercel authorization. #2950's one
+  flaky moderation-browser failure passed on a failed-only rerun, so it is also
+  fully green except expected fork Vercel authorization. No PR was merged.
 - Refreshed and force-pushed the ClawHub account/following stack onto current
   `main` without merging it: #2948 is now `8f11aca0`, #2950 is `fc85d7d2`, and
   #2958 is `5705ced4`. The orthogonal publisher-state draft #2949 is refreshed
