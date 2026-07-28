@@ -131,6 +131,9 @@ The restored hold admits only an authenticated local, device-less backend
 probe so a new supervisor can call `gateway.restore.status`; its handshake is
 tracked as root work across restart. Nodes, browsers, enrollment, remote
 clients, ordinary RPCs, generic suspension, and restart drain remain closed.
+GitHub currently marks cumulative child PR 112896 conflicting after `main`
+moved beyond the exact reviewed stack. Rebase all three branches together in
+the next owner-review or merge window; do not churn only the child.
 All three live PR bodies now link issue 114145, cite only the operator issues
 relevant to their slice without claiming to close them, credit the existing
 Vincent/Peter/Josh foundations they compose, and carry the current exact-head
