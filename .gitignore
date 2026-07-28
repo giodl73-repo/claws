@@ -40,3 +40,8 @@ test/e2e/coverage/
 
 # Design proof compile-cache — local build artifact.
 design/.proof/
+
+# Local review bundles, rendered previews, and copied upstream scratch files.
+.local/
+/.rp.ts
+/.rp.test.ts
