@@ -95,7 +95,12 @@ After the Claws stack lands:
 3. let PromoteClaw create or update the next version-bump PR;
 4. validate patch deletion/carry-forward, image startup, Gateway, Teams, and
    version proof;
-5. target Lobster pickup roughly two weeks after upstream landing.
+5. after merge and a successful exact `main` Official build, use #5681's
+   validate-first action to stage Candidate serially to 301 and then 302;
+6. smoke/soak Candidate with isolated state, optionally flight explicit users
+   through #5646's contract, and promote with a separate governed role change;
+7. retain Previous for rollback and target Lobster pickup roughly two weeks
+   after upstream landing.
 
 ## Issue Exit Plans
 
