@@ -13,6 +13,8 @@ framework.
 
 - stable machine identity and bounded structured fields for owner results,
   outcomes, findings, decisions, and usage observations;
+- owner-native attempt, subject/revision, evaluation, finding, and accounting
+  lifetimes, without one universal identity schema;
 - correlation through existing trace context and product identifiers, including
   run, call, tool-call, session, message, agent, generation, and owner identity
   where applicable;
@@ -27,10 +29,13 @@ framework.
 ## Boundaries
 
 - Semantic owners keep ownership of when and why an operational fact is
-  produced or emitted.
+  produced or emitted, its identity, and its authoritative lifetime.
 - Localization owns human rendering and locale fallback.
-- Telemetry systems own transport, sampling, aggregation, and storage.
+- Telemetry and audit systems own transport, sampling, aggregation, retention,
+  replay, integrity, and storage guarantees.
 - Resource-governance consumers own budgets, quotas, and enforcement.
+- Consumers that alert, admit, retry, repair, block, or enforce own the
+  freshness, trust, unknown-state, and action-authority contract.
 - Signals must extend existing structured concepts before introducing a new
   abstraction.
 
