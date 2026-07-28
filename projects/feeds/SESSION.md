@@ -12,10 +12,15 @@
   ClawSweeper were asked to re-review; the stale requested-change decision and
   explicit unsigned-public-contract ownership question remain.
 - Restacked and exact-lease pushed the dependent account series over that fix:
-  #2950 is `86849e9a`, #2958 is `0ad61f1c`, and draft #3293 is `cdf35e20`.
+  #2950 is `b7696499`, #2958 is `03b7ba4f`, and draft #3293 is `7e662bf3`.
   The cumulative top passes 34 focused tests, full TypeScript, targeted
-  type-aware lint, formatting, and diff checks. Fresh GitHub CI is running; no
-  PR was merged.
+  type-aware lint, formatting, and diff checks. #2950's first restacked CI run
+  found a test-table union that required the impossible intersection of the
+  follower and publisher cleanup arguments; `b7696499` makes that dispatch
+  explicit. The corrected aggregate gates pass on all three PRs. #2958 and
+  #3293 are fully green except expected fork Vercel authorization; #2950 has
+  only one unusually slow independent browser shard still running. No PR was
+  merged.
 - Refreshed and force-pushed the ClawHub account/following stack onto current
   `main` without merging it: #2948 is now `8f11aca0`, #2950 is `fc85d7d2`, and
   #2958 is `5705ced4`. The orthogonal publisher-state draft #2949 is refreshed
@@ -48,17 +53,18 @@
   from a whole-file rewrite to the expected 21-line Inbox addition and restored
   the Start router type footer. All downstream branches were restacked and
   pushed with exact leases. #2948's exact-head required GitHub Actions gate is
-  green; fresh gates for #2950/#2958/#3293 are queued.
+  green; corrected aggregate gates for #2950/#2958/#3293 are also green.
 - The PR branches are commit-stacked but must keep `main` as their GitHub base:
   GitHub cannot select a branch in the contributor fork as the base of an
   `openclaw/clawhub` PR. PR bodies now state the dependency order explicitly:
   #2948 -> #2950 -> #2958 -> #3293.
 - #2948 has no unresolved inline review threads after the rewrite. Patrick's
-  old-head changes-requested review remains visible, and ClawSweeper still
-  requires redacted live HTTP proof for publisher detail, first page,
-  continuation, and stale-cursor rejection plus maintainer acceptance of the
-  unsigned public API contract. Do not describe #2948 as merge-ready until
-  that proof and decision are supplied.
+  old-head changes-requested review remains visible. The redacted live HTTP
+  proof for publisher detail, first page, continuation, revision advance, and
+  stale-cursor rejection is now in the PR body; ClawSweeper has acknowledged
+  the re-review request but has not published a fresh exact-head verdict.
+  Maintainer acceptance of the unsigned public API contract remains. Do not
+  describe #2948 as merge-ready until that decision and re-review arrive.
 - #3171 remains parked as the separate OpenClaw-installed/watched item inbox
   prototype; it is not the ClawHub following inbox and should not be folded into
   this series.
