@@ -22,6 +22,127 @@
 
 ## Current Session
 
+### 2026-07-27 public evidence catalog reaches 30
+
+- Added four public-evidence Awesome Claws: public company watcher (official
+  regulator/issuer sources plus Blogwatcher and a private weekday cron),
+  research scout (public scholarly indexes/correction feeds plus Blogwatcher
+  and a private weekday cron), public safety monitor (official CAP/agency feeds
+  plus Open-Meteo, Blogwatcher, and a private non-life-safety recurring cron),
+  and civic data analyst (Census/open-data/OSM/GTFS methodology plus the
+  clean-scanned Pilot transit skill with explicit remote-intermediary limits).
+- Rejected the obvious `@ractorrr/arxiv@1.0.4` and `@lkcair/sec@1.3.3`
+  candidates because Skillspector marks both CRITICAL/Do Not Install. Safer
+  alternatives introduced authenticated, paid, or third-party gateway
+  dependencies, so official public APIs remain authoritative in the manifests.
+  Selected reusable dependencies retain their prior clean scans; the Pilot
+  transit skill is aggregate/VT/LLM clean and LOW/Safe in Skillspector, with
+  daemon and remote-overlay disclosure.
+- Awesome Claws now contains 30 starters at signed public-main commit
+  `d7aceb80025ef21b17fb4d3f64801c09be855f51`. Catalog check and standalone
+  inspection pass all 30. Real OpenClaw previews against live ClawHub passed
+  all four additions with exact action counts, `ready: true`, and zero blocked
+  actions. Codex review found no actionable consistency defect; GitHub Validate
+  run `30313706188` passed at the exact pushed head.
+
+### 2026-07-27 public-source travel planner
+
+- Added a 26th Awesome Claw, `travel-planner`, using clean pinned ClawHub
+  skills `@dapkus/open-meteo@1.0.0` and
+  `@onlydreams/travel-checklist@1.0.2`. Its source policy prefers official
+  government entry/health/advisory sites, OpenStreetMap/Nominatim/Overpass,
+  operator GTFS/GTFS-Realtime feeds, and official carrier/airport/operator
+  status pages. These are described as public data sources, not OpenClaw
+  channels or transactional authority.
+- Explicitly rejected `@ivangdavila/travel-planning@1.0.1` because current
+  ClawHub scans mark it suspicious/Do Not Install for persistent travel-profile
+  behavior, and rejected `@awlevin/flight-search@0.1.7` because Skillspector
+  marks its remote installer path HIGH/Do Not Install. The new Claw does not
+  book, pay, contact providers, submit forms, or retain sensitive traveler
+  identifiers.
+- Signed public-main commit
+  `4176544d8a7fbc19c341a282db61bccc09ec0d7e` is pushed. All 26 catalog and
+  standalone inspections pass. A real OpenClaw preview against live ClawHub
+  returned two package actions, two disclosed capability escalations,
+  `ready: true`, and zero blockers. Codex review found no actionable defect and
+  GitHub Validate run `30310960364` passed at the exact head.
+
+### 2026-07-27 Awesome Claws expanded to 25
+
+- Audited current high-use ClawHub skills and exact-version scan reports, then
+  added five capability-bearing starters: presentation producer
+  (`@ivangdavila/powerpoint-pptx@1.0.1`), document intake analyst
+  (`@steipete/markdown-converter@1.0.0`), media evidence reviewer
+  (`@steipete/video-frames@1.0.0` plus Whisper), release coordinator
+  (`@steipete/github@1.0.0` plus Slack), and feed intelligence monitor
+  (`@steipete/blogwatcher@1.0.0` plus an isolated weekday cron). All selected
+  dependencies report clean aggregate, VirusTotal, and LLM scans with LOW/Safe
+  Skillspector results; package guidance still constrains local binaries,
+  sensitive content, account scope, writes, posts, and scheduled execution.
+- Awesome Claws now has 25 generated starters at signed public-main commit
+  `8f0f2b0961e5a01adaabbcab03765a9af0f209a5`. Catalog check and standalone CLI
+  inspection pass all 25. Real OpenClaw previews against live ClawHub passed
+  all five new starters with exact action counts, `ready: true`, zero blocked
+  actions, consent digests, and disposable state cleanup. `codex review
+  --uncommitted` found no actionable defect. GitHub Validate run `30310166588`
+  passed at the exact pushed head.
+
+### 2026-07-27 ClawHub CLAW.md readiness and composed starter expansion
+
+- Restacked ClawHub PR #3262 onto current `main` and replaced its contributor
+  fork/pre-merge OpenClaw test pin with canonical `openclaw/openclaw` commit
+  `e79faff8aa755b201302edd286976a03f9ed79ea`, the merged #113454 CLAW.md
+  prompt contract. Signed head `5df9ef27cefad15848299949ac51e1d28c71df01`
+  is pushed and the PR is ready and mergeable. Every repository-owned exact-head
+  check passes, including the OpenClaw contract lane; the only red status is
+  Vercel external-contributor authorization.
+- Revalidated all 15 existing Awesome Claws with both the catalog checker and
+  standalone reference CLI. The four prior integrated examples are incident
+  response (cron), financial analyst (Yahoo Finance skill), customer support
+  (customer-support skill), and software maintainer (Diffs plugin, filtered
+  GitHub MCP, and an OpenClaw coding profile).
+- Audited live ClawHub skill/plugin metadata and security scan results, then
+  added five synthetic compositions: executive briefing (Gog, Weather, cron),
+  meeting intelligence (Whisper, DOCX), spreadsheet analyst (XLSX), knowledge
+  gardener (Notion), and research monitor (official Parallel plugin, cron).
+  Rejected an Obsidian candidate because its aggregate clean status disagreed
+  with a suspicious semantic scan; the Notion replacement has clean aggregate,
+  VirusTotal, and LLM scans plus LOW Skillspector risk.
+- Awesome Claws now contains 20 starters at signed public-main commit
+  `736661c428f3e7dbc4d7c8f0e4941738bd77d999`. `npm run check` and standalone
+  inspection pass all 20. Real OpenClaw dry-runs against live ClawHub resolved
+  all five new packages with `ready: true` and zero blocked actions. GitHub
+  Validate run `30308638463` passed at the exact pushed head.
+
+### 2026-07-27 public incubator repositories
+
+- Made `giodl73-repo/claws` and `giodl73-repo/awesome-claws` public at the
+  user's explicit request. Anonymous GitHub API reads confirm both are public
+  with `main` as the default branch.
+- Public heads are `de5b6f3d18d52d96274b4fdcc23a026f0b7a693c` for the standalone
+  Claws CLI/spec incubator and `7e87c09a520d310509ec66a682729914887d11e2`
+  for the integrated Awesome Claws catalog. Their latest Validate runs pass.
+- This was a repository-visibility change only. No npm package was published,
+  no package name was claimed, and neither repository was transferred to the
+  OpenClaw organization.
+
+### 2026-07-27 merged CLAW.md baseline and integrated lifecycle fix
+
+- OpenClaw #113454 merged as `e79faff8aa755b201302edd286976a03f9ed79ea`;
+  CLAW.md body materialization to managed `SOUL.md` is now on `main`.
+- Exercised four integrated Awesome Claws through real add, status, and remove
+  flows against that merged source: incident response with cron, financial
+  analyst and customer support with production ClawHub skills, and software
+  maintainer with Diffs, GitHub MCP, and a package-local tools profile.
+- The proof found three host lifecycle defects: cron add raced Gateway config
+  reload, scheduler-owned trusted policy appeared as cron drift, and exact
+  Claw agent removal could trip the generic config-size guard. All are fixed in
+  OpenClaw PR #114670 on signed branch `fix/claws-wait-for-agent-reload`.
+- Focused validation passed 163 tests plus Oxfmt and type-aware Oxlint before a
+  clean no-conflict rebase to current main. Two Codex review passes found and
+  fixed eager waiting and lost pending-state recovery; a final extra review was
+  unavailable due the Codex account usage limit. No real model turn was run.
+
 ### 2026-07-27 integrated Awesome Claws examples
 
 - Enriched four starters in private `giodl73-repo/awesome-claws`: incident
