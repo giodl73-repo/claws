@@ -81,7 +81,7 @@ Defines:
 - final owner capture after authoritative quiescence;
 - immutable host acceptance bound to the aggregate manifest;
 - replay after unknown publication outcome;
-- generation-bound `safeToDestroy`;
+- generation-bound `sourceComputeRetirementAuthorized`;
 - source retention and quarantine on uncertainty.
 
 Does not define object-store APIs, placement, retention policy, or Elastic wake.
@@ -385,9 +385,17 @@ scheduler state, and open admission exactly once.
 - ordinary startup unchanged;
 - no public generic restore-hook framework.
 
+**Readiness composition:** when RFC 0018 is available and enabled, publish one
+required `RecoveryPointRestored` condition from the same durable record that
+opens admission. Preserve `gateway.restore.status` as the independently useful
+exact operation-fenced query, with both surfaces reporting the same readiness
+generation and subject identities when composed.
+
 **Evidence slice:** fresh restore, missing dependency hold, corrupt component
 quarantine, scheduler reconciliation, required owner readiness, and one-time
-admission.
+admission. The recovery journal must also prove schema-version rejection,
+corruption quarantine, explicit repair ownership, active-record retention, and
+idempotent terminal cleanup.
 
 ### PR 5: Lobster crash-safe restore replay
 

@@ -35,14 +35,42 @@ Define a host-neutral application-consistency contract with these outcomes:
 5. Replacement Gateway admission remains closed until the accepted recovery point, scheduler generation, and required owners are reconciled.
 6. Unknown outcomes hold or quarantine rather than guessing.
 
+The contract keeps its lifecycle facts separate:
+
+```text
+GatewaySuspensionReady
+  -> SourceWritersClosed
+  -> RecoveryPointCaptured
+  -> RecoveryPointAccepted
+  -> SourceComputeRetirementAuthorized
+  -> RecoveryPointRestored
+  -> AdmissionReady
+```
+
+There is no global `/synced` state. In particular,
+`SourceComputeRetirementAuthorized` applies only to one named source compute
+generation and never authorizes deletion of persistent tenant state or accepted
+recovery points.
+
+The diagram is the success path. Retained work may race retirement: while
+source compute exists it must atomically revoke or defeat retirement authority;
+after retirement it joins the single destination wake and restore operation.
+
 Reuse the primitives already added by maintainers and RFC 0013:
 
 - RFC 0013 and #105718 remain the authoritative SQLite snapshot/restore primitive.
 - #103618 and #103925 remain the cooperative Gateway suspension foundation.
 - Josh Lehman's #98236 established the SQLite-backed session/transcript runtime, and #111869 established the restart-recovery admission behavior this proposal extends rather than replaces.
-- Retained ingress, wake registration, durable external acceptance, compute placement, lifecycle policy, and destruction remain host-owned.
+- Retained ingress, wake registration, durable external acceptance, compute placement, lifecycle policy, and source-compute retirement remain host-owned.
 
 The current implementation evidence is RFC https://github.com/openclaw/rfcs/pull/46 and the stacked PRs #112385, #112865, and #112896. Those PRs demonstrate one bounded solution; this issue intentionally does not require that decomposition. If maintainers prefer a smaller or different core seam that satisfies the same outcomes, that is a valid resolution.
+
+When RFC 0018 canonical readiness is available and enabled, restored admission
+also publishes one required `RecoveryPointRestored` condition with stable
+subjects for the Gateway, restore operation, recovery point, destination
+generation, scheduler reconciliation, and required state owners.
+`gateway.restore.status` remains the independent operation-fenced query; both
+surfaces project the same durable readiness generation when composed.
 
 ### Cron, Teams, and absent-compute wake
 
@@ -65,6 +93,15 @@ Proposed follow-on PR plan:
 1. **Host/Scout cron-projection adapter:** consume the shipped `cron_reconciled` plus `cron_changed` pattern, durably replace the complete external wake set, and atomically bind its accepted revision to the final recovery point and revocable sleep authority. Fork-only draft [giodl/lobster#38](https://microsoft.ghe.com/giodl/lobster/pull/38) proves the authority binding; stacked [giodl/lobster#39](https://microsoft.ghe.com/giodl/lobster/pull/39) adds permanent atomic projection replacement, stale-writer supersession, and recovery into Lobster's existing Redis scheduler; stacked [giodl/lobster#41](https://microsoft.ghe.com/giodl/lobster/pull/41) makes prepare, commit, abort, and newer-attempt supersession race in the same permanent CAS state so a disconnected request cannot later become hidden authority; and stacked [giodl/lobster#42](https://microsoft.ghe.com/giodl/lobster/pull/42) connects Peter's shipped hooks to that bounded protocol as an image-present, baked-disabled plugin (Microsoft GHE access required). Stacked [giodl/lobster#43](https://microsoft.ghe.com/giodl/lobster/pull/43) completes the inactive path through Lobster's existing loopback proxy-pipe bridge, trusted runtime identity, Blob CAS authority, and existing Redis scheduler rehydration (Microsoft GHE access required). It avoids a new public callback/bearer system. Stacked [giodl/lobster#45](https://microsoft.ghe.com/giodl/lobster/pull/45) completes the default-off activation boundary: private permanent Blob-container provisioning, explicit per-user ECS projection through the shared Gateway start path, pooled-slot reset, and tracked retry/sleep-veto handling of an already-due recovered projection (Microsoft GHE access required). No user is enabled; the actual ECS cohort remains an owner rollout decision.
 2. **Host/Scout wake authority:** retain ingress causes before acknowledgement, schedule deadlines, revoke sleep, and coalesce them into one ensure-runtime-ready operation. Fork-only draft [giodl/lobster#46](https://microsoft.ghe.com/giodl/lobster/pull/46) is the bounded authority/core evidence (Microsoft GHE access required): it validates already-retained owner identities, composes the existing final-handoff revocation race and managed-start seam, and grants one destination generation for concurrent Teams/API/cron/operator causes. Stacked fork-only draft [giodl/lobster#47](https://microsoft.ghe.com/giodl/lobster/pull/47) adds metadata-only native Teams and exact permanent cron projection/provider/deadline validation into that authority (Microsoft GHE access required). Route/cohort activation and readiness-gated delivery remain owner-controlled follow-ups.
 3. **Readiness-gated delivery proof:** consume the exact restored-admission result before delivery and prove one retained Teams message plus one cron deadline share one cold start across a host-process failure without lost or duplicate acknowledgement. Fork-only draft [giodl/lobster#51](https://microsoft.ghe.com/giodl/lobster/pull/51) supplies the core payload-free dispatch journal, exact recovery/destination/readiness fence, independent per-cause completion, and deterministic crash replay (Microsoft GHE access required). It deliberately does not activate production Teams or cron delivery: Lobster owners still need to choose the accepted-final-handoff lookup, canonical opaque-logical-runtime-to-owner mapping, and default-off route/cohort wiring.
+
+The end-to-end acceptance proof must exercise the complete race, not only each
+component independently: retain one Teams message and one cron deadline, race
+them with planned sleep, lose a coordinator response after durable acceptance,
+retire the source generation, cold-restore one destination, observe readiness
+remain unavailable until the exact recovery point is reconciled, then observe
+`503 -> 200` and independently acknowledge both owner operations without loss
+or duplicate side effects. Journal corruption, stale inventory, or an unknown
+generation must hold or quarantine instead of starting an ordinary Gateway.
 
 These are evidence slices, not a required repository decomposition. The host slices may be combined if their ownership, race, replay, and failure boundaries remain independently reviewable. Unknown provisioning or restore outcomes retain work and hold or quarantine; timeout is not permission to acknowledge work, start a second authoritative generation, or open admission.
 
@@ -116,4 +153,3 @@ Yes, I plan to implement this myself.
 - Accepted restore and restored-admission evidence: #112896
 
 Success should be judged by the observable outcome: a host can remove idle compute, retain its own ingress and wake authority, and later expose a replacement Gateway only after the exact accepted OpenClaw recovery point is ready.
-

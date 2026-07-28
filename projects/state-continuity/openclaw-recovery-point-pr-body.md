@@ -6,7 +6,7 @@ Non-normative host follow-on evidence (Microsoft access): https://microsoft.ghe.
 
 Stacked follow-up: https://github.com/openclaw/openclaw/pull/112865
 
-Exact reviewed head: `ad5c177c7820a05793bb92e02f0db44bac014553`
+Exact reviewed head: `062f4d937b3aef0aa5474a9fe214444b95b14b77`
 
 ## What Problem This Solves
 
@@ -26,8 +26,11 @@ This draft adds a private aggregate-manifest evidence slice above the existing
 `SqliteSnapshotProvider`. It:
 
 - re-verifies owner snapshots and fences owner-manifest byte rewrites;
-- requires the runtime state owner's exact selected-agent inventory during
-  composition and verification;
+- requires a closed runtime-state-owner inventory receipt during composition
+  and verification, binding owner, source runtime generation, inventory
+  revision, and the exact selected-agent set into recovery-point identity;
+- exports one shared schema and verifier for every stacked consumer, rejecting
+  invalid, duplicate, traversal-shaped, or non-canonical agent inventories;
 - binds owner-manifest and artifact digests and sizes;
 - labels ordinary snapshot composition `host-protected`;
 - validates a closed obligation kind/owner/treatment vocabulary;
@@ -53,11 +56,12 @@ integration is proposed.
 
 - Behavior exercised: composition and re-verification of real manifest files
   through mocked RFC 0013 owner providers, including exact inventory closure,
-  deterministic identities, closed obligations, and rewrite-race rejection.
+  owner-revision and source-generation binding, deterministic identities,
+  closed obligations, and rewrite-race rejection.
 - Real environment tested: Ubuntu 24.04 WSL, Node/Vitest repository harness;
   no live Gateway, CLI, Lobster, or storage provider is involved in this slice.
 - Exact command: `node scripts/run-vitest.mjs src/snapshot/recovery-point.test.ts`.
-- Evidence after fix: one file passed, seven tests passed.
+- Evidence after fix: one file passed, eight tests passed.
 - Additional checks: targeted Oxfmt passed; targeted Oxlint passed with zero
   warnings and zero errors; `pnpm tsgo:core` passed; `codex review
   --uncommitted` returned no actionable correctness findings.
@@ -71,9 +75,11 @@ integration is proposed.
 
 ## Draft Review Gate
 
-This PR remains draft and must not merge before maintainers accept the ownership
-split in openclaw/rfcs#46. In particular, the runtime state owner must confirm
-the selected-agent inventory boundary, and snapshot owners must define any
+This PR is ready for owner review but must not merge before maintainers accept
+the ownership split in openclaw/rfcs#46. In particular, the runtime state owner
+must confirm which activation-pinned source produces the inventory receipt;
+this private composition slice validates and binds that receipt but does not
+invent the production owner lookup. Snapshot owners must also define any
 credential-free portability receipt. This PR deliberately adds no second
 snapshot implementation, storage-provider contract, Gateway pause API, or
 restore framework.

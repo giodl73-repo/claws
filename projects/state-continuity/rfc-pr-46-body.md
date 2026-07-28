@@ -1,7 +1,9 @@
 ## Summary
 
-Adds three optional, host-neutral lifecycle sidecars to the completed RFC 0013
-SQLite snapshot contract:
+Defines the application-consistency contract a host needs to scale OpenClaw
+compute to zero and later admit work on a replacement. It adds three optional,
+host-neutral lifecycle specifications to the completed RFC 0013 SQLite
+snapshot contract:
 
 - recovery-point component composition;
 - portable final handoff; and
@@ -25,7 +27,7 @@ can prove all of the following:
 
 1. the retiring Gateway generation closed the complete owner-selected state;
 2. the host durably accepted the exact required byte set;
-3. source retirement was authorized for that exact generation; and
+3. source-compute retirement was authorized for that exact generation; and
 4. replacement admission remained closed until the same recovery point and
    required owner state were restored.
 
@@ -96,8 +98,28 @@ retention, placement, and wake.
   owner-manifest and artifact byte sequence. Packaging and paths remain
   host-owned.
 - Restored admission binds the same acceptance-set identity through hold,
-  restored-start, and ready evidence.
+  restored-start, and ready evidence. When RFC 0018 canonical readiness is
+  available and enabled, it projects that same evidence without adding a
+  second evaluator.
 - Unknown outcomes hold or quarantine. Quarantine has no automatic exit.
+
+The lifecycle facts are deliberately separate:
+
+```text
+GatewaySuspensionReady
+  -> SourceWritersClosed
+  -> RecoveryPointCaptured
+  -> RecoveryPointAccepted
+  -> SourceComputeRetirementAuthorized
+  -> RecoveryPointRestored
+  -> AdmissionReady
+```
+
+There is no global `/synced` state. Each fact has a different owner, subject,
+lifetime, and failure boundary. The diagram is the success path, not an
+unconditional linear workflow: retained work may race retirement, atomically
+revoking it while source compute exists or joining the destination wake after
+retirement.
 
 ## Observable Outcome Of The Complete Composition
 
@@ -106,13 +128,13 @@ retention, placement, and wake.
 - Accepted ingress remains retained until restored admission succeeds.
 - Autonomous scheduled work can recover from absent compute without an
   unrelated user message.
-- A source generation is never destroyed before exact durable acceptance.
+- Source compute is never retired before exact durable acceptance.
 - Replacement readiness identifies the accepted recovery point it restored.
 
 These are system-level acceptance criteria. The three current OpenClaw PRs
 prove only the owner-side recovery-point, final-capture, and restored-admission
 slices; they do not claim to complete host acceptance, retained ingress, wake,
-or destruction.
+or source-compute retirement.
 
 ## One Contract, Two Directions
 
@@ -120,15 +142,17 @@ The lifecycle can be presented as one bidirectional host/runtime contract
 without putting host lifecycle authority in OpenClaw. OpenClaw supplies the
 running-source suspension methods, offline final-capture and accepted-restore
 operations, and the restored-readiness fact. The host supplies durable
-acceptance, compute generations, retained wake, placement, and destruction.
+acceptance, compute generations, retained wake, placement, and source-compute
+retirement.
 
 ```text
-SuspensionReady
-  -> FinalRecoveryPointResult
-  -> HostAcceptanceReceipt
-  -> generation-scoped safeToDestroy
+Quiesced
+  -> RecoveryPointCaptured
+  -> RecoveryPointAccepted
+  -> generation-scoped SourceComputeRetirementAuthorized
   -> retained wake cause
-  -> RestoredAdmissionReadyRecord
+  -> RecoveryPointRestored
+  -> AdmissionReady
   -> owner delivery and acknowledgement
 ```
 
@@ -154,14 +178,33 @@ and typed conflict behavior. It projects PR 112896's existing durable ready
 record rather than adding another journal or state machine. Offline restore
 and quarantine do not become invented live phases. The method remains callable
 only through an authenticated pre-admission control path while ordinary work
-is held. There is no `gateway.restore.admit`; OpenClaw computes readiness and
-opens its own admission.
+is held. That path is a tracked, bounded, non-enrolling host probe: restart
+still wins, and nodes, pairing, remote clients, presence-bearing sessions, and
+ordinary RPCs remain fenced. There is no `gateway.restore.admit`; OpenClaw
+computes readiness and opens its own admission.
+
+When RFC 0018 is available and enabled, the same record also publishes a
+required `RecoveryPointRestored` condition through `/readyz`, `openclaw ready`,
+Status, and Gateway readiness RPC. Stable subject refs identify the destination
+Gateway, restore operation, accepted recovery point, runtime generation,
+scheduler reconciliation, and required state-owner roles; current IDs and
+generations stay in RFC 0018's identity package. The generic readiness
+projection and operation-fenced status method must report the same readiness
+generation. Neither may infer restore success from process health or
+database-open success. `gateway.restore.status` remains independently useful
+when canonical readiness is disabled or has not landed.
+
+Planned handoff may create a new recovery point only after Gateway suspension,
+host-proven source-writer closure, final capture, and durable acceptance.
+Forced source loss creates no clean-retirement fact and recovers from the last
+previously accepted point under its declared RPO.
 
 ## Implementation Evidence
 
 - [openclaw/openclaw#112385](https://github.com/openclaw/openclaw/pull/112385)
   composes verified RFC 0013 snapshots into one deterministic host-protected
-  recovery point and exact acceptance-byte inventory.
+  recovery point and exact acceptance-byte inventory, using one canonical
+  generation-bound state-owner inventory receipt across the stack.
 - [openclaw/openclaw#112865](https://github.com/openclaw/openclaw/pull/112865)
   is the final-capture PR stacked on #112385. It binds
   host-supplied closure evidence, creates final owner snapshots, and durably
@@ -171,7 +214,8 @@ opens its own admission.
   accepted recovery point to fresh paths and reuses Gateway work admission to
   remain closed until scheduler reconciliation and required-owner readiness
   produce one durable ready record. It now also implements the proposed
-  read-only `gateway.restore.status` projection as representative proof. The
+  read-only `gateway.restore.status` projection and its tracked local probe
+  handshake as representative proof. The
   public Gateway Protocol addition remains an explicit owner-review decision
   before merge or ship.
 - Fork-only Lobster drafts
@@ -198,7 +242,8 @@ semantic owners before those call sites can be wired safely.
 
 These PRs and fork drafts are non-normative feasibility and owner-review
 evidence. None moves external ingress fencing, clean shutdown, host acceptance,
-publication, wake, compute placement, or source destruction into OpenClaw.
+publication, wake, compute placement, or source-compute retirement into
+OpenClaw.
 
 If Vincent, Peter, Josh Lehman, or other maintainers prefer a smaller or
 different implementation that meets the RFC and issue #114145 outcomes, please
@@ -213,10 +258,17 @@ implementation stack is promoted:
 1. RFC 0013 remains the completed SQLite owner primitive.
 2. Current-main `gateway.suspend.*` remains the cooperative pause primitive.
 3. The state owner, not aggregate composition, supplies the complete selected
-   agent inventory.
+   agent inventory from the activation-pinned runtime and binds its revision to
+   the source generation.
 4. Ordinary snapshots remain host-protected; portability requires owner proof.
 5. Acceptance binds a closed logical byte set without standardizing a storage
    container.
 6. The host owns ingress fencing, suspension orchestration, clean shutdown,
    wake, and compute lifecycle; final capture only binds supplied closure
    evidence.
+7. OpenClaw core owns recovery-journal schema, migration, corruption, repair,
+   retention, and cleanup semantics; unknown journal state never falls back to
+   ordinary startup.
+8. When available and enabled, RFC 0018 owns the canonical current-readiness
+   projection, while `gateway.restore.status` remains the independent exact
+   operation-fenced observation seam.

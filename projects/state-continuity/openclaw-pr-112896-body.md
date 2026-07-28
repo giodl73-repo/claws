@@ -6,7 +6,7 @@ Non-normative host follow-on evidence (Microsoft access): https://microsoft.ghe.
 
 Stacked on: https://github.com/openclaw/openclaw/pull/112865
 
-Exact reviewed head: `123356ea430`
+Exact reviewed head: `5dc5e719e7a3ce3a6953cf3b0d89509543aa24ab`
 
 ## What problem this solves
 
@@ -32,6 +32,12 @@ typed `UNAVAILABLE` conflict that does not disclose the active operation. It
 projects the same in-memory restored-start object and operation-scoped SQLite
 journal that own admission. It adds no status file, config key, public probe,
 listener, sidecar, or caller-controlled `admit` method.
+
+While restored admission is held, a new supervisor still needs to authenticate
+before it can inspect this method. The exception is limited to OpenClaw's local,
+device-less backend probe shape and is tracked as root work for the full
+handshake. Nodes, browsers, device enrollment, remote clients, ordinary RPCs,
+and every connection during restart drain remain blocked.
 
 This is the destination slice of the scale-to-zero contract tracked in #114145.
 It is motivated by skipped recurring work while Gateway is stopped (#104412),
@@ -75,8 +81,9 @@ CLI, started through the emitted descriptor, observed with work admission
 closed, committed to one SQLite `ready` row, and then admitted. The Gateway shut
 down cleanly.
 
-On exact head `123356ea430`, 63 focused tests pass across the Gateway, Gateway
-Protocol, and Admin HTTP extension shards. They cover:
+On exact head `5dc5e719e7a3ce3a6953cf3b0d89509543aa24ab`, the restored-admission,
+Gateway Protocol, and Admin HTTP matrix passes. The final suspension/handshake
+rerun passes 51 tests across six Vitest projects. They cover:
 
 - closed request validation and token bounds;
 - ordinary, held, ready, invalid, and mismatched-operation results;
@@ -84,6 +91,9 @@ Protocol, and Admin HTTP extension shards. They cover:
 - scheduler, owner-readiness, and ready-commit phase projection;
 - ready only after durable evidence and admission release;
 - restored-fence reachability without opening unrelated methods;
+- authenticated local probe reachability while nodes, enrollment, remote
+  clients, and restart-draining connections remain blocked;
+- root-work tracking across a concurrent restart during the probe handshake;
 - core method descriptors and request-context wiring; and
 - authenticated Admin HTTP method routing.
 
@@ -106,9 +116,11 @@ was still running when the local orchestrator timed out; CI is authoritative
 for that lane and the packaged build.
 
 The checked-in Swift and Kotlin Gateway clients were regenerated for the new
-method, and the exact protocol-generation diff is stable. A focused post-fix
-rerun passes 26/26 tests across five Vitest projects. `codex review
---uncommitted` reported no actionable finding on that CI repair.
+method, and the exact protocol-generation diff is stable. Targeted Oxfmt,
+type-aware Oxlint, and `pnpm tsgo:core` pass. The full changed-test run passed
+136 tests and hit one unrelated fake-timer prewarm assertion in an unchanged
+test; that assertion passed immediately in isolation. Final `codex review
+--uncommitted` reported no actionable regression.
 
 ## Merge gate
 
