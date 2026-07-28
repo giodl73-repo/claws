@@ -144,13 +144,47 @@ Lobster_web (`bic/lobster`'s web host) consumes aether endpoints by exact field 
 
 ## L6 — Feature-flag and rollback discipline
 
-Production behavior changes need a rollback story.
+Review rollback controls in proportion to blast radius. Do not demand a feature
+flag for every ordinary change. Do require an independently operable kill
+switch when a feature can cause dangerous, expensive, irreversible, or
+high-blast-radius effects.
 
 **Watch for:**
-- New behaviors not gated by a feature flag where comparable past behaviors were gated. Look for `FEATURE_FLAGS__*`, runtime config keys, env-var-driven toggles.
-- Per-route mounts that bypass per-request gating — see `bic/aether#7229` reviews where the lobster_workspace_router was initially conditionally mounted; the correct shape is unconditional mount + per-request gate so the kill-switch flips without a pod restart.
-- Removed feature flags (W3 Strong) — yield only on evidence the flag has been measurably no-op.
-- Default-on FF additions for risky surfaces — needs justification.
+
+- **Dangerous behavior without a kill switch (W12).** Treat a feature as
+  dangerous when it can mutate external state, automate user/maintainer
+  actions, change auth/permissions/data exposure, trigger migrations or
+  destructive cleanup, redirect provider/model/routing behavior, create
+  unbounded fan-out, or materially increase spend/load. The kill switch must:
+  - stop the dangerous effect without a new build or code deployment;
+  - be operable independently of the flight cohort or experiment assignment;
+  - have a named owner/operator path and documented safe state;
+  - be checked at the effect boundary, not only at startup or route mounting;
+  - have a test proving the disabled path cannot perform the dangerous effect.
+- **A flight mistaken for a kill switch.** A percentage/cohort flag is not a
+  sufficient rollback control if operators cannot disable the effect globally
+  and promptly.
+- **Routine feature-flagging.** Flighting is by exception, not the default
+  architecture. A new flight must name the rollout question, bounded cohort,
+  owner, success/failure signals, expiry or review date, and removal target.
+  If the PR cannot explain why staged exposure is necessary, prefer normal
+  code plus a kill switch only where risk requires one.
+- **Permanent flight branches.** Once the feature is stable, remove the flight
+  assignment, stale branch, and dead fallback path. A PR extending or retaining
+  a mature flight must cite current evidence that the rollout question remains
+  open and provide a new near-term removal date.
+- **Per-route mounts that bypass per-request control.** See
+  `bic/aether#7229`: the correct shape is unconditional mount plus a
+  per-request kill check so operators do not need a pod restart.
+- **Default-on controls for risky surfaces.** Require explicit rollout and
+  rollback justification.
+
+### Skip when
+
+- The change is local, readily reversible by a single commit revert, has no
+  migration or persistent client state, and cannot produce dangerous effects.
+- The diff only consumes an established flag without changing its lifetime,
+  assignment, fallback, default, or controlled behavior.
 
 ## L8 — Factoring & reuse (DRY discipline)
 

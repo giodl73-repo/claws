@@ -84,15 +84,42 @@ Code that violates an API-REFERENCE.md, CLAUDE.md, or wire-format spec without u
 - **Yield**: never for contract specs.
 - **Non-contract specs** (W11 — Strong tier): design doc prose, stale comment, README, anything not consumed by another component.
 
+### W12 — No dangerous feature without an independently operable kill switch
+Features with high-blast-radius effects must be stoppable without a new build
+or code deployment.
+- **Why**: rollback after harm begins is an operational action, not a source
+  change. Cohort flighting, deployment rollback, and "revert the PR" are too
+  slow or too narrow for dangerous effects.
+- **Dangerous effects**: external-state mutation; automated user or maintainer
+  actions; auth, permission, credential, tenant, or data-exposure changes;
+  migrations or destructive cleanup; provider/model/routing changes;
+  unbounded fan-out; or material spend/load increases.
+- **Required shape**: global enough to halt the effect; independent of flight
+  assignment; checked at the effect boundary; documented owner/operator path
+  and safe state; test coverage proving the disabled path cannot perform the
+  effect.
+- **Yield**: never while the dangerous effect remains reachable without that
+  control. A flag that only selects a flight cohort is not sufficient.
+
 ---
 
 ## Strong watches
 
-### W3 — No removal of feature flag / kill switch without explicit deprecation note
-Demoted from non-negotiable.
-- **Why**: kill switches are rollback paths; their cost is near-zero, their option value is high. But blanket non-negotiability would block every chore PR.
-- **Yield**: Strong. Yields if author shows the flag has been no-op for a measurable period (commits, telemetry receipt) AND a rollback alternative is documented.
-- **Surfaces**: `FEATURE_FLAGS__*` removals, kill-switch env vars, runtime config removals.
+### W3 — Flighting is exceptional and temporary
+- **Why**: permanent cohort branches multiply states, hide dead paths, and turn
+  rollout machinery into product architecture. Flighting exists to answer a
+  bounded rollout question, then converge.
+- **New flights require**: named rollout question, bounded cohort, owner,
+  success/failure signals, expiry or review date, and explicit removal target.
+- **Stable features**: remove the flight assignment, fallback branch, and dead
+  code after stability is established. Retaining a mature flight requires
+  current evidence that the rollout question remains open plus a new near-term
+  removal date.
+- **Kill-switch removal**: separate from flight cleanup. Yields only when the
+  dangerous effect no longer exists or an equally prompt operator-controlled
+  rollback is documented and tested.
+- **Yield**: Strong. New flighting yields on a concrete bounded rollout need.
+  Stale flighting yields on evidence-backed extension with a removal date.
 
 ### W4 — No production code path without documented rollback
 Demoted from non-negotiable.
