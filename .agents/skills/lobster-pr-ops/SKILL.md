@@ -13,12 +13,11 @@ Main branch rules currently require these Azure/GitOps contexts:
 
 - `GitOps/GitHubPop`
 - `Lobster-Runtime-PullRequest`
-- `Lobster-Runtime-Build-Validation`
 
-Treat this as mandatory for every Lobster PR, including docs-only PRs. The repo
-ruleset requires the two Lobster runtime ADO contexts even when normal pipeline
-path filters do not attach them automatically. Do not declare a Lobster PR ready
-until all three required contexts are visible on the PR head and green.
+Treat these as mandatory for every Lobster PR, including docs-only PRs. Do not
+declare a Lobster PR ready until both required contexts are visible on the PR
+head and green. `Lobster-Runtime-Build-Validation` may still attach on some
+heads, but it is not a required main-branch context as of 2026-07-26.
 
 Inspect live PR checks with:
 
@@ -40,10 +39,9 @@ The active ruleset can be checked with:
 gh api repos/bic/lobster/rules/branches/main --hostname microsoft.ghe.com
 ```
 
-As of 2026-06-05 it includes repository-required checks:
+As of 2026-07-26 it includes repository-required checks:
 
 - `Lobster-Runtime-PullRequest` (`integration_id: 136`)
-- `Lobster-Runtime-Build-Validation` (`integration_id: 136`)
 
 ## ADO Queue Policy
 
