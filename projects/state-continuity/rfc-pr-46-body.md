@@ -41,6 +41,10 @@ racing idle retirement, scheduler continuity failing after replacement, and
 cold runtimes appearing ready before the required owner state is restored.
 OpenClaw's broader state-ownership risk is also tracked in
 [openclaw/openclaw#101290](https://github.com/openclaw/openclaw/issues/101290).
+The complete user/operator case, including missed recurring work, competitor
+scale-to-zero primitives, and Microsoft Scout's host-side composition, is
+tracked in
+[openclaw/openclaw#114145](https://github.com/openclaw/openclaw/issues/114145).
 
 ## Industry Baseline And OpenClaw's Missing Layer
 
@@ -105,10 +109,53 @@ retention, placement, and wake.
 - A source generation is never destroyed before exact durable acceptance.
 - Replacement readiness identifies the accepted recovery point it restored.
 
-These are system-level acceptance criteria. The two current OpenClaw drafts
-prove only the owner-side recovery-point and final-capture slices; they do not
-claim to complete host acceptance, retained ingress, wake, destruction, or
-restored-start integration.
+These are system-level acceptance criteria. The three current OpenClaw PRs
+prove only the owner-side recovery-point, final-capture, and restored-admission
+slices; they do not claim to complete host acceptance, retained ingress, wake,
+or destruction.
+
+## One Contract, Two Directions
+
+The lifecycle can be presented as one bidirectional host/runtime contract
+without putting host lifecycle authority in OpenClaw. OpenClaw supplies the
+running-source suspension methods, offline final-capture and accepted-restore
+operations, and the restored-readiness fact. The host supplies durable
+acceptance, compute generations, retained wake, placement, and destruction.
+
+```text
+SuspensionReady
+  -> FinalRecoveryPointResult
+  -> HostAcceptanceReceipt
+  -> generation-scoped safeToDestroy
+  -> retained wake cause
+  -> RestoredAdmissionReadyRecord
+  -> owner delivery and acknowledgement
+```
+
+This is a protocol boundary, not a generic base class or new callback
+framework. A host may compose it behind `prepareHibernate`,
+`ensureRuntimeReady`, and `inspectLifecycle`, but those remain host operations.
+The existing `gateway.suspend.*`, scheduler hooks, recovery operations, and
+admission fence are reused.
+
+The RFC now recommends one concrete missing seam:
+
+```ts
+gateway.restore.status({ restoreOperationId })
+  -> { status: "not-restored" }
+   | { status: "held", reason, retryAfterMs, ...restoreIdentities }
+   | { status: "ready", ...restoreIdentities, schedulerIdentity,
+       ownerReadinessIdentity, readinessIdentity }
+```
+
+This follows Peter's `gateway.suspend.status` pattern: closed Gateway Protocol
+schemas, `operator.read`, stable operation identity, no mutation, exact replay,
+and typed conflict behavior. It projects PR 112896's existing durable ready
+record rather than adding another journal or state machine. Offline restore
+and quarantine do not become invented live phases. The method remains callable
+only through an authenticated pre-admission control path while ordinary work
+is held. There is no `gateway.restore.admit`; OpenClaw computes readiness and
+opens its own admission.
 
 ## Implementation Evidence
 
@@ -116,19 +163,52 @@ restored-start integration.
   composes verified RFC 0013 snapshots into one deterministic host-protected
   recovery point and exact acceptance-byte inventory.
 - [openclaw/openclaw#112865](https://github.com/openclaw/openclaw/pull/112865)
-  is the final-capture draft stacked on #112385. It binds
+  is the final-capture PR stacked on #112385. It binds
   host-supplied closure evidence, creates final owner snapshots, and durably
   replays one committed recovery point.
+- [openclaw/openclaw#112896](https://github.com/openclaw/openclaw/pull/112896)
+  is the restored-admission PR stacked on #112865. It restores an exact
+  accepted recovery point to fresh paths and reuses Gateway work admission to
+  remain closed until scheduler reconciliation and required-owner readiness
+  produce one durable ready record. It now also implements the proposed
+  read-only `gateway.restore.status` projection as representative proof. The
+  public Gateway Protocol addition remains an explicit owner-review decision
+  before merge or ship.
+- Fork-only Lobster drafts
+  [#39](https://microsoft.ghe.com/giodl/lobster/pull/39),
+  [#41](https://microsoft.ghe.com/giodl/lobster/pull/41),
+  [#42](https://microsoft.ghe.com/giodl/lobster/pull/42),
+  [#43](https://microsoft.ghe.com/giodl/lobster/pull/43), and
+  [#45](https://microsoft.ghe.com/giodl/lobster/pull/45),
+  [#46](https://microsoft.ghe.com/giodl/lobster/pull/46),
+  [#47](https://microsoft.ghe.com/giodl/lobster/pull/47), and
+  [#51](https://microsoft.ghe.com/giodl/lobster/pull/51) (Microsoft access
+  required) demonstrate permanent cron projection, cancellation arbitration,
+  Peter's shipped hook/proxy-pipe composition, and a default-off private
+  Blob/per-user ECS/already-due sleep-veto boundary, followed by one permanent
+  payload-free retained-wake authority that coalesces concurrent owner causes
+  into an exact destination generation, production-backed metadata-only
+  Teams/cron owner validation, and exact-readiness-gated per-cause delivery
+  with durable crash replay.
 
-These drafts are non-normative feasibility and owner-review evidence. Neither
-moves Gateway suspension, external ingress fencing, clean shutdown, host
-acceptance, publication, restored admission, or source destruction into
-OpenClaw.
+The retained-wake drafts deliberately do not activate a production route or
+cohort. Lobster still needs an owner-approved accepted-final-handoff lookup and
+canonical mapping from opaque logical runtime identity to the Teams/cron
+semantic owners before those call sites can be wired safely.
+
+These PRs and fork drafts are non-normative feasibility and owner-review
+evidence. None moves external ingress fencing, clean shutdown, host acceptance,
+publication, wake, compute placement, or source destruction into OpenClaw.
+
+If Vincent, Peter, Josh Lehman, or other maintainers prefer a smaller or
+different implementation that meets the RFC and issue #114145 outcomes, please
+use it. The fork stack is evidence for review, not a requirement to preserve
+this exact decomposition.
 
 ## Review Request
 
-Please review the ownership split before either implementation draft is
-promoted:
+Please review the ownership split and public status method before the
+implementation stack is promoted:
 
 1. RFC 0013 remains the completed SQLite owner primitive.
 2. Current-main `gateway.suspend.*` remains the cooperative pause primitive.

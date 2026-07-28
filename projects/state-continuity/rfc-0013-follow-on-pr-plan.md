@@ -458,9 +458,26 @@ Stacked [giodl/lobster#39](https://microsoft.ghe.com/giodl/lobster/pull/39)
 adds atomic permanent `replaceAll`, stale-writer supersession, canonical digest
 construction from the live Gateway cron inventory, and recovery into the
 existing Redis scheduler. It is 828 additions across seven files, including
-286 lines of focused tests/fixtures. The remaining PR 6A proof is live wiring
-from Peter's shipped OpenClaw hooks into that journal plus the due-at-recovery
-runtime-readiness boundary.
+286 lines of focused tests/fixtures. Stacked
+[giodl/lobster#41](https://microsoft.ghe.com/giodl/lobster/pull/41)
+makes prepare, commit, abort, and newer-attempt supersession contend in the
+same permanent CAS state, closing the transport-disconnect cancellation gap
+across fungible host pods. Stacked
+[giodl/lobster#42](https://microsoft.ghe.com/giodl/lobster/pull/42)
+adds the image-present, baked-disabled OpenClaw plugin and bounded protocol
+client. Its complete reread loop uses Peter's shipped hooks, excludes job
+definitions and credentials, and durably arbitrates lifecycle cancellation.
+Stacked [giodl/lobster#43](https://microsoft.ghe.com/giodl/lobster/pull/43)
+uses the existing loopback proxy-pipe bridge, derives owner/provider authority
+from trusted runtime context, persists through Blob CAS, and rehydrates the
+existing Redis scheduler on every accepted-receipt path. This deletes the need
+for a new public endpoint or reusable bearer design. Stacked
+[giodl/lobster#45](https://microsoft.ghe.com/giodl/lobster/pull/45)
+completes the default-off PR 6A activation boundary: private permanent Blob
+container provisioning, explicit per-user ECS projection through the shared
+Gateway start path, pooled-slot reset, and tracked retry/sleep-veto handling of
+an already-due recovered projection. Actual ECS cohort rollout remains an
+owner decision.
 
 The hook audit fixes the live topology: `cron_reconciled` and `cron_changed`
 are plugin API observations, not Gateway WS events. The adapter should therefore
@@ -474,6 +491,12 @@ hooks in the Rust Gateway WS client.
 ### PR 6B: Host/Scout wake authority and coalescing
 
 **Repo:** host implementation; the public RFC remains product-neutral
+
+**Fork draft:** [giodl/lobster#46](https://microsoft.ghe.com/giodl/lobster/pull/46)
+
+**Branch:** `user/giodl/rfc-0013-retained-wake-authority`
+
+**Head:** `9ec773467851224883e27196f4f50737556208f1`
 
 **Depends on:** PR 6A, revocable sleep authority, and one
 generation-scoped ensure-runtime-ready path
@@ -494,9 +517,29 @@ placement, compute lifecycle, cold-start lead, and delivery retries.
 resident process, concurrent causes joining one destination generation, and
 unknown provisioning retaining every cause.
 
+Fork PR 46 is the authority/core portion of this slice. It composes the
+existing final-handoff revocation race and managed-start seam, but deliberately
+does not yet wire production Teams/cron owner adapters or delivery. Those
+adapters should translate only already-retained owner identities into the
+contract; they must not move payloads, acknowledgements, scheduler truth, or
+credentials into the central lifecycle journal.
+
+Stacked fork draft [giodl/lobster#47](https://microsoft.ghe.com/giodl/lobster/pull/47)
+adds the production-backed validation/request-construction portion: native
+Teams partition/activity/sequence metadata and the accepted permanent cron
+projection/provider/deadline are revalidated through their owner stores and a
+trusted logical-runtime directory before entering PR 46. It deliberately does
+not activate routes/cohorts or claim exact restored readiness.
+
 ### PR 6C: Readiness-gated delivery and crash replay
 
 **Repo:** host implementation
+
+**Fork draft:** [giodl/lobster#51](https://microsoft.ghe.com/giodl/lobster/pull/51)
+
+**Branch:** `user/giodl/rfc-0013-retained-wake-delivery`
+
+**Head:** `f6248d9656`
 
 **Depends on:** PR 6B and OpenClaw restored-admission evidence
 
@@ -508,6 +551,16 @@ acknowledgement state, and replay the same winning generation after host exit.
 cold start; OpenClaw reconciles scheduler state before admission; the host
 crashes after restored-ready but before completion; restart reuses the same
 destination and delivers/acknowledges each cause exactly through its owner.
+
+Fork PR 51 supplies the core delivery evidence: it persists a separate
+payload-free CAS journal before crossing an owner boundary, requires the exact
+accepted recovery point, destination generation, and restored-readiness fence,
+keeps Teams/cron progress independent, and reuses deterministic dispatch
+identity across response loss and restart. It does not activate production
+Teams or cron delivery. Live wiring remains fail-closed until Lobster owners
+choose the accepted-final-handoff lookup and canonical opaque-logical-runtime
+to semantic-owner mapping; the owner operation must enforce the destination
+and readiness fence atomically with its side effect.
 
 PRs 6B and 6C may be combined if the atomic authority, retained-delivery, and
 crash-replay gates remain independently testable. This is a review topology,
@@ -553,11 +606,16 @@ proof first.
 
 ## Immediate Next Action
 
-Keep PRs 1, 2, 2B, and 3A-3D draft while their reviews run. PR 3D's source audit
-is recorded in `pr3d-source-audit-2026-07-22.md`. Final owner capture now exists
-in draft PR 112865, but a live Lobster caller and live generation-scoped
-provider remover remain missing. Obtain those seams before PR 3E; do not
-simulate them with advisory Redis state or unsupported Plex lifecycle
-vocabulary. Do not add a read-then-delete destruction check, new Gateway pause
-API, provider registry, credential-free portability claim, or merge-ready
-surface until Vincent confirms the owner boundary.
+Keep the RFC and implementation evidence drafts reviewable while Vincent and
+the relevant OpenClaw/Lobster owners review the ownership split. Review PR 43's
+loopback/trusted-context/storage composition together with PR 45's default-off
+Blob/ECS/pooled-reset/due-retry activation boundary. PR 6A is now represented
+end to end in fork drafts; actual ECS cohort rollout remains owner-controlled.
+Review fork PR 46's PR 6B authority/core proof together with PR 47's owner
+validation/request construction and PR 51's PR 6C readiness-gated delivery
+journal/crash replay. The planned evidence stack is now represented. The next
+step is owner review and selection of the smallest production
+accepted-final-handoff lookup, logical-runtime owner mapping, and route/cohort
+wiring from already-claimed native Teams and accepted-due cron paths into
+Peter's managed-start path. Keep payloads, acknowledgements, scheduler truth,
+credentials, and atomic delivery fencing with their semantic owners.

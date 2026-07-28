@@ -36,7 +36,7 @@ The host therefore needs to reread and atomically replace a bounded projection, 
 
 This does **not** add a second scheduler, store job definitions, or execute OpenClaw cron jobs. It is the host authority and recovery slice, not the final live adapter wiring.
 
-The remaining bounded integration is to connect OpenClaw's post-commit/reconciled reread signals to this `replaceAll` journal and ensure the runtime is retained or started when recovery returns `Due`. Teams/API retained-cause wake remains a separate source-specific path described by RFC 0013.
+The bounded cron integration is now represented by stacked drafts #41, #42, #43, and #45: they add cancellation arbitration, consume OpenClaw's post-commit/reconciled reread signals, connect the trusted host path, and retain tracked retry/sleep-veto work when recovery returns `Due`. Teams/API retained-cause wake remains a separate source-specific path described by RFC 0013.
 
 ## Review size
 
@@ -51,3 +51,7 @@ The stacked diff is 828 additions across seven files. Of those, 286 lines are fo
 - `just cargo test wake_projection --lib` — pass, 6 tests
 
 The focused native-Windows test proof used local-only baseline compilation scaffolding for an existing unrelated test dependency; that scaffolding was removed before this commit. No dependency or visibility workaround is included in this PR.
+
+## Live adapter continuation
+
+Stacked fork-only draft [giodl/lobster#42](https://microsoft.ghe.com/giodl/lobster/pull/42) adds the image-present, baked-disabled OpenClaw hook/protocol plugin. [giodl/lobster#43](https://microsoft.ghe.com/giodl/lobster/pull/43) then connects it through the existing loopback proxy-pipe bridge to trusted runtime identity, Blob CAS authority, and this PR's Redis scheduler rehydration. It removes the need for a new public callback/bearer design. [giodl/lobster#45](https://microsoft.ghe.com/giodl/lobster/pull/45) completes the default-off activation boundary with permanent Blob-container provisioning, explicit per-user ECS projection and pooled-slot reset, and tracked retry/sleep-veto handling of this PR's explicit `Due` recovery outcome.

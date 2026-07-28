@@ -1,6 +1,12 @@
 Related RFC: https://github.com/openclaw/rfcs/pull/46
 
+Umbrella outcome: https://github.com/openclaw/openclaw/issues/114145
+
+Non-normative host follow-on evidence (Microsoft access): https://microsoft.ghe.com/giodl/lobster/pull/51
+
 Stacked follow-up: https://github.com/openclaw/openclaw/pull/112865
+
+Exact reviewed head: `ad5c177c7820a05793bb92e02f0db44bac014553`
 
 ## What Problem This Solves
 
@@ -71,4 +77,3 @@ the selected-agent inventory boundary, and snapshot owners must define any
 credential-free portability receipt. This PR deliberately adds no second
 snapshot implementation, storage-provider contract, Gateway pause API, or
 restore framework.
-
