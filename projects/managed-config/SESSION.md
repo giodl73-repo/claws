@@ -12,72 +12,49 @@
 
 - Area: Managed Configuration
 - Primary repos: `openclaw/rfcs`, `openclaw/openclaw`, `bic/lobster`
-- RFC worktree: `C:\src\openclaw-rfcs-managed-config`
-- Slice 1 worktree: `C:\src\openclaw-managed-config-slice1`
+- RFC worktree: `C:\src\openclaw-rfcs-managed-config-rfc-only`
+- Historical slice worktree: `C:\src\openclaw-managed-config-slice1` (dirty;
+  do not use for current implementation work)
 - Lobster audit worktree: `C:\src\lobster-layering-audit`
-- Current RFC branch: `user/giodl/rfc-managed-configuration`
-- Current prototype branch: `user/giodl/managed-config-slice1`
+- Current RFC branch: `user/giodl/rfc-managed-config-rfc-only`
+- Current implementation branch: `user/giodl/managed-config-upstream`
 - Main tracking file: `README.md`
 - Skill to use: `project-session`; use OpenClaw/Lobster PR skills when implementation starts
 
 ## Current Session
 
-- Last updated: 2026-07-23
+- Last updated: 2026-07-28
 - Last agent: Codex
-- Current focus: Fork-only OpenClaw stack is reviewed, type-clean, and pushed
-  through the pre-migration Gateway bootstrap. Next is Lobster
-  capability-gated consumption and bounded dual-run evidence.
-- Active PRs: [fork RFC draft 4](https://github.com/giodl73-repo/rfcs/pull/4),
-  [OpenClaw PR 1](https://github.com/giodl73-repo/openclaw/pull/33),
-  [OpenClaw PR 2](https://github.com/giodl73-repo/openclaw/pull/36),
-  [OpenClaw PR 3](https://github.com/giodl73-repo/openclaw/pull/37),
-  [OpenClaw PR 4](https://github.com/giodl73-repo/openclaw/pull/39), and
-  [OpenClaw integration PR](https://github.com/giodl73-repo/openclaw/pull/40),
-  [OpenClaw local-file PR](https://github.com/giodl73-repo/openclaw/pull/44), and
-  [OpenClaw Gateway controller PR](https://github.com/giodl73-repo/openclaw/pull/60),
-  [OpenClaw Gateway bootstrap PR](https://github.com/giodl73-repo/openclaw/pull/61), and
-  [Lobster evidence PR 1](https://microsoft.ghe.com/giodl/lobster/pull/1).
-- Current RFC branch: `user/giodl/rfc-managed-config-rfc-only`; RFC number is
-  `0019`, at `a189eb9`. Fork RFC PR 4 now documents the delivered local-file,
-  canonical persistence, complete-chain refresh, and write-race guarantees.
-- Local-file branch: `user/giodl/managed-config-local-files` at `0fb89d90963`,
-  fork PR 44, pushed fork-only. Its final Codex review found no actionable
-  correctness regressions; 5 files / 48 tests, full `tsgo`, and focused lint
-  pass.
-- Gateway controller branch: `user/giodl/managed-config-gateway-controller` at
-  `db211f61727`, fork PR 60, based on local-file PR 44 and pushed fork-only.
-- Gateway bootstrap branch: `user/giodl/managed-config-gateway-bootstrap` at
-  `0a263762463`, fork PR 61, based on controller PR 60 and pushed fork-only. The earlier late-startup
-  experiment remains preserved locally as `user/giodl/managed-config-cli-wip`
-  at `6b48780dbc3`; do not promote it.
-- Gateway stack proof: 9 focused files / 303 tests are accounted for, full
-  `tsgo` is clean, focused `oxlint` is clean, and final
-  `codex review --commit HEAD` reports no actionable correctness regressions.
-  Review fixes bind source/include and plugin metadata generations to the
-  activated snapshot, preserve parent/child layer order, and fail source drift
-  through structured findings.
-- Current Lobster branch: `user/giodl/managed-config-lobster-migration` at
-  `f5930b3b6a`, pushed to the existing Lobster fork branch. The stack compares
-  the real allowed-origins overlay with compiled global/tenant/operator sources
-  for loopback, external, and stale-removal cases, and includes an unwired pure
-  `--config-layer` argv compiler guarded by an unforgeable capability token.
-  The token is issued only when installed `openclaw gateway --help` succeeds and
-  advertises the exact `--config-layer <id=path>` surface. Both Lobster slices
-  received clean `codex review --uncommitted` results before commit. Production
-  selection and deletion remain release/capability gated. Cargo test execution
-  remains pending: the review subprocess could not launch its Windows sandbox
-  helper, and the private registry token may still be required outside that
-  sandbox. An immutable bundle materializer now validates traversal-free source
-  paths, stages all files under a unique directory, publishes the complete
-  generation with one rename, verifies idempotent reuse, and rejects mutated
-  existing generations. It is also unwired.
-- Delivery rule: keep exact core, bounded authority, opt-in activation,
-  writes/inspection, and Lobster deletion as separate PRs. RFC completion
-  includes the bounded-authority PR with at least one demonstrated field.
+- Current focus: RFC 0019 and its normative V1 sidecar now define the complete
+  ownership and renewal model. OpenClaw field owners retain semantic ownership;
+  the host owns source materialization and order; OpenClaw bootstrap derives
+  field authority; Gateway owns the accepted snapshot; and each layered server
+  owns only its own mutation guard. Next is maintainer review followed by one
+  coordinated implementation rebase and exact-head proof refresh.
+- RFC: [openclaw/rfcs#34](https://github.com/openclaw/rfcs/pull/34), branch
+  `user/giodl/rfc-managed-config-rfc-only`, head `5b33475052c`; clean,
+  mergeable, draft, and synchronized with fork RFC PR 4.
+- OpenClaw implementation: [openclaw/openclaw#107026](https://github.com/openclaw/openclaw/pull/107026),
+  branch `user/giodl/managed-config-upstream`, head `409fab999c4`; non-draft,
+  currently conflicting with moving main. Prior exact-head validation covered
+  101 focused tests, type, lint, docs, build, security, QA, and lifecycle proof.
+- Lobster adopter: [giodl/lobster#12](https://microsoft.ghe.com/giodl/lobster/pull/12),
+  branch `user/giodl/managed-config-lobster-simple`, head `0d37e2a34b`;
+  fork-only and validated, with production deletion gated on a released
+  conformant OpenClaw version.
+- RFC PR 34, fork RFC PR 4, and implementation PR 107026 bodies now share the
+  same owner/authority/lifetime model and point to the normative sidecar and
+  active implementation/adopter surfaces.
+- Final `codex review --uncommitted` on the RFC change found no actionable
+  correctness issue; `git diff --check` passed. The review subprocess logged a
+  missing Windows sandbox helper for two auxiliary grep calls but completed its
+  document review successfully.
+- Durable PR bodies: `rfc-pr-34-body.md` and
+  `openclaw-pr-107026-body.md`.
 
 ## Resume Checklist
 
-- Run: `git -C C:\src\openclaw-rfcs-managed-config status --short --branch`
+- Run: `git -C C:\src\openclaw-rfcs-managed-config-rfc-only status --short --branch`
 - Run: `git -C C:\src\lobster-layering-audit status --short --branch`
 - Review: `../layering-contracts/managed-configuration-deliverable.md`
 - Review: `../layering-contracts/inventory/config-writers-2026-07-10.md`
