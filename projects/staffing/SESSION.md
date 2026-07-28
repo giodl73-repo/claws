@@ -19,11 +19,21 @@
 
 ## Current Session
 
-- Last updated: 2026-06-26.
+- Last updated: 2026-07-27.
 - Last agent: Codex.
-- Current focus: Started staffing project area and captured first-pass
-  statistics for Lobster and ClawPilot/Scout. WorkIQ is only a search term for
-  finding related evidence in those repos.
+- Current focus: Prepared self-contained collaboration and ownership briefs under
+  `projects/staffing/china-handoffs/` for Extensibility/Feeds,
+  Admin/Governance, and Policy/Compliance. The pack transcribes Omar's eight
+  China-team asks and reconciles each brief with current project notes and
+  live PR state. Each brief now inlines its vision, work areas, partners,
+  completed/in-flight work, remaining opportunities, and selectable ownership
+  slices for recipients without access to this repository. A `.craft/roles`
+  review added external-reader orientation, authority guardrails, dated-status
+  caveats, fleet/partial-failure behavior, runtime-cost boundaries, incident
+  response, tamper-evident evidence, SIEM export, and actionable UX requirements.
+  Three shorter, visually reviewed Word briefs now provide sendable executive
+  versions while referring recipients to the detailed engineering briefs for
+  the full PR inventory and implementation context.
 - Active branch / PR: none.
 - Known dirty state: `C:\src\claws-hapi` already had unrelated dirty project
   files before this area was added. `C:\src\lobster` and `C:\src\clawpilot`

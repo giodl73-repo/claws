@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OpenClaw Feeds — Expert Review and Collaboration Brief</title>
+<style>
+body { font-family: Aptos, Arial, sans-serif; color: #243044; margin: 0; line-height: 1.35; }
+h1 { color: #17365d; font-size: 26pt; margin-bottom: 4pt; }
+h2 { color: #1f4e79; font-size: 16pt; border-bottom: 1px solid #9dc3e6; padding-bottom: 3pt; margin-top: 20pt; }
+h3 { color: #2f5597; font-size: 12pt; margin-bottom: 3pt; }
+p, li { font-size: 10.5pt; }
+.subtitle { color: #5b6573; font-size: 12pt; margin-top: 0; }
+.vision { background: #eaf2f8; border-left: 6px solid #2f75b5; padding: 12pt 16pt; font-size: 14pt; font-weight: bold; }
+.callout { background: #f3f6f9; border: 1px solid #c9d5e3; padding: 10pt 14pt; }
+.small { color: #657080; font-size: 9pt; }
+table { border-collapse: collapse; width: 100%; margin: 8pt 0 14pt; }
+th { background: #1f4e79; color: white; text-align: left; padding: 7pt; font-size: 9.5pt; }
+td { border: 1px solid #b4c7dc; vertical-align: top; padding: 7pt; font-size: 9.5pt; }
+ul, ol { margin-top: 4pt; }
+</style>
+</head>
+<body>
+<h1>OpenClaw Feeds</h1>
+<p class="subtitle">Expert review and collaboration brief across OpenClaw, ClawHub, Scout, and MOS3</p>
+<div class="vision">Build a safe, open feed system for discovering, following, verifying, installing, and updating extensions—while keeping discovery, trust, approval, and installation as distinct decisions.</div>
+
+<h2>Purpose</h2>
+<p>This document summarizes what Gio has built and proposed, what remains in flight, and where a feeds expert's judgment would help. It is <strong>not a work assignment or ownership-transfer request</strong>. The requested contribution is expert advice: challenge the architecture, review the protocol and PR boundaries, identify missing failure modes, and recommend how Gio should simplify or sequence the work. Gio remains responsible for PR ownership and follow-through.</p>
+
+<h2>Architecture at a glance</h2>
+<table>
+<tr><th>Area</th><th>Role</th></tr>
+<tr><td>OpenClaw</td><td>Generic subscription, verification, refresh, cache, search, install, Gateway lifecycle, and UI primitives.</td></tr>
+<tr><td>ClawHub</td><td>Public/community catalog and publisher-feed history, query, delta, snapshot, and signing services.</td></tr>
+<tr><td>MOS3 / MAC</td><td>Microsoft registry, acquisitions, package defense, scope/RBAC, policy, and effective enterprise-feed composition.</td></tr>
+<tr><td>Lobster / Scout</td><td>Microsoft-hosted adapter, product UX, E2E, rollout, observability, and support.</td></tr>
+</table>
+<div class="callout"><strong>Safety invariants:</strong> following is not trust or installation; authenticity, integrity, approval, and runtime trust are separate; installs use exact approved versions; rollback is rejected; refresh retains previous-good state and never widens access.</div>
+
+<h2>Work completed</h2>
+<ul>
+<li>OpenClaw signed-feed prerequisites #101981, #110037, and #108342 have landed.</li>
+<li>The older native-feed experiment was closed; current work uses publisher feeds and scalable signed catalogs.</li>
+<li>Scout/Lobster supports local search/install/publish, MOS3 catalog projection and personal acquisitions, hosted tenant/personal routes, marketplace search/install/admin approval/publish/state, and personal/policy publishing foundations.</li>
+<li>A 301-user FirstRelease E2E proved marketplace discovery and installation.</li>
+<li>A Lobster draft is aligning Builder API publish with multipart <code>package</code> plus JSON <code>info</code> carrying <code>builderName: ScoutCloud</code>; it awaits MOS3 enum rollout and publish authorization.</li>
+</ul>
+
+<h2>Open work and review seams</h2>
+<h3>Protocol</h3>
+<p><a href="https://github.com/openclaw/rfcs/pull/39">RFC #39</a> aligns Hosted Feed v1 specifications. It is open, non-draft, and clean. This is the best whole-protocol review point.</p>
+
+<h3>Publisher-feed producer in ClawHub</h3>
+<table>
+<tr><th>PR</th><th>Slice</th><th>2026-07-27 state</th></tr>
+<tr><td><a href="https://github.com/openclaw/clawhub/pull/2948">#2948</a></td><td>Publisher identity, snapshot model, base API</td><td>Non-draft; conflicting; changes requested</td></tr>
+<tr><td><a href="https://github.com/openclaw/clawhub/pull/3116">#3116</a></td><td>Durable revisions, query, and delta state</td><td>Draft; conflicting</td></tr>
+<tr><td><a href="https://github.com/openclaw/clawhub/pull/3117">#3117</a></td><td>Signed snapshot, query, change, and reset</td><td>Draft; conflicting</td></tr>
+</table>
+
+<h3>Publisher-feed consumer in OpenClaw</h3>
+<table>
+<tr><th>PR</th><th>Slice</th><th>Recommendation</th></tr>
+<tr><td><a href="https://github.com/openclaw/openclaw/pull/109305">#109305</a></td><td>Search and follow signed publisher feeds from CLI</td><td><strong>Primary review question:</strong> is this the right first useful OpenClaw stopping point?</td></tr>
+<tr><td><a href="https://github.com/openclaw/openclaw/pull/109461">#109461</a></td><td>Gateway refresh, persistence, scheduling, and RPC</td><td>Follow accepted CLI semantics.</td></tr>
+<tr><td><a href="https://github.com/openclaw/openclaw/pull/109584">#109584</a></td><td>Publisher-following Control UI</td><td>Follow stable Gateway contract.</td></tr>
+</table>
+
+<h3>Scalable catalog distribution</h3>
+<p>ClawHub #3005, #3149, #3160, and #3163 cover dormant signing, durable history, signed query/change transport, and sharded snapshots. OpenClaw <a href="https://github.com/openclaw/openclaw/pull/110250">#110250</a> consumes signed sharded catalogs. The producer PRs are mergeable but currently unstable; #3005 has changes requested. Signing must remain dormant until key custody, rotation, and activation ownership are agreed.</p>
+<p>OpenClaw <a href="https://github.com/openclaw/openclaw/pull/110438">#110438</a> adds local marketplace watches and can follow the main publisher CLI landing.</p>
+
+<h2>Recommended sequence</h2>
+<ol>
+<li>Align RFC #39 and the protocol vocabulary.</li>
+<li>Repair the ClawHub publisher producer through a signed revisioned projection.</li>
+<li>Rebuild and land OpenClaw #109305 as the CLI vertical.</li>
+<li>Add Gateway lifecycle (#109461), then UI (#109584).</li>
+<li>Stabilize scalable catalog production and OpenClaw #110250.</li>
+<li>Add local watches; introduce named/shared feeds only after publisher feeds are deployed.</li>
+</ol>
+
+<h2>Future composition</h2>
+<p>Publisher feeds should be the first durable primitive. Later personal, shared/group, tenant, and named feeds can become ACL-controlled effective views. For Microsoft, MOS3 should own stable feed identity, revisions, signatures, scope/RBAC, inclusion provenance, exact versions, pins, denies, revocations, exceptions, preview, explain, and audit. Lobster remains an adapter; file feeds remain development/test/bridge mechanisms.</p>
+
+<h2>Questions for expert review</h2>
+<ol>
+<li>Is publisher feed the right first primitive?</li>
+<li>Is the CLI-first #109305 boundary the right initial landing?</li>
+<li>Is snapshot/query/delta/change/reset minimal and operationally sound?</li>
+<li>What trust-root, rotation, rollback-prevention, and DSSE model should we use?</li>
+<li>Can the stacks be smaller while retaining independently reviewable proof?</li>
+<li>How should OpenClaw persist subscriptions, previous-good state, freshness, and errors?</li>
+<li>When should named/shared feeds arrive?</li>
+<li>How should ClawHub community feeds align with—but remain independent of—MOS3 composition?</li>
+</ol>
+
+<h2>Requested expert input</h2>
+<p>Please challenge the architecture, review the RFC and producer/consumer contracts, assess whether the OpenClaw PR boundaries are correctly divided and sequenced, suggest smaller or safer slices, and identify missing operational failure modes. For a concrete review, #109305 is the strongest client example; RFC #39 and the ClawHub publisher producer are the strongest protocol examples. Gio remains the implementation owner.</p>
+
+<h2>Success</h2>
+<p>A publisher exposes a signed monotonic feed; OpenClaw can follow, refresh, inspect, search, and install exact artifacts; failure retains previous-good state; large catalogs distribute efficiently; MOS3 enterprise composition remains authoritative and explainable; and OpenClaw/ClawHub remain independently useful.</p>
+<p class="small">Prepared 2026-07-27. PR state is a dated snapshot and must be refreshed before acting. The companion Markdown brief contains the complete inventory and design detail.</p>
+</body>
+</html>

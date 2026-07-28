@@ -1,3 +1,24 @@
+# 2026-07-27 MOS3 Builder metadata and expert handoff
+
+- Opened draft Lobster PR #5947 at `d2d2a82fe9` from
+  `user/giodl/scout-feeds-mos3-builder-name`. It aligns `POST
+  /builder/v1/users/packages` with Builder APIs 1.0.0: the ZIP is multipart
+  `package`, JSON `info` carries `builderName: ScoutCloud`, and tests assert the
+  wire contract. Keep it draft until MOS3 publishes the `ScoutCloud` enum and
+  enables Personal/TenantPersonal publishing for Scout AppID
+  `f1217e17-d0fc-4a9e-a8a1-e1fc64868032`. No ADO pipeline was manually queued.
+- `just rust-fmt`, `just rust-fmt-check`, and `git diff --check` pass with
+  `ms-prod-1.95`. The full `just rust-test` workspace build exceeded the
+  15-minute command capture window and continued compiling for several more
+  minutes; its orphaned local processes were then stopped cleanly. CI is the
+  authoritative full-suite result unless a later local rerun completes.
+- Added `openclaw-feeds-expert-review.md`, a self-contained architecture,
+  completed-work, live-PR, and decision-review brief. A visually
+  checked four-page Word edition and the Markdown source are copied to
+  `Microsoft Scout/Scout Areas`, with an index entry. The expert is being asked
+  for advice on OpenClaw, not to take over or co-own its PRs; Gio retains
+  implementation ownership.
+
 # 2026-07-22 OpenClaw productivity-profile dependency
 
 - Filed OpenClaw feature issue #112682 and opened draft PR #112683, now at
@@ -900,3 +921,17 @@ scripts/check-token-collisions.py`, and `git diff --check`. Focused Rust
   honest scale limits. No PR was merged, no production key was installed, and
   no signing/ECS switch was activated. Next review order remains #3005 ->
   #3149 -> #3160 -> #3163; first close #3005 re-review and #3163 CI.
+# 2026-07-27 Lobster ownership handoff
+
+- Prepared `projects/staffing/china-handoffs/extensibility-feeds.md` as the
+  transfer prompt for the China Extensibility team.
+- Live Lobster state: #5045, #5057, and #5336 are merged. #5424 is the only
+  open feed PR; it is non-draft at `6529e0a9e5`, has requested changes, and
+  currently fails both GitHubPop and Runtime PR validation.
+- Live publisher-feed state: ClawHub #2948, #2949, #2950, #2953, #3116, and
+  #3117 plus OpenClaw #109305, #109461, and #109584 remain open but conflict
+  with current main. #109305 is the first useful CLI stopping point. Signed
+  feed prerequisites #101981, #110037, and #108342 have merged.
+- Permanent enablement still requires MOS3 Personal/TenantPersonal publish
+  authorization for the Lobster Prod/FPA app and a passing 301 E2E proving
+  publish, exact ID/version projection, reload persistence, and cleanup.
