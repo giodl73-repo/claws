@@ -20,20 +20,28 @@
 
 - Last updated: 2026-07-29
 - Last agent: Codex
-- Current focus: track active project worktrees under the laptop-aware allocator
+- Current focus: track active project worktrees under the laptop-aware allocator;
+  Hosted Integration is paused and its current worktrees have been released
 - Active branch / PR: local tools on claws-hapi
 - Known dirty state: disk-mgmt allocator tools/docs; local registry gitignored
 - Laptop profile: **heavy** (4–5 projects + 1 merge; claws cap ~50 GB; free target ≥50 GB)
 - Other laptop profile: **heavy** (4–5 projects + merge; claws cap ~50 GB; free target ≥50 GB)
-- Free space trajectory: ~5 → ~10 → ~23 → ~40 → ~253 → **~249 GB free** on `DESKTOP-INBLCCK`; comfortably above heavy target
-- First enforce removed ~40 unallocated claws feature/detached trees; current active registry now **6/6**:
+- Free space trajectory: ~5 → ~10 → ~23 → ~40 → ~253 → ~249 → **~239.7 GB free** on `DESKTOP-INBLCCK`; comfortably above heavy target
+- First enforce removed ~40 unallocated claws feature/detached trees; current active registry now **5/6**:
   `feeds` (`C:\src\lobster-feeds-claw-mos-package`, Lobster PR #6169 open),
   `hosting-profiles` (`C:\src\openclaw-hosting-profiles-current`, fork PR #157 open),
-  `hosted-integration` (`C:\src\openclaw-reverse-carrier-owner`, fork PR #184 open),
   `state-continuity` (`C:\src\openclaw-rfc0013-restored-admission`, upstream PR #112896 open),
   `control-ui` (`C:\src\lobster-control-ui-surgical`, Lobster PR #6121 open),
   `managed-config` (`C:\src\openclaw-rfcs-managed-config-rfc-only`, clean RFC worktree; no matching live PR found by `gh pr list` on fork).
-- Current registry intentionally has **6 project slots / 5 nominal heavy project slots** because Gio named six active project areas beyond protected `claws-hapi`.
+- Current registry is at the nominal heavy limit of **5 project slots**, with
+  the merge slot free.
+- 2026-07-29 Hosted Integration pause cleanup: after confirming clean trees,
+  committed heads, and authoritative remote PR heads, released ten worktrees
+  without deleting branches: Windows duplicate G2 plus Lobster PR 58-62, and
+  WSL O1, stale pre-rebase O4, G1, and exact-head G2. The Hosted Integration
+  project notes and restart packet remain pushed in `claws` commit
+  `b8de9994454`; OpenClaw/Lobster branches remain on their fork/upstream
+  remotes. Free C: measured ~227.1 GB before the cleanup and ~239.7 GB after.
 - 2026-07-29 project-note regulation pass: checked the named project sessions for `claws`, `feeds`, `hosting-profiles`, `hosted-integration`, `state-continuity`, `control-ui`, and `managed-config` against live PR state. No active named project worktree was terminal/merged. Keep the six registered slots above, and treat the following unregistered worktrees as **valid but over budget** while their project notes/PRs remain open:
   `C:\src\openclaw-claws-application-pr2` (OpenClaw #115962 open draft),
   `C:\src\awesome-claws-private-prototype` (awesome-claws #1 open draft),
@@ -41,7 +49,6 @@
   `C:\src\lobster-control-ui-proof` (Lobster #6088 open draft, currently branch `control-ui-root-cutover`),
   `C:\src\openclaw-control-ui-host-policy-main` (OpenClaw #115408 open draft),
   `C:\src\openclaw-control-ui-server-policy` (OpenClaw #116013 open draft),
-  `C:\src\lobster-reverse-carrier-runtime-peer` / `selection` / `owner` (giodl Lobster #60/#61/#62 open drafts),
   `C:\src\openclaw-rfc0013-final-capture` (OpenClaw #112865 open),
   `C:\src\openclaw-rfcs-state-continuity` (deprecated RFC 0021 evidence in project notes),
   and `C:\src\lobster-rfc0013-retained-wake-delivery` (giodl Lobster #51 open draft).
