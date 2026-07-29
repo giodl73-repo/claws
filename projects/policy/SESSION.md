@@ -12,3 +12,12 @@
   and removes the old `needs_refactoring` copy.
 - Active branch: `user/giodl/rfc-0003-policy-conformance` at
   `7770a4b`.
+
+## 2026-07-27 Lobster PR 5945 review
+
+- Reviewed `bic/lobster#5945` at exact head `0b5435373fd1ac8fe8990e2ff6f414b43cfd4567` without posting to the PR or queuing pipelines.
+- The draft changes the baked OpenClaw exec posture to `full/off`, then projects an ECS-selected `allow_all`, `auto`, or `always_ask` mode at Gateway start; it is not yet a user-selectable profile system.
+- Blocking evidence: the PR does not compile because `GatewayStartBody` test construction omits `exec_approval_mode`; required `GitOps/GitHubPop` and `Lobster-Runtime-PullRequest` checks are red.
+- Review findings: malformed-but-valid JSON can be treated as a successfully applied restrictive overlay while leaving `full/off`; no ECS rule resolves to `AlwaysAsk` despite the documented allow-all default; the Auto mapping does not select OpenClaw's normalized auto-review mode; and the gitignored ownership marker prevents reliable release to AllowAll after workspace rehydration.
+- Product recommendation: preserve the runtime projection plumbing but separate policy authority from profile preference. Emergency lockdown overrides all; tenant/operator policy defines allowed modes, default, and whether users may choose; users select only within that envelope; effective posture records provenance. Recommend `Ask` as the initial default, with Auto and Full explicitly enabled.
+- Next: keep the PR draft/request changes, split plumbing from tenant/user profile authority and any default flip, and do not post review feedback until Gio approves the wording.

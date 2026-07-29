@@ -20,7 +20,7 @@
 
 ## Current Session
 
-- Last updated: 2026-07-27
+- Last updated: 2026-07-29
 - Last agent: Codex
 - Promotion guardrail: O1 and O4 received explicit filing authorization and
   are now upstream issue-linked drafts. Continue authoring and validating the
@@ -28,15 +28,17 @@
   OpenClaw issue or PR until Gio explicitly authorizes that package.
 - Current O1 landing packet: upstream [issue #114772](https://github.com/openclaw/openclaw/issues/114772)
   and [draft PR #114773](https://github.com/openclaw/openclaw/pull/114773), on
-  `user/giodl/o1-one-hop-dispatch-upstream` at `e3ddb64c1567`, based on
-  upstream `main` `15ab1334f42`. It narrows O1 to the behavior-preserving local
+  `user/giodl/o1-one-hop-dispatch-upstream` at `48fab2d723d0`, rebased onto
+  upstream `main` `dd248759ef56`. It narrows O1 to the behavior-preserving local
   one-hop dispatcher after the live maintainer review rejected a durable
   `network-guard/v1` profile without a second connection owner. The portable
   guard profile is now deferred to O6. Proof passed 101 focused tests,
-  `pnpm tsgo:core`, type-aware Oxlint, Oxfmt, diff hygiene, a real loopback
-  redirect harness, and clean `codex review --base upstream/main`. The branch
-  is pushed to the fork with maintainer edits enabled. Exact-head CI attached;
-  the real-behavior and workflow-sanity gates passed with no failing checks.
+  type-aware Oxlint, Oxfmt, diff hygiene, a real loopback redirect harness, and
+  clean `codex review --base upstream/main`. The refreshed branch is pushed to
+  the fork with maintainer edits enabled. ClawSweeper reviewed the exact head,
+  found no actionable issue, retained `proof: sufficient`, and marked it
+  platinum / ready for maintainer review. It is mergeable and intentionally
+  not rebased a second time merely to chase a moving `main`.
   Broader draft PR #113513 was linked and closed as superseded.
 - Current O2 evidence packet: fork branch
   `user/giodl/o2-exact-origin-credential-slots-current-main` at
@@ -53,21 +55,43 @@
   and `o2-exact-origin-credential-slots-pr-draft.md`.
 - Current O4 landing packet: upstream [issue #114782](https://github.com/openclaw/openclaw/issues/114782)
   and [draft PR #114783](https://github.com/openclaw/openclaw/pull/114783), on
-  `user/giodl/o4-manifest-first-host-bundles-upstream` at `95c4d3fdcaff`,
-  based on upstream `main` `0073862e232b`. It adds only the closed, inert
+  `user/giodl/o4-manifest-first-host-bundles-upstream` at `dbc74b3c1d2e`,
+  rebased onto upstream `main` `dd248759ef56`. It adds only the closed, inert
   `hostIntegrationBundle` manifest inventory and existing-registry projection;
   no runtime registration, activation, readiness, Status, Doctor, credentials,
   dispatch, or hosted execution. Proof passed 143 focused plugin tests, core
   typecheck, type-aware lint, formatting, full build, docs checks, clean Codex
-  review, and the real Lobster five-contribution discovery harness. Exact-head
-  CI is terminal with real-behavior and Workflow Sanity gates green; duplicate
-  cancelled workflow records were superseded by successful runs. The new
+  review, and the real Lobster five-contribution discovery harness. The
+  refreshed exact-head proof repeated all 143 focused tests and the live
+  Lobster manifest/registry harness. ClawSweeper found no actionable defect,
+  retained `proof: sufficient`, and marked it gold / ready for maintainer
+  review with the intentional manifest compatibility risk called out. The new
   plugin-manifest surface explicitly requires plugin-owner confirmation.
-- Current primary slice: [OpenClaw fork PR 179](https://github.com/giodl73-repo/openclaw/pull/179),
-  the standalone reverse-provider dispatch contract at `b155d1797f3`, based
-  directly on Package 1. Its exact production conformance peer is
-  [Lobster fork PR 53](https://microsoft.ghe.com/giodl/lobster/pull/53) at
-  `dd8b3e1e24`, based directly on inert host-contribution plugin PR 29.
+- Current primary slice: [OpenClaw fork PR 184](https://github.com/giodl73-repo/openclaw/pull/184)
+  at `f810aa8c390`, the bounded reverse-carrier owner consolidation stacked on
+  G1 host-bundle generation PR 183. It composes O11-O14, prepares one
+  content-addressed owner binding from exact recorded generations, exposes the
+  effective bundle generation through the public Plugin SDK, and fences URL
+  schemes, proof expiry, session currentness, and clock ownership. It is draft
+  and mergeable; no upstream issue or PR was filed.
+- Current Lobster adopter: [fork draft PR 59](https://microsoft.ghe.com/giodl/lobster/pull/59)
+  at `ee697055129`, stacked directly on deployment-selection PR 58. It registers
+  one exact plugin-authenticated WebSocket route only from a G2-prepared binding
+  whose owner generation and `lobster/host` bundle generation match. The normal
+  startup entry and disabled selection remain inert and do not read authority.
+- Runtime-peer gate: G1-G3 are authored and proven. The local upstream landing
+  packet and problem-led issue body are now ready but remain unfiled. G4's
+  lifecycle contract is defined in
+  `g4-lobster-runtime-peer-lifecycle-2026-07-29.md`. Fork draft
+  [Lobster PR 60](https://microsoft.ghe.com/giodl/lobster/pull/60) at
+  `8b4402a737` proves stable-window reset, full jitter, and exact shutdown-watch
+  semantics. Fork draft [Lobster PR 61](https://microsoft.ghe.com/giodl/lobster/pull/61)
+  at `bad65d354d`, stacked on PR 60, atomically binds one selected authority,
+  peer fingerprint, identity, and exact plugin route; transport failures retry,
+  while configuration, admission, and protocol failures enter `Blocked` without
+  a retry storm. All 38 tests and strict Clippy pass; review is clean. Both
+  slices remain inactive. Next add circuit cooldown and bounded drain; rollout,
+  production startup wiring, and default activation remain separate.
 - Current focus: validate independently useful OpenClaw factorizations without
   requiring the RFC. O1 now has the canonical upstream issue and draft PR
   above; upstream draft PR 113513 is closed superseded evidence. Exact-origin
@@ -246,24 +270,34 @@
   not manually queued.
 - Reverse-provider dispatch contract: [fork PR 179](https://github.com/giodl73-repo/openclaw/pull/179),
   draft, branch `user/giodl/hosted-integration-standalone-reverse-carrier-contract`,
-  head `b155d1797f3`, stacked directly on Package 1. It defines a
+  head `fa6f09737a8`, stacked directly on current O1 `48fab2d723d0`. It defines a
   bounded `reverse-provider-dispatch/v1` frame contract, strict validator,
   deterministic trace evaluator, and language-neutral fixtures for credit,
   half-close, cancellation, certainty, and binding/incarnation/generation
-  fencing. Credential references never cross the boundary. Closeout passed 55
-  focused tests, core/core-test type graphs, type-aware lint, formatting, diff
-  hygiene, and final clean Codex review. No endpoint, live connection,
-  readiness, Status, Doctor, retry, or reconnect replay is included.
+  fencing. Credential references and network-guard policy never cross the
+  boundary; `routeProfile` is only the bounded identity of a route owned and
+  prepared by the connection owner. Closeout passed 27 focused tests,
+  type-aware lint, formatting, diff hygiene, and final clean Codex review. The
+  exact 16-case fixture SHA-256 is `237f98958af9e732860d87ac0e560ce5adfccb16b0d53a66fea27d75bc24f864`.
+  The fork real-behavior check passed; its red auto-response job is only the
+  expected missing upstream GitHub App private key. No endpoint, live
+  connection, readiness, Status, Doctor, retry, or reconnect replay is included.
 - Lobster reverse-carrier conformance adopter: [fork PR 53](https://microsoft.ghe.com/giodl/lobster/pull/53),
   draft, branch `user/giodl/lobster-standalone-reverse-carrier-conformance`, head
-  `dd8b3e1e24`, stacked directly on inert plugin PR 29. It pins OpenClaw
-  `b155d1797f3`'s exact 16-case fixture bytes by SHA-256 and adds production
+  `6725e0b2b1`, stacked directly on inert plugin PR 29. It pins OpenClaw
+  `fa6f09737a8`'s exact 16-case fixture bytes by SHA-256 and adds production
   coverage for stale bindings, GET/HEAD bodies, zero chunks, and cumulative
-  response credit. It
+  response credit. It rejects carrier-supplied `networkGuard` fields and keeps
+  Lobster-owned network guard profiles in `DispatcherConfig.route_guards`, keyed
+  by the approved `routeProfile`. It
   changes no socket, registration, plugin manifest, deployment, or activation
   authority. Eighteen focused tests, deny-warnings Clippy, diff
-  hygiene, and clean Codex review pass. The draft is mergeable with no attached
-  checks; ADO was not manually queued.
+  hygiene, and Rustfmt pass. Codex review proposed an in-flight-credit race; it
+  was rejected because the single operation actor cannot poll inbound credit
+  while its outbound send is awaited and commits `response_bytes` before its
+  next inbound poll. Two broader runtime-suite attempts both reached 4,000+
+  tests and failed only the unrelated `graceful_shutdown_test` target. The
+  draft is clean and mergeable; ADO was not manually queued.
 - Active branch / PR: [fork Doctor readiness PR 170](https://github.com/giodl73-repo/openclaw/pull/170), branch `user/giodl/hosted-integration-doctor-inventory`, head `b728840dcea`; [Lobster live Doctor adopter PR 48](https://microsoft.ghe.com/giodl/lobster/pull/48), branch `user/giodl/lobster-host-doctor-inventory`, head `55a9c03302`; [Lobster reverse-carrier conformance PR 40](https://microsoft.ghe.com/giodl/lobster/pull/40), branch `user/giodl/lobster-reverse-carrier-conformance`, head `b1b662bacf`; [fork reverse carrier contract PR 166](https://github.com/giodl73-repo/openclaw/pull/166), branch `user/giodl/hosted-integration-reverse-carrier-contract`, head `566cbe31d0e`; [fork runtime readiness PR 165](https://github.com/giodl73-repo/openclaw/pull/165), branch `user/giodl/hosted-integration-runtime-readiness`, head `b86df32297c`; [Lobster runtime readiness adopter PR 37](https://microsoft.ghe.com/giodl/lobster/pull/37), branch `user/giodl/lobster-host-runtime-readiness`, head `343cff9a78`; [fork credential materialization PR 164](https://github.com/giodl73-repo/openclaw/pull/164), branch `user/giodl/hosted-integration-credential-materialization`, head `938218ae3b6`; [Lobster packaged adopter PR 36](https://microsoft.ghe.com/giodl/lobster/pull/36), branch `user/giodl/lobster-host-credential-plugin`, head `63ec23b7ac`; [fork credential resolver registrar PR 163](https://github.com/giodl73-repo/openclaw/pull/163), branch `user/giodl/hosted-integration-credential-resolver-registration`, head `83230d1cc37`; [fork package 3B PR 162](https://github.com/giodl73-repo/openclaw/pull/162), branch `user/giodl/hosted-integration-provider-dispatch-bindings`, head `0e62ffe1711`; [fork package 3A PR 160](https://github.com/giodl73-repo/openclaw/pull/160), branch `user/giodl/hosted-integration-provider-traffic-policy`, head `13f6012e2ca`; [upstream package 1 PR 113513](https://github.com/openclaw/openclaw/pull/113513), branch `user/giodl/guarded-dispatch-core-upstream`, head `c85d52bfff5`; [fork package 2A PR 158](https://github.com/giodl73-repo/openclaw/pull/158), branch `user/giodl/hosted-integration-credential-slots`, head `7dfbc71bdeb`; [fork package 2 PR 72](https://github.com/giodl73-repo/openclaw/pull/72), branch `user/giodl/hosted-integration-capi-owner-operations`, head `10b5d0f23c2`; [fork package 3 PR 73](https://github.com/giodl73-repo/openclaw/pull/73), branch `user/giodl/hosted-integration-hosted-capi-execution`, head `1ac7184d60e`; [fork package 4 PR 74](https://github.com/giodl73-repo/openclaw/pull/74), branch `user/giodl/hosted-integration-additional-provider-owners`, head `633e087a455`; [fork package 5 PR 75](https://github.com/giodl73-repo/openclaw/pull/75), branch `user/giodl/hosted-integration-microsoft-interactions`, head `bfc0e8fe5e3`; [fork RFC PR 2](https://github.com/giodl73-repo/rfcs/pull/2), branch `user/giodl/rfc-duplex-transport`, published head `ebf8ea8af55`; [readiness composition PR 156](https://github.com/giodl73-repo/openclaw/pull/156), head `9c6ceb9016a`.
 - Package 1 Lobster proof: [Lobster PR 30](https://microsoft.ghe.com/giodl/lobster/pull/30),
   branch `user/giodl/lobster-validate-guarded-dispatch`, head `dc48f43dad2`,
@@ -1087,30 +1121,124 @@ fork/user/giodl/hosted-integration-capi-owner-operations` exited clean with no
   syntax, diff hygiene, live proof, and Codex review pass. The draft is clean
   and mergeable with no attached required Lobster contexts; ADO was not
   manually queued.
-- The standalone carrier-session admission pair is now published as fork-only
-  drafts. OpenClaw PR 180 at `b1630e5f319` is stacked on reverse-carrier
-  contract PR 179; Lobster PR 54 at `40e7137ca8` is stacked on conformance PR
-  53. Both are draft and mergeable. No OpenClaw issue or upstream PR was filed.
+- The standalone carrier-session admission pair is now refreshed as fork-only
+  drafts. OpenClaw PR 180 at `5459acdd52e` is stacked on corrected
+  reverse-carrier contract PR 179 head `fa6f09737a8`; Lobster PR 54 at
+  `58643569f1` is stacked on corrected conformance PR 53 head `6725e0b2b1`.
+  Both remain draft and mergeable. No OpenClaw issue or upstream PR was filed.
 - OpenClaw PR 180 adds only a pure caller-verified admission registry: exact
-  binding/interface/carrier/owner/bundle/audience checks, proof expiry,
+  binding/interface/carrier/owner/bundle/audience/peer-key checks, proof expiry,
   duplicate ownership rejection, immutable evidence, bounded inputs,
-  constant-memory unique incarnation IDs, incarnation-safe detach, and expiry.
+  constant-memory unique incarnation IDs, contained incarnation-source
+  failures, incarnation-safe detach, and expiry.
   It adds no Gateway role, token issuer, socket, reconnect, dispatch,
   activation, readiness, Status, or Doctor behavior.
 - Lobster PR 54 adds only
   `HostProviderDeclaration::session_declaration()` and its public V1 shape. The
   existing inactive handshake and package remain unchanged. Its production
   serializer is checked against the exact shared OpenClaw fixture.
-- OpenClaw proof passed 17 focused tests, Oxlint, Oxfmt, and diff hygiene.
-  Repository-wide TypeScript reached unrelated baseline LINE/policy
-  declaration errors. Lobster proof passed 19 package tests and strict Clippy;
-  package rustfmt exposes unrelated base drift that is intentionally excluded.
+- OpenClaw proof passed 19 focused tests, type-aware Oxlint, Oxfmt, diff
+  hygiene, and final branch review. Lobster proof passed 19 package tests,
+  strict Clippy, repository rustfmt, diff hygiene, and final branch review.
   Both copies pin fixture SHA-256
-  `a361f7dfce21237eb937ce3a30ce44fe4aef5d230bcf16d7e15ba27576d5c367`.
+  `7f652424b4be83a34a065dbd6b3edb6d929117bcf55047911264086e69143a51`.
 - OpenClaw PR 180's Real behavior proof, Workflow Sanity, and lightweight
   detection checks are green. Only the expected fork-only Labeler and Auto
   response jobs fail. Lobster PR 54 has no attached checks; no ADO pipeline was
   manually queued.
+- O13 session-scoped operation ownership is published as OpenClaw fork draft
+  PR 181 at `8a6590048fc`, stacked directly on O12. It adds one exact-current
+  session identity seam plus a synchronous process-local registry: operation
+  IDs are scoped to one incarnation, total active ownership is capped at 64,
+  terminal frames release ownership, detach drains only the old incarnation,
+  and late frames cannot attach to a replacement. It adds no socket, queue,
+  timer, trace accumulation, dispatch, replay, Gateway role, persistence,
+  activation, readiness, Status, or Doctor behavior.
+- O13 proof passed 26 focused O12/O13 tests, type-aware Oxlint, Oxfmt, diff
+  hygiene, and mandatory autoreview with no actionable findings. PR 181 is
+  draft and mergeable. No OpenClaw issue, upstream PR, Lobster change, or ADO
+  run was created.
+- O14 connection ownership is published as OpenClaw fork draft PR 182 at
+  `c3a2cd79ea45`, stacked directly on O13. It exposes the O11-O13 frame,
+  session-admission, and operation-ownership contracts through one narrow
+  Plugin SDK subpath and documents the existing plugin-authenticated WebSocket
+  upgrade route as the owner of peer verification, the accepted socket, send
+  scheduling, proof-of-possession credentials, and disconnect cleanup. It adds
+  no Gateway role, listener, token issuer, socket manager, reconnect protocol,
+  Status, or Doctor surface.
+- O14 proof passed the SDK export/API-baseline checks, type-aware Oxlint, diff
+  hygiene, all 53 focused O11-O13 tests, and mandatory autoreview with no
+  actionable findings. Blacksmith and brokered Crabbox proof could not start
+  because both remote auth paths require renewal; no lease was created. PR 182
+  is draft and mergeable. Real behavior proof, actionlint, no-tabs, and dispatch
+  are green; Labeler and Auto response fail only on the fork's missing OpenClaw
+  GitHub App private key. No upstream issue/PR, Lobster change, or ADO run was
+  created. The next implementation slice is the Lobster external-plugin
+  connection-owner adopter against O14.
+- The O14 Lobster adopter is published as fork draft PR 55 at `f01fa7d8ab43`,
+  stacked on PR 54. It owns one exact plugin-authenticated upgrade route,
+  proof-of-possession admission, O14 session/operation registries, serialized
+  sends, handshake timeout, exact-incarnation drain/detach, and reconnect with
+  no replay. The adapter is a separate lazy package export; the existing
+  startup plugin remains inert until deployment provides the two required
+  authority ports. `ws` is bundled with an ESM `createRequire` bridge and the
+  deterministic bundles are hidden as generated review artifacts.
+- PR 55 proof passed 20 Rust package tests including a real loopback WebSocket
+  handshake, strict Clippy, repository rustfmt, 11 plugin lifecycle/packaging
+  tests, exact O14 public-type compatibility, diff hygiene, and final
+  full-access commit autoreview with no accepted/actionable findings. The
+  draft is mergeable with no comments or reviews. No checks are attached on
+  the personal fork and no ADO pipeline was manually queued. No upstream
+  OpenClaw issue/PR or runtime activation was created.
+- The deployment-authority follow-up is published as Lobster fork draft PR 56
+  at `bb174d675a13`, stacked on PR 55. It implements the existing Rust
+  credential-source port with a maximum-five-minute credential bound to the
+  peer Ed25519 key fingerprint, audience, binding, owner generation, and bundle
+  generation. The lazy plugin verifier checks the domain-separated HMAC token,
+  canonical encoding, freshness, exact authority, and nonce-bound Ed25519 proof
+  and returns verified peer plus authority atomically, closing the prior
+  verifier/authority sampling race.
+- PR 56 proof passed 22 Rust package tests, strict Clippy, repository rustfmt,
+  17 plugin lifecycle/authority/packaging tests, deterministic bundle drift,
+  diff hygiene, and final `codex review --uncommitted` with no actionable
+  findings. The draft is mergeable with no comments, reviews, or attached
+  checks. No ADO pipeline, runtime activation, upstream issue, or upstream PR
+  was created. The next slice is explicit off-by-default deployment composition
+  and paired live proof, not default activation.
+- The deployment-composition follow-up is published as Lobster fork draft PR
+  57 at `98b726c681e2`, stacked on PR 56. Its discriminated selector makes the
+  disabled branch side-effect free and gives the selected branch only a
+  credential-specific key plus immutable authority. A deterministic test-only
+  fixture proves the exact Rust-issued credential through the production
+  JavaScript authority and connection owner over a real WebSocket.
+- PR 57 proof passed 22 Rust package tests, strict Clippy, repository rustfmt,
+  20 plugin lifecycle/authority/composition/packaging tests, bundle drift,
+  direct generated-module syntax checking, and diff hygiene. The first
+  `codex review --uncommitted` found a duplicate `createRequire` import in the
+  composed bundle; that P1 was reproduced, fixed, regression-tested, and the
+  required second review passed with no actionable findings. The draft is
+  mergeable and clean with no comments, reviews, or attached checks. No ADO
+  pipeline, runtime activation, upstream issue, or upstream PR was created.
+  The next bounded slice is deployment-owned credential-key projection and
+  explicit selection, followed later by broader live Gateway/OpenClaw proof;
+  it must remain off by default until its rollout and rollback gates exist.
+- The deployment-selection follow-up is published as Lobster fork draft PR 58
+  at `86edeaafc859`, stacked on PR 57. Disabled intent carries no authority and
+  never invokes the credential-key resolver. Selected intent validates exact
+  authority first, resolves one fixed-size domain-separated key, and returns
+  one object containing the Rust issuer plus the plugin's directly serializable
+  flat authority and credential-only key. JavaScript now consumes that projected
+  fixture and no longer receives the fake broad deployment secret.
+- PR 58 proof passed 26 Rust package tests, strict Clippy, repository rustfmt,
+  20 plugin tests including real WebSocket admission, and diff hygiene. Two
+  autoreview P2 findings were reproduced and fixed: authority now validates
+  before key resolution, and the Rust authority projection now exactly matches
+  the plugin's flat contract. The required third `codex review --uncommitted`
+  passed with no actionable findings. The draft is mergeable and clean with no
+  comments, reviews, or attached checks. No ADO pipeline, runtime activation,
+  upstream issue, or upstream PR was created. The next slice should define the
+  runtime peer lifecycle and real Gateway proof only after explicit owner- and
+  bundle-generation sources are identified.
 - `landing-ledger-2026-07-27.md` is now the canonical consolidation plan. It
   treats the fork portfolio as evidence, reduces the prospective OpenClaw queue
   to O1-O14, maps every hosted-integration implementation/proof draft to

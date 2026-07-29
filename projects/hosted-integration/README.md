@@ -70,6 +70,17 @@ rollback authority, and a named downstream deletion target.
 | Area 4 provider-dispatch reverse carrier                         | `area-4-provider-dispatch-reverse-carrier.md`                                    |
 | Reverse-carrier contract FACES review                            | `reverse-carrier-contract-review-2026-07-26.md`                                  |
 | Reverse-carrier session admission FACES review                   | `reverse-carrier-session-admission-review-2026-07-27.md`                         |
+| Reverse-carrier operation ownership FACES review                 | `reverse-carrier-operation-ownership-review-2026-07-27.md`                       |
+| Reverse-carrier connection-owner FACES review                    | `reverse-carrier-connection-owner-review-2026-07-27.md`                          |
+| Lobster reverse-carrier connection-owner adopter review          | `reverse-carrier-lobster-connection-owner-review-2026-07-28.md`                  |
+| Lobster reverse-carrier deployment-authority review               | `reverse-carrier-lobster-deployment-authority-review-2026-07-28.md`              |
+| Lobster reverse-carrier deployment-composition review             | `reverse-carrier-lobster-deployment-composition-review-2026-07-28.md`            |
+| Lobster reverse-carrier deployment-selection review               | `reverse-carrier-lobster-deployment-selection-review-2026-07-28.md`              |
+| Reverse-carrier generation-authority audit                         | `reverse-carrier-generation-authority-audit-2026-07-28.md`                       |
+| Bounded reverse-carrier upstream landing packet                    | `bounded-reverse-carrier-owner-landing-packet-2026-07-29.md`                     |
+| Bounded reverse-carrier local issue body                           | `bounded-reverse-carrier-owner-issue-body.md`                                    |
+| G4 Lobster runtime-peer lifecycle contract                         | `g4-lobster-runtime-peer-lifecycle-2026-07-29.md`                                |
+| G4 atomic runtime-selection fork PR body                            | `g4-lobster-runtime-selection-pr-body.md`                                        |
 | Read-only status inventory FACES review                          | `status-inventory-review-2026-07-26.md`                                          |
 | Lobster live status adopter review                               | `status-inventory-lobster-live-review-2026-07-26.md`                             |
 | Doctor inventory FACES review                                    | `doctor-inventory-review-2026-07-27.md`                                          |

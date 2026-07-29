@@ -80,20 +80,20 @@ file upstream yet.
 
 | Order | Capability | Fork evidence | Disposition | Prerequisite | Upstream shape |
 | --- | --- | --- | --- | --- | --- |
-| O1 | Local one-hop dispatch extraction | Upstream [issue #114772](https://github.com/openclaw/openclaw/issues/114772) and [draft PR #114773](https://github.com/openclaw/openclaw/pull/114773), branch `user/giodl/o1-one-hop-dispatch-upstream` at `e3ddb64c1567` | `FILED` | Current upstream `main` | One behavior-preserving internal networking refactor; no portable guard profile, credentials, or hosted execution. |
+| O1 | Local one-hop dispatch extraction | Upstream [issue #114772](https://github.com/openclaw/openclaw/issues/114772) and [draft PR #114773](https://github.com/openclaw/openclaw/pull/114773), branch `user/giodl/o1-one-hop-dispatch-upstream` at `48fab2d723d0` | `FILED` | Current upstream `main` | One behavior-preserving internal networking refactor; no portable guard profile, credentials, or hosted execution. Exact-head ClawSweeper review is proof-sufficient and ready for maintainer review. |
 | O2 | Exact-origin credential slots | [#158](https://github.com/giodl73-repo/openclaw/pull/158), current-main fork branch `user/giodl/o2-exact-origin-credential-slots-current-main` at `d15ab96cbf4` | `EXTRACT` | O1 + maintainer product/security decision on [#104849](https://github.com/openclaw/openclaw/issues/104849) + an approved provider/plugin owner | Fork proof only. Recompose with the approved owner and consumer; do not file a standalone infrastructure PR while the issue carries `no-new-fix-pr`. |
 | O3 | Credential resolver registration | [#163](https://github.com/giodl73-repo/openclaw/pull/163) | `LAND` | O2 | Plugin-owned resolver registration with lifecycle and provenance. |
-| O4 | Manifest-first host bundles | Upstream [issue #114782](https://github.com/openclaw/openclaw/issues/114782) and [draft PR #114783](https://github.com/openclaw/openclaw/pull/114783), branch `user/giodl/o4-manifest-first-host-bundles-upstream` at `95c4d3fdcaff` | `FILED` | Current upstream `main`; parallel with O1-O3 | Inert manifest inventory only; no runtime registration API or activation. New plugin-manifest surface requires plugin-owner confirmation. |
+| O4 | Manifest-first host bundles | Upstream [issue #114782](https://github.com/openclaw/openclaw/issues/114782) and [draft PR #114783](https://github.com/openclaw/openclaw/pull/114783), branch `user/giodl/o4-manifest-first-host-bundles-upstream` at `14bd05f5691` | `FILED` | Current upstream `main`; parallel with O1-O3 | Inert manifest inventory only; no runtime registration API or activation. Exact-head ClawSweeper review is proof-sufficient and ready for maintainer review; the new plugin-manifest surface still requires plugin-owner confirmation. |
 | O5 | Provider request traffic policy | [#160](https://github.com/giodl73-repo/openclaw/pull/160) | `LAND` | O2 | Fail-closed immutable policy generation in the existing guarded fetch owner. |
 | O6 | Provider dispatch bindings | [#162](https://github.com/giodl73-repo/openclaw/pull/162) | `LAND` | O5 | Lifecycle-safe generic dispatcher selection; introduce a portable network guard only with the approved second connection owner; no carrier or provider product code. |
 | O7 | Credential materialization | [#164](https://github.com/giodl73-repo/openclaw/pull/164) | `LAND` | O3 + O6 | Resolve same-plugin slots at dispatch time and remove references before host dispatch. |
 | O8 | Canonical profile runtime inventory | [#175](https://github.com/giodl73-repo/openclaw/pull/175) | `LAND` | O4 + Hosting Profiles | Project bundle services into the canonical readiness provider; no duplicate registry. |
 | O9 | Read-only Status | [#177](https://github.com/giodl73-repo/openclaw/pull/177) | `LAND` | O8 | One operator-read RPC and optional non-empty JSON field. |
 | O10 | Read-only Doctor | [#178](https://github.com/giodl73-repo/openclaw/pull/178) | `LAND` | O9 | Redacted actionable findings; no activation or repair. |
-| O11 | Reverse-provider frame contract | [#179](https://github.com/giodl73-repo/openclaw/pull/179) | `LAND` | O1 | Portable bounded state machine and fixtures; no endpoint. |
-| O12 | Reverse-provider session admission | [#180](https://github.com/giodl73-repo/openclaw/pull/180) | `LAND` | O11 | Caller-verified exact authority, expiry, immutable sessions, safe detach. |
-| O13 | Session-scoped operation ownership | Not authored | Future `LAND` candidate | O12 | Bounded operation IDs, terminal release, detach drain, late-frame fencing; no socket. |
-| O14 | Connection-owner seam | Not authored | Future `EXTRACT` decision | O13 + plugin-route/SDK audit | Smallest plugin-owned or OpenClaw seam that can supply verified peer evidence; no generic host bus. |
+| O11 | Reverse-provider frame contract | [#179](https://github.com/giodl73-repo/openclaw/pull/179) at `fa6f09737a8` | `LAND` | O1 | Portable bounded state machine and fixtures; no endpoint, credentials, or carrier-supplied network policy. Lobster conformance PR 53 is at `6725e0b2b1`. |
+| O12 | Reverse-provider session admission | [#180](https://github.com/giodl73-repo/openclaw/pull/180) at `5459acdd52e` | `LAND` | O11 | Caller-verified exact authority including peer key, expiry, immutable sessions, safe detach. Lobster declaration PR 54 is at `58643569f1`. |
+| O13 | Session-scoped operation ownership | [#181](https://github.com/giodl73-repo/openclaw/pull/181) at `8a6590048fc` | `LAND` | O12 | Exact current-session ownership, 64-operation cap, terminal release, detach drain, and late-frame fencing; no socket, queue, timer, or replay. |
+| O14 | Connection-owner Plugin SDK seam | [#182](https://github.com/giodl73-repo/openclaw/pull/182) at `c3a2cd79ea45` | `LAND` | O13 | One narrow public facade over O11-O13 plus plugin-owned upgrade guidance; no Gateway role, token issuer, listener, socket manager, or generic host bus. |
 
 O1 is filed as issue #114772 and draft PR #114773. O4 is filed as issue #114782
 and draft PR #114783. O2 maps to the
@@ -104,6 +104,17 @@ where a real second connection owner can justify and co-own the contract. O5
 and O6 should not be filed until the credential-owner decision is stable.
 O8-O10 are owned with Hosting Profiles.
 O11-O14 are one carrier sequence, but each remains independently reviewable.
+
+### Fork-only reverse-carrier prerequisites
+
+These are evidence slices, not additions to the authorized upstream queue.
+
+| Order | Capability | Fork evidence | State | Next dependency |
+| --- | --- | --- | --- | --- |
+| G1 | Per-effective-bundle opaque generation | [#183](https://github.com/giodl73-repo/openclaw/pull/183) at `c6ce310f1ab`, stacked on O4 `14bd05f5691` | Draft, mergeable, exact-head review clean | G2 owner-preparation generation |
+| G2 | Owner-prepared binding generation | [#184](https://github.com/giodl73-repo/openclaw/pull/184) at `f810aa8c390`, consolidating O11-O14 on G1 | Draft, mergeable, exact-head build and review clean | G1 + effective config authority + recorded traffic-policy generation |
+| G3 | Plugin-owned Gateway connection owner | Lobster [#59](https://microsoft.ghe.com/giodl/lobster/pull/59) at `ee697055129`, stacked on #58 | Draft, mergeable, off by default, real loopback upgrade/admission proof | G2 + O11-O14 |
+| G4 | Lobster runtime peer | Retry slice: Lobster [#60](https://microsoft.ghe.com/giodl/lobster/pull/60) at `8b4402a737`; atomic selection/classification slice: Lobster [#61](https://microsoft.ghe.com/giodl/lobster/pull/61) at `bad65d354d`, stacked on #60; full contract in `g4-lobster-runtime-peer-lifecycle-2026-07-29.md` | Exact selected authority/identity/route and blocked-vs-retry behavior proven; still inactive. Next circuit cooldown, bounded drain, and generation replacement | G3 + exact selected generation, classified retry, bounded shutdown, observation, rollback |
 
 ## OpenClaw supersession ledger
 
@@ -190,7 +201,14 @@ contains their receiver contracts; proof-only branches are archived.
 | [#50](https://microsoft.ghe.com/giodl/lobster/pull/50) | Live Status proof | `LOBSTER` | Current O9 live proof; fold harness into final plugin validation. |
 | [#52](https://microsoft.ghe.com/giodl/lobster/pull/52) | Live Doctor proof | `LOBSTER` | Current O10 live proof; fold harness into final plugin validation. |
 | [#53](https://microsoft.ghe.com/giodl/lobster/pull/53) | Standalone carrier conformance | `LOBSTER` | Current O11 adopter source. |
-| [#54](https://microsoft.ghe.com/giodl/lobster/pull/54) | Session declaration | `LOBSTER` | Current O12 adopter source. |
+| [#54](https://microsoft.ghe.com/giodl/lobster/pull/54) at `58643569f1` | Session declaration | `LOBSTER` | Current O12 adopter source against OpenClaw `5459acdd52e`. |
+| [#55](https://microsoft.ghe.com/giodl/lobster/pull/55) at `f01fa7d8ab43` | Inactive plugin connection owner | `LOBSTER` | Current O14 connection factory, stacked on #54; superseded as stack tip by #56. |
+| [#56](https://microsoft.ghe.com/giodl/lobster/pull/56) at `bb174d675a13` | Inactive deployment credential and authority | `LOBSTER` | Credential/authority source stacked on #55; superseded as stack tip by #57. |
+| [#57](https://microsoft.ghe.com/giodl/lobster/pull/57) at `98b726c681e2` | Off-by-default deployment composition and live proof | `LOBSTER` | Composition source stacked on #56; superseded as stack tip by #58. |
+| [#58](https://microsoft.ghe.com/giodl/lobster/pull/58) at `86edeaafc859` | Deployment-owned key projection and explicit selection | `LOBSTER` | Selection source stacked on #57; superseded as the carrier adopter tip by #59 after G1/G2 supplied real generation authority. |
+| [#59](https://microsoft.ghe.com/giodl/lobster/pull/59) at `ee697055129` | G2-prepared plugin-owned Gateway route | `LOBSTER` | Current off-by-default adopter tip, stacked on #58 and proven against OpenClaw #184. Normal startup remains inert; production runtime peer and rollout are G4. |
+| [#60](https://microsoft.ghe.com/giodl/lobster/pull/60) at `8b4402a737` | Stable-window, jittered runtime-peer reconnect lifecycle | `LOBSTER` | First inactive G4 slice stacked on #59. It hardens retry timing and shutdown signaling only; exact selection wiring, failure classification, drain, activation, and rollout remain future slices. |
+| [#61](https://microsoft.ghe.com/giodl/lobster/pull/61) at `bad65d354d` | Atomic selected runtime peer and blocked-failure classification | `LOBSTER` | Second inactive G4 slice stacked on #60. It binds authority, peer fingerprint, identity, credential issuer, and exact route; only transport retries. Circuit cooldown, drain, generation replacement, activation, and rollout remain future slices. |
 
 ### Proof-only Lobster drafts
 
@@ -220,10 +238,10 @@ standalone issues should lead with their own reusable OpenClaw problem.
 
 ## Role review findings
 
-- **Gateway runtime:** O11-O13 remain pure and allocation-bounded. O14 must not
-  import token issuance, reconnect scheduling, provider semantics, or a second
-  operator queue into the Gateway. The old #49 endpoint is evidence, not code
-  to cherry-pick.
+- **Gateway runtime:** O11-O14 remain pure and allocation-bounded. O14 exposes
+  the existing contracts to a plugin-owned upgrade route and imports no token
+  issuance, reconnect scheduling, provider semantics, or second operator queue
+  into the Gateway. The old #49 endpoint is evidence, not code to cherry-pick.
 - **Lobster container owner:** one inactive in-process plugin/client is the
   target. No new sidecar or service is introduced. Reconnect creates a new
   incarnation and never transfers pending operations.

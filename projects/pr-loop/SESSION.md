@@ -1,5 +1,236 @@
 # PR Loop Session Context
 
+## 2026-07-29 10:13 PDT live Lobster PR gate refresh
+
+- Live authored queue is 18 open Lobster PRs. #5424 merged on 2026-07-28 and
+  left the queue.
+- #6060 advanced to head `b393ba2fe2`; required Runtime build `174257841` is
+  green, but the new exact head has no current approval. It remains mergeable
+  and needs exact-head review plus final `GitOps/GitHubPop`.
+- #6086 is non-draft but conflicting at `d7b6f80f19`; Runtime build `174226772`
+  failed Unit Tests Test 1 and Repo Validation. GitHubPop is already green, so
+  conflict/review repair and Runtime diagnosis are the remaining work.
+- New parked stacks are #6088 -> #6113 with #6116/#6121 based on #6113, and
+  #5947 -> #6169. The children are draft, approved, mergeable, and carry
+  neutral Runtime checks; do not spend full CI on them before their fronts.
+- Required Runtime summary: green on #6060; failed on #6086, #5947, #5646,
+  #5491, #5460, #5402, and #4648; neutral on #6169, #6121, #6116, #6113, and
+  #5506; missing on #6088, #5572, #5571, #5481, and #5422.
+- No ADO job was manually queued or rerun. The Lobster checkout has unrelated
+  dirty policy/harness work and was not modified.
+
+## 2026-07-28 14:00 PDT #6060 Runtime green
+
+- #6060 natural required Runtime build `174180063` completed successfully on
+  exact approved head `8fadd0fa42`.
+- #6060 is conversation-clean, non-draft, approved, and mergeable. The only
+  remaining required gate is `GitOps/GitHubPop`, which requires user
+  proof-of-presence.
+- No review feedback or Scout state changed, and no manual ADO action occurred.
+
+## 2026-07-28 13:30 PDT #6060 natural Runtime attached
+
+- Natural required Runtime build `174180063` attached to exact #6060 head
+  `8fadd0fa42` after the PR was promoted from draft and is now in progress.
+- #6060 remains exact-head approved, conversation-clean, and mergeable.
+- This is the sole active full-CI consumer. Do not publish or manually queue
+  another run while it is active.
+- No Scout review or head state changed.
+
+## 2026-07-28 13:19 PDT #6060 approved and promoted from draft
+
+- #6060 received exact-head approval at `8fadd0fa42` and remains
+  conversation-clean.
+- Marked #6060 ready for review. This is no longer a draft and is mergeable;
+  required Runtime still has not attached to the exact head.
+- No manual ADO operation or head change occurred. Continue waiting for the
+  natural ready-for-review trigger before considering any escalation.
+
+## 2026-07-28 13:08 PDT #6060 no-change checkpoint
+
+- Replied to and resolved the new #6060 implementation checkpoint: PR 2 review
+  must prove unknown/new settings routes deterministically remain hidden or
+  read-only until their method footprint is reviewed; ambiguity requires the
+  generated route/mutation manifest.
+- #6060 remains conversation-clean at `8fadd0fa42`. Its exact head has only
+  GitHubPop, OwnershipEnforcer, and FileAffordance; required Runtime still has
+  not naturally attached. Do not republish or manually queue ADO.
+- No Scout heads or review states changed.
+
+## 2026-07-28 12:46 PDT #6060 exact-head review fixes
+
+- Published #6060 `8fadd0fa42`, removing the stale ten-PR reference and pinning
+  one PR 2-owned bypass transition decision with a named Lobster Runtime owner
+  and blocking proof.
+- Replied to and resolved both new conversations and requested exact-head
+  review. The worktree is clean.
+- The prior natural Runtime was attached to the superseded head. Required
+  Runtime has not yet attached to `8fadd0fa42`; do not manually queue or publish
+  again while the natural trigger settles.
+
+## 2026-07-28 12:38 PDT stale requested-change review unblock
+
+- Posted exact-head evidence for Harry on #5491, #5571, and #5572:
+  - #5491 now gates telemetry on runtime broker admission and carries the
+    integrated gateway-to-runtime telemetry assertion requested by the old
+    `44aa089c` review.
+  - #5571's current four-file child delta contains no feature-flight removals
+    and keeps AGENTS wording aligned with native session tools.
+  - #5572's current ten-file child delta contains none of the feature-flag,
+    script, or stale MIP/LM documentation changes cited by its old review.
+- All tracked worktrees remain clean. #6060 natural Runtime `174169741`
+  remains the only active full-CI consumer; no ADO action was manually queued.
+
+## 2026-07-28 12:32 PDT Control UI design moved internal
+
+- Moved fork draft #6041 to internal Lobster draft
+  [#6060](https://microsoft.ghe.com/bic/lobster/pull/6060) at the identical
+  `d72e269ea1` head. Closed #6041 with a replacement link and requested
+  exact-head review on #6060.
+- The design worktree now tracks
+  `origin/user/giodl/control-ui-hosting-design`, preventing future fixes from
+  landing only on the personal fork.
+- GitHubPop, ownership, file-affordance, and required Runtime checks attached
+  immediately. Natural Runtime build `174169741` is queued; do not manually
+  queue or duplicate it.
+- Re-requested exact-head review on #5491, #5571, and #5572 and resolved the
+  final no-change #6041 implementation checkpoint before migration.
+
+## 2026-07-28 12:18 PDT front Runtime terminal classification
+
+- #5491 natural Runtime `174155644` is terminal: 40 substantive lanes passed;
+  only Repo Validation failed, with the required aggregate red as a consequence.
+  This matches the shared failure already classified on #5646. Do not churn or
+  manually rerun.
+- Dispositioned and resolved three new non-blocking review notes on #5571 and
+  #5572. The session-history test already normalizes only its extracted JSON
+  block; MCP naming remains the documented OpenClaw heuristic; the capability
+  action's direct array shape remains intentional and test-covered.
+- All six tracked PRs remain conversation-clean. No heads changed during this
+  pass and no ADO operation was manually queued.
+
+## 2026-07-28 12:07 PDT review feedback refresh
+
+- Addressed and resolved all new feedback across #5506, #5571, #5572, and
+  #6041; every tracked PR is again conversation-clean.
+- Published #5571 `104fb86337` with a pinned `sessions_list limit: 20` and
+  corrected its stale PR description, then restacked #5572 on that exact head.
+- Published #5572 `299a6fbd25`, documenting that capability selectors are
+  canonicalized while the source path identifies the exact config field.
+  Retained the existing TypeScript/shipped-JavaScript parity model as a
+  separate follow-up concern.
+- Published #6041 `d72e269ea1`, making explicit that read-only
+  `config.schema` is brokered through the runtime admin leg without granting
+  browser admin scope. The bypass isolation proof and named Runtime owner remain
+  hard PR 2 gates.
+- #5491 Runtime `174155644` remains active; no ADO operation was manually
+  queued. #5506 remains approved. Exact-head reviews are requested on the
+  updated children.
+
+## 2026-07-28 11:45 PDT Scout stack narrowed and fully restacked
+
+- Published the repaired Scout chain in dependency order without manually
+  queueing ADO:
+  `#5491 e3ee308ffa -> #5506 afa6de3478 -> #5571 96c30498d1 ->
+  #5572 55593ba719`.
+- Narrowed #5506 to its unique typed Scout capability inventory after merged
+  #5075 superseded the durable-approval/proto half. Capability compilation and
+  formatting pass; the focused Rust test remains blocked only by current-main's
+  Windows `find_git_binary` test-helper defect.
+- Restacked #5571 from its exact final four-file delta and corrected the skill
+  to the pinned OpenClaw v2026.5.28 schema. Restacked #5572 from its exact
+  capability-provenance delta; catalog inventory passes 34/34 and permission
+  UI passes 3/3.
+- Replied to and resolved all remaining #5491, #5506, #5571, and #6041
+  conversations. #6041 `9923c0efea` replaces seven mojibake-prone heading
+  separators with ASCII.
+- #5491 natural Runtime build `174155644` is active. Repo Validation failed
+  with the known shared signal while substantive lanes continue; do not rerun
+  or publish another front. #5506 remains exact-head approved; exact-head
+  re-reviews are requested on #5491, #5571, and #5572.
+
+## 2026-07-28 11:07 PDT second review pass and Candidate terminal classification
+
+- #5646 is exact-head approved and conversation-clean. Natural Runtime
+  `174138183` completed with all Runtime/unit/container/E2E lanes green; only
+  the shared Repo Validation leg failed, matching #5491. Do not churn or
+  manually rerun.
+- Replied to and resolved every #5572, #5646, and #6041 thread successfully.
+- Published #6041 `43adcbffc3`; added promoted-source scope verification,
+  mandatory cross-pod ticket replay proof, and removed the remaining fixed
+  sub-50 ms wording. It is conversation-clean but still lacks required Runtime
+  because the draft uses a personal fork.
+- Added held #5506 commit `92d4d197c7`: documents why app-backed,
+  namespace-scoped `execute_code` is allowed while generic `process` and
+  `code_execution` remain denied, and restores cosmetic ascending proto field
+  order in both hash-identical copies.
+- #5491 build `174140775` remains active. Its held front fix and the #5506/#5571
+  child fixes remain unpublished to avoid replacement full-CI pressure.
+
+## 2026-07-28 10:44 PDT review refresh and cautious loop armed
+
+- New exact-head feedback arrived on #5491, #5571, #5572, #5646, and #6041.
+  Replied to and resolved every #5572, #5646, and #6041 conversation.
+- Prepared three reviewed Scout commits locally while the current natural
+  Runtime builds remain active:
+  - #5491 `fdf4b60239`: persisted legacy host/node origins now independently
+    block always-allow reuse for an untagged request; focused tests pass 11/11.
+  - #5506 `09127d6f22`: carries the new `broker_admitted` field through the
+    child's approval-decision test constructors, fixing a latent stacked-child
+    compile error.
+  - #5571 `ba76d00f63`: removes unsupported `offset`/`nextOffset` guidance after
+    verifying the pinned OpenClaw v2026.5.28 schemas directly; the shipped
+    arguments are `sessionKey`/`limit`/`includeTools` and the documented
+    `sessions_list` filters. The focused Rust test reaches the two known
+    inherited compile blockers before execution.
+- Published #6041 `8c05ff67cb` with all eight design notes addressed: promoted
+  digest/source pinning, deterministic no-I/O policy proof, observed/configured
+  latency budget, owner/timeline gates, managed-copy example, hidden-surface
+  rationale, device-auth negative proof, and ticket ownership/telemetry.
+- #5491 build `174140775` and #5646 build `174138183` are still active. Hold
+  all three Scout commits until #5491 reaches terminal state, then publish the
+  stack once in dependency order. No ADO run was manually queued.
+- Scheduled cautious PR loop `#1` every 10 minutes with the same no-manual-ADO
+  and single-front rules.
+
+## 2026-07-28 10:14 PDT four-PR Scout stack published
+
+- Gio authorized committing and pushing up to four PRs. Published the full
+  Scout chain without manually queueing ADO:
+  `#5491 a841dbc937 -> #5506 6489c58588 -> #5571 67f29b06f4 ->
+  #5572 dd5481c7c4`.
+- #5506's only merge conflict preserved both current-main's sensitivity-label
+  proxy-pipe handler and the child's native approval outcome contract.
+- All four worktrees are clean and match their internal Lobster branches.
+  #5491 natural Runtime is queued; stacked children are mergeable with neutral
+  Runtime checks. Exact-head review refreshes were requested for all four.
+- #5646 does not depend on #5491: both PRs target `main`, and their heads are
+  divergent rather than ancestor/descendant.
+
+## 2026-07-28 10:03 PDT Candidate feedback closeout and Scout-front hold
+
+- #5681 merged, exposing #5402 and #5646 as independent fronts.
+- Published #5646 `e08c89c9fd` from the internal Lobster branch after addressing
+  all four new conversations. Warm Active routes no longer create durable
+  Candidate bindings or perform per-ping policy reconciliation; Candidate
+  transition authority remains fail-closed and route-lifetime bounded.
+  Candidate tests pass 13/13 and the runtime keepalive regression passes 1/1.
+  All threads are resolved, exact-head review is requested, and natural Runtime
+  is queued. No ADO run was manually queued.
+- Published #6041 `241408666f` with a shared Redis-backed atomic ticket
+  redemption contract and an explicit device-auth bypass retirement/isolation
+  gate. Replied to and resolved both conversations. This draft remains on a
+  personal fork, so the required Runtime context cannot attach; do not treat it
+  as merge-ready without replacing the fork topology.
+- Reconciled Scout front #5491 locally with current `main` at `a841dbc937`.
+  The only conflict preserved both inherited ChatPage kill-switch annotations.
+  Focused web approval tests pass 130/130. OpenClaw Adapter test compilation is
+  blocked only by current-main's Windows-only missing `find_git_binary` helper.
+  Hold this clean commit until #5646 Runtime is terminal, then publish once and
+  restack #5506 -> #5571 -> #5572.
+- #5402's two local worktrees contain concurrent dirty persistence/lifecycle
+  work. They were inspected but not modified.
+
 ## 2026-07-27 16:42 PDT active review sweep and stack refresh
 
 - Rebuilt the live queue across all 13 open Gio-authored Lobster PRs and added

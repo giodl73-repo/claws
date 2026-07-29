@@ -29,6 +29,7 @@ be buried in generated wave directories.
 | `memory/`             | Agent memory strategy, OpenClaw memory assessment, and XAI report coordination.                                                          |
 | `mail/`               | OpenClaw mail-channel research, mail plugin options, and Exchange/Microsoft Graph integration framing.                                   |
 | `claws/`              | OpenClaw RFC direction for runnable starter setups across skills, plugins, MCP servers, workspace files, persona files, and automations. |
+| `control-ui/`         | Hosted OpenClaw Control UI in Lobster, with version-matched assets, Lobster auth/routing/rollout, and enforced lockdown.                 |
 | `claws-review-bot/`   | `@bic/claws-review-bot` package notes; primary Lobster PR reviewer lane plus separate ClawPilot issue-classifier experiment.             |
 | `localization/`       | OpenClaw localization architecture, current coverage, runtime message gaps, and bounded evidence slices.                                 |
 | `oc-path/`            | oc-path, workspace destination specs, and related local worktrees.                                                                       |
@@ -73,6 +74,7 @@ agent is assigned to an area, then read the area `README.md`.
 | Memory                              | `memory/SESSION.md`             |
 | Mail                                | `mail/SESSION.md`               |
 | Claws                               | `claws/SESSION.md`              |
+| Control UI hosting                  | `control-ui/SESSION.md`         |
 | Claws Review Bot                    | `claws-review-bot/SESSION.md`   |
 | Localization                        | `localization/SESSION.md`       |
 | oc-path                             | `oc-path/SESSION.md`            |

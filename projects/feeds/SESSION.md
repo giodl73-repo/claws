@@ -1,3 +1,25 @@
+# 2026-07-29 OpenClaw Claw compatibility envelope for MOS3
+
+- Opened draft Lobster PR #6169 at `64ced9b60a`, stacked on Builder-contract
+  PR #5947. `scout feed publish-mos3 --claw <package-directory>` now validates
+  a canonical Claw package and preserves its exact files under a standard MOS
+  AgentSkill resource wrapper with nested `metadata.openclaw` discovery data.
+- The wrapper is transport only: publication does not activate the Claw or
+  translate its MCP/plugin capabilities. An OpenClaw-aware consumer must use
+  the normal Claw inspect/add lifecycle and consent boundaries.
+- Focused proof passes all 81 Scout feed CLI tests, focused `lobster-scout`
+  Clippy, rustfmt, and diff checks. Full workspace test check passed, but the
+  all-workspace test run was blocked by an unrelated idle
+  `openclaw_chat_send_e2e` test after roughly ten minutes; an earlier parallel
+  attempt exhausted host memory.
+- Review/land order is #5947 -> #6169. Before rollout, live MOS proof must show
+  Builder accepts the AgentSkill resource envelope and title readback preserves
+  the embedded Claw bytes. Neither PR was merged and no ECS switch changed.
+- #6169's initial stacked-branch automation passed ownership/file-affordance,
+  skipped Runtime validation, and showed the same immediate GitHubPop failure
+  already present on draft parent #5947. Retarget to `main` after #5947 lands
+  to obtain the substantive PR pipeline run.
+
 # 2026-07-28 ClawHub following inbox and feed-ready activity
 
 - Live HTTP proof for #2948 exposed a real Convex-only failure that mocks and

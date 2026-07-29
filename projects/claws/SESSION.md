@@ -22,6 +22,157 @@
 
 ## Current Session
 
+### 2026-07-29 RFC #52 application lifecycle PR2
+
+- Opened draft OpenClaw PR #115962, `feat(claws): apply application extensions
+  and resources`, from verified signed head `357783626980daddf1230620812635b3fb6656d2`.
+  It is semantically stacked after application planning #115565 and setup state
+  #115296; GitHub targets `main` because those heads are fork PR branches.
+- The PR applies schema-v2 profile extensions through existing plugin owners,
+  persists canonical adapter provenance, preserves v1-to-v2 dependency edges,
+  carries workspace resource roles through the lifecycle, diagnoses adapter
+  drift, and exports extension-backed plugins into profile v2.
+- Live isolated WSL proof used official `@openclaw/diffs@2026.7.1` through
+  preview, consent-bound apply, compatible status, schema-v2 export, remove,
+  and zero-record final status. It found and fixed installed-plugin probe
+  self-collision while retaining live target-conflict checks for new installs.
+- Final proof passed core tsgo, 273 tests across 11 Claws/state suites,
+  type-aware lint, formatting, generated-schema verification, diff hygiene,
+  and Codex review with no actionable findings. PR #115962 remains draft while
+  its dependencies are open; next implementation slice is the corresponding
+  ClawHub application-schema/lifecycle validation after core review.
+
+### 2026-07-28 RFC #52 role-review corrections
+
+- Reviewed the application-extension/resource addendum with founder,
+  skill-author, new-hire, CISO, Gateway, platform, and power-user tensions plus
+  current OpenClaw bundle-owner behavior. Pushed signed RFC commit
+  `4b55c2f93a0c9e9ca2342b4f918ae40efccea9dd` and refreshed PR #52's body.
+- Claws now inherit canonical plugin mapped/detect-only behavior. Profile
+  `format` is an assertion checked by the plugin owner; Claws disclose mapped
+  and unavailable inventory but do not reinterpret or execute detect-only
+  components.
+- Direct MCP remains unchanged. Claws do not perform semantic cross-owner
+  deduplication; existing owners handle exact conflicts and previews disclose
+  ambiguous overlap. Extension secrets remain owner-held and redacted.
+- Added consent invalidation over extension identity/integrity/format/inventory,
+  host-upgrade compatibility drift in status/doctor, v1-to-v2 dependency-edge
+  preservation, resource discoverability guidance, and an explicit no-per-turn
+  overhead invariant.
+- Corrected OpenClaw order: setup schema -> application schema/planning -> setup
+  mutation -> application lifecycle -> guided export -> Gateway/Control UI.
+  Two ClawHub validation PRs follow their corresponding schemas.
+- `git diff --check` and final `codex review --uncommitted` passed with no
+  actionable findings. Next: maintainer review before authoring Application PR
+  1 and restacking existing setup PR 2+.
+
+### 2026-07-28 RFC #52 Claw application composition addendum
+
+- Updated draft RFC #52 on `user/giodl/claws-onboarding-personalization-ui` at
+  signed commit `c1b456545682d14f288a4dd426bbe98e786def32` and refreshed the
+  PR title/body. The RFC now defines a Claw as the agent-application layer over
+  portable core, harness profile, and local instance boundaries.
+- Schema v2 keeps Agent Skills in portable `packages` and direct `mcpServers`
+  unchanged. Canonical v2 producers place OpenClaw, Claude, Codex, or Cursor
+  plugin bundle dependencies in strict `profiles/openclaw.yml` extensions;
+  unsupported required components fail the complete plan.
+- Claw-wide references, schemas, templates, examples, fixtures, and assets
+  reuse managed `workspace.files` with an optional descriptive `role`; skill-
+  private support files remain inside the skill and executable behavior remains
+  owned by skills/plugins.
+- Preserved the existing four-PR setup stack and added a bounded follow-on plan:
+  two OpenClaw PRs for extension/resource planning and lifecycle, then one
+  ClawHub validation PR. Cross-harness CLI adapters and semantic capability
+  matching remain deferred until a second adapter exists.
+- `git diff --check` and `codex review --uncommitted` passed with no actionable
+  findings. Next: maintainer review of the RFC direction before authoring PR 5.
+
+### 2026-07-28 guided setup Control UI PR4
+
+- Reused draft OpenClaw PR #112828 for the final RFC #52 implementation slice,
+  retargeted it to PR3 #115371, and pushed signed commit
+  `85d3af004ad1b32fdc77889bbd59514678fdf151`. The PR remains draft while
+  #115237, #115296, and #115371 are open.
+- The experimental Control UI now covers ClawHub discovery, exact-release
+  detail, setup personalization, canonical plan/apply consent, add, status,
+  doctor, configure, update, and remove. Read previews are independent from
+  admin mutation access, and duplicate package installs require an explicitly
+  selected agent.
+- Final review fixed preservation of an explicit Add `agentId` across preview
+  and apply. WSL Node 24.15 formatting, 21 focused UI tests, UI type checking,
+  type-aware lint, and diff checks passed; the final full Codex review reported
+  no actionable findings. Earlier cumulative proof also passed 31 focused
+  core/Gateway tests, production UI build, i18n verification, and a real local
+  Gateway/Chromium personalization and apply flow.
+- Current hosted checks for #112828 pass or are intentionally skipped. Its PR
+  body now contains the stack, safety model, exact validation, and real behavior
+  proof. The next product step can be Claws idea evaluation without additional
+  PR4 cleanup unless hosted review finds a new issue.
+
+### 2026-07-28 guided setup export implementation PR3
+
+- Opened draft OpenClaw PR #115371 from signed commit
+  `3ff8234f7ff30b2c7ed16096e8f82bbaf2cd02d7`, dependent on setup schema PR
+  #115237, setup-state PR #115296, and RFC #52. It adds
+  `claws export --author-setup <path>` for explicitly converting selected
+  user-owned workspace values into ordinary schema-v2 setup inputs and seed
+  templates.
+- Export distinguishes private values from reviewed reusable defaults, rejects
+  unsafe or managed sources and overlapping replacements, scans every package
+  file for selected private literals, removes incomplete output on failure,
+  and re-reads the artifact through the standard reader before producing a
+  clean recipient add plan. The local authoring document and source files are
+  not packaged.
+- WSL Node 24.15 validation passed 57 focused tests, core type checking,
+  type-aware changed-file lint, docs formatting, and an independent Codex
+  review with no actionable findings. A real isolated source-CLI proof added a
+  schema-v1 Claw, authored schema-v2 setup, found zero private-literal package
+  hits, passed ordinary inspect, and produced a valid recipient setup preview.
+- PR #115371 remains draft while PR1 and PR2 are open. Its exact Real behavior
+  proof is in the PR body; hosted proof and automation checks pass, and no
+  review comments have been filed yet.
+
+### 2026-07-28 setup/personalization implementation PR2
+
+- Opened draft OpenClaw PR #115296 from signed commit
+  `da6a4bdf9adf54fb39abbdc667688fb2844c81ab`, dependent on schema/preview
+  PR #115237 and RFC #52. It persists current non-secret setup answers,
+  creates and hands off user-owned seeds, adds explicit configure/regeneration,
+  reconciles setup during update, and surfaces recovery through status, doctor,
+  and remove.
+- The narrow recovery rule allows a partial add to resume only when its exact
+  schema-v2 setup state matches; generic partial installs still cannot claim an
+  existing agent or workspace. Codex review found this dead-end, the fix was
+  accepted and proven, and the final review was clean.
+- WSL Node 24.15 validation passed 145 focused tests, core type checking,
+  type-aware lint, format, docs MDX/map/link checks, and isolated real CLI
+  add/configure/status/remove proof. Remove left zero Claw records and retained
+  the user-owned seed. PR2 remains draft and currently conflicts with current
+  `main` until the PR1 stack is refreshed/landed.
+
+### 2026-07-27 official Expedia Travel Concierge
+
+- Added `travel-concierge` as Awesome Claws starter 31 using the official,
+  clean, source-linked ClawHub plugin
+  `@expediagroup/expedia-openclaw@1.0.4`. It is distinct from the
+  public-source `travel-planner`: Expedia supplies live lodging and flight
+  inventory plus booking links, while every transaction remains a traveler
+  handoff.
+- The package imports OpenClaw's `minimal` profile plus only
+  `search_stays`, `search_flights`, `eg_travel_signup`, and
+  `eg_travel_verify`. Its prompt requires exact user confirmation before any
+  signup or re-auth email, prohibits automatic use of the cached email noted
+  by Skillspector, keeps codes out of durable output, discloses Expedia terms
+  and local credential persistence, and makes no market-wide price claim.
+- Catalog check and standalone inspection pass all 31 starters. A real
+  current-main OpenClaw proof resolved the exact ClawHub artifact, disclosed
+  two capability escalations, completed add and status with zero findings,
+  and completed remove in disposable state. No Expedia setup, search, or
+  transaction tool was invoked. Codex review found no actionable issue.
+- Signed public-main commit
+  `d0d4166cd4615fc6c81e66985d0a5f64d68b77a4` is pushed; GitHub Validate run
+  `30321802063` passed at that exact head.
+
 ### 2026-07-27 public evidence catalog reaches 30
 
 - Added four public-evidence Awesome Claws: public company watcher (official
@@ -5027,3 +5178,119 @@ package install policy`). The branch is `user/giodl/claws-pr5-installers`,
   merged by `giodl73-repo`. `main` advanced by two unrelated commits while
   waiting for checks, but GitHub accepted the head-pinned merge with the
   required gate green.
+
+### 2026-07-27 Awesome Claws expansion and readiness validation
+
+- Expanded `giodl73-repo/awesome-claws` from 31 to 35 materialized Claws with
+  `web-evidence-researcher` (Tavily), `website-evidence-collector`
+  (Firecrawl), `video-concept-producer` (PixVerse), and `workflow-operator`
+  (Lobster). Signed commit `d6e8ffe9f9287a44b93c19cab4dd38c52e9ade38`
+  is pushed to public `main`.
+- `npm run build`, `npm run check`, and standalone inspect passed for all four
+  additions; the catalog reports 35 validated Claws. Real OpenClaw add,
+  status, and remove lifecycle proof passed for the four packages against live
+  ClawHub artifacts without invoking their external tools.
+- Real dry-run validation found a core bug: plugin package preflight retained
+  artifact identity and integrity but discarded canonical
+  `setup.providers`, causing credential-dependent Claws to report
+  `readiness.ready: true` without credentials.
+- Opened OpenClaw PR #114899, `fix(claws): report plugin setup readiness`, from
+  signed commit `2eb508f551e58beca5052f2cc66ec87a77dce0eb`. The fix preserves normalized
+  plugin setup metadata through archive preflight and emits `plugin-setup`
+  readiness requirements. Tavily and Firecrawl now report not ready without
+  their API keys; Tavily reports ready with its key; credential-free Lobster
+  remains ready.
+- Focused Claws tests pass (62), as do `pnpm tsgo:prod`,
+  `pnpm tsgo:test:root`, scoped Oxlint, scoped Oxfmt, and a complete build.
+  `pnpm check:changed` could not delegate to Blacksmith Testbox because the
+  current credential lacks organization access. Legacy `tsc` exhausted both
+  4 GB and 8 GB heaps; repository `tsgo` lanes are green.
+- PixVerse `2026.7.1` on ClawHub still uses retired
+  `providerAuthEnvVars`; current OpenClaw source already uses canonical
+  `setup.providers`. Do not restore retired parsing in Claws. Refresh the
+  ClawHub artifact on a subsequent plugin release so PixVerse participates in
+  readiness automatically.
+- Successful Claw removal still emits config size-drop anomaly telemetry.
+  This is intentional: `allowConfigSizeDrop` permits the expected mutation but
+  preserves suspicious-write auditing and warning behavior, so no change was
+  made.
+
+### 2026-07-28 RFC 0052 application implementation started
+
+- Opened draft OpenClaw PR #115565, `feat(claws): plan harness extensions and
+  resources`, from signed head `1de1393371163a5e610c8f27cfa6a6689a0fa3fb`.
+  It is Application PR 1 from RFC #52 and is stacked after setup schema PR
+  #115237.
+- PR #115565 adds strict OpenClaw profile v2 extension assertions, schema v2
+  skill-only portable packages, descriptive managed-file resource roles,
+  canonical plugin artifact inspection, and integrity-bound inspect/dry-run
+  extension planning. Extension packages now remain in update previews.
+- Two Codex review passes completed. The first found extension packages absent
+  from update reconciliation; that was fixed. The second found no discrete
+  correctness issues.
+- Supported WSL2 Ubuntu 24.04 / Node 24.15 proof passed 40 focused application,
+  package, update-plan, and plugin-inspection tests, core tsgo, changed-file
+  Oxlint, docs MDX/link checks, and diff hygiene.
+- Restacked existing setup mutation PR #115296 on #115565. Its signed exact
+  head is `901d9b03a1c0b65af3ffe9b4eb1a9164b3e16b22`.
+- Added explicit add/update mutation guards so profile extensions remain
+  preview-only in setup PR #115296 until Application PR 2. Supported WSL proof
+  passed 56 focused setup, personalization, application, update, and CLI tests;
+  core tsgo, scoped Oxlint, and diff hygiene are clean. Full-delta Codex review
+  found no actionable regression.
+- Created `C:\src\openclaw-claws-application-pr2` on branch
+  `user/giodl/claws-application-lifecycle` at the exact #115296 head. The next
+  slice should canonicalize extension package action identity, persist applied
+  format/mapped/unavailable/adapter inventory, enable add/update/remove through
+  canonical plugin owners, diagnose host-adapter drift, and preserve resource
+  roles through status/doctor/update/remove/export.
+
+### 2026-07-29 setup privacy and Control UI hardening
+
+- PR #115371 is updated at signed head
+  `4c79f09f4d7475d6bfb43aa81ba6b6b9a8656288`. Public lifecycle status now
+  allowlists setup completion/seed state and omits answer values and answer
+  digests; configure/update reconciliation reads the full private state store.
+  WSL2 Node 24.15 proof passed 51 focused tests, core tsgo, type-aware Oxlint,
+  Oxfmt, and diff hygiene. Fresh ClawSweeper review reports no actionable
+  finding and routes the remaining product/upgrade decision to maintainers.
+- PR #112828 is updated at signed head
+  `a0e5968988b9c7b931e5bb6add9abd9a7b0004da`. Gateway status and browser state
+  no longer expose persisted setup answers; optional answers can be explicitly
+  cleared without disclosure. All plan/apply scopes now have direct tests, and
+  ClawHub trust tests prove preview disclosure is not apply consent and an
+  unacknowledged risky apply fails before download.
+- The #112828 pass also fixed its pre-existing Control UI ownership failures:
+  Claws mode selection now uses the shared segmented control and its stylesheet
+  uses a defined theme token. Proof passed 468 focused core/Gateway tests, 16
+  focused UI tests, core tsgo, type-aware Oxlint, Oxfmt, a production Control
+  UI build, and `codex review --uncommitted` with no actionable findings.
+- PR #112828 remains draft. Its exact-head ClawSweeper re-review was requested;
+  do not mark ready or merge until that hosted result and the stack owner
+  decision are available.
+
+### 2026-07-29 standalone application v2 adoption
+
+- Opened draft `giodl73-repo/claws` PR #1 from
+  `user/giodl/claws-application-v2` at signed head
+  `ae541e00a9106075efb0912e3d16457b88878c87`. It adds strict portable v1/v2
+  parsing, typed setup and seed-template validation, application resource
+  roles, schema-v2 skill-only packages, integrity coverage, and CLI summaries.
+- Opened draft `giodl73-repo/awesome-claws` PR #1 from
+  `user/giodl/awesome-claws-application-v2` at signed head
+  `b5d0f3e1f97d31af9e0300653621f77a73c1f2e2`. It upgrades Executive
+  Assistant, Financial Analyst, Software Maintainer, and Travel Concierge to
+  schema v2 with setup, local seeds, role-labeled resources, and OpenClaw
+  extension profiles.
+- Both drafts explicitly depend on RFC #52 and OpenClaw PRs #115237, #115565,
+  #115296, #115962, #115371, and #112828. Do not merge either draft until the
+  experimental contracts are accepted or the consumers are reconciled with
+  final schema changes.
+- Proof passed 85 CLI tests (1 skipped), packed CLI installation/inspection,
+  generation and validation of all 35 catalog Claws, and independent
+  standalone inspection of all 35. Final Codex reviews of both diffs reported
+  no actionable correctness findings after path, collision, setup validity,
+  prompt-conflict, and extension-identity fixes.
+- A real aggregate OpenClaw preview remains pending: the Windows Node 24.14
+  runtime is below OpenClaw's 24.15 floor, while the WSL 24.15 application PR
+  worktree lacks built output containing the complete six-PR aggregate stack.

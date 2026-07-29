@@ -33,6 +33,7 @@ For agent and harness entry points, start with `CONTEXT.md`.
 | Memory                              | `projects/memory/`               | Agent memory strategy, OpenClaw assessment, and XAI report notes.                                                                        |
 | Mail                                | `projects/mail/`                 | Mail-channel research, mail plugin options, and Exchange/Microsoft Graph integration framing.                                            |
 | Claws                               | `projects/claws/`                | OpenClaw RFC direction for runnable starter setups across skills, plugins, MCP servers, workspace files, persona files, and automations. |
+| Control UI hosting                  | `projects/control-ui/`           | Version-matched OpenClaw Control UI hosted in Lobster, with Lobster auth, runtime routing, rollout, and enforced lockdown.                |
 | Claws Review Bot                    | `projects/claws-review-bot/`     | `@bic/claws-review-bot` package notes; primary Lobster PR reviewer lane plus separate ClawPilot issue-classifier experiment.             |
 | Localization                        | `projects/localization/`         | OpenClaw localization architecture, surface coverage, runtime errors, channel messages, and bounded evidence slices.                     |
 | oc-path                             | `projects/oc-path/`              | oc-path worktrees, specs, and follow-up PRs.                                                                                             |

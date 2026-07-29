@@ -193,6 +193,19 @@
   patch 0012. Every active patch now has an upstream disposition, linked thread,
   readiness blocker, and next action. `just openclaw-patches-check --offline`
   passes all README, Dockerfile, test-wiring, and pin-consistency checks.
+- Lobster issue #6044 tracks retiring Carmen's newer carried
+  `0014-memory-list-gateway-rpc` patch from Lobster PR #6043, not the active
+  #5402 baseline. Live triage on 2026-07-28 found no duplicate upstream
+  OpenClaw `memory.list` / persisted-memory Gateway enumeration issue or PR via
+  gitcrawl or GitHub search, then filed upstream proposal
+  openclaw/openclaw#115303 and linked it back in Lobster comment #210205741.
+  The original all-in-one proposal was factored on 2026-07-28: #115303 is now
+  the umbrella, #115330 owns the public Gateway read contract, #115331 owns
+  persisted-memory file discovery semantics, and draft PR #115329 is parked as
+  an implementation sketch until those decisions settle. Local #115329
+  validation remains blocked by incomplete dependency install/private feed auth
+  in `C:\src\openclaw-memory-list`. Do not add this to the 2026.7.1 inventory
+  unless PR #6043 lands or becomes the active patch-set baseline.
 
 ## Session Checkpoints
 

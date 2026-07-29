@@ -1,5 +1,58 @@
 # PromoteClaw Session Context
 
+## 2026-07-29 #6086 review and current-main repair
+
+- Merged current Lobster `main` into
+  `user/giodl/openclaw-image-promotion-cleanup`, resolved the renamed
+  PromoteClaw contract-test conflict, and pushed exact head `380510a1cf`.
+- Addressed both blocking peer-review findings:
+  - added focused Scout CLI tests proving top-level help lists only supported
+    commands and removed OpenClaw/transition commands return top-level usage;
+  - documented that existing 301 still auto-triggers with
+    `validateOnly=false`, so the helper's digest and validation-receipt gates
+    apply only to operator-initiated helper runs, not the unchanged automatic
+    path.
+- Added the suggested image-digest mismatch rejection self-test.
+- Focused PromoteClaw tests, job tests, FRE 301/302 safety suites, and both new
+  Rust tests pass. Posted exact-head proof and requested Harry's re-review.
+- #6086 is now mergeable and conflict-free. Requested-change state remains
+  until re-review; exact-head required Runtime has not attached yet. No ADO run
+  was manually queued.
+
+## 2026-07-28 image-promotion scope correction #6086
+
+- Ryan's merged #6076 restored the pre-#5681 OpenClaw 301/302 deployment
+  definitions after #5681 added a forbidden script task to OneBranch release
+  pools and prematurely removed the 301 OfficialBuild trigger.
+- Opened corrective PR #6086 at `d7b6f80f19`. It leaves both production release
+  YAML files unchanged, replaces Candidate-PlexService staging with exact
+  Official build plus verified ACR digest promotion through existing 301 then
+  302 releases, and removes the nonfunctional Scout role-transition planning
+  commands while retaining the deployed compatibility read path.
+- Added release-pool regressions rejecting script, CmdLine, and PowerShell
+  tasks. Focused PromoteClaw, FRE 301/302, release-alignment, Rust compilation,
+  formatting, and diff checks pass. No ADO run was manually queued.
+- Keep image promotion additive. Preserve existing deployment triggers until
+  the replacement workflow is operationally proven and explicitly cut over.
+
+## 2026-07-27 #5402 current-main refresh
+
+- Merged `origin/main` (`3a4db10e5a`) into
+  `promoteclaw/openclaw-2026.7.1` and pushed exact head `475061cdf9`.
+  Published fixes `43d8d85716` and `2c44ca25c0` remain ancestors.
+- Regenerated `0002-msteams-lobster.patch` against pinned `v2026.7.1`,
+  carrying main's externally-brokered exec/plugin ownership, text-free pending
+  results, and generic-forwarder suppression. Regenerated
+  `0008-cron-passport-execution-fence.patch` with main's stable successor
+  occurrence token and `nextScheduledAtMs` authority request while retaining
+  the 2026.7.1 timer reservation/`lastError` behavior.
+- Green proof: full 12-patch applicability/drift gate; PromoteClaw self-tests;
+  14 generator/release-alignment tests; cron contract suites 7/7 and 13/13; and
+  `just cargo check`. The worktree is clean. PR #5402 is mergeable but blocked
+  by `CHANGES_REQUESTED`; `GitOps/GitHubPop` attached failed and natural
+  `Lobster-Runtime-PullRequest` build `174048235` attached queued/running. No
+  Azure run was manually queued.
+
 ## 2026-07-27 Candidate-first safety repair #5681
 
 - Published follow-up `1c5bda8f80` after natural build `173939107` reached
@@ -210,14 +263,15 @@
 
 ## Current Session
 
-- Last updated: 2026-07-21.
+- Last updated: 2026-07-27.
 - Last agent: Copilot CLI.
-- Current focus: Drive the quarantine-cleared OpenClaw `2026.7.1` candidate
-  through patch carry-forward, CI, and acceptance while finishing the daily
-  PromoteClaw pipeline authorization.
+- Current focus: Let #5402's natural required checks attach on the refreshed
+  exact head, then obtain fresh owner review and image/startup acceptance.
 - Active branch / PR: Lobster #5402
   `https://microsoft.ghe.com/bic/lobster/pull/5402`, branch
-  `promoteclaw/openclaw-2026.7.1`, head `f64899b8f4`, draft and mergeable.
+  `promoteclaw/openclaw-2026.7.1`, head `475061cdf9`, mergeable but blocked by
+  `CHANGES_REQUESTED`; `GitOps/GitHubPop` is failed and natural
+  `Lobster-Runtime-PullRequest` build `174048235` is queued/running.
   Lobster #4528 remains open at `2026.6.11`, but is superseded as the promotion
   target and should be used only as a donor for still-relevant patch and CI
   repairs.
@@ -227,11 +281,10 @@
 - Known dirty state: PromoteClaw Lobster worktrees used this session are clean.
   `C:\src\claws-hapi` has this session note update plus unrelated existing
   dirty project notes.
-- Blocking question: #5402 leaves `@openclaw/diagnostics-otel` at `2026.5.28`
-  because `2026.7.1` is not present in the internal Release view. The retained
-  Lobster patches must be audited/re-derived against `v2026.7.1` before image,
-  persisted-home Gateway, brokered Teams/msteams, and version-visibility
-  acceptance.
+- Blocking question: #5402 needs current-head GitHubPop acceptance, fresh owner
+  review, and the natural runtime image/persisted-home/version-visibility
+  acceptance for the intentional `openclaw@2026.7.1` /
+  `@openclaw/diagnostics-otel@2026.5.28` pair.
 
 ## Resume Checklist
 

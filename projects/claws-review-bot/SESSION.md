@@ -22,11 +22,20 @@
 
 ## Current Session
 
-- Last updated: 2026-07-23.
+- Last updated: 2026-07-28.
 - Last agent: Copilot.
 - Current focus: review guidance now checks that dangerous features have
   independently operable kill switches and that flighting is exceptional,
   bounded, and removed after stability.
+- 2026-07-28 targeted review on Galin's Lobster PR `#6036`:
+  - Waited for the active scheduled execution to finish, then started targeted
+    execution `claws-review-bot-job-uga7swc` with
+    `tick bic/lobster#6036 --post`, preserving the live job template, env, and
+    secret references.
+  - The execution succeeded and posted architect review comment `210375776` on
+    exact head `b7529b75f5`; no blocking findings were reported.
+  - PR #6036 was already formally approved by the peer reviewer on the same
+    exact head.
 - 2026-07-23 kill-switch and flighting review guidance:
   - Added non-negotiable W12 for high-blast-radius features that mutate external
     state, automate actions, affect auth/data, migrate or destroy state, alter

@@ -38,8 +38,9 @@ caller.
 
 ## Evaluate
 
-- Security: exact binding/interface/carrier/owner/bundle/audience matching;
-  expired proofs fail closed; credentials and secret parsing stay outside.
+- Security: exact binding/interface/carrier/owner/bundle/audience/peer-key
+  matching; expired proofs fail closed; credentials and secret parsing stay
+  outside.
 - Runtime: no network, Gateway, dispatch, retry, or activation behavior exists.
 - Operator: no new config, Status, Doctor, readiness, or repair surface exists.
 - Ecosystem: fixed V1 declaration and language-neutral fixture can be consumed
@@ -47,25 +48,30 @@ caller.
 - Simplicity: Lobster projects its existing declaration rather than introducing
   a second authority source.
 
-Review found and fixed one lifecycle edge: incarnation IDs now combine opaque
-entropy with a constant-memory monotonic suffix, so repeated injected entropy
-cannot let a late close detach a later session and no unbounded historical-ID
-set is retained.
+Review found and fixed three bounded edges:
+
+- incarnation IDs combine opaque entropy with a constant-memory monotonic
+  suffix, so repeated injected entropy cannot let a late close detach a later
+  session and no unbounded historical-ID set is retained;
+- expected authority now binds the caller-verified peer key fingerprint, so a
+  shared audience cannot authorize a different binding's peer; and
+- exceptions from the configurable incarnation source are contained in the
+  result-based admission API without mutating registry state.
 
 ## Slice and evidence
 
-OpenClaw fork draft PR 180, commit `b1630e5f3192777486dbf4a52fac321e647108e8`,
-is stacked on reverse-carrier contract PR 179. Its 17 focused tests, Oxlint,
-Oxfmt, and diff checks pass. Repository-wide TypeScript reached unrelated
-baseline declaration errors in LINE and policy test helpers.
+OpenClaw fork draft PR 180, commit `5459acdd52ea18d79500c6015483e9ea6a35d0fc`,
+is stacked on corrected reverse-carrier contract PR 179 head
+`fa6f09737a83637fafd566d6cf1e728144e2e0e3`. Its 19 focused tests,
+type-aware Oxlint, Oxfmt, diff checks, and final branch review pass.
 
-Lobster fork draft PR 54, commit `40e7137ca8782f486a7c7a55a8fbb436f1100bd0`,
-is stacked on conformance PR 53. Its 19 package tests and strict Clippy pass.
-Package-wide rustfmt exposes unrelated base drift in `client.rs` and
-`package.rs`; those changes are excluded.
+Lobster fork draft PR 54, commit `58643569f1c444dd0384b48ff3baab99cde8644d`,
+is stacked on corrected conformance PR 53 head
+`6725e0b2b14cd664834dad201b0039a0d8d4b0f6`. Its 19 package tests, strict
+Clippy, repository rustfmt, diff checks, and final branch review pass.
 
 Both repositories pin the same fixture SHA-256:
-`a361f7dfce21237eb937ce3a30ce44fe4aef5d230bcf16d7e15ba27576d5c367`.
+`7f652424b4be83a34a065dbd6b3edb6d929117bcf55047911264086e69143a51`.
 
 ## Outcome
 
