@@ -11,7 +11,7 @@ Fork-only OpenClaw owner contract: https://github.com/giodl73-repo/openclaw/pull
 
 ## Proof
 
-Against OpenClaw fork head `f810aa8c390`, the plugin suite used a real loopback HTTP server and `handleUpgrade` on `/plugins/lobster-host/reverse-provider/v1`, then admitted an HMAC credential and Ed25519 proof bound to the exact prepared authority.
+Against OpenClaw fork head `519e1c57819`, the plugin suite used a real loopback HTTP server and `handleUpgrade` on `/plugins/lobster-host/reverse-provider/v1`, then admitted an HMAC credential and Ed25519 proof bound to the exact prepared authority. This replay includes the incremental protocol-state validation fix that prevents premature terminal frames from releasing operation ownership.
 
 Observed terminal result: `tests 23`, `pass 23`, `fail 0`. The selected branch registered one exact route and admitted the prepared peer; the unselected branch did not read plugin authority or register anything.
 

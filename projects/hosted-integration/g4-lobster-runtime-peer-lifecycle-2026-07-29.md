@@ -284,3 +284,29 @@ classification slice:
 This still does not wire production startup, activate the peer, add circuit
 cooldown, or own bounded operation drain. Generation replacement and rollout
 remain later slices.
+
+## Third implementation checkpoint
+
+Fork draft [Lobster PR 62](https://microsoft.ghe.com/giodl/lobster/pull/62)
+at `728678ac3c`, stacked on PR 61, implements the remaining inactive lifecycle
+owner slice:
+
+- deployment metadata supplies a nonzero transient-attempt budget, circuit
+  cooldown, and graceful drain bound;
+- exhausting the attempt budget enters an observable `CircuitOpen` state and
+  permits only one later probe per cooldown interval until a stable session
+  resets the schedule;
+- shutdown fences new credentials and admissions, closes operation channels,
+  emits terminal cancellation while the socket writer remains available, and
+  aborts any remaining session task at the grace bound;
+- one runtime-peer owner stops the old selected generation before spawning its
+  replacement, retains exactly one active authority, and aborts its task if the
+  owner is dropped without explicit shutdown;
+- backoff, circuit-open, and draining readiness remain redacted,
+  unavailable, and non-authoritative;
+- canonical format, diff validation, 41 Rust tests, strict Clippy, and Codex
+  review pass.
+
+This completes the bounded inactive G4 lifecycle proof. Production startup,
+real Gateway/canary proof, rollout, default activation, and ProxyPipe deletion
+remain separate promotion work after the matching OpenClaw contracts land.

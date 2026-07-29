@@ -18,6 +18,19 @@ The local issue body is
 source is fork [PR 184](https://github.com/giodl73-repo/openclaw/pull/184),
 with host-bundle generation source in fork
 [PR 183](https://github.com/giodl73-repo/openclaw/pull/183).
+The filing-ready PR body is
+`bounded-reverse-carrier-owner-pr-body.md`.
+
+## Readiness verdict
+
+The packet is technically ready to present as one problem-led issue plus one
+issue-linked draft PR after explicit filing authorization. It does not depend
+on RFC 0020. It does depend on the O4 manifest boundary being accepted or
+replaced with a maintainer-approved equivalent.
+
+This is a new public Plugin SDK and plugin/Gateway ownership seam. The issue
+and PR must explicitly request @steipete's confirmation before merge; tests
+cannot decide that product boundary.
 
 ## FACES frame
 
@@ -63,7 +76,8 @@ Disproof condition:
 3. Replay the minimal G1 effective-bundle generation seam.
 4. Replay the O11-O14/G2 implementation as one reviewed change, squashing only
    after preserving the three review fixes: HTTP(S)-only URLs, live proof-expiry
-   fencing, and one injected session clock.
+   fencing, one injected session clock, and constant-memory protocol-state
+   enforcement before operation release.
 5. Regenerate the Plugin SDK API baseline and exact canonical declarations.
 6. Repeat the focused OpenClaw suite and the external Lobster proof against the
    exact replay head.
@@ -97,7 +111,28 @@ As checked on 2026-07-29:
 
 - upstream host-bundle PR 114783 is open and draft at `14bd05f5691`;
 - fork G1 PR 183 is open, draft, and mergeable at `c6ce310f1ab`;
-- fork owner PR 184 is open, draft, and mergeable at `f810aa8c390`;
+- fork owner PR 184 is open, draft, and mergeable at `519e1c57819`;
 - Lobster adopter PR 59 is open, draft, and mergeable at `ee697055129`;
+- Lobster lifecycle PRs 60-62 are open, draft, and mergeable through stack tip
+  `728678ac3c`; they remain inactive downstream proof;
+- current OpenClaw `main` was `42e23c11e0f`; a merge-tree check found only
+  the expected generated Plugin SDK baseline conflict, which the fresh replay
+  regenerates;
+- Gitcrawl plus live GitHub searches for reverse provider, reverse carrier,
+  connection owner, plugin WebSocket, and host provider found no competing
+  issue or PR; #97046 is an agent-run ownership envelope and #114145 is a
+  scale-to-zero recovery contract, not duplicates;
 - no upstream issue or PR exists for this connection-owner packet.
+
+Exact-head readiness proof at `519e1c57819` passed 65 reverse-carrier tests,
+11 host-bundle tests, and the external Lobster consumer's 23 plugin tests. The
+full OpenClaw build, Plugin SDK API/export checks, core type graph, all 175 test
+declaration projects, focused lint/format/diff checks, and final Codex review
+also passed. Blacksmith Testbox did not allocate because the CLI organization
+did not match; no lease or Actions run was created.
+
+Fork automation accepted the refreshed real-behavior proof and workflow-sanity
+checks. The remaining `auto-response` and `label` failures are fork permission
+noise; the full upstream CI matrix is intentionally skipped on this fork-only
+draft and must run on the fresh issue-linked upstream replay.
 

@@ -79,8 +79,10 @@ rollback authority, and a named downstream deletion target.
 | Reverse-carrier generation-authority audit                         | `reverse-carrier-generation-authority-audit-2026-07-28.md`                       |
 | Bounded reverse-carrier upstream landing packet                    | `bounded-reverse-carrier-owner-landing-packet-2026-07-29.md`                     |
 | Bounded reverse-carrier local issue body                           | `bounded-reverse-carrier-owner-issue-body.md`                                    |
+| Bounded reverse-carrier local PR body                              | `bounded-reverse-carrier-owner-pr-body.md`                                       |
 | G4 Lobster runtime-peer lifecycle contract                         | `g4-lobster-runtime-peer-lifecycle-2026-07-29.md`                                |
 | G4 atomic runtime-selection fork PR body                            | `g4-lobster-runtime-selection-pr-body.md`                                        |
+| G4 cooldown/drain/runtime-owner fork PR body                         | `g4-lobster-runtime-owner-pr-body.md`                                            |
 | Read-only status inventory FACES review                          | `status-inventory-review-2026-07-26.md`                                          |
 | Lobster live status adopter review                               | `status-inventory-lobster-live-review-2026-07-26.md`                             |
 | Doctor inventory FACES review                                    | `doctor-inventory-review-2026-07-27.md`                                          |

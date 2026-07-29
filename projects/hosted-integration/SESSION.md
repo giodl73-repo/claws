@@ -22,6 +22,28 @@
 
 - Last updated: 2026-07-29
 - Last agent: Codex
+- Project state: **PAUSED by Gio on 2026-07-29**. Preserve all branches, fork
+  PRs, upstream issues/PRs, landing packets, and adopter evidence. Resume with
+  live GitHub/GHE and current-`main` checks; do not assume the recorded merge
+  state or bases remain current after the pause.
+- Resume decision: obtain the O4 plugin-manifest ownership decision first:
+  whether `hostIntegrationBundle` is accepted as a distinct durable manifest
+  contract or replaced by an approved `contracts`-based equivalent. If the
+  boundary is accepted, replay the prepared bounded reverse-carrier package
+  from a fresh then-current `main` branch and file it only after Gio explicitly
+  authorizes the upstream issue and issue-linked draft PR.
+- Archive branch verification on 2026-07-29:
+  - O1 remote and clean worktree: `48fab2d723d0`;
+  - O4 authoritative remote/PR head: `14bd05f56914`;
+  - G1 remote and clean worktree: `c6ce310f1ab4`;
+  - G2 remote and clean worktree: `519e1c57819d`;
+  - Lobster deployment selection/G3/G4 remote and clean worktrees:
+    `86edeaafc859`, `ee6970551294`, `8b4402a73766`, `bad65d354d2e`, and
+    `728678ac3c81`.
+  The WSL O4 worktree `/root/src/openclaw-hosted-package-2b-host-bundles`
+  remains on superseded pre-rebase commit `dbc74b3c1d2e` and diverges from the
+  authoritative pushed branch. Never push that checkout as-is; recreate or
+  refresh it from remote head `14bd05f56914` when resuming.
 - Promotion guardrail: O1 and O4 received explicit filing authorization and
   are now upstream issue-linked drafts. Continue authoring and validating the
   remaining package series as fork-only drafts; do not file another upstream
@@ -68,17 +90,28 @@
   review with the intentional manifest compatibility risk called out. The new
   plugin-manifest surface explicitly requires plugin-owner confirmation.
 - Current primary slice: [OpenClaw fork PR 184](https://github.com/giodl73-repo/openclaw/pull/184)
-  at `f810aa8c390`, the bounded reverse-carrier owner consolidation stacked on
+  at `519e1c57819`, the bounded reverse-carrier owner consolidation stacked on
   G1 host-bundle generation PR 183. It composes O11-O14, prepares one
   content-addressed owner binding from exact recorded generations, exposes the
   effective bundle generation through the public Plugin SDK, and fences URL
-  schemes, proof expiry, session currentness, and clock ownership. It is draft
-  and mergeable; no upstream issue or PR was filed.
+  schemes, proof expiry, session currentness, clock ownership, and incremental
+  protocol state before terminal operation release. The combined review's
+  premature-terminal finding is fixed. Exact-head proof passes 65 carrier and
+  11 host-bundle tests, the full build and Plugin SDK API/export gates, core and
+  all 175 test declaration projects, focused lint/format/diff hygiene, and a
+  clean final Codex review. Blacksmith Testbox could not allocate because the
+  CLI was authenticated to a different organization; no lease or Actions run
+  was created. Fork real-behavior-proof and workflow-sanity checks pass; only
+  expected fork-permission auto-response/label jobs fail, while the upstream
+  CI matrix is skipped. It is draft and mergeable; no upstream issue or PR was
+  filed.
 - Current Lobster adopter: [fork draft PR 59](https://microsoft.ghe.com/giodl/lobster/pull/59)
   at `ee697055129`, stacked directly on deployment-selection PR 58. It registers
   one exact plugin-authenticated WebSocket route only from a G2-prepared binding
   whose owner generation and `lobster/host` bundle generation match. The normal
   startup entry and disabled selection remain inert and do not read authority.
+  Its exact external-consumer replay against OpenClaw `519e1c57819` passes all
+  23 plugin tests with a real loopback HTTP/WebSocket upgrade.
 - Runtime-peer gate: G1-G3 are authored and proven. The local upstream landing
   packet and problem-led issue body are now ready but remain unfiled. G4's
   lifecycle contract is defined in
@@ -89,9 +122,17 @@
   at `bad65d354d`, stacked on PR 60, atomically binds one selected authority,
   peer fingerprint, identity, and exact plugin route; transport failures retry,
   while configuration, admission, and protocol failures enter `Blocked` without
-  a retry storm. All 38 tests and strict Clippy pass; review is clean. Both
-  slices remain inactive. Next add circuit cooldown and bounded drain; rollout,
-  production startup wiring, and default activation remain separate.
+  a retry storm. Fork draft [Lobster PR 62](https://microsoft.ghe.com/giodl/lobster/pull/62)
+  at `728678ac3c`, stacked on PR 61, adds the deployment-owned attempt budget
+  and circuit cooldown, terminal cancellation plus forced-abort drain bound,
+  and one stop-before-start generation owner. All 41 tests, canonical format,
+  strict Clippy, and review pass. All G4 slices remain inactive. Next freeze the
+  fork proof and prepare the single reverse-carrier upstream landing packet;
+  real Gateway proof, rollout, production startup wiring, and default activation
+  remain separate and require explicit authorization. The canonical filing
+  packet is `bounded-reverse-carrier-owner-landing-packet-2026-07-29.md`, with
+  independent issue and PR bodies; the only product gate is explicit
+  @steipete confirmation of the O4 manifest/public Plugin SDK ownership seam.
 - Current focus: validate independently useful OpenClaw factorizations without
   requiring the RFC. O1 now has the canonical upstream issue and draft PR
   above; upstream draft PR 113513 is closed superseded evidence. Exact-origin
