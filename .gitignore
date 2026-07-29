@@ -13,6 +13,8 @@ tmp/
 inspect-*.sh
 pr*-body.md
 projects/prs/worktrees.md
+projects/disk-mgmt/last-*.md
+projects/disk-mgmt/local/
 
 # Python/runtime byproducts from local tools.
 __pycache__/
@@ -45,3 +47,4 @@ design/.proof/
 .local/
 /.rp.ts
 /.rp.test.ts
+

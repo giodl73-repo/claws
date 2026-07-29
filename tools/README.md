@@ -10,6 +10,7 @@ Repo-local operator tools live here.
 | OpenClaw PR status | `tools/openclaw-prs/status.ps1`                | Compact WSL/GitHub status for open fix PRs, checks, ClawSweeper, and requested changes. |
 | Worktree audit     | `tools/worktrees/audit-worktrees.ps1`          | Inventory local OpenClaw/Lobster worktrees and write `projects/prs/worktrees.md`.       |
 | Worktree setup     | `tools/worktrees/setup-worktree.ps1`           | Create or hydrate a git worktree and run package-manager install.                       |
+| Disk management    | `tools/disk-mgmt/`                             | Inventory free space/repos, prune merged PR worktrees and stale pushed branches, reclaim caches. |
 
 If a tool is promoted into this repo, give it `tools/<name>/README.md` with:
 

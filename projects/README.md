@@ -24,8 +24,8 @@ be buried in generated wave directories.
 | `hosted-integration/` | Host integration bundles, owner-selected capability bindings, Hosting Profiles, narrow carriers, and ProxyPipe retirement.               |
 | `state-continuity/`   | State inventory, consistency, checkpoint/publication, dirty/synced status, fencing, restore, and persistence deletion.                   |
 | `promoteclaw/`        | Lobster OpenClaw version promotion from quarantine-cleared LTS releases, including patch carry-forward/drop validation.                  |
-| `openclaw-patches/`   | Lobster-carried OpenClaw patch inventory, related-thread discovery, and upstream fix/contract extraction.                               |
 | `typeclaw/`           | OpenClaw TypeScript native / TS7 performance and compatibility evaluation.                                                               |
+| `openclaw-rust-node/` | Rust node client/headless host RFC, node-contract conformance, release ownership, and first Lobster embedding evidence.                  |
 | `memory/`             | Agent memory strategy, OpenClaw memory assessment, and XAI report coordination.                                                          |
 | `mail/`               | OpenClaw mail-channel research, mail plugin options, and Exchange/Microsoft Graph integration framing.                                   |
 | `claws/`              | OpenClaw RFC direction for runnable starter setups across skills, plugins, MCP servers, workspace files, persona files, and automations. |
@@ -39,6 +39,7 @@ be buried in generated wave directories.
 | `lobster/`            | Lobster worktree links, LobsterTank notes, runtime/dashboard notes.                                                                      |
 | `pr-loop/`            | Active PR-loop operations, dependency restacks, review refreshes, and CI gate handoffs.                                                  |
 | `prs/`                | Cross-project PR queue views, staleness, proof, and watcher notes.                                                                       |
+| `disk-mgmt/`          | Laptop disk reclaim, managed-repo inventory (claws first), merged/closed PR worktree prune, stale branch cleanup, reclaim techniques.    |
 
 Wave directories under `.craft/waves/` remain historical context. Promote useful
 wave output into one of these directories when it becomes active work.
@@ -67,8 +68,8 @@ agent is assigned to an area, then read the area `README.md`.
 | Hosted Integration                  | `hosted-integration/SESSION.md` |
 | Runtime State Continuity            | `state-continuity/SESSION.md`   |
 | PromoteClaw                         | `promoteclaw/SESSION.md`        |
-| OpenClaw patch upstreaming          | `openclaw-patches/SESSION.md`   |
 | TypeClaw                            | `typeclaw/SESSION.md`           |
+| OpenClaw Rust node                  | `openclaw-rust-node/SESSION.md` |
 | Memory                              | `memory/SESSION.md`             |
 | Mail                                | `mail/SESSION.md`               |
 | Claws                               | `claws/SESSION.md`              |
@@ -80,5 +81,6 @@ agent is assigned to an area, then read the area `README.md`.
 | Bugs                                | `bugs/SESSION.md`               |
 | PR loop                             | `pr-loop/SESSION.md`            |
 | PR watcher                          | `prs/SESSION.md`                |
+| Disk management                     | `disk-mgmt/SESSION.md`          |
 
 Use `session-context-template.md` when adding a new area.

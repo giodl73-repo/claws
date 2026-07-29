@@ -28,8 +28,8 @@ tools.
 | Hosted Integration                  | `projects/hosted-integration/README.md`              |
 | Runtime State Continuity            | `projects/state-continuity/README.md`                |
 | PromoteClaw                         | `projects/promoteclaw/README.md`                     |
-| OpenClaw patch upstreaming          | `projects/openclaw-patches/README.md`                |
 | TypeClaw                            | `projects/typeclaw/README.md`                        |
+| OpenClaw Rust node                  | `projects/openclaw-rust-node/README.md`              |
 | Memory work                         | `projects/memory/README.md`                          |
 | Mail work                           | `projects/mail/README.md`                            |
 | Claws work                          | `projects/claws/README.md`                           |
@@ -41,6 +41,7 @@ tools.
 | Bugfix work                         | `projects/bugs/README.md`                            |
 | PR loop                             | `projects/pr-loop/README.md`                         |
 | PR queues and Gitcrawl              | `projects/prs/README.md`, `projects/prs/gitcrawl.md` |
+| Disk management                     | `projects/disk-mgmt/README.md`, `tools/disk-mgmt/README.md` |
 | WSL operation                       | `projects/wsl/README.md`, `tools/wsl/README.md`      |
 | Local tools                         | `tools/README.md`                                    |
 | Worktree setup and audit            | `tools/worktrees/README.md`                          |
@@ -67,8 +68,8 @@ Common session files:
 - `projects/hosted-integration/SESSION.md`
 - `projects/state-continuity/SESSION.md`
 - `projects/promoteclaw/SESSION.md`
-- `projects/openclaw-patches/SESSION.md`
 - `projects/typeclaw/SESSION.md`
+- `projects/openclaw-rust-node/SESSION.md`
 - `projects/claws-review-bot/SESSION.md`
 - `projects/oc-path/SESSION.md`
 - `projects/clawpilot/SESSION.md`
@@ -76,6 +77,7 @@ Common session files:
 - `projects/bugs/SESSION.md`
 - `projects/pr-loop/SESSION.md`
 - `projects/prs/SESSION.md`
+- `projects/disk-mgmt/SESSION.md`
 
 ## Current Rules
 
@@ -170,11 +172,12 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
   dirty/synced status, fencing, restore, and Lobster persistence deletion.
 - PromoteClaw: regular Lobster OpenClaw version promotion from Galin's
   quarantine-cleared LTS feed, including patch carry-forward/drop validation.
-- OpenClaw patch upstreaming: inventory Lobster-carried source patches, locate
-  related upstream issues and PRs, and extract generic fixes or host contracts.
 - TypeClaw: OpenClaw TypeScript native / TS7 evaluation, benchmarks,
   compatibility findings, and feedback suitable for OpenClaw or Microsoft TS
   owners.
+- OpenClaw Rust node: experimental Rust node client and headless host,
+  language-neutral node-contract publication, two-layer pairing conformance,
+  release ownership, and the first bounded Lobster embedding proof.
 - Memory: AI agent memory strategy, OpenClaw memory assessment, and XAI
   Harness / Tools / Skills report coordination.
 - Mail: OpenClaw mail-channel research, plugin options, and Exchange/Microsoft
@@ -194,6 +197,9 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
   CI gates, and handoffs while driving PRs to approval/merge.
 - PR watcher: staleness, proof freshness, CI/review comments, ClawSweeper, and
   branch hygiene across active PRs.
+- Disk management: laptop free-space reclaim, managed-repo inventory (claws
+  family first), merged/closed PR worktree prune, stale pushed branch delete,
+  and safe cache/git/retired-tree techniques.
 
 ## External Worktrees
 

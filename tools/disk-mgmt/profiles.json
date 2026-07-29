@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "notes": [
+    "Laptop-aware worktree budgets for claws/OpenClaw/Lobster work.",
+    "light = 1-2 active projects + merge lane (this class of laptop).",
+    "heavy = 4-5 active projects + merge lane (multi-stack laptop).",
+    "GB numbers are planning budgets, not hard filesystem quotas."
+  ],
+  "defaults": {
+    "roots": ["C:\\src", "C:\\tmp"],
+    "worktreeRoot": "C:\\src",
+    "perWorktreeBudgetGB": 3.0,
+    "protectedBaseNames": [
+          "claws-hapi",
+          "lobster",
+          "openclaw",
+          "srcopenclaw"
+        ],
+        "optionalLongLivedNotes": [
+          "Allocate clawpilot/clawhub/clawsweeper/resonance/openclaw-rust-node only while actively working them."
+        ]
+  },
+  "profiles": {
+    "light": {
+      "description": "1-2 OpenClaw/Lobster projects plus merging",
+      "activeProjectSlots": 2,
+      "mergeSlots": 1,
+      "maxActiveSlots": 3,
+      "perWorktreeBudgetGB": 3.0,
+      "activeWorkingSetBudgetGB": 12,
+      "protectedBasesBudgetGB": 15,
+      "clawsCheckoutBudgetGB": 30,
+      "minFreeGB": 40,
+      "warnFreeGB": 25,
+      "criticalFreeGB": 15,
+      "staleReleaseDays": 7
+    },
+    "heavy": {
+      "description": "4-5 concurrent OpenClaw/Lobster project stacks plus merging",
+      "activeProjectSlots": 5,
+      "mergeSlots": 1,
+      "maxActiveSlots": 6,
+      "perWorktreeBudgetGB": 3.0,
+      "activeWorkingSetBudgetGB": 24,
+      "protectedBasesBudgetGB": 20,
+      "clawsCheckoutBudgetGB": 50,
+      "minFreeGB": 50,
+      "warnFreeGB": 30,
+      "criticalFreeGB": 20,
+      "staleReleaseDays": 10
+    }
+  }
+}
