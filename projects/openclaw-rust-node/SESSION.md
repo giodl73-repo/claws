@@ -38,7 +38,7 @@
 - Final sequential review closeout completed for the four public review
   surfaces. Foundation #116050 is at `41f4e705887` with 56 Rust tests;
   follow-up #116450 is at `894d125ee76` with 73 Rust tests; RFC #54 is at
-  `08a58fcf2f08`; Windows #1068 is at `c0cfa8ba668`. Core, architecture/API,
+  `923aed0e1f2`; Windows #1068 is at `c0cfa8ba668`. Core, architecture/API,
   and security reviewers are clean after all findings were resolved. The
   standalone Codex CLI review remained quota-blocked and is disclosed rather
   than represented as a pass.
