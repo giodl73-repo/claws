@@ -45,12 +45,19 @@
   guard passed 57 focused tests plus core tsgo, type-aware lint, and format.
 - Posted an inspectable redacted current-head transcript at
   https://github.com/openclaw/openclaw/pull/115237#issuecomment-5136842693 and
-  requested ClawSweeper re-review. Hosted checks are running; #115237 remains
-  draft until that current-head review is clean.
+  requested ClawSweeper re-review. The exact-head review accepted the proof,
+  closed the compatibility finding, and reported no actionable code or security
+  findings. Hosted checks are green; #115237 remains draft only for explicit
+  maintainer acceptance of the experimental schema-v1/profile/bootstrap model.
 - Next: clear hosted #115237 feedback, then rebuild #115962 as the narrow
   schema-v1 profile-extension/application-content PR. Assets remain portable
   managed `workspace.files`, so add/update/remove/export use the existing file
   lifecycle rather than a new asset owner.
+- Created `/root/src/openclaw-claws-extensions-v1` on
+  `proof/claws-extensions-v1` from exact #115237 head `8de7541b851d`. The old
+  #115962 implementation is evidence only; the rebuild must exclude schema-v2
+  setup state and resource roles while retaining canonical plugin-owner
+  inspection, consent, mutation, provenance, drift, and cleanup behavior.
 
 ### 2026-07-30 RFC #48 portable-profile sidecars
 
