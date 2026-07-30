@@ -22,6 +22,24 @@
 
 ## Current Session
 
+### 2026-07-30 RFC #48 portable-profile sidecars
+
+- Updated RFC #48 and its normative sidecars around a three-layer contract:
+  portable `CLAW.md`, package artifact/lifecycle semantics, and the
+  OpenClaw-specific `profiles/openclaw.yml` adapter contract.
+- Kept schema version 1 and removed metadata pointers. Package-root
+  `BOOTSTRAP.md` is a bounded, seed-once native first-run file rather than a
+  managed workspace file or setup-form schema.
+- Added `openclaw-profile-v1-spec.md` for dynamic built-in agent settings,
+  native plugin extensions, ordinary workspace assets, canonical owner
+  delegation, consent/provenance, and `show_widget` with message/Markdown
+  fallback.
+- The specs intentionally add no generic capability registry, resource-role
+  schema, setup template engine, or separate dashboard tool. Direct MCP remains
+  portable; native plugins stay in the selected harness profile.
+- Signed heads `2909501` and `bef312b` are pushed. RFC #48 is ready, clean,
+  and has passing dispatch checks.
+
 ### 2026-07-29 Awesome Claws wave-plan role review
 
 - Reviewed the 35-package, six-dimension upgrade plan through founder,
