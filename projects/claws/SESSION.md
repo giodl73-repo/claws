@@ -22,6 +22,36 @@
 
 ## Current Session
 
+### 2026-07-30 portable profile/bootstrap implementation checkpoint
+
+- Rebased and pushed RFC #48 at signed head `be9fb97e8a5d`. Its three
+  normative sidecars now consistently define portable `CLAW.md`, package
+  lifecycle, and the conventional `profiles/openclaw.yml` adapter. Final
+  `codex review --base origin/main` found no actionable issue; the PR body now
+  records the exact pending/digest-identical bootstrap removal rule and real
+  OpenClaw lifecycle proof.
+- Rebased and pushed draft RFC #52 at signed head `326778d40e53`. It now reuses
+  OpenClaw #115237 as PR 1 rather than calling it superseded, preserves schema
+  v1, and aligns bootstrap update/remove semantics with RFC #48. The final
+  two-file alignment passed diff/stale-reference review; a new external Codex
+  run was quota-blocked after the prior full RFC review had passed.
+- Rewrote and pushed OpenClaw #115237 as conventional profile plus native
+  bootstrap at signed head `8de7541b851d`. Full proof remains 631 focused
+  lifecycle/DB tests, core tsgo, generated DB checks, type-aware lint, format,
+  and real add/status/remove CLI behavior.
+- Addressed ClawSweeper's compatibility finding without restoring the retired
+  metadata pointer or moving to schema v2: `metadata.openclaw.config` now fails
+  closed with an actionable move-to-`profiles/openclaw.yml` diagnostic. The
+  guard passed 57 focused tests plus core tsgo, type-aware lint, and format.
+- Posted an inspectable redacted current-head transcript at
+  https://github.com/openclaw/openclaw/pull/115237#issuecomment-5136842693 and
+  requested ClawSweeper re-review. Hosted checks are running; #115237 remains
+  draft until that current-head review is clean.
+- Next: clear hosted #115237 feedback, then rebuild #115962 as the narrow
+  schema-v1 profile-extension/application-content PR. Assets remain portable
+  managed `workspace.files`, so add/update/remove/export use the existing file
+  lifecycle rather than a new asset owner.
+
 ### 2026-07-30 RFC #48 portable-profile sidecars
 
 - Updated RFC #48 and its normative sidecars around a three-layer contract:
