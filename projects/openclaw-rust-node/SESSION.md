@@ -51,13 +51,11 @@
   consolidation-wide review is claimed.
 - Draft [RFC #54](https://github.com/openclaw/rfcs/pull/54) is at `9df4ee7`.
   It now identifies the RFC PR as the acceptance record and narrows the one
-  requested decision to unpublished monorepo incubation with a named initial
-  implementation/conformance owner and explicit Gateway/security authority;
-  publication, an official binary, broader parity, and
-  platform/release support remain later gates. `@giodl73-repo` is now named as
-  the proposed initial implementation/conformance owner, while `@steipete` and
-  the OpenClaw maintainer group retain Gateway/security authority and decide
-  acceptance. Draft Windows
+  requested decision to whether the unpublished monorepo crates should be an
+  OpenClaw core technical surface with canonical Gateway/security authority and
+  cross-language conformance; publication, an official binary, broader parity,
+  and platform/release support remain later gates. It deliberately does not ask
+  for individual staffing or maintainer assignment. Draft Windows
   [#1068](https://github.com/openclaw/openclaw-windows-node/pull/1068) absorbed
   fork PR #1 and is rebased onto upstream `9acafa60` at `194928fd`; GitHub now
   reports it mergeable/CLEAN with all hosted checks complete and green. Its

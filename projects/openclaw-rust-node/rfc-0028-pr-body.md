@@ -15,7 +15,7 @@ Microsoft-specific protocol or runtime fork.
 
 Scout's alignment with the main Copilot app—and the long-lived Windows
 Companion/system-tray process becoming the local controller—now makes that
-shared dependency practical. Scott's requested model is for Windows Companion
+shared dependency practical. Microsoft's requested model is for Windows Companion
 to depend on the OpenClaw-owned Rust runtime, simplifying the Companion
 architecture and avoiding a second node implementation, while its shell and
 native adapters remain in Edge/Chromium.
@@ -27,26 +27,25 @@ runtime does not gain separate Windows and Scout control planes. It also
 clarifies that this is one canonical node-mode contract with a bounded Rust
 implementation for native/headless hosts—not an uncontrolled product fork.
 Microsoft is willing to seed implementation and maintenance. The bounded
-decision requested here is to incubate the two unpublished workspace crates in
-the OpenClaw monorepo, with a named initial implementation/conformance owner,
-explicit Gateway/security authority, and shared conformance beside the
-TypeScript reference. It does not publish crates, make
+technical decision requested here is whether the two unpublished workspace
+crates should incubate as an OpenClaw core surface in the monorepo, with
+Gateway/security authority and shared conformance beside the TypeScript
+reference. It does not publish crates, make
 the proof host an official binary, promise platform support, or accept broader
 node-mode parity; those remain explicit follow-on decisions. This PR is the
 acceptance discussion and decision record.
 
-The proposed initial implementation/conformance owner is
-[`@giodl73-repo`](https://github.com/giodl73-repo), backed by the Microsoft
-product team. [`@steipete`](https://github.com/steipete) and the OpenClaw
-maintainer group retain Gateway/security authority and decide whether to accept
-that boundary. No release owner is assigned until a later publication or
-official-binary decision.
+The RFC deliberately does not assign individual maintainers or ask for a
+staffing decision. Implementation, review, and CODEOWNERS can follow normal
+OpenClaw practice, and any later publication or official-binary proposal can
+define the additional operational commitments it introduces.
 
 Microsoft is the anchor adopter, not the exclusive audience. The runtime and
 every accepted capability surface remain customer-neutral so other native,
-embedded, appliance, and headless OpenClaw adopters can reuse them. Peter can
-therefore choose the scope based on what is right for OpenClaw's broader
-customer base, with Microsoft willing to seed implementation and maintenance.
+embedded, appliance, and headless OpenClaw adopters can reuse them. OpenClaw
+maintainers can therefore choose the scope based on what is right for the
+broader customer base, with Microsoft willing to seed implementation and
+maintenance.
 
 This is a convergence refactor, not the introduction of an unrelated Rust
 stack. OpenClaw's Linux Tauri app already contains a production Rust Gateway
