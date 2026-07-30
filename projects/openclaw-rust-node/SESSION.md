@@ -500,6 +500,13 @@
 
 ## Open Threads
 
+- RFC 0028 now has five companion documents under `rfcs/0028/`: Gateway client
+  v1, node runtime v1, future sidecar hosting v1, conformance/adoption plan, and
+  implementation/evidence inventory. Gateway, platform, CISO, release, and
+  maintainer role review is recorded in
+  `rfc-0028-companion-spec-role-review-2026-07-30.md`. The review explicitly
+  separates the current foreground proof host from a production sidecar and
+  adds event-memory and product-audit gaps to the release/adoption inventory.
 - Final PR-body consistency pass on 2026-07-30 synchronized RFC #54,
   OpenClaw #116050/#116450, and Windows #1068: identical three-part stack
   language, `openclaw-gateway-client`/`openclaw-node-host` ownership terms,
