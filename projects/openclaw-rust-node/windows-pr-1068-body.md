@@ -59,6 +59,24 @@ Exact steps or command run after this patch:
 Evidence after fix:
 The retained console/TRX transcript at `TestResults/MxcE2E/OpenClaw.E2ETests.Mxc.trx` reports `Test Run Successful`, `Total tests: 2`, `Passed: 2`. The success invocation returned `OPENCLAW_GATEWAY_SYSTEM_RUN_MXC_OK`, exit code 0, `contained=True`, and `containment=mxc`. The denied-write invocation returned exit code 1 with `Access is denied.`, confirmed `fileExists=False`, and reported `containment=mxc`. Teardown completed successfully and unregistered the generated distro.
 
+Redacted current-head transcript:
+
+```text
+head: 194928fdc0c86be1360b79c2f109520ef01959ec
+RealGateway_SystemRun_BlocksWritesToTrayDataDirectoryInMxcSandbox  Passed  00:00:07.4611118
+  node.invoke: ok=true, command=system.run
+  stdout=OPENCLAW_GATEWAY_SYSTEM_RUN_MXC_SOURCE_READY
+  stderr="Access is denied.", exitCode=1, success=false
+  contained=True, containment=mxc, fileExists=False
+RealGateway_SystemRun_ExecutesThroughWindowsNodeMxcSandbox          Passed  00:00:06.7413585
+  node.invoke: ok=true, command=system.run
+  stdout=OPENCLAW_GATEWAY_SYSTEM_RUN_MXC_OK
+  stderr="", exitCode=0, success=true
+  contained=True, containment=mxc
+Test Run Successful. Total tests: 2. Passed: 2. Failed: 0.
+Teardown: uninstall completed; generated WSL distro unregistered.
+```
+
 Observed result after fix:
 Both `RealGateway_SystemRun_ExecutesThroughWindowsNodeMxcSandbox` and `RealGateway_SystemRun_BlocksWritesToTrayDataDirectoryInMxcSandbox` passed through the live Gateway, replaceable runtime boundary, and shared Windows dispatcher. Existing production selection still chose the C# `WindowsNodeClient`.
 

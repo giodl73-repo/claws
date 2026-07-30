@@ -26,11 +26,13 @@ same node through the Gateway. Controller authority stays in the Gateway; the
 runtime does not gain separate Windows and Scout control planes. It also
 clarifies that this is one canonical node-mode contract with a bounded Rust
 implementation for native/headless hosts—not an uncontrolled product fork.
-Microsoft is willing to provide named owners for the additional node-mode
-capability layers, including broader parity. Peter and the OpenClaw maintainers
-can choose how much to accept: the shared client, the bounded host, or a fuller
-native node implementation. Every accepted layer remains bound to the same
-OpenClaw contract, policy, and conformance corpus.
+Microsoft is willing to seed implementation and maintenance. The bounded
+decision requested here is to incubate the two unpublished workspace crates in
+the OpenClaw monorepo, with a named initial code/security owner and shared
+conformance beside the TypeScript reference. It does not publish crates, make
+the proof host an official binary, promise platform support, or accept broader
+node-mode parity; those remain explicit follow-on decisions. This PR is the
+acceptance discussion and decision record.
 
 Microsoft is the anchor adopter, not the exclusive audience. The runtime and
 every accepted capability surface remain customer-neutral so other native,

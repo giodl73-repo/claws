@@ -49,12 +49,18 @@
   still resets on Windows and has prior Linux proof. Full aggregate and
   commit-only Codex reviews timed out without a verdict, so no clean
   consolidation-wide review is claimed.
-- Draft [RFC #54](https://github.com/openclaw/rfcs/pull/54) is clean at
-  `cdc10f5` and now links the two upstream OpenClaw PRs. Draft Windows
+- Draft [RFC #54](https://github.com/openclaw/rfcs/pull/54) is at `9df4ee7`.
+  It now identifies the RFC PR as the acceptance record and narrows the one
+  requested decision to unpublished monorepo incubation with a named initial
+  code/security owner; publication, an official binary, broader parity, and
+  platform/release support remain later gates. Draft Windows
   [#1068](https://github.com/openclaw/openclaw-windows-node/pull/1068) absorbed
   fork PR #1 and is rebased onto upstream `9acafa60` at `194928fd`; GitHub now
   reports it mergeable/CLEAN with all hosted checks complete and green. Its
-  current-head live Gateway MXC proof passes 2/2.
+  current-head live Gateway MXC proof passes 2/2. Its PR body now includes an
+  inspectable redacted current-head transcript, and a fresh ClawSweeper review
+  was requested. Foundation #116050 likewise now makes its existing
+  `publish = false` status and proof-only binary status explicit.
 - Merged Windows fork PR [giodl73-repo/openclaw-windows-node#1](https://github.com/giodl73-repo/openclaw-windows-node/pull/1)
   is included in upstream adopter PR #1068 at `194928fd`. It extracts command
   indexing, eight-slot bounded execution, duplicate tracking, caller/transport

@@ -12,6 +12,13 @@ This is the independently useful foundation. It does not publish crates,
 replace Tauri or `src/node-host`, add Windows integration, or add
 product-specific Scout or Lobster behavior.
 
+Both Cargo packages set `publish = false`. The `openclaw-node` executable is a
+repository-local foreground proof host in this draft; this PR does not package,
+release, or declare it a supported operator-facing binary. Accepting this slice
+would incubate the shared contract in the monorepo, not stabilize a public Rust
+API or create a platform-support commitment. Those remain explicit RFC release
+gates.
+
 ## Position in the series
 
 The ownership proposal is [RFC #54](https://github.com/openclaw/rfcs/pull/54).

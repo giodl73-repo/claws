@@ -24,6 +24,7 @@ owner and not a reason to add product-specific wire fields.
 | OpenClaw runtime follow-up PR body | `openclaw-pr2-consolidated-body.md` |
 | Windows adopter PR body | `windows-pr-1068-body.md` |
 | RFC 0028 companion-spec role review | `rfc-0028-companion-spec-role-review-2026-07-30.md` |
+| Live PR feedback resolution | `feedback-resolution-2026-07-30.md` |
 | Runnable-node PR body | `openclaw-pr3-body.md` |
 | OpenClaw integrations PR body | `openclaw-pr4-body.md` |
 | Gateway authority conformance PR body | `openclaw-pr4b-body.md` |
