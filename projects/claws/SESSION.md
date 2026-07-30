@@ -5473,3 +5473,36 @@ package install policy`). The branch is `user/giodl/claws-pr5-installers`,
 - Removed an unhooked native `show_widget` fixture before push. A real Control
   UI inline-widget/dashboard orchestration lane remains an explicit discussion
   item rather than an implied completed contract.
+
+### 2026-07-30 RFC 0052 schema-v1 extension lifecycle rebuilt
+
+- Replaced the stale schema-v2/resource-role implementation on OpenClaw draft
+  PR #115962 with the accepted schema-v1 profile-extension design. The signed
+  exact head is `9002871d2f3bdf24b288070fa9935638f3ebda5e`; the PR title/body and
+  proof now describe conventional `profiles/openclaw.yml`, native bootstrap,
+  ordinary managed assets, and canonical plugin ownership.
+- The three PR2 commits after #115237 add schema-v1 planning, shared plugin
+  bundle-capability inspection, mutation/provenance, update/status/doctor,
+  export, and read-only CLI inspect. No setup forms, persisted answers,
+  resource roles, generic capability registry, or schema v2 remain.
+- Real WSL2/Node 24.15 proof used live ClawHub
+  `@openclaw/lobster@2026.7.1`. Inspect/add/status/export/inspect-export/remove
+  passed with bootstrap and a managed schema asset. A separate v1-to-v1.1
+  update changed extension identity while reusing the same plugin, updated the
+  asset and `SOUL.md`, and finished with compatible adapter provenance.
+- The update proof found and fixed one real bug: planning hashed enriched
+  package status while apply hashed persisted provenance. Package-reference
+  digests now project only persisted fields, with regression coverage.
+- Validation: 303 focused lifecycle/CLI/state tests, 40 final update tests,
+  core source/test types, full test types before the final typed regression,
+  changed-file type-aware Oxlint, generated Kysely verification, docs
+  formatting/MDX/links/map, Oxfmt, and diff checks. `codex review
+  --uncommitted` reported no actionable correctness findings. The aggregate
+  docs glossary gate remains blocked by unrelated zh-CN debt across main-side
+  docs.
+- Fresh `@clawsweeper re-review` is queued on #115962. The PR remains draft;
+  do not merge or mark ready without the stack-owner decision.
+- Next: reconcile standalone `giodl73-repo/claws#1` to the same schema-v1
+  conventional profile/bootstrap/extensions/assets contract, then align
+  ClawHub/Awesome Claws before the deferred Gateway/Control UI and adapter
+  conformance tracks.
