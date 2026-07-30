@@ -8,8 +8,8 @@ This combines the implementation proven in fork PRs #186-#191, the Rust 1.95 str
 
 ## Position in the series
 
-1. [#116050](https://github.com/openclaw/openclaw/pull/116050) creates the reusable Gateway client, bounded node-host foundation, headless binary, and Tauri consumer.
-2. **This PR** adds the production-shaped embeddable lifecycle and cross-language conformance layer on that foundation.
+1. [#116050](https://github.com/openclaw/openclaw/pull/116050) creates the reusable Gateway client, bounded node-host foundation, and headless binary, and makes the Linux Tauri app its first consumer.
+2. **This PR** adds the embeddable lifecycle and cross-language conformance layer on that foundation.
 3. [Windows node #1068](https://github.com/openclaw/openclaw-windows-node/pull/1068) prepares the official Windows tray/node to consume the runtime later while keeping C# as its production default.
 
 This PR does not contain the Windows adapter. It defines the generic runtime surface that an authenticated, versioned Windows adapter can consume in a later adopter slice.
@@ -43,7 +43,7 @@ The logical diff is ten commits on exact foundation head `7600501dd50`; no squas
 
 ## Validation
 
-Current aggregate head:
+Current aggregate head: `c533982d751e92be4b5b754842c05e8758b9a78f`
 
 - `cargo fmt --all -- --check`: passed
 - `cargo test --workspace`: 62 passed
@@ -70,7 +70,7 @@ Windows 11 with Rust 1.95 at aggregate head `c533982d751e92be4b5b754842c05e8758b
 
 Exact steps or command run after this patch:
 
-1. Run `cargo test -p openclaw-node-host` from `crates/`.
+1. Run `cargo test --workspace` from `crates/`.
 2. Exercise the loopback lifecycle, signing, reconnect, duplex input/progress, cancellation, admission, manifest retirement, and shared-fixture tests over actual local WebSocket connections.
 3. Run strict workspace Clippy and Rustdoc gates.
 

@@ -11,7 +11,7 @@ This is the consolidated Windows adopter slice for the proposed OpenClaw Rust ru
 
 ## Position in the series
 
-1. [OpenClaw #116050](https://github.com/openclaw/openclaw/pull/116050) creates the reusable Gateway client, bounded node-host foundation, headless binary, and Tauri consumer.
+1. [OpenClaw #116050](https://github.com/openclaw/openclaw/pull/116050) creates the reusable Gateway client, bounded node-host foundation, and headless binary, and makes the Linux Tauri app its first consumer.
 2. [OpenClaw #116450](https://github.com/openclaw/openclaw/pull/116450) adds the embeddable lifecycle, duplex invocation, admission, connection manifests, and cross-language conformance layer.
 3. **This PR** prepares the official Windows tray/node to adopt that runtime through a replaceable client boundary and one shared Windows capability dispatcher.
 

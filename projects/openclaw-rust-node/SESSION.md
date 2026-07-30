@@ -500,6 +500,11 @@
 
 ## Open Threads
 
+- Final PR-body consistency pass on 2026-07-30 synchronized RFC #54,
+  OpenClaw #116050/#116450, and Windows #1068: identical three-part stack
+  language, `openclaw-gateway-client`/`openclaw-node-host` ownership terms,
+  typed issued-device-token terminology, proof commands matching reported test
+  counts, and no placeholder discussion link. All four remain draft.
 - Codex review closeout on 2026-07-30: completed passes found and fixed six
   foundation issues (request/cancellation ordering, mapped-IPv4 trust, TLS
   typing/reconnect policy, terminal reconnect metadata, and queued final-event

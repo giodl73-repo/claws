@@ -1,11 +1,11 @@
-## What Problem This Solves
+## What problem this solves
 
 Microsoft's Windows Companion/system-tray work needs a native Rust node runtime,
 but placing that runtime in Edge/Chromium would duplicate OpenClaw's protocol,
 lifecycle, policy, and security behavior. OpenClaw also needs a clear ownership
 boundary between its reusable runtime and product-specific shells.
 
-## Why This Change Was Made
+## Why this change was made
 
 This RFC proposes that OpenClaw own a reusable, headless Rust node runtime in
 the OpenClaw monorepo, while Microsoft keeps the Windows shell, native tools,
@@ -66,13 +66,13 @@ The RFC governs three implementation PRs with distinct jobs:
 
 1. [OpenClaw #116050](https://github.com/openclaw/openclaw/pull/116050)
    extracts Tauri's Gateway transport into `openclaw-gateway-client`, adds the
-   bounded `openclaw-node-host` foundation and headless binary, and makes Tauri
-   the first consumer of the shared client.
+   bounded `openclaw-node-host` foundation and headless binary, and makes the
+   Linux Tauri app the first consumer of the shared client.
 2. [OpenClaw #116450](https://github.com/openclaw/openclaw/pull/116450)
-   follows #116050 with the embeddable lifecycle: platform signing and issued
-   tokens, reconnect, duplex invocation, local admission, connection-scoped
-   manifests, and shared TypeScript/Rust conformance fixtures. It must not land
-   before #116050.
+   follows #116050 with the embeddable lifecycle: platform signing and typed
+   issued-device-token delivery, reconnect, duplex invocation, local
+   admission, connection-scoped manifests, and shared TypeScript/Rust
+   conformance fixtures. It must not land before #116050.
 3. [Windows node #1068](https://github.com/openclaw/openclaw-windows-node/pull/1068)
    creates a replaceable runtime boundary and shared Windows capability
    dispatcher. It keeps C# as the production default and adds no Rust sidecar
@@ -81,7 +81,7 @@ The RFC governs three implementation PRs with distinct jobs:
 Fork PRs #186-#192 remain evidence history, not part of the proposed public
 review stack.
 
-## User Impact
+## User impact
 
 No immediate user-facing behavior changes. The existing Linux Tauri app keeps
 its product role while sharing its Rust Gateway implementation. If accepted,
@@ -90,16 +90,11 @@ instead of carrying a Node.js wrapper or a separate protocol implementation.
 
 ## Implementation and evidence
 
-- Foundation implementation and Tauri refactor:
-  https://github.com/openclaw/openclaw/pull/116050
-- Consolidated embeddable runtime follow-up:
-  https://github.com/openclaw/openclaw/pull/116450
-- Consolidated Windows adopter:
-  https://github.com/openclaw/openclaw-windows-node/pull/1068
+- [Foundation implementation and Tauri refactor](https://github.com/openclaw/openclaw/pull/116050)
+- [Embeddable runtime follow-up](https://github.com/openclaw/openclaw/pull/116450)
+- [Windows adopter seam](https://github.com/openclaw/openclaw-windows-node/pull/1068)
 
 The RFC has also been reviewed through Gateway reliability, sidecar lifecycle,
 enterprise security, and maintainer-correctness lenses. That review added
 explicit fail-closed authority, audit, readiness, crash recovery, reconnect,
 resource, and release gates.
-
-Related discussion thread: pending

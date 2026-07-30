@@ -6,7 +6,7 @@ OpenClaw's Linux Tauri app already contains a production Rust Gateway client,
 but that implementation is app-local. This PR extracts its reusable transport
 and security behavior into `openclaw-gateway-client`, adds the bounded
 `openclaw-node-host` foundation and headless `openclaw-node` binary, and makes
-Tauri the first consumer of the shared client.
+the Linux Tauri app the first consumer of the shared client.
 
 This is the independently useful foundation. It does not publish crates,
 replace Tauri or `src/node-host`, add Windows integration, or add
@@ -18,7 +18,8 @@ The ownership proposal is [RFC #54](https://github.com/openclaw/rfcs/pull/54).
 The implementation is split into three reviewable jobs:
 
 1. **This PR** creates the reusable Gateway client, bounded node-host
-   foundation, headless binary, and Tauri consumer. It lands first.
+   foundation, and headless binary, and makes the Linux Tauri app its first
+   consumer. It lands first.
 2. [#116450](https://github.com/openclaw/openclaw/pull/116450) depends on this
    PR and adds the embeddable lifecycle, duplex invocation, admission,
    connection manifests, and cross-language conformance layer.
@@ -109,9 +110,9 @@ production credential was used.
 
 Exact steps or command run after this patch:
 
-1. Built `openclaw-node` from the PR head and launched it with a non-secret
-   config that omitted `healthListen`; test-only identity/auth values were
-   supplied through the documented environment indirections.
+1. Built `openclaw-node` from proof head `13242763f3d` and launched it with a
+   non-secret config that omitted `healthListen`; test-only identity/auth
+   values were supplied through the documented environment indirections.
 2. Read the structured `host.starting` record, requested `/healthz` and
    `/readyz` at the reported address, sent SIGTERM, and read `host.stopped`.
 3. Ran `cargo test --manifest-path crates/Cargo.toml -p openclaw-node-host
@@ -149,6 +150,6 @@ passed 43 Rust workspace tests plus doc tests and all 98 Linux Tauri tests.
 The current reviewed head passes 47 Rust workspace tests on Windows.
 
 What was not tested:
-A packaged desktop UI build, a production Gateway deployment from this exact
-head, Windows Companion/Scout integration, cross-platform release artifacts,
-or crate publication.
+A packaged desktop UI build, a production Gateway deployment from the current
+reviewed head, Windows Companion/Scout integration, cross-platform release
+artifacts, or crate publication.
