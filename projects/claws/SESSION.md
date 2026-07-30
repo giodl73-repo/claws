@@ -22,6 +22,104 @@
 
 ## Current Session
 
+### 2026-07-29 Awesome Claws wave-plan role review
+
+- Reviewed the 35-package, six-dimension upgrade plan through founder,
+  skill-author, new-hire, CISO, repository-steward, release-engineer, and
+  power-user roles using the FACES Evaluate phase.
+- Kept the plan but made 21/30 a private human review target rather than a
+  machine quota; scores and the 15-pair matrix stay out of public packages.
+- Adaptation now requires allowlisted, previewed, attributable, correctable
+  context reuse. Theme cannot grant authority, weaken safety, impersonate a
+  person, or duplicate the `AGENTS.md` workflow.
+- Wave 1 starts with existing catalog fields; repository-local authoring helpers
+  are extracted only after concrete repetition. External package copying and
+  generated-repo contribution now have separate documented paths.
+- Every wave runs all 35 packages through standalone inspection, an isolated
+  OpenClaw lifecycle, and a package-specific domain scenario with assertions
+  selected by its target dimension levels. Golden adds deeper live Expedia and
+  exhaustive proof; it is not the only package exercised end to end.
+- The complete universal lifecycle, score-level contracts, provider proof
+  policy, 35 scenario matrix, and machine-readable result shape are in
+  `projects/claws/awesome-claws-validation-plan.md`.
+- The planned `npm run proof:portfolio` surface makes Awesome Claws an
+  executable Claws conformance corpus. Failures are classified as package,
+  spec, standalone CLI, OpenClaw lifecycle, capability-owner, or
+  provider/environment defects and should yield minimal reproductions rather
+  than weakened expectations.
+- Durable findings are in
+  `projects/claws/awesome-claws-upgrade-plan-role-review.md`; no blocking policy
+  question remains before Wave 1.
+
+### 2026-07-29 Awesome Claws application-platform scorecard
+
+- Scored all 35 packages in `giodl73-repo/awesome-claws#1` as agent
+  applications across product definition, capability composition, packaged
+  resources, setup/personalization, and operational readiness.
+- The rubric was refined so adaptation measures how efficiently a Claw becomes
+  locally useful, not how many setup fields it presents. Safe discovery of
+  agent identity, workspace context, existing configuration/integrations, and
+  user-owned state can outperform a form; sensitive identity and secrets are
+  never inferred for score.
+- The portfolio averages 15.9/25: Product 4.7, Capabilities 2.9, Resources 1.3,
+  Adaptation 2.2, and Operations 4.7. Travel Concierge and Software Maintainer
+  lead at 22; Financial Analyst scores 20 and Executive Assistant scores 18.
+- The main portfolio gap is executable application composition rather than
+  prose or safety. Most packages need meaningful persisted setup and packaged
+  schemas/templates/examples/fixtures/assets with an explicit contract showing
+  how their skills, plugins, or tools consume or produce those resources.
+- Portfolio policy now targets all 35 at 18+, keeps the ten pair exemplars
+  distinct, and designates Travel Concierge as the sole 25/25 Golden Claw. Its
+  perfect score requires real Expedia-backed end-to-end lifecycle proof rather
+  than a larger or artificially feature-rich manifest.
+- Executive Assistant is the separate Copyable Reference Claw: a small,
+  dependency-free example of portable prompt, workflow, managed template,
+  contextual adaptation, and seed-once user-owned preferences. Copyability is
+  an authoring/usability designation rather than a score dimension.
+- Theme is now the sixth rubric dimension (`T`, 3-5), making the Golden Claw
+  target 30/30 and expanding pair coverage from 10 to 15 distinct exemplars.
+  Every `CLAW.md` body must yield a recognizable `SOUL.md`; Executive Assistant
+  intentionally demonstrates light, copyable theming while Travel Concierge
+  demonstrates a strong professional identity. Theme cannot duplicate
+  `AGENTS.md`, weaken safety, or become theatrical role-play.
+- Full private scorecard and upgrade cohorts are recorded in
+  `projects/claws/awesome-claws-app-scorecard.md`; no review material was added
+  to the public Awesome Claws repository.
+
+### 2026-07-29 eight-PR application series review and rebase
+
+- Reviewed the six OpenClaw RFC #52 implementation PRs in order, followed by
+  `giodl73-repo/claws#1` and `giodl73-repo/awesome-claws#1`, with independent
+  Codex GPT-5.5, Claude Opus 4.6, and GPT-5.4 passes. Applied actionable
+  findings before advancing each branch; final repair panels were clean.
+- Hardened setup/update diagnostics, extension preflight contracts, setup-state
+  publication, extension inspection, guided-export provenance/redaction, and
+  Control UI stale-response and consent gating. The standalone CLI now bounds
+  and deduplicates declarations while preserving harness-neutral profile
+  ownership. Awesome Claws now independently validates portable paths,
+  setup-template references, seed collisions, profile/schema compatibility,
+  generated content, and bootstrap/profile wiring.
+- Rebased the cumulative OpenClaw stack onto current `main` and carried each
+  reviewed slice through its descendants. Every rewritten commit has a valid
+  Gio SSH signature and every `git range-diff` is patch-equivalent to the
+  reviewed version. Final heads: #115237 `2c111eb4aeac`, #115565
+  `84e1982c1294`, #115296 `2b7235e8c140`, #115962 `00a6c7b62d6c`, #115371
+  `bb672486b117`, and #112828 `a232cd800368`.
+- PR #112828 remains based on the dedicated reviewed PR5 branch
+  `user/giodl/claws-guided-export-v2-reviewed`, now advanced to
+  `bb672486b117`. All six OpenClaw heads are mergeable with zero current
+  failing or running checks; #112828 is clean and #115237/#115565/#115296/
+  #115962/#115371 are unstable only on draft/maintainer gates. ClawSweeper
+  re-reviews were requested at every rebased head.
+- Downstream final signed heads are `giodl73-repo/claws#1` at
+  `64b29ccffc75` and `giodl73-repo/awesome-claws#1` at `71461308364e`; both
+  are clean, mergeable drafts with green hosted validation. Exact WSL proof
+  passed 87 standalone CLI tests plus packed-CLI proof, and all 35 starter
+  Claws built, validated, and inspected through that exact CLI.
+- No PR was merged. Windows dependency refresh after the final rebase was
+  blocked by registry TLS/proxy failures, so final-main compatibility is being
+  covered by hosted CI; the reviewed patch behavior already has exact WSL proof.
+
 ### 2026-07-29 RFC #52 application lifecycle PR2
 
 - Opened draft OpenClaw PR #115962, `feat(claws): apply application extensions
@@ -5294,3 +5392,29 @@ package install policy`). The branch is `user/giodl/claws-pr5-installers`,
 - A real aggregate OpenClaw preview remains pending: the Windows Node 24.14
   runtime is below OpenClaw's 24.15 floor, while the WSL 24.15 application PR
   worktree lacks built output containing the complete six-PR aggregate stack.
+
+### 2026-07-30 Awesome Claws 50-package proof checkpoint
+
+- Expanded `giodl73-repo/awesome-claws#1` from 35 to 50 Claws and pushed signed
+  heads `3be60c7` and `342fe12` on
+  `user/giodl/awesome-claws-application-v2`. The PR remains draft for the next
+  Patrick design checkpoint.
+- Added the seventh Experience rubric dimension: X3 artifact plus fallback, X4
+  inline widget plus fallback, and X5 stable named dashboard plus fallback.
+  Travel Concierge is the primary X5 example and uses `travel-shortlist` only
+  after explicit user consent.
+- All 50 packages passed static generation and semantic checks. Existing proof
+  covers the complete isolated lifecycle for all 50, and retained request logs
+  now cover one real deterministic OpenClaw agent turn for every package.
+- All 15 visual Claws rendered at desktop and mobile sizes. The 30-render suite
+  checks blank output, document overflow, unnamed controls, console failures,
+  and visual signal; it found and fixed a mobile overflow in Localization
+  Program Manager's locale table. Final result: 30/30.
+- The portfolio exposed owner-qualified ClawHub skill lifecycle handling in
+  OpenClaw; the focused signed fix is draft PR #116462 at `6449cdf` with 51
+  targeted tests passing. Parallel proof also exposed harness-only Gateway
+  startup/reload contention; serial reruns provided the missing application
+  evidence without changing product policy.
+- Removed an unhooked native `show_widget` fixture before push. A real Control
+  UI inline-widget/dashboard orchestration lane remains an explicit discussion
+  item rather than an implied completed contract.
