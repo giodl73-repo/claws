@@ -21,7 +21,7 @@
   `C:\src\openclaw-rust-runtime-followup`.
 - Active Windows adopter worktree: `C:\src\openclaw-windows-rust-sidecar`.
 - Current Windows branch: `agent/rust-node-sidecar-seam-rebase`, with exact
-  head `194928fd` pushed to
+  head `c0cfa8ba` pushed to
   `giodl73-repo/openclaw-windows-node:agent/rust-node-sidecar-seam`.
 - Current reviewed `main` commit: `307945482d5543b7e3572bc6c0c288d4ff5b758c`.
 - OpenClaw source audit: `openclaw/openclaw` main at
@@ -35,6 +35,26 @@
 
 - Last updated: 2026-07-30.
 - Last agent: Codex.
+- Final sequential review closeout completed for the four public review
+  surfaces. Foundation #116050 is at `41f4e705887` with 56 Rust tests;
+  follow-up #116450 is at `894d125ee76` with 73 Rust tests; RFC #54 is at
+  `08a58fcf2f08`; Windows #1068 is at `c0cfa8ba668`. Core, architecture/API,
+  and security reviewers are clean after all findings were resolved. The
+  standalone Codex CLI review remained quota-blocked and is disclosed rather
+  than represented as a pass.
+- Windows #1068 now makes runtime connect cancellation explicit, retires every
+  cancelled candidate generation before releasing the connector, disposes
+  substitute runtimes outside the lifecycle lock, handles `Disposed` from any
+  `INodeRuntimeClient`, and makes adapter-to-`NodeCapabilityDispatcher`
+  conformance a gate before runtime selection. Final validation: full build;
+  3,402 Shared passed with 32 existing environment-gated skips; 2,023 Tray
+  passed; 519 Connection passed; 2/2 current-head live Gateway MXC proofs
+  passed with successful teardown and distro unregister. Hosted unit/build,
+  setup-connect, and network-recovery jobs passed. The revocation-recovery
+  shard failed before test execution because the hosted runner rejected its
+  `wslrelay` as non-canonical/not Microsoft-signed; the uploaded log confirms
+  this is runner setup, not the runtime seam. A failed-job rerun was attempted,
+  but GitHub denied it because the active account lacks repository admin rights.
 - The intended review shape is now two OpenClaw implementation PRs plus one
   initial Windows adopter PR. Draft [OpenClaw #116050](https://github.com/openclaw/openclaw/pull/116050)
   remains the foundation. Upstream draft [#116450](https://github.com/openclaw/openclaw/pull/116450)

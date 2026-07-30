@@ -99,7 +99,7 @@ instead of carrying a Node.js wrapper or a separate protocol implementation.
 
 ## Implementation and evidence
 
-- [RFC 0028 companion specifications](https://github.com/openclaw/rfcs/tree/user/giodl/rfc-0028-openclaw-rust-runtime/rfcs/0028) define the Gateway client, bounded node runtime, future sidecar-hosting contract, conformance/adoption gates, and implementation/evidence inventory.
+- [RFC 0028 companion specifications](https://github.com/openclaw/rfcs/pull/54/files) define the Gateway client, bounded node runtime, future sidecar-hosting contract, conformance/adoption gates, and implementation/evidence inventory.
 - [Foundation implementation and Tauri refactor](https://github.com/openclaw/openclaw/pull/116050)
 - [Embeddable runtime follow-up](https://github.com/openclaw/openclaw/pull/116450)
 - [Windows adopter seam](https://github.com/openclaw/openclaw-windows-node/pull/1068)
@@ -107,4 +107,8 @@ instead of carrying a Node.js wrapper or a separate protocol implementation.
 The RFC has also been reviewed through Gateway reliability, sidecar lifecycle,
 enterprise security, and maintainer-correctness lenses. That review added
 explicit fail-closed authority, audit, readiness, crash recovery, reconnect,
-resource, and release gates.
+resource, and release gates. Current-head Rust evidence is green at #116050
+`41f4e705887` (56 tests) and #116450 `894d125ee76` (73 tests plus strict static
+gates). The final TypeScript UTF-8 fixture-validator run remains explicitly
+pending after a local package-registry TLS failure; earlier hosted TypeScript
+fixture lanes passed.

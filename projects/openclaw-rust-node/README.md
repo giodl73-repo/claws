@@ -83,19 +83,20 @@ The canonical RFC and discussion brief live in the implementation repository:
 | `openclaw/openclaw` | [Issue #115975](https://github.com/openclaw/openclaw/issues/115975) | N/A | Open; maintainer decision requested | Decide whether OpenClaw will adopt, govern, publish, and support the proven Rust node client and bounded headless host. |
 | `microsoft.ghe.com/bic/lobster` | TBD | TBD | Evidence slice only | Prove one bounded `lobster.runtime.describe` handler after the generic client contract is accepted. |
 | `giodl73-repo/openclaw` | [Branch](https://github.com/giodl73-repo/openclaw/tree/agent/rust-gateway-core) | `agent/rust-gateway-core` | Pushed at `12659125fc7`; no PR yet | Make Linux Tauri the first consumer of a Tauri-free core for TLS pinning and connect/reconnect policy. |
-| `openclaw/openclaw` | [Draft PR #116050](https://github.com/openclaw/openclaw/pull/116050) | `agent/rust-gateway-client` | Draft at `7600501dd50`; completed Codex passes fixed session ordering, address trust, TLS/reconnect classification, and final-event delivery; 47 Rust tests plus strict static gates pass | Submit the complete two-crate shared Rust layer and migrate Linux Tauri in one OpenClaw PR for Peter's review. |
-| `openclaw/openclaw` | [Draft PR #116450](https://github.com/openclaw/openclaw/pull/116450) | `giodl73-repo:agent/rust-runtime-followup` logically stacked on #116050 | Upstream draft at `c533982d751`; rebased onto exact #116050 head; completed Codex pass fixed rejected-device-token fallback; 62 stacked tests plus strict static gates pass; temporarily targets `main` because GitHub cannot use a fork branch as an upstream PR base | Consolidate native signing/token delivery, lifecycle/reconnect, duplex invocation, admission, Gateway-authority conformance, connection manifests, and the shared TypeScript/Rust lifecycle corpus into the second OpenClaw review surface. |
-| `openclaw/rfcs` | [Draft RFC PR #54](https://github.com/openclaw/rfcs/pull/54) | `user/giodl/rfc-0028-openclaw-rust-runtime` | RFC 0028 draft at `cdc10f5`; links upstream PRs #116050 and #116450 plus Windows adopter #1068; maintainer ownership decision requested | Put the reusable runtime and conformance contract under OpenClaw ownership while Microsoft retains its product shells and Scout Cloud manages the canonical node. |
-| `openclaw/openclaw-windows-node` | [Draft PR #1068](https://github.com/openclaw/openclaw-windows-node/pull/1068) | `giodl73-repo:agent/rust-node-sidecar-seam` | Rebased at `194928fd`; mergeable/CLEAN with all hosted checks complete and green; fork PR #1 absorbed; full build, 3,402 Shared, 2,022 Tray, 516 Connection, and 2/2 live Gateway MXC tests pass | Combine the replaceable runtime boundary and shared Windows capability dispatcher while retaining C# as the default and WinUI/operator/MCP/approval/native capability ownership. |
+| `openclaw/openclaw` | [Draft PR #116050](https://github.com/openclaw/openclaw/pull/116050) | `agent/rust-gateway-client` | Draft at `41f4e705887`; three sequential reviewer passes clean; 56 Rust tests plus strict static gates pass | Submit the complete two-crate shared Rust layer and migrate Linux Tauri in one OpenClaw PR for Peter's review. |
+| `openclaw/openclaw` | [Draft PR #116450](https://github.com/openclaw/openclaw/pull/116450) | `giodl73-repo:agent/rust-runtime-followup` logically stacked on #116050 | Upstream draft at `894d125ee76`; rebased onto exact #116050 head; three sequential reviewer passes clean after cancellation, UTF-8, redaction, and namespace fixes; 73 stacked Rust tests plus strict static gates pass | Consolidate native signing/token delivery, lifecycle/reconnect, duplex invocation, admission, Gateway-authority conformance, connection manifests, and the shared TypeScript/Rust lifecycle corpus into the second OpenClaw review surface. |
+| `openclaw/rfcs` | [Draft RFC PR #54](https://github.com/openclaw/rfcs/pull/54) | `user/giodl/rfc-0028-openclaw-rust-runtime` | RFC 0028 draft at `08a58fc`; core, design, and security reviews clean; evidence distinguishes the pending final TypeScript validator run | Put the reusable runtime and conformance contract under OpenClaw ownership while Microsoft retains its product shells and Scout Cloud manages the canonical node. |
+| `openclaw/openclaw-windows-node` | [Draft PR #1068](https://github.com/openclaw/openclaw-windows-node/pull/1068) | `giodl73-repo:agent/rust-node-sidecar-seam` | At `c0cfa8ba`; mergeable; sequential core/design/security review findings resolved; full build, 3,402 Shared, 2,023 Tray, 519 Connection, and 2/2 current-head live Gateway MXC tests pass; hosted checks are settling | Combine the replaceable runtime boundary and shared Windows capability dispatcher while retaining C# as the default and WinUI/operator/MCP/approval/native capability ownership. |
 
 ## Cheapest Next Test
 
 Seek maintainer feedback on RFC 0028, foundation PR #116050, stacked Rust
-follow-up #116450, and rebased Windows adopter #1068. After #116050 lands,
-verify that #116450 shrinks to the exact ten-commit follow-up. The next implementation
-slice is the paired, versioned local IPC contract and opt-in Windows adapter
-that feeds invocations into `NodeCapabilityDispatcher`; keep C# as the default
-and require live Gateway parity plus rollback before deletion.
+follow-up #116450, and Windows adopter #1068. After #116050 lands, rebase
+#116450 onto the landed foundation. The next implementation slice is the
+paired, versioned local IPC contract and opt-in Windows adapter that feeds
+invocations into `NodeCapabilityDispatcher`; keep C# as the default and require
+adapter-level dispatcher conformance, live Gateway parity, and rollback before
+runtime selection or deletion.
 
 ## Related Areas
 
