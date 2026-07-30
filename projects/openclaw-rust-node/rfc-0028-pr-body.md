@@ -28,11 +28,19 @@ clarifies that this is one canonical node-mode contract with a bounded Rust
 implementation for native/headless hosts—not an uncontrolled product fork.
 Microsoft is willing to seed implementation and maintenance. The bounded
 decision requested here is to incubate the two unpublished workspace crates in
-the OpenClaw monorepo, with a named initial code/security owner and shared
-conformance beside the TypeScript reference. It does not publish crates, make
+the OpenClaw monorepo, with a named initial implementation/conformance owner,
+explicit Gateway/security authority, and shared conformance beside the
+TypeScript reference. It does not publish crates, make
 the proof host an official binary, promise platform support, or accept broader
 node-mode parity; those remain explicit follow-on decisions. This PR is the
 acceptance discussion and decision record.
+
+The proposed initial implementation/conformance owner is
+[`@giodl73-repo`](https://github.com/giodl73-repo), backed by the Microsoft
+product team. [`@steipete`](https://github.com/steipete) and the OpenClaw
+maintainer group retain Gateway/security authority and decide whether to accept
+that boundary. No release owner is assigned until a later publication or
+official-binary decision.
 
 Microsoft is the anchor adopter, not the exclusive audience. The runtime and
 every accepted capability surface remain customer-neutral so other native,
