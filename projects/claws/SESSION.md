@@ -22,6 +22,19 @@
 
 ## Current Session
 
+### 2026-07-31 shared plugin removal clarification
+
+- Updated draft RFC #52, RFC 0027, its implementation plan, and the normative
+  RFC 0016 package-v1 sidecar at signed head `b1035ed0dfb3`.
+- Plugins remain referenced even when Claw add introduced them. Default remove
+  releases only the Claw dependency edge and retains the global plugin.
+- Provenance records known ownership, not every agent's runtime use. Global
+  plugins are therefore excluded from bulk `remove-if-unused`; exact selected
+  cleanup remains available after dry-run, known-owner disclosure, an explicit
+  unknown-agent-use warning, plan-integrity consent, and canonical uninstall.
+- RFC #52 is clean and mergeable but remains draft. Implementation must tighten
+  the existing bulk cleanup planner before claiming this clarified conformance.
+
 ### 2026-07-31 end-to-end application framework proposal
 
 - Framed Claws as OpenClaw's application project, deterministic package, and
