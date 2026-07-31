@@ -25,10 +25,11 @@
 ### 2026-07-31 schema-v1 lifecycle, Codex adapter, and RFC 0027 checkpoint
 
 - Rebuilt draft OpenClaw PR #112828 on its real #112808 prerequisite and the
-  current schema-v1 Claws stack. Signed head `da0dc8da0cd1` replaces the stale
+  current schema-v1 Claws stack. Signed head `c22234011d91` replaces the stale
   setup-v2 implementation with ClawHub discovery, bounded Gateway add/update/
   remove plans and applies, managed/referenced status and doctor, native
-  bootstrap chat routing, and the experimental Control UI lifecycle.
+  bootstrap chat routing, and the experimental Control UI lifecycle. Pending
+  setup is labeled as package-authored and warns against sharing credentials.
 - #112828 passed focused and broad protocol/lifecycle/UI tests, type-aware
   lint, docs checks, production UI build, browser viewport proof, and final
   Codex review. It remains a clean, mergeable draft. ClawSweeper re-review was
