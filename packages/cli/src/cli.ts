@@ -40,6 +40,7 @@ Sources:
 
 Create options:
   --agents <AGENTS.md>
+  --bootstrap <BOOTSTRAP.md>
   --skill <local-skill-directory|clawhub:package@version> (repeatable)
   --plugin <clawhub:package@version> (repeatable)
   --package <package-name> --version <exact-version>
@@ -131,6 +132,10 @@ function renderHuman(outcome: CliOutcome): string {
     `${outcome.claw.agent.name ?? outcome.claw.agent.id} (${outcome.package.packageName}@${outcome.package.packageVersion})`,
     `agent: ${outcome.claw.agent.id}`,
     `portable prompt: ${outcome.claw.hasPortablePrompt ? "yes" : "no"}`,
+    `first-run bootstrap: ${outcome.claw.hasPackageBootstrap ? "yes" : "no"}`,
+    ...(outcome.claw.profilePaths.length > 0
+      ? [`harness profiles: ${outcome.claw.profilePaths.join(", ")}`]
+      : []),
     `integrity: ${outcome.package.integrity}`,
     ...("artifactIntegrity" in outcome.package
       ? [`artifact integrity: ${outcome.package.artifactIntegrity}`]
@@ -217,6 +222,7 @@ export async function runCli(
           description: { type: "string" },
           soul: { type: "string" },
           agents: { type: "string" },
+          bootstrap: { type: "string" },
           package: { type: "string" },
           version: { type: "string" },
           skill: { type: "string", multiple: true },
@@ -282,6 +288,9 @@ export async function runCli(
         description,
         soulPath,
         ...(typeof parsed.values.agents === "string" ? { agentsPath: parsed.values.agents } : {}),
+        ...(typeof parsed.values.bootstrap === "string"
+          ? { bootstrapPath: parsed.values.bootstrap }
+          : {}),
         ...(typeof parsed.values.package === "string"
           ? { packageName: parsed.values.package }
           : {}),

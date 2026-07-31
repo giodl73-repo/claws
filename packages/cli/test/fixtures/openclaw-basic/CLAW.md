@@ -8,7 +8,9 @@ workspace:
   bootstrapFiles:
     SOUL.md:
       source: workspace/SOUL.md
-  files: []
+  files:
+    - source: assets/incident.schema.json
+      path: schemas/incident.schema.json
 packages: []
 mcpServers: {}
 cronJobs: []

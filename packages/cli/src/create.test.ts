@@ -28,6 +28,10 @@ describe("Claw construction", () => {
     await writeFile(join(skill, "references", "sources.md"), "# Sources\n");
     await writeFile(join(root, "SOUL.md"), "# Financial analyst\n\nBe precise.\n");
     await writeFile(join(root, "AGENTS.md"), "Use the supplied research skill.\n");
+    await writeFile(
+      join(root, "BOOTSTRAP.md"),
+      "# First run\n\nAsk about reporting preferences.\n",
+    );
     const output = join(root, "financial-analyst");
 
     const result = await createClawPackage({
@@ -37,6 +41,7 @@ describe("Claw construction", () => {
       description: "Analyzes a company from primary sources.",
       soulPath: join(root, "SOUL.md"),
       agentsPath: join(root, "AGENTS.md"),
+      bootstrapPath: join(root, "BOOTSTRAP.md"),
       skills: [skill, "clawhub:@example/market-data@1.2.3"],
       plugins: ["clawhub:@example/sec-filings@2.0.0"],
     });
@@ -47,12 +52,19 @@ describe("Claw construction", () => {
       bootstrapFiles: ["AGENTS.md", "SOUL.md"],
       workspaceFileCount: 2,
       skillCount: 2,
-      pluginCount: 1,
+      pluginCount: 0,
+      hasPackageBootstrap: true,
+      profilePaths: ["profiles/openclaw.yml"],
     });
     expect(result.manifest.packages).toEqual([
       { kind: "skill", source: "clawhub", ref: "@example/market-data", version: "1.2.3" },
-      { kind: "plugin", source: "clawhub", ref: "@example/sec-filings", version: "2.0.0" },
     ]);
+    expect(await readFile(join(output, "profiles", "openclaw.yml"), "utf8")).toContain(
+      "id: sec-filings",
+    );
+    expect(await readFile(join(output, "BOOTSTRAP.md"), "utf8")).toContain(
+      "Ask about reporting preferences.",
+    );
     expect(result.manifest.workspace.files).toEqual([
       {
         source: "components/skills/research/SKILL.md",

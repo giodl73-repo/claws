@@ -62,7 +62,8 @@ export type LocalClawPackage = {
     mcpServerCount: number;
     cronJobCount: number;
     hasPortablePrompt: boolean;
-    openClawProfilePath?: string;
+    hasPackageBootstrap: boolean;
+    profilePaths: string[];
   };
 };
 

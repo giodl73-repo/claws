@@ -6,7 +6,7 @@ selecting or publishing its final npm identity.
 ```bash
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create
-OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create ./financial-analyst --id financial-analyst --name "Financial Analyst" --description "Analyzes companies." --soul ./SOUL.md --skill ./.agents/skills/research --plugin clawhub:@publisher/sec-filings@1.0.0
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create ./financial-analyst --id financial-analyst --name "Financial Analyst" --description "Analyzes companies." --soul ./SOUL.md --bootstrap ./BOOTSTRAP.md --skill ./.agents/skills/research --plugin clawhub:@publisher/sec-filings@1.0.0
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --dry-run
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --yes --plan-integrity sha256:<reviewed-digest>
 CLAWHUB_REGISTRY_URL=https://registry.example OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- clawhub:@publisher/claw@1.0.0 --agent openclaw --dry-run
@@ -25,13 +25,20 @@ boundary. Preview uses `--dry-run --json`; apply requires explicit `--yes` and
 the exact `planIntegrity` returned by preview. It does not import OpenClaw code
 or reproduce OpenClaw consent, mutation, provenance, or removal policy.
 
-`create` writes a new, validated package from a `SOUL.md`, optional `AGENTS.md`,
-selected local skill directories, and exact ClawHub skill/plugin dependencies.
-Local skill bytes are copied beneath `components/skills` and mapped into the
-agent workspace. The command does not mutate a harness or overwrite an existing
+`create` writes a new, validated schema-v1 package from a `SOUL.md`, optional
+`AGENTS.md` and package-root `BOOTSTRAP.md`, selected local skill directories,
+exact ClawHub skill dependencies, and OpenClaw-native extensions. Local skill
+bytes are copied beneath `components/skills` and mapped into the agent
+workspace. Selected plugins are written to `profiles/openclaw.yml` rather than
+portable `packages`. The command does not mutate a harness or overwrite an existing
 destination. The `SOUL.md` input is embedded as the generated `CLAW.md` body;
 packages cannot combine a non-empty body with an explicit workspace declaration
 that overlaps `SOUL.md`.
+
+Optional `profiles/<harness>.yml`, package-root `BOOTSTRAP.md`, and every
+declared workspace source participate in package integrity. Foreign profiles
+remain inert until their named harness adapter is selected. Assets, schemas,
+references, templates, examples, and fixtures use ordinary `workspace.files`.
 
 Exact `clawhub:<package>@<version>` sources resolve through the official
 experimental Claws feed. The CLI binds feed package/version/integrity to

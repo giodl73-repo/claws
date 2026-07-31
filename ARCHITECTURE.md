@@ -20,8 +20,9 @@ exact packages -----/              ClawHub coordinate --/         |
 These are deliberately independent extension points:
 
 1. **Component importers** select material used to construct a Claw. The
-   current `create` command vendors local skill directories and records exact
-   ClawHub skill or plugin dependencies. A skill installed with the
+   current `create` command vendors local skill directories, records exact
+   ClawHub skill dependencies, and writes selected plugins into the
+   conventional OpenClaw profile. A skill installed with the
    [skills.sh CLI](https://github.com/vercel-labs/skills) can therefore be
    selected as a local directory. Direct skills.sh and other catalog importers
    can be added later by resolving and vendoring the selected bytes.
@@ -46,7 +47,11 @@ useful component catalogs; they are not registries of complete Claw packages.
   verified ClawHub integrity, or exact Git commit hashes with archive integrity.
 - Construction copies local skill bytes into the output package. Later changes
   to the source directory cannot silently alter that package.
-- The portable parser accepts no provider-specific behavior.
+- The portable parser accepts only schema version 1 and no provider-specific
+  behavior. Conventional profiles and package-root `BOOTSTRAP.md` are
+  integrity-bound package bytes; the selected harness interprets them.
+- Application assets are ordinary declared workspace files. Their directory
+  names do not grant execution or context-loading behavior.
 - A non-empty `CLAW.md` body is the portable agent prompt. It is mutually
   exclusive with an explicit workspace target that conflicts with `SOUL.md`.
 - The harness remains authoritative for capability disclosure, consent,
@@ -64,8 +69,9 @@ useful component catalogs; they are not registries of complete Claw packages.
 - Direct skills.sh, LobeHub, browse.sh, and Git importers are not implemented.
   Use their own tooling to place a skill locally, then pass that directory to
   `--skill`.
-- Referenced skill and plugin dependencies currently use exact ClawHub package
-  coordinates because that is the dependency source supported by schema v1.
+- Referenced portable skills currently use exact ClawHub coordinates. Native
+  plugins belong to `profiles/<harness>.yml`; the OpenClaw constructor accepts
+  exact ClawHub plugin coordinates and emits `profiles/openclaw.yml`.
 - GitHub is currently a complete-Claw transport, not a general dependency
   declaration inside `CLAW.md`.
 - OpenClaw is the only executable harness adapter in this repository.

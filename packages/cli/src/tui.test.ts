@@ -12,6 +12,8 @@ describe("terminal presentation", () => {
     expect(summary).toContain("Incident triage");
     expect(summary).toContain("Agent       incident-triage");
     expect(summary).toContain("Persona     workspace files only");
+    expect(summary).toContain("Bootstrap   none");
+    expect(summary).toContain("Profiles    profiles/openclaw.yml");
     expect(summary).toContain("Integrity   sha256:");
     expect(summary).not.toContain("Review incoming incidents");
   });

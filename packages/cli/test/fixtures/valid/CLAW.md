@@ -6,8 +6,6 @@ agent:
   description: Reviews incidents and prepares an evidence-backed handoff.
   identity:
     avatar: data:image/png;base64,Y29udGVudC1mcmVlLWluc3BlY3Rpb24=
-metadata:
-  openclaw.config: profiles/openclaw.yml
 workspace:
   bootstrapFiles:
     AGENTS.md:

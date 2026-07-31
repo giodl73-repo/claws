@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { realpath, stat } from "node:fs/promises";
+import { readdir, realpath, stat } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import {
   conflictsWithClawPath,
@@ -17,8 +17,11 @@ import type { LocalClawPackage } from "./types.js";
 
 const MAX_PACKAGE_JSON_BYTES = 256 * 1024;
 const MAX_MANIFEST_BYTES = 1024 * 1024;
+const MAX_BOOTSTRAP_BYTES = 2 * 1024 * 1024;
+const MAX_PROFILE_BYTES = 256 * 1024;
 const MAX_PACKAGE_BYTES = 50 * 1024 * 1024;
 const MAX_PACKAGE_FILES = 4_096;
+const PROFILE_NAME_PATTERN = /^[a-z][a-z0-9_-]{0,63}\.yml$/;
 
 type LoadedFile = { path: string; bytes: Buffer; text?: string };
 
@@ -225,8 +228,41 @@ function referencedPackagePaths(manifest: LocalClawPackage["manifest"]): string[
       .filter((entry): entry is { source: string } => entry !== undefined)
       .map((entry) => entry.source),
     ...manifest.workspace.files.map((entry) => entry.source),
-    ...(manifest.metadata?.["openclaw.config"] ? [manifest.metadata["openclaw.config"]] : []),
   ];
+}
+
+async function discoverProfilePaths(root: string): Promise<string[]> {
+  let entries;
+  try {
+    entries = await readdir(resolve(root, "profiles"), { withFileTypes: true });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw error;
+  }
+  const paths: string[] = [];
+  for (const entry of entries) {
+    if (!/\.ya?ml$/i.test(entry.name)) continue;
+    const path = `profiles/${entry.name}`;
+    if (!entry.isFile() || entry.isSymbolicLink()) {
+      throw new CliError({
+        code: "unsafe_harness_profile",
+        phase: "package",
+        message: "Harness profiles must be regular, non-symlinked files.",
+        path,
+      });
+    }
+    if (!PROFILE_NAME_PATTERN.test(entry.name)) {
+      throw new CliError({
+        code: "invalid_harness_profile_path",
+        phase: "package",
+        message:
+          "Harness profiles must use profiles/<lowercase-harness-id>.yml conventional paths.",
+        path,
+      });
+    }
+    paths.push(path);
+  }
+  return paths.toSorted((left, right) => Buffer.compare(Buffer.from(left), Buffer.from(right)));
 }
 
 export async function inspectLocalPackage(input: string): Promise<LocalClawPackage> {
@@ -304,25 +340,31 @@ export async function inspectLocalPackage(input: string): Promise<LocalClawPacka
       path: "$.workspace",
     });
   }
-  const profilePath = parsed.manifest.metadata?.["openclaw.config"];
-  if (
-    profilePath !== undefined &&
-    (profilePath.includes("\\") ||
-      !isSafeClawRelativePath(profilePath) ||
-      !/\.ya?ml$/i.test(profilePath))
-  ) {
+  if (Object.hasOwn(parsed.manifest.metadata ?? {}, "openclaw.config")) {
     throw new CliError({
-      code: "invalid_openclaw_profile_path",
+      code: "legacy_openclaw_profile_pointer",
       phase: "package",
       message:
-        "openclaw.config must reference a forward-slash package-relative .yml or .yaml file.",
+        "metadata.openclaw.config is no longer supported; move the profile to profiles/openclaw.yml and remove the metadata entry.",
       path: "$.metadata.openclaw.config",
+    });
+  }
+  const profilePaths = await discoverProfilePaths(root);
+  const packageBootstrap = await loadPackageFile(sourceRoot, "BOOTSTRAP.md", MAX_BOOTSTRAP_BYTES);
+  if (packageBootstrap && (packageBootstrap.text === undefined || !packageBootstrap.text.trim())) {
+    throw new CliError({
+      code: "package_bootstrap_invalid",
+      phase: "package",
+      message: "Package-root BOOTSTRAP.md must contain valid UTF-8 first-run instructions.",
+      path: "BOOTSTRAP.md",
     });
   }
   const declaredPaths = [
     "package.json",
     metadata.manifestPath,
     ...referencedPackagePaths(parsed.manifest),
+    ...(packageBootstrap ? ["BOOTSTRAP.md"] : []),
+    ...profilePaths,
   ];
   if (declaredPaths.length > MAX_PACKAGE_FILES) {
     throw new CliError({
@@ -355,7 +397,15 @@ export async function inspectLocalPackage(input: string): Promise<LocalClawPacka
         ? packageJson
         : key === portableClawPathKey(metadata.manifestPath)
           ? manifestFile
-          : await loadPackageFile(sourceRoot, declaredPath, MAX_PACKAGE_BYTES - aggregateBytes);
+          : key === portableClawPathKey("BOOTSTRAP.md") && packageBootstrap
+            ? packageBootstrap
+            : await loadPackageFile(
+                sourceRoot,
+                declaredPath,
+                profilePaths.includes(declaredPath)
+                  ? Math.min(MAX_PROFILE_BYTES, MAX_PACKAGE_BYTES - aggregateBytes)
+                  : MAX_PACKAGE_BYTES - aggregateBytes,
+              );
     if (!file) {
       missing.push(declaredPath);
       continue;
@@ -424,9 +474,8 @@ export async function inspectLocalPackage(input: string): Promise<LocalClawPacka
       mcpServerCount: Object.keys(parsed.manifest.mcpServers).length,
       cronJobCount: parsed.manifest.cronJobs.length,
       hasPortablePrompt,
-      ...(parsed.manifest.metadata?.["openclaw.config"]
-        ? { openClawProfilePath: parsed.manifest.metadata["openclaw.config"] }
-        : {}),
+      hasPackageBootstrap: packageBootstrap !== undefined,
+      profilePaths,
     },
   };
 }

@@ -193,6 +193,15 @@ try {
     requireExit(preview, 0, "packed CLI OpenClaw preview");
     const previewOutcome = parseJson(preview.stdout, "packed CLI OpenClaw preview");
     assert(previewOutcome.ok === true, "The packed CLI delegates an OpenClaw preview.");
+    assert(
+      previewOutcome.claw?.hasPackageBootstrap === true,
+      "The preview binds package bootstrap.",
+    );
+    assert(
+      previewOutcome.claw?.profilePaths?.includes("profiles/openclaw.yml"),
+      "The preview binds the conventional OpenClaw profile.",
+    );
+    assert(previewOutcome.claw?.workspaceFileCount === 1, "The preview binds the schema asset.");
     assert(previewOutcome.harness?.id === "openclaw", "The preview used the OpenClaw adapter.");
     assert(
       typeof previewOutcome.harness?.outcome?.planIntegrity === "string",
