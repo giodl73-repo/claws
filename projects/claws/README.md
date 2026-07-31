@@ -24,6 +24,8 @@ Claws are not feeds and not raw workspace templates:
 | Skill Memory Lobster plugin POC            | `skill-memory-lobster-poc.md`          |
 | Skill Memory fork PR bodies                | `skill-memory-pr-bodies/`              |
 | Standalone Claws CLI PR plan               | `portable-standard-pr-plan.md`         |
+| End-to-end application framework design    | `e2e-application-framework-design.md`  |
+| End-to-end application framework PR plan   | `e2e-application-framework-pr-plan.md` |
 
 ## M5 Rendezvous Commitment
 

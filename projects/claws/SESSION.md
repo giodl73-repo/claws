@@ -22,6 +22,60 @@
 
 ## Current Session
 
+### 2026-07-31 end-to-end application framework proposal
+
+- Framed Claws as OpenClaw's application project, deterministic package, and
+  developer lifecycle while OpenClaw remains the runtime and canonical owner
+  for agents, models, tools, sandboxes, channels, secrets, and mutation.
+- Audited current OpenClaw ownership and compared the model with Eve. The
+  proposed V1 keeps schema version 1, adds no portable code or secret state,
+  and distinguishes a source project, built package, and applied Claw.
+- Added `e2e-application-framework-design.md` and
+  `e2e-application-framework-pr-plan.md`. The six-milestone sequence starts
+  with an RFC decision checkpoint, then create/validate, deterministic build,
+  bounded OpenClaw realization, isolated dev/test, and experimental
+  publish/corpus proof.
+- Revised the delivery model to make native `openclaw claws` the complete V1
+  command surface. Patrick's standalone `npx claws` direction remains a
+  possible later consumer of the public package/command contract, not a V1
+  dependency or a condition for Peter's application-framework decision.
+- The framework contract is a follow-on addendum to RFC 0016, not a new
+  numbered RFC: update `rfcs/0016-claws.md` and add
+  `rfcs/0016/claw-project-v1-spec.md` beside the existing V1 sidecar specs.
+- No active RFC or implementation branch was changed. Next: get Patrick and
+  Peter's read on the application-framework thesis and ownership boundary,
+  then author the RFC addendum before implementation.
+
+### 2026-07-31 bootstrap-native export rewrite
+
+- Reused OpenClaw draft PR #115371 for the RFC #52 bootstrap-native export
+  follow-up. Its former schema-v2 guided setup, questionnaires, templates,
+  persisted answers, and configure lifecycle were removed from the branch.
+- Signed head `ce4fb74dce255cf2390d9aaf784cc33c695c5345` adds
+  `claws export --bootstrap <path>`. The exporter safely reads explicit
+  reviewed Markdown, emits package-root `BOOTSTRAP.md`, includes its bytes in
+  the derivative package version, re-reads the completed package through the
+  canonical reader, and removes incomplete output on validation failure.
+- WSL2 proof passed 53 focused export/CLI tests, core and root-test tsgo,
+  type-aware implementation lint, formatting, and diff hygiene. Codex review
+  against #115962 head `9fed48b` found no actionable issue. #115371 is open,
+  mergeable, and draft; a fresh ClawSweeper review was requested at the exact
+  head.
+- RFC #52 and its implementation sidecar already classify #115565 and #115296
+  as superseded and #115371 as this bootstrap-native export slice. Next:
+  inspect current-head ClawSweeper/CI results and keep the downstream read/UI
+  branches aligned without restoring setup-v2 behavior.
+- Completed a live ten-PR revector audit across RFC #52, OpenClaw #115237,
+  #115962, #115371, #112808, and #112828, standalone Claws #1/#2, ClawHub
+  #3328, and Awesome Claws #1. Added-line scans found retired setup/profile
+  terms only in explicit rejection or migration diagnostics.
+- Fixed the remaining stacked-PR metadata defect: the fork heads had been
+  rebased but their Gio-owned `openclaw/openclaw` base refs were stale. Advanced
+  `user/giodl/claws-application-lifecycle` to `9fed48b` and
+  `user/giodl/claws-pr15-control-ui-read` to `d75678d` with exact force leases.
+  #112808 and #112828 now both report clean and mergeable. Renamed #112828 to
+  `feat(claws): add experimental Control UI lifecycle`.
+
 ### 2026-07-31 schema-v1 lifecycle, Codex adapter, and RFC 0027 checkpoint
 
 - Rebuilt draft OpenClaw PR #112828 on its real #112808 prerequisite and the
@@ -64,6 +118,30 @@
   inspect the final ClawSweeper verdict on #112828, add live disposable
   lifecycle evidence if still required, and collect maintainer review of RFC
   #52 plus standalone #2 before broadening any adapter contract.
+
+### 2026-07-31 Awesome Claws experience assets and real Control UI captures
+
+- Updated `C:\src\awesome-claws-schema-v1-experience` and pushed Awesome Claws
+  PR #1 to signed head `12f3892`. All 35 artifact-first Claws now carry a
+  session fixture, report schema, and handoff template; all 15 visual Claws
+  carry polished domain-facing HTML assets.
+- Replaced the discarded synthetic screenshot shell with OpenClaw's actual
+  Control UI. `npm run screenshots` starts the real UI, injects a deterministic
+  Claw session, serves visual assets through internal Canvas URLs, and captures
+  the user-visible Chat/Canvas/composer surface for all 50 Claws.
+- Source captures live under `screenshots/`; package materialization copies
+  them byte-for-byte into each generated package. Normal `npm run build` and CI
+  do not need a browser or OpenClaw checkout. Screenshot source paths validate
+  catalog ids before filesystem access.
+- Proof passed all 50 Control UI captures, `npm run build`, `npm run check`,
+  30/30 desktop/mobile visual renders, `git diff --check`, signed-commit checks,
+  and final `codex review --uncommitted` with no actionable finding. Codex's own
+  test subprocess was sandbox-blocked; the same tests were run separately.
+- Reconciled Awesome Claws PR #1 with the preserved schema-v2 `main` lineage at
+  signed merge commit `78f9bb2` after explicit approval. The merge records
+  `main` at `8469dde` as incorporated while preserving the reviewed schema-v1
+  tree byte-for-byte; build/check passed and GitHub now reports the draft PR
+  mergeable.
 
 ### 2026-07-30 portable profile/bootstrap implementation checkpoint
 
