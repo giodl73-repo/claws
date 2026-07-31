@@ -22,6 +22,48 @@
 
 ## Current Session
 
+### 2026-07-31 schema-v1 lifecycle, Codex adapter, and RFC 0027 checkpoint
+
+- Rebuilt draft OpenClaw PR #112828 on its real #112808 prerequisite and the
+  current schema-v1 Claws stack. Signed head `da0dc8da0cd1` replaces the stale
+  setup-v2 implementation with ClawHub discovery, bounded Gateway add/update/
+  remove plans and applies, managed/referenced status and doctor, native
+  bootstrap chat routing, and the experimental Control UI lifecycle.
+- #112828 passed focused and broad protocol/lifecycle/UI tests, type-aware
+  lint, docs checks, production UI build, browser viewport proof, and final
+  Codex review. It remains a clean, mergeable draft. ClawSweeper re-review was
+  requested at the exact head; its durable verdict has not yet refreshed and
+  real disposable Gateway-to-ClawHub add/status/remove evidence remains the
+  explicit follow-up proof.
+- Opened draft `giodl73-repo/claws#2` from signed head `6d072b2141b3`, stacked
+  on schema-v1 standalone PR #1. It adds a bounded Codex workspace adapter:
+  portable `CLAW.md` prompt plus bootstrap instructions map to project-root
+  `AGENTS.md`, ordinary workspace files copy into a new `--target`, foreign
+  profiles stay inert, and unsupported required semantics fail closed.
+- Standalone #2 proves one schema-v1 package through separate OpenClaw and
+  Codex native previews. Apply atomically reserves a nonexistent target and
+  uses create-only writes. Review fixed generated-`AGENTS.md` ancestor
+  collisions and portable backslash normalization; final Codex review is
+  clean. `pnpm proof:private` passed 95 tests with one platform skip, lint,
+  typecheck, production bundle, private tarball, and packed install. A real
+  built-CLI Codex preview/apply mapped instructions and copied the declared
+  schema asset. Hosted validation is green.
+- Refreshed RFC PR #52 against current `openclaw/rfcs` main. RFC 0025 was
+  assigned to the merged Computer Use RFC, so the Claws draft is now RFC 0027
+  at signed head `b7df7fad7e48`, one commit on current main. The RFC and
+  sidecar link #115237, #115962, #112808, #112828, standalone #1, and
+  standalone #2; they correctly delegate lifecycle state to each host.
+- RFC review also clarified two policy boundaries: merged RFC 0016 remains
+  draft-status in source, and package-root `BOOTSTRAP.md` is reviewed package
+  prompt content rather than trusted host UI. Hosts never inject secrets,
+  clients label package-authored onboarding and warn against pasting secrets,
+  and canonical credential setup launches only from host-owned controls. Final
+  Codex review is clean; RFC #52 is clean, mergeable, and still draft.
+- No PR was merged and no npm package or public name was registered. Next:
+  inspect the final ClawSweeper verdict on #112828, add live disposable
+  lifecycle evidence if still required, and collect maintainer review of RFC
+  #52 plus standalone #2 before broadening any adapter contract.
+
 ### 2026-07-30 portable profile/bootstrap implementation checkpoint
 
 - Rebased and pushed RFC #48 at signed head `be9fb97e8a5d`. Its three
