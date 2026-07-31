@@ -22,6 +22,25 @@
 
 ## Current Session
 
+### 2026-07-31 Claw application-framework addendum
+
+- Opened draft `openclaw/rfcs#56`, `docs(claws): define application project
+  lifecycle`, at signed and GitHub-verified head `1d41b8fadc58`.
+- The PR updates RFC 0016 and adds parallel normative
+  `claw-project-v1-spec.md` and `implementation-plan.md` sidecars. It defines a
+  human-authored project, deterministic `.tgz` package, applied Claw, offline
+  validation, isolated dev/test, and exact-artifact publication boundaries.
+- #56 explicitly depends on RFC #48 and RFC #52 and must not be accepted or
+  merged first. It reuses their schema-v1 profiles, native bootstrap,
+  extensions/assets, and lifecycle clients rather than adding another profile
+  expansion.
+- The six-PR series is: RFC #56; OpenClaw create/validate; OpenClaw build;
+  OpenClaw dev/test; ClawHub exact-artifact publish; Awesome Claws reference
+  corpus and clean-recipient proof.
+- FACES and nine-role review, local-link validation, diff hygiene, and final
+  Codex review found no actionable issue. The RFC PR remains draft; its dispatch
+  check was pending at handoff.
+
 ### 2026-07-31 shared plugin removal clarification
 
 - Updated draft RFC #52, RFC 0027, its implementation plan, and the normative
