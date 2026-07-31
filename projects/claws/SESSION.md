@@ -5679,3 +5679,21 @@ package install policy`). The branch is `user/giodl/claws-pr5-installers`,
   omitted live check in the exhaustive list; it was fixed, and the required
   rerun found no actionable issue. ClawSweeper re-review is requested on the
   exact new head.
+
+### 2026-07-31 RFC 0056 refocused on vertical proof
+
+- Refactored draft RFC #56 to signed verified head
+  `f63b48ba389d3e0fcfb7bec8afe3519111c13b39` after evaluating the proposal from
+  Peter's likely simplicity and product-proof perspective.
+- Reduced the initial series from six PRs to four: RFC contract, complete
+  OpenClaw local authoring lifecycle, exact ClawHub publication, and one
+  polished Awesome Claws clean-recipient proof.
+- V1 now covers `create`, implicit/read-only validation, offline non-mutating
+  `dev`, deterministic `build`, exact publication, and existing add/status/
+  doctor/remove lifecycle owners.
+- Deleted the premature normative test-v1 sidecar. Declarative tests,
+  provider-backed evaluation, live disposable development/interruption
+  recovery, and the broad corpus matrix are explicit evidence-driven
+  follow-ups.
+- Diff hygiene, local links, and final `codex review --uncommitted` are clean.
+  ClawSweeper re-review was requested on the new exact head.
