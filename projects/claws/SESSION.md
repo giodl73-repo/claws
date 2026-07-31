@@ -5659,3 +5659,23 @@ package install policy`). The branch is `user/giodl/claws-pr5-installers`,
   conventional profile/bootstrap/extensions/assets contract, then align
   ClawHub/Awesome Claws before the deferred Gateway/Control UI and adapter
   conformance tracks.
+
+### 2026-07-31 RFC 0056 lifecycle contract hardened
+
+- Updated draft RFC #56 at signed verified head
+  `9c61d3536886e5313b734da2f281eec1cc99f640` after two `.craft/roles` passes.
+- Default `claws dev` is now offline, non-delivering, and non-mutating. Explicit
+  live execution uses marked disposable state, canonical effect consent, and
+  reclaimable abandoned-state markers without touching production state.
+- Added strict `claw-test-v1-spec.md`: bounded declarative static/live checks,
+  structured readiness prerequisites, no arbitrary test code, no automatic
+  network/provider/schedule/delivery effects, and privacy-preserving results.
+- Validation now rejects nonempty root package scripts. Deterministic build
+  proof requires one golden artifact digest across Linux, macOS, Windows, and a
+  WSL packed-CLI smoke.
+- The implementation plan remains six dependency-ordered PRs and still depends
+  on RFC #48 and RFC #52. No extra implementation PR was added for test-v1.
+- `git diff --check` and local links passed. The first Codex review found one
+  omitted live check in the exhaustive list; it was fixed, and the required
+  rerun found no actionable issue. ClawSweeper re-review is requested on the
+  exact new head.
