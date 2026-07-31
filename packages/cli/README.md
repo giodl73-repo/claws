@@ -9,6 +9,8 @@ OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create ./financial-analyst --id financial-analyst --name "Financial Analyst" --description "Analyzes companies." --soul ./SOUL.md --bootstrap ./BOOTSTRAP.md --skill ./.agents/skills/research --plugin clawhub:@publisher/sec-filings@1.0.0
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --dry-run
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --yes --plan-integrity sha256:<reviewed-digest>
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent codex --target ./new-workspace --dry-run
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent codex --target ./new-workspace --yes --plan-integrity sha256:<reviewed-digest>
 CLAWHUB_REGISTRY_URL=https://registry.example OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- clawhub:@publisher/claw@1.0.0 --agent openclaw --dry-run
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- github:publisher/awesome-claws@0123456789abcdef0123456789abcdef01234567#claws/financial-analyst --agent openclaw --dry-run
 ```
@@ -24,6 +26,15 @@ The OpenClaw adapter delegates through the public `openclaw claws add` process
 boundary. Preview uses `--dry-run --json`; apply requires explicit `--yes` and
 the exact `planIntegrity` returned by preview. It does not import OpenClaw code
 or reproduce OpenClaw consent, mutation, provenance, or removal policy.
+
+The Codex adapter is intentionally narrower. It creates a new project directory
+and maps the portable `CLAW.md` prompt plus declared bootstrap instructions to
+root `AGENTS.md`; ordinary declared workspace files are copied alongside it.
+Preview is non-mutating and integrity-bound, apply uses create-only writes, and
+an existing target is never overlaid. Foreign profiles are inert. Required
+packages, MCP servers, schedules, package-root `BOOTSTRAP.md`, and an as-yet
+undefined `profiles/codex.yml` contract block apply instead of being silently
+dropped.
 
 `create` writes a new, validated schema-v1 package from a `SOUL.md`, optional
 `AGENTS.md` and package-root `BOOTSTRAP.md`, selected local skill directories,
@@ -45,8 +56,9 @@ experimental Claws feed. The CLI binds feed package/version/integrity to
 same-origin artifact metadata, bounded safe extraction, and the extracted
 package identity before delegation. `CLAWHUB_REGISTRY_URL` is required until
 that feed is deployed. OpenClaw recomputes the plan before mutation and rejects
-stale consent. Broader lifecycle dispatch, final naming, and publication remain
-deferred.
+stale consent. The Codex adapter likewise rebuilds its exact workspace plan
+before creating the target. Broader lifecycle dispatch, final naming, and
+publication remain deferred.
 
 Complete Claws may also resolve from GitHub with
 `github:<owner>/<repo>@<exact-commit>[#package/path]`. Branches and tags are

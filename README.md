@@ -14,6 +14,8 @@ OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create ./financial-analyst --id financial-analyst --name "Financial Analyst" --description "Analyzes companies from primary sources." --soul ./SOUL.md --bootstrap ./BOOTSTRAP.md --skill ./.agents/skills/research --plugin clawhub:@publisher/sec-filings@1.0.0
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --dry-run
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --yes --plan-integrity sha256:<reviewed-digest>
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent codex --target ./new-workspace --dry-run
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent codex --target ./new-workspace --yes --plan-integrity sha256:<reviewed-digest>
 CLAWHUB_REGISTRY_URL=https://registry.example OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- clawhub:@publisher/claw@1.0.0 --agent openclaw --dry-run
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- github:publisher/awesome-claws@0123456789abcdef0123456789abcdef01234567#claws/financial-analyst --agent openclaw --dry-run
 ```
@@ -22,6 +24,7 @@ The intended future command shape remains:
 
 ```text
 npx <name> <claw> --agent openclaw
+npx <name> <claw> --agent codex --target ./new-workspace
 ```
 
 `<name>` remains unresolved until the Foundation selects or secures the npm
@@ -50,6 +53,9 @@ automation must continue to choose preview or apply explicitly.
   process. It does not import OpenClaw code or recreate host policy.
 - OpenClaw revalidates packages at its own trust boundary and continues to own
   consent, mutation, provenance, update, status, doctor, and removal.
+- The Codex adapter maps the portable prompt and declared bootstrap instructions
+  to a new project-root `AGENTS.md`, then copies declared workspace files. It
+  does not import OpenClaw or mutate Codex user configuration.
 
 ## Current Scope
 
@@ -88,12 +94,21 @@ downloads remain pinned to that origin. GitHub resolution accepts redirects
 only from the API to GitHub's codeload origin and records both archive and
 package integrity.
 
-Preview returns OpenClaw's complete native plan and its `planIntegrity` value.
-Apply requires explicit `--yes` plus that exact value. The adapter re-resolves
-and snapshots the package, then delegates to `openclaw claws add --yes
+For OpenClaw, preview returns its complete native plan and `planIntegrity`
+value. Apply requires explicit `--yes` plus that exact value. The adapter
+re-resolves and snapshots the package, then delegates to `openclaw claws add --yes
 --plan-integrity`; OpenClaw recomputes the plan and rejects stale consent before
-mutation. Broader lifecycle dispatch, final naming, publication, and other
-harness adapters remain deferred.
+mutation.
+
+For Codex, preview returns a content-free, integrity-bound workspace plan. Apply
+creates the reviewed files under an atomically reserved new target directory;
+it never overlays an existing project. This portable-core slice supports the
+`CLAW.md` prompt, declared bootstrap instructions, and workspace files. It
+ignores foreign profiles and fails closed on `profiles/codex.yml`, package
+dependencies, MCP servers, schedules, package-root `BOOTSTRAP.md`, or an
+explicit `AGENTS.md` destination until those host contracts are designed.
+Broader lifecycle dispatch, final naming, publication, and additional adapters
+remain deferred.
 
 See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the source-provider, component
 importer, and harness-adapter boundaries. Public skill catalogs are component

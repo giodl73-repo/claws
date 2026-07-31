@@ -52,6 +52,7 @@ export type LocalClawPackage = {
   source: ClawPackageSource;
   manifest: ClawManifest;
   manifestPath: string;
+  portablePrompt?: string;
   payload: Array<{ path: string; bytes: Buffer }>;
   summary: {
     agent: Pick<ClawManifest["agent"], "id" | "name" | "description">;

@@ -2,7 +2,7 @@
 import { realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import { applyWithHarness, previewWithHarness } from "./adapters.js";
+import { applyWithHarness, previewWithHarness, type HarnessAdapterOptions } from "./adapters.js";
 import { createClawPackage, type CreateClawOptions } from "./create.js";
 import { CliError } from "./errors.js";
 import { inspectClawSource } from "./source-providers.js";
@@ -32,6 +32,8 @@ Usage:
   claws-dev <source> --agent openclaw
   claws-dev <source> --agent openclaw --dry-run [--json]
   claws-dev <source> --agent openclaw --yes --plan-integrity <digest> [--json]
+  claws-dev <source> --agent codex --target <new-workspace> --dry-run [--json]
+  claws-dev <source> --agent codex --target <new-workspace> --yes --plan-integrity <digest> [--json]
 
 Sources:
   ./local-package
@@ -59,11 +61,16 @@ type Io = {
 type Dependencies = {
   create?(options: CreateClawOptions): Promise<LocalClawPackage>;
   inspect(source: string): Promise<LocalClawPackage>;
-  preview(harness: string, claw: LocalClawPackage): Promise<{ id: string; outcome: unknown }>;
+  preview(
+    harness: string,
+    claw: LocalClawPackage,
+    options?: HarnessAdapterOptions,
+  ): Promise<{ id: string; outcome: unknown }>;
   apply(
     harness: string,
     claw: LocalClawPackage,
     planIntegrity: string,
+    options?: HarnessAdapterOptions,
   ): Promise<{ id: string; outcome: unknown }>;
 };
 
@@ -175,10 +182,14 @@ export async function runCli(
   const dependencies = options.dependencies ?? {
     create: (createOptions: CreateClawOptions) => createClawPackage(createOptions),
     inspect: (source: string) => inspectClawSource(source, { env }),
-    preview: (harness: string, claw: LocalClawPackage) =>
-      previewWithHarness(harness, claw, undefined, env),
-    apply: (harness: string, claw: LocalClawPackage, planIntegrity: string) =>
-      applyWithHarness(harness, claw, planIntegrity, undefined, env),
+    preview: (harness: string, claw: LocalClawPackage, adapterOptions?: HarnessAdapterOptions) =>
+      previewWithHarness(harness, claw, undefined, env, adapterOptions),
+    apply: (
+      harness: string,
+      claw: LocalClawPackage,
+      planIntegrity: string,
+      adapterOptions?: HarnessAdapterOptions,
+    ) => applyWithHarness(harness, claw, planIntegrity, undefined, env, adapterOptions),
   };
   const createCommand = argv[0] === "create";
   const inspectCommand = argv[0] === "inspect";
@@ -336,6 +347,7 @@ export async function runCli(
         "dry-run": { type: "boolean", default: false },
         yes: { type: "boolean", default: false },
         "plan-integrity": { type: "string" },
+        target: { type: "string" },
         json: { type: "boolean", default: false },
       },
     });
@@ -370,12 +382,13 @@ export async function runCli(
         parsed.values.agent !== undefined ||
         parsed.values["dry-run"] === true ||
         parsed.values.yes === true ||
-        parsed.values["plan-integrity"] !== undefined
+        parsed.values["plan-integrity"] !== undefined ||
+        parsed.values.target !== undefined
       ) {
         throw new CliError({
           code: "invalid_arguments",
           phase: "arguments",
-          message: "inspect does not accept --agent or --dry-run.",
+          message: "inspect does not accept harness execution options.",
         });
       }
       if (interactive) {
@@ -403,6 +416,24 @@ export async function runCli(
       }
       const dryRun = parsed.values["dry-run"] === true;
       const yes = parsed.values.yes === true;
+      const target = parsed.values.target;
+      if (harness === "codex" && (typeof target !== "string" || !target.trim())) {
+        throw new CliError({
+          code: "codex_target_required",
+          phase: "arguments",
+          message: "The Codex adapter requires --target <new-workspace>.",
+        });
+      }
+      if (harness !== "codex" && target !== undefined) {
+        throw new CliError({
+          code: "adapter_target_unsupported",
+          phase: "arguments",
+          message: `The ${harness} adapter does not accept --target.`,
+          path: harness,
+        });
+      }
+      const adapterOptions =
+        typeof target === "string" ? ({ target } satisfies HarnessAdapterOptions) : undefined;
       const interactiveApply = interactive && !dryRun && !yes;
       const planIntegrity = parsed.values["plan-integrity"];
       const consentPlanIntegrity = typeof planIntegrity === "string" ? planIntegrity : undefined;
@@ -442,9 +473,13 @@ export async function runCli(
         activeOperation = "preview";
         const preview = interactive
           ? await withSpinner(ui, "Preparing host plan…", "Host plan ready", () =>
-              dependencies.preview(harness, claw),
+              adapterOptions
+                ? dependencies.preview(harness, claw, adapterOptions)
+                : dependencies.preview(harness, claw),
             )
-          : await dependencies.preview(harness, claw);
+          : adapterOptions
+            ? await dependencies.preview(harness, claw, adapterOptions)
+            : await dependencies.preview(harness, claw);
         outcome = success("preview", claw, preview);
         if (interactive) {
           ui.note(formatHarnessPlan(preview.outcome), `${harness} Apply Plan`);
@@ -472,7 +507,9 @@ export async function runCli(
           }
           activeOperation = "apply";
           const applied = await withSpinner(ui, "Applying Claw…", "Claw applied", () =>
-            dependencies.apply(harness, claw, integrity),
+            adapterOptions
+              ? dependencies.apply(harness, claw, integrity, adapterOptions)
+              : dependencies.apply(harness, claw, integrity),
           );
           outcome = success("apply", claw, applied);
           ui.outro(`${claw.summary.agent.name ?? claw.summary.agent.id} is ready`);
@@ -483,7 +520,9 @@ export async function runCli(
         outcome = success(
           "apply",
           claw,
-          await dependencies.apply(harness, claw, consentPlanIntegrity!),
+          adapterOptions
+            ? await dependencies.apply(harness, claw, consentPlanIntegrity!, adapterOptions)
+            : await dependencies.apply(harness, claw, consentPlanIntegrity!),
         );
       }
     }

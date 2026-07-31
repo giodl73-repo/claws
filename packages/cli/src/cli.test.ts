@@ -318,6 +318,52 @@ describe("standalone Claw CLI", () => {
     });
   });
 
+  it("passes an explicit new workspace target to the Codex adapter", async () => {
+    const capture = output();
+    const target = resolve(".tmp", "codex-workspace");
+    const preview = vi.fn().mockResolvedValue({
+      id: "codex",
+      outcome: { ready: true, planIntegrity: `sha256:${"7".repeat(64)}` },
+    });
+    const apply = vi.fn();
+
+    const exitCode = await runCli(
+      [validFixture, "--agent", "codex", "--target", target, "--dry-run", "--json"],
+      {
+        io: capture.io,
+        env: { OPENCLAW_EXPERIMENTAL_CLAWS: "1" },
+        dependencies: { inspect: inspectLocalPackage, preview, apply },
+      },
+    );
+
+    expect(exitCode).toBe(0);
+    expect(preview).toHaveBeenCalledWith("codex", expect.any(Object), { target });
+    expect(apply).not.toHaveBeenCalled();
+    expect(JSON.parse(capture.read().stdout)).toMatchObject({
+      operation: "preview",
+      harness: { id: "codex", outcome: { ready: true } },
+    });
+  });
+
+  it("requires a Codex target before inspecting package bytes", async () => {
+    const capture = output();
+    const inspect = vi.fn();
+    const preview = vi.fn();
+    const apply = vi.fn();
+
+    const exitCode = await runCli([validFixture, "--agent", "codex", "--dry-run", "--json"], {
+      io: capture.io,
+      env: { OPENCLAW_EXPERIMENTAL_CLAWS: "1" },
+      dependencies: { inspect, preview, apply },
+    });
+
+    expect(exitCode).toBe(2);
+    expect(inspect).not.toHaveBeenCalled();
+    expect(JSON.parse(capture.read().stderr)).toMatchObject({
+      diagnostics: [{ code: "codex_target_required", phase: "arguments" }],
+    });
+  });
+
   it("previews, confirms, and applies one interactive command with the exact plan", async () => {
     const capture = output();
     const terminal = terminalUi([true]);

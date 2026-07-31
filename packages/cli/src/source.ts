@@ -456,6 +456,7 @@ export async function inspectLocalPackage(input: string): Promise<LocalClawPacka
     },
     manifest: parsed.manifest,
     manifestPath: metadata.manifestPath,
+    ...(hasPortablePrompt ? { portablePrompt: markdown.body } : {}),
     payload: files.map((file) => ({ path: file.path, bytes: file.bytes })),
     summary: {
       agent: {

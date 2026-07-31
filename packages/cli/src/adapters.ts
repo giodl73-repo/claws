@@ -17,6 +17,7 @@ import {
 import { tmpdir } from "node:os";
 import { delimiter, dirname, join, resolve } from "node:path";
 import { CliError } from "./errors.js";
+import { applyCodexWorkspace, previewCodexWorkspace } from "./codex-adapter.js";
 import type { LocalClawPackage } from "./types.js";
 
 const MAX_ADAPTER_OUTPUT_BYTES = 4 * 1024 * 1024;
@@ -36,6 +37,10 @@ export type HarnessPreview = {
 };
 
 export type HarnessApply = HarnessPreview;
+
+export type HarnessAdapterOptions = {
+  target?: string;
+};
 
 type ProcessResult = {
   exitCode: number;
@@ -621,7 +626,22 @@ export async function previewWithHarness(
   claw: LocalClawPackage,
   runtime: AdapterRuntime = defaultRuntime,
   env: NodeJS.ProcessEnv = process.env,
+  options: HarnessAdapterOptions = {},
 ): Promise<HarnessPreview> {
+  if (harness === "codex") {
+    return {
+      id: "codex",
+      outcome: await previewCodexWorkspace(claw, options.target ?? ""),
+    };
+  }
+  if (options.target !== undefined) {
+    throw new CliError({
+      code: "adapter_target_unsupported",
+      phase: "arguments",
+      message: `The ${harness} adapter does not accept --target.`,
+      path: harness,
+    });
+  }
   return delegateOpenClawAdd({ harness, claw, mode: "preview", runtime, env });
 }
 
@@ -631,12 +651,27 @@ export async function applyWithHarness(
   planIntegrity: string,
   runtime: AdapterRuntime = defaultRuntime,
   env: NodeJS.ProcessEnv = process.env,
+  options: HarnessAdapterOptions = {},
 ): Promise<HarnessApply> {
   if (!planIntegrity) {
     throw new CliError({
       code: "plan_integrity_required",
       phase: "arguments",
       message: "Harness apply requires the integrity from an exact dry-run plan.",
+    });
+  }
+  if (harness === "codex") {
+    return {
+      id: "codex",
+      outcome: await applyCodexWorkspace(claw, options.target ?? "", planIntegrity),
+    };
+  }
+  if (options.target !== undefined) {
+    throw new CliError({
+      code: "adapter_target_unsupported",
+      phase: "arguments",
+      message: `The ${harness} adapter does not accept --target.`,
+      path: harness,
     });
   }
   return delegateOpenClawAdd({ harness, claw, mode: "apply", planIntegrity, runtime, env });
