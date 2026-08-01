@@ -21,6 +21,21 @@
 
 - Last updated: 2026-08-01
 - Last agent: Codex
+- Next-slice authoring checkpoint (2026-08-01): three clean fork branches are
+  pushed after the exact updater head `00f37e291db8`, without modifying the
+  existing merge branches. `user/giodl/localization-cli-shell-validation`
+  (`d9061fdc64a`) establishes shared `cli-shell` catalog ownership and
+  localizes status/health/tasks numeric validation; 41 focused tests,
+  `tsgo:core`, catalog drift, and surface disposition gates pass.
+  `user/giodl/localization-cli-acp-capability` (`b36478cb042`) stacks on it and
+  localizes ACP provenance/product wrappers plus unknown-capability guidance;
+  149 focused tests and the same gates pass. `user/giodl/localization-cli-agent-guidance`
+  (`10cd4ec7334`) stacks next and localizes bounded pre-dispatch agent/message-file,
+  timeout, session-key, target, and `/compact` guidance while leaving IDs,
+  paths, commands, provider/Gateway diagnostics, and JSON invariant; 85 focused
+  tests and the same gates pass. Do not open or rebase these branches until the
+  foundation/adoption/updater landing order is known; then publish them as
+  `O10-A`, `O11-A`, and `O11-B` with exact dependency bodies.
 - F01 exact-head landing checkpoint (2026-08-01): the official maintainer
   review/prepare workflow rebased #111541 onto OpenClaw `main` at
   `065d39067e1`, fixed the repository env-name ratchet by renaming the
