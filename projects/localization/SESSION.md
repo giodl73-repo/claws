@@ -35,7 +35,7 @@
   `08305dbb94b0`. The live heads are foundation #111541
   `82c5ee227076`, contributor skill #111543 `46bf0197482b`, authoring
   exemplar #112784 `92b11ded8b86`, adoption gate #112801 `85545226fe88`,
-  updater #111542 `d5d570a31f53`, TUI #111544 `3247563750e2`,
+  updater #111542 `d5d570a31f53`, TUI #111544 `1ad4a83bab33`,
   Gateway/Control UI #111545 `d26d0230952f`, and wizard migration offer
   #113427 `5dc85f87f989`.
 - Foundation CI closeout: hosted logs exposed two real integration defects.
