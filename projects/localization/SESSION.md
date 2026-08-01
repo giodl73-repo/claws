@@ -33,7 +33,7 @@
   processed, every PR body was republished against its exact head, and the
   cumulative fork stack was rebased onto OpenClaw `main` at
   `08305dbb94b0`. The live heads are foundation #111541
-  `82c5ee227076`, contributor skill #111543 `46bf0197482b`, authoring
+  `5268dee87992`, contributor skill #111543 `46bf0197482b`, authoring
   exemplar #112784 `92b11ded8b86`, adoption gate #112801 `85545226fe88`,
   updater #111542 `d5d570a31f53`, TUI #111544 `1ad4a83bab33`,
   Gateway/Control UI #111545 `d26d0230952f`, and wizard migration offer
@@ -44,6 +44,12 @@
   candidate failures separately for type-aware lint. The affected 57 wizard
   and catalog tests, the 22-test catalog suite, focused type-aware oxlint,
   formatting, and `tsgo:core` pass locally.
+- Foundation merge-window refresh (2026-07-31): #111541 was cleanly rebased
+  onto upstream `main` at `a1b41d5ddb05` and force-pushed with an exact lease at
+  `5268dee8799293f4f43c6cf485584052fb2d3f28`. All 105 focused core, wizard,
+  and watch-path tests pass; formatting, `git diff --check`, and `tsgo:core`
+  pass. The PR body carries the exact head, and Patrick plus Vince were asked
+  for the exact-head correctness review and dependency authorization.
 - Current-main authoring merge: upstream refactored workflow test ownership
   while the stack was under review. The resolution preserves the new
   `GITHUB_WORKFLOW_TEST_OWNERS` structure, adds only the localization refresh
