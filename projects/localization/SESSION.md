@@ -54,7 +54,7 @@
   and the adoption gate were restacked in order onto the refreshed foundation;
   updater, TUI, Gateway/Control UI, and the Chinese-only wizard slice remain
   independent children of the adoption gate. Exact-lease pushes and PR-body
-  head/dependency updates are live. Local proof passes: 371 authoring tests, 41
+  head/dependency updates are live. Local proof passes: 522 authoring tests, 41
   adoption tests, 215 updater tests, 231 TUI unit tests plus 49 PTY scenarios,
   71 Gateway/UI tests, and 35 wizard tests; catalog/surface gates, formatting,
   diff checks, and the declared product typechecks pass. The first TUI PTY run
