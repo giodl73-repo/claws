@@ -19,8 +19,22 @@
 
 ## Current Session
 
-- Last updated: 2026-07-31
+- Last updated: 2026-08-01
 - Last agent: Codex
+- F01 exact-head landing checkpoint (2026-08-01): the official maintainer
+  review/prepare workflow rebased #111541 onto OpenClaw `main` at
+  `065d39067e1`, fixed the repository env-name ratchet by renaming the
+  package-scoped `OPENCLAW_LOCALES`/registry exports, and pushed signed exact
+  head `491a5df89666a7f808a50000ff4494ceb119a319`. The PR body matches that
+  head. Focused registry/catalog/context tests pass 51/51, the package build,
+  `tsgo:core`, formatting, docs, and `OPENCLAW_*` ratchet 517/517 pass. Hosted
+  CI run 30681993117 is green after rerunning one runner-canceled `check-lint`
+  job; the aggregate `openclaw/ci-gate` is green. `scripts/pr-prepare run
+  111541` and `scripts/pr-merge verify 111541` pass. Merge remains waiting on
+  Vince's exact-head `/allow-dependencies-change` authorization and Patrick's
+  stale GitHub changes-requested state; both were requested at comment
+  5149583221, and exact-head ClawSweeper re-review is queued. Do not restack
+  F03 until F01 actually lands.
 - Current focus: RFC 0024 is accepted and merged. Patrick Erichsen
   (`Patrick-Erichsen`) remains the primary reviewer for the correctness-clean
   implementation stack. Vince and Peter remain requested only on their narrower
