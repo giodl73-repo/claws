@@ -33,11 +33,11 @@
   processed, every PR body was republished against its exact head, and the
   cumulative fork stack was rebased onto OpenClaw `main` at
   `08305dbb94b0`. The live heads are foundation #111541
-  `5268dee87992`, contributor skill #111543 `46bf0197482b`, authoring
-  exemplar #112784 `92b11ded8b86`, adoption gate #112801 `85545226fe88`,
-  updater #111542 `d5d570a31f53`, TUI #111544 `1ad4a83bab33`,
-  Gateway/Control UI #111545 `d26d0230952f`, and wizard migration offer
-  #113427 `5dc85f87f989`.
+  `5268dee87992`, contributor skill #111543 `9f6a55cd2e3`, authoring
+  exemplar #112784 `e5d59c96ee24`, adoption gate #112801 `af4567408552`,
+  updater #111542 `00f37e291db8`, TUI #111544 `08933a04b588`,
+  Gateway/Control UI #111545 `bed80b5b3f5c`, and wizard migration offer
+  #113427 `a2a7084c8ef5`.
 - Foundation CI closeout: hosted logs exposed two real integration defects.
   The singular app-recommendation key no longer receives the plural-only
   `count` parameter, and catalog parse diagnostics now narrow source and
@@ -50,6 +50,17 @@
   and watch-path tests pass; formatting, `git diff --check`, and `tsgo:core`
   pass. The PR body carries the exact head, and Patrick plus Vince were asked
   for the exact-head correctness review and dependency authorization.
+- Full-stack merge-window restack (2026-07-31): F03, the authoring exemplar,
+  and the adoption gate were restacked in order onto the refreshed foundation;
+  updater, TUI, Gateway/Control UI, and the Chinese-only wizard slice remain
+  independent children of the adoption gate. Exact-lease pushes and PR-body
+  head/dependency updates are live. Local proof passes: 371 authoring tests, 41
+  adoption tests, 215 updater tests, 231 TUI unit tests plus 49 PTY scenarios,
+  71 Gateway/UI tests, and 35 wizard tests; catalog/surface gates, formatting,
+  diff checks, and the declared product typechecks pass. The first TUI PTY run
+  failed at suite startup before running a scenario; an isolated rerun passed
+  all 49. Hosted CI is running, with downstream Dependency Guard failures
+  expected until F01 lands.
 - Current-main authoring merge: upstream refactored workflow test ownership
   while the stack was under review. The resolution preserves the new
   `GITHUB_WORKFLOW_TEST_OWNERS` structure, adds only the localization refresh
