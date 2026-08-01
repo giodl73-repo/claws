@@ -19,7 +19,7 @@
 
 ## Current Session
 
-- Last updated: 2026-07-26
+- Last updated: 2026-07-31
 - Last agent: Codex
 - Current focus: RFC 0024 is accepted and merged. Patrick Erichsen
   (`Patrick-Erichsen`) remains the primary reviewer for the correctness-clean
@@ -29,6 +29,33 @@
   and do not start another registry package if that rollout gate fails. The
   projected 47-entry registry is an editable source audit, not a fixed PR quota
   or a runtime registry.
+- Review-stack closeout (2026-07-31): all Patrick and ClawSweeper findings were
+  processed, every PR body was republished against its exact head, and the
+  cumulative fork stack was rebased onto OpenClaw `main` at
+  `08305dbb94b0`. The live heads are foundation #111541
+  `82c5ee227076`, contributor skill #111543 `46bf0197482b`, authoring
+  exemplar #112784 `92b11ded8b86`, adoption gate #112801 `85545226fe88`,
+  updater #111542 `d5d570a31f53`, TUI #111544 `3247563750e2`,
+  Gateway/Control UI #111545 `d26d0230952f`, and wizard migration offer
+  #113427 `5dc85f87f989`.
+- Foundation CI closeout: hosted logs exposed two real integration defects.
+  The singular app-recommendation key no longer receives the plural-only
+  `count` parameter, and catalog parse diagnostics now narrow source and
+  candidate failures separately for type-aware lint. The affected 57 wizard
+  and catalog tests, the 22-test catalog suite, focused type-aware oxlint,
+  formatting, and `tsgo:core` pass locally.
+- Current-main authoring merge: upstream refactored workflow test ownership
+  while the stack was under review. The resolution preserves the new
+  `GITHUB_WORKFLOW_TEST_OWNERS` structure, adds only the localization refresh
+  workflow and CI owner edges, and passes 413 focused workflow-routing tests.
+- Remaining landing gates: current hosted CI must finish, Patrick must replace
+  the stale foundation changes-requested review with an exact-head review, and
+  a maintainer must authorize the intentional `intl-messageformat@11.2.12`
+  dependency delta with the repository's current-head dependency command.
+  Dependency Guard is expected to remain red until that authorization. The
+  wizard slice deliberately remains limited to the existing `zh-CN` and
+  `zh-TW` targets; full-wizard/all-locale expansion is deferred until the
+  shared loop succeeds in production.
 - Active branches / PRs: accepted RFC
   [#42](https://github.com/openclaw/rfcs/pull/42), implementation tracker
   [#113105](https://github.com/openclaw/openclaw/issues/113105), authoring exemplar
