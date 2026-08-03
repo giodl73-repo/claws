@@ -27,9 +27,10 @@
 - Current focus: PRE-001, BOOT-001, the 55-source quarantine inventory, the
   XPK-001 through XPK-009 Wave 0 definition gate, exact multi-commit source
   reconstruction, and B3 conflict-resolution authority are landed on
-  protected `lobster/integration` at
-  `4fec24edc1c0231d9008a937116532eb0c461109` through fork PRs #203-#207.
-  EVID-001 admission PR #208 carries exactly #107026, #104018, and #113421:
+  protected `lobster/integration` through fork PRs #203-#207. EVID-001
+  admission PR #208 is also landed there at
+  `07f288dffef67723c4a0cd05624697346df28661` and carries exactly #107026,
+  #104018, and #113421:
   52 source commits with 14 parent- and prefix-tree-bound B3 resolutions.
   The source inventory marks only those three ranges
   `evidence-only/admitted`; all retain authority `none`. Two independent
@@ -41,9 +42,11 @@
   current configuration/readiness/release owner projection and rejects stale,
   omitted, and mixed-generation required owners. The runtime evidence branch
   is published as `lobster/evid-001-runtime-carry`; the integrated admission
-  branch is `lobster/evid-001-carried-sources`. Next: monitor PR #208 CI and
-  review, then stop for classification before admitting #113422, #114636, or
-  any additional source.
+  branch is `lobster/evid-001-carried-sources`. Meaningful current-head CI
+  completed with 155 successful checks, including `openclaw/ci-gate`; the
+  remaining failures were unavailable fork GitHub App tokens, and OpenGrep
+  remained queued without an assigned Blacksmith runner. Next: stop for
+  classification before admitting #113422, #114636, or any additional source.
 - Architecture context: The target architecture now has thirteen major swim
   lanes.
   Each lane records goals, responsibilities, conceptual pieces, contracts,
@@ -466,11 +469,10 @@
   authority. Only #90708 when required, #107026, and the minimum readiness
   prefix may precede EVID-001; all other heads remain source-only until their
   individual trust, policy, evidence, ownership, migration, and deletion gates.
-- Active branch / PR: `giodl73-repo/openclaw` PR #208 is open from
+- Active branch / PR: `giodl73-repo/openclaw` PR #208 is merged from
   `lobster/evid-001-carried-sources` to `lobster/integration` at
-  `1e96a97ff6f8be3c694175c64a5769ffb50b698b`. PR #207 is merged; protected
-  `lobster/integration` is at
-  `4fec24edc1c0231d9008a937116532eb0c461109`.
+  `07f288dffef67723c4a0cd05624697346df28661`. Protected
+  `lobster/integration` is at that exact fast-forwarded head.
 - Known dirty state: The wider checkout contains unrelated user changes.
   Preserve them. `projects/openclaw-design/` and this area are coherent
   documentation additions. The fork-only EC-026 proof is in
@@ -478,11 +480,9 @@
   `user/giodl/ec026-rust-node-evidence`. The protected-effect simulation is
   untracked in `C:\src\openclaw-protected-effect-sim` on
   `user/giodl/ec-protected-effect-sim`.
-- Blocking question: no EVID-001 contract or reconstruction blocker remains.
-  Broader local runtime tests are blocked before collection by a stale shared
-  `@openclaw/fs-safe@0.4.7` installation that lacks the lockfile-required
-  0.5.0 API; Blacksmith Testbox access and the AWS Crabbox broker login were
-  unavailable. PR #208 CI is the current broad runtime proof path.
+- Blocking question: EVID-001 is complete. The next decision is classification
+  of #113422, #114636, or another quarantined source before any further
+  admission.
 
 ## Resume Checklist
 
@@ -509,12 +509,12 @@
 
 - Retain PRE-001 run `30773428781` as vanilla baseline evidence with its known
   `native-i18n` inventory-drift failure.
-- Keep BOOT-001, the 55-source inventory, the Wave 0 definition gate, and B3
-  reconstruction authority synchronized at
-  `4fec24edc1c0231d9008a937116532eb0c461109`.
-- Drive EVID-001 admission PR #208 through meaningful CI and current-head
-  review. Preserve the exact three admitted ranges, 14 B3 resolutions,
-  deterministic reconstruction identities, and owner-projection fixture.
+- Keep BOOT-001, the 55-source inventory, the Wave 0 definition gate, B3
+  reconstruction authority, and EVID-001 synchronized at
+  `07f288dffef67723c4a0cd05624697346df28661`.
+- Preserve EVID-001's exact three admitted ranges, 14 B3 resolutions,
+  deterministic reconstruction identities, owner-projection fixture, and
+  evidence-only authority boundary.
 - Stop for classification before admitting #113422, #114636, or any other
   carried head; EVID-001 remains evidence-only with no release/runtime
   authority.

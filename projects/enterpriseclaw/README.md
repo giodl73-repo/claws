@@ -121,7 +121,7 @@ does not remove or flatten the underlying owner and relationship contracts.
 | `giodl73-repo/openclaw` | #205 | `lobster/wave-0-contracts` | Merged | Publish executable XPK-001 through XPK-009 definition-only gates with no admission authority. |
 | `giodl73-repo/openclaw` | #206 | `lobster/evid-001-admission` | Merged | Add deterministic exact multi-commit source ranges without admitting quarantined source. |
 | `giodl73-repo/openclaw` | #207 | `lobster/evid-001-source-admission` | Merged | Bind per-commit B3 conflict resolutions to exact queue-prefix trees and carried identities. |
-| `giodl73-repo/openclaw` | #208 | `lobster/evid-001-carried-sources` | Open | Admit the exact #107026/#104018/#113421 evidence stack and executable owner-projection fixture with authority `none`. |
+| `giodl73-repo/openclaw` | #208 | `lobster/evid-001-carried-sources` | Merged | Admit the exact #107026/#104018/#113421 evidence stack and executable owner-projection fixture with authority `none`. |
 | `openclaw/openclaw` | Current and future implementation | Per worktree | Reference | Test whether implementation remains consistent with the architecture. |
 | `openclaw/rfcs` | Normative proposals | Per RFC | Reference | Express focused contracts without duplicating the architecture notebook. |
 
