@@ -86,6 +86,7 @@ decision or action.
 | Area-level implementation packages and work-item decomposition | `implementation-packages/README.md` |
 | Fork branch, patch queue, phase, release, and upstream-promotion plan | `fork-execution-plan-2026-08-02.md` |
 | Live PRE-001 fork sync, protection, checkout, and baseline record | `fork-preflight-2026-08-02.md` |
+| EVID-002 hosting-profile source classification and proof boundary | `evid-002-hosting-profile-classification-2026-08-03.md` |
 | Full `.craft/roles` review of the fork execution plan | `fork-execution-plan-role-review-2026-08-02.md` |
 | Concrete proposed fork, upstream, Lobster, Rust, and deletion PR stack | `fork-pr-plan-2026-08-02.md` |
 | Full `.craft/roles` review and correction of the PR portfolio | `fork-pr-plan-role-review-2026-08-02.md` |

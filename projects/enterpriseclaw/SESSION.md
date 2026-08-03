@@ -49,8 +49,14 @@
   branch is `lobster/evid-001-carried-sources`. Meaningful current-head CI
   completed with 155 successful checks, including `openclaw/ci-gate`; the
   remaining failures were unavailable fork GitHub App tokens, and OpenGrep
-  remained queued without an assigned Blacksmith runner. Next: stop for
-  classification before admitting #113422, #114636, or any additional source.
+  remained queued without an assigned Blacksmith runner. #113422 and #114636
+  are now classified together as EVID-002 Hosting Profile Conformance:
+  #113422 contributes 39 unique profile/runtime commits and #114636 contributes
+  three catalog, validation, and release-evidence commits. Both remain
+  quarantined with authority `none`. The first exact replay conflict is bounded
+  CLI/documentation drift in `docs/cli/gateway.md` and
+  `src/cli/gateway-cli/run-options.ts`; it requires an explicit B3 resolution,
+  not a baseline move. Next: build the EVID-002 evidence-only admission.
 - Architecture context: The target architecture now has thirteen major swim
   lanes.
   Each lane records goals, responsibilities, conceptual pieces, contracts,
@@ -484,9 +490,10 @@
   `user/giodl/ec026-rust-node-evidence`. The protected-effect simulation is
   untracked in `C:\src\openclaw-protected-effect-sim` on
   `user/giodl/ec-protected-effect-sim`.
-- Blocking question: EVID-001 is complete. The next decision is classification
-  of #113422, #114636, or another quarantined source before any further
-  admission.
+- Blocking question: no source-classification question remains for #113422 and
+  #114636. EVID-002 must prove exact replay, bounded B3 resolutions, unprofiled
+  compatibility, canonical profile validation, and complete package evidence
+  before either source leaves quarantine.
 
 ## Resume Checklist
 
@@ -519,9 +526,9 @@
 - Preserve EVID-001's exact three admitted ranges, 14 B3 resolutions,
   deterministic reconstruction identities, owner-projection fixture, and
   evidence-only authority boundary.
-- Stop for classification before admitting #113422, #114636, or any other
-  carried head; EVID-001 remains evidence-only with no release/runtime
-  authority.
+- Build EVID-002 from #113422 followed by #114636 as one evidence-only feature
+  stack with separate source identities. Preserve unprofiled compatibility and
+  stop again before release/runtime authority.
 - Review the target architecture through runtime-owner, hobbyist, enterprise
   operator, security, and skeptical-simplicity roles.
 - Review lane boundaries and identify responsibilities that are duplicated,
