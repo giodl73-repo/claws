@@ -50,14 +50,14 @@
   completed with 155 successful checks, including `openclaw/ci-gate`; the
   remaining failures were unavailable fork GitHub App tokens, and OpenGrep
   remained queued without an assigned Blacksmith runner. EVID-002 Hosting
-  Profile Conformance is now open as controlled-fork PR #209:
+  Profile Conformance is now merged as controlled-fork PR #209:
   #113422 contributes 39 unique commits for the optional `local`, `container`,
   `reverse-proxy`, and `node-mode` profiles, while #114636 contributes three
   commits for catalog inspection, live validation, and package release
   evidence. The pure runtime branch `lobster/evid-002-runtime-carry` is
-  published at `8b5514221c1593585592e95435c1030284ec1307`; the admission branch
-  is `lobster/evid-002-hosting-profiles` at
-  `1132adf4c3dffffef7ff4c40a643f91dfa79ad07`. Six bounded B3 resolutions are
+  published at `8b5514221c1593585592e95435c1030284ec1307`; controlled-fork PR
+  #209 landed by exact lease-protected fast-forward on `lobster/integration`
+  at `5c51773ab91f2de8047f27c538f550d8ae55fc29`. Six bounded B3 resolutions are
   bound to exact source, carried, patch, and queue-prefix identities. Two
   independent reconstructions produced commit
   `bed8c65fe948d3088b83e76849cefeaf6c993dfe`, tree
@@ -67,12 +67,15 @@
   profile catalog, required conditions, ready and intentionally not-ready
   states, immutable provenance, and the exact 13-scenario package evidence
   set. Both sources remain `evidence-only/admitted` with authority `none`.
-  Integration-only compatibility fixes remove a config-schema import deadlock,
-  close current CLI/test-routing contracts, and remove unused exports without
-  changing the pure runtime carry tree. Focused validation, the full
-  2,815-test Gateway-methods shard, test types, dead-code checks, and
-  autoreview are clean; fork CI is rerunning. Next: close PR #209 gates and
-  land it on `lobster/integration`.
+  Integration-only compatibility fixes removed a config-schema import deadlock,
+  closed current CLI/test-routing contracts, and removed unused exports without
+  changing the pure runtime carry tree. The corrected head passed 148 CI checks;
+  the remaining failures were the pre-existing `brace-expansion@5.0.8`
+  baseline advisory and unavailable fork GitHub App keys. Focused validation,
+  the full 2,815-test Gateway-methods shard, test types, dead-code checks, and
+  autoreview are clean. Landing proof:
+  `https://github.com/giodl73-repo/openclaw/pull/209#issuecomment-5172244882`.
+  Next: select and classify the next evidence source stack.
 - Architecture context: The target architecture now has thirteen major swim
   lanes.
   Each lane records goals, responsibilities, conceptual pieces, contracts,

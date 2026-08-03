@@ -131,7 +131,7 @@ decision or action.
 | `giodl73-repo/openclaw` | #206 | `lobster/evid-001-admission` | Merged | Add deterministic exact multi-commit source ranges without admitting quarantined source. |
 | `giodl73-repo/openclaw` | #207 | `lobster/evid-001-source-admission` | Merged | Bind per-commit B3 conflict resolutions to exact queue-prefix trees and carried identities. |
 | `giodl73-repo/openclaw` | #208 | `lobster/evid-001-carried-sources` | Merged | Admit the exact #107026/#104018/#113421 evidence stack and executable owner-projection fixture with authority `none`. |
-| `giodl73-repo/openclaw` | #209 | `lobster/evid-002-hosting-profiles` | Open | Admit #113422/#114636 hosting profiles, catalog, validation, and release evidence with six bounded B3 resolutions and authority `none`. |
+| `giodl73-repo/openclaw` | #209 | `lobster/evid-002-hosting-profiles` | Merged | Admit #113422/#114636 hosting profiles, catalog, validation, and release evidence with six bounded B3 resolutions and authority `none`. |
 | `openclaw/openclaw` | Current and future implementation | Per worktree | Reference | Test whether implementation remains consistent with the architecture. |
 | `openclaw/rfcs` | Normative proposals | Per RFC | Reference | Express focused contracts without duplicating the architecture notebook. |
 
