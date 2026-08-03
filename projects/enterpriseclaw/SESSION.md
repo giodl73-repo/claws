@@ -49,14 +49,26 @@
   branch is `lobster/evid-001-carried-sources`. Meaningful current-head CI
   completed with 155 successful checks, including `openclaw/ci-gate`; the
   remaining failures were unavailable fork GitHub App tokens, and OpenGrep
-  remained queued without an assigned Blacksmith runner. #113422 and #114636
-  are now classified together as EVID-002 Hosting Profile Conformance:
-  #113422 contributes 39 unique profile/runtime commits and #114636 contributes
-  three catalog, validation, and release-evidence commits. Both remain
-  quarantined with authority `none`. The first exact replay conflict is bounded
-  CLI/documentation drift in `docs/cli/gateway.md` and
-  `src/cli/gateway-cli/run-options.ts`; it requires an explicit B3 resolution,
-  not a baseline move. Next: build the EVID-002 evidence-only admission.
+  remained queued without an assigned Blacksmith runner. EVID-002 Hosting
+  Profile Conformance is now open as controlled-fork PR #209:
+  #113422 contributes 39 unique commits for the optional `local`, `container`,
+  `reverse-proxy`, and `node-mode` profiles, while #114636 contributes three
+  commits for catalog inspection, live validation, and package release
+  evidence. The pure runtime branch `lobster/evid-002-runtime-carry` is
+  published at `8b5514221c1593585592e95435c1030284ec1307`; the admission branch
+  is `lobster/evid-002-hosting-profiles` at
+  `9655e5a1f3cb42129f0e74935ed3bfbce6db7900`. Six bounded B3 resolutions are
+  bound to exact source, carried, patch, and queue-prefix identities. Two
+  independent reconstructions produced commit
+  `bed8c65fe948d3088b83e76849cefeaf6c993dfe`, tree
+  `a79e9b172a46471b37109c98734f5446745fee33`, and result digest
+  `8f20062723754844b864cadbc1679a09b5b53b3fabc7cf72ea535deea33a90c7`.
+  The `lobster.exa.hosting-profile-conformance.v1` fixture proves the exact
+  profile catalog, required conditions, ready and intentionally not-ready
+  states, immutable provenance, and the exact 13-scenario package evidence
+  set. Both sources remain `evidence-only/admitted` with authority `none`.
+  Focused validation and autoreview are clean; fork CI is running. Next: close
+  PR #209 gates and land it on `lobster/integration`.
 - Architecture context: The target architecture now has thirteen major swim
   lanes.
   Each lane records goals, responsibilities, conceptual pieces, contracts,
