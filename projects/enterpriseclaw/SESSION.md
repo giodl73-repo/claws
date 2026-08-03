@@ -19,6 +19,10 @@
 - Main tracking file: `projects/enterpriseclaw/target-architecture.md`
 - Skill to use: `project-session`; use `faces-development-loop` for target
   contract revisions and executable slices
+- Reporting preference: lead with the mission, then the actual upstream
+  feature PRs or investment areas and what each delivers, then the next step.
+  Keep fork/reconstruction/process PRs separate and secondary unless explicitly
+  requested.
 
 ## Current Session
 

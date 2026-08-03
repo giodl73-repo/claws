@@ -30,6 +30,14 @@ The 35 RFC scopes remain the durable contract portfolio. Human and product
 surfaces simplify them through audience-specific projections; simplification
 does not remove or flatten the underlying owner and relationship contracts.
 
+## Reporting Convention
+
+Status summaries lead with the mission and the actual upstream feature PRs or
+investment areas, including what each delivers and its current status. Fork
+scaffolding, reconstruction, CI, and project-management PRs are reported
+separately as supporting process. Every summary ends with the next concrete
+decision or action.
+
 ## Frame
 
 - **Problem**: OpenClaw has mature facilities, but important relationships

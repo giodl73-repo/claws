@@ -69,6 +69,24 @@ summary:
 
 Then continue with the user's requested work if they asked for action.
 
+## Reporting Format
+
+For project status, delivery, PR, and evidence summaries, lead with what the
+user is investing in rather than the internal machinery used to manage it:
+
+1. State the mission or outcome in one sentence.
+2. List the actual feature, upstream PR, issue, or deliverable items. For each,
+   say what it does, why it matters, and its current status.
+3. Clearly separate those product/source items from supporting fork, CI,
+   reconstruction, review, or project-management PRs.
+4. End with the next concrete decision or action.
+
+When a project-management label such as a wave, evidence admission, or package
+contains other PRs, answer first with the contained upstream/source PRs the user
+cares about. Explain scaffolding PRs only as a secondary process view. Prefer a
+short table or one compact subsection per item over a chronological activity
+log.
+
 ## Update Session
 
 At the end of meaningful work:
