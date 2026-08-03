@@ -14,6 +14,22 @@
   normalized intent digest and reruns risk classification plus the required
   authorization/approval check at the existing runtime enforcement seam.
 
+## Current Owner Baseline
+
+The current approval path has one canonical resolution truth, snapshots
+deferred execution parameters, applies expiry, and fails closed for malformed,
+disallowed, or late verdicts. The target adds normalized review/modify
+semantics and binds them to normalized intent, risk, and policy generations;
+it does not replace the existing enforcement seam with a generic transform
+layer.
+
+Current owner work already covers two adjacent gaps: #113444 proposes
+authenticated external ownership of approval presentation without moving
+decision authority, and #115408/#116013 split hosted Control UI shaping from
+server-side enforcement. The remaining portable question is whether the exact
+consumed decision reference and generation survive through final invocation
+and evidence.
+
 ## Explicit Exclusions
 
 - One policy language for all facilities.
@@ -39,7 +55,8 @@
 
 ## Dependencies
 
-- EC-003 and operation identity.
+- EC-003. Operation identity is consumed from the invoking owner rather than
+  from a hard dependency on any one runtime contract.
 
 ## Proof and Deletion Gate
 

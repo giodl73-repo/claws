@@ -26,6 +26,10 @@ working owner systems
 -> simpler local use and governable enterprise operation
 ```
 
+The 35 RFC scopes remain the durable contract portfolio. Human and product
+surfaces simplify them through audience-specific projections; simplification
+does not remove or flatten the underlying owner and relationship contracts.
+
 ## Frame
 
 - **Problem**: OpenClaw has mature facilities, but important relationships
@@ -55,28 +59,69 @@ working owner systems
 | Area | File |
 | ---- | ---- |
 | Current session and resume state | `SESSION.md` |
+| Executive five-box overview and top-down narrative | `executive-overview.md` |
+| Executive agent-harness competitive landscape | `executive-competitive-landscape-2026-08-02.md` |
+| Slide-ready presentation materials | `presentation-materials/README.md` |
 | Ideal target architecture | `target-architecture.md` |
 | Shared commandments and contract-review grammar | `contract-principles.md` |
 | Shared interface, API, envelope, and state-machine patterns | `contract-interface-patterns.md` |
 | Recurring contract pitfalls and corrective patterns | `contract-pitfalls.md` |
 | Role review of principles, mechanics, and pitfalls | `contract-meta-role-review-2026-08-01.md` |
 | Source-backed specialist review program and packets | `specialist-reviews/README.md` |
-| Evidence grades, readiness gate, and 34-contract ledger | `evidence-base/README.md` |
+| Evidence grades, readiness gate, and 35-contract ledger | `evidence-base/README.md` |
+| B-to-A portfolio promotion audit | `evidence-base/portfolio-promotion-audit-2026-08-02.md` |
+| Competitive analysis and strategic corrections | `competitive-analysis-2026-08-02.md` |
+| Layered human operator journeys | `operator-journeys/README.md` |
+| Protected-effect fork simulation evidence | `evidence-base/protected-external-effect-simulation-2026-08-02.md` |
+| Durable-delivery fork simulation evidence | `evidence-base/durable-delivery-simulation-2026-08-02.md` |
+| Fleet rollout and recovery simulation evidence | `evidence-base/fleet-rollout-recovery-simulation-2026-08-02.md` |
+| Area-level implementation packages and work-item decomposition | `implementation-packages/README.md` |
+| Fork branch, patch queue, phase, release, and upstream-promotion plan | `fork-execution-plan-2026-08-02.md` |
+| Live PRE-001 fork sync, protection, checkout, and baseline record | `fork-preflight-2026-08-02.md` |
+| Full `.craft/roles` review of the fork execution plan | `fork-execution-plan-role-review-2026-08-02.md` |
+| Concrete proposed fork, upstream, Lobster, Rust, and deletion PR stack | `fork-pr-plan-2026-08-02.md` |
+| Full `.craft/roles` review and correction of the PR portfolio | `fork-pr-plan-role-review-2026-08-02.md` |
+| All 55 currently open owned upstream PRs assigned to phased fork carry queues | `fork-carried-upstream-prs-2026-08-02.md` |
+| Full 40-character source-head ledger for all 55 carried upstream PRs | `fork-carried-upstream-pr-ledger-2026-08-02.md` |
+| Full `.craft/roles` review of the all-55 carried-source program | `fork-carried-upstream-prs-role-review-2026-08-02.md` |
+| Consolidated `.craft/roles` review of all ten implementation packages | `implementation-packages/role-review-2026-08-02.md` |
+| Cross-package execution ownership, contracts, DAG, and waves | `implementation-packages/cross-package-execution-contracts.md` |
+| Operations, assurance, and fleet implementation package | `implementation-packages/operations-assurance-fleet.md` |
+| Knowledge, context, and continuity implementation package | `implementation-packages/knowledge-context-continuity.md` |
+| Identity, authority, actions, effects, conversations, and delivery package | `implementation-packages/identity-authority-actions-effects.md` |
+| Runtime fabric, nodes, and Rust implementation package | `implementation-packages/runtime-fabric-nodes-rust.md` |
+| Configuration and activation implementation package | `implementation-packages/configuration-activation.md` |
+| Agent runtime and delegated execution implementation package | `implementation-packages/agent-runtime-delegated-execution.md` |
+| Models, provider attempts, and usage implementation package | `implementation-packages/models-provider-usage.md` |
+| Extensibility, artifact trust, and release implementation package | `implementation-packages/extensibility-artifact-release.md` |
+| Data governance and resource control implementation package | `implementation-packages/data-governance-resource-control.md` |
+| Experience and administration implementation package | `implementation-packages/experience-administration.md` |
 | Major architecture swim lanes and technology-fit inventory | `swim-lanes/README.md` |
 | Concise recommendation and evolution posture for every lane | `area-recommendations.md` |
+| Upstream, fork, Lobster, and Rust disposition for all 35 contracts | `implementation-disposition-35-contracts.md` |
+| Live upstream PR, issue, Lobster, and carried-patch delivery inventory | `delivery-portfolio-inventory-2026-08-02.md` |
+| Runtime, operator, founder, security, and maintainer review of that disposition | `implementation-disposition-role-review-2026-08-02.md` |
+| Full `.craft/roles` review and corrections before area decomposition | `implementation-disposition-craft-role-review-2026-08-02.md` |
 | Broad `.craft/roles` review of the area roadmap | `area-recommendations-role-review-2026-08-01.md` |
 | Candidate assessment order, rubric, and worksheet | `technology-fit-framework.md` |
 | Existing, fork/RFC, and new-component designations by lane | `initial-implementation-map.md` |
 | OpenClaw-fork-to-Rust strangler transition | `rust-transition-strategy.md` |
 | Omar guidance and Scout September alignment agenda | `stakeholder-guidance-omar-2026-08-01.md` |
 | Founder, operator, learner, platform, and security review | `role-review-2026-08-01.md` |
-| Thirty-four architectural contract scopes and RFC candidates | `rfcs/README.md` |
+| Thirty-five architectural contract scopes and RFC candidates | `rfcs/README.md` |
+| Formal owner, relationship, lifecycle, and end-to-end closure audit | `rfcs/portfolio-closure-audit-2026-08-01.md` |
 
 ## Active Work
 
 | Repo | PR / Issue | Branch | Status | Purpose |
 | ---- | ---------- | ------ | ------ | ------- |
 | `claws-hapi` | Local target model | `main` | Active | Define and refine the EnterpriseClaw architecture. |
+| `giodl73-repo/openclaw` | #203 | `lobster/bootstrap-reconstruction` | Merged | Establish deterministic fork reconstruction and evidence metadata. |
+| `giodl73-repo/openclaw` | #204 | `lobster/source-ledger` | Merged | Capture all 55 owned upstream PR generations as quarantined inventory. |
+| `giodl73-repo/openclaw` | #205 | `lobster/wave-0-contracts` | Merged | Publish executable XPK-001 through XPK-009 definition-only gates with no admission authority. |
+| `giodl73-repo/openclaw` | #206 | `lobster/evid-001-admission` | Merged | Add deterministic exact multi-commit source ranges without admitting quarantined source. |
+| `giodl73-repo/openclaw` | #207 | `lobster/evid-001-source-admission` | Merged | Bind per-commit B3 conflict resolutions to exact queue-prefix trees and carried identities. |
+| `giodl73-repo/openclaw` | #208 | `lobster/evid-001-carried-sources` | Open | Admit the exact #107026/#104018/#113421 evidence stack and executable owner-projection fixture with authority `none`. |
 | `openclaw/openclaw` | Current and future implementation | Per worktree | Reference | Test whether implementation remains consistent with the architecture. |
 | `openclaw/rfcs` | Normative proposals | Per RFC | Reference | Express focused contracts without duplicating the architecture notebook. |
 

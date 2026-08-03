@@ -12,6 +12,19 @@
   generation, policy, approval, invocation, idempotency/effect identity, owner
   result, and external-effect certainty.
 
+## Current Owner Baseline
+
+Current tool and message paths separate pre-dispatch gating, owner-specific
+idempotency, and redaction-safe blocked or unknown audit outcomes. Generic
+tool completion is not sufficient effect proof. Durable approval-to-effect
+correlation and a portable effect-certainty record remain target semantics.
+
+Open issue #113440 already owns the missing generic check for a final resolved
+nested operation immediately before effect. The current protected-effect
+simulation proves the composition shape without real I/O. Any further
+upstream delta should therefore extend that owner seam or existing trusted
+diagnostics; it should not create another pre-effect hook or action ledger.
+
 ## Explicit Exclusions
 
 - Generic tool success as effect proof.

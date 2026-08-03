@@ -1,0 +1,27 @@
+{
+  "profile": "protected-external-effect.v1",
+  "description": "Contract-shaped fixtures for one human-approved outbound message effect.",
+  "status": "target-semantics",
+  "fixtures": [
+    {
+      "file": "send.provider-accepted.json",
+      "expected": "sent"
+    },
+    {
+      "file": "send.stale-approval.json",
+      "expected": "not_sent"
+    },
+    {
+      "file": "send.stale-binding.json",
+      "expected": "not_sent"
+    },
+    {
+      "file": "send.incomplete-binding.json",
+      "expected": "not_sent"
+    },
+    {
+      "file": "send.timeout-effect-unknown.json",
+      "expected": "needs_attention"
+    }
+  ]
+}

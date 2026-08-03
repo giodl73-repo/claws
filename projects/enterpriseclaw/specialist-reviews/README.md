@@ -71,8 +71,11 @@ A contract is **depth-ready** only when:
 ## Area Review Batches
 
 These batches remain the specialist-review order after their evidence packets
-are ready. Evidence collection itself proceeds by weakness and risk, starting
-with the six C-grade contracts.
+are ready. No C-grade contracts remain. The portfolio promotion audit now
+records 28 A and seven B contracts. Work first closes the decisive proof for
+EC-001, EC-021, EC-022, EC-026, EC-027, EC-031, and EC-034, then closes
+target, migration, deletion, mixed-version, and disproof gaps across A-grade
+packets.
 
 | Batch | Contracts | Core specialists |
 | --- | --- | --- |
@@ -81,7 +84,7 @@ with the six C-grade contracts.
 | Runtime, protocol, Node/Rust | EC-008, EC-009, EC-010, EC-022, EC-023, EC-025, EC-026, EC-031 | Agent runtime, Gateway/protocol, Node/Rust, resource operator |
 | Providers and extensions | EC-011, EC-012, EC-013, EC-027 | Provider routing, usage/budget, skill author, release |
 | Conversations and delivery | EC-015, EC-016, EC-017 | Messaging/channel, connector, session, UX/operator |
-| Memory, context, lifecycle | EC-018, EC-019, EC-020, EC-030 | Memory owner, context runtime, privacy/compliance, storage operator |
+| Memory, context, lifecycle | EC-018, EC-019, EC-020, EC-030, EC-035 | Memory owner, context runtime, workspace/filesystem, privacy/compliance, storage operator |
 | Administration, evidence, fleet | EC-001, EC-002, EC-033, EC-034 | Doctor/admin, evidence/compliance, platform/fleet, simplicity challenger |
 
 ## Durable Outputs

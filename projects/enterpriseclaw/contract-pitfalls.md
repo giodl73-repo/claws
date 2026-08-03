@@ -1,7 +1,7 @@
 # EnterpriseClaw Contract Pitfalls
 
 These are thirty-five recurring architectural mistakes found while reviewing
-the thirty-four EnterpriseClaw contract scopes and their shared meta-model.
+the EnterpriseClaw contract scopes and their shared meta-model.
 
 They complement:
 

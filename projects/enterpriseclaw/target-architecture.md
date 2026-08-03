@@ -37,6 +37,34 @@ The architecture is successful when users and operators no longer need to
 infer those distinctions from logs, current process state, or implementation
 knowledge.
 
+## Executive Teaching Model
+
+The architecture is introduced through five top-level boxes:
+
+1. **See and control**: status, attention, diagnostics, repair, and operator
+   actions.
+2. **Govern**: identity, authority, configuration, readiness, lifecycle
+   obligations, budgets, and admission.
+3. **Think and act**: agent runs, models, tools, external effects,
+   conversations, and delivery.
+4. **Remember and connect**: sessions, context, memory, recovery, protocols,
+   nodes, and workspaces.
+5. **Operate at scale**: extensions, artifacts, releases, hosting, evidence,
+   and fleet recovery.
+
+The explanation cascades as:
+
+```text
+one executive story
+  -> five top-level boxes
+     -> thirteen architectural capability lanes
+        -> thirty-five owner and relationship contracts
+           -> profile-specific implementation mechanics
+```
+
+The canonical executive narrative and complete RFC grouping live in
+`executive-overview.md`.
+
 ## Scope and Non-Goals
 
 This document defines architecture:
@@ -144,6 +172,67 @@ compose owner evidence for a particular audience.
 
 Projections may simplify presentation. They must not flatten meaningful owner
 states into one generic status.
+
+## Audience and Abstraction Layers
+
+The thirty-five EC contracts remain the complete top-level contract portfolio.
+Operator simplicity is achieved through layering, not by merging, deleting, or
+flattening those contracts.
+
+### 1. Human operator experience
+
+The primary experience answers:
+
+- What am I running?
+- Is it working?
+- What is it doing?
+- Is anything waiting on me?
+- What needs attention?
+- What can I approve, deny, retry, repair, roll back, restore, or inspect?
+
+This layer uses ordinary product language. It does not require operators to
+understand owner IDs, generations, operation envelopes, or evidence schemas.
+
+### 2. Product projections
+
+CLI, Control UI, Doctor, activity, approval, recovery, and fleet views compose
+the relevant contract facts into recognizable product concepts such as agents,
+workspaces, connections, activity, health, attention, and recovery.
+
+These projections may hide inapplicable detail, but they must preserve
+material partial, stale, incompatible, retained, external, and unknown states.
+
+### 3. Contract portfolio
+
+All thirty-five EC contracts remain independently reviewable. They preserve
+the owner and relationship boundaries needed to make product projections
+truthful across configuration, authority, execution, effects, conversations,
+delivery, continuity, protocols, nodes, artifacts, resources, evidence, fleet,
+and filesystems.
+
+No contract is removed merely because its mechanics are hidden from an
+operator. A contract may be merged or retired only if its owner/relationship
+separation is disproved and the portfolio closure audit remains valid.
+
+### 4. Implementation and conformance
+
+Schemas, APIs, identity/generation fields, operation and attempt IDs,
+settlement states, evidence references, adapters, and fixtures implement the
+contracts. Runtime owners and extension authors encounter only the profiles
+and mechanics applicable to their domain.
+
+The layering rule is:
+
+```text
+simple human experience
+  -> truthful product projections
+     -> complete 35-contract architecture
+        -> profile-specific implementation mechanics
+```
+
+Simplifying an upper layer must not erase a lower-layer distinction that is
+required for authority, recovery, effect certainty, lifecycle, compatibility,
+or evidence.
 
 ## Owner Domains
 

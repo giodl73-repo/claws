@@ -11,6 +11,27 @@
 - Bind command, node, pairing, connection, route, policy, approval, deadline,
   idempotency, invocation, cancellation, and settlement.
 
+## Current Owner Baseline
+
+Current node invocation is fenced by policy, pairing generation, connection
+ID, route, deadline, and invocation identity. Timeout, disconnect, late
+result, route change, and pairing replacement reject stale settlement. Local
+abort or timeout never proves confirmed remote stop or effect reversal.
+
+The current relationship already carries the major portable identities. The
+residual work is conformance: prove the same admission, ordering, timeout,
+disconnect, cancellation, and late-result behavior through TypeScript and a
+bounded Rust profile before adding another invocation API.
+
+## Implementation Disposition
+
+- Reuse the current invocation owner and structured failures.
+- Adopt #100960/#104158/#104159 for command observation and guidance only.
+- Keep Scout actor policy, placement, approvals, reconciliation, and audit
+  retention in Lobster.
+- Select TypeScript or Rust before admission and bind the selected runtime
+  generation; never dual-dispatch one effect.
+
 ## Explicit Exclusions
 
 - Gateway ownership of remote effects.

@@ -32,10 +32,22 @@
 - Owners without attestation support remain diagnosable; absence of evidence
   is explicit and never inferred as pass.
 - Audit/attestation persistence is non-blocking to runtime hot paths.
+- Operational settlement and assurance completeness are separate dimensions.
+  A healthy owner is not rewritten as failed because evidence persistence is
+  unavailable, but the result remains `assurance_incomplete` and cannot produce
+  a required attestation or compliance pass.
+- Evidence that authorizes targeted repair binds an immutable prior parent,
+  child-settlement revisions, and eligible-unit snapshot or digest. Mutating a
+  repair request cannot mutate the evidence that made units eligible.
 
 ## Dependencies
 
-- EC-001 and EC-004.
+- EC-004.
+
+## Dependency Direction
+
+EC-001 projections consume EC-033 evidence references. EC-033 does not depend
+on an administrative projection to define durable evidence.
 
 ## Proof and Deletion Gate
 

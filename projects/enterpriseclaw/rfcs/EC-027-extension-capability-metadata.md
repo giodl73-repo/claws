@@ -14,6 +14,14 @@
 - Carry stable definition identity independent of display name, path, or
   consumer-specific manifest shape.
 
+## Current Owner Baseline
+
+Current evidence is plugin-first: canonical plugin manifests, bundled metadata
+snapshots, install records, precedence, reserved-ID refusal, and security-scan
+block outcomes are source-tested. Stable identity across skill, plugin,
+provider, channel, and host-binding families remains a target, as does
+fail-closed handling of unknown required metadata on one shared inert surface.
+
 ## Explicit Exclusions
 
 - Catalog as activation authority.
@@ -48,3 +56,16 @@
   already expose stable, portable, inert capability metadata and
   compatibility/trust requirements without changing baseline artifact shape
   or adding parallel manifests.
+
+## Implementation Package Reconciliation
+
+- Treat #114782/#114783 as a plugin-family, manifest-first exemplar rather than
+  the universal schema.
+- Use merged #112773 as the portability precedent: native portable metadata and
+  strict host-specific profiles may coexist without dual runtime authority.
+- Require plugin, Claw/skill, and one unlike provider/channel/host-binding
+  fixture before proposing a shared definition envelope.
+- Generate adapters over native definitions; do not require ecosystem-wide
+  rewrites or make a catalog the semantic owner.
+- File no upstream delta until the fixtures prove stable cross-family identity
+  or unknown-required refusal is missing from current owners.

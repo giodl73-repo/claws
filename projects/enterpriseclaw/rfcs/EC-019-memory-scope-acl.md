@@ -13,6 +13,21 @@
 - Consume memory copy and derived-index identity from EC-020 without
   redefining corpus lifecycle.
 
+## Current Owner Baseline
+
+Current memory search enforces agent and A2A visibility at retrieval time, and
+agent-scoped LanceDB storage refuses unscoped legacy tables. Provenance labels
+remain explanatory metadata rather than enterprise classification. Portable
+generation-fenced revocation through every derived cache and index remains
+unproven.
+
+Current `memory-core` exposes semantic read tools but not accepted equivalent
+semantic Save/Delete tools for its file-backed owner. Active upstream decisions
+cover persisted-memory read discovery, dedicated memory methods versus scoped
+`agents.files.*`, semantic write tools, protected memory paths, and standing
+consent for non-interactive writers. This contract must consume those decisions
+rather than create a parallel authority namespace.
+
 ## Explicit Exclusions
 
 - A separate ACL database as memory truth.
@@ -23,6 +38,8 @@
 
 - Enforcement occurs at retrieval and each supported owner mutation boundary;
   unsupported authority verbs are explicit.
+- Raw file, shell, sandbox bridge, or generic workspace mutations cannot bypass
+  an accepted semantic memory mutation boundary.
 - Provenance explains why a memory was visible.
 - Revocation propagates to derived indexes and caches.
 - Classification, policy, and revocation inputs are generation-fenced;

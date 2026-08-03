@@ -1,0 +1,47 @@
+{
+  "case": "provider-accepted send",
+  "input": {
+    "action": "message.send",
+    "recipient": {
+      "display": "Jordan Lee",
+      "owner_ref": "channel-recipient:jordan-lee"
+    },
+    "account_ref": "channel-account:work",
+    "content": "Your replacement has shipped. Tracking: 1234.",
+    "reason": "The customer asked for a shipping update."
+  },
+  "binding": {
+    "operation_id": "op-message-1042",
+    "attempt_id": "attempt-1",
+    "intent_digest": "sha256:accepted-intent",
+    "capability_generation": "surface-17",
+    "credential_generation": "credential-8",
+    "risk_generation": "risk-4",
+    "policy_generation": "policy-12",
+    "approval_ref": "approval-83",
+    "approval_outcome": "allow",
+    "replay": "reconcile_before_replay"
+  },
+  "owner_result": {
+    "dispatch": "provider_accepted",
+    "provider_message_ids": [
+      "provider-message-551"
+    ],
+    "effect_certainty": "effected"
+  },
+  "expected_projection": {
+    "state": "sent",
+    "headline": "Message sent",
+    "detail": "Provider accepted the message.",
+    "actions": [
+      "view_conversation",
+      "view_details"
+    ]
+  },
+  "expected_evidence": {
+    "operation_id": "op-message-1042",
+    "approval_ref": "approval-83",
+    "effect_certainty": "effected",
+    "contains_secret_material": false
+  }
+}

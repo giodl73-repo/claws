@@ -1,0 +1,40 @@
+{
+  "case": "credential generation changes after approval",
+  "input": {
+    "action": "message.send",
+    "operation_id": "op-message-1045",
+    "attempt_id": "attempt-1",
+    "approval_ref": "approval-86"
+  },
+  "approved_binding": {
+    "credential_ref": "credential-profile:work",
+    "credential_generation": "credential-8",
+    "runtime_owner_ref": "channel-runtime:fake",
+    "runtime_generation": "runtime-3"
+  },
+  "observed_binding": {
+    "credential_ref": "credential-profile:work",
+    "credential_generation": "credential-9",
+    "runtime_owner_ref": "channel-runtime:fake",
+    "runtime_generation": "runtime-3"
+  },
+  "owner_result": {
+    "dispatch": "blocked_before_effect",
+    "reason": "credential_generation_changed_after_approval",
+    "effect_certainty": "not_effected"
+  },
+  "expected_projection": {
+    "state": "not_sent",
+    "headline": "Message not sent",
+    "detail": "The governing identity changed after approval. Review it again before sending.",
+    "actions": [
+      "review_changes",
+      "dismiss"
+    ]
+  },
+  "expected_evidence": {
+    "dispatch_occurred": false,
+    "effect_certainty": "not_effected",
+    "contains_secret_material": false
+  }
+}

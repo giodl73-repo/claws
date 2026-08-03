@@ -11,6 +11,20 @@
 - Represent pairing, delegation, plugin, host, and federated trust generations.
 - Define renewal, revocation, in-flight exposure, and evidence.
 
+## Current Owner Baseline
+
+Current device and node pairing records are generation-bearing and revocable.
+Scope-checked revocation can fence live node-hosted surfaces. Federation,
+host, and plugin trust remain separate target families; current source does
+not prove one shared portable trust generation or cross-owner propagation
+contract.
+
+Device/node pairing is the strongest current precedent: public-key identity,
+role/scoped grants, pairing generations, connection-incarnation fencing, token
+rotation/revocation, and live-session invalidation are already owner-native.
+Enterprise federation should adapt to those owners and declare propagation
+targets; it should not replace them with one trust database.
+
 ## Explicit Exclusions
 
 - A universal identity database.

@@ -1,0 +1,29 @@
+{
+  "case": "required generation is missing before dispatch",
+  "input": {
+    "action": "message.send",
+    "operation_id": "op-message-1046",
+    "attempt_id": "attempt-1",
+    "approval_ref": "approval-87"
+  },
+  "missing_binding": "observed.risk_generation",
+  "owner_result": {
+    "dispatch": "blocked_before_effect",
+    "reason": "binding_incomplete",
+    "effect_certainty": "not_effected"
+  },
+  "expected_projection": {
+    "state": "not_sent",
+    "headline": "Message not sent",
+    "detail": "The required identity or rule binding could not be verified.",
+    "actions": [
+      "view_details",
+      "dismiss"
+    ]
+  },
+  "expected_evidence": {
+    "dispatch_occurred": false,
+    "effect_certainty": "not_effected",
+    "contains_secret_material": false
+  }
+}

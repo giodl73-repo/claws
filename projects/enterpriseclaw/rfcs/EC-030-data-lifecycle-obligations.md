@@ -44,3 +44,17 @@ contract does not depend on their individual implementations.
 - Disprove the shared obligation contract if semantic owners already expose
   compatible copy identity, lifecycle vocabulary, retained exceptions, and
   per-owner settlement without global-delete inference.
+
+## Implementation Package Reconciliation
+
+- Start with the existing session export/delete/index/archive/QMD copy graph;
+  ordinary session deletion is archive-and-remove, not purge.
+- Adopt U-KCC-01 for stable export/copy identity rather than adding another
+  exporter.
+- Wait for #116484/#116485 and #116499-#116501 before implementing memory
+  lifecycle settlement.
+- Treat legal hold, tenant retention, residency, eDiscovery, and cross-owner
+  retry policy as Lobster composition over owner-native capabilities/results.
+- Add no upstream lifecycle surface until the bounded session fixture proves
+  current owners cannot report retained, deferred, external, unsupported, or
+  unknown copies truthfully.

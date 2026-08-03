@@ -13,6 +13,30 @@
   tool, runtime, and configuration generations.
 - Consume the EC-004 decision reference; do not re-evaluate authorization.
 
+## Current Owner Baseline
+
+Current Gateway admission already binds the idempotency key as `runId`,
+captures a lifecycle generation, persists the target session before heavy
+execution, and dispatches through a prepared model runtime generation.
+Embedded execution separately owns staged attempt setup, tools, provider
+streaming, transcript settlement, cleanup, phase-aware cancellation, and one
+normalized terminal outcome.
+
+The main gap is not run identity. It is a stable whole-execution attempt and
+binding relationship shared by Gateway and channel/auto-reply entry paths.
+Provider/model candidate attempts remain EC-011 children rather than aliases
+for this attempt.
+
+## Investment Reconciliation
+
+- #50291 already owns broad hook/run correlation demand.
+- Fork PR #148 proves a narrower routed-outbound `runId` handoff while omitting
+  live run identity from durable replay.
+- #104950 owns missing aborted-run trajectory evidence.
+- #57404 owns per-run usage lifecycle projection.
+- Closed #80551 and #102019 must be rechecked before proposing a new public
+  start hook or terminal-reason taxonomy.
+
 ## Explicit Exclusions
 
 - Provider-call and external-effect semantics.

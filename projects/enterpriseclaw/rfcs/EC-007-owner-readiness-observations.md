@@ -15,6 +15,24 @@
 - For OpenClaw configuration activation, EC-006 owns accepted/active
   generations, rollback, and restart debt; EC-007 observes those facts.
 
+## Current Owner Baseline
+
+The active upstream delivery stack is RFC #33 and #104018 for canonical
+readiness, #113421 for core owner observations, RFC #37 and #113422 for
+standard hosting profiles, and #114636 for catalog, live validation, and
+package release evidence. All remain open as of 2026-08-02.
+
+## Implementation Disposition
+
+- Adopt the existing stack in dependency order; do not create another
+  readiness framework or host evaluator.
+- Treat watch, wait, catalog, validation, and release evidence as facilities
+  consuming the canonical result.
+- Replace private process/listener checks only where canonical profile
+  readiness covers the same semantics; retain shallow liveness separately.
+- Require Rust owners to emit this same contract rather than a Rust-specific
+  health schema.
+
 ## Explicit Exclusions
 
 - One generic health state.

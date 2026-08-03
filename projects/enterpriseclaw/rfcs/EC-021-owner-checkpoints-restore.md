@@ -11,6 +11,14 @@
 - Define owner checkpoints, consistency generations, capture manifests,
   restore fences, compatibility, dirty state, and completion evidence.
 
+## Current Owner Baseline
+
+Current source proves per-owner SQLite snapshot, verification, atomic archive
+publication, and fresh restore, including refusal of sidecars and unrelated
+provider artifacts. The accepted upstream baseline does not yet include a
+cross-owner restore coordinator, durable journal/quarantine contract,
+mixed-generation admission fence, or truthful aggregate partial settlement.
+
 ## Explicit Exclusions
 
 - One universal state database.
@@ -20,6 +28,9 @@
 
 - Owners remain independently restorable where valid.
 - Cross-owner capture reports consistency limits.
+- Each checkpoint manifest binds the source owner generation, source
+  artifact/runtime schema, intended target artifact or migration generation,
+  and the compatibility claim required to restore the prior owner.
 - Restore identifies retained or externally controlled state using EC-030
   lifecycle vocabulary.
 - Restore fails closed on dirty/in-flight owner state or stale/unverifiable
@@ -29,6 +40,10 @@
 - Restore commit is atomic per owner generation: an owner exposes the restored
   generation as active or remains on the prior generation; the coordinator
   never projects mixed restored generations as one coherent restored state.
+- Reinstalling prior code is not proof of restored state. If the previous
+  artifact and checkpoint cannot be proven compatible and active together, the
+  owner reports `recovery_blocked` and remains quarantined rather than claiming
+  rollback.
 
 ## Dependencies
 

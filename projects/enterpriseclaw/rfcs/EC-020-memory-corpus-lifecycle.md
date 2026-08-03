@@ -13,6 +13,19 @@
 - Limit exports in this contract to memory-owned derived copies; session
   exports remain EC-017 and cross-owner obligation settlement remains EC-030.
 
+## Current Owner Baseline
+
+Current file-backed memory cleanup and reindex publication fencing are real.
+Stale shadow publication is rejected, and an incomplete vector rebuild keeps
+a rebuild marker instead of claiming completion. LanceDB row deletion and QMD
+projection cleanup remain separate from whole-memory lifecycle completion.
+
+The accepted read/delete path grammar and semantic write owner are still under
+upstream decision. File deletion, semantic memory removal, index/cache
+reconciliation, persistence/sync, memory-owned exports, and retained
+exceptions therefore remain separate obligations. This contract must not
+choose a competing API before those owner decisions settle.
+
 ## Explicit Exclusions
 
 - One memory implementation.

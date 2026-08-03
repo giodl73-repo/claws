@@ -5,6 +5,10 @@
 This map assigns the first implementation strategy for each EnterpriseClaw
 swim lane.
 
+The exact EC-001 through EC-035 upstream, fork, Lobster/Scout, and Rust
+disposition now lives in `implementation-disposition-35-contracts.md`. This
+lane-level map remains the supporting architectural inventory.
+
 It does not select detailed APIs or packages. It decides whether each
 architectural piece should begin as:
 

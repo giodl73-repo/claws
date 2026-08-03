@@ -11,6 +11,25 @@
 - Define peer identity, protocol/schema version, capability negotiation,
   compatibility, unsupported behavior, and deprecation.
 
+## Current Owner Baseline
+
+Current TypeScript gateway-protocol source proves separate wire versions,
+role-specific minimum/maximum negotiation, structured protocol mismatch
+errors, and additive unknown-field behavior at declared seams. Current N-1
+commitments apply to node and probe roles, not universally to every client.
+Language-neutral TypeScript/Rust compatibility and explicit removal windows
+remain unproven.
+
+## Implementation Disposition
+
+- Reuse the current Gateway protocol as the compatibility oracle.
+- Build and publish one versioned language-neutral fixture format before
+  proposing new negotiation fields.
+- Keep protocol fixtures in the portable OpenClaw contract; keep the Rust
+  implementation in an independent open-source component.
+- Add owner fields only when TypeScript/Rust conformance exposes a concrete
+  portable gap.
+
 ## Explicit Exclusions
 
 - Transport capability as authorization.

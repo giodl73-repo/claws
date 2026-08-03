@@ -4,8 +4,10 @@ These are non-normative architectural contract scopes. Focused OpenClaw RFCs
 are the intended review and adoption mechanism. The contracts are the durable
 design artifacts; RFCs propose them upstream.
 
-The portfolio contains **34 RFC scopes**, consolidated from 48 raw contract
-candidates.
+The portfolio contains **35 RFC scopes**. The original 34 were consolidated
+from 48 raw contract candidates; the formal closure audit added EC-035 after
+finding that the workspace/filesystem owner boundary was named in the target
+architecture but absent from the contract portfolio.
 
 All scopes follow the shared commandments and review grammar in
 `../contract-principles.md` and the common interface/state-machine mechanics in
@@ -15,6 +17,11 @@ All scopes follow the shared commandments and review grammar in
 The portfolio-wide evidence inventory and evidence-ready gate live in
 `../evidence-base/`. Contract quality, evidence maturity, specialist depth,
 and implementation readiness are tracked separately.
+
+The implementation home for every scope is mapped in
+`../implementation-disposition-35-contracts.md`: portable semantics upstream,
+bounded Scout adoption in the fork, managed composition in Lobster, and
+complete owner replacement through independent Rust components.
 
 ## Scope Rules
 
@@ -67,6 +74,7 @@ Each RFC should:
 | EC-032 | Hosting Lifecycle and Readiness | Operations/fleet | Fork + RFC |
 | EC-033 | Evidence, Audit, and Attestation | Operations/fleet | Fork + RFC |
 | EC-034 | Fleet Convergence and Containment | Operations/fleet | New projection/relationship |
+| EC-035 | Workspace and Filesystem Boundaries | Knowledge/continuity | Fork + RFC |
 
 ## Suggested Waves
 
@@ -112,6 +120,7 @@ Each RFC should:
 - EC-031 Resource Admission and Usage
 - EC-033 Evidence, Audit, and Attestation
 - EC-034 Fleet Convergence and Containment
+- EC-035 Workspace and Filesystem Boundaries
 
 ## Reviews
 
@@ -123,3 +132,4 @@ Each RFC should:
 - `wave-3-meta-alignment-2026-08-01.md`
 - `portfolio-meta-alignment-2026-08-01.md`
 - `portfolio-review-2026-08-01.md`
+- `portfolio-closure-audit-2026-08-01.md`

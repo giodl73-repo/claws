@@ -13,6 +13,21 @@
 - Surface authorization requirements for EC-014 without owning authorization
   or effect settlement.
 
+## Current Owner Baseline
+
+Current local-tool and MCP composition materially filters run-scoped tool
+surfaces and can fail closed on policy or invalid schema. Catalog discovery
+does not grant execution authority. Some MCP servers remain usable when they
+omit an advertised `tools` capability, so unsupported and degraded outcomes
+must come from explicit runtime negotiation rather than advertisement alone.
+
+Current effective-tool inventory preserves core, plugin, MCP, and channel
+ownership, carries risk/display metadata, and quarantines incompatible schemas
+before model projection. #114782/#114783 already own the inert manifest-first
+host-bundle inventory question. The residual target is stable run-surface
+identity and invocation correlation only where current inventory evidence is
+insufficient.
+
 ## Explicit Exclusions
 
 - Capability advertisement as permission.

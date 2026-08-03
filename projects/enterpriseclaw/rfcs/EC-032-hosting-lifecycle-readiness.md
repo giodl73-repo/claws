@@ -30,12 +30,17 @@
 - Start, drain, stop, restart, and recovery commands persist authoritative
   acceptance before acknowledgement and reconcile idempotently across
   host/controller restart before retry.
+- Each per-unit lifecycle child operation is durably accepted before host
+  mutation. A lost acknowledgement is reconciled by stable child identity; it
+  does not authorize a new start, restart, or recovery operation.
 - Deployment profiles declare supported host/runtime/sidecar version
   combinations, upgrade order, and explicit unsupported/degraded results.
 - Start, ready, drain, stop, restart, and recovery transitions emit
   owner/generation/time/reason/outcome evidence.
 - Failed, partial, timed-out, and unknown lifecycle transitions preserve the
   last authoritative state and remain diagnosable.
+- Candidate readiness is accepted only for the lifecycle and artifact
+  generation being activated. Stale readiness cannot complete host handoff.
 - Existing host scripts migrate behind the lifecycle contract before deletion;
   unsupported or unknown lifecycle state remains explicit.
 

@@ -15,6 +15,28 @@
 - Managed inputs enter the same candidate, conflict, preflight, commit,
   canonical-reread, activation, and recovery path as local inputs.
 
+## Current Owner Baseline
+
+Current OpenClaw already owns separate source/runtime snapshots, process-local
+revisions, source/runtime fingerprints, validated and preflighted writes,
+expected-base conflict fencing, canonical reread, candidate supersession, hot
+activation, restart targets, bounded rollback, and recovery debt.
+
+RFC #34 and implementation PR #107026 add a smaller opt-in V1: repeated ordered
+ordinary config documents, exact authority, bounded tool-policy tightening,
+and one immutable read-only startup snapshot. They intentionally do not add
+live layer reload, write routing, provenance APIs, or portable generations.
+
+## Implementation Disposition
+
+- Adopt #107026 without inflating its bounded V1.
+- Use the Lobster three-document adapter only after a conformant released
+  version exists.
+- Prove accepted/active generation and provenance needs against the current
+  snapshot/reload owner before proposing a follow-up surface.
+- Delete Lobster overlay writers one at a time after equivalent effective
+  configuration and rollback proof.
+
 ## Explicit Exclusions
 
 - Readiness meaning, host probe ordering, and fleet convergence; those

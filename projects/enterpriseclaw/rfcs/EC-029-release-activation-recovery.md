@@ -26,8 +26,19 @@
 
 - Fresh-install and published-artifact smoke are release gates.
 - Mixed TypeScript/Rust per-component compatibility is declared.
+- Protocol, artifact, migration, checkpoint, and evidence compatibility is
+  checked before mutating a deployment unit.
+- Release commit requires the exact candidate artifact to be active and a
+  readiness observation for that candidate generation; stale readiness cannot
+  commit a release.
 - Upgrade, downgrade, and partial-publication recovery are explicit.
 - Partial activation and recovery remain explicit.
+- `rolled_back` requires both the previous artifact and compatible prior state
+  to be active and ready. Reinstalling previous code over incompatible migrated
+  state reports `recovery_blocked` and quarantines the unit.
+- Operational activation and assurance completeness are separate. Failure to
+  persist required evidence does not rewrite owner runtime state, but it blocks
+  attestation and any claim of assured convergence.
 - Release evidence records target, component versions, owner generations,
   time, outcome, and retained recovery state.
 
@@ -42,3 +53,19 @@
 - Disprove the separate contract if existing artifact owners already provide
   fresh-install, atomic activation, mixed-version recovery, downgrade, and
   published-artifact proof without a release relationship.
+
+## Implementation Package Reconciliation
+
+- Extend the existing package/git updater, target-owned Doctor migration,
+  database downgrade checks, service handoff, plugin convergence, publication,
+  and fresh-install owners rather than building a second updater.
+- Generate the compact release-component manifest from current package,
+  protocol, database, plugin, and recovery facts; do not make it a parallel
+  hand-authored source of truth.
+- Keep this contract scoped to one deployment unit. Lobster release slots,
+  rings, cohorts, quarantine, patch promotion, and fleet repair consume the
+  result but do not own local activation truth.
+- Adopt #111542 for localized human preview while preserving canonical
+  machine-readable release facts.
+- Require exact candidate-generation readiness and compatible prior state
+  before claiming commit or rollback.

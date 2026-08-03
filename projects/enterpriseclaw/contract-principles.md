@@ -1,6 +1,6 @@
 # EnterpriseClaw Contract Principles
 
-These principles are the common design grammar observed across the thirty-four
+These principles are the common design grammar observed across the thirty-five
 EnterpriseClaw contract scopes. They are not implementation mandates or
 upstream proposals. They are the rules used to keep independently owned
 facilities composable, inspectable, and safe.

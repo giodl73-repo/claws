@@ -1,6 +1,6 @@
 # EnterpriseClaw Evidence Base
 
-This area records the evidence behind all 34 EnterpriseClaw contracts before
+This area records the evidence behind all 35 EnterpriseClaw contracts before
 specialist review, upstream RFC work, or implementation planning.
 
 The evidence base prevents a well-written target contract from being mistaken
@@ -23,12 +23,14 @@ readiness.
 | Grade | Meaning |
 | --- | --- |
 | A | Current source is audited and at least one representative proof exists. Target claims may still need proof. |
-| B | Current owner behavior is source-backed, but the target contribution lacks representative executable proof. |
+| B | Current owner behavior is source-backed. Target evidence is absent, fork-only, or incomplete. |
 | C | Evidence is primarily conceptual, proposal-based, or an adjacent analogue. A dedicated owner/source audit is still required. |
 | D | The owner or material evidence is unresolved. |
 
-The initial inventory is in
-`evidence-ledger-2026-08-01.md`: **8 A, 20 B, 6 C, and 0 D**.
+The current inventory is in
+`evidence-ledger-2026-08-01.md`: **28 A, 7 B, 0 C, and 0 D**.
+The B-to-A decisions and exact representative proofs are recorded in
+`portfolio-promotion-audit-2026-08-02.md`.
 
 ## Evidence-Ready Gate
 
@@ -52,31 +54,65 @@ already has a stronger starting baseline.
 
 Evidence work proceeds by weakness and risk rather than RFC number.
 
-### Pass 1: establish missing owner baselines
+### Pass 1: establish missing owner baselines - complete
 
-- EC-001 Owner State Projection
-- EC-010 Scheduled Activation Lifecycle
-- EC-015 Conversation Identity
-- EC-016 Delivery Settlement
 - EC-026 Rust Node Runtime Profile
 - EC-034 Fleet Convergence and Containment
 
-These C-grade contracts need dedicated source audits or bounded owner proofs
-before specialist scoring is useful.
+EC-015 and EC-016 moved to B after their existing messaging source audit and
+current routing, durable-delivery, retry, and receipt tests were packetized.
+EC-001 moved to B after current configuration, readiness, release, channel,
+node, and lifecycle projection facts were assembled. EC-010 moved to A after
+current Cron source and
+tests proved independent schedule, occurrence, restart, admission,
+cancellation, and ABA-safe ownership.
 
-### Pass 2: prove high-risk relationship contracts
+EC-026 now has a real fork-only Rust artifact plus five language-neutral
+accepted/failure fixtures for one bounded connect/invoke profile. EC-034 now
+has two unlike source-backed target families: Lobster version-slot rollout and
+OpenClaw Fleet tenant-cell lifecycle. Both move to B. Canary, migration,
+portable fan-out, containment certainty, and deletion proof remain open.
+
+### Pass 2: prove high-risk relationship contracts - audited
 
 - authority/effects: EC-003, EC-004, EC-005, EC-014, EC-024, EC-028;
 - continuity/recovery: EC-017, EC-019, EC-020, EC-021, EC-023, EC-025;
-- compatibility/operations: EC-022, EC-027, EC-031.
+- compatibility/operations: EC-022, EC-027, EC-031; and
+- cross-projection, delivery, replacement, and fleet:
+  EC-001, EC-015, EC-016, EC-026, EC-034.
 
-### Pass 3: complete remaining B-grade target slices
+This pass promoted EC-003/004/005/014/015/016/017/019/020/023/024/025/028.
+EC-001/021/022/026/027/031/034 remain B because the decisive portable,
+cross-owner, cross-language, restart, or multi-unit proof does not yet exist.
+
+### Pass 3: complete remaining general target slices - audited
 
 - EC-002, EC-011, EC-012, EC-013, and EC-018.
 
-### Pass 4: close A-grade target gaps
+All five moved to A after audited accepted/failure proof.
 
-- EC-006, EC-007, EC-008, EC-009, EC-029, EC-030, EC-032, and EC-033.
+### Pass 4: close remaining B-grade decisive slices
+
+- EC-001 cross-owner projection envelope;
+- EC-021 cross-owner restore composition;
+- EC-022 language-neutral compatibility;
+- EC-026 live Rust/Gateway admission;
+- EC-027 cross-family required metadata;
+- EC-031 durable restart-portable lease; and
+- EC-034 multi-unit fan-out and targeted repair.
+
+The standalone fleet rollout/recovery simulation now proves immutable target
+membership, durable parent/child acceptance, lost-ack reconciliation, targeted
+repair, compatibility-before-mutation, generation-bound readiness,
+recovery-blocked quarantine, assurance separation, and containment uncertainty.
+It also found and corrected a mutable repair-eligibility defect. EC-034 remains
+B until the same relationship is proved against disposable current OpenClaw
+Fleet cells rather than only fake owners.
+
+### Pass 5: close A-grade target gaps
+
+- all 28 A-grade contracts, prioritized by authority, effect, migration,
+  deletion, mixed-version, and disproof risk.
 
 Existing source and proof should be reused. A-grade contracts still require
 portable target semantics, migration/deletion, and disproof to be executable

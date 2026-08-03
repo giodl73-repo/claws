@@ -13,6 +13,21 @@
 - Consume attempt/generation identity from EC-008, retrieval/ACL from EC-019,
   and corpus/copy identity from EC-020.
 
+## Current Owner Baseline
+
+Current source separates transcript prompt, model prompt, and hidden runtime
+context. Context-engine failure can fall back without corrupting transcript
+state or submitting twice. The missing target is an inspectable per-input
+inclusion/exclusion ledger with explicit degraded and omitted-source results,
+not basic hidden-context separation.
+
+The context-engine contract already exposes ordered messages, token estimates,
+projection mode/epoch/fingerprint, runtime and fallback mode, engine selection
+source, host capability requirements, and compaction ownership. Merged native
+context-pressure signals are consumed by a Lobster-owned quarantined plugin.
+The residual upstream question is one optional source-level evidence result,
+not a new context-budget or context-storage platform.
+
 ## Explicit Exclusions
 
 - Context as durable memory or transcript state.
