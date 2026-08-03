@@ -57,18 +57,22 @@
   evidence. The pure runtime branch `lobster/evid-002-runtime-carry` is
   published at `8b5514221c1593585592e95435c1030284ec1307`; the admission branch
   is `lobster/evid-002-hosting-profiles` at
-  `9655e5a1f3cb42129f0e74935ed3bfbce6db7900`. Six bounded B3 resolutions are
+  `1132adf4c3dffffef7ff4c40a643f91dfa79ad07`. Six bounded B3 resolutions are
   bound to exact source, carried, patch, and queue-prefix identities. Two
   independent reconstructions produced commit
   `bed8c65fe948d3088b83e76849cefeaf6c993dfe`, tree
   `a79e9b172a46471b37109c98734f5446745fee33`, and result digest
-  `8f20062723754844b864cadbc1679a09b5b53b3fabc7cf72ea535deea33a90c7`.
+  `83beb77a9aea841bc9258ffa21ffe4a75b264b94874049d7da5f821037906bfd`.
   The `lobster.exa.hosting-profile-conformance.v1` fixture proves the exact
   profile catalog, required conditions, ready and intentionally not-ready
   states, immutable provenance, and the exact 13-scenario package evidence
   set. Both sources remain `evidence-only/admitted` with authority `none`.
-  Focused validation and autoreview are clean; fork CI is running. Next: close
-  PR #209 gates and land it on `lobster/integration`.
+  Integration-only compatibility fixes remove a config-schema import deadlock,
+  close current CLI/test-routing contracts, and remove unused exports without
+  changing the pure runtime carry tree. Focused validation, the full
+  2,815-test Gateway-methods shard, test types, dead-code checks, and
+  autoreview are clean; fork CI is rerunning. Next: close PR #209 gates and
+  land it on `lobster/integration`.
 - Architecture context: The target architecture now has thirteen major swim
   lanes.
   Each lane records goals, responsibilities, conceptual pieces, contracts,
