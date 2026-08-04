@@ -26,56 +26,26 @@
 
 ## Current Session
 
-- Last updated: 2026-08-03
+- Last updated: 2026-08-04
 - Last agent: GitHub Copilot CLI
-- Current focus: PRE-001, BOOT-001, the 55-source quarantine inventory, the
-  XPK-001 through XPK-009 Wave 0 definition gate, exact multi-commit source
-  reconstruction, and B3 conflict-resolution authority are landed on
-  protected `lobster/integration` through fork PRs #203-#207. EVID-001
-  admission PR #208 is also landed there at
-  `07f288dffef67723c4a0cd05624697346df28661` and carries exactly #107026,
-  #104018, and #113421:
-  52 source commits with 14 parent- and prefix-tree-bound B3 resolutions.
-  The source inventory marks only those three ranges
-  `evidence-only/admitted`; all retain authority `none`. Two independent
-  reconstructions produced commit
-  `1dc9e1fd0d8b5a6989fa1ca11e25a656ea80cc5c`, tree
-  `8f0adcc0ba62a4309dc268f7bb4e04134ed2b639`, and result digest
-  `5e95253de25c10dd0c6b9bd7a7d8e956372c6a713a6cc6eeff1d40832b4d6b17`.
-  The implemented `lobster.exa.owner-projection.v1` fixture accepts the
-  current configuration/readiness/release owner projection and rejects stale,
-  omitted, and mixed-generation required owners. The runtime evidence branch
-  is published as `lobster/evid-001-runtime-carry`; the integrated admission
-  branch is `lobster/evid-001-carried-sources`. Meaningful current-head CI
-  completed with 155 successful checks, including `openclaw/ci-gate`; the
-  remaining failures were unavailable fork GitHub App tokens, and OpenGrep
-  remained queued without an assigned Blacksmith runner. EVID-002 Hosting
-  Profile Conformance is now merged as controlled-fork PR #209:
-  #113422 contributes 39 unique commits for the optional `local`, `container`,
-  `reverse-proxy`, and `node-mode` profiles, while #114636 contributes three
-  commits for catalog inspection, live validation, and package release
-  evidence. The pure runtime branch `lobster/evid-002-runtime-carry` is
-  published at `8b5514221c1593585592e95435c1030284ec1307`; controlled-fork PR
-  #209 landed by exact lease-protected fast-forward on `lobster/integration`
-  at `5c51773ab91f2de8047f27c538f550d8ae55fc29`. Six bounded B3 resolutions are
-  bound to exact source, carried, patch, and queue-prefix identities. Two
-  independent reconstructions produced commit
-  `bed8c65fe948d3088b83e76849cefeaf6c993dfe`, tree
-  `a79e9b172a46471b37109c98734f5446745fee33`, and result digest
-  `83beb77a9aea841bc9258ffa21ffe4a75b264b94874049d7da5f821037906bfd`.
-  The `lobster.exa.hosting-profile-conformance.v1` fixture proves the exact
-  profile catalog, required conditions, ready and intentionally not-ready
-  states, immutable provenance, and the exact 13-scenario package evidence
-  set. Both sources remain `evidence-only/admitted` with authority `none`.
-  Integration-only compatibility fixes removed a config-schema import deadlock,
-  closed current CLI/test-routing contracts, and removed unused exports without
-  changing the pure runtime carry tree. The corrected head passed 148 CI checks;
-  the remaining failures were the pre-existing `brace-expansion@5.0.8`
-  baseline advisory and unavailable fork GitHub App keys. Focused validation,
-  the full 2,815-test Gateway-methods shard, test types, dead-code checks, and
-  autoreview are clean. Landing proof:
-  `https://github.com/giodl73-repo/openclaw/pull/209#issuecomment-5172244882`.
-  Next: select and classify the next evidence source stack.
+- Current focus: migrate the controlled EnterpriseClaw fork from its
+  August-main baseline to signed OpenClaw `v2026.6.33`, then rebuild Lobster's
+  downstream adoption layer without granting release or runtime authority.
+  The release reconstruction is complete at
+  `14664331451c5235c053ceb268ba69d91993c06d`; its deterministic runtime result
+  is commit `67aab04e5e1b3c06fcf9f01e176995cf5474c217`, tree
+  `d63d680645e4c0284436f5fb5b3bb11451b396a7`, and digest
+  `4888f19c6d3580d15945f58d336475ca13e66e1937acd6fbf33d791cc4d3e0b3`.
+  The exact Lobster PR #6839 stack is 27 physical patches: 15 applied cleanly
+  and 12 conflicted identically on vanilla and reconstructed `v2026.6.33`.
+  Commit `92917f9bedf` adds the authority-none downstream disposition ledger,
+  separating upstream candidates, Lobster-only adoption, contract evidence,
+  temporary carries, splits, and deletions. A separate replay branch has
+  completed the six-patch Teams island and eight-patch Cron island, plus
+  config/prompt, node output, memory RPC, and capability-token commits. It is
+  currently rebasing `0022-node-exec-deadlines`; sensitivity, reduced-stack
+  generation, container/adapter validation, publication, and protected-branch
+  migration remain pending.
 - Architecture context: The target architecture now has thirteen major swim
   lanes.
   Each lane records goals, responsibilities, conceptual pieces, contracts,
@@ -498,10 +468,13 @@
   authority. Only #90708 when required, #107026, and the minimum readiness
   prefix may precede EVID-001; all other heads remain source-only until their
   individual trust, policy, evidence, ownership, migration, and deletion gates.
-- Active branch / PR: `giodl73-repo/openclaw` PR #208 is merged from
-  `lobster/evid-001-carried-sources` to `lobster/integration` at
-  `07f288dffef67723c4a0cd05624697346df28661`. Protected
-  `lobster/integration` is at that exact fast-forwarded head.
+- Active branch / PR: controlled metadata branch
+  `lobster/rebase-v2026.6.33` is local at `92917f9bedf`. Downstream replay is
+  local on `lobster/pr6839-v2026.6.33-rebase`; its latest clean commit is
+  `e6baed3c3d7` and it has in-progress `0022-node-exec-deadlines` changes.
+  Nothing from this migration has been pushed. Protected
+  `lobster/integration` remains unchanged at
+  `5c51773ab91f2de8047f27c538f550d8ae55fc29`.
 - Known dirty state: The wider checkout contains unrelated user changes.
   Preserve them. `projects/openclaw-design/` and this area are coherent
   documentation additions. The fork-only EC-026 proof is in
@@ -509,10 +482,10 @@
   `user/giodl/ec026-rust-node-evidence`. The protected-effect simulation is
   untracked in `C:\src\openclaw-protected-effect-sim` on
   `user/giodl/ec-protected-effect-sim`.
-- Blocking question: no source-classification question remains for #113422 and
-  #114636. EVID-002 must prove exact replay, bounded B3 resolutions, unprofiled
-  compatibility, canonical profile validation, and complete package evidence
-  before either source leaves quarantine.
+- Blocking question: complete the `0022` residual analysis, rebase
+  context-derived sensitivity and its Teams bridge, generate the reduced patch
+  stack, remove the stale request-timeout patcher, and obtain OpenClaw,
+  container, and Lobster adapter proof before publishing a migration PR.
 
 ## Resume Checklist
 
