@@ -18,7 +18,7 @@
 
 ## Current Session
 
-- Last updated: 2026-07-29
+- Last updated: 2026-08-06
 - Last agent: Codex
 - Current focus: track active project worktrees under the laptop-aware allocator;
   Hosted Integration is paused and its current worktrees have been released
@@ -26,7 +26,23 @@
 - Known dirty state: disk-mgmt allocator tools/docs; local registry gitignored
 - Laptop profile: **heavy** (4–5 projects + 1 merge; claws cap ~50 GB; free target ≥50 GB)
 - Other laptop profile: **heavy** (4–5 projects + merge; claws cap ~50 GB; free target ≥50 GB)
-- Free space trajectory: ~5 → ~10 → ~23 → ~40 → ~253 → ~249 → **~239.7 GB free** on `DESKTOP-INBLCCK`; comfortably above heavy target
+- Free space trajectory: ~5 → ~10 → ~23 → ~40 → ~253 → ~249 → ~239.7 →
+  ~291.2 → **51.0 GB free** on `DESKTOP-INBLCCK`; at the heavy target
+- 2026-08-06 bounded Rust cleanup: after a native ICELINES test compile hit
+  `no space on device`, measured only top-level Cargo `target/` trees and ran
+  `cargo clean` in two paused/released Hosted Integration worktrees:
+  `d3b-substrate-adoption` (22.5 GiB) and `e4b-restore-hold` (19.0 GiB).
+  Free C: increased from 10.6 GB to 49.2 GB, then measured 51.0 GB after
+  validation. No source, branch, Docker, WSL, package cache, or active
+  Codeprints/ICELINES build tree was removed.
+- 2026-07-29 feeds-only cleanup applied: cleared four regenerable Rust
+  `target/` trees with `cargo clean` (about 53 GiB reported), released 16 clean
+  merged/closed/duplicate Lobster and OpenClaw worktrees, removed seven
+  junction-only Lobster shells, and removed four invalid abandoned trust clone
+  remnants. Measured free space increased from ~239.6 GB to 291.2 GB (+51.6
+  GB). The #5947 and registered #6169 source worktrees remain clean and present;
+  #6169 remains allocated. All dirty/protected checkouts retained their exact
+  pre-cleanup change counts, and no branches or remote PR state were changed.
 - First enforce removed ~40 unallocated claws feature/detached trees; current active registry now **5/6**:
   `feeds` (`C:\src\lobster-feeds-claw-mos-package`, Lobster PR #6169 open),
   `hosting-profiles` (`C:\src\openclaw-hosting-profiles-current`, fork PR #157 open),

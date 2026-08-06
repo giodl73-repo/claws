@@ -59,4 +59,3 @@ The transaction slice must prove:
 - a newer prepare supersedes the old attempt;
 - concurrent commit/abort has exactly one durable winner;
 - legacy PR 39 accepted receipts remain readable.
-

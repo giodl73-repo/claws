@@ -6,7 +6,15 @@ import path from "node:path";
 import process from "node:process";
 
 const valueFlags = new Set([
-  "area", "focus", "result", "next", "agent", "branch", "dirty", "blocker", "at",
+  "area",
+  "focus",
+  "result",
+  "next",
+  "agent",
+  "branch",
+  "dirty",
+  "blocker",
+  "at",
 ]);
 
 function usage() {
@@ -51,7 +59,10 @@ function parseArgs(argv) {
 }
 
 function safeSlug(value, label) {
-  const slug = value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const slug = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
   if (!slug) throw new Error(`${label} must contain a letter or number`);
   return slug;
 }

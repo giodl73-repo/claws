@@ -100,18 +100,18 @@ For every managed instance:
 
 ## Partners and dependencies
 
-| Partner | Contribution and decisions needed |
-| --- | --- |
-| OpenClaw Policy maintainers | Generic policy evaluation, evidence schemas, finding IDs, repair classes, doctor behavior, and upstream compatibility. |
-| Lobster/Scout | Effective-policy materialization, evidence ingestion, hosted enforcement, central state, admin UX, E2E, rollout, and operations. |
-| Admin & Governance | Global/tenant authority, permissions, exception/override lifecycle, audit, and effective-state UX. |
-| MOS3/MAC | Feed/catalog policy sources, package-defense/quarantine, title availability, tenant decisions, provenance, and revisions. |
-| Extensibility | Feed policy sources, trust, signing, exact-version acquisition, revocation, and extension remediation. |
-| Security | Severity and enforcement decisions, exceptions, privacy, threat model, break-glass, and security-only visibility. |
-| Infrastructure & Engineering Systems | Evidence transport, freshness, E2E, reliability, dashboards, alerts, and recovery exercises. |
-| Data Science & Insights | Fleet trends, warning/violation patterns, remediation effectiveness, exception trends, and product insight. |
-| Frontend Product Engineering | Fleet/tenant status, explain, preview, warning, violation, repair, exception, and audit UX. |
-| Operations & TPM | Decision closure, cross-team rollout, escalation, launch readiness, and operational ownership. |
+| Partner                              | Contribution and decisions needed                                                                                                |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| OpenClaw Policy maintainers          | Generic policy evaluation, evidence schemas, finding IDs, repair classes, doctor behavior, and upstream compatibility.           |
+| Lobster/Scout                        | Effective-policy materialization, evidence ingestion, hosted enforcement, central state, admin UX, E2E, rollout, and operations. |
+| Admin & Governance                   | Global/tenant authority, permissions, exception/override lifecycle, audit, and effective-state UX.                               |
+| MOS3/MAC                             | Feed/catalog policy sources, package-defense/quarantine, title availability, tenant decisions, provenance, and revisions.        |
+| Extensibility                        | Feed policy sources, trust, signing, exact-version acquisition, revocation, and extension remediation.                           |
+| Security                             | Severity and enforcement decisions, exceptions, privacy, threat model, break-glass, and security-only visibility.                |
+| Infrastructure & Engineering Systems | Evidence transport, freshness, E2E, reliability, dashboards, alerts, and recovery exercises.                                     |
+| Data Science & Insights              | Fleet trends, warning/violation patterns, remediation effectiveness, exception trends, and product insight.                      |
+| Frontend Product Engineering         | Fleet/tenant status, explain, preview, warning, violation, repair, exception, and audit UX.                                      |
+| Operations & TPM                     | Decision closure, cross-team rollout, escalation, launch readiness, and operational ownership.                                   |
 
 ### Terms used in this brief
 

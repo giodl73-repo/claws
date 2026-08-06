@@ -95,4 +95,3 @@ Yes. A reviewed fork implementation is ready to replay onto current `main`
 after its manifest-first host-bundle prerequisite is accepted. No issue or PR
 should be filed until that prerequisite and the public SDK boundary are ready
 for maintainer review.
-

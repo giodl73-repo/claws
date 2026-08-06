@@ -40,10 +40,10 @@
   - Lobster deployment selection/G3/G4 remote and clean worktrees:
     `86edeaafc859`, `ee6970551294`, `8b4402a73766`, `bad65d354d2e`, and
     `728678ac3c81`.
-  The WSL O4 worktree `/root/src/openclaw-hosted-package-2b-host-bundles`
-  remains on superseded pre-rebase commit `dbc74b3c1d2e` and diverges from the
-  authoritative pushed branch. Never push that checkout as-is; recreate or
-  refresh it from remote head `14bd05f56914` when resuming.
+    The WSL O4 worktree `/root/src/openclaw-hosted-package-2b-host-bundles`
+    remains on superseded pre-rebase commit `dbc74b3c1d2e` and diverges from the
+    authoritative pushed branch. Never push that checkout as-is; recreate or
+    refresh it from remote head `14bd05f56914` when resuming.
 - Promotion guardrail: O1 and O4 received explicit filing authorization and
   are now upstream issue-linked drafts. Continue authoring and validating the
   remaining package series as fork-only drafts; do not file another upstream

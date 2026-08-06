@@ -17,25 +17,25 @@ bootstrap; do not make the registration depend on them.
 
 ## Registration Basis
 
-| Item | Value |
-| --- | --- |
-| Primary proof PR | `https://microsoft.ghe.com/bic/lobster/pull/2211` |
-| Registration prep PR | `https://microsoft.ghe.com/bic/lobster/pull/2422` |
-| Merged commit | `a45e8328caf8566868dce1253d84b907b704c0c6` |
-| Merged date | 2026-06-04 |
-| Runtime PR validation | `Lobster-Runtime-PullRequest` build `166755560` passed |
-| Runtime build validation | `Lobster-Runtime-Build-Validation` build `166805394` passed |
-| Admin claim supported | Lobster has runtime primitives for deployment admin, tenant admin, tenant reader, tenant/deployment scope checks, user vs app principal assignments, and delegated-user vs app-only token handling. |
-| Storage claim allowed | Admin storage is not finalized. Redis may be used only for testing/bootstrap/projection state until a durable authority is selected. |
+| Item                     | Value                                                                                                                                                                                               |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primary proof PR         | `https://microsoft.ghe.com/bic/lobster/pull/2211`                                                                                                                                                   |
+| Registration prep PR     | `https://microsoft.ghe.com/bic/lobster/pull/2422`                                                                                                                                                   |
+| Merged commit            | `a45e8328caf8566868dce1253d84b907b704c0c6`                                                                                                                                                          |
+| Merged date              | 2026-06-04                                                                                                                                                                                          |
+| Runtime PR validation    | `Lobster-Runtime-PullRequest` build `166755560` passed                                                                                                                                              |
+| Runtime build validation | `Lobster-Runtime-Build-Validation` build `166805394` passed                                                                                                                                         |
+| Admin claim supported    | Lobster has runtime primitives for deployment admin, tenant admin, tenant reader, tenant/deployment scope checks, user vs app principal assignments, and delegated-user vs app-only token handling. |
+| Storage claim allowed    | Admin storage is not finalized. Redis may be used only for testing/bootstrap/projection state until a durable authority is selected.                                                                |
 
 ## Submission Inputs
 
-| Area | Notes |
-| --- | --- |
-| Package metadata | App name, publisher, descriptions, icons, support links. |
-| Permissions | Microsoft Graph and app permissions needed for setup and operation. |
-| Admin setup flow | How deployment or tenant admins authorize Lobster features. |
-| Privacy/support | Privacy statement, terms, support contact, escalation path. |
+| Area                | Notes                                                                      |
+| ------------------- | -------------------------------------------------------------------------- |
+| Package metadata    | App name, publisher, descriptions, icons, support links.                   |
+| Permissions         | Microsoft Graph and app permissions needed for setup and operation.        |
+| Admin setup flow    | How deployment or tenant admins authorize Lobster features.                |
+| Privacy/support     | Privacy statement, terms, support contact, escalation path.                |
 | Validation evidence | Screenshots, setup proof, runtime validation, policy/admin behavior notes. |
 
 ## Microsoft Submission Checklist

@@ -16,12 +16,12 @@ An extension feed is a versioned, signed projection of available artifacts and t
 
 The intended ownership boundary is:
 
-| Area | Intended role |
-|---|---|
-| OpenClaw | Generic client/runtime primitives: subscriptions, verification, refresh, cache, search, install, Gateway lifecycle, and UI. |
-| ClawHub | Public/community catalog and publisher-feed production, history, queries, deltas, snapshots, and signing. |
+| Area                              | Intended role                                                                                                                            |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| OpenClaw                          | Generic client/runtime primitives: subscriptions, verification, refresh, cache, search, install, Gateway lifecycle, and UI.              |
+| ClawHub                           | Public/community catalog and publisher-feed production, history, queries, deltas, snapshots, and signing.                                |
 | MOS3 / Microsoft 365 Admin Center | Microsoft's registry, acquisitions, package metadata and defense, policy-aware composition, scope, RBAC, and effective enterprise feeds. |
-| Lobster / Scout | Microsoft-hosted adapter and product experience: MOS3 projection, UX, E2E, rollout, observability, and support. |
+| Lobster / Scout                   | Microsoft-hosted adapter and product experience: MOS3 projection, UX, E2E, rollout, observability, and support.                          |
 
 Core invariants:
 
@@ -68,21 +68,21 @@ One active Lobster draft is aligning Scout's Builder API upload with the current
 
 A publisher may be a person or an organization. “Publisher feed” is deliberate terminology; it avoids hard-coding feeds to user accounts.
 
-| PR | Purpose | Snapshot |
-|---|---|---|
-| [ClawHub #2948](https://github.com/openclaw/clawhub/pull/2948) | Publisher identity, snapshot model, and base API | Open, non-draft, conflicting, changes requested |
-| [ClawHub #3116](https://github.com/openclaw/clawhub/pull/3116) | Durable revisions, query, and delta state | Draft, conflicting |
-| [ClawHub #3117](https://github.com/openclaw/clawhub/pull/3117) | Signed snapshot, query, change, and reset projections | Draft, conflicting |
+| PR                                                             | Purpose                                               | Snapshot                                        |
+| -------------------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------- |
+| [ClawHub #2948](https://github.com/openclaw/clawhub/pull/2948) | Publisher identity, snapshot model, and base API      | Open, non-draft, conflicting, changes requested |
+| [ClawHub #3116](https://github.com/openclaw/clawhub/pull/3116) | Durable revisions, query, and delta state             | Draft, conflicting                              |
+| [ClawHub #3117](https://github.com/openclaw/clawhub/pull/3117) | Signed snapshot, query, change, and reset projections | Draft, conflicting                              |
 
 The desired landing order is #2948, #3116, then #3117. These branches need to be reconciled with current ClawHub main and reviewer feedback; preserving the conceptual slices is more important than preserving the existing commits.
 
 ### 3. Publisher feeds: OpenClaw consumer
 
-| PR | Purpose | Suggested disposition |
-|---|---|---|
-| [OpenClaw #109305](https://github.com/openclaw/openclaw/pull/109305) | Search and follow signed publisher feeds from the CLI | Primary review question: is this the right first useful OpenClaw stopping point? |
-| [OpenClaw #109461](https://github.com/openclaw/openclaw/pull/109461) | Gateway refresh, scheduling, persistence, and management RPC | Follow after CLI semantics are accepted |
-| [OpenClaw #109584](https://github.com/openclaw/openclaw/pull/109584) | Control UI for publisher following | Follow after Gateway contract stabilizes |
+| PR                                                                   | Purpose                                                      | Suggested disposition                                                            |
+| -------------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| [OpenClaw #109305](https://github.com/openclaw/openclaw/pull/109305) | Search and follow signed publisher feeds from the CLI        | Primary review question: is this the right first useful OpenClaw stopping point? |
+| [OpenClaw #109461](https://github.com/openclaw/openclaw/pull/109461) | Gateway refresh, scheduling, persistence, and management RPC | Follow after CLI semantics are accepted                                          |
+| [OpenClaw #109584](https://github.com/openclaw/openclaw/pull/109584) | Control UI for publisher following                           | Follow after Gateway contract stabilizes                                         |
 
 The CLI slice is intentionally first: it can prove subscription, verification, refresh, search, cache, and exact-version behavior without making Gateway lifecycle or UI part of the initial review surface.
 
@@ -90,12 +90,12 @@ The CLI slice is intentionally first: it can prove subscription, verification, r
 
 Publisher feeds solve following a chosen source. They do not by themselves solve efficient distribution of a large public catalog.
 
-| PR | Purpose | Snapshot |
-|---|---|---|
-| [ClawHub #3005](https://github.com/openclaw/clawhub/pull/3005) | Dormant catalog signing foundation | Open, mergeable but unstable, changes requested |
-| [ClawHub #3149](https://github.com/openclaw/clawhub/pull/3149) | Durable catalog revision/history state | Open, mergeable but unstable |
-| [ClawHub #3160](https://github.com/openclaw/clawhub/pull/3160) | Signed catalog query and change transport | Open, mergeable but unstable |
-| [ClawHub #3163](https://github.com/openclaw/clawhub/pull/3163) | Sharded signed catalog snapshots | Draft, mergeable but unstable |
+| PR                                                                   | Purpose                                    | Snapshot                                                             |
+| -------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------- |
+| [ClawHub #3005](https://github.com/openclaw/clawhub/pull/3005)       | Dormant catalog signing foundation         | Open, mergeable but unstable, changes requested                      |
+| [ClawHub #3149](https://github.com/openclaw/clawhub/pull/3149)       | Durable catalog revision/history state     | Open, mergeable but unstable                                         |
+| [ClawHub #3160](https://github.com/openclaw/clawhub/pull/3160)       | Signed catalog query and change transport  | Open, mergeable but unstable                                         |
+| [ClawHub #3163](https://github.com/openclaw/clawhub/pull/3163)       | Sharded signed catalog snapshots           | Draft, mergeable but unstable                                        |
 | [OpenClaw #110250](https://github.com/openclaw/openclaw/pull/110250) | Consume and search signed sharded catalogs | Open; needs current-main reconciliation and producer contract review |
 
 Signing should remain dormant until key custody, rotation, activation, and operational ownership are explicitly agreed. Merging a signing foundation must not silently activate production trust.

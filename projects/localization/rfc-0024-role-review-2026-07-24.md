@@ -10,15 +10,15 @@ Applied result: RFC head
 
 ## Panel
 
-| Role | Tension | Review focus |
-| --- | --- | --- |
-| `claws:new-hire` | Approachability over completeness | Can a first-time reader explain the target and workflow? |
-| `claws:power-user` | Operational control over ceremony | Does automation replace manual translation work, including failures? |
-| `claws:platform-eng` | Fleet consistency over autonomy | Are shared gates reusable without replacing owner workflows? |
-| `claws:gateway-eng` | Runtime stability over governance overhead | Are rendering, fallback, and activation boundaries real? |
-| `claws:founder` | Community trust over centralization | Does the proposal remain simple and owner-native? |
-| `claws:ciso` | Security assurance over convenience | Are untrusted PR and trusted credential boundaries explicit? |
-| `claws:lorant-reviewer` | Current-head correctness over optimistic approval | Do claims match implementation and current proof? |
+| Role                    | Tension                                           | Review focus                                                         |
+| ----------------------- | ------------------------------------------------- | -------------------------------------------------------------------- |
+| `claws:new-hire`        | Approachability over completeness                 | Can a first-time reader explain the target and workflow?             |
+| `claws:power-user`      | Operational control over ceremony                 | Does automation replace manual translation work, including failures? |
+| `claws:platform-eng`    | Fleet consistency over autonomy                   | Are shared gates reusable without replacing owner workflows?         |
+| `claws:gateway-eng`     | Runtime stability over governance overhead        | Are rendering, fallback, and activation boundaries real?             |
+| `claws:founder`         | Community trust over centralization               | Does the proposal remain simple and owner-native?                    |
+| `claws:ciso`            | Security assurance over convenience               | Are untrusted PR and trusted credential boundaries explicit?         |
+| `claws:lorant-reviewer` | Current-head correctness over optimistic approval | Do claims match implementation and current proof?                    |
 
 ## Findings and dispositions
 

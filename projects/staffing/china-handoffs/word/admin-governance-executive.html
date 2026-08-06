@@ -1,103 +1,305 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Admin and Governance — Collaboration Opportunities</title>
-<style>
-body { font-family: Aptos, Arial, sans-serif; color: #243044; margin: 0; line-height: 1.35; }
-h1 { color: #17365d; font-size: 26pt; margin-bottom: 4pt; }
-h2 { color: #1f4e79; font-size: 16pt; border-bottom: 1px solid #9dc3e6; padding-bottom: 3pt; margin-top: 20pt; }
-h3 { color: #2f5597; font-size: 12pt; margin-bottom: 3pt; }
-p, li { font-size: 10.5pt; }
-.subtitle { color: #5b6573; font-size: 12pt; margin-top: 0; }
-.vision { background: #eaf2f8; border-left: 6px solid #2f75b5; padding: 12pt 16pt; font-size: 14pt; font-weight: bold; }
-.callout { background: #f3f6f9; border: 1px solid #c9d5e3; padding: 10pt 14pt; }
-.small { color: #657080; font-size: 9pt; }
-table { border-collapse: collapse; width: 100%; margin: 8pt 0 14pt; }
-th { background: #1f4e79; color: white; text-align: left; padding: 7pt; font-size: 9.5pt; }
-td { border: 1px solid #b4c7dc; vertical-align: top; padding: 7pt; font-size: 9.5pt; }
-ul { margin-top: 4pt; }
-</style>
-</head>
-<body>
-<h1>Admin and Governance</h1>
-<p class="subtitle">Collaboration and ownership opportunities across Scout, MAC/MOS3, Partner Center, and OpenClaw</p>
-<div class="vision">Omar's vision: Own tenant/global settings, policy, permissions, approvals, audit/override state, Partner Center, marketplace governance, and M365 auth decisions.</div>
+  <head>
+    <meta charset="utf-8" />
+    <title>Admin and Governance — Collaboration Opportunities</title>
+    <style>
+      body {
+        font-family: Aptos, Arial, sans-serif;
+        color: #243044;
+        margin: 0;
+        line-height: 1.35;
+      }
+      h1 {
+        color: #17365d;
+        font-size: 26pt;
+        margin-bottom: 4pt;
+      }
+      h2 {
+        color: #1f4e79;
+        font-size: 16pt;
+        border-bottom: 1px solid #9dc3e6;
+        padding-bottom: 3pt;
+        margin-top: 20pt;
+      }
+      h3 {
+        color: #2f5597;
+        font-size: 12pt;
+        margin-bottom: 3pt;
+      }
+      p,
+      li {
+        font-size: 10.5pt;
+      }
+      .subtitle {
+        color: #5b6573;
+        font-size: 12pt;
+        margin-top: 0;
+      }
+      .vision {
+        background: #eaf2f8;
+        border-left: 6px solid #2f75b5;
+        padding: 12pt 16pt;
+        font-size: 14pt;
+        font-weight: bold;
+      }
+      .callout {
+        background: #f3f6f9;
+        border: 1px solid #c9d5e3;
+        padding: 10pt 14pt;
+      }
+      .small {
+        color: #657080;
+        font-size: 9pt;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 8pt 0 14pt;
+      }
+      th {
+        background: #1f4e79;
+        color: white;
+        text-align: left;
+        padding: 7pt;
+        font-size: 9.5pt;
+      }
+      td {
+        border: 1px solid #b4c7dc;
+        vertical-align: top;
+        padding: 7pt;
+        font-size: 9.5pt;
+      }
+      ul {
+        margin-top: 4pt;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Admin and Governance</h1>
+    <p class="subtitle">
+      Collaboration and ownership opportunities across Scout, MAC/MOS3, Partner Center, and OpenClaw
+    </p>
+    <div class="vision">
+      Omar's vision: Own tenant/global settings, policy, permissions, approvals, audit/override
+      state, Partner Center, marketplace governance, and M365 auth decisions.
+    </div>
 
-<h2>Purpose</h2>
-<p>This brief frames a menu of areas where the Admin &amp; Governance team could lead, co-own, or help close decisions. It is not a fixed assignment. Possible seams include native Scout availability, Partner Center, tenant/global authority, permissions and approvals, marketplace governance, M365 authentication, and the unified admin experience.</p>
+    <h2>Purpose</h2>
+    <p>
+      This brief frames a menu of areas where the Admin &amp; Governance team could lead, co-own, or
+      help close decisions. It is not a fixed assignment. Possible seams include native Scout
+      availability, Partner Center, tenant/global authority, permissions and approvals, marketplace
+      governance, M365 authentication, and the unified admin experience.
+    </p>
 
-<h2>Product vision</h2>
-<p>Scout needs one enterprise control plane where administrators can configure availability and policy, govern extensions, understand effective state, approve or override safely, and audit consequential decisions.</p>
-<ul>
-<li><strong>MAC/MOS3 and Partner Center</strong> remain authoritative for Microsoft catalog, title availability, distribution, and native M365 admin decisions.</li>
-<li><strong>Lobster/Scout</strong> composes those decisions with enrollment, tenant configuration, policy, and runtime state and presents a coherent experience.</li>
-<li><strong>OpenClaw</strong> owns generic runtime configuration, policy, evidence, and conformance primitives.</li>
-</ul>
-<div class="callout"><strong>Guardrail:</strong> Use one authoritative source for each security or availability decision. Missing identity, permission, or first resolution must not silently permit protected behavior; transient failures may retain an explicit previous-good decision but must never widen access.</div>
+    <h2>Product vision</h2>
+    <p>
+      Scout needs one enterprise control plane where administrators can configure availability and
+      policy, govern extensions, understand effective state, approve or override safely, and audit
+      consequential decisions.
+    </p>
+    <ul>
+      <li>
+        <strong>MAC/MOS3 and Partner Center</strong> remain authoritative for Microsoft catalog,
+        title availability, distribution, and native M365 admin decisions.
+      </li>
+      <li>
+        <strong>Lobster/Scout</strong> composes those decisions with enrollment, tenant
+        configuration, policy, and runtime state and presents a coherent experience.
+      </li>
+      <li>
+        <strong>OpenClaw</strong> owns generic runtime configuration, policy, evidence, and
+        conformance primitives.
+      </li>
+    </ul>
+    <div class="callout">
+      <strong>Guardrail:</strong> Use one authoritative source for each security or availability
+      decision. Missing identity, permission, or first resolution must not silently permit protected
+      behavior; transient failures may retain an explicit previous-good decision but must never
+      widen access.
+    </div>
 
-<h2>Opportunity portfolio</h2>
-<table>
-<tr><th>Opportunity</th><th>Outcome</th><th>Primary partners</th></tr>
-<tr><td>Native Scout availability</td><td>Use MAC/MOS3 title state as authority and safely compose it with operator enrollment.</td><td>MAC/MOS3, Lobster, Infrastructure</td></tr>
-<tr><td>Partner Center readiness</td><td>Complete Scout package metadata, permission decisions, submission, tenant validation, and runbooks.</td><td>Partner Center, M365, Operations</td></tr>
-<tr><td>Tenant/global controls</td><td>Define durable authority, global floors, equal-or-stricter tenant settings, provenance, preview, and rollback.</td><td>MOS3, Policy, Security</td></tr>
-<tr><td>Approvals and overrides</td><td>Deliver roles, approval, exception, break-glass, expiry, reversal, and tamper-evident audit.</td><td>Security, Compliance, Frontend</td></tr>
-<tr><td>Marketplace governance</td><td>Unify source registration, approval, pinning, quarantine, revocation, and explainability without a second catalog.</td><td>Extensibility, MOS3, Security</td></tr>
-<tr><td>M365 auth and operations</td><td>Own consent, scopes, OBO/app-only, preauthorization, sovereign routing, SIEM, incident response, and support.</td><td>Identity, Security, Infrastructure</td></tr>
-</table>
+    <h2>Opportunity portfolio</h2>
+    <table>
+      <tr>
+        <th>Opportunity</th>
+        <th>Outcome</th>
+        <th>Primary partners</th>
+      </tr>
+      <tr>
+        <td>Native Scout availability</td>
+        <td>
+          Use MAC/MOS3 title state as authority and safely compose it with operator enrollment.
+        </td>
+        <td>MAC/MOS3, Lobster, Infrastructure</td>
+      </tr>
+      <tr>
+        <td>Partner Center readiness</td>
+        <td>
+          Complete Scout package metadata, permission decisions, submission, tenant validation, and
+          runbooks.
+        </td>
+        <td>Partner Center, M365, Operations</td>
+      </tr>
+      <tr>
+        <td>Tenant/global controls</td>
+        <td>
+          Define durable authority, global floors, equal-or-stricter tenant settings, provenance,
+          preview, and rollback.
+        </td>
+        <td>MOS3, Policy, Security</td>
+      </tr>
+      <tr>
+        <td>Approvals and overrides</td>
+        <td>
+          Deliver roles, approval, exception, break-glass, expiry, reversal, and tamper-evident
+          audit.
+        </td>
+        <td>Security, Compliance, Frontend</td>
+      </tr>
+      <tr>
+        <td>Marketplace governance</td>
+        <td>
+          Unify source registration, approval, pinning, quarantine, revocation, and explainability
+          without a second catalog.
+        </td>
+        <td>Extensibility, MOS3, Security</td>
+      </tr>
+      <tr>
+        <td>M365 auth and operations</td>
+        <td>
+          Own consent, scopes, OBO/app-only, preauthorization, sovereign routing, SIEM, incident
+          response, and support.
+        </td>
+        <td>Identity, Security, Infrastructure</td>
+      </tr>
+    </table>
 
-<h2>Work completed to date</h2>
-<ul>
-<li>Scout package and admin-integration preparation landed through Lobster #2422 and #3555.</li>
-<li>Existing operator/ECS enrollment provides one availability input.</li>
-<li>MOS3/MAC title discovery and preview contracts were investigated; a bounded native-availability implementation is in flight.</li>
-<li>Policy foundations support bootstrap/materialization, preview, authenticated acceptance, MOS3 publishing, effective-baseline projection, persistence, and effective-policy read UX.</li>
-<li>Feed foundations support MOS3 acquisition, personal and tenant-approved projections, marketplace search, tenant review, and approved-feed publication.</li>
-</ul>
+    <h2>Work completed to date</h2>
+    <ul>
+      <li>
+        Scout package and admin-integration preparation landed through Lobster #2422 and #3555.
+      </li>
+      <li>Existing operator/ECS enrollment provides one availability input.</li>
+      <li>
+        MOS3/MAC title discovery and preview contracts were investigated; a bounded
+        native-availability implementation is in flight.
+      </li>
+      <li>
+        Policy foundations support bootstrap/materialization, preview, authenticated acceptance,
+        MOS3 publishing, effective-baseline projection, persistence, and effective-policy read UX.
+      </li>
+      <li>
+        Feed foundations support MOS3 acquisition, personal and tenant-approved projections,
+        marketplace search, tenant review, and approved-feed publication.
+      </li>
+    </ul>
 
-<h2>Current work in flight</h2>
-<p><a href="https://microsoft.ghe.com/bic/lobster/pull/5422">Lobster #5422</a> enforces native MAC/MOS3 availability for the existing Scout Teams app after operator enrollment. On the 2026-07-27 snapshot it was open and non-draft, with GitHubPop failing, the required Runtime PR context missing, and review not current. Live state must be rechecked.</p>
-<p>The intended contract is already bounded:</p>
-<ul>
-<li>Scout is an existing Teams tabs app, not a new declarative agent.</li>
-<li>Do not invent a separate Lobster availability setting or policy surface.</li>
-<li>MAC/MOS3 title availability and block state are authoritative.</li>
-<li>Lobster validates the environment title ID and stable AppId, resolves with a user OBO token, caches per caller, and composes explicit denial with enrollment.</li>
-<li>The armed gate fails closed before first success; later refresh failure retains the last-known decision rather than widening access.</li>
-<li>Enforcement remains default-off until live validation succeeds.</li>
-</ul>
+    <h2>Current work in flight</h2>
+    <p>
+      <a href="https://microsoft.ghe.com/bic/lobster/pull/5422">Lobster #5422</a> enforces native
+      MAC/MOS3 availability for the existing Scout Teams app after operator enrollment. On the
+      2026-07-27 snapshot it was open and non-draft, with GitHubPop failing, the required Runtime PR
+      context missing, and review not current. Live state must be rechecked.
+    </p>
+    <p>The intended contract is already bounded:</p>
+    <ul>
+      <li>Scout is an existing Teams tabs app, not a new declarative agent.</li>
+      <li>Do not invent a separate Lobster availability setting or policy surface.</li>
+      <li>MAC/MOS3 title availability and block state are authoritative.</li>
+      <li>
+        Lobster validates the environment title ID and stable AppId, resolves with a user OBO token,
+        caches per caller, and composes explicit denial with enrollment.
+      </li>
+      <li>
+        The armed gate fails closed before first success; later refresh failure retains the
+        last-known decision rather than widening access.
+      </li>
+      <li>Enforcement remains default-off until live validation succeeds.</li>
+    </ul>
 
-<h2>Work still to be done</h2>
-<ul>
-<li>Finish package metadata, privacy/terms/support materials, production and validation tenants/accounts, permission/consent documentation, Partner Center validation, submission, and per-environment MOS3 title IDs.</li>
-<li>Choose the durable authority for customer settings and define global floor, tenant subset, effective value, provenance, freshness, and rollback.</li>
-<li>Define how allow, deny, approval, exception, override, quarantine, revocation, and package-defense decisions compose.</li>
-<li>Deliver marketplace/feed governance using MOS3 authority rather than a competing Lobster catalog.</li>
-<li>Own M365 scope, preauthorization, consent, token audience, OBO/app-only, and sovereign environment decisions.</li>
-<li>Build actionable preview/explain/audit UX showing decision source, owner, reason, impact, and next action.</li>
-<li>Add ring/fleet rollout, partial-failure recovery, E2E, dashboards, SIEM export, incident response, emergency disable, support, and tamper-evident audit.</li>
-</ul>
+    <h2>Work still to be done</h2>
+    <ul>
+      <li>
+        Finish package metadata, privacy/terms/support materials, production and validation
+        tenants/accounts, permission/consent documentation, Partner Center validation, submission,
+        and per-environment MOS3 title IDs.
+      </li>
+      <li>
+        Choose the durable authority for customer settings and define global floor, tenant subset,
+        effective value, provenance, freshness, and rollback.
+      </li>
+      <li>
+        Define how allow, deny, approval, exception, override, quarantine, revocation, and
+        package-defense decisions compose.
+      </li>
+      <li>
+        Deliver marketplace/feed governance using MOS3 authority rather than a competing Lobster
+        catalog.
+      </li>
+      <li>
+        Own M365 scope, preauthorization, consent, token audience, OBO/app-only, and sovereign
+        environment decisions.
+      </li>
+      <li>
+        Build actionable preview/explain/audit UX showing decision source, owner, reason, impact,
+        and next action.
+      </li>
+      <li>
+        Add ring/fleet rollout, partial-failure recovery, E2E, dashboards, SIEM export, incident
+        response, emergency disable, support, and tamper-evident audit.
+      </li>
+    </ul>
 
-<h2>Suggested first conversation</h2>
-<ol>
-<li>Select one initial responsibility and a coordinating DRI; one team need not implement every seam.</li>
-<li>Confirm which authority owns each control: MAC/M365 admin center, MOS3, Lobster, or OpenClaw.</li>
-<li>Recheck #5422 and decide whether to co-own, take over, or replace it with smaller current-main slices.</li>
-<li>Close the first blocking external decision—typically title identity, permission/preauthorization, or Partner Center ownership.</li>
-</ol>
+    <h2>Suggested first conversation</h2>
+    <ol>
+      <li>
+        Select one initial responsibility and a coordinating DRI; one team need not implement every
+        seam.
+      </li>
+      <li>
+        Confirm which authority owns each control: MAC/M365 admin center, MOS3, Lobster, or
+        OpenClaw.
+      </li>
+      <li>
+        Recheck #5422 and decide whether to co-own, take over, or replace it with smaller
+        current-main slices.
+      </li>
+      <li>
+        Close the first blocking external decision—typically title identity,
+        permission/preauthorization, or Partner Center ownership.
+      </li>
+    </ol>
 
-<h2>Success measures</h2>
-<ul>
-<li>Native Scout availability is proven and safely enabled.</li>
-<li>The Partner Center/M365 package is submitted or submission-ready with named external owners.</li>
-<li>Tenant/global settings have durable authority, inheritance, API, preview, explain, audit, and rollback.</li>
-<li>Marketplace outcomes are enforceable without turning Lobster into a competing registry.</li>
-<li>M365 auth, incident response, telemetry, support, and long-term ownership are explicit.</li>
-</ul>
+    <h2>Success measures</h2>
+    <ul>
+      <li>Native Scout availability is proven and safely enabled.</li>
+      <li>
+        The Partner Center/M365 package is submitted or submission-ready with named external owners.
+      </li>
+      <li>
+        Tenant/global settings have durable authority, inheritance, API, preview, explain, audit,
+        and rollback.
+      </li>
+      <li>
+        Marketplace outcomes are enforceable without turning Lobster into a competing registry.
+      </li>
+      <li>
+        M365 auth, incident response, telemetry, support, and long-term ownership are explicit.
+      </li>
+    </ul>
 
-<h2>Companion engineering detail</h2>
-<p>A detailed engineering brief titled <strong>“Admin and Governance: Collaboration and Ownership Opportunities”</strong> is available from Gio. It contains the complete authority model, PR state, Partner Center checklist, proposed slices, decisions, failure semantics, and success criteria.</p>
-<p class="small">Prepared 2026-07-27. PR and check status is a dated snapshot and must be refreshed before acting.</p>
-</body>
+    <h2>Companion engineering detail</h2>
+    <p>
+      A detailed engineering brief titled
+      <strong>“Admin and Governance: Collaboration and Ownership Opportunities”</strong> is
+      available from Gio. It contains the complete authority model, PR state, Partner Center
+      checklist, proposed slices, decisions, failure semantics, and success criteria.
+    </p>
+    <p class="small">
+      Prepared 2026-07-27. PR and check status is a dated snapshot and must be refreshed before
+      acting.
+    </p>
+  </body>
 </html>

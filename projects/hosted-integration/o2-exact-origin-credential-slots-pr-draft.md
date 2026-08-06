@@ -89,4 +89,3 @@ No production secret backend, external provider/plugin consumer, TLS endpoint,
 generic model-facing fetch tool, private response cache, or hosted service was
 tested. Those surfaces are deliberately absent and the owner decision remains
 open.
-

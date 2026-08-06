@@ -117,68 +117,68 @@ semantic quality.
 
 ## Wave 1: Exemplar Matrix A
 
-| Claw | Pair | Target | Concrete application upgrade |
-| --- | --- | --- | --- |
-| Travel concierge | P+C | 5/5/5/5/5/5 = 30 | Golden Claw: reuse safe traveler identity and existing Expedia state; ask only missing trip preferences; connect requirements/comparison schemas, template, worked example, and verification checklist to real Expedia searches and the traveler-controlled handoff; give it an unmistakable but restrained concierge identity. |
-| Financial analyst | P+R | 5/4/5/4/5/5 = 28 | Add a calculation/input schema, worked scenario example, and scenario template contract; preserve currency/materiality preferences and use a rigorous, assumption-explicit financial voice. |
-| Executive assistant | P+A | 5/3/4/5/5/3 = 25 | Copyable Reference Claw: keep the dependency-free package anatomy and theme light; read agent/principal identity, timezone, and workspace context before asking gaps; persist communication/focus preferences and demonstrate one managed brief template. |
-| Incident response | P+O | 5/3/4/5/5/5 = 27 | Discover active incident/service context safely; package timeline, mitigation-decision, and handoff resources; use a terse incident-command identity while preserving exact approval and rollback boundaries. |
-| Software maintainer | C+R | 5/5/5/4/5/4 = 28 | Make GitHub and Diffs consume the change contract and produce the reviewer handoff; add a change schema and representative fixture; derive repository state automatically with a pragmatic maintainer identity. |
+| Claw                | Pair | Target           | Concrete application upgrade                                                                                                                                                                                                                                                                                                    |
+| ------------------- | ---- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Travel concierge    | P+C  | 5/5/5/5/5/5 = 30 | Golden Claw: reuse safe traveler identity and existing Expedia state; ask only missing trip preferences; connect requirements/comparison schemas, template, worked example, and verification checklist to real Expedia searches and the traveler-controlled handoff; give it an unmistakable but restrained concierge identity. |
+| Financial analyst   | P+R  | 5/4/5/4/5/5 = 28 | Add a calculation/input schema, worked scenario example, and scenario template contract; preserve currency/materiality preferences and use a rigorous, assumption-explicit financial voice.                                                                                                                                     |
+| Executive assistant | P+A  | 5/3/4/5/5/3 = 25 | Copyable Reference Claw: keep the dependency-free package anatomy and theme light; read agent/principal identity, timezone, and workspace context before asking gaps; persist communication/focus preferences and demonstrate one managed brief template.                                                                       |
+| Incident response   | P+O  | 5/3/4/5/5/5 = 27 | Discover active incident/service context safely; package timeline, mitigation-decision, and handoff resources; use a terse incident-command identity while preserving exact approval and rollback boundaries.                                                                                                                   |
+| Software maintainer | C+R  | 5/5/5/4/5/4 = 28 | Make GitHub and Diffs consume the change contract and produce the reviewer handoff; add a change schema and representative fixture; derive repository state automatically with a pragmatic maintainer identity.                                                                                                                 |
 
 ## Wave 2: Exemplar Matrix B
 
-| Claw | Pair | Target | Concrete application upgrade |
-| --- | --- | --- | --- |
-| Executive briefing | C+A | 5/5/3/5/5/5 = 28 | Discover available calendar/mail/weather context, ask only source/recipient gaps, persist briefing preferences, add a concise output template, and use a decisive briefing-editor identity. |
-| Public safety monitor | C+O | 5/5/3/4/5/5 = 27 | Reuse authorized region/source context; add alert thresholds and an alert record template with an authoritative, non-alarmist monitor identity and isolated, non-announcing scheduled behavior. |
-| Presentation producer | R+A | 5/4/5/5/5/4 = 28 | Discover approved audience and brand context; package a deck template, brand asset example, content schema, and review checklist consumed by the PPTX skill; use a disciplined editorial design voice. |
-| Compliance reviewer | R+O | 5/3/5/3/5/4 = 25 | Package framework references, control/evidence schemas, review checklist, and example evidence set with a traceable, evidence-first reviewer identity. |
-| Recruiting coordinator | A+O | 4/3/3/5/5/4 = 24 | Reuse role, interviewer, timezone, and calendar context; ask accommodation/contact gaps only; add interview-plan and candidate-safe handoff templates with a discreet coordinator identity. |
+| Claw                   | Pair | Target           | Concrete application upgrade                                                                                                                                                                           |
+| ---------------------- | ---- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Executive briefing     | C+A  | 5/5/3/5/5/5 = 28 | Discover available calendar/mail/weather context, ask only source/recipient gaps, persist briefing preferences, add a concise output template, and use a decisive briefing-editor identity.            |
+| Public safety monitor  | C+O  | 5/5/3/4/5/5 = 27 | Reuse authorized region/source context; add alert thresholds and an alert record template with an authoritative, non-alarmist monitor identity and isolated, non-announcing scheduled behavior.        |
+| Presentation producer  | R+A  | 5/4/5/5/5/4 = 28 | Discover approved audience and brand context; package a deck template, brand asset example, content schema, and review checklist consumed by the PPTX skill; use a disciplined editorial design voice. |
+| Compliance reviewer    | R+O  | 5/3/5/3/5/4 = 25 | Package framework references, control/evidence schemas, review checklist, and example evidence set with a traceable, evidence-first reviewer identity.                                                 |
+| Recruiting coordinator | A+O  | 4/3/3/5/5/4 = 24 | Reuse role, interviewer, timezone, and calendar context; ask accommodation/contact gaps only; add interview-plan and candidate-safe handoff templates with a discreet coordinator identity.            |
 
 ## Wave 3: Resource-Led Applications
 
-| Claw | Pair | Target | Concrete application upgrade |
-| --- | --- | --- | --- |
-| Security analyst | P+T | 5/2/5/3/5/5 = 25 | Theme exemplar: add threat-model, evidence, finding, and verification schemas plus a bounded example; use a skeptical, authorization-first analyst identity and discover only explicitly authorized target context. |
-| Research briefing | P+R | 5/3/5/3/4/3 = 23 | Add source ledger, claim/evidence schema, brief template, and worked example; reuse the current question and supplied sources with a deliberately light analyst theme. |
-| Content operations | R+T | 5/3/5/4/4/5 = 26 | Theme exemplar: package brand/claim references, channel templates, rights checklist, and publication handoff; use a distinctive editorial-operations identity grounded in approved brand/channel context. |
-| Product manager | P+R | 5/3/5/3/4/3 = 23 | Add decision memo, experiment schema, evidence ledger, and worked product decision; keep the product judgment theme light and portable. |
-| Knowledge curator | R+A | 4/3/5/5/4/4 = 25 | Package taxonomy, provenance, deduplication, and destination templates; discover current workspace taxonomy with a careful archivist identity. |
-| Video concept producer | C+T | 5/5/5/3/5/5 = 28 | Theme exemplar: package rights-cleared prompt/brand asset examples, generation record schema, and review board; use a creative-director identity while requiring explicit provider/cost/publication approval. |
+| Claw                   | Pair | Target           | Concrete application upgrade                                                                                                                                                                                        |
+| ---------------------- | ---- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Security analyst       | P+T  | 5/2/5/3/5/5 = 25 | Theme exemplar: add threat-model, evidence, finding, and verification schemas plus a bounded example; use a skeptical, authorization-first analyst identity and discover only explicitly authorized target context. |
+| Research briefing      | P+R  | 5/3/5/3/4/3 = 23 | Add source ledger, claim/evidence schema, brief template, and worked example; reuse the current question and supplied sources with a deliberately light analyst theme.                                              |
+| Content operations     | R+T  | 5/3/5/4/4/5 = 26 | Theme exemplar: package brand/claim references, channel templates, rights checklist, and publication handoff; use a distinctive editorial-operations identity grounded in approved brand/channel context.           |
+| Product manager        | P+R  | 5/3/5/3/4/3 = 23 | Add decision memo, experiment schema, evidence ledger, and worked product decision; keep the product judgment theme light and portable.                                                                             |
+| Knowledge curator      | R+A  | 4/3/5/5/4/4 = 25 | Package taxonomy, provenance, deduplication, and destination templates; discover current workspace taxonomy with a careful archivist identity.                                                                      |
+| Video concept producer | C+T  | 5/5/5/3/5/5 = 28 | Theme exemplar: package rights-cleared prompt/brand asset examples, generation record schema, and review board; use a creative-director identity while requiring explicit provider/cost/publication approval.       |
 
 ## Wave 4: Capability and Resource Applications
 
-| Claw | Pair | Target | Concrete application upgrade |
-| --- | --- | --- | --- |
-| Data analyst | C+R | 5/4/5/3/4/3 = 24 | Add a vetted data-file capability, dataset contract, analysis schema, reproducible example, and result template; infer safe file/workspace context with a light analytical theme. |
-| Meeting intelligence | C+R | 5/5/5/3/5/4 = 27 | Connect Whisper and DOCX to consent record, transcript schema, meeting-summary template, and representative fixture with a discreet recorder identity. |
-| Spreadsheet analyst | C+R | 5/4/5/3/5/3 = 25 | Connect the XLSX skill to workbook templates, validation schema, formula-preservation checklist, and synthetic workbook fixture with a light audit-minded theme. |
-| Document intake analyst | C+R | 5/4/5/3/5/3 = 25 | Connect conversion to intake/extraction schemas, output templates, and safe representative fixtures; reuse discovered file context with a light normalization theme. |
-| Media evidence reviewer | C+R | 5/5/5/3/5/4 = 27 | Connect frame/audio extraction to evidence schema, timestamped review template, and synthetic audiovisual fixture with a forensic-review identity. |
-| Website evidence collector | C+R | 5/5/5/3/5/4 = 27 | Connect Firecrawl to crawl policy, extraction schema, source ledger, and deterministic fixture; use a methodical collector identity while preserving access boundaries. |
-| Civic data analyst | C+R | 5/4/5/4/4/4 = 26 | Connect transit data to jurisdiction/dataset metadata, analysis schema, worked example, and locally adapted geography with a public-interest analyst identity. |
+| Claw                       | Pair | Target           | Concrete application upgrade                                                                                                                                                      |
+| -------------------------- | ---- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Data analyst               | C+R  | 5/4/5/3/4/3 = 24 | Add a vetted data-file capability, dataset contract, analysis schema, reproducible example, and result template; infer safe file/workspace context with a light analytical theme. |
+| Meeting intelligence       | C+R  | 5/5/5/3/5/4 = 27 | Connect Whisper and DOCX to consent record, transcript schema, meeting-summary template, and representative fixture with a discreet recorder identity.                            |
+| Spreadsheet analyst        | C+R  | 5/4/5/3/5/3 = 25 | Connect the XLSX skill to workbook templates, validation schema, formula-preservation checklist, and synthetic workbook fixture with a light audit-minded theme.                  |
+| Document intake analyst    | C+R  | 5/4/5/3/5/3 = 25 | Connect conversion to intake/extraction schemas, output templates, and safe representative fixtures; reuse discovered file context with a light normalization theme.              |
+| Media evidence reviewer    | C+R  | 5/5/5/3/5/4 = 27 | Connect frame/audio extraction to evidence schema, timestamped review template, and synthetic audiovisual fixture with a forensic-review identity.                                |
+| Website evidence collector | C+R  | 5/5/5/3/5/4 = 27 | Connect Firecrawl to crawl policy, extraction schema, source ledger, and deterministic fixture; use a methodical collector identity while preserving access boundaries.           |
+| Civic data analyst         | C+R  | 5/4/5/4/4/4 = 26 | Connect transit data to jurisdiction/dataset metadata, analysis schema, worked example, and locally adapted geography with a public-interest analyst identity.                    |
 
 ## Wave 5: Capability and Operations Applications
 
-| Claw | Pair | Target | Concrete application upgrade |
-| --- | --- | --- | --- |
-| Research monitor | C+O | 5/5/3/4/5/4 = 26 | Reuse tracked questions/sources, add change/evidence records, and keep parallel and scheduled work bounded with a patient watch-analyst identity. |
-| Release coordinator | C+O | 5/5/3/4/5/4 = 26 | Discover repository/channel context, add release and approval records, and keep GitHub/Slack activity approval-bound with a calm release-captain identity. |
-| Feed intelligence monitor | C+O | 5/5/3/4/5/4 = 26 | Reuse existing feeds/topics, add digest/change records, and preserve isolated work with a signal-over-noise editor identity. |
-| Web evidence researcher | C+O | 5/5/3/3/5/4 = 25 | Add search/extraction scope and evidence records while retaining minimal constraints and a source-skeptical researcher identity. |
-| Workflow operator | O+T | 5/5/3/4/5/5 = 27 | Theme exemplar: discover available Lobster workflows, package input/output schemas and examples, and use a precise operations-console identity while preserving approvals. |
-| Public company watcher | C+O | 5/5/3/4/5/4 = 26 | Reuse company/source preferences, add disclosure/change records, and use a sober filings-watcher identity without drifting into investment advice. |
+| Claw                      | Pair | Target           | Concrete application upgrade                                                                                                                                               |
+| ------------------------- | ---- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Research monitor          | C+O  | 5/5/3/4/5/4 = 26 | Reuse tracked questions/sources, add change/evidence records, and keep parallel and scheduled work bounded with a patient watch-analyst identity.                          |
+| Release coordinator       | C+O  | 5/5/3/4/5/4 = 26 | Discover repository/channel context, add release and approval records, and keep GitHub/Slack activity approval-bound with a calm release-captain identity.                 |
+| Feed intelligence monitor | C+O  | 5/5/3/4/5/4 = 26 | Reuse existing feeds/topics, add digest/change records, and preserve isolated work with a signal-over-noise editor identity.                                               |
+| Web evidence researcher   | C+O  | 5/5/3/3/5/4 = 25 | Add search/extraction scope and evidence records while retaining minimal constraints and a source-skeptical researcher identity.                                           |
+| Workflow operator         | O+T  | 5/5/3/4/5/5 = 27 | Theme exemplar: discover available Lobster workflows, package input/output schemas and examples, and use a precise operations-console identity while preserving approvals. |
+| Public company watcher    | C+O  | 5/5/3/4/5/4 = 26 | Reuse company/source preferences, add disclosure/change records, and use a sober filings-watcher identity without drifting into investment advice.                         |
 
 ## Wave 6: Adaptation-Led Applications
 
-| Claw | Pair | Target | Concrete application upgrade |
-| --- | --- | --- | --- |
-| Customer support | C+A | 4/4/3/5/4/4 = 24 | Reuse product, customer, queue, and escalation context; persist preferences; connect the support skill to response resources with an empathetic but exact support identity. |
-| Sales operations | C+A | 4/3/3/5/4/3 = 22 | Select a vetted CRM capability only if available; otherwise adapt from supplied pipeline context, package forecast/handoff resources, and keep the operations theme light. |
-| Project manager | A+O | 4/3/3/5/4/3 = 22 | Discover project/workspace state, persist cadence/owner preferences, package status/decision/risk records, and keep the coordinator theme light. |
-| Knowledge gardener | C+A | 4/4/3/5/4/4 = 24 | Reuse Notion workspace/database/taxonomy context, persist curation policy, and add resources with a patient knowledge-gardener identity. |
-| Travel planner | C+A | 5/4/4/5/5/4 = 27 | Reuse traveler identity/preferences, connect weather/checklist skills to itinerary resources, preserve transaction boundaries, and use a practical planner identity. |
-| Research scout | A+T | 5/4/3/5/5/5 = 27 | Theme exemplar: reuse research questions/sources, persist monitoring preferences, add evidence/change records, and use a curious but source-disciplined scout identity with non-announcing schedules. |
+| Claw               | Pair | Target           | Concrete application upgrade                                                                                                                                                                          |
+| ------------------ | ---- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Customer support   | C+A  | 4/4/3/5/4/4 = 24 | Reuse product, customer, queue, and escalation context; persist preferences; connect the support skill to response resources with an empathetic but exact support identity.                           |
+| Sales operations   | C+A  | 4/3/3/5/4/3 = 22 | Select a vetted CRM capability only if available; otherwise adapt from supplied pipeline context, package forecast/handoff resources, and keep the operations theme light.                            |
+| Project manager    | A+O  | 4/3/3/5/4/3 = 22 | Discover project/workspace state, persist cadence/owner preferences, package status/decision/risk records, and keep the coordinator theme light.                                                      |
+| Knowledge gardener | C+A  | 4/4/3/5/4/4 = 24 | Reuse Notion workspace/database/taxonomy context, persist curation policy, and add resources with a patient knowledge-gardener identity.                                                              |
+| Travel planner     | C+A  | 5/4/4/5/5/4 = 27 | Reuse traveler identity/preferences, connect weather/checklist skills to itinerary resources, preserve transaction boundaries, and use a practical planner identity.                                  |
+| Research scout     | A+T  | 5/4/3/5/5/5 = 27 | Theme exemplar: reuse research questions/sources, persist monitoring preferences, add evidence/change records, and use a curious but source-disciplined scout identity with non-announcing schedules. |
 
 ## Delivery Sequence
 

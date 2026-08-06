@@ -1,3 +1,90 @@
+# 2026-07-30 Lobster #6197 ClawHub/MOS3 gateway review
+
+- Reviewed Ziyang's Lobster PR #6197 at current head `a04210da0`. It is a
+  narrow, stateless ClawHub `0.23.1` compatibility gateway for MOS3 personal
+  skills, not yet the enterprise feed itself: Lobster translates discovery,
+  device auth, whoami, search, resolve, and single-manifest personal publish
+  while MOS3 remains package/version/acquisition/policy authority.
+- Architecture position: keep the compatibility path MOS3-authoritative and do
+  not read or write the optional Lobster personal overlay. The fixed
+  authority/client/scope device bridge, JWT validation, expected-client check,
+  server-side OBO, bounded public proxy, deployment switch, and GUID kill
+  switch are the right trust shape. Give protected ClawHub routes a dedicated
+  rollout/ownership flag (optionally conjunctive with Feeds UX) rather than
+  treating `lobster.scout_feeds_ux_enabled` alone as authorization to expose a
+  new registry protocol.
+- Do not merge the current head. GitHubPop is green and Galin approved the exact
+  head, but required `Lobster-Runtime-PullRequest` is red. The workspace quality
+  failure is PR-owned: CI rustfmt changed
+  `src/lobster_scout/src/scout_mos3_publish_tests.rs`. The .NET failure is the
+  unrelated timing test
+  `AutodevCli.Tests.CopilotTaskTests.RunAsync_ContinueAfter_UsesOneWallClockDeadlineFromProcessStart`.
+  Format/push, then let the required check rerun; do not manually queue by
+  default.
+- Auth distinction: the intended client path requests a Lobster-audience token
+  from an approved public client; Lobster then exchanges that assertion through
+  its confidential FPA/OBO provider for the MOS3 audience. A local client that
+  requests MOS3 directly needs MOS3 to preauthorize that exact public-client id
+  for the exact MSIT resource/scope (or an approved developer broker). Deploying
+  does not cure `AADSTS65002`. Deployment is still required to validate the
+  Lobster FPA -> MOS3 OBO relationship and the bounded user's
+  Personal/TenantPersonal entitlement; the latter previously reached MOS3 and
+  returned 403.
+- Merge-before-live-auth is acceptable only after the dedicated rollout
+  boundary/ownership decision, green required checks, and truthful default-off
+  documentation. Do not enable or claim real E2E until token preauthorization,
+  FPA OBO, publish entitlement, and publish/readback succeed against actual
+  MOS3.
+
+# 2026-07-29 local feeds cleanup applied
+
+- Cleared the regenerable Rust `target/` trees from active draft #5947 and
+  registered draft #6169, plus merged #5424 and the detached #5947 duplicate.
+  `cargo clean` reported about 53 GiB removed; measured C: free space rose from
+  about 239.6 GB to 291.2 GB (+51.6 GB).
+- Retained the clean source worktrees for #5947
+  (`lobster-feeds-builder-name`) and #6169
+  (`lobster-feeds-claw-mos-package`); #6169 remains in the active allocator
+  registry. Released 16 clean merged, closed, or duplicate Lobster/OpenClaw
+  worktrees without deleting local branches or changing remote PR state.
+- Removed seven junction-only Lobster shells and four invalid abandoned
+  OpenClaw trust clone remnants. All 27 intended paths were absent in the
+  post-cleanup assertion.
+- Preserved all dirty work exactly: `lobster-feeds-personal-publish-scope-error`
+  (2 changes), `clawhub-review-2948` (2),
+  `openclaw-clawhub-default-trust-http-fix` (11),
+  `openclaw-trust-clawhub-default-profile` (292), and the unrelated
+  `openclaw-clawhub-claws-pr1` (19). Open feeds PR-stack worktrees were not
+  released.
+
+# 2026-07-29 local feeds worktree and disk audit
+
+- Keep the clean Lobster stack worktrees for draft #5947
+  (`lobster-feeds-builder-name`) and draft #6169
+  (`lobster-feeds-claw-mos-package`). Only #6169 is allocator-registered. Their
+  regenerable Rust `target/` trees occupy about 10.4 GB and 28.6 GB
+  respectively and can be cleared without releasing the source worktrees.
+- Immediate clean release candidates include merged Lobster #5424
+  (`lobster-feeds-marketplace-default-on`, about 6.5 GB of `target/`) and the
+  detached duplicate `lobster-scout-mos3-marketplace` at #5947's head (about
+  5.2 GB of `target/`). The old OpenClaw trust/DSSE worktrees map to merged
+  #98299/#98316/#98338/#98350/#101981/#108342/#110037 and are no longer needed
+  for active feeds work when clean.
+- Preserve `lobster-feeds-personal-publish-scope-error`: it has an uncommitted
+  39-line MOS production `Forbidden`/scope-disabled handling fix with tests and
+  no PR. Preserve detached `clawhub-review-2948`: its two modified account-feed
+  files differ from current #2948 and need reconciliation before cleanup.
+- Signing/scale (#3005 -> #3149 -> #3160 -> draft #3163), account/inbox
+  (#2948/#2950/#2958/#3293), publisher-feed (#109305/#109461/#109584), and
+  catalog-consumer (#110250/#113333) PRs remain open. Their clean local
+  worktrees are optional remote-safe rehydration candidates when those stacks
+  are not being actively reviewed; they are not terminal work.
+- Seven `C:\src\lobster-*feeds*` directory shells contain only old
+  `node_modules` junctions, and four old `openclaw-trust-*` directories contain
+  incomplete `.git` remnants. Treat them as orphan cleanup candidates, not
+  active worktrees. Dated feeds proof/probe directories under `C:\tmp` total
+  only about 0.54 GB and are lower-value cleanup.
+
 # 2026-07-29 OpenClaw Claw compatibility envelope for MOS3
 
 - Opened draft Lobster PR #6169 at `64ced9b60a`, stacked on Builder-contract
@@ -95,7 +182,7 @@
 
 - Opened draft Lobster PR #5947 at `d2d2a82fe9` from
   `user/giodl/scout-feeds-mos3-builder-name`. It aligns `POST
-  /builder/v1/users/packages` with Builder APIs 1.0.0: the ZIP is multipart
+/builder/v1/users/packages` with Builder APIs 1.0.0: the ZIP is multipart
   `package`, JSON `info` carries `builderName: ScoutCloud`, and tests assert the
   wire contract. Keep it draft until MOS3 publishes the `ScoutCloud` enum and
   enables Personal/TenantPersonal publishing for Scout AppID
@@ -852,9 +939,9 @@ scripts/check-token-collisions.py`, and `git diff --check`. Focused Rust
   check in a tested ClawHub key-generation/provisioning script that writes the
   private PKCS#8 key only to a permission-restricted temporary file/pipe,
   atomically sets `CLAWHUB_FEED_SIGNING_CONFIG`, emits only public PEM + key id
-  + fingerprint, verifies a signed fixture, and cleans up. Patrick or another
-  confirmed Convex operator should run the final production write; never commit
-  or print the private key.
+  - fingerprint, verifies a signed fixture, and cleans up. Patrick or another
+    confirmed Convex operator should run the final production write; never commit
+    or print the private key.
 
 - 2026-07-22 signed-feed repair pass: isolated the ClawHub baseline audit
   regression in https://github.com/openclaw/clawhub/pull/3232 at `d7d4a61f`.
@@ -1014,6 +1101,7 @@ scripts/check-token-collisions.py`, and `git diff --check`. Focused Rust
   honest scale limits. No PR was merged, no production key was installed, and
   no signing/ECS switch was activated. Next review order remains #3005 ->
   #3149 -> #3160 -> #3163; first close #3005 re-review and #3163 CI.
+
 # 2026-07-27 Lobster ownership handoff
 
 - Prepared `projects/staffing/china-handoffs/extensibility-feeds.md` as the

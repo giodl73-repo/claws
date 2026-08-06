@@ -18,7 +18,7 @@ This PR implements RFC 0018 as one readiness contract:
 - fail closed with `ReadinessEvaluationComplete=Unknown` when canonical evaluation cannot complete; and
 - project the same result through `/ready`, `/readyz`, Gateway `ready`, health, status, and `openclaw ready --json`.
 
-~~~json5
+```json5
 {
   gateway: {
     readiness: {
@@ -27,7 +27,7 @@ This PR implements RFC 0018 as one readiness contract:
     },
   },
 }
-~~~
+```
 
 Registering a criterion does not make it required. Existing installations retain the universal Gateway baseline unless an operator explicitly selects more criteria.
 

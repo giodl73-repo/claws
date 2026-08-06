@@ -72,4 +72,3 @@ enabled registry entry bound to loader-owned plugin provenance.
 
 Yes. A current-`main`, issue-linked draft implementation is ready for plugin
 owner review.
-

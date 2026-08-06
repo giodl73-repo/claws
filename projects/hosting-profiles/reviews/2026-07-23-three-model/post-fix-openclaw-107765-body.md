@@ -12,12 +12,12 @@ OpenClaw runs locally, in containers, behind identity proxies, and as a controll
 
 Profiles are optional, named, release-tested presets over the readiness conditions from PR 104018. They do not create another evaluator.
 
-| Profile | Supported posture | Additional required evidence |
-| --- | --- | --- |
-| `local` | Explicit foreground/local Gateway | Writable workspace |
-| `container` | Directly reachable container listener | Non-loopback effective listener and writable workspace |
+| Profile         | Supported posture                       | Additional required evidence                                                                                             |
+| --------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `local`         | Explicit foreground/local Gateway       | Writable workspace                                                                                                       |
+| `container`     | Directly reachable container listener   | Non-loopback effective listener and writable workspace                                                                   |
 | `reverse-proxy` | Gateway behind a trusted identity proxy | Trusted-proxy auth, identity header, trusted source, explicit loopback allowance when applicable, and writable workspace |
-| `node-mode` | Gateway controlling execution targets | Approved pairing, connected target, canonical command-policy approval, live control channel, and writable workspace |
+| `node-mode`     | Gateway controlling execution targets   | Approved pairing, connected target, canonical command-policy approval, live control channel, and writable workspace      |
 
 Selection precedence is `gateway startup argument > environment > openclaw.json`. Without a selection, OpenClaw preserves the existing readiness baseline and emits no profile or activation fields. With a selection, machine-readable readiness identifies the profile, its source, a logical runtime ID, and a unique incarnation ID. Invalid selected values fail before destructive reset/force behavior; shadowed lower-precedence values are ignored.
 

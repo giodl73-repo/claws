@@ -28,30 +28,30 @@ exist only to exercise a schema field or dashboard control.
 
 ## Six Experience Exemplars
 
-| Pair | New Claw | Target | Experience shape |
-| --- | --- | --- | --- |
-| P+X | Event operations director | 5/3/4/4/5/4/5 = 30 | A run-of-show application with named readiness, timeline, and decision widgets plus a printable fallback packet. |
-| C+X | API integration engineer | 5/5/5/3/5/4/5 = 32 | A coding-profile integration console backed by packaged OpenAPI fixtures, contract tests, and endpoint-readiness widgets. |
-| R+X | Procurement evaluator | 5/3/5/4/5/4/5 = 31 | A schema-backed vendor comparison and evidence matrix rendered as an interactive decision card without purchasing authority. |
-| A+X | Grant portfolio manager | 5/3/4/5/5/4/5 = 31 | Local program priorities and deadlines seed an updateable opportunity and submission-readiness board. |
-| O+X | Privacy request coordinator | 5/3/4/4/5/4/5 = 30 | A deadline/evidence dashboard that keeps identity verification, legal decisions, disclosure, and deletion execution human-owned. |
-| T+X | Manufacturing operations planner | 5/3/4/4/5/5/5 = 31 | A distinctive constraint-first production-control surface with capacity, dependency, exception, and handoff views. |
+| Pair | New Claw                         | Target             | Experience shape                                                                                                                 |
+| ---- | -------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| P+X  | Event operations director        | 5/3/4/4/5/4/5 = 30 | A run-of-show application with named readiness, timeline, and decision widgets plus a printable fallback packet.                 |
+| C+X  | API integration engineer         | 5/5/5/3/5/4/5 = 32 | A coding-profile integration console backed by packaged OpenAPI fixtures, contract tests, and endpoint-readiness widgets.        |
+| R+X  | Procurement evaluator            | 5/3/5/4/5/4/5 = 31 | A schema-backed vendor comparison and evidence matrix rendered as an interactive decision card without purchasing authority.     |
+| A+X  | Grant portfolio manager          | 5/3/4/5/5/4/5 = 31 | Local program priorities and deadlines seed an updateable opportunity and submission-readiness board.                            |
+| O+X  | Privacy request coordinator      | 5/3/4/4/5/4/5 = 30 | A deadline/evidence dashboard that keeps identity verification, legal decisions, disclosure, and deletion execution human-owned. |
+| T+X  | Manufacturing operations planner | 5/3/4/4/5/5/5 = 31 | A distinctive constraint-first production-control surface with capacity, dependency, exception, and handoff views.               |
 
 ## Nine Complementary Applications
 
 These broaden the collection while intentionally ranging from X3 to X4.
 
-| Claw | Target | Distinct job and experience |
-| --- | --- | --- |
-| Facilities operations coordinator | 5/3/4/4/5/4/4 = 29 | Triage site issues into a private maintenance queue and shift handoff; no emergency dispatch or work-order submission. |
-| UX research synthesizer | 5/3/5/4/5/4/4 = 30 | Convert consented research evidence into a traceable theme, contradiction, and opportunity map. |
-| Experimentation lead | 5/3/5/4/5/4/4 = 30 | Plan and review product experiments with guardrails, metric definitions, exposure checks, and decision records. |
-| Data migration planner | 5/3/5/4/5/4/4 = 30 | Build source/target mappings, reconciliation rules, cutover readiness, and rollback evidence without executing production migration. |
-| Localization program manager | 5/3/5/4/5/4/4 = 30 | Coordinate locale scope, terminology, string readiness, review ownership, and release blockers without publishing translations. |
-| Accessibility review coordinator | 5/3/5/3/5/4/4 = 29 | Organize standards-linked findings, evidence, severity, remediation, and verification without claiming certification. |
-| Quality assurance lead | 5/3/5/4/5/4/4 = 30 | Turn risk and requirements into a coverage matrix, execution ledger, defect triage, and release recommendation. |
-| Cloud cost analyst | 5/3/5/4/5/4/4 = 30 | Reconcile supplied billing exports into allocation, anomaly, commitment, and optimization evidence without changing cloud resources. |
-| Fundraising campaign manager | 5/3/4/4/5/4/3 = 28 | Prepare an approval-bound nonprofit campaign plan, audience assets, stewardship ledger, and measurement handoff without sending or soliciting. |
+| Claw                              | Target             | Distinct job and experience                                                                                                                    |
+| --------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Facilities operations coordinator | 5/3/4/4/5/4/4 = 29 | Triage site issues into a private maintenance queue and shift handoff; no emergency dispatch or work-order submission.                         |
+| UX research synthesizer           | 5/3/5/4/5/4/4 = 30 | Convert consented research evidence into a traceable theme, contradiction, and opportunity map.                                                |
+| Experimentation lead              | 5/3/5/4/5/4/4 = 30 | Plan and review product experiments with guardrails, metric definitions, exposure checks, and decision records.                                |
+| Data migration planner            | 5/3/5/4/5/4/4 = 30 | Build source/target mappings, reconciliation rules, cutover readiness, and rollback evidence without executing production migration.           |
+| Localization program manager      | 5/3/5/4/5/4/4 = 30 | Coordinate locale scope, terminology, string readiness, review ownership, and release blockers without publishing translations.                |
+| Accessibility review coordinator  | 5/3/5/3/5/4/4 = 29 | Organize standards-linked findings, evidence, severity, remediation, and verification without claiming certification.                          |
+| Quality assurance lead            | 5/3/5/4/5/4/4 = 30 | Turn risk and requirements into a coverage matrix, execution ledger, defect triage, and release recommendation.                                |
+| Cloud cost analyst                | 5/3/5/4/5/4/4 = 30 | Reconcile supplied billing exports into allocation, anomaly, commitment, and optimization evidence without changing cloud resources.           |
+| Fundraising campaign manager      | 5/3/4/4/5/4/3 = 28 | Prepare an approval-bound nonprofit campaign plan, audience assets, stewardship ledger, and measurement handoff without sending or soliciting. |
 
 ## Authoring Waves
 

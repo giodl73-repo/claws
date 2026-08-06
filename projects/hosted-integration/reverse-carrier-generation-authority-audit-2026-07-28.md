@@ -59,12 +59,12 @@ reconnect counters must not stand in for either semantic generation.
 
 ## Internal Analogues
 
-| Analogue | Decision | Reason |
-| --- | --- | --- |
-| Lobster ECS cache generation | `avoid` as wire authority | Process-local invalidation evidence; not a stable selected-config identity. |
-| Dispatcher traffic-policy generation | `reuse` only in its domain | Correctly fences one policy dependency; cannot identify the complete binding. |
-| O4 immutable bundle registration view | `adapt` | It is the right state boundary, but needs an identity for the exact committed snapshot. |
-| O12/O13 admission and operation fences | `reuse` | They already enforce the values once authoritative producers supply them. |
+| Analogue                               | Decision                   | Reason                                                                                  |
+| -------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------- |
+| Lobster ECS cache generation           | `avoid` as wire authority  | Process-local invalidation evidence; not a stable selected-config identity.             |
+| Dispatcher traffic-policy generation   | `reuse` only in its domain | Correctly fences one policy dependency; cannot identify the complete binding.           |
+| O4 immutable bundle registration view  | `adapt`                    | It is the right state boundary, but needs an identity for the exact committed snapshot. |
+| O12/O13 admission and operation fences | `reuse`                    | They already enforce the values once authoritative producers supply them.               |
 
 ## External Comparators
 

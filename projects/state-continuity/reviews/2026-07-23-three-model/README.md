@@ -10,11 +10,11 @@ OpenClaw PRs 112385, 112865, and 112896 at these exact heads:
 - final capture: `9c3dedb3afd7df9fb95787d0606303304e14579f`
 - restored admission: `eaeb21f0a7db5bdfac3a86464d9b1762f22d8f56`
 
-| Review | Model | Mandate | Result |
-| --- | --- | --- | --- |
-| Maintainer | GPT-5.6-Sol | Cumulative implementation correctness | Clean |
-| Contract | Claude Opus 4.7 | RFC, ownership, identity, and claim coherence | Three accepted findings |
-| Adversarial | GPT-5.5 | Crash, replay, tampering, and lifecycle transitions | One accepted finding |
+| Review      | Model           | Mandate                                             | Result                  |
+| ----------- | --------------- | --------------------------------------------------- | ----------------------- |
+| Maintainer  | GPT-5.6-Sol     | Cumulative implementation correctness               | Clean                   |
+| Contract    | Claude Opus 4.7 | RFC, ownership, identity, and claim coherence       | Three accepted findings |
+| Adversarial | GPT-5.5         | Crash, replay, tampering, and lifecycle transitions | One accepted finding    |
 
 ## Accepted Findings
 

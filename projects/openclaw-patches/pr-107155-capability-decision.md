@@ -42,9 +42,7 @@ remaining fail-closed. Illustrative shape only:
   "webSearchProviderMetadata": {
     "webiq": {
       "openClawCredential": {
-        "notRequiredWhen": [
-          { "path": "webSearch.omitAuth", "equals": true }
-        ]
+        "notRequiredWhen": [{ "path": "webSearch.omitAuth", "equals": true }]
       }
     }
   }

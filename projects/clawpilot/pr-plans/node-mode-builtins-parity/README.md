@@ -17,12 +17,12 @@ owning local policy, approval cards, token boundaries, and execution.
 
 ## Proposed Order
 
-| Step | Planned PR | Area | Base |
-| --- | --- | --- | --- |
-| 1 | Planned | Self-tools bridge | After #4089 |
-| 2 | Planned | WorkIQ/M365 read and metadata tools | After self-tools |
-| 3 | Planned | WorkIQ/M365 mutating tools | After read parity |
-| 4 | Planned | Browser MCP special actions and remaining permission kinds | After M365 mutations |
+| Step | Planned PR | Area                                                       | Base                 |
+| ---- | ---------- | ---------------------------------------------------------- | -------------------- |
+| 1    | Planned    | Self-tools bridge                                          | After #4089          |
+| 2    | Planned    | WorkIQ/M365 read and metadata tools                        | After self-tools     |
+| 3    | Planned    | WorkIQ/M365 mutating tools                                 | After read parity    |
+| 4    | Planned    | Browser MCP special actions and remaining permission kinds | After M365 mutations |
 
 `system.run` can remain the shell-specific follow-up after these non-shell
 built-in parity slices, or be kept as its already-open PR if review flow needs
@@ -250,7 +250,7 @@ Scope:
   node-mode MCP runtime used by raw `mcp.invoke`.
 - Wire Gateway
   `desktop.executeLocalTool({ kind: "read" | "write", toolName:
-  "filesystem.read" | "filesystem.write" | "filesystem.patch" })` to the same
+"filesystem.read" | "filesystem.write" | "filesystem.patch" })` to the same
   Desktop Node filesystem executor used by raw filesystem node commands.
 - Prove MCP config/status/discovery/OAuth behavior across reconnects in node
   mode.
@@ -267,4 +267,4 @@ Scope:
 
 Keep this as a single PR rather than a new series. Browser expansion, M365
 mutation expansion, and shell cancellation can stay as later targeted work
-  unless this PR uncovers one shared harness primitive that they all require.
+unless this PR uncovers one shared harness primitive that they all require.

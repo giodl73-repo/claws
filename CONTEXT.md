@@ -7,45 +7,48 @@ tools.
 
 ## Start Here
 
-| Need                                | File                                                 |
-| ----------------------------------- | ---------------------------------------------------- |
-| Workspace map                       | `WORKSPACE.md`                                       |
-| Active project areas                | `projects/README.md`                                 |
-| Policy work                         | `projects/policy/README.md`                          |
-| Doctor work                         | `projects/doctor/README.md`                          |
-| Feeds work                          | `projects/feeds/README.md`                           |
-| Catalog work                        | `projects/catalog/README.md`                         |
-| Lobster work                        | `projects/lobster/README.md`                         |
-| UX state work                       | `projects/ux-state/README.md`                        |
-| Admin work                          | `projects/admin/README.md`                           |
-| Config admin UX                     | `projects/config-admin/README.md`                    |
-| Staffing analysis                   | `projects/staffing/README.md`                        |
-| Context-budget work                 | `projects/context-budget/README.md`                  |
-| Snapshot work                       | `projects/snapshot/README.md`                        |
-| OpenClaw hosting profiles           | `projects/hosting-profiles/README.md`                |
-| Lobster/OpenClaw layering contracts | `projects/layering-contracts/README.md`              |
-| Managed Configuration               | `projects/managed-config/README.md`                  |
-| Hosted Integration                  | `projects/hosted-integration/README.md`              |
-| Runtime State Continuity            | `projects/state-continuity/README.md`                |
-| PromoteClaw                         | `projects/promoteclaw/README.md`                     |
-| TypeClaw                            | `projects/typeclaw/README.md`                        |
-| OpenClaw Rust node                  | `projects/openclaw-rust-node/README.md`              |
-| Memory work                         | `projects/memory/README.md`                          |
-| Mail work                           | `projects/mail/README.md`                            |
-| Claws work                          | `projects/claws/README.md`                           |
-| Control UI hosting                  | `projects/control-ui/README.md`                      |
-| Claws Review Bot                    | `projects/claws-review-bot/README.md`                |
-| Localization work                   | `projects/localization/README.md`                    |
-| oc-path work                        | `projects/oc-path/README.md`                         |
-| ClawPilot issue loop                | `projects/clawpilot/README.md`                       |
-| M5 Rendezvous commitments           | `projects/rendezvous/README.md`                      |
-| Bugfix work                         | `projects/bugs/README.md`                            |
-| PR loop                             | `projects/pr-loop/README.md`                         |
-| PR queues and Gitcrawl              | `projects/prs/README.md`, `projects/prs/gitcrawl.md` |
+| Need                                | File                                                        |
+| ----------------------------------- | ----------------------------------------------------------- |
+| Workspace map                       | `WORKSPACE.md`                                              |
+| Active project areas                | `projects/README.md`                                        |
+| OpenClaw system design              | `projects/openclaw-design/README.md`                        |
+| EnterpriseClaw architecture         | `projects/enterpriseclaw/README.md`                         |
+| Policy work                         | `projects/policy/README.md`                                 |
+| Doctor work                         | `projects/doctor/README.md`                                 |
+| Feeds work                          | `projects/feeds/README.md`                                  |
+| Catalog work                        | `projects/catalog/README.md`                                |
+| Lobster work                        | `projects/lobster/README.md`                                |
+| UX state work                       | `projects/ux-state/README.md`                               |
+| Admin work                          | `projects/admin/README.md`                                  |
+| Config admin UX                     | `projects/config-admin/README.md`                           |
+| Staffing analysis                   | `projects/staffing/README.md`                               |
+| Context-budget work                 | `projects/context-budget/README.md`                         |
+| Snapshot work                       | `projects/snapshot/README.md`                               |
+| OpenClaw hosting profiles           | `projects/hosting-profiles/README.md`                       |
+| Lobster/OpenClaw layering contracts | `projects/layering-contracts/README.md`                     |
+| Managed Configuration               | `projects/managed-config/README.md`                         |
+| Hosted Integration                  | `projects/hosted-integration/README.md`                     |
+| Runtime State Continuity            | `projects/state-continuity/README.md`                       |
+| PromoteClaw                         | `projects/promoteclaw/README.md`                            |
+| TypeClaw                            | `projects/typeclaw/README.md`                               |
+| Codeprints                          | `projects/codeprints/README.md`                             |
+| OpenClaw Rust node                  | `projects/openclaw-rust-node/README.md`                     |
+| Memory work                         | `projects/memory/README.md`                                 |
+| Mail work                           | `projects/mail/README.md`                                   |
+| Claws work                          | `projects/claws/README.md`                                  |
+| Control UI hosting                  | `projects/control-ui/README.md`                             |
+| Claws Review Bot                    | `projects/claws-review-bot/README.md`                       |
+| Localization work                   | `projects/localization/README.md`                           |
+| oc-path work                        | `projects/oc-path/README.md`                                |
+| ClawPilot issue loop                | `projects/clawpilot/README.md`                              |
+| M5 Rendezvous commitments           | `projects/rendezvous/README.md`                             |
+| Bugfix work                         | `projects/bugs/README.md`                                   |
+| PR loop                             | `projects/pr-loop/README.md`                                |
+| PR queues and Gitcrawl              | `projects/prs/README.md`, `projects/prs/gitcrawl.md`        |
 | Disk management                     | `projects/disk-mgmt/README.md`, `tools/disk-mgmt/README.md` |
-| WSL operation                       | `projects/wsl/README.md`, `tools/wsl/README.md`      |
-| Local tools                         | `tools/README.md`                                    |
-| Worktree setup and audit            | `tools/worktrees/README.md`                          |
+| WSL operation                       | `projects/wsl/README.md`, `tools/wsl/README.md`             |
+| Local tools                         | `tools/README.md`                                           |
+| Worktree setup and audit            | `tools/worktrees/README.md`                                 |
 
 ## Starting A Project Session
 
@@ -55,6 +58,8 @@ active branch/PR, known dirty state, resume checks, and guardrails.
 
 Common session files:
 
+- `projects/openclaw-design/SESSION.md`
+- `projects/enterpriseclaw/SESSION.md`
 - `projects/policy/SESSION.md`
 - `projects/doctor/SESSION.md`
 - `projects/feeds/SESSION.md`
@@ -140,6 +145,11 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
 
 ## Active Areas
 
+- OpenClaw system design: cross-RFC conceptual model, object vocabulary,
+  facility map, capability boundaries, and contract summaries.
+- EnterpriseClaw: desired owner-first OpenClaw target architecture, logical
+  layers, trust boundaries, control loops, deployment profiles, and evolution
+  rules.
 - Policy: policy conformance, named evidence files, RFC addenda, Lobster managed
   policy baselines.
 - Doctor: health findings, structured repair output, dry-run repair preview
@@ -177,6 +187,8 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
 - TypeClaw: OpenClaw TypeScript native / TS7 evaluation, benchmarks,
   compatibility findings, and feedback suitable for OpenClaw or Microsoft TS
   owners.
+- Codeprints: language-neutral repository factorization, first-language
+  analyzers, owner-led evidence, and native-authority preservation.
 - OpenClaw Rust node: experimental Rust node client and headless host,
   language-neutral node-contract publication, two-layer pairing conformance,
   release ownership, and the first bounded Lobster embedding proof.

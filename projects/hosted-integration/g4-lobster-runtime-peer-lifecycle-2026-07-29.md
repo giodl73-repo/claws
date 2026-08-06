@@ -86,13 +86,13 @@ Gaps before production wiring:
 
 ## Internal analogues
 
-| Analogue | Decision | Reason |
-| --- | --- | --- |
-| `HostProviderClient` and dispatcher | Reuse | Real cross-language protocol, bounded queues, deadlines, no replay. |
-| `HostProviderLifecycle` | Adapt | Preserve one task and fresh credentials; strengthen retry classification, jitter, stability reset, and shutdown proof. |
-| ProxyPipe supervisor | Adapt selectively | Reuse single-owner, kill-switch, bounded-backoff, health, and graceful-shutdown lessons; do not reuse its Redis lease because the peer is container-local. |
-| ProxyPipe reactivation | Avoid for V1 | Cross-pod lease recovery and persisted dial targets solve a different owner topology. |
-| `HostPackageStatusSnapshot` | Reuse as supporting status | Already redacted and explicitly non-authoritative. Exact OpenClaw readiness must come from G3's current admitted session. |
+| Analogue                            | Decision                   | Reason                                                                                                                                                     |
+| ----------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `HostProviderClient` and dispatcher | Reuse                      | Real cross-language protocol, bounded queues, deadlines, no replay.                                                                                        |
+| `HostProviderLifecycle`             | Adapt                      | Preserve one task and fresh credentials; strengthen retry classification, jitter, stability reset, and shutdown proof.                                     |
+| ProxyPipe supervisor                | Adapt selectively          | Reuse single-owner, kill-switch, bounded-backoff, health, and graceful-shutdown lessons; do not reuse its Redis lease because the peer is container-local. |
+| ProxyPipe reactivation              | Avoid for V1               | Cross-pod lease recovery and persisted dial targets solve a different owner topology.                                                                      |
+| `HostPackageStatusSnapshot`         | Reuse as supporting status | Already redacted and explicitly non-authoritative. Exact OpenClaw readiness must come from G3's current admitted session.                                  |
 
 ## Lifecycle contract
 

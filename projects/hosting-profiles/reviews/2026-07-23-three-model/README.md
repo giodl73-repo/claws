@@ -6,11 +6,11 @@ This directory records three independent, read-only reviews of RFC 0018,
 RFC 0023, their normative sidecar specifications, and the exact readiness and
 Hosting Profiles implementation diffs.
 
-| Review | Model | Mandate | Result |
-| --- | --- | --- | --- |
-| Architecture | GPT-5.6-Sol | Contract coherence and OpenClaw ownership | Approve |
-| Resilience | GPT-5.5 | Adversarial runtime, reliability, and security | Ship |
-| Maintainer | GPT-5.4 | API compatibility, repository fit, and landing shape | Approve |
+| Review       | Model       | Mandate                                              | Result  |
+| ------------ | ----------- | ---------------------------------------------------- | ------- |
+| Architecture | GPT-5.6-Sol | Contract coherence and OpenClaw ownership            | Approve |
+| Resilience   | GPT-5.5     | Adversarial runtime, reliability, and security       | Ship    |
+| Maintainer   | GPT-5.4     | API compatibility, repository fit, and landing shape | Approve |
 
 The prompt and final result for each review are retained. Transient CLI logs are
 not retained because they contain verbose source traversal rather than review
@@ -18,14 +18,14 @@ conclusions.
 
 ## Independently Converged Findings
 
-| Finding | Review agreement | Source validation |
-| --- | --- | --- |
-| Plugin provider output does not enforce the RFC reason, size, and redaction contract. | 3/3 | Confirmed |
-| Profile activation changes unprofiled readiness and is absent from the canonical protocol schema. | 3/3 | Confirmed |
-| `reverse-proxy` can report ready without proving that configured ingress can authenticate. | 2/3 | Confirmed |
-| A provider that ignores cancellation can accumulate overlapping calls after timeout/cache expiry. | 2/3 | Confirmed |
-| RFC 0023's machine-readable profile/source/activation projection is not implemented. | 2/3 | Confirmed |
-| `WorkspaceMissing` is emitted but absent from RFC 0018's stable reason catalog. | 2/3 | Confirmed |
+| Finding                                                                                           | Review agreement | Source validation |
+| ------------------------------------------------------------------------------------------------- | ---------------- | ----------------- |
+| Plugin provider output does not enforce the RFC reason, size, and redaction contract.             | 3/3              | Confirmed         |
+| Profile activation changes unprofiled readiness and is absent from the canonical protocol schema. | 3/3              | Confirmed         |
+| `reverse-proxy` can report ready without proving that configured ingress can authenticate.        | 2/3              | Confirmed         |
+| A provider that ignores cancellation can accumulate overlapping calls after timeout/cache expiry. | 2/3              | Confirmed         |
+| RFC 0023's machine-readable profile/source/activation projection is not implemented.              | 2/3              | Confirmed         |
+| `WorkspaceMissing` is emitted but absent from RFC 0018's stable reason catalog.                   | 2/3              | Confirmed         |
 
 The architecture review also identified a confirmed node-mode ownership issue:
 the readiness evaluator reconstructs part of command approval from raw config,

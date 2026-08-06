@@ -45,8 +45,8 @@ Its config lives at `~/.openclaw/openclaw.json`. Confirm:
   "gateway": {
     "auth": { "mode": "token", "token": "<GATEWAY_TOKEN>" },
     "nodes": { "allowCommands": ["system.run", "system.run.prepare"] },
-    "bind": "loopback"
-  }
+    "bind": "loopback",
+  },
 }
 ```
 
@@ -73,11 +73,11 @@ Test-NetConnection 127.0.0.1 -Port 18789
 
 Resolved in `electron/backend/create-backend.ts`:
 
-| Env var | Overrides | Default |
-| --- | --- | --- |
-| `OPENCLAW_GATEWAY_URL` | no-auth gateway URL | `ws://localhost:8001/v1/openclaw-gateway` |
-| `OPENCLAW_GATEWAY_URL_AAD` | AAD gateway URL | production Lobster `/v1/openclaw-gateway` |
-| `OPENCLAW_GATEWAY_TOKEN` | shared gateway token | `aether-internal-gateway-token` |
+| Env var                    | Overrides            | Default                                   |
+| -------------------------- | -------------------- | ----------------------------------------- |
+| `OPENCLAW_GATEWAY_URL`     | no-auth gateway URL  | `ws://localhost:8001/v1/openclaw-gateway` |
+| `OPENCLAW_GATEWAY_URL_AAD` | AAD gateway URL      | production Lobster `/v1/openclaw-gateway` |
+| `OPENCLAW_GATEWAY_TOKEN`   | shared gateway token | `aether-internal-gateway-token`           |
 
 For a local token-auth gateway on port `18789`, set all three:
 
@@ -115,7 +115,7 @@ the build sends the shared token:
 {
   "mode": "no-auth",
   "roleMode": "operator-and-node",
-  "nodeName": "local-gw-test"
+  "nodeName": "local-gw-test",
 }
 ```
 
@@ -234,18 +234,18 @@ Get-Process electron -ErrorAction SilentlyContinue | Stop-Process -Force
 
 ## Failure Quick Reference
 
-| Symptom | Cause | Fix |
-| --- | --- | --- |
-| `url=wss://lobster...prod...` and `401` | AAD mode or WAM auto-signed-in M365 | Set credential `no-auth`; point `OPENCLAW_GATEWAY_URL_AAD` at localhost |
-| `url=ws://localhost:8001` and `ECONNREFUSED` | Env override did not reach Electron | Launch via `.cmd`, not inline `$env:` |
-| `gateway token mismatch (provide gateway auth token)` | Wrong or missing shared token, or still in AAD mode | Set `OPENCLAW_GATEWAY_TOKEN` to gateway `auth.token`; ensure `no-auth` |
-| Command runs but gateway rejects invoke | Command not allow-listed | Add command to `gateway.nodes.allowCommands` |
-| Mixed AAD/no-auth log | Stale overlapping launches sharing a log | Kill all `electron` and launcher processes, use a fresh log, relaunch |
+| Symptom                                               | Cause                                               | Fix                                                                     |
+| ----------------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------- |
+| `url=wss://lobster...prod...` and `401`               | AAD mode or WAM auto-signed-in M365                 | Set credential `no-auth`; point `OPENCLAW_GATEWAY_URL_AAD` at localhost |
+| `url=ws://localhost:8001` and `ECONNREFUSED`          | Env override did not reach Electron                 | Launch via `.cmd`, not inline `$env:`                                   |
+| `gateway token mismatch (provide gateway auth token)` | Wrong or missing shared token, or still in AAD mode | Set `OPENCLAW_GATEWAY_TOKEN` to gateway `auth.token`; ensure `no-auth`  |
+| Command runs but gateway rejects invoke               | Command not allow-listed                            | Add command to `gateway.nodes.allowCommands`                            |
+| Mixed AAD/no-auth log                                 | Stale overlapping launches sharing a log            | Kill all `electron` and launcher processes, use a fresh log, relaunch   |
 
 ## Troubleshooting
 
 - `prebuild:skills` can hang at `Need to install the following packages:
-  skills@...` because `npx` is waiting for interactive confirmation. For a quick
+skills@...` because `npx` is waiting for interactive confirmation. For a quick
   dev launch, skip it and run:
 
   ```powershell

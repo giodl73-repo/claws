@@ -41,4 +41,3 @@ type that guarantees a lower-level exchange cannot follow redirects on its own.
 - Credential handling
 - Provider selection or traffic policy
 - New proxy, DNS, TLS or private-network authority
-

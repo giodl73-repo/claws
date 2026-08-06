@@ -83,43 +83,43 @@ The table below is the legacy six-dimension baseline used to plan the original
 evidence rather than silently assigning X scores without rendered proof. The
 50-package conformance run will replace it with seven-dimension achieved scores.
 
-| Claw | P | C | R | A | O | T | Total | Primary gap |
-| --- | -: | -: | -: | -: | -: | -: | -: | --- |
-| Travel concierge | 5 | 5 | 3 | 4 | 5 | 5 | **27** | Reuse safe local travel identity and make its template a plugin-output contract |
-| Software maintainer | 5 | 5 | 4 | 3 | 5 | 4 | **26** | Persist project preferences while deriving repository context automatically |
-| Financial analyst | 5 | 3 | 3 | 4 | 5 | 4 | **24** | Add calculation schema/example and connect the skill to the template |
-| Executive assistant | 5 | 1 | 3 | 4 | 5 | 3 | **21** | Add calendar, mail, task, or briefing capabilities |
-| Executive briefing | 5 | 5 | 1 | 2 | 5 | 4 | **22** | Derive recipient/source context and add a reusable brief template |
-| Public safety monitor | 5 | 5 | 1 | 2 | 5 | 5 | **23** | Discover safe location/source context and add an alert template |
-| Meeting intelligence | 5 | 4 | 1 | 2 | 5 | 4 | **21** | Reuse consent/output context and add transcript schemas and templates |
-| Research monitor | 5 | 4 | 1 | 2 | 5 | 4 | **21** | Discover tracked topics/sources and add evidence-report resources |
-| Media evidence reviewer | 5 | 4 | 1 | 2 | 5 | 4 | **21** | Reuse media/workspace context and add evidence resources |
-| Release coordinator | 5 | 4 | 1 | 2 | 5 | 4 | **21** | Discover repository/channel context and add release templates |
-| Feed intelligence monitor | 5 | 4 | 1 | 2 | 5 | 4 | **21** | Reuse existing feeds/topics and add a digest schema/template |
-| Travel planner | 5 | 4 | 1 | 2 | 5 | 4 | **21** | Reuse traveler context and add itinerary/comparison resources |
-| Web evidence researcher | 5 | 4 | 1 | 2 | 5 | 4 | **21** | Derive query/workspace context and add evidence schemas |
-| Website evidence collector | 5 | 4 | 1 | 2 | 5 | 4 | **21** | Reuse crawl context and add extraction schemas and fixtures |
-| Video concept producer | 5 | 4 | 1 | 2 | 5 | 5 | **22** | Reuse workspace brand context and add rights-cleared assets |
-| Workflow operator | 5 | 4 | 1 | 2 | 5 | 4 | **21** | Discover available workflows and add schemas and examples |
-| Public company watcher | 5 | 4 | 1 | 2 | 5 | 4 | **21** | Reuse company/source context and add a digest template |
-| Research scout | 5 | 4 | 1 | 2 | 5 | 4 | **21** | Reuse research context and add evidence resources |
-| Incident response | 5 | 3 | 1 | 2 | 5 | 4 | **20** | Discover incident context and add system integrations/templates |
-| Spreadsheet analyst | 5 | 3 | 1 | 2 | 5 | 3 | **19** | Derive workbook context and add schemas/templates/fixtures |
-| Presentation producer | 5 | 3 | 1 | 2 | 5 | 4 | **20** | Reuse audience/brand context and add deck assets/templates |
-| Document intake analyst | 5 | 3 | 1 | 2 | 5 | 3 | **19** | Infer safe document context and add schemas/templates/fixtures |
-| Civic data analyst | 5 | 3 | 1 | 2 | 4 | 4 | **19** | Reuse jurisdiction/dataset context and add schemas/examples |
-| Customer support | 4 | 3 | 1 | 2 | 4 | 3 | **17** | Discover support context and add escalation/response resources |
-| Security analyst | 5 | 1 | 1 | 2 | 5 | 4 | **18** | Add approved tools and reuse safe target/evidence context |
-| Compliance reviewer | 5 | 1 | 1 | 2 | 5 | 4 | **18** | Discover framework/control context and add evidence connectors |
-| Knowledge gardener | 4 | 3 | 1 | 2 | 4 | 4 | **18** | Reuse workspace/database context and add taxonomy resources |
-| Data analyst | 5 | 1 | 1 | 2 | 4 | 3 | **16** | Add data tools and derive source/schema context safely |
-| Recruiting coordinator | 4 | 1 | 1 | 2 | 5 | 4 | **17** | Add ATS/calendar capabilities and reuse role/interview context |
-| Research briefing | 4 | 1 | 1 | 2 | 4 | 3 | **15** | Add search capabilities and reuse topic/source context |
-| Sales operations | 4 | 1 | 1 | 2 | 4 | 3 | **15** | Add CRM capabilities and derive pipeline context |
-| Content operations | 4 | 1 | 1 | 2 | 4 | 4 | **16** | Add publishing capabilities and reuse brand/channel context |
-| Project manager | 4 | 1 | 1 | 2 | 4 | 3 | **15** | Add project tools and derive workspace/project context |
-| Product manager | 4 | 1 | 1 | 2 | 4 | 3 | **15** | Add evidence/project tools and reuse product context |
-| Knowledge curator | 4 | 1 | 1 | 2 | 4 | 3 | **15** | Add source/destination tools and derive taxonomy context |
+| Claw                       |   P |   C |   R |   A |   O |   T |  Total | Primary gap                                                                     |
+| -------------------------- | --: | --: | --: | --: | --: | --: | -----: | ------------------------------------------------------------------------------- |
+| Travel concierge           |   5 |   5 |   3 |   4 |   5 |   5 | **27** | Reuse safe local travel identity and make its template a plugin-output contract |
+| Software maintainer        |   5 |   5 |   4 |   3 |   5 |   4 | **26** | Persist project preferences while deriving repository context automatically     |
+| Financial analyst          |   5 |   3 |   3 |   4 |   5 |   4 | **24** | Add calculation schema/example and connect the skill to the template            |
+| Executive assistant        |   5 |   1 |   3 |   4 |   5 |   3 | **21** | Add calendar, mail, task, or briefing capabilities                              |
+| Executive briefing         |   5 |   5 |   1 |   2 |   5 |   4 | **22** | Derive recipient/source context and add a reusable brief template               |
+| Public safety monitor      |   5 |   5 |   1 |   2 |   5 |   5 | **23** | Discover safe location/source context and add an alert template                 |
+| Meeting intelligence       |   5 |   4 |   1 |   2 |   5 |   4 | **21** | Reuse consent/output context and add transcript schemas and templates           |
+| Research monitor           |   5 |   4 |   1 |   2 |   5 |   4 | **21** | Discover tracked topics/sources and add evidence-report resources               |
+| Media evidence reviewer    |   5 |   4 |   1 |   2 |   5 |   4 | **21** | Reuse media/workspace context and add evidence resources                        |
+| Release coordinator        |   5 |   4 |   1 |   2 |   5 |   4 | **21** | Discover repository/channel context and add release templates                   |
+| Feed intelligence monitor  |   5 |   4 |   1 |   2 |   5 |   4 | **21** | Reuse existing feeds/topics and add a digest schema/template                    |
+| Travel planner             |   5 |   4 |   1 |   2 |   5 |   4 | **21** | Reuse traveler context and add itinerary/comparison resources                   |
+| Web evidence researcher    |   5 |   4 |   1 |   2 |   5 |   4 | **21** | Derive query/workspace context and add evidence schemas                         |
+| Website evidence collector |   5 |   4 |   1 |   2 |   5 |   4 | **21** | Reuse crawl context and add extraction schemas and fixtures                     |
+| Video concept producer     |   5 |   4 |   1 |   2 |   5 |   5 | **22** | Reuse workspace brand context and add rights-cleared assets                     |
+| Workflow operator          |   5 |   4 |   1 |   2 |   5 |   4 | **21** | Discover available workflows and add schemas and examples                       |
+| Public company watcher     |   5 |   4 |   1 |   2 |   5 |   4 | **21** | Reuse company/source context and add a digest template                          |
+| Research scout             |   5 |   4 |   1 |   2 |   5 |   4 | **21** | Reuse research context and add evidence resources                               |
+| Incident response          |   5 |   3 |   1 |   2 |   5 |   4 | **20** | Discover incident context and add system integrations/templates                 |
+| Spreadsheet analyst        |   5 |   3 |   1 |   2 |   5 |   3 | **19** | Derive workbook context and add schemas/templates/fixtures                      |
+| Presentation producer      |   5 |   3 |   1 |   2 |   5 |   4 | **20** | Reuse audience/brand context and add deck assets/templates                      |
+| Document intake analyst    |   5 |   3 |   1 |   2 |   5 |   3 | **19** | Infer safe document context and add schemas/templates/fixtures                  |
+| Civic data analyst         |   5 |   3 |   1 |   2 |   4 |   4 | **19** | Reuse jurisdiction/dataset context and add schemas/examples                     |
+| Customer support           |   4 |   3 |   1 |   2 |   4 |   3 | **17** | Discover support context and add escalation/response resources                  |
+| Security analyst           |   5 |   1 |   1 |   2 |   5 |   4 | **18** | Add approved tools and reuse safe target/evidence context                       |
+| Compliance reviewer        |   5 |   1 |   1 |   2 |   5 |   4 | **18** | Discover framework/control context and add evidence connectors                  |
+| Knowledge gardener         |   4 |   3 |   1 |   2 |   4 |   4 | **18** | Reuse workspace/database context and add taxonomy resources                     |
+| Data analyst               |   5 |   1 |   1 |   2 |   4 |   3 | **16** | Add data tools and derive source/schema context safely                          |
+| Recruiting coordinator     |   4 |   1 |   1 |   2 |   5 |   4 | **17** | Add ATS/calendar capabilities and reuse role/interview context                  |
+| Research briefing          |   4 |   1 |   1 |   2 |   4 |   3 | **15** | Add search capabilities and reuse topic/source context                          |
+| Sales operations           |   4 |   1 |   1 |   2 |   4 |   3 | **15** | Add CRM capabilities and derive pipeline context                                |
+| Content operations         |   4 |   1 |   1 |   2 |   4 |   4 | **16** | Add publishing capabilities and reuse brand/channel context                     |
+| Project manager            |   4 |   1 |   1 |   2 |   4 |   3 | **15** | Add project tools and derive workspace/project context                          |
+| Product manager            |   4 |   1 |   1 |   2 |   4 |   3 | **15** | Add evidence/project tools and reuse product context                            |
+| Knowledge curator          |   4 |   1 |   1 |   2 |   4 |   3 | **15** | Add source/destination tools and derive taxonomy context                        |
 
 ## Portfolio Result
 

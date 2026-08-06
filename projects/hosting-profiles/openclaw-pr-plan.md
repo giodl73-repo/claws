@@ -61,11 +61,11 @@ The owner adoption is one upstream follow-on merge unit:
 branch `user/giodl/readiness-core-owner-adoption`, head `debd3a56a098`, based
 exactly on PR 104018 head `28ad0cf76fa9`.
 
-| Owner area | Selectable conditions | Review slice |
-| --- | --- | --- |
+| Owner area           | Selectable conditions                                                                                 | Review slice                                                |
+| -------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
 | Startup dependencies | `ConfigCurrent`, `ModelRouteReady`, `SecretsReady`, selectable `PluginsLoaded` and `EventLoopHealthy` | [PR 153](https://github.com/giodl73-repo/openclaw/pull/153) |
-| Agent execution | `ContextEngineReady`, `ToolCatalogReady`, `McpRuntimeReady`, `SandboxReady`, `HarnessReady` | [PR 154](https://github.com/giodl73-repo/openclaw/pull/154) |
-| State and services | `StateReady`, `SessionStorageReady`, `DeliveryRuntimeReady`, `SchedulerReady` | [PR 155](https://github.com/giodl73-repo/openclaw/pull/155) |
+| Agent execution      | `ContextEngineReady`, `ToolCatalogReady`, `McpRuntimeReady`, `SandboxReady`, `HarnessReady`           | [PR 154](https://github.com/giodl73-repo/openclaw/pull/154) |
+| State and services   | `StateReady`, `SessionStorageReady`, `DeliveryRuntimeReady`, `SchedulerReady`                         | [PR 155](https://github.com/giodl73-repo/openclaw/pull/155) |
 
 PRs 153-155 are review slices, not separate upstream landing requests. The
 combined upstream diff is 42 files, 3,098 insertions, and 39 deletions. It adds

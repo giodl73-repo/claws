@@ -52,13 +52,13 @@ tracked in
 
 Infrastructure and sandbox platforms already expose the compute primitives:
 
-| Platform | Primitive |
-| --- | --- |
-| [Fly Machines](https://fly.io/docs/launch/autostop-autostart/) | Traffic-driven stop-to-zero and autostart |
-| [E2B](https://e2b.dev/docs/sandbox/auto-resume) | Persistent pause and automatic resume |
-| [Daytona](https://www.daytona.io/docs/en/persistence/) | Persistent stop/start, archive, and VM pause/resume |
-| [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/scale-app) | Event-driven scale-to-zero |
-| [Cloudflare Durable Objects](https://developers.cloudflare.com/durable-objects/best-practices/websockets/) | Hibernation with wakeable WebSocket delivery |
+| Platform                                                                                                   | Primitive                                           |
+| ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| [Fly Machines](https://fly.io/docs/launch/autostop-autostart/)                                             | Traffic-driven stop-to-zero and autostart           |
+| [E2B](https://e2b.dev/docs/sandbox/auto-resume)                                                            | Persistent pause and automatic resume               |
+| [Daytona](https://www.daytona.io/docs/en/persistence/)                                                     | Persistent stop/start, archive, and VM pause/resume |
+| [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/scale-app)                         | Event-driven scale-to-zero                          |
+| [Cloudflare Durable Objects](https://developers.cloudflare.com/durable-objects/best-practices/websockets/) | Hibernation with wakeable WebSocket delivery        |
 
 Those systems cannot infer OpenClaw's complete owner inventory, SQLite
 invariants, scheduler state, or restored-readiness boundary. This addendum

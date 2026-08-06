@@ -2,6 +2,7 @@ Review the OpenClaw Readiness Conditions/Providers and Standard Hosting Profiles
 package as an independent upstream OpenClaw maintainer. Do not modify files.
 
 Artifacts:
+
 - RFC 0018 plus its readiness v1 sidecar spec in
   `/root/src/openclaw-rfcs-0018-refresh`.
 - RFC 0023 plus its hosting-profile v1 sidecar spec in

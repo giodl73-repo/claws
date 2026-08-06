@@ -35,14 +35,14 @@ Practical implication for ClawPilot:
 These PRs were merged in `openclaw/openclaw` since 2026-06-09 and are relevant
 to ClawPilot architecture or proof framing.
 
-| Area | OpenClaw PRs | ClawPilot leverage |
-| --- | --- | --- |
-| Provider safety | #92941, #92928, #92921, #92908, #92896, #92830 | Treat provider payloads, reasoning signatures, and tool schemas as untrusted. Managed-provider and Local OpenClaw adapters should fail closed, redact sensitive payloads, and surface degraded/unavailable states instead of silently continuing. |
-| Model/provider expansion | #92796, #92554, #91882 | Reinforces provider-neutral routing in #3953 and the need for explicit provider identity, model identity, readiness, and fallback rather than hardcoding Copilot-only assumptions. |
-| Session and agent reliability | #97140, #95039, #94421, #93287, #93228 | Supports ClawPilot session-status, progress, recovery, and terminal-outcome contracts. ClawPilot should distinguish active work, waiting-on-user, degraded provider, failed tool call, and terminal completion. |
-| Channel delivery correctness | #97130, #94881, #94428, #91962 | Supports ClawPilot's requirement that local/hosted provider proof include visible delivery and channel-specific behavior, not just model completion. |
-| Plugin/catalog hardening | #95827, #92084, #92652 | Supports ClawPilot package/provider eligibility and capability catalog rules. Catalog and allowlist behavior should be bounded, explicit, and testable. |
-| Release/update proof | #93722, #94580 | Supports treating install/update/rollback as a first-class ClawPilot validation lane for Local OpenClaw packaged rollout. |
+| Area                          | OpenClaw PRs                                   | ClawPilot leverage                                                                                                                                                                                                                                |
+| ----------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Provider safety               | #92941, #92928, #92921, #92908, #92896, #92830 | Treat provider payloads, reasoning signatures, and tool schemas as untrusted. Managed-provider and Local OpenClaw adapters should fail closed, redact sensitive payloads, and surface degraded/unavailable states instead of silently continuing. |
+| Model/provider expansion      | #92796, #92554, #91882                         | Reinforces provider-neutral routing in #3953 and the need for explicit provider identity, model identity, readiness, and fallback rather than hardcoding Copilot-only assumptions.                                                                |
+| Session and agent reliability | #97140, #95039, #94421, #93287, #93228         | Supports ClawPilot session-status, progress, recovery, and terminal-outcome contracts. ClawPilot should distinguish active work, waiting-on-user, degraded provider, failed tool call, and terminal completion.                                   |
+| Channel delivery correctness  | #97130, #94881, #94428, #91962                 | Supports ClawPilot's requirement that local/hosted provider proof include visible delivery and channel-specific behavior, not just model completion.                                                                                              |
+| Plugin/catalog hardening      | #95827, #92084, #92652                         | Supports ClawPilot package/provider eligibility and capability catalog rules. Catalog and allowlist behavior should be bounded, explicit, and testable.                                                                                           |
+| Release/update proof          | #93722, #94580                                 | Supports treating install/update/rollback as a first-class ClawPilot validation lane for Local OpenClaw packaged rollout.                                                                                                                         |
 
 ## Open OpenClaw Work To Watch
 
@@ -50,19 +50,19 @@ These OpenClaw PRs looked product-shaped but were live-checked on 2026-06-30 as
 open, not on `origin/main`, and conflicting. They should be tracked as future
 opportunities, not current dependencies.
 
-| OpenClaw PR | Surface | Current state on 2026-06-30 | ClawPilot opportunity once landed |
-| --- | --- | --- | --- |
-| #90431 | Node-hosted plugin tools | Open, conflicting, waiting on author, proof sufficient | Could simplify Desktop/local capability federation and remote node tool exposure. |
-| #85359 | Local skill route tool | Open, conflicting, waiting on author, proof sufficient | Could improve skill/capability discovery for ClawPilot and Local OpenClaw routing. |
-| #83415 | Workspace checkpoints | Draft, conflicting, needs proof | Could provide rollback/audit primitives for workspace write/patch capability execution. |
-| #76027 | WebChat read aloud | Draft, conflicting, needs proof | Useful UX parity signal, but not core to Local OpenClaw switch-over. |
-| #77774 | Control dashboard redesign | Open, conflicting, needs proof | Could inform operator/admin visibility for ClawPilot's Agents panel and readiness ladder. |
-| #81792 | Gateway token scopes | Open, conflicting, needs proof | Important future authz boundary for managed-provider and gateway-client access. |
-| #78164 | Agent worker runtime isolation | Draft, conflicting, waiting on author | Could reduce blast radius for managed/local runtime execution. |
-| #93313 | Codex app-server runtime ownership | Open, conflicting, needs video proof | Could affect how ClawPilot describes Codex/OpenClaw runtime ownership and recovery. |
-| #81402 | Runtime state to SQLite | Open, conflicting, P1, needs proof | Could improve durable session/runtime switch-over and recovery. |
-| #88454 | Restart recovery delivery routes in SQLite | Open, conflicting, needs proof | Could reduce ClawPilot-side recovery bookkeeping for delivery routes. |
-| #83611 | Shared notification wake policy | Open, conflicting, needs proof | Could help normalize wake/reaction behavior across channels. |
+| OpenClaw PR | Surface                                    | Current state on 2026-06-30                            | ClawPilot opportunity once landed                                                         |
+| ----------- | ------------------------------------------ | ------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| #90431      | Node-hosted plugin tools                   | Open, conflicting, waiting on author, proof sufficient | Could simplify Desktop/local capability federation and remote node tool exposure.         |
+| #85359      | Local skill route tool                     | Open, conflicting, waiting on author, proof sufficient | Could improve skill/capability discovery for ClawPilot and Local OpenClaw routing.        |
+| #83415      | Workspace checkpoints                      | Draft, conflicting, needs proof                        | Could provide rollback/audit primitives for workspace write/patch capability execution.   |
+| #76027      | WebChat read aloud                         | Draft, conflicting, needs proof                        | Useful UX parity signal, but not core to Local OpenClaw switch-over.                      |
+| #77774      | Control dashboard redesign                 | Open, conflicting, needs proof                         | Could inform operator/admin visibility for ClawPilot's Agents panel and readiness ladder. |
+| #81792      | Gateway token scopes                       | Open, conflicting, needs proof                         | Important future authz boundary for managed-provider and gateway-client access.           |
+| #78164      | Agent worker runtime isolation             | Draft, conflicting, waiting on author                  | Could reduce blast radius for managed/local runtime execution.                            |
+| #93313      | Codex app-server runtime ownership         | Open, conflicting, needs video proof                   | Could affect how ClawPilot describes Codex/OpenClaw runtime ownership and recovery.       |
+| #81402      | Runtime state to SQLite                    | Open, conflicting, P1, needs proof                     | Could improve durable session/runtime switch-over and recovery.                           |
+| #88454      | Restart recovery delivery routes in SQLite | Open, conflicting, needs proof                         | Could reduce ClawPilot-side recovery bookkeeping for delivery routes.                     |
+| #83611      | Shared notification wake policy            | Open, conflicting, needs proof                         | Could help normalize wake/reaction behavior across channels.                              |
 
 ## How This Should Shape ClawPilot Notes
 

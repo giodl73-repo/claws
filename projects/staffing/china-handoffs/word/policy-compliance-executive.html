@@ -1,95 +1,295 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Policy and Compliance — Collaboration Opportunities</title>
-<style>
-body { font-family: Aptos, Arial, sans-serif; color: #243044; margin: 0; line-height: 1.35; }
-h1 { color: #17365d; font-size: 26pt; margin-bottom: 4pt; }
-h2 { color: #1f4e79; font-size: 16pt; border-bottom: 1px solid #9dc3e6; padding-bottom: 3pt; margin-top: 20pt; }
-h3 { color: #2f5597; font-size: 12pt; margin-bottom: 3pt; }
-p, li { font-size: 10.5pt; }
-.subtitle { color: #5b6573; font-size: 12pt; margin-top: 0; }
-.vision { background: #eaf2f8; border-left: 6px solid #2f75b5; padding: 12pt 16pt; font-size: 14pt; font-weight: bold; }
-.callout { background: #f3f6f9; border: 1px solid #c9d5e3; padding: 10pt 14pt; }
-.small { color: #657080; font-size: 9pt; }
-table { border-collapse: collapse; width: 100%; margin: 8pt 0 14pt; }
-th { background: #1f4e79; color: white; text-align: left; padding: 7pt; font-size: 9.5pt; }
-td { border: 1px solid #b4c7dc; vertical-align: top; padding: 7pt; font-size: 9.5pt; }
-ul { margin-top: 4pt; }
-</style>
-</head>
-<body>
-<h1>Policy and Compliance</h1>
-<p class="subtitle">Managed OpenClaw governance collaboration opportunities</p>
-<div class="vision">Omar's Admin &amp; Governance vision: Own tenant/global settings, policy, permissions, approvals, audit/override state, Partner Center, marketplace governance, and M365 auth decisions.</div>
+  <head>
+    <meta charset="utf-8" />
+    <title>Policy and Compliance — Collaboration Opportunities</title>
+    <style>
+      body {
+        font-family: Aptos, Arial, sans-serif;
+        color: #243044;
+        margin: 0;
+        line-height: 1.35;
+      }
+      h1 {
+        color: #17365d;
+        font-size: 26pt;
+        margin-bottom: 4pt;
+      }
+      h2 {
+        color: #1f4e79;
+        font-size: 16pt;
+        border-bottom: 1px solid #9dc3e6;
+        padding-bottom: 3pt;
+        margin-top: 20pt;
+      }
+      h3 {
+        color: #2f5597;
+        font-size: 12pt;
+        margin-bottom: 3pt;
+      }
+      p,
+      li {
+        font-size: 10.5pt;
+      }
+      .subtitle {
+        color: #5b6573;
+        font-size: 12pt;
+        margin-top: 0;
+      }
+      .vision {
+        background: #eaf2f8;
+        border-left: 6px solid #2f75b5;
+        padding: 12pt 16pt;
+        font-size: 14pt;
+        font-weight: bold;
+      }
+      .callout {
+        background: #f3f6f9;
+        border: 1px solid #c9d5e3;
+        padding: 10pt 14pt;
+      }
+      .small {
+        color: #657080;
+        font-size: 9pt;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 8pt 0 14pt;
+      }
+      th {
+        background: #1f4e79;
+        color: white;
+        text-align: left;
+        padding: 7pt;
+        font-size: 9.5pt;
+      }
+      td {
+        border: 1px solid #b4c7dc;
+        vertical-align: top;
+        padding: 7pt;
+        font-size: 9.5pt;
+      }
+      ul {
+        margin-top: 4pt;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Policy and Compliance</h1>
+    <p class="subtitle">Managed OpenClaw governance collaboration opportunities</p>
+    <div class="vision">
+      Omar's Admin &amp; Governance vision: Own tenant/global settings, policy, permissions,
+      approvals, audit/override state, Partner Center, marketplace governance, and M365 auth
+      decisions.
+    </div>
 
-<h2>Purpose</h2>
-<p>This brief focuses the policy portion of the Admin &amp; Governance vision. It is not a fixed assignment. Admin &amp; Governance, Security, Infrastructure, Data, and Frontend may lead or co-own different seams: policy composition, evidence ingestion, central compliance, enforcement, UX, and fleet operations.</p>
+    <h2>Purpose</h2>
+    <p>
+      This brief focuses the policy portion of the Admin &amp; Governance vision. It is not a fixed
+      assignment. Admin &amp; Governance, Security, Infrastructure, Data, and Frontend may lead or
+      co-own different seams: policy composition, evidence ingestion, central compliance,
+      enforcement, UX, and fleet operations.
+    </p>
 
-<h2>Product vision</h2>
-<p>Every managed OpenClaw instance should have a centrally visible, attributable, and actionable compliance state. Administrators should know which policy is effective, whether the instance evaluated that exact policy, what warnings or violations exist, what is enforced, and how to remediate or grant a bounded exception.</p>
-<ul>
-<li><strong>OpenClaw</strong> owns generic policy evaluation, evidence, findings, doctor behavior, and repair classifications.</li>
-<li><strong>Lobster/Microsoft control plane</strong> selects and materializes enterprise policy, ingests verified evidence, enforces hosted outcomes, and provides fleet/tenant experiences.</li>
-<li><strong>MOS3/MAC</strong> contribute authoritative feed, package-defense, tenant, and availability decisions.</li>
-</ul>
-<div class="callout"><strong>Guardrail:</strong> Missing identity, policy, evidence, or a mandatory enforcement dependency must never appear compliant or silently permit a protected high-risk action. Lower-risk reporting failures should degrade visibly without crashing the OpenClaw runtime.</div>
+    <h2>Product vision</h2>
+    <p>
+      Every managed OpenClaw instance should have a centrally visible, attributable, and actionable
+      compliance state. Administrators should know which policy is effective, whether the instance
+      evaluated that exact policy, what warnings or violations exist, what is enforced, and how to
+      remediate or grant a bounded exception.
+    </p>
+    <ul>
+      <li>
+        <strong>OpenClaw</strong> owns generic policy evaluation, evidence, findings, doctor
+        behavior, and repair classifications.
+      </li>
+      <li>
+        <strong>Lobster/Microsoft control plane</strong> selects and materializes enterprise policy,
+        ingests verified evidence, enforces hosted outcomes, and provides fleet/tenant experiences.
+      </li>
+      <li>
+        <strong>MOS3/MAC</strong> contribute authoritative feed, package-defense, tenant, and
+        availability decisions.
+      </li>
+    </ul>
+    <div class="callout">
+      <strong>Guardrail:</strong> Missing identity, policy, evidence, or a mandatory enforcement
+      dependency must never appear compliant or silently permit a protected high-risk action.
+      Lower-risk reporting failures should degrade visibly without crashing the OpenClaw runtime.
+    </div>
 
-<h2>Opportunity portfolio</h2>
-<table>
-<tr><th>Opportunity</th><th>Outcome</th><th>Primary partners</th></tr>
-<tr><td>Effective-policy composition</td><td>Resolve global, tenant, feed, and personal baselines with explicit precedence, provenance, and equal-or-stricter constraints.</td><td>Admin, MOS3, OpenClaw</td></tr>
-<tr><td>Evidence ingestion</td><td>Verify exact policy/config identity, hashes, schema, timestamps, instance binding, freshness, and findings.</td><td>OpenClaw Policy, Infrastructure</td></tr>
-<tr><td>Central compliance</td><td>Provide durable per-instance state and fleet/tenant rollups for compliant, warning, noncompliant, stale, unknown, and excepted.</td><td>Admin, Data, Compliance</td></tr>
-<tr><td>Enforcement and remediation</td><td>Define lifecycle blocking, warning behavior, previous-good semantics, and automatic/review/manual repair.</td><td>Security, Runtime, OpenClaw</td></tr>
-<tr><td>Governance UX</td><td>Explain policy, findings, freshness, exceptions, remediation, audit, and ownership.</td><td>Frontend, Admin, Support</td></tr>
-<tr><td>Signals and operations</td><td>Deliver E2E, dashboards, alerts, SIEM, tamper-evident evidence, incident response, and fleet recovery.</td><td>Infrastructure, Security, Operations</td></tr>
-</table>
+    <h2>Opportunity portfolio</h2>
+    <table>
+      <tr>
+        <th>Opportunity</th>
+        <th>Outcome</th>
+        <th>Primary partners</th>
+      </tr>
+      <tr>
+        <td>Effective-policy composition</td>
+        <td>
+          Resolve global, tenant, feed, and personal baselines with explicit precedence, provenance,
+          and equal-or-stricter constraints.
+        </td>
+        <td>Admin, MOS3, OpenClaw</td>
+      </tr>
+      <tr>
+        <td>Evidence ingestion</td>
+        <td>
+          Verify exact policy/config identity, hashes, schema, timestamps, instance binding,
+          freshness, and findings.
+        </td>
+        <td>OpenClaw Policy, Infrastructure</td>
+      </tr>
+      <tr>
+        <td>Central compliance</td>
+        <td>
+          Provide durable per-instance state and fleet/tenant rollups for compliant, warning,
+          noncompliant, stale, unknown, and excepted.
+        </td>
+        <td>Admin, Data, Compliance</td>
+      </tr>
+      <tr>
+        <td>Enforcement and remediation</td>
+        <td>
+          Define lifecycle blocking, warning behavior, previous-good semantics, and
+          automatic/review/manual repair.
+        </td>
+        <td>Security, Runtime, OpenClaw</td>
+      </tr>
+      <tr>
+        <td>Governance UX</td>
+        <td>Explain policy, findings, freshness, exceptions, remediation, audit, and ownership.</td>
+        <td>Frontend, Admin, Support</td>
+      </tr>
+      <tr>
+        <td>Signals and operations</td>
+        <td>
+          Deliver E2E, dashboards, alerts, SIEM, tamper-evident evidence, incident response, and
+          fleet recovery.
+        </td>
+        <td>Infrastructure, Security, Operations</td>
+      </tr>
+    </table>
 
-<h2>Work completed to date</h2>
-<ul>
-<li>Lobster foundations cover policy baseline state, OpenClaw bootstrap/materialization, Scout policy preview, MOS3/package-defense interpretation, equal-or-stricter personal policy, authenticated acceptance, MOS3 publish, effective projection, trusted comparison evidence, persistence, and effective-policy read UX.</li>
-<li>Key landed Lobster work includes #2275, #2270, #3355, #3383, #3388, #3391, #3585, #3586, #3588, #3590, #3603, #3623, #3693, and #3695.</li>
-<li>OpenClaw already provides broad conformance and doctor primitives, recommendation metadata, guarded automatic narrowing, required-deny/channel/Gateway repairs, and review-required previews.</li>
-</ul>
-<p>These foundations establish policy creation and materialization, but not yet the complete centrally managed compliance product.</p>
+    <h2>Work completed to date</h2>
+    <ul>
+      <li>
+        Lobster foundations cover policy baseline state, OpenClaw bootstrap/materialization, Scout
+        policy preview, MOS3/package-defense interpretation, equal-or-stricter personal policy,
+        authenticated acceptance, MOS3 publish, effective projection, trusted comparison evidence,
+        persistence, and effective-policy read UX.
+      </li>
+      <li>
+        Key landed Lobster work includes #2275, #2270, #3355, #3383, #3388, #3391, #3585, #3586,
+        #3588, #3590, #3603, #3623, #3693, and #3695.
+      </li>
+      <li>
+        OpenClaw already provides broad conformance and doctor primitives, recommendation metadata,
+        guarded automatic narrowing, required-deny/channel/Gateway repairs, and review-required
+        previews.
+      </li>
+    </ul>
+    <p>
+      These foundations establish policy creation and materialization, but not yet the complete
+      centrally managed compliance product.
+    </p>
 
-<h2>Current work worth restoring</h2>
-<p>Old Lobster <a href="https://microsoft.ghe.com/bic/lobster/pull/3607">#3607</a> attempted to persist tenant-admin-selected, attested feed policy sources. It is closed, conflicting, and should not be reopened wholesale. Later #3695 landed part of the UX. The useful next step is a small current-main backend contract containing only source authority, feed ID/revision, content hash, attestation, tenant scope, selection actor, and time. Source registration must not grant install authority.</p>
-<p>This is a dated snapshot; current source and live PR state must be rechecked before reusing any old implementation.</p>
+    <h2>Current work worth restoring</h2>
+    <p>
+      Old Lobster <a href="https://microsoft.ghe.com/bic/lobster/pull/3607">#3607</a> attempted to
+      persist tenant-admin-selected, attested feed policy sources. It is closed, conflicting, and
+      should not be reopened wholesale. Later #3695 landed part of the UX. The useful next step is a
+      small current-main backend contract containing only source authority, feed ID/revision,
+      content hash, attestation, tenant scope, selection actor, and time. Source registration must
+      not grant install authority.
+    </p>
+    <p>
+      This is a dated snapshot; current source and live PR state must be rechecked before reusing
+      any old implementation.
+    </p>
 
-<h2>Work still to be done</h2>
-<ul>
-<li>Define the effective-policy and evidence contract across deployment/global, tenant, selected-feed, and personal baselines.</li>
-<li>Enforce package-defense/quarantine outcomes consistently while preserving distinct warning, scanning, trust, vulnerability, revocation, and exception reasons.</li>
-<li>Ingest OpenClaw conformance evidence for the exact materialized policy/config revision and reject missing, invalid, mismatched, stale, or failed evidence.</li>
-<li>Implement durable states: <code>compliant</code>, <code>compliantWithWarnings</code>, <code>noncompliant</code>, <code>stale</code>, <code>unknown</code>, and <code>excepted</code>.</li>
-<li>Decide which findings block startup, activation, discovery, installation, or a specific operation and which only warn.</li>
-<li>Provide fleet/tenant UX for findings, source, reason, freshness, repair class, acknowledgement, exception, expiry, owner, reversal, and history.</li>
-<li>Add measured runtime budgets, cancellation, failure isolation, fleet/ring rollout, partial-failure recovery, E2E, telemetry, dashboards, SIEM, incident response, and privacy/retention.</li>
-<li>Produce timestamped, attributable, tamper-evident evidence exports usable for audit and investigation.</li>
-</ul>
+    <h2>Work still to be done</h2>
+    <ul>
+      <li>
+        Define the effective-policy and evidence contract across deployment/global, tenant,
+        selected-feed, and personal baselines.
+      </li>
+      <li>
+        Enforce package-defense/quarantine outcomes consistently while preserving distinct warning,
+        scanning, trust, vulnerability, revocation, and exception reasons.
+      </li>
+      <li>
+        Ingest OpenClaw conformance evidence for the exact materialized policy/config revision and
+        reject missing, invalid, mismatched, stale, or failed evidence.
+      </li>
+      <li>
+        Implement durable states: <code>compliant</code>, <code>compliantWithWarnings</code>,
+        <code>noncompliant</code>, <code>stale</code>, <code>unknown</code>, and
+        <code>excepted</code>.
+      </li>
+      <li>
+        Decide which findings block startup, activation, discovery, installation, or a specific
+        operation and which only warn.
+      </li>
+      <li>
+        Provide fleet/tenant UX for findings, source, reason, freshness, repair class,
+        acknowledgement, exception, expiry, owner, reversal, and history.
+      </li>
+      <li>
+        Add measured runtime budgets, cancellation, failure isolation, fleet/ring rollout,
+        partial-failure recovery, E2E, telemetry, dashboards, SIEM, incident response, and
+        privacy/retention.
+      </li>
+      <li>
+        Produce timestamped, attributable, tamper-evident evidence exports usable for audit and
+        investigation.
+      </li>
+    </ul>
 
-<h2>Suggested first conversation</h2>
-<ol>
-<li>Select one seam and a coordinating DRI; implementation can remain distributed.</li>
-<li>Decide which system owns the durable compliance record and evidence export.</li>
-<li>Define the first lifecycle enforcement point and its severity/failure posture.</li>
-<li>Choose a bounded E2E: compliant, warning, violation, stale evidence, exception, repair, rollback, and recovery.</li>
-</ol>
+    <h2>Suggested first conversation</h2>
+    <ol>
+      <li>Select one seam and a coordinating DRI; implementation can remain distributed.</li>
+      <li>Decide which system owns the durable compliance record and evidence export.</li>
+      <li>Define the first lifecycle enforcement point and its severity/failure posture.</li>
+      <li>
+        Choose a bounded E2E: compliant, warning, violation, stale evidence, exception, repair,
+        rollback, and recovery.
+      </li>
+    </ol>
 
-<h2>Success measures</h2>
-<ul>
-<li>Every managed instance reports verified evidence for its exact effective policy/config revision.</li>
-<li>Missing, stale, invalid, or failed evidence never appears green.</li>
-<li>Package-defense and policy outcomes have consistent enforcement, explicit exceptions, and actionable reasons.</li>
-<li>Administrators can explain compliance, warnings, violations, drift, freshness, exceptions, and remediation.</li>
-<li>Evidence is tamper-evident and exportable; runtime behavior remains stable and bounded.</li>
-</ul>
+    <h2>Success measures</h2>
+    <ul>
+      <li>
+        Every managed instance reports verified evidence for its exact effective policy/config
+        revision.
+      </li>
+      <li>Missing, stale, invalid, or failed evidence never appears green.</li>
+      <li>
+        Package-defense and policy outcomes have consistent enforcement, explicit exceptions, and
+        actionable reasons.
+      </li>
+      <li>
+        Administrators can explain compliance, warnings, violations, drift, freshness, exceptions,
+        and remediation.
+      </li>
+      <li>
+        Evidence is tamper-evident and exportable; runtime behavior remains stable and bounded.
+      </li>
+    </ul>
 
-<h2>Companion engineering detail</h2>
-<p>A detailed engineering brief titled <strong>“Policy and Compliance: Collaboration and Ownership Opportunities”</strong> is available from Gio. It contains the full state model, evidence contract, proposed PR slices, partner responsibilities, enforcement questions, UX requirements, and operational exit criteria.</p>
-<p class="small">Prepared 2026-07-27. PR and check status is a dated snapshot and must be refreshed before acting.</p>
-</body>
+    <h2>Companion engineering detail</h2>
+    <p>
+      A detailed engineering brief titled
+      <strong>“Policy and Compliance: Collaboration and Ownership Opportunities”</strong> is
+      available from Gio. It contains the full state model, evidence contract, proposed PR slices,
+      partner responsibilities, enforcement questions, UX requirements, and operational exit
+      criteria.
+    </p>
+    <p class="small">
+      Prepared 2026-07-27. PR and check status is a dated snapshot and must be refreshed before
+      acting.
+    </p>
+  </body>
 </html>

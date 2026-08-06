@@ -5,12 +5,12 @@ worktrees; this file is the operator index.
 
 ## Current Stack
 
-| PR | Branch | Purpose | Status |
-| --- | --- | --- | --- |
-| #2210 | `user/giodl/lobster-admin-spaces` | Design doc for Lobster admin spaces. | Merged |
-| #2211 | `user/giodl/lobster-admin-spaces-runtime` | Runtime authorization primitives for deployment and tenant admins. | Merged 2026-06-04 as `a45e8328caf8566868dce1253d84b907b704c0c6` |
-| #2275 | `user/giodl/lobster-admin-policy-state` | Policy baseline state primitives. | Open; mergeable after refresh at `0d7cbfac8`; waits for PoP, CI, and re-review |
-| #2270 | `user/giodl/lobster-admin-policy-bootstrap` | OpenClaw container policy baseline bootstrap stacked on #2275. | Open; waits for #2275 refresh |
+| PR    | Branch                                      | Purpose                                                            | Status                                                                         |
+| ----- | ------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| #2210 | `user/giodl/lobster-admin-spaces`           | Design doc for Lobster admin spaces.                               | Merged                                                                         |
+| #2211 | `user/giodl/lobster-admin-spaces-runtime`   | Runtime authorization primitives for deployment and tenant admins. | Merged 2026-06-04 as `a45e8328caf8566868dce1253d84b907b704c0c6`                |
+| #2275 | `user/giodl/lobster-admin-policy-state`     | Policy baseline state primitives.                                  | Open; mergeable after refresh at `0d7cbfac8`; waits for PoP, CI, and re-review |
+| #2270 | `user/giodl/lobster-admin-policy-bootstrap` | OpenClaw container policy baseline bootstrap stacked on #2275.     | Open; waits for #2275 refresh                                                  |
 
 ## Merge Order
 
@@ -38,9 +38,9 @@ worktrees; this file is the operator index.
   addressed by validating `sha256` against `contentJsonc` before accepting,
   selecting, or bootstrapping baseline content.
 - Local proof for #2275 head `0d7cbfac8`: `just cargo test
-  admin_policy_baselines --no-fail-fast` passed 14 tests, `just cargo fmt
-  --check` passed through `cargo.sh`, and `git diff --check` passed. `just
-  rust-fmt` remains blocked locally because the CI msrustup `ms-prod-1.93`
+admin_policy_baselines --no-fail-fast` passed 14 tests, `just cargo fmt
+--check` passed through `cargo.sh`, and `git diff --check` passed. `just
+rust-fmt` remains blocked locally because the CI msrustup `ms-prod-1.93`
   toolchain is not installed.
 - #2275 ADO builds manually queued: `166825922`
   (`Lobster-Runtime-PullRequest`) and `166825926`

@@ -77,15 +77,15 @@ New provider use of these capabilities is eligible only when:
 
 ## What #3955 Should Contain
 
-| Capability family | What it adds | Why provider-neutral matters |
-| --- | --- | --- |
-| Desktop node capability core | Request envelope, risk/data-boundary vocabulary, approval routing, executor skeleton, audit attribution, policy gates, and no-bypass evals. | Every provider should cross the same Desktop authority boundary before local execution. |
-| Filesystem and shell | `filesystem.read` and `shell.exec` handlers with workspace scope, bounded output, sanitized env, timeout, approval, audit, and fail-closed behavior. | These are useful to cloud and Local OpenClaw, and should not be Local OpenClaw-private tools. |
-| Browser | `browser.open`, active-tab read, selection extraction, origin/context binding, preview, approval, audit. | Cloud and Local OpenClaw both need browser context, but neither should get ambient browser profile access. |
-| Clipboard | Read/write contracts, user gesture, preview, redaction, approval, audit. | Clipboard access is user-context sensitive regardless of which provider asks. |
-| Local app | Intent-based `app.open`, `file.openWithDefaultApp`, and `url.openExternal` patterns. | Providers should request user-visible intents, not arbitrary executable launch. |
-| Workspace write | `filesystem.write` and `filesystem.patch` with workspace scope, diff preview, result digest, rollback hints. | Any provider that writes locally needs the same safety contract. |
-| M365 | Draft-first delegated action broker, scoped result, redacted status, no token pass-through. | Cloud and Local OpenClaw should never receive raw Graph tokens, cookies, or refresh tokens. |
+| Capability family            | What it adds                                                                                                                                         | Why provider-neutral matters                                                                               |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Desktop node capability core | Request envelope, risk/data-boundary vocabulary, approval routing, executor skeleton, audit attribution, policy gates, and no-bypass evals.          | Every provider should cross the same Desktop authority boundary before local execution.                    |
+| Filesystem and shell         | `filesystem.read` and `shell.exec` handlers with workspace scope, bounded output, sanitized env, timeout, approval, audit, and fail-closed behavior. | These are useful to cloud and Local OpenClaw, and should not be Local OpenClaw-private tools.              |
+| Browser                      | `browser.open`, active-tab read, selection extraction, origin/context binding, preview, approval, audit.                                             | Cloud and Local OpenClaw both need browser context, but neither should get ambient browser profile access. |
+| Clipboard                    | Read/write contracts, user gesture, preview, redaction, approval, audit.                                                                             | Clipboard access is user-context sensitive regardless of which provider asks.                              |
+| Local app                    | Intent-based `app.open`, `file.openWithDefaultApp`, and `url.openExternal` patterns.                                                                 | Providers should request user-visible intents, not arbitrary executable launch.                            |
+| Workspace write              | `filesystem.write` and `filesystem.patch` with workspace scope, diff preview, result digest, rollback hints.                                         | Any provider that writes locally needs the same safety contract.                                           |
+| M365                         | Draft-first delegated action broker, scoped result, redacted status, no token pass-through.                                                          | Cloud and Local OpenClaw should never receive raw Graph tokens, cookies, or refresh tokens.                |
 
 ## What #3955 Should Not Contain
 
@@ -94,13 +94,13 @@ capability contracts.
 
 Move or keep these in Local OpenClaw-specific work instead:
 
-| Local-only concern | Better home |
-| --- | --- |
+| Local-only concern                                           | Better home                                      |
+| ------------------------------------------------------------ | ------------------------------------------------ |
 | Local OpenClaw package descriptor and fingerprint validation | Local OpenClaw runtime/readiness PR or follow-up |
-| Lobster Gateway package-path proof | Local OpenClaw proof doc/PR |
-| Local OpenClaw managed install/acquisition | Local OpenClaw admin/readiness follow-up |
-| Local OpenClaw sidecar lifecycle and rollback | Local OpenClaw runtime/readiness PR or follow-up |
-| Local OpenClaw-specific provider attestation gaps | Local OpenClaw proof doc/PR |
+| Lobster Gateway package-path proof                           | Local OpenClaw proof doc/PR                      |
+| Local OpenClaw managed install/acquisition                   | Local OpenClaw admin/readiness follow-up         |
+| Local OpenClaw sidecar lifecycle and rollback                | Local OpenClaw runtime/readiness PR or follow-up |
+| Local OpenClaw-specific provider attestation gaps            | Local OpenClaw proof doc/PR                      |
 
 Those are still important. They are just not prerequisites for making Desktop
 capabilities provider-neutral.

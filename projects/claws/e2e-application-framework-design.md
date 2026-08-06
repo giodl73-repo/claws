@@ -62,22 +62,22 @@ OpenClaw PRs #115237 and #115962.
 
 ### Existing owners
 
-| Concern | Current owner and evidence | Reuse decision |
-| --- | --- | --- |
-| Agent identity and configuration | `src/config/types.agents.ts` defines per-agent model, memory, tools, sandbox, heartbeat, runtime, and identity | Reuse agent creation and config validation |
-| Model selection | `AgentConfig.model`, model catalogs, model-policy validation, and provider auth commands | Profile may select a model; model availability and credentials remain owner-validated |
-| Tool posture | `AgentToolsConfig`, registered tool profiles, allow/deny policy, and capability consent | Reuse; already supported by `profiles/openclaw.yml` |
-| Sandbox | `AgentSandboxConfig` and sandbox backend owners | Reuse a safe per-agent subset; never package host paths, keys, binds, setup commands, or dangerous overrides |
-| Plugins and native extensions | Canonical plugin preflight/install/update/uninstall and bundle inspection | Reuse; already delegated by profile extensions |
-| Skills | Existing skill package and discovery owners | Reuse portable exact package declarations |
-| MCP | Existing MCP normalization, OAuth, environment prerequisites, and Claw lifecycle | Reuse direct portable declarations and owner readiness |
-| Workspace and assets | Claw managed-file planner, digests, provenance, update, and removal | Reuse ordinary files and directory conventions |
-| Onboarding | Native package-root `BOOTSTRAP.md` seed-once lifecycle | Reuse; no forms or answer database |
-| Schedules | OpenClaw cron owner and existing Claw `cronJobs` | Reuse portable schedules and local enablement/readiness |
-| Channels | Channel-specific account setup plus canonical agent routing bindings | Add requirements and owner handoff; do not package accounts, tokens, peer ids, or credentials |
-| Secrets and connections | `SecretInput`/SecretRef owners, plugin setup, MCP OAuth, and channel setup | Package only prerequisites; resolve locally through canonical setup surfaces |
-| Rich UI | Agent tools such as `show_widget`, packaged assets, and Control UI | Keep as profile/tool behavior with complete message or Markdown fallback |
-| Status and repair | Claw status/doctor plus capability-owner diagnostics | Reuse and aggregate; do not create project-specific runtime health state |
+| Concern                          | Current owner and evidence                                                                                     | Reuse decision                                                                                               |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Agent identity and configuration | `src/config/types.agents.ts` defines per-agent model, memory, tools, sandbox, heartbeat, runtime, and identity | Reuse agent creation and config validation                                                                   |
+| Model selection                  | `AgentConfig.model`, model catalogs, model-policy validation, and provider auth commands                       | Profile may select a model; model availability and credentials remain owner-validated                        |
+| Tool posture                     | `AgentToolsConfig`, registered tool profiles, allow/deny policy, and capability consent                        | Reuse; already supported by `profiles/openclaw.yml`                                                          |
+| Sandbox                          | `AgentSandboxConfig` and sandbox backend owners                                                                | Reuse a safe per-agent subset; never package host paths, keys, binds, setup commands, or dangerous overrides |
+| Plugins and native extensions    | Canonical plugin preflight/install/update/uninstall and bundle inspection                                      | Reuse; already delegated by profile extensions                                                               |
+| Skills                           | Existing skill package and discovery owners                                                                    | Reuse portable exact package declarations                                                                    |
+| MCP                              | Existing MCP normalization, OAuth, environment prerequisites, and Claw lifecycle                               | Reuse direct portable declarations and owner readiness                                                       |
+| Workspace and assets             | Claw managed-file planner, digests, provenance, update, and removal                                            | Reuse ordinary files and directory conventions                                                               |
+| Onboarding                       | Native package-root `BOOTSTRAP.md` seed-once lifecycle                                                         | Reuse; no forms or answer database                                                                           |
+| Schedules                        | OpenClaw cron owner and existing Claw `cronJobs`                                                               | Reuse portable schedules and local enablement/readiness                                                      |
+| Channels                         | Channel-specific account setup plus canonical agent routing bindings                                           | Add requirements and owner handoff; do not package accounts, tokens, peer ids, or credentials                |
+| Secrets and connections          | `SecretInput`/SecretRef owners, plugin setup, MCP OAuth, and channel setup                                     | Package only prerequisites; resolve locally through canonical setup surfaces                                 |
+| Rich UI                          | Agent tools such as `show_widget`, packaged assets, and Control UI                                             | Keep as profile/tool behavior with complete message or Markdown fallback                                     |
+| Status and repair                | Claw status/doctor plus capability-owner diagnostics                                                           | Reuse and aggregate; do not create project-specific runtime health state                                     |
 
 ### Existing OpenClaw profile
 
@@ -159,22 +159,22 @@ These modes describe policy for the follow-on design. They are not proposed as
 four new generic schema wrappers. Each owner should expose the smallest native
 shape that needs them.
 
-| Capability | Project/package declaration | OpenClaw realization | Local/operator state | Update/remove |
-| --- | --- | --- | --- | --- |
-| Purpose and identity | Managed `CLAW.md` | Agent identity and `SOUL.md` | Optional local identity edits become drift/user choice | Existing managed-file rules |
-| Skills and assets | Managed exact packages/files | Canonical skill owner and workspace planner | User-created outputs stay local | Existing provenance and safe removal |
-| Plugins | Managed exact profile extensions | Canonical plugin owners | Credentials and plugin-local choices | Dependency edges, owner update, optional cleanup |
-| MCP | Managed endpoint/process declaration plus required auth/env | Canonical MCP owner | OAuth grants, env values, SecretRefs | Existing status/update/remove |
-| Model | Suggested or required exact OpenClaw model reference | Model catalog and agent config owner | Credentials and explicit operator override | Record selected local override; never write provider secrets |
-| Tool policy | Managed allowlisted profile/allow/deny posture | Existing agent tool policy | Host policy may further restrict, never broaden silently | Existing capability consent and drift |
-| Sandbox | Managed safe posture plus optional required backend capability | Existing sandbox owner | Installed backend, host paths, keys, network policy | Diagnose unavailable backend; never package dangerous overrides |
-| Memory and heartbeat | Managed per-agent settings | Existing owners | Host may block unsupported settings | Existing capability drift/update |
-| Channels | Required channel kinds and route purpose, not account ids | Channel setup and routing-binding owners | Account, credential, guild/team/peer, and final binding | Preserve local binding choice; warn before releasing Claw-created edge |
-| Schedules | Managed job definition | Existing cron owner | Enablement, timezone override where explicitly allowed | Existing cron lifecycle |
-| Onboarding | Managed package-root bootstrap seed | Native bootstrap owner | Answers and generated user files | Never recreate consumed bootstrap |
-| UI experience | Managed assets and instructions; required/suggested OpenClaw tools | Tool profile and `show_widget` | Active client and placement availability | Message/Markdown fallback remains complete |
-| Deployment | Project test target only in V1 | Existing OpenClaw installation/Gateway | Host topology, ports, auth, service manager | Outside package lifecycle |
-| Evals | Project-only scenarios | OpenClaw CLI invokes the native lifecycle | Model credentials and optional live budget | Not shipped as runtime state by default |
+| Capability           | Project/package declaration                                        | OpenClaw realization                        | Local/operator state                                     | Update/remove                                                          |
+| -------------------- | ------------------------------------------------------------------ | ------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Purpose and identity | Managed `CLAW.md`                                                  | Agent identity and `SOUL.md`                | Optional local identity edits become drift/user choice   | Existing managed-file rules                                            |
+| Skills and assets    | Managed exact packages/files                                       | Canonical skill owner and workspace planner | User-created outputs stay local                          | Existing provenance and safe removal                                   |
+| Plugins              | Managed exact profile extensions                                   | Canonical plugin owners                     | Credentials and plugin-local choices                     | Dependency edges, owner update, optional cleanup                       |
+| MCP                  | Managed endpoint/process declaration plus required auth/env        | Canonical MCP owner                         | OAuth grants, env values, SecretRefs                     | Existing status/update/remove                                          |
+| Model                | Suggested or required exact OpenClaw model reference               | Model catalog and agent config owner        | Credentials and explicit operator override               | Record selected local override; never write provider secrets           |
+| Tool policy          | Managed allowlisted profile/allow/deny posture                     | Existing agent tool policy                  | Host policy may further restrict, never broaden silently | Existing capability consent and drift                                  |
+| Sandbox              | Managed safe posture plus optional required backend capability     | Existing sandbox owner                      | Installed backend, host paths, keys, network policy      | Diagnose unavailable backend; never package dangerous overrides        |
+| Memory and heartbeat | Managed per-agent settings                                         | Existing owners                             | Host may block unsupported settings                      | Existing capability drift/update                                       |
+| Channels             | Required channel kinds and route purpose, not account ids          | Channel setup and routing-binding owners    | Account, credential, guild/team/peer, and final binding  | Preserve local binding choice; warn before releasing Claw-created edge |
+| Schedules            | Managed job definition                                             | Existing cron owner                         | Enablement, timezone override where explicitly allowed   | Existing cron lifecycle                                                |
+| Onboarding           | Managed package-root bootstrap seed                                | Native bootstrap owner                      | Answers and generated user files                         | Never recreate consumed bootstrap                                      |
+| UI experience        | Managed assets and instructions; required/suggested OpenClaw tools | Tool profile and `show_widget`              | Active client and placement availability                 | Message/Markdown fallback remains complete                             |
+| Deployment           | Project test target only in V1                                     | Existing OpenClaw installation/Gateway      | Host topology, ports, auth, service manager              | Outside package lifecycle                                              |
+| Evals                | Project-only scenarios                                             | OpenClaw CLI invokes the native lifecycle   | Model credentials and optional live budget               | Not shipped as runtime state by default                                |
 
 ## Proposed Project Shape
 

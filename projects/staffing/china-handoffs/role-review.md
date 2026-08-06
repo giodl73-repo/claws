@@ -13,16 +13,16 @@ importing product-specific assumptions that the briefs do not claim.
 
 ## Roles used
 
-| Role | Tension represented | Primary question applied |
-| --- | --- | --- |
-| Founder | Community trust over enterprise capture | Does Microsoft-specific governance preserve an independently useful OpenClaw and ClawHub ecosystem? |
-| Gateway engineer | Runtime stability over governance overhead | Are lookups bounded, cached, cancellable, and isolated so governance cannot crash or starve the runtime? |
-| Platform engineer | Fleet consistency over workspace autonomy | Can this be rolled out, observed, retried, and recovered across many instances without hiding partial failure? |
-| Lorant reviewer | Current-head correctness over optimistic narrative | Are PR claims explicitly dated, are authority paths singular, and are fail-closed guarantees precise? |
-| CISO | Security assurance over capability | Are mandatory gates fail-closed, incidents containable, events exportable, and emergency controls governed? |
-| Compliance officer | Evidence completeness over speed | Is evidence attributable, timestamped, tamper-evident, retained, and exportable? |
-| Cowork UX engineer | Governance transparency over UI minimalism | Can a user see who made a decision, why, its impact, and the next action before committing a change? |
-| New hire | Approachability over completeness | Can a recipient without repository context understand the acronyms, choose a starting seam, and avoid reading the document as an all-or-nothing assignment? |
+| Role               | Tension represented                                | Primary question applied                                                                                                                                    |
+| ------------------ | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Founder            | Community trust over enterprise capture            | Does Microsoft-specific governance preserve an independently useful OpenClaw and ClawHub ecosystem?                                                         |
+| Gateway engineer   | Runtime stability over governance overhead         | Are lookups bounded, cached, cancellable, and isolated so governance cannot crash or starve the runtime?                                                    |
+| Platform engineer  | Fleet consistency over workspace autonomy          | Can this be rolled out, observed, retried, and recovered across many instances without hiding partial failure?                                              |
+| Lorant reviewer    | Current-head correctness over optimistic narrative | Are PR claims explicitly dated, are authority paths singular, and are fail-closed guarantees precise?                                                       |
+| CISO               | Security assurance over capability                 | Are mandatory gates fail-closed, incidents containable, events exportable, and emergency controls governed?                                                 |
+| Compliance officer | Evidence completeness over speed                   | Is evidence attributable, timestamped, tamper-evident, retained, and exportable?                                                                            |
+| Cowork UX engineer | Governance transparency over UI minimalism         | Can a user see who made a decision, why, its impact, and the next action before committing a change?                                                        |
+| New hire           | Approachability over completeness                  | Can a recipient without repository context understand the acronyms, choose a starting seam, and avoid reading the document as an all-or-nothing assignment? |
 
 ## Findings and resulting changes
 

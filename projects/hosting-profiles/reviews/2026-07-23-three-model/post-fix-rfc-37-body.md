@@ -12,12 +12,12 @@ OpenClaw runs locally, in containers, behind identity proxies, and as a controll
 
 ## Proposed v1
 
-| Profile | Supported posture | Additional required evidence |
-| --- | --- | --- |
-| `local` | Explicit foreground/local Gateway | Writable workspace |
-| `container` | Directly reachable container listener | Non-loopback listener and writable workspace |
+| Profile         | Supported posture                       | Additional required evidence                                                                                             |
+| --------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `local`         | Explicit foreground/local Gateway       | Writable workspace                                                                                                       |
+| `container`     | Directly reachable container listener   | Non-loopback listener and writable workspace                                                                             |
 | `reverse-proxy` | Gateway behind a trusted identity proxy | Trusted-proxy auth, identity header, trusted source, explicit loopback allowance when applicable, and writable workspace |
-| `node-mode` | Gateway controlling execution targets | Approved pairing, connected target, canonical command-policy approval, control channel, and writable workspace |
+| `node-mode`     | Gateway controlling execution targets   | Approved pairing, connected target, canonical command-policy approval, control channel, and writable workspace           |
 
 Profiles are declarative compositions of RFC 0018 conditions, not another evaluator. Selection is optional with precedence `gateway startup argument > environment > openclaw.json`. Unprofiled startup remains unchanged and emits no profile/activation fields. Selected results identify the profile, selection source, logical runtime, and process/container incarnation.
 

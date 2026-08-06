@@ -98,8 +98,7 @@ surface.
 
 OpenClaw
 [PR 112865](https://github.com/openclaw/openclaw/pull/112865), branch
-`user/giodl/rfc-0013-final-capture`, commit `50148f20782`, is stacked on PR
-112385. Its hidden offline operation durably binds host-supplied closure
+`user/giodl/rfc-0013-final-capture`, commit `50148f20782`, is stacked on PR 112385. Its hidden offline operation durably binds host-supplied closure
 evidence to real global and selected-agent snapshots, the canonical aggregate,
 and a full acceptance inventory. Intent and committed result are stored in
 OpenClaw's stable operation-scoped SQLite recovery journal rather than under
@@ -1457,8 +1456,7 @@ SafeToDestroy`, exact-source-worker and source-runtime-generation binding,
   PR 39 all link PR 41. They state that this closes the cancellation authority
   prerequisite but does not claim the production endpoint, scoped auth,
   storage bootstrap, ECS rollout, or final hook-to-protocol adapter.
-- Next stack the baked-disabled Lobster plugin and bounded host protocol on PR
-  41. Keep production bootstrap separate until the region-pinned origin,
+- Next stack the baked-disabled Lobster plugin and bounded host protocol on PR 41. Keep production bootstrap separate until the region-pinned origin,
   permanent-store construction, and container-scoped authentication decisions
   are owner-reviewed.
 
@@ -1471,7 +1469,7 @@ SafeToDestroy`, exact-source-worker and source-runtime-generation binding,
   11 files; 297 added lines are dependency-free behavioral tests.
 - The image-present plugin uses Peter's shipped `cron_reconciled` baseline and
   `cron_changed` reread hint. It projects only sorted `{jobId, enabled,
-  nextRunAtMs?}` facts, clears on disabled reconciliation, cancels stale work,
+nextRunAtMs?}` facts, clears on disabled reconciliation, cancels stale work,
   and waits for tracked work before Gateway shutdown.
 - The client implements the bounded prepare/commit/abort wire contract over
   HTTPS with container-scoped bearer authentication. It handles stale revision
@@ -1517,7 +1515,7 @@ SafeToDestroy`, exact-source-worker and source-runtime-generation binding,
 - Verification: `just cargo check --lib` and strict `just cargo clippy --lib`
   pass; `just cron-projection-plugin-test` passes 13/13; plugin packaging and
   exact inventory pass through `just code-mode-container-check`; `git diff
-  --check` passes. Focused Rust test binaries remain blocked before execution
+--check` passes. Focused Rust test binaries remain blocked before execution
   by inherited Windows-only workspace defects (`windows_sys` MIP imports,
   Unix-only `aether-priv-bridge`, and baseline OpenClaw adapter test/import
   failures); no unrelated workaround is included.

@@ -1,6 +1,6 @@
 # Lobster PR Fronts
 
-Last live refresh: 2026-07-29 10:13 PDT.
+Last live refresh: 2026-07-29 19:25 PDT.
 
 This is the durable queue for Gio-authored Lobster PRs. A **front** is the only
 PR in a dependency chain that should consume merge attention or a fresh full
@@ -21,47 +21,44 @@ Runtime run. Children stay parked until the front lands.
 
 ## Active queue
 
-| Priority | PR | Exact head / Runtime | Conversations | What is left |
-| ---: | --- | --- | ---: | --- |
-| 1 | [#6060](https://microsoft.ghe.com/bic/lobster/pull/6060) hosted Control UI design | `b393ba2fe2`; Runtime green | 0 | New exact head is mergeable and Runtime `174257841` is green, but approval is no longer current. Request exact-head review, then use `GitOps/GitHubPop` as the final gate. |
-| 2 | [#5646](https://microsoft.ghe.com/bic/lobster/pull/5646) per-user Candidate flighting | `e08c89c9fd`; Runtime failed only Repo Validation | 0 | Exact-head approved. Runtime, unit, container, and every E2E lane passed; only the shared Repo Validation leg failed, matching #5491. Do not churn or manually rerun. |
-| 3 | [#5491](https://microsoft.ghe.com/bic/lobster/pull/5491) approval observability | `e3ee308ffa`; Runtime failed only Repo Validation | 0 | Runtime `174155644` is terminal with 40 substantive lanes green; only the shared Repo Validation leg and resulting aggregate are red. Exact-head re-review requested; do not churn or manually rerun. |
-| 4 | [#6086](https://microsoft.ghe.com/bic/lobster/pull/6086) image promotion cleanup | `380510a1cf`; Runtime pending attachment | 0 | Current main is merged and the PR is conflict-free/mergeable. Both blocking review findings are fixed with exact-head proof posted; requested-change state awaits Harry's re-review. Let Runtime attach naturally. |
-| 5 | [#5402](https://microsoft.ghe.com/bic/lobster/pull/5402) OpenClaw 2026.7.1 | `57dac11ab9`; Runtime failed; conflicting | 0 | Two local promotion worktrees contain concurrent dirty work, so do not overwrite them; coordinate the conflict and exact-head branch-owned failures before another publish. |
-| 6 | [#4648](https://microsoft.ghe.com/bic/lobster/pull/4648) governed node invoke | `41c0201f44`; Runtime failed | 0 | Exact-head review residue remains; classify the failed Runtime before branch churn. |
-| 7 | [#5422](https://microsoft.ghe.com/bic/lobster/pull/5422) MAC/MOS3 availability | `d55f3487c0`; Runtime missing | 0 | Exact-head approved. Natural Runtime still has not attached; do not manually queue. |
-| 8 | [#5460](https://microsoft.ghe.com/bic/lobster/pull/5460) offline-node recovery | `c3b799c2e6`; Runtime failed | 0 | Exact-head approved and mergeable. Classify the failed Runtime before branch churn. |
-| 9 | [#5481](https://microsoft.ghe.com/bic/lobster/pull/5481) RFC 0013 handoff | `2778124583`; Runtime missing | 0 | Mergeable but requested-change state remains and required Runtime is absent. Preserve the internal-head requirement before treating it as a merge candidate. |
-| 10 | [#5947](https://microsoft.ghe.com/bic/lobster/pull/5947) MOS3 Builder metadata | `c0583cf6bf`; Runtime failed | 0 | Draft, approved, and mergeable; retain the MOS3 `ScoutCloud` enum/AppID rollout gate and classify Runtime before advancing #6169. |
-| 11 | [#6088](https://microsoft.ghe.com/bic/lobster/pull/6088) hosted Control UI runtime | `904090781f`; Runtime missing | 0 | Draft root for the implementation stack. It is mergeable but has no approval or required Runtime; keep the approved children parked. |
+| Priority | PR                                                                                         | Exact head / Runtime                                   | Conversations | What is left                                                                                                                                                                                              |
+| -------: | ------------------------------------------------------------------------------------------ | ------------------------------------------------------ | ------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|        1 | [#5646](https://microsoft.ghe.com/bic/lobster/pull/5646) per-user Candidate flighting      | `179a706745`; Runtime green `174398205`                |             0 | Exact-head approved and Runtime-green. Only GitHubPop remains; do not change the branch.                                                                                                                  |
+|        2 | [#5491](https://microsoft.ghe.com/bic/lobster/pull/5491) approval observability            | `8aea172caa`; Runtime queued naturally                 |             0 | Current-main-restacked and mergeable. Harry's rollback concern is addressed through the existing broker ECS flag; exact-head review requested. Let Runtime drain naturally and do not manually queue ADO. |
+|        3 | [#5460](https://microsoft.ghe.com/bic/lobster/pull/5460) offline-node recovery             | `3c11c572b4`; Runtime green                            |             0 | Exact-head Galin-approved and Runtime-green. Harry's approval is on the prior head; GitHubPop remains.                                                                                                    |
+|        4 | [#5402](https://microsoft.ghe.com/bic/lobster/pull/5402) OpenClaw 2026.7.1                 | `57dac11ab9`; Runtime failed; conflicting              |             0 | Two local promotion worktrees contain concurrent dirty work, so do not overwrite them; coordinate the conflict and exact-head branch-owned failures before another publish.                               |
+|        5 | [#4648](https://microsoft.ghe.com/bic/lobster/pull/4648) governed node invoke              | `41c0201f44`; Runtime failed; conflicting              |             0 | Current-main probe found nine semantic conflicts, including `gateway_lifecycle_tests.rs`, which overlaps protected dirty work in `C:\src\lobster-pr-4648`; coordinate before restacking.                  |
+|        6 | [#5422](https://microsoft.ghe.com/bic/lobster/pull/5422) MAC/MOS3 availability             | live `d55f3487c0`; local `52b924b400`; Runtime missing |             0 | Validated restack is held locally only. Fork-backed and externally managed admin lane; do not publish or manually queue Runtime.                                                                          |
+|        7 | [#5481](https://microsoft.ghe.com/bic/lobster/pull/5481) RFC 0013 handoff                  | `2778124583`; Runtime missing                          |             0 | Code-reviewed and approved at exact head, but fork-backed with required Runtime absent. Preserve the internal-head requirement before treating it as a merge candidate.                                   |
+|        8 | [#5947](https://microsoft.ghe.com/bic/lobster/pull/5947) MOS3 Builder metadata             | `c0583cf6bf`; Runtime failed                           |             0 | Draft, approved, and mergeable; feeds is externally managed, so do not advance #5947 or child #6169.                                                                                                      |
+|        9 | [#6121](https://microsoft.ghe.com/bic/lobster/pull/6121) hosted Control UI surgical routes | `aff75f4a4b`; Runtime queued                           |             0 | Externally managed lane; observe only.                                                                                                                                                                    |
 
 ## Dependency chains
 
-| Chain | Order | Current pointer |
-| --- | --- | --- |
-| Scout standard | **#5491** -> #5506 -> #5571 -> #5572 | Published stack is `e3ee308ffa` -> `afa6de3478` -> `104fb86337` -> `299a6fbd25`. #5491 Runtime `174155644` passed 40 substantive lanes and failed only shared Repo Validation. #5506 is approved; updated children are mergeable and awaiting exact-head review/check attachment. |
-| OpenClaw 2026.7.1 | **#5402** | #5681 merged; #5402 is now exposed but has concurrent dirty repair worktrees and a failed exact-head Runtime to diagnose. |
-| Candidate user flighting | **#5646** | #5681 merged. #5646 is published at `e08c89c9fd`, conversation-clean, and awaiting its natural Runtime plus exact-head review. |
-| Hosted Control UI runtime | **#6088** -> #6113 -> (#6116, #6121) | #6088 is the draft main-based root. The three approved children are mergeable with neutral Runtime and remain parked until the root is reviewed and validated. |
-| MOS3 packaging | **#5947** -> #6169 | #5947 remains the draft front with failed Runtime. #6169 is an approved, mergeable draft child with neutral Runtime. |
+| Chain                     | Order                                | Current pointer                                                                                                                                                                                             |
+| ------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Scout standard            | **#5491** -> #5506 -> #5571 -> #5572 | Published current-main stack is `8aea172caa` -> `ac56d9437d` -> `a85ba1f369` -> `d15ce58bec`. #5491 Runtime queued naturally; children are mergeable/neutral and await exact-head review/check progression. |
+| OpenClaw 2026.7.1         | **#5402**                            | #5681 merged; #5402 is now exposed but has concurrent dirty repair worktrees and a failed exact-head Runtime to diagnose.                                                                                   |
+| Candidate user flighting  | **#5646**                            | #5681 merged. #5646 is current-main-restacked at `179a706745`, exact-head approved, conversation-clean, and Runtime-green; only GitHubPop remains.                                                          |
+| Hosted Control UI runtime | **#6121**; orphaned child #6116      | #6088 and #6113 closed. #6121 is now main-based with requested changes and queued Runtime. #6116 remains based on closed #6113. Externally managed: observe only.                                           |
+| MOS3 packaging            | **#5947** -> #6169                   | #5947 remains the draft front with failed Runtime. #6169 is an approved, mergeable draft child with neutral Runtime.                                                                                        |
 
 ## Parked stacked children
 
-| PR | Head | State |
-| --- | --- | --- |
-| #5506 | `afa6de3478` | Base #5491; narrowed typed-capability delta; Runtime neutral; approved; zero conversations. |
-| #5571 | `104fb86337` | Base #5506; zero conversations; exact-head re-review requested; natural stacked checks have not attached yet. |
-| #5572 | `299a6fbd25` | Base #5571; zero conversations; exact-head re-review requested; natural stacked checks have not attached yet. |
-| #6113 | `331d5eb59d` | Base #6088; draft, approved, mergeable, Runtime neutral. |
-| #6116 | `3c2e1f7110` | Base #6113; draft, approved, mergeable, Runtime neutral. |
-| #6121 | `c2b8f9e786` | Base #6113; draft, approved, mergeable, Runtime neutral. |
-| #6169 | `64ced9b60a` | Base #5947; draft, approved, mergeable, Runtime neutral. |
+| PR    | Head         | State                                                                                  |
+| ----- | ------------ | -------------------------------------------------------------------------------------- |
+| #5506 | `ac56d9437d` | Base #5491; approved; Runtime neutral; exact-head review refresh requested.            |
+| #5571 | `a85ba1f369` | Base #5506; prior prose-pin nit remains addressed; exact-head re-review requested.     |
+| #5572 | `d15ce58bec` | Base #5571; deny-alias dedupe preserved and validated; exact-head re-review requested. |
+| #6116 | `3c2e1f7110` | Base #6113; draft, approved, mergeable, Runtime neutral.                               |
+| #6169 | `64ced9b60a` | Base #5947; draft, approved, mergeable, Runtime neutral.                               |
 
 ## Held local commits
 
-| PR | Local worktree | Held work |
-| --- | --- | --- |
-| #5402 | `C:\src\lobster-pr5402-refresh`, `C:\src\lobster-promoteclaw-2026.7.1` | Concurrent dirty persistence/lifecycle work exists; preserve it and coordinate before editing or publishing. |
+| PR    | Local worktree                                                         | Held work                                                                                                                             |
+| ----- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| #5402 | `C:\src\lobster-pr5402-refresh`, `C:\src\lobster-promoteclaw-2026.7.1` | Concurrent dirty persistence/lifecycle work exists; preserve it and coordinate before editing or publishing.                          |
+| #5422 | `C:\src\lobster-scout-tenant-availability`                             | Validated current-main restack at `52b924b400`; hold because the existing PR is fork-backed and the admin lane is externally managed. |
 
 ## Refresh recipe
 

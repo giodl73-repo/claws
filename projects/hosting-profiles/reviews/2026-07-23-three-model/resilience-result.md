@@ -4,6 +4,7 @@ LOC reviewed:
 Readiness diff: `+2602/-64` across 64 files. Profile-only diff: `+1480/-6` across 38 files.
 
 **Findings**
+
 1. **Blocker: `reverse-proxy` can report ready while real trusted-proxy ingress is unusable.**  
    Type: implementation defect + missing test.  
    RFC 0023 requires `TrustedProxyReady=True` only when active ingress accepts asserted identity from validated trusted sources and rejects direct/untrusted forged identity headers (`rfcs/0023/hosting-profile-v1-spec.md:141`, `rfcs/0023/hosting-profile-v1-spec.md:146`). The profile predicate only checks `authMode`, `userHeader`, and `trustedProxyCount`, then returns `True` (`src/hosting/profiles.ts:193`, `src/hosting/profiles.ts:221`). The actual auth path rejects loopback trusted-proxy sources unless `gateway.auth.trustedProxy.allowLoopback=true` (`src/gateway/auth.ts:317`, `src/gateway/auth.test.ts:1204`). The package E2E even configures `trustedProxies=["127.0.0.1"]` without `allowLoopback` and expects `reverse-proxy-ready` to be `200` (`scripts/e2e/hosting-profiles-docker.sh:39`, `scripts/e2e/hosting-profiles-docker.sh:120`), contradicting the auth contract and docs (`docs/gateway/configuration-reference.md:679`, `docs/gateway/security/index.md:620`).  

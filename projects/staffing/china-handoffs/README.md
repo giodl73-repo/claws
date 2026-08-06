@@ -12,16 +12,16 @@ capacity.
 
 ## Image transcription
 
-| Role | Job |
-| --- | --- |
-| Extensibility | Build the platform for plugins, skills, UX extensions, governance, ratings, versioning, tenant controls, and 1P/community contribution. |
-| Admin & Governance | Own tenant/global settings, policy, permissions, approvals, audit/override state, Partner Center, marketplace governance, and M365 auth decisions. |
-| Frontend Product Engineering | Close the cloud UX/product polish gap and make Scout feel coherent, fast, and high quality. |
-| Infrastructure & Engineering Systems | Own quality harnesses, E2E verification, reliability, developer velocity, and engineering systems. |
-| Operations & TPM | Drive the last 10%: decisions, coordination, follow-through, launch readiness, and cross-workstream execution. |
-| Security | Provide embedded security depth across policy, permissions, marketplace, local execution, and M365 auth. |
-| Data Science & Insights | Own instrumentation, usage/community signals, analysis, and product insights. |
-| Technical Community Manager | Engage the 16k-person community, identify patterns, route issues, and surface extension opportunities. |
+| Role                                 | Job                                                                                                                                                |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Extensibility                        | Build the platform for plugins, skills, UX extensions, governance, ratings, versioning, tenant controls, and 1P/community contribution.            |
+| Admin & Governance                   | Own tenant/global settings, policy, permissions, approvals, audit/override state, Partner Center, marketplace governance, and M365 auth decisions. |
+| Frontend Product Engineering         | Close the cloud UX/product polish gap and make Scout feel coherent, fast, and high quality.                                                        |
+| Infrastructure & Engineering Systems | Own quality harnesses, E2E verification, reliability, developer velocity, and engineering systems.                                                 |
+| Operations & TPM                     | Drive the last 10%: decisions, coordination, follow-through, launch readiness, and cross-workstream execution.                                     |
+| Security                             | Provide embedded security depth across policy, permissions, marketplace, local execution, and M365 auth.                                           |
+| Data Science & Insights              | Own instrumentation, usage/community signals, analysis, and product insights.                                                                      |
+| Technical Community Manager          | Engage the 16k-person community, identify patterns, route issues, and surface extension opportunities.                                             |
 
 ## Primary opportunity briefs
 

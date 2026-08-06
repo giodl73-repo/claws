@@ -58,13 +58,13 @@ all concurrent causes.
 
 ## Internal analogue classification
 
-| Existing mechanism | Classification | Use in PR 6B |
-| --- | --- | --- |
-| Native inbox enqueue + wake hint | Reuse | Teams retains payload and acknowledgement; expose only retained activity identity. |
-| Native warm claim | Adapt | Preserve fast source-local coalescing, but join the permanent cross-source generation. |
-| Cron scheduler in-flight lease | Reuse | Cron owns alarm claim/requeue; pass only the accepted projection/deadline cause identity. |
-| Final-handoff lifecycle CAS | Reuse | Retained cause revokes destruction atomically; never create a parallel sleep authority. |
-| Shared managed Gateway start | Reuse | Provision the coordinator-granted generation idempotently. |
+| Existing mechanism                       | Classification                  | Use in PR 6B                                                                                                                                                       |
+| ---------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Native inbox enqueue + wake hint         | Reuse                           | Teams retains payload and acknowledgement; expose only retained activity identity.                                                                                 |
+| Native warm claim                        | Adapt                           | Preserve fast source-local coalescing, but join the permanent cross-source generation.                                                                             |
+| Cron scheduler in-flight lease           | Reuse                           | Cron owns alarm claim/requeue; pass only the accepted projection/deadline cause identity.                                                                          |
+| Final-handoff lifecycle CAS              | Reuse                           | Retained cause revokes destruction atomically; never create a parallel sleep authority.                                                                            |
+| Shared managed Gateway start             | Reuse                           | Provision the coordinator-granted generation idempotently.                                                                                                         |
 | Deprecated RFC 0021 `continuity_elastic` | Avoid as code; adapt invariants | Keep cause validation, one granted generation, unknown-as-pending, and exact readiness binding; discard its parallel Plex hold model and broad 1,300+ LOC surface. |
 
 ## Role findings

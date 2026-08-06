@@ -72,4 +72,3 @@ fetch returned the final HTTP 200 response, and the final body was `ok`.
 What was not tested:
 No external proxy or remote connection owner was tested because this PR keeps
 only the existing local transport and adds no remote dispatch contract.
-

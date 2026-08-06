@@ -115,7 +115,7 @@
 ## 2026-07-10 Commands Prompt Follow-Up
 
 - Opened fork-only draft PR #26, `Optional PR3: add scoped command prompt
-  projection`: `https://github.com/giodl73-repo/openclaw/pull/26`.
+projection`: `https://github.com/giodl73-repo/openclaw/pull/26`.
 - Branch `user/giodl/commands-inventory-prompt` at `1eb05fc55a`, stacked on
   PR #25 (`user/giodl/commands-inventory-inspect`).
 - The projection uses only command-owned catalog records: routed CLI
@@ -199,7 +199,7 @@
   `https://github.com/giodl73-repo/openclaw/pull/24`, branch
   `user/giodl/commands-inventory-foundation`, head `d038dbb415`.
 - Opened stacked fork draft PR #25, `Alternative PR2: add exact command
-  inspection`: `https://github.com/giodl73-repo/openclaw/pull/25`, branch
+inspection`: `https://github.com/giodl73-repo/openclaw/pull/25`, branch
   `user/giodl/commands-inventory-inspect`, current head `90a7b1ca2b`.
 - Option B removes ownerless tool adapters and aggregate audit/test-matrix/
   summary reports. It retains CLI descriptors, routes, runtime commands,

@@ -42,13 +42,13 @@ the adapters require a second lifecycle/provisioning state machine.
 
 ## Internal analogue decisions
 
-| Mechanism | Decision | Adapter use |
-| --- | --- | --- |
-| Native warm claim | Reuse | Produce a Teams cause only after durable claim; revalidate metadata in the inbox owner. |
-| Permanent projection receipt | Reuse | Bind cron cause to accepted projection id, revision, and exact deadline. |
-| Trusted runtime directory | Adapt | Resolve owner identities from logical runtime; never accept tenant/user/provider from a wake caller as authority. |
-| PR 46 coordinator | Reuse | Sole lifecycle, coalescing, generation, and provisioner entry point. |
-| Coarse `EnsureContainerReady` result | Avoid as exact evidence | It may remain the managed-start mechanism but cannot complete restored readiness. |
+| Mechanism                            | Decision                | Adapter use                                                                                                       |
+| ------------------------------------ | ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Native warm claim                    | Reuse                   | Produce a Teams cause only after durable claim; revalidate metadata in the inbox owner.                           |
+| Permanent projection receipt         | Reuse                   | Bind cron cause to accepted projection id, revision, and exact deadline.                                          |
+| Trusted runtime directory            | Adapt                   | Resolve owner identities from logical runtime; never accept tenant/user/provider from a wake caller as authority. |
+| PR 46 coordinator                    | Reuse                   | Sole lifecycle, coalescing, generation, and provisioner entry point.                                              |
+| Coarse `EnsureContainerReady` result | Avoid as exact evidence | It may remain the managed-start mechanism but cannot complete restored readiness.                                 |
 
 ## Role findings
 

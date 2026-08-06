@@ -25,7 +25,7 @@
 ### 2026-07-31 Claw application-framework addendum
 
 - Opened draft `openclaw/rfcs#56`, `docs(claws): define application project
-  lifecycle`, at signed and GitHub-verified head `1d41b8fadc58`.
+lifecycle`, at signed and GitHub-verified head `1d41b8fadc58`.
 - The PR updates RFC 0016 and adds parallel normative
   `claw-project-v1-spec.md` and `implementation-plan.md` sidecars. It defines a
   human-authored project, deterministic `.tgz` package, applied Claw, offline
@@ -331,7 +331,7 @@
 ### 2026-07-29 RFC #52 application lifecycle PR2
 
 - Opened draft OpenClaw PR #115962, `feat(claws): apply application extensions
-  and resources`, from verified signed head `357783626980daddf1230620812635b3fb6656d2`.
+and resources`, from verified signed head `357783626980daddf1230620812635b3fb6656d2`.
   It is semantically stacked after application planning #115565 and setup state
   #115296; GitHub targets `main` because those heads are fork PR branches.
 - The PR applies schema-v2 profile extensions through existing plugin owners,
@@ -541,7 +541,7 @@
   inspection pass all 25. Real OpenClaw previews against live ClawHub passed
   all five new starters with exact action counts, `ready: true`, zero blocked
   actions, consent digests, and disposable state cleanup. `codex review
-  --uncommitted` found no actionable defect. GitHub Validate run `30310166588`
+--uncommitted` found no actionable defect. GitHub Validate run `30310166588`
   passed at the exact pushed head.
 
 ### 2026-07-27 ClawHub CLAW.md readiness and composed starter expansion
@@ -665,7 +665,7 @@
   and exported with sidecar fallback for whitespace, non-UTF-8, or oversized
   SOUL content.
 - `git diff --check origin/main...HEAD` passed and `git merge-tree --write-tree
-  origin/main HEAD` produced a clean merge tree. Focused local Vitest did not
+origin/main HEAD` produced a clean merge tree. Focused local Vitest did not
   execute because Windows Node 24.14 is below the repository minimum and pnpm
   correctly refused to purge the existing dependency tree noninteractively;
   exact-head hosted `openclaw/ci-gate` remains green.
@@ -717,7 +717,7 @@
 - Private `giodl73-repo/claws` main is clean at signed commit `5bac7b9799c2`.
   Local `pnpm check` passed 79 tests with one intentional Windows symlink skip;
   `pnpm proof:pack` passed isolated packed-bin proof. `codex review
-  --uncommitted` returned no actionable finding. GitHub Validate run
+--uncommitted` returned no actionable finding. GitHub Validate run
   `30221359755` passed a fresh frozen-lockfile install and full check suite.
 - No npm package was registered or published, no repository was made public,
   and no resolver, provider, adapter, or public package-name decision was
@@ -1142,6 +1142,7 @@
 - Temporary regression assertions proved both failures and were removed. The
   WSL PR worktree is clean. PR #112773 remains draft and should not be promoted
   until both regressions, their tests, and the matching RFC wording are fixed.
+
 ### 2026-07-24 Skill Memory product rename and proof closeout
 
 - Recast RFC 0022 and the full fork-only evidence series as **Skill Memory**.
@@ -1295,7 +1296,7 @@
   format, lint, and diff checks pass. The standalone `test/tsconfig.json` is not
   a valid linked-worktree check because its `rootDir=test` pulls repository and
   extension sources outside the root. Final unsandboxed `codex review
-  --uncommitted` reported no actionable correctness findings.
+--uncommitted` reported no actionable correctness findings.
 - RFC addendum [#48](https://github.com/openclaw/rfcs/pull/48) now links both UI
   PRs and records the final artifact, integrity, scope, and cleanup policy at
   signed head `bea0bcca99a`.
@@ -1404,6 +1405,7 @@
   `scripts/pr-merge run` defaults to `gh pr merge --squash`, and GitHub creates
   the resulting `web-flow` commit with a valid, Verified GitHub signature.
   Do not use rebase merge if a single signed final commit is required.
+
 ### 2026-07-22 PR #102427 doctor diagnostics slice in progress
 
 - OpenClaw PR [#102427](https://github.com/openclaw/openclaw/pull/102427)
@@ -1501,6 +1503,7 @@
 - Wrapper cleanup reported non-blocking warnings deleting the remote branch and
   orphaned worktree directory `.worktrees/pr-102306`; the PR merge itself
   completed successfully.
+
 ### 2026-07-21 project-state reconciliation
 
 - Fast-forwarded the coordination checkout to current `origin/main` and merged
@@ -5288,6 +5291,7 @@ package install policy`). The branch is `user/giodl/claws-pr5-installers`,
   stack to repair ambient dependency state. ClawSweeper exact-head reviews have
   started. Wait for queued preflight and review results before treating PR12 or
   PR13 as merge-ready. Do not merge or enable automerge.
+
 ### 2026-07-22 PR #102427 lifecycle diagnostics landed
 
 - PR #102427 `Add experimental Claw lifecycle diagnostics` landed through the
@@ -5524,7 +5528,7 @@ package install policy`). The branch is `user/giodl/claws-pr5-installers`,
 ### 2026-07-28 RFC 0052 application implementation started
 
 - Opened draft OpenClaw PR #115565, `feat(claws): plan harness extensions and
-  resources`, from signed head `1de1393371163a5e610c8f27cfa6a6689a0fa3fb`.
+resources`, from signed head `1de1393371163a5e610c8f27cfa6a6689a0fa3fb`.
   It is Application PR 1 from RFC #52 and is stacked after setup schema PR
   #115237.
 - PR #115565 adds strict OpenClaw profile v2 extension assertions, schema v2
@@ -5650,7 +5654,7 @@ package install policy`). The branch is `user/giodl/claws-pr5-installers`,
   core source/test types, full test types before the final typed regression,
   changed-file type-aware Oxlint, generated Kysely verification, docs
   formatting/MDX/links/map, Oxfmt, and diff checks. `codex review
-  --uncommitted` reported no actionable correctness findings. The aggregate
+--uncommitted` reported no actionable correctness findings. The aggregate
   docs glossary gate remains blocked by unrelated zh-CN debt across main-side
   docs.
 - Fresh `@clawsweeper re-review` is queued on #115962. The PR remains draft;

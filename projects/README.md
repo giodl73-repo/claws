@@ -8,6 +8,8 @@ be buried in generated wave directories.
 
 | Directory             | Use                                                                                                                                      |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `openclaw-design/`    | Cross-RFC OpenClaw conceptual model, major objects, facility capabilities, ownership boundaries, and contract summaries.                 |
+| `enterpriseclaw/`     | Desired OpenClaw architecture: principles, logical layers, owner domains, trust, control loops, deployment profiles, and evolution rules. |
 | `policy/`             | Policy conformance, evidence files, RFC addenda, and Lobster policy baselines.                                                           |
 | `doctor/`             | Doctor health findings, structured repairs, and repair-stack PRs.                                                                        |
 | `feeds/`              | OpenClaw feed primitives and Lobster Scout feed integration.                                                                             |
@@ -25,6 +27,7 @@ be buried in generated wave directories.
 | `state-continuity/`   | State inventory, consistency, checkpoint/publication, dirty/synced status, fencing, restore, and persistence deletion.                   |
 | `promoteclaw/`        | Lobster OpenClaw version promotion from quarantine-cleared LTS releases, including patch carry-forward/drop validation.                  |
 | `typeclaw/`           | OpenClaw TypeScript native / TS7 performance and compatibility evaluation.                                                               |
+| `codeprints/`         | Language-neutral repository factorization, first-language analyzers, owner-led evidence, and native-authority preservation.               |
 | `openclaw-rust-node/` | Rust node client/headless host RFC, node-contract conformance, release ownership, and first Lobster embedding evidence.                  |
 | `memory/`             | Agent memory strategy, OpenClaw memory assessment, and XAI report coordination.                                                          |
 | `mail/`               | OpenClaw mail-channel research, mail plugin options, and Exchange/Microsoft Graph integration framing.                                   |
@@ -52,6 +55,8 @@ agent is assigned to an area, then read the area `README.md`.
 
 | Area                                | Session                         |
 | ----------------------------------- | ------------------------------- |
+| OpenClaw system design              | `openclaw-design/SESSION.md`    |
+| EnterpriseClaw architecture         | `enterpriseclaw/SESSION.md`     |
 | Policy                              | `policy/SESSION.md`             |
 | Doctor                              | `doctor/SESSION.md`             |
 | Feeds                               | `feeds/SESSION.md`              |
@@ -70,6 +75,7 @@ agent is assigned to an area, then read the area `README.md`.
 | Runtime State Continuity            | `state-continuity/SESSION.md`   |
 | PromoteClaw                         | `promoteclaw/SESSION.md`        |
 | TypeClaw                            | `typeclaw/SESSION.md`           |
+| Codeprints                          | `codeprints/SESSION.md`         |
 | OpenClaw Rust node                  | `openclaw-rust-node/SESSION.md` |
 | Memory                              | `memory/SESSION.md`             |
 | Mail                                | `mail/SESSION.md`               |

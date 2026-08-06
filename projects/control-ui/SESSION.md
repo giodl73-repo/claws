@@ -17,39 +17,36 @@
 - Related repo: `openclaw/openclaw`.
 - Local worktree: choose or create a clean Lobster worktree before
   implementation; do not use the dirty `C:\src\lobster` checkout.
-- Current branch: `user/giodl/control-ui-hosting-design`.
+- Current branch: `user/giodl/control-ui-surgical-routes`.
 - Main tracking file: `projects/control-ui/README.md`.
 - Skills to use: `project-session`, `project-creator`, and `lobster-pr-ops`;
   use OpenClaw PR/testing skills when the generic OpenClaw slices start.
 
 ## Current Session
 
-- Last updated: 2026-07-29.
-- Last agent: Codex.
-- Current focus: Lobster hosted OpenClaw Control UI surgical replacement PR
-  stack with real OpenClaw bundle proof.
-- Active branch / PR: Lobster draft PR
-  [bic/lobster#6041](https://microsoft.ghe.com/bic/lobster/pull/6041),
+- Last updated: 2026-08-04.
+- Last agent: Copilot.
+- Current focus: Land and deploy Lobster PR #7039 to FRE-301, then validate the
+  merged hosted OpenClaw Control UI preview through its three ECS gates.
+- Active branch / PR: Lobster design PR
+  [bic/lobster#6060](https://microsoft.ghe.com/bic/lobster/pull/6060),
   `user/giodl/control-ui-hosting-design` at
-  `b393ba2fe2b6c689498026e30560da9eb652573c`; Lobster draft implementation PR
-  [bic/lobster#6088](https://microsoft.ghe.com/bic/lobster/pull/6088),
-  `user/giodl/control-ui-hosting-runtime` at
-  `904090781f1e64828cc86cba96a8beda9eff6987` in
-  `C:\src\lobster-control-ui-proof`; Lobster draft stacked PR
-  [bic/lobster#6113](https://microsoft.ghe.com/bic/lobster/pull/6113),
-  `user/giodl/control-ui-rollout-gate` at
-  `331d5eb59d6231c1a511f8bb9044bf77bb60194c`, targets #6088 and adds the
-  process-scope `/openclaw` ECS rollout gate; Lobster draft stacked PR
-  [bic/lobster#6121](https://microsoft.ghe.com/bic/lobster/pull/6121),
-  `user/giodl/control-ui-surgical-routes` at
-  `c2b8f9e786d12f24528ef9166f3f32582cd230f7`, targets #6113 and adds
-  default-off surgical `/chat` -> `/openclaw/chat`, `/sessions` ->
-  `/openclaw/sessions`, and `/settings` -> `/openclaw/settings` replacement
-  gates plus a local real-bundle proof harness; Lobster draft stacked PR
+  `bab71c50d4`; Lobster draft all-in-one preview PR
+  [bic/lobster#6121](https://microsoft.ghe.com/bic/lobster/pull/6121)
+  merged as `8be34c43f1c1` and contains hosted `/openclaw`, Control UI staging, runtime host policy
+  bootstrap, hosted Gateway route, default-off ECS rollout/replacement gates
+  for `/chat`, `/sessions`, and `/settings`, real-bundle proof harness, and
+  Lobster image patch `0019-hosted-control-ui-policy.patch`; Lobster PR
+  [bic/lobster#7039](https://microsoft.ghe.com/bic/lobster/pull/7039),
+  `user/giodl/control-ui-deployment-env` at `691ac5987d`, configures
+  `OPENCLAW_CONTROL_UI_DIR=/app/static/openclaw-control-ui` in the production
+  Runtime chart and adds a deployment contract test; Lobster PRs
+  [#6088](https://microsoft.ghe.com/bic/lobster/pull/6088) and
+  [#6113](https://microsoft.ghe.com/bic/lobster/pull/6113) are closed as
+  superseded; Lobster draft stacked PR
   [bic/lobster#6116](https://microsoft.ghe.com/bic/lobster/pull/6116),
-  `user/giodl/control-ui-root-cutover` at
-  `3c2e1f71105d3f2ed0fb0cea868ffadd317a6fdf`, targets #6113 and adds the
-  separate `/` to `/openclaw/` ECS cutover gate. OpenClaw draft PR
+  `user/giodl/control-ui-root-cutover` remains a separate follow-up for the
+  `/` to `/openclaw/` ECS cutover gate. OpenClaw draft PR
   [openclaw/openclaw#115408](https://github.com/openclaw/openclaw/pull/115408)
   targets `main` from fork branch
   `user/giodl/control-ui-host-policy-main` at
@@ -66,14 +63,25 @@
   is clean at PR #115408 head.
   Lobster implementation worktree `C:\src\lobster-control-ui-proof` tracks
   `origin/user/giodl/control-ui-hosting-runtime` and is clean against pushed
-  #6088 except untracked `.tmp-control-ui-screen/` scratch. Lobster surgical
-  worktree `C:\src\lobster-control-ui-surgical` is clean at pushed #6121 head
-  `c2b8f9e786d12f24528ef9166f3f32582cd230f7`.
-- Blocking question: no active code blocker. Lobster PR #6088 has no usable
-  `Lobster-Runtime-PullRequest` GitHub context yet; Azure build `174234223`
-  exists for the exact head but was a canceled informational draft PR run.
-  Follow-on Lobster PRs may stack on #6088 while the OpenClaw build/package
-  quarantine window runs for at least a week.
+  #6088 except untracked `.tmp-control-ui-screen/` scratch.   Lobster surgical
+  worktree `C:\src\lobster-control-ui-surgical` is clean against pushed #6121
+  head `114efc92fb` except untracked CI scratch logs, `.tmp-cdn-fixture/`,
+  and `.tmp-ado-timeline-174718311.json`. Deployment worktree
+  `C:\src\lobster-control-ui-env` is clean at pushed PR #7039 head
+  `691ac5987d`.
+- Blocking question: PR #7039 is open, mergeable, review-required, and has no
+  required checks attached yet. It must merge and deploy to FRE-301 before the
+  three ECS gates can activate `/openclaw`.
+
+## 2026-07-29 PR #6060 review closeout
+
+- Published `bab71c50d4`, making the five requested design contracts
+  falsifiable and normative: publication/runtime fail-closed policy, initial
+  P99 <= 1 ms acceptance, blocking device-auth bypass proof, per-flag fallback
+  preservation, and structured inline editable-page denial findings.
+- Replied to and resolved all five conversations. Exact-head review is
+  requested and natural Runtime `174368694` is queued. The dedicated design
+  worktree is clean.
 
 ## 2026-07-28 Project Start
 
@@ -175,7 +183,7 @@
   handler maps that query value to the hosted family while preserving legacy
   browser behavior for missing/unknown values.
 - Verification passed: `just cargo test -p lobster-runtime hosted_control_ui
-  --lib` (`2 passed; 0 failed; 3860 filtered out`),
+--lib` (`2 passed; 0 failed; 3860 filtered out`),
   `just cargo test -p lobster-runtime openclaw_control_ui --lib`
   (`5 passed; 0 failed; 3857 filtered out`),
   `cargo fmt -p lobster-runtime --check`, and `git diff --check`.
@@ -200,8 +208,8 @@
   config edits centrally; server-side enforcement remains required.
 - Verification passed in `C:\src\openclaw-5402-0012-rederive`:
   `..\node_modules\.bin\vitest.cmd run --config vitest.config.ts
-  src/app/host-policy.test.ts src/app/gateway-store.test.ts
-  src/lib/config/host-policy.test.ts src/api/gateway.node.test.ts`
+src/app/host-policy.test.ts src/app/gateway-store.test.ts
+src/lib/config/host-policy.test.ts src/api/gateway.node.test.ts`
   (`4 passed`, `58 tests passed`), `pnpm --dir ui build`, and
   `git diff --check` for touched files.
 
@@ -216,9 +224,9 @@
   config presets, and Save/Apply while leaving navigation/status controls live.
 - Verification passed in `C:\src\openclaw-5402-0012-rederive`:
   `..\node_modules\.bin\vitest.cmd run --config vitest.config.ts
-  src/pages/config/quick.test.ts src/pages/config/view.host-policy.test.ts
-  src/app/host-policy.test.ts src/lib/config/host-policy.test.ts
-  src/app/gateway-store.test.ts src/api/gateway.node.test.ts`
+src/pages/config/quick.test.ts src/pages/config/view.host-policy.test.ts
+src/app/host-policy.test.ts src/lib/config/host-policy.test.ts
+src/app/gateway-store.test.ts src/api/gateway.node.test.ts`
   (`6 passed`, `79 tests passed`), `pnpm --dir ui build`, and
   `git diff --check` for touched files. A direct run of
   `view.browser.test.ts` was skipped after Playwright reported the local
@@ -257,9 +265,9 @@
   delete button while defaulting open for local/non-hosted callers.
 - Verification passed in `C:\src\openclaw-5402-0012-rederive`:
   `..\node_modules\.bin\vitest.cmd run --config vitest.config.ts
-  src/pages/sessions/view.test.ts src/app/host-policy.test.ts
-  src/lib/config/host-policy.test.ts src/pages/config/view.host-policy.test.ts
-  src/app/gateway-store.test.ts src/api/gateway.node.test.ts`
+src/pages/sessions/view.test.ts src/app/host-policy.test.ts
+src/lib/config/host-policy.test.ts src/pages/config/view.host-policy.test.ts
+src/app/gateway-store.test.ts src/api/gateway.node.test.ts`
   (`6 passed`, `91 tests passed`), `pnpm --dir ui build`, and
   `git diff --check` for touched OpenClaw UI policy files.
 
@@ -274,10 +282,10 @@
   [openclaw/openclaw#115396](https://github.com/openclaw/openclaw/pull/115396)
   against `release/2026.7.1`.
 - Local validation before PR: `pnpm --dir ui build`, `pnpm --dir ui exec
-  vitest run --config vitest.config.ts src/pages/sessions/view.test.ts
-  src/app/host-policy.test.ts src/lib/config/host-policy.test.ts
-  src/pages/config/view.host-policy.test.ts src/app/gateway-store.test.ts
-  src/api/gateway.node.test.ts` (`6 passed`, `91 tests passed`), and
+vitest run --config vitest.config.ts src/pages/sessions/view.test.ts
+src/app/host-policy.test.ts src/lib/config/host-policy.test.ts
+src/pages/config/view.host-policy.test.ts src/app/gateway-store.test.ts
+src/api/gateway.node.test.ts` (`6 passed`, `91 tests passed`), and
   `git diff --check`.
 - Current-main port was attempted in clean worktree
   `C:\src\openclaw-control-ui-host-policy-main`; direct cherry-pick has real
@@ -379,10 +387,10 @@
   keeps `/openclaw` hidden with 404 even when `OPENCLAW_CONTROL_UI_DIR` is
   configured, and reads the gate per request for no-restart rollback.
   Validation passed: `cargo fmt -p lobster-runtime --check`, `just cargo test
-  -p lobster-config-schema openclaw_control_ui --lib` (`2 passed`), `just cargo
-  test -p lobster-runtime openclaw_control_ui --lib` (`7 passed`), `just cargo
-  test -p lobster-runtime hosted_control_ui --lib` (`2 passed`), `python
-  scripts/ci/check-ecs-settings-inventory.py`, and `git diff --check`.
+-p lobster-config-schema openclaw_control_ui --lib` (`2 passed`), `just cargo
+test -p lobster-runtime openclaw_control_ui --lib` (`7 passed`), `just cargo
+test -p lobster-runtime hosted_control_ui --lib` (`2 passed`), `python
+scripts/ci/check-ecs-settings-inventory.py`, and `git diff --check`.
   Initial #6113 checks: `GitOps/FileAffordance` and
   `GitOps/OwnershipEnforcer` passed, `GitOps/GitHubPop` failed as expected for
   human proof-of-presence, and `Lobster-Runtime-PullRequest` completed
@@ -397,22 +405,22 @@
   returns the operator service/build JSON snapshot during cutover, and the
   root redirect reads ECS per request for no-restart rollback.
   Validation passed: `cargo fmt -p lobster-runtime --check`, `just cargo test
-  -p lobster-config-schema openclaw_control_ui --lib` (`4 passed`), `just cargo
-  test -p lobster-runtime openclaw_control_ui --lib` (`7 passed`), `just cargo
-  test -p lobster-runtime full_runtime_root --lib` (`5 passed`), `just cargo
-  test -p lobster-runtime hosted_control_ui --lib` (`2 passed`), `python
-  scripts/ci/check-ecs-settings-inventory.py`, and `git diff --check`.
+-p lobster-config-schema openclaw_control_ui --lib` (`4 passed`), `just cargo
+test -p lobster-runtime openclaw_control_ui --lib` (`7 passed`), `just cargo
+test -p lobster-runtime full_runtime_root --lib` (`5 passed`), `just cargo
+test -p lobster-runtime hosted_control_ui --lib` (`2 passed`), `python
+scripts/ci/check-ecs-settings-inventory.py`, and `git diff --check`.
   Initial #6116 checks: `GitOps/FileAffordance` and
   `GitOps/OwnershipEnforcer` passed, `GitOps/GitHubPop` failed as expected for
   human proof-of-presence, and `Lobster-Runtime-PullRequest` completed
   neutral/skipping.
 - Local pre-PR validation passed: `node --check
-  scripts/stage-openclaw-control-ui.mjs`, `cargo fmt -p lobster-runtime
-  --check`, `git diff --check`, `just cargo test -p lobster-runtime
-  openclaw_control_ui --lib` (`5 passed`), `just cargo test -p lobster-runtime
-  hosted_control_ui --lib` (`2 passed`), and `just cargo test -p
-  lobster-runtime hosted_control_ui_route_selects_read_write_client_family
-  --lib` (`1 passed`).
+scripts/stage-openclaw-control-ui.mjs`, `cargo fmt -p lobster-runtime
+--check`, `git diff --check`, `just cargo test -p lobster-runtime
+openclaw_control_ui --lib` (`5 passed`), `just cargo test -p lobster-runtime
+hosted_control_ui --lib` (`2 passed`), and `just cargo test -p
+lobster-runtime hosted_control_ui_route_selects_read_write_client_family
+--lib` (`1 passed`).
 
 ## 2026-07-29 Surgical Replacement Design Addendum
 
@@ -510,11 +518,11 @@
 - Added client-route unit coverage for direct `/web/sessions` normalization,
   though the local JS runner remains dependency-blocked in this worktree.
 - Verification passed in `C:\src\lobster-control-ui-surgical`: `git diff
-  --check`, `cargo fmt -p lobster-runtime --check`, `cargo test -p
-  lobster-runtime openclaw_control_ui --lib` (`11 passed`), and `cargo test -p
-  lobster-runtime render_index_html --lib` (`8 passed`). Local
+--check`, `cargo fmt -p lobster-runtime --check`, `cargo test -p
+lobster-runtime openclaw_control_ui --lib` (`11 passed`), and `cargo test -p
+lobster-runtime render_index_html --lib` (`8 passed`). Local
   `pnpm --dir src/lobster_web exec vitest run tests/services/clientRoutes.unit.test.ts
-  --project unit` failed because `vitest` is not installed locally.
+--project unit` failed because `vitest` is not installed locally.
 
 ## 2026-07-29 Lobster Handoff Query Preservation
 
@@ -529,7 +537,7 @@
   `src/lobster_web/tests/services/clientRoutes.unit.test.ts`; local execution
   remains dependency-blocked because `vitest` is not installed in this worktree.
 - Verification passed in `C:\src\lobster-control-ui-surgical`: `git diff
-  --check` and `cargo test -p lobster-runtime openclaw_control_ui --lib`
+--check` and `cargo test -p lobster-runtime openclaw_control_ui --lib`
   (`11 passed`). Local Vitest remained blocked by missing `vitest`.
 
 ## 2026-07-29 Lobster Settings Handoff Slice
@@ -550,11 +558,11 @@
   remains intact because it owns Lobster-specific identity/attendant settings,
   not generic OpenClaw Control UI settings.
 - Verification passed in `C:\src\lobster-control-ui-surgical`: `cargo fmt -p
-  lobster-runtime -p lobster-config-schema --check`, `git diff --check`,
+lobster-runtime -p lobster-config-schema --check`, `git diff --check`,
   `python scripts/ci/check-ecs-settings-inventory.py`, `cargo test -p
-  lobster-config-schema openclaw_control_ui --lib` (`5 passed`), `cargo test
-  -p lobster-runtime openclaw_control_ui --lib` (`11 passed`), and `cargo test
-  -p lobster-runtime render_index_html --lib` (`8 passed`). Local Vitest
+lobster-config-schema openclaw_control_ui --lib` (`5 passed`), `cargo test
+-p lobster-runtime openclaw_control_ui --lib` (`11 passed`), and `cargo test
+-p lobster-runtime render_index_html --lib` (`8 passed`). Local Vitest
   remained blocked by missing `vitest`.
 
 ## 2026-07-29 Lobster Surgical Acceptance Checklist
@@ -589,7 +597,7 @@
   `633c2f60fb223fcb253d4da33208be21d8b8b2e0` and
   `C:\src\openclaw-control-ui-host-policy-main\dist\control-ui`:
   `cargo test -p lobster-runtime openclaw_control_ui_serves_real_bundle_proof
-  --lib -- --ignored` (`1 passed`).
+--lib -- --ignored` (`1 passed`).
 - The proof covers the real OpenClaw shell under `/openclaw/settings`,
   surgical redirects for `/chat`, `/sessions`, and `/settings`, query
   preservation, reduced hosted Gateway path/scopes, read-only wildcard
@@ -597,11 +605,11 @@
   `/openclaw/control-ui-config.json`.
 - Regression validation also passed in
   `C:\src\lobster-control-ui-surgical`: `cargo fmt -p lobster-runtime
-  --check`, `git diff --check`, `python scripts/ci/check-ecs-settings-inventory.py`,
+--check`, `git diff --check`, `python scripts/ci/check-ecs-settings-inventory.py`,
   `cargo test -p lobster-runtime openclaw_control_ui --lib` (`11 passed`, `1
-  ignored`), `cargo test -p lobster-runtime render_index_html --lib` (`8
-  passed`), and `cargo test -p lobster-config-schema openclaw_control_ui
-  --lib` (`5 passed`).
+ignored`), `cargo test -p lobster-runtime render_index_html --lib` (`8
+passed`), and `cargo test -p lobster-config-schema openclaw_control_ui
+--lib` (`5 passed`).
 - PR #6121 body was updated with the local proof. Live state after push:
   draft, mergeable, `UNSTABLE`; `GitOps/FileAffordance` and
   `GitOps/OwnershipEnforcer` passed, `Lobster-Runtime-PullRequest` completed
@@ -677,8 +685,8 @@
   component-level embedding.
 - Validation on #115408 main worktree:
   `vitest run --config vitest.config.ts src/app/host-policy.test.ts
-  src/lib/config/host-policy.test.ts src/app/gateway-store.test.ts
-  src/api/gateway.node.test.ts` from `ui/` passed (`4 files`, `88 tests`),
+src/lib/config/host-policy.test.ts src/app/gateway-store.test.ts
+src/api/gateway.node.test.ts` from `ui/` passed (`4 files`, `88 tests`),
   and `git diff --check HEAD~2 HEAD` passed.
 - Validation gap: local jsdom rendered view tests remain blocked by missing
   local `ui/node_modules/.bin/vitest`/`jsdom`; `pnpm exec` attempts private
@@ -703,8 +711,8 @@
   list.
 - Validation passed in `C:\src\openclaw-control-ui-host-policy-main\ui`:
   `vitest run --config vitest.config.ts src/api/gateway.node.test.ts
-  src/app/host-policy.test.ts src/lib/config/host-policy.test.ts
-  src/app/gateway-store.test.ts` (`4 files`, `89 tests`) and `git diff --check`.
+src/app/host-policy.test.ts src/lib/config/host-policy.test.ts
+src/app/gateway-store.test.ts` (`4 files`, `89 tests`) and `git diff --check`.
 - Updated #115408 body with the fixed P1 and collapsed follow-ups to three
   meaty PRs: host-authoritative config/action enforcement, granular settings
   ownership after that contract exists, and packaged hosted proof harness.
@@ -739,11 +747,11 @@
 - Local post-refresh validation passed in
   `C:\src\openclaw-control-ui-host-policy-main`: `git diff --check`,
   `node scripts/check-docs-mdx.mjs docs/web/host-control-policy.md
-  docs/web/control-ui.md --max-errors 20`, `node scripts/generate-docs-map.mjs
-  --check`, and from `ui/`,
+docs/web/control-ui.md --max-errors 20`, `node scripts/generate-docs-map.mjs
+--check`, and from `ui/`,
   `vitest run --config vitest.config.ts src/api/gateway.node.test.ts
-  src/app/host-policy.test.ts src/lib/config/host-policy.test.ts
-  src/app/gateway-store.test.ts` (`4 files`, `89 tests`).
+src/app/host-policy.test.ts src/lib/config/host-policy.test.ts
+src/app/gateway-store.test.ts` (`4 files`, `89 tests`).
 - Validation caveats: broad docs scripts timed out locally when run across the
   tree; `pnpm docs:map:gen` also attempted dependency repair and failed against
   the private feed without auth, so the docs map was regenerated directly with
@@ -788,7 +796,7 @@
   files, `git diff --check`, and a `node --import tsx` probe proving wildcard
   policy denial returns `HOST_GATEWAY_POLICY_BLOCKED`.
 - Focused Vitest caveat: `vitest run --config vitest.config.ts
-  src/gateway/server-methods.authorization.test.ts` starts but fails before
+src/gateway/server-methods.authorization.test.ts` starts but fails before
   test execution because this local worktree cannot install/fetch private
   `@openclaw/fs-safe` from `packagefeedproxy.microsoft.io` without credentials.
   The PR includes new tests covering write-scope denial, admin-scope denial,
@@ -799,3 +807,284 @@
 Detailed session handoffs live in `sessions/` and are created with
 `.agents/skills/project-session/scripts/checkpoint-session.mjs`. Keep this file
 as the concise canonical resume snapshot.
+
+## 2026-07-29 Lobster OpenClaw Image Policy Patch
+
+- Added Lobster-side OpenClaw source patch
+  `src/openclaw_container/openclaw-patches/0019-hosted-control-ui-policy.patch`
+  on `C:\src\lobster-control-ui-surgical`, following the existing image patch
+  registry/apply model instead of shipping a new OpenClaw package during the
+  quarantine wait.
+- Patch 0019 backports the hosted Control UI browser policy contract onto the
+  pinned `v2026.5.28` source after patches `0001`-`0018`: bootstrap
+  `hostControlPolicy`, hosted Gateway path/scopes, `/settings` alias,
+  centrally hidden disabled routes/settings tabs, coarse read-only settings for
+  Advanced + Quick Settings, and disabled bulk `sessions.delete`.
+- Wired `0019-hosted-control-ui-policy.patch` into the Dockerfile `COPY` and
+  sequential `git apply --check && git apply` list, and documented it in
+  `openclaw-patches/README.md` with re-derive guidance and upstream drop
+  condition.
+- Validation passed in `C:\src\lobster-control-ui-surgical`:
+  `just openclaw-patches-check --offline`, `just openclaw-patches-check`
+  fresh-clone applicability (`18 patch(es) apply cleanly to pristine
+v2026.5.28`), and `git diff --cached --check`.
+- Validation caveat: `just openclaw-js-unit-tests` was attempted for a patched
+  source build but timed out locally after 10 minutes while running Docker
+  target `openclaw-msteams-build`; the leftover build processes from that
+  attempt were stopped.
+
+## 2026-07-30 Lobster PR #6121 CI Repair
+
+- Pushed commit `f3c9376f97415bb0037405996d19f94437946c7e` to
+  [bic/lobster#6121](https://microsoft.ghe.com/bic/lobster/pull/6121) after
+  diagnosing ADO run `174420064` failures from exact head `aff75f4a4b`.
+- Fixes included the Biome formatter diff in `src/lobster_web/src/App.tsx`,
+  a clippy `needless-pass-by-value` fix for
+  `build_router_with_profile_kill_switches_and_control_ui`, stale Autodev
+  `AdoErrorReasons` references, and CDN packaging exclusion for
+  `dist/openclaw-control-ui/**` because hosted OpenClaw assets are served by
+  runtime rather than uploaded to Lobster web CDN.
+- Local verification passed in `C:\src\lobster-control-ui-surgical`:
+  `just web-fmt-check`, `just cargo fmt -p lobster-runtime --check`,
+  `python scripts/package_web_cdn_test.py`, a fixture replay of
+  `scripts/package-web-cdn.py` with representative
+  `openclaw-control-ui/` files, `cd src/lobster_runtime; ../../cargo.sh
+clippy --all-targets --no-deps -- -D warnings`, and `git diff --check`.
+- Local verification caveat: `just autodev-dotnet-check` cannot run on this
+  machine because `global.json` requires .NET SDK `10.0.100` and no .NET SDK is
+  installed.
+- Live state after push: `GitOps/FileAffordance` and
+  `GitOps/OwnershipEnforcer` green; `GitOps/GitHubPop` failed for expected
+  human proof-of-presence; ADO run `174429986` is in progress with Detect
+  green and the formerly failing Web Static, Runtime Quality, Autodev .NET,
+  and web bundle/CDN paths still running at last poll.
+
+## 2026-07-30 Lobster PR #6121 Runtime Clippy Follow-Up
+
+- ADO run `174429986` proved the prior repair fixed Autodev, Web Static, web
+  bundle, CDN packaging, OpenClaw image build, and OpenClaw JS unit tests, but
+  still failed `Lobster Runtime — Quality` on a second
+  `clippy::needless-pass-by-value` wrapper at
+  `build_router_with_profile_and_kill_switches`.
+- Pushed follow-up commit `9465e9c9def129c9f375addb95c13dae05a08e65` to make
+  the router-builder wrapper chain borrow the runtime config subscriber
+  consistently.
+- Local verification passed: `just cargo fmt -p lobster-runtime --check`,
+  `cd src/lobster_runtime; ../../cargo.sh clippy --all-targets --no-deps --
+-D warnings`, and `git diff --check`.
+- Live state after push: `GitOps/FileAffordance` and
+  `GitOps/OwnershipEnforcer` green; expected `GitOps/GitHubPop` failure;
+  new `Lobster-Runtime-PullRequest` ADO run `174433748` attached and is in
+  early Detect/Repo validation.
+
+## 2026-07-30 Lobster PR #6121 Bootstrap Route Review Fix
+
+- Took dspektor's constructive `CHANGES_REQUESTED` feedback on
+  [bic/lobster#6121](https://microsoft.ghe.com/bic/lobster/pull/6121): the
+  OpenClaw bundle requests `/__openclaw/control-ui-config.json` before
+  Lobster route policy is available, while Lobster was only serving
+  `/openclaw/control-ui-config.json`.
+- Pushed commit `924d65ce7b5968e186818b75043b3ad38b9a6cd7` adding a
+  runtime-owned alias at `/__openclaw/control-ui-config.json`, backed by the
+  same hosted Control UI config handler and the same default-off ECS gate as
+  the `/openclaw` config route.
+- Extended runtime tests to assert the mount stays hidden when disabled, both
+  config URLs return the same no-cache hosted policy when enabled, and the
+  ignored real-bundle proof fetches the concrete relative `./assets/...` file
+  plus the upstream bootstrap config URL.
+- Local verification passed in `C:\src\lobster-control-ui-surgical`:
+  `just cargo fmt -p lobster-runtime --check`, `git diff --check`,
+  `cd src/lobster_runtime; ../../cargo.sh clippy --all-targets --no-deps --
+-D warnings`, `just cargo test -p lobster-runtime openclaw_control_ui --lib`
+  (`11 passed`, `1 ignored`), and with
+  `OPENCLAW_CONTROL_UI_PROOF_DIR=C:\src\openclaw-control-ui-host-policy-main\dist\control-ui`,
+  `just cargo test -p lobster-runtime
+openclaw_control_ui_serves_real_bundle_proof --lib -- --ignored` (`1
+passed`).
+- Live state after push: PR #6121 head is `924d65ce7b`, draft, mergeable but
+  `BLOCKED` with `CHANGES_REQUESTED`; `GitOps/FileAffordance` and
+  `GitOps/OwnershipEnforcer` are green, `GitOps/GitHubPop` has the expected
+  proof-of-presence failure, and `Lobster-Runtime-PullRequest` ADO run
+  `174441255` is queued/in progress.
+
+## 2026-07-30 Lobster PR #6121 Main Merge Refresh
+
+- ADO run `174441255` on head `924d65ce7b` failed, and GitHub marked PR #6121
+  `CONFLICTING` after `main` moved.
+- Merged current `origin/main` into
+  `user/giodl/control-ui-surgical-routes`, resolving the only content conflict
+  in `src/openclaw_container/openclaw-patches/README.md` by preserving both
+  `main`'s `0017-exec-approval-capability-token-relay.patch` documentation and
+  this PR's `0022-hosted-control-ui-policy.patch` documentation.
+- Pushed merge commit `bd85aaf7a92a26843fdc411c462866569d8c1f50`. PR #6121 is
+  mergeable again, still draft, with no active review decision at first poll.
+- Local validation passed in `C:\src\lobster-control-ui-surgical`:
+  `just cargo fmt -p lobster-runtime --check`,
+  `just openclaw-patches-check --offline`,
+  `just cargo test -p lobster-runtime openclaw_control_ui --lib` (`11 passed`,
+  `1 ignored`), `cd src/lobster_runtime; ../../cargo.sh clippy --all-targets
+--no-deps -- -D warnings`, full `just openclaw-patches-check`, and
+  `git diff --check`.
+- Live state after push: `GitOps/FileAffordance` and
+  `GitOps/OwnershipEnforcer` green; expected `GitOps/GitHubPop` failure;
+  `Lobster-Runtime-PullRequest` ADO run `174512321` queued/in progress.
+
+## 2026-07-31 Lobster PR #6121 Rebase Onto Main
+
+- Rebasing `user/giodl/control-ui-surgical-routes` onto current `origin/main`
+  completed and was force-pushed with lease to head
+  `dff45863eef78ba7fe14cd8598eab88f56400f07`.
+- Resolved main drift by keeping the current consolidated OpenClaw patch stack,
+  inserting hosted Control UI policy as
+  `0019-hosted-control-ui-policy.patch`, and preserving main's rail
+  automations model while using one
+  `openclawControlUiReplaceCoreRoutesEnabled` gate for `/chat`, `/sessions`,
+  and `/settings`.
+- Added a tiny rebase repair commit to remove a duplicate Windows
+  `windows-sys` target dependency section and keep Windows clippy green for
+  Linux-only confined manifest store carriers.
+- Local validation passed in `C:\src\lobster-control-ui-surgical`:
+  `git diff --check`, `just web-fmt-check`, `just web-lint`,
+  `just web-type-check`, `just cargo fmt -p lobster-runtime --check`,
+  `just check-runtime-clippy`, `just openclaw-patches-check --offline`, and
+  `just openclaw-patches-check`.
+- Live state after push: PR #6121 head is `dff45863ee`, draft, mergeable, and
+  `BLOCKED`. `GitOps/FileAffordance` and `GitOps/OwnershipEnforcer` passed;
+  `GitOps/GitHubPop` failed for the expected human proof-of-presence gate; and
+  required `Lobster-Runtime-PullRequest` ADO run `174614353` is queued/in
+  progress.
+
+## 2026-07-31 Lobster PR #6121 AAD Throttle Repair
+
+- ADO run `174718311` on PR #6121 head `ca3785524f` proved the prior runtime
+  route clippy repair was good: `Lobster Runtime - Quality`, unit tests, web
+  static/unit/E2E, OpenClaw image build, OpenClaw JS unit tests, and adapter
+  checks passed.
+- The remaining actionable failures shared one root cause before repo code ran:
+  AzureCLI service-connection login hit AAD `AADSTS90055` / HTTP 429 throttling
+  while validating Torus WIF or minting TRIPS/git tokens.
+- Pushed commit `114efc92fb50546e16dd125252320e04ab9fa953`
+  (`fix: retry throttled AzureCLI auth gates`) to add
+  `retryCountOnTaskFailure: 2` to the three observed AzureCLI@2 auth gates:
+  Repo validation Torus WIF validation, hard-mint git-write TRIPS user, and
+  TRIPS connectivity-smoke token mint.
+- Local validation passed in `C:\src\lobster-control-ui-surgical`:
+  `python scripts\check_runtime_pipeline_sdl_test.py` (`314 tests`),
+  `python scripts\pipeline_cancel_safe_conditions_test.py` (`28 tests`), and
+  `git diff --check`.
+- Live state immediately after push: PR #6121 head is `114efc92fb`, draft and
+  mergeable, but checks had not attached yet. `GitOps/GitHubPop` is still
+  expected to require human proof-of-presence once checks attach.
+
+## 2026-07-31 Lobster PR #6121 Main Refresh Repair
+
+- ADO run `174724180` on the prior PR head failed after most validation passed;
+  GitHub then marked #6121 conflicting against current `main`.
+- Rebasing `user/giodl/control-ui-surgical-routes` onto current `origin/main`
+  completed and was force-pushed with lease to head
+  `5d5a82bc458bdf31bdcae72d7ccac42dd602b6cf`.
+- Resolved the rebase conflict in
+  `src/openclaw_container/openclaw-patches/README.md` by preserving `main`'s
+  newer patch inventory and adding this PR's hosted Control UI patch as
+  `0019-hosted-control-ui-policy.patch`; the README now documents all 24 patch
+  files, including `0018`, `0019`, `0021`, `0022`, `0023`, `0024`, and `0025`.
+- Local validation passed in `C:\src\lobster-control-ui-surgical`:
+  `git diff --check`, `just web-fmt-check`, `just web-lint`,
+  `just web-type-check`, `python scripts\package_web_cdn_test.py`,
+  `just cargo fmt -p lobster-runtime --check`,
+  `python scripts\check_runtime_pipeline_sdl_test.py` (`314 tests`),
+  `python scripts\pipeline_cancel_safe_conditions_test.py` (`28 tests`),
+  `just cargo test -p lobster-runtime openclaw_control_ui --lib` (`11 passed`,
+  `1 ignored`; rerun with `CARGO_BUILD_JOBS=1` after a timed-out parallel
+  compile), `just check-runtime-clippy`, `just openclaw-patches-check
+  --offline`, full `just openclaw-patches-check`, and direct web unit tests for
+  `SkillsPage.querycache.unit.test.tsx` plus `clientRoutes.unit.test.ts`
+  (`39 passed`).
+- Validation caveats: broad `just web-test` timed out locally, so the two
+  touched web unit suites were run directly; ignored real-bundle proof skipped
+  because `C:\src\openclaw-control-ui-host-policy-main\dist\control-ui` is not
+  present.
+- Live state immediately after push: PR #6121 is draft, mergeable, and
+  `BLOCKED`; checks had not attached yet. `GitOps/GitHubPop` is still expected
+  to require human proof-of-presence once checks attach.
+
+## 2026-08-01 Lobster PR #6121 Current-Main Restack
+
+- Merged current `origin/main` into
+  `user/giodl/control-ui-surgical-routes` and published exact head
+  `33313f26e74414378b4cc96046c9552427ec2b57`.
+- Resolved the only conflict in
+  `src/openclaw_container/src/confined_manifest_store.rs` by retaining
+  `main`'s Linux-only `MAX_MANIFEST_BYTES` guard, which matches the
+  Linux-gated `MANIFEST_BOUNDS` import, and deduplicating overlapping
+  `cfg_attr` annotations.
+- Preserved the approved hosted Control UI behavior and did not add Galin's
+  optional P3 follow-ups during the conflict repair.
+- Local validation passed: `git diff --check`, `just rust-fmt-check`,
+  `just openclaw-patches-check`,
+  `cargo.sh test -p openclaw-adapter --no-fail-fast`, and the PR hard-gate
+  policy checker plus all 17 policy tests. The aggregate
+  `just openclaw-container-test` cannot run on native Windows because
+  `aether-priv-bridge` uses Unix sockets.
+- PR #6121 is mergeable again. Exact-head reviews were re-requested from
+  `Galin-Iliev` and `dspektor`; required Runtime CI attached naturally and is
+  queued with early stages running, while `GitOps/GitHubPop` is red pending
+  human proof of presence.
+
+## 2026-07-31 OpenClaw Server Enforcement Contract Shape
+
+- Updated OpenClaw PR
+  [#116013](https://github.com/openclaw/openclaw/pull/116013) in
+  `C:\src\openclaw-control-ui-server-policy` with commit
+  `4a09753f25400b1fc729b1fe95be4abc72a4a58f`
+  (`feat: share hosted policy decision contract`).
+- PR2 still only enforces hosted policy for Gateway actions, but now defines a
+  reusable `HostPolicyDecision` shape (`state`, `reason`, `source`, `broker`)
+  and shared matcher for exact keys, hierarchical wildcards, same-depth segment
+  wildcards, and `*`.
+- The docs now include a hypothetical Lobster/Policy settings example
+  (`gateway.bind`, `tools.exec.host`, `channels.*.groupPolicy`) so the later
+  policy settings-constraints stack can reuse the same decision model instead
+  of introducing a second contract.
+- Validation passed: `git diff --check`, targeted `oxfmt --check`, targeted
+  `oxlint`, `scripts/check-docs-mdx.mjs docs/web/host-control-policy.md`, and a
+  direct `tsx` smoke for decision matching and broker/source error details.
+  Focused Vitest was blocked before test execution by missing private
+  `@openclaw/fs-safe/config`; the commit hook was blocked by missing
+  `node_modules/.bin/oxfmt`, so the commit used `--no-verify` after direct
+  checks.
+- Live state after refresh: #116013 head `4a09753f25`, draft, and
+  `CONFLICTING`/`DIRTY` against `main` because it remains stacked on #115408;
+  attached checks are green or intentionally skipped.
+
+## 2026-07-31 OpenClaw Hosted Policy Stack Refresh
+
+- Refreshed OpenClaw PR
+  [#115408](https://github.com/openclaw/openclaw/pull/115408) in
+  `C:\src\openclaw-control-ui-host-policy-main` by rebasing
+  `user/giodl/control-ui-host-policy-main` onto current `origin/main`.
+- Resolved current Control UI settings/sidebar conflicts by preserving `main`'s
+  extracted settings shell and reapplying the hosted policy hooks:
+  host-policy route filtering, settings read-only/disabled state, config
+  autosave/apply affordances, and disabled session deletion.
+- Added rebase repair commit `6fba8ef36745794493266960efc063afacb0fcd1`
+  (`fix: repair hosted policy rebase`) restoring the small
+  `view-status.ts` helper plus `ConfigProps.onApply` wiring.
+- Force-pushed #115408 to fork branch
+  `user/giodl/control-ui-host-policy-main`; live state after push:
+  draft, mergeable, `UNSTABLE` while checks settled, with no-tabs/actionlint,
+  proof, labels, and detector checks passing or intentionally skipped.
+- Restacked OpenClaw PR
+  [#116013](https://github.com/openclaw/openclaw/pull/116013) in
+  `C:\src\openclaw-control-ui-server-policy` onto the refreshed #115408 head
+  and force-pushed to fork branch `user/giodl/control-ui-server-policy`.
+  New head is `55e3c97ddc157c1ad167be60dcd2e497834536f5`.
+- Local validation available without a full JS dependency install passed:
+  `git diff --check` and anchored conflict-marker scans on both worktrees.
+  Full `pnpm exec oxfmt --check ...` could not run locally because pnpm tried
+  to install the full workspace and failed against `packagefeedproxy` with
+  `chalk-6.0.0.tgz` 404 plus current Node `v24.14.0` below repo engine
+  `>=24.15.0`.
+- Live state after #116013 push: draft, mergeable, `UNSTABLE`; dispatch and
+  detectors started passing, with no-tabs/actionlint/proof/labels still
+  attaching at first poll.

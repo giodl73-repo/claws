@@ -10,12 +10,12 @@ OpenClaw runs locally, in containers, behind identity proxies, and as a controll
 
 Profiles are optional compositions of RFC 0018 criteria, not another evaluator.
 
-| Profile | Supported posture | Profile-specific evidence |
-| --- | --- | --- |
-| `local` | Foreground/local Gateway | Shared serving baseline |
-| `container` | Directly reachable container listener | Non-loopback effective listener |
-| `reverse-proxy` | Gateway behind a trusted identity proxy | Trusted-proxy auth, identity header, trusted source, and viable topology |
-| `node-mode` | Gateway controlling execution targets | Approved pairing, connected target, command-policy approval, and live control channel |
+| Profile         | Supported posture                       | Profile-specific evidence                                                             |
+| --------------- | --------------------------------------- | ------------------------------------------------------------------------------------- |
+| `local`         | Foreground/local Gateway                | Shared serving baseline                                                               |
+| `container`     | Directly reachable container listener   | Non-loopback effective listener                                                       |
+| `reverse-proxy` | Gateway behind a trusted identity proxy | Trusted-proxy auth, identity header, trusted source, and viable topology              |
+| `node-mode`     | Gateway controlling execution targets   | Approved pairing, connected target, command-policy approval, and live control channel |
 
 Every profile selects the same required serving baseline and advisory operational facts. Selection precedence is `gateway argument > environment > openclaw.json`; unprofiled startup remains unchanged, and operators can add criteria directly.
 

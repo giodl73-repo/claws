@@ -68,12 +68,12 @@ giving up the current Desktop baseline?"
 
 Local OpenClaw adds the next set of questions:
 
-| Question | Why it matters | Main PR |
-| --- | --- | --- |
-| Can Local OpenClaw be discovered and shown without becoming default? | Visibility should not imply authority. | [#3954](https://github.com/gim-home/m/pull/3954) |
-| Can Scout bind a session to Local OpenClaw behind explicit dogfood flags? | The route must be testable in the app without changing normal behavior. | [#3954](https://github.com/gim-home/m/pull/3954) |
-| Can Local OpenClaw ask Desktop for local work without bypassing Desktop? | Local capabilities must stay behind policy, approval, and audit. | [#3954](https://github.com/gim-home/m/pull/3954) |
-| Can the runtime path prove package/Gateway compatibility? | A local runtime provider needs concrete transport/package proof before broader dogfood. | [#3954](https://github.com/gim-home/m/pull/3954) |
+| Question                                                                  | Why it matters                                                                          | Main PR                                          |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Can Local OpenClaw be discovered and shown without becoming default?      | Visibility should not imply authority.                                                  | [#3954](https://github.com/gim-home/m/pull/3954) |
+| Can Scout bind a session to Local OpenClaw behind explicit dogfood flags? | The route must be testable in the app without changing normal behavior.                 | [#3954](https://github.com/gim-home/m/pull/3954) |
+| Can Local OpenClaw ask Desktop for local work without bypassing Desktop?  | Local capabilities must stay behind policy, approval, and audit.                        | [#3954](https://github.com/gim-home/m/pull/3954) |
+| Can the runtime path prove package/Gateway compatibility?                 | A local runtime provider needs concrete transport/package proof before broader dogfood. | [#3954](https://github.com/gim-home/m/pull/3954) |
 
 ## The Core Safety Rule
 
@@ -120,11 +120,11 @@ as a governed Desktop runtime provider.
 
 It folds these focused fork PRs:
 
-| Fork PR | Short title | What it proves |
-| --- | --- | --- |
-| [#72](https://github.com/giodl_microsoft/m/pull/72) | Local provider foundation | Local OpenClaw can be represented as provider status and discovery data without launching or selecting it by default. |
-| [#73](https://github.com/giodl_microsoft/m/pull/73) | Policy, session, lifecycle, transport | Provider eligibility, session binding, sidecar/client contracts, and safe disabled defaults are explicit. |
-| [#74](https://github.com/giodl_microsoft/m/pull/74) | Dogfood UI and chat routing | The route can be exercised through Scout surfaces behind diagnostics/flags without changing default behavior. |
+| Fork PR                                             | Short title                           | What it proves                                                                                                        |
+| --------------------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| [#72](https://github.com/giodl_microsoft/m/pull/72) | Local provider foundation             | Local OpenClaw can be represented as provider status and discovery data without launching or selecting it by default. |
+| [#73](https://github.com/giodl_microsoft/m/pull/73) | Policy, session, lifecycle, transport | Provider eligibility, session binding, sidecar/client contracts, and safe disabled defaults are explicit.             |
+| [#74](https://github.com/giodl_microsoft/m/pull/74) | Dogfood UI and chat routing           | The route can be exercised through Scout surfaces behind diagnostics/flags without changing default behavior.         |
 
 Review #3954 for these properties:
 
@@ -163,12 +163,12 @@ capability review into the same foundational PR.
 Local OpenClaw gives Scout four strategic options that are hard to get from a
 single cloud-only path.
 
-| Value | Explanation |
-| --- | --- |
-| Provider independence | Scout can evaluate Local OpenClaw without immediately removing the current Desktop provider baseline. |
-| Local authority with governance | Local capabilities can be powerful because Desktop remains the policy, approval, audit, and execution boundary. |
-| Package and rollback control | Runtime health, compatibility, source identity, launch, reconnect, and rollback can become product-visible states. |
-| Shared capability reuse | Local OpenClaw can use the same provider-neutral Desktop capability contracts as hosted cloud instead of owning special local-only tools. |
+| Value                           | Explanation                                                                                                                               |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Provider independence           | Scout can evaluate Local OpenClaw without immediately removing the current Desktop provider baseline.                                     |
+| Local authority with governance | Local capabilities can be powerful because Desktop remains the policy, approval, audit, and execution boundary.                           |
+| Package and rollback control    | Runtime health, compatibility, source identity, launch, reconnect, and rollback can become product-visible states.                        |
+| Shared capability reuse         | Local OpenClaw can use the same provider-neutral Desktop capability contracts as hosted cloud instead of owning special local-only tools. |
 
 This is the core argument for Local OpenClaw: not "run something locally," but
 "make local runtime power governable enough to review, dogfood, and eventually
@@ -178,25 +178,25 @@ switch over safely if the evidence supports it."
 
 The latest validation recorded in the PR stack shows:
 
-| Area | Current status |
-| --- | --- |
-| Local provider model | Source-level contracts and feature-off behavior are proven. |
-| Local runtime discovery and diagnostics | Local OpenClaw can be visible and diagnosable without becoming default. |
-| Local session/runtime routing | Dogfood routing can bind a session to Local OpenClaw behind explicit flags. |
-| Sidecar/client transport contracts | Local OpenClaw can be represented through sidecar/client contracts without broad local authority. |
-| Lobster package adapter foundation | Gateway-compatible adapter proof belongs in the integration proof PR when combined with shared Desktop capabilities. |
+| Area                                    | Current status                                                                                                       |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Local provider model                    | Source-level contracts and feature-off behavior are proven.                                                          |
+| Local runtime discovery and diagnostics | Local OpenClaw can be visible and diagnosable without becoming default.                                              |
+| Local session/runtime routing           | Dogfood routing can bind a session to Local OpenClaw behind explicit flags.                                          |
+| Sidecar/client transport contracts      | Local OpenClaw can be represented through sidecar/client contracts without broad local authority.                    |
+| Lobster package adapter foundation      | Gateway-compatible adapter proof belongs in the integration proof PR when combined with shared Desktop capabilities. |
 
 ## Remaining Gaps
 
 These are not reasons to reject the architecture. They are the precise items
 that should stay visible before anyone treats Local OpenClaw as default-ready.
 
-| Gap | Why it still matters |
-| --- | --- |
-| Gateway-returned provider attestation | Scout should receive source-authenticated provider evidence instead of relying on runtime logs. |
-| Packaged installer/update rollback | Source lifecycle rollback is proven in prior work; packaged installer/update rollback has not been run end to end. |
-| Scout-managed package acquisition | The current proof can launch configured sidecars; Scout-owned downloader/acquirer is not wired yet. |
-| Default-provider flip | The current Desktop provider remains the fully capable baseline until parity and validation justify changing defaults. |
+| Gap                                   | Why it still matters                                                                                                   |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Gateway-returned provider attestation | Scout should receive source-authenticated provider evidence instead of relying on runtime logs.                        |
+| Packaged installer/update rollback    | Source lifecycle rollback is proven in prior work; packaged installer/update rollback has not been run end to end.     |
+| Scout-managed package acquisition     | The current proof can launch configured sidecars; Scout-owned downloader/acquirer is not wired yet.                    |
+| Default-provider flip                 | The current Desktop provider remains the fully capable baseline until parity and validation justify changing defaults. |
 
 ## Reading Order
 

@@ -135,4 +135,3 @@ Fork automation accepted the refreshed real-behavior proof and workflow-sanity
 checks. The remaining `auto-response` and `label` failures are fork permission
 noise; the full upstream CI matrix is intentionally skipped on this fork-only
 draft and must run on the fresh issue-linked upstream replay.
-

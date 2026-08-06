@@ -56,4 +56,3 @@ observes exactly `/start` followed by `/finish`, with a final HTTP 200 response.
 
 Yes. A narrow, behavior-preserving implementation is ready and will be linked
 to this issue.
-

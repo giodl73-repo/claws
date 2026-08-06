@@ -10,6 +10,8 @@ For agent and harness entry points, start with `CONTEXT.md`.
 
 | Area                                | Home                             | Purpose                                                                                                                                  |
 | ----------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| OpenClaw system design              | `projects/openclaw-design/`      | Cross-RFC conceptual model, major objects, facility capabilities, ownership boundaries, and contract summaries.                         |
+| EnterpriseClaw                      | `projects/enterpriseclaw/`       | Desired owner-first OpenClaw architecture: layers, domains, trust, control loops, local/managed profiles, and evolution rules.          |
 | OpenClaw PR work                    | `projects/openclaw/`             | Current OpenClaw branches, PR notes, review loops, proof, and RFC tracking.                                                              |
 | Lobster work                        | `projects/lobster/`              | Lobster worktrees, dashboard links, PR notes, and local runtime notes.                                                                   |
 | Policy                              | `projects/policy/`               | Active policy conformance, evidence, RFC, and Lobster baseline work.                                                                     |
@@ -29,11 +31,12 @@ For agent and harness entry points, start with `CONTEXT.md`.
 | Runtime State Continuity            | `projects/state-continuity/`     | State ownership, checkpoints, publication, dirty/synced status, fencing, restore, and persistence removal.                               |
 | PromoteClaw                         | `projects/promoteclaw/`          | Regular Lobster OpenClaw version promotion from quarantine-cleared LTS releases, with patch carry-forward validation.                    |
 | TypeClaw                            | `projects/typeclaw/`             | OpenClaw TypeScript native / TS7 performance and compatibility evaluation.                                                               |
+| Codeprints                          | `projects/codeprints/`           | Language-neutral repository factorization, first-language analyzers, owner-led evidence, and native-authority preservation.               |
 | OpenClaw Rust node                  | `projects/openclaw-rust-node/`   | Rust node client/headless host RFC, node-contract conformance, release ownership, and first Lobster embedding evidence.                  |
 | Memory                              | `projects/memory/`               | Agent memory strategy, OpenClaw assessment, and XAI report notes.                                                                        |
 | Mail                                | `projects/mail/`                 | Mail-channel research, mail plugin options, and Exchange/Microsoft Graph integration framing.                                            |
 | Claws                               | `projects/claws/`                | OpenClaw RFC direction for runnable starter setups across skills, plugins, MCP servers, workspace files, persona files, and automations. |
-| Control UI hosting                  | `projects/control-ui/`           | Version-matched OpenClaw Control UI hosted in Lobster, with Lobster auth, runtime routing, rollout, and enforced lockdown.                |
+| Control UI hosting                  | `projects/control-ui/`           | Version-matched OpenClaw Control UI hosted in Lobster, with Lobster auth, runtime routing, rollout, and enforced lockdown.               |
 | Claws Review Bot                    | `projects/claws-review-bot/`     | `@bic/claws-review-bot` package notes; primary Lobster PR reviewer lane plus separate ClawPilot issue-classifier experiment.             |
 | Localization                        | `projects/localization/`         | OpenClaw localization architecture, surface coverage, runtime errors, channel messages, and bounded evidence slices.                     |
 | oc-path                             | `projects/oc-path/`              | oc-path worktrees, specs, and follow-up PRs.                                                                                             |
@@ -44,19 +47,19 @@ For agent and harness entry points, start with `CONTEXT.md`.
 | WSL tools                           | `tools/wsl/` and `projects/wsl/` | Stable wrappers and WSL worktree index for OpenClaw/Lobster work under `/root/src`.                                                      |
 | PR loop                             | `projects/pr-loop/`              | Active stacked-PR operations, dependency restacks, review refreshes, and CI gate handoffs.                                               |
 | PR queues                           | `projects/prs/`                  | Cross-project PR tracking, staleness, proof, and watcher notes.                                                                          |
-| Disk management                     | `projects/disk-mgmt/`            | Laptop disk reclaim: managed-repo inventory, merged/closed PR worktree prune, stale branch cleanup, and reclaim techniques.             |
+| Disk management                     | `projects/disk-mgmt/`            | Laptop disk reclaim: managed-repo inventory, merged/closed PR worktree prune, stale branch cleanup, and reclaim techniques.              |
 | Archived waves                      | `.craft/waves/`                  | Historical research, panels, proposals, and generated wave artifacts. Do not use this as the active task surface.                        |
 
 ## Current External Worktrees
 
-| Project          | Path                                                            | Notes                                                                  |
-| ---------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| OpenClaw         | `C:\src\openclaw` and PR-specific `C:\src\openclaw-*` worktrees | Use for upstream OpenClaw implementation and PR stacks.                |
-| OpenClaw Rust node | `C:\src\openclaw-rust-node`                                 | Experimental Rust node RFC and future conformance implementation.      |
-| Lobster          | `C:\src\lobster`                                                | Main Lobster checkout.                                                 |
-| LobsterTank      | `C:\src\lobster-lobstertank`                                    | Dashboard worktree; current dashboard code is in `tools/lobstertank/`. |
-| RFCs             | `C:\src\openclaw-rfcs` or the active RFC worktree when present  | Use for RFC text and discussion follow-up.                             |
-| WSL active index | `/root/src/_hapi`                                               | Symlinks to active WSL OpenClaw/RFC worktrees.                         |
+| Project            | Path                                                            | Notes                                                                  |
+| ------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| OpenClaw           | `C:\src\openclaw` and PR-specific `C:\src\openclaw-*` worktrees | Use for upstream OpenClaw implementation and PR stacks.                |
+| OpenClaw Rust node | `C:\src\openclaw-rust-node`                                     | Experimental Rust node RFC and future conformance implementation.      |
+| Lobster            | `C:\src\lobster`                                                | Main Lobster checkout.                                                 |
+| LobsterTank        | `C:\src\lobster-lobstertank`                                    | Dashboard worktree; current dashboard code is in `tools/lobstertank/`. |
+| RFCs               | `C:\src\openclaw-rfcs` or the active RFC worktree when present  | Use for RFC text and discussion follow-up.                             |
+| WSL active index   | `/root/src/_hapi`                                               | Symlinks to active WSL OpenClaw/RFC worktrees.                         |
 
 ## Rules
 

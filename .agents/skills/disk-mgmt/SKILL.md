@@ -20,10 +20,10 @@ Get-Content tools\disk-mgmt\README.md
 
 ## Laptop-aware budget
 
-| Profile | Use | Active slots | Claws checkout cap | Keep free |
-| ------- | --- | ------------ | ------------------ | --------- |
-| `light` | 1-2 OpenClaw/Lobster projects + merge | 2+1=3 | ~30 GB | >=40 GB |
-| `heavy` | 4-5 concurrent stacks + merge | 5+1=6 | ~50 GB | >=50 GB |
+| Profile | Use                                   | Active slots | Claws checkout cap | Keep free |
+| ------- | ------------------------------------- | ------------ | ------------------ | --------- |
+| `light` | 1-2 OpenClaw/Lobster projects + merge | 2+1=3        | ~30 GB             | >=40 GB   |
+| `heavy` | 4-5 concurrent stacks + merge         | 5+1=6        | ~50 GB             | >=50 GB   |
 
 Numbers: `tools/disk-mgmt/profiles.json`.
 Machine local: `projects/disk-mgmt/local/` (gitignored).

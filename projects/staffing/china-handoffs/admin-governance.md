@@ -78,18 +78,18 @@ unified admin experience.
 
 ## Partners and dependencies
 
-| Partner | Contribution and decisions needed |
-| --- | --- |
-| MAC/MOS3 | Native title availability, catalog/feed authority, tenant controls, title IDs, package-defense state, RBAC, and admin APIs. |
-| Partner Center / M365 admin center | App/package submission, certification, publishing, tenant enablement, consent, and admin distribution. |
-| Lobster/Scout | Authority composition, hosted control plane, effective-state APIs, admin UX, materialization, E2E, rollout, and operations. |
-| OpenClaw | Generic policy, config, conformance, repair, and runtime enforcement primitives. |
-| Extensibility | Feed composition, marketplace governance, extension identity, versioning, trust, and revocation. |
-| Frontend Product Engineering | Coherent settings, preview, explain, audit, errors, freshness, and remediation UX. |
-| Security | Roles, consent, permissions, exceptions, overrides, package governance, auth boundaries, and privacy review. |
-| Infrastructure & Engineering Systems | Test tenants, E2E harnesses, required checks, reliability, tracing, dashboards, and rollback automation. |
-| Data Science & Insights | Admin adoption, decision latency, override/exception trends, blocked-state and rollout signals. |
-| Operations & TPM | Partner decisions, certification/submission follow-through, launch readiness, and named ownership. |
+| Partner                              | Contribution and decisions needed                                                                                           |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| MAC/MOS3                             | Native title availability, catalog/feed authority, tenant controls, title IDs, package-defense state, RBAC, and admin APIs. |
+| Partner Center / M365 admin center   | App/package submission, certification, publishing, tenant enablement, consent, and admin distribution.                      |
+| Lobster/Scout                        | Authority composition, hosted control plane, effective-state APIs, admin UX, materialization, E2E, rollout, and operations. |
+| OpenClaw                             | Generic policy, config, conformance, repair, and runtime enforcement primitives.                                            |
+| Extensibility                        | Feed composition, marketplace governance, extension identity, versioning, trust, and revocation.                            |
+| Frontend Product Engineering         | Coherent settings, preview, explain, audit, errors, freshness, and remediation UX.                                          |
+| Security                             | Roles, consent, permissions, exceptions, overrides, package governance, auth boundaries, and privacy review.                |
+| Infrastructure & Engineering Systems | Test tenants, E2E harnesses, required checks, reliability, tracing, dashboards, and rollback automation.                    |
+| Data Science & Insights              | Admin adoption, decision latency, override/exception trends, blocked-state and rollout signals.                             |
+| Operations & TPM                     | Partner decisions, certification/submission follow-through, launch readiness, and named ownership.                          |
 
 ### Terms used in this brief
 

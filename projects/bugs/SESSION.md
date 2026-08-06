@@ -69,11 +69,11 @@
   adjusted for upstream's removal of `doctor-health-conversion-plan.ts`, and
   amended to register the new check in the current ordered doctor health
   contributions so `--lint --only` actually runs it. Proof passed: `pnpm
-  format:check src\flows\doctor-core-checks.ts
-  src\commands\doctor-lint.test.ts src\flows\doctor-health-contributions.ts`
+format:check src\flows\doctor-core-checks.ts
+src\commands\doctor-lint.test.ts src\flows\doctor-health-contributions.ts`
   and `node scripts/run-vitest.mjs src\commands\doctor-lint.test.ts
-  src\flows\doctor-core-checks.test.ts src\flows\doctor-lint-flow.test.ts
-  src\flows\doctor-health-contributions.test.ts`. Commit `eccd735f3e` was
+src\flows\doctor-core-checks.test.ts src\flows\doctor-lint-flow.test.ts
+src\flows\doctor-health-contributions.test.ts`. Commit `eccd735f3e` was
   force-pushed to `giodl73-repo:user/giodl/doctor-model-ref-lint`. Live PR
   state after fresh checks: draft, mergeStateStatus `CLEAN`, Real behavior
   proof passed, and all non-skipped checks reported by `gh pr checks` passed.
@@ -146,7 +146,7 @@
   doctor contribution tests updated to preserve current gateway secret-input
   path exports after the rebase and include the required mocked Gateway health
   `status` field. Focused doctor Vitest, `oxfmt`, `oxlint`, and `git diff
-  --check` passed; fresh GitHub checks and ClawSweeper re-review were pending.
+--check` passed; fresh GitHub checks and ClawSweeper re-review were pending.
 - PR #86627 was rebased again on 2026-06-16 to signed head `47e91227fcd`, adding
   the current `plugin-sdk/health` deprecated export budget after
   `checks-node-core-fast` exposed a plugin SDK surface budget failure. Focused
@@ -183,7 +183,7 @@
 - #90708 was updated on 2026-06-16 to signed head `6c77020296`, restoring Slack
   dropped-history media timeouts to 1s/3s and removing that runtime behavior
   delta from the PR. Focused WSL Vitest, `oxfmt`, `oxlint`, and `git diff
-  --check` passed; re-review comment posted. Live snapshot later showed clean
+--check` passed; re-review comment posted. Live snapshot later showed clean
   checks, but the proof label had not synced yet.
 - #87471 was rebased on 2026-06-16 to signed head `6f37b508808`, resolving
   replay projection conflicts while preserving the `sessions_yield` visible
@@ -195,7 +195,7 @@
 - #90062 was rebased on 2026-06-16 to signed head `b07f56876e7`. Targeted
   Gateway session-key Vitest and `git diff --check` passed. Re-review comment
   posted while explicitly noting the missing real fresh `openclaw agent
-  --session-key agent:main:probe-* --message ...` proof remains outstanding.
+--session-key agent:main:probe-* --message ...` proof remains outstanding.
 - #90062 was rechecked on 2026-06-16: live PR state is draft,
   mergeable/CLEAN, maintainerCanModify=true, head `b07f56876e7`, and no
   non-skipped failing checks were reported by `gh pr checks`. ClawSweeper
@@ -207,7 +207,7 @@
   source worktree lacks built `dist/entry`, while the TS entrypoint help works.
 - #83991 was rebased on 2026-06-16 to signed head `db10b0be72e`. Focused
   `src/plugin-sdk/provider-stream.test.ts`, `oxfmt`, `oxlint`, and `git diff
-  --check` passed. Re-review comment posted while explicitly noting live
+--check` passed. Re-review comment posted while explicitly noting live
   Vertex/Gemini provider proof remains outstanding unless maintainers accept
   source-harness proof.
 - #86285 was rebased on 2026-06-16 to signed head `0470662961d`. Focused
@@ -255,7 +255,7 @@
   to signed head `0641d1fdb5ab`. Maintainer edits are enabled. Local validation
   passed: `extensions/openai/realtime-voice-provider.test.ts`,
   `extensions/voice-call/src/webhook/realtime-handler.test.ts`, `git diff
-  --check`, scoped `oxfmt`, and scoped `oxlint`. Re-review comment posted at
+--check`, scoped `oxfmt`, and scoped `oxlint`. Re-review comment posted at
   https://github.com/openclaw/openclaw/pull/86285#issuecomment-4748698463.
   Live refresh showed mergeable/CLEAN and all checks passing, including Real
   behavior proof. ClawSweeper labels still say `status: needs proof` and
@@ -268,7 +268,7 @@
   https://github.com/openclaw/openclaw/pull/83991#issuecomment-4748710036.
   Live refresh showed Real behavior proof passing and all checks green.
   ClawSweeper labels still say `status: needs proof` and `rating: unranked
-  krab`, so the remaining ask is live Vertex/Gemini proof or maintainer
+krab`, so the remaining ask is live Vertex/Gemini proof or maintainer
   acceptance of the source-harness proof.
 - #89596 live check on 2026-06-19 showed head `3f8628b4fd17`, all checks clean,
   `rating: diamond lobster`, and `status: ready for maintainer look`.
@@ -290,7 +290,7 @@
 - #90708 proof in WSL root: focused failed files passed; five previously
   failing shard configs passed; `oxfmt`, `oxlint`, `git diff --check`,
   `pnpm build`, `pnpm check`, and full `env -u DISPLAY -u WAYLAND_DISPLAY pnpm
-  test` passed. Full test result: 88 Vitest shards in 1197.64s.
+test` passed. Full test result: 88 Vitest shards in 1197.64s.
 - #94176 was triaged on 2026-06-17 as the next small bugfix candidate after
   duplicate-searching current cron/config/skill candidates. Duplicate search
   found no open PR for `non_deliverable_terminal_turn`. Local worktree:
@@ -302,9 +302,9 @@
   instead of generic `/new` fallback copy. It intentionally does not implement
   the requested automatic single retry yet because that is a behavior change
   requiring maintainer/Peter review. Proof passed: `pnpm install
-  --frozen-lockfile`, focused
+--frozen-lockfile`, focused
   `node scripts/run-vitest.mjs src/auto-reply/reply/agent-runner-execution.test.ts
-  --reporter=dot` (205 tests), `oxfmt --check`, `oxlint`, `git diff --check`,
+--reporter=dot` (205 tests), `oxfmt --check`, `oxlint`, `git diff --check`,
   and `pnpm tsgo:core`. After the local fix, a live recheck found newly opened
   PR #94187 by `lsr911` for the same issue. Do not open a duplicate PR. Local
   diff is useful as review/reference because it includes typed metadata
@@ -314,7 +314,7 @@
 - #94187 was repaired directly on 2026-06-17 because `maintainerCanModify=true`
   on `lsr911/openclaw:fix/issue-94176-non_deliverable_terminal_turn`.
   Initially pushed signed commit `4b2e60a8e579` (`fix(agent): preserve terminal
-  turn diagnostics`) to the contributor branch. The branch was rebased on
+turn diagnostics`) to the contributor branch. The branch was rebased on
   2026-06-18 onto upstream `main` `c9707ab635b` and force-with-lease pushed to
   signed head `87351bedd45f8`. The commit adds the typed metadata propagation,
   copies `terminalError` into final embedded run meta/lifecycle metadata, marks
@@ -323,7 +323,7 @@
   Telegram/direct regression. Local proof in `C:\tmp\openclaw-94187` passed:
   focused agent-runner Vitest (205 tests), full plugin-sdk Vitest config (58
   files / 385 tests), `oxfmt --check`, `oxlint`, `git diff --check
-  upstream/main..HEAD`, `pnpm tsgo:core`, and signature checks. The PR body now
+upstream/main..HEAD`, `pnpm tsgo:core`, and signature checks. The PR body now
   has the required `## Real behavior proof` section and the rerun proof-body
   gate passes; fresh GitHub CI is green, including the formerly failing
   `checks-node-agentic-plugin-sdk`. Posted
@@ -334,6 +334,6 @@
   produce a Telegram bot reply in either checkout, so no visible Telegram
   after-fix evidence was captured. On 2026-06-19 the failing proof log showed
   the hard blocker is that external PRs must include a PR-body `Real behavior
-  proof` section with after-fix evidence from a real setup. Maintainer edits are
+proof` section with after-fix evidence from a real setup. Maintainer edits are
   now false, so we cannot edit the body/branch from here. Posted author unblock
   note at https://github.com/openclaw/openclaw/pull/94187#issuecomment-4748818019.

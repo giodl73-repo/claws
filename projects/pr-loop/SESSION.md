@@ -1,5 +1,562 @@
 # PR Loop Session Context
 
+## 2026-08-04 #6839 latest Runtime result
+
+- Exact head `0238fee805` is still open and draft. Required Runtime build
+  `175185366` failed two branch-owned lanes: image warm-up rejects
+  `agents.defaults.memorySearch.store`, and four msteams reaction-action tests
+  retain the older expected call shape. GitHubPop is red and review is required.
+- The authoritative upstream feed now exposes `openclaw@2026.6.33` in
+  `Local,Release,quarantine`, despite its 2026-08-03 publish date. Prefer a new
+  6.33 promotion branch over additional 6.11 repair churn.
+
+## 2026-08-04 #6839 OpenClaw 2026.6.11 repair published
+
+- Restacked the promotion onto current Lobster `main` and published exact head
+  `0238fee805b21a6ad250fc8df762065438b7a6e0`.
+- Ported all 29 active OpenClaw patches, including current main's group-chat
+  participant binding and trusted `node.invoke` session envelope contracts.
+- Added `0029-openclaw-6.11-port-corrections.patch` to repair malformed 6.11
+  merge artifacts across runner, session, cron, gateway, and regression-test
+  code while preserving Candidate/Active isolation.
+- Proof passed: pristine 29-patch applicability, corrected OpenClaw
+  `build:docker`, targeted node/session-binding tests, adapter version
+  contracts, and all 314 runtime pipeline SDL tests.
+- The first replacement Runtime run exposed two additional 6.11 deltas. The
+  fast-path auth probe now recognizes SQLite-backed main auth stores, and the
+  image request-timeout patcher accepts 6.11's native catalog-timeout contract
+  instead of requiring the old 5.28 bundle shape.
+- The next Runtime run exposed three final branch-owned gates. The sensitivity
+  regression now mocks 6.11's `updateSessionEntry` accessor, the cron-plan
+  patcher accepts 6.11's `hasApprovalsScope` bundle shape, and the Rust timeout
+  assertion is formatted. Focused sensitivity, Linux patcher, applicability,
+  rustfmt, and adapter contract proof pass.
+- Runtime build `175174039` then exposed a second 6.11 approval bundle shape,
+  malformed cron hook-context test merges, and an invalid duplicate max-timeout
+  assertion. The patcher now supports structured approval resolution, cron
+  identity reaches both lifecycle hooks, and focused JS/patcher proof passes.
+- #6839 is draft and mergeable. Checks have not attached to the replacement
+  head yet. GitHubPop will still require human proof; no ADO run was manually
+  queued.
+
+## 2026-08-01 #5402 and #5646 current-main repairs published
+
+- #5402 Runtime build `174762753` failed two branch-owned early gates:
+  Biome reformatted the new same-document navigation assertion, and Agent Tools
+  staging rejected the `@agents/tools` `0.0.4` package against Office CLI
+  wrappers still at `0.0.3`.
+- Merged current Lobster `main`, formatted the helper, bumped all Office CLI
+  wrapper package manifests to `0.0.4`, and re-derived the updated brokered
+  Teams Graph patch onto pristine OpenClaw `v2026.7.1` while preserving the
+  promotion branch's existing private msteams features.
+- Published #5402 exact head
+  `e69dfbf042771b76404f27495d38a870249fcca8`. Patch inventory/applicability,
+  navigation helper tests (67/67), Agent Tools artifact contract tests (20/20),
+  Rust formatting, and PR hard-gate policy checks pass.
+- Merged current `main` into #5646 and resolved its sole conflict by preserving
+  both the Candidate-flighting and Teams channel-participation policy
+  annotations. Published exact head
+  `e3d85819a704fa0e5615a222c6941ba4c83fd0d3`; focused Plex adapter tests and
+  formatting pass.
+- Exact-head reviews were re-requested from `Galin-Iliev` and `harryf` on both
+  PRs. Runtime CI was left to attach naturally.
+
+## 2026-08-01 #6121 replacement head published
+
+- Merged current Lobster `main` into #6121 and published exact head
+  `33313f26e74414378b4cc96046c9552427ec2b57`.
+- The single conflict was in
+  `src/openclaw_container/src/confined_manifest_store.rs`; the resolution keeps
+  `main`'s Linux-only manifest-byte bound and removes duplicate dead-code
+  attributes without adding the optional hosted-Control-UI review follow-ups.
+- Local checks passed: diff hygiene, Rust formatting, OpenClaw patch inventory
+  and applicability, `openclaw-adapter` tests, and the PR hard-gate policy
+  checker plus its 17 tests. The aggregate OpenClaw container test recipe
+  remains non-runnable on native Windows because `aether-priv-bridge` requires
+  Unix sockets.
+- #6121 is mergeable again. Exact-head reviews were re-requested from
+  `Galin-Iliev` and `dspektor`; `GitOps/GitHubPop` is red pending human proof
+  of presence, and `Lobster-Runtime-PullRequest` attached naturally and is
+  queued with early stages running.
+
+## 2026-08-01 #5402 and #5646 replacement heads published
+
+- #5402 exact head is
+  `77f7dc408d9852677baeaf08cbcc7b80d7315459`, mergeable after merging
+  current `main` `2e5766385f`.
+- Build `174758826` failures shared one root cause: OpenClaw 2026.7.1 startup
+  migration rejected the immutable image because the independently installed
+  `diagnostics-otel` and `msteams` plugins declared an `openclaw` peer without
+  install-local peer links. The image now bakes and tests both trusted links.
+- The minted-user Playwright failure was separate: a successful same-document
+  `#/chat` navigation returns `null`. The shared helper now accepts that result
+  while still rejecting non-OK network responses, with a unit regression test.
+- Top-level `@agents/tools` and its lockfile are now `0.0.4`, clearing Galin's
+  G1 version blocker. The PR body evidence was updated and exact-head review
+  was re-requested from Galin and Harry.
+- #5646 exact head is
+  `37b100f01a54e08fbe483339a9a69008c484ee4a`, mergeable after merging the same
+  current `main`. The previously published fail-closed stale-route repair
+  remains intact; Galin had approved that delta and Harry was re-requested on
+  the replacement head.
+- Natural Runtime checks are queued on both heads. #5646 GitHubPop is red
+  pending user proof of presence; #5402 GitHubPop has not attached yet. No ADO
+  run was manually queued.
+
+## 2026-08-01 #5402 OpenClaw 7.1 state-path repair published
+
+- Build `174755167` proved the image still baked a stock-`orig` database:
+  OpenClaw 2026.7.1 warm-up writes
+  `~/.openclaw/state/openclaw.sqlite`, while cleanup, the final image guard,
+  snapshot plugin config, and dedicated DoltLite materialization still targeted
+  the pre-7.1 `~/.openclaw/tasks/runs.sqlite`.
+- Published exact head `432d3b90775ddf520adc03cbe2501ca42914900a`.
+  The live/persisted path is now the 7.1 shared-state database, warm-up removes
+  its main/WAL/SHM files, and the image rejects either current or legacy baked
+  global databases. The old task-runs path remains fallback-only.
+- Focused adapter path contracts and formatting pass. Natural Runtime build
+  `174758826` attached and is running; no ADO run was manually queued.
+
+## 2026-08-01 #5402 checkpoint proof repair published
+
+- Published exact head `a382a12d585186837aa6139732904d4cfd40bb40`.
+  Natural Runtime build `174755167` attached without a manual queue.
+- Build `174735972` already contained
+  `OpenClaw SQLite snapshot created before workspace checkpoint`; the E2E
+  helper missed it because `docker logs --follow --tail 1` omitted immutable
+  pre-teardown history. It now captures `--tail all`.
+- Merged current `main` `9520d832c2` and re-derived its context-sensitive label
+  patch onto OpenClaw 2026.7.1. The full image patch stack applies cleanly;
+  the focused `openclaw_chat_send_e2e` target compiles.
+- Posted exact-head proof on #5402. The PR is mergeable but remains blocked on
+  Runtime/GitHubPop completion and refreshed reviews.
+- #5646 remains at `5c233c0587eb456e1cebb071bdbf2b7b845d1434`.
+  Its required Runtime and GitHubPop contexts remain red from the previously
+  classified minted-user/AAD infrastructure failure, and review is still
+  changes requested.
+
+## 2026-07-31 #5402 early CI gate follow-up published
+
+- Runtime `174719793` reached most non-E2E checks but failed two branch-owned
+  early gates before the repaired scenarios could run:
+  - Clippy rejected a non-minimal boolean expression in the snapshot lifecycle
+    gate.
+  - The image proof established that DoltLite does not support `VACUUM INTO`.
+- Published exact head `fdaeaeb85848f348a2269cd288a894a456cb8529`.
+  The gate now uses Clippy's minimal form, and the adapter exposes its native
+  asynchronous backup API for engine-only workspace snapshots.
+- The image gate verifies the backup remains `prolly` and preserves rows.
+  Focused proof: exact adapter Clippy gate, SQLite snapshot 19/19, adapter
+  syntax, image harness, and diff hygiene.
+- Natural Runtime build `174735972` attached and is queued. No ADO run was
+  manually queued.
+
+## 2026-07-31 #5402 DoltLite persistence repair published
+
+- #5402 is published at exact head
+  `abc6a34a4208a239421f6c37c8c9e21c4c816e1f`, mergeable after merging
+  Lobster `main` `0d924ea9a0`.
+- Repaired the two exact-head runtime defects:
+  - engine-only users retain the legacy workspace SQLite checkpoint, whose
+    embedded snapshot/restore scripts now use the DoltLite adapter and reject
+    legacy `orig` artifacts;
+  - full DoltLite persistence refuses an incompatible restored `orig` database,
+    starts fresh on `prolly`, and replaces the poisoned store at the next
+    checkpoint.
+- The image-native adapter now falls back to its baked absolute addon path when
+  the Gateway pointer is absent, enabled adapter-load faults fail closed, and
+  Docker gates require exact `doltlite_engine()=prolly`, including a
+  pointer-free `VACUUM INTO` snapshot round trip.
+- Restore inspection/copy errors leave the persistent store uninstalled for
+  that start so transient failures cannot overwrite the remote database.
+- Proof: OpenClaw patch applies; DoltLite-focused Rust tests pass 10/10;
+  SQLite snapshot tests pass 19/19; config-schema tests pass 4/4; image-build
+  harness, rustfmt, JSON, adapter syntax, and diff hygiene pass.
+- Natural Runtime build `174719793` attached and is queued with Detect and Repo
+  validation running. No ADO run was manually queued.
+- #5646 remains unchanged at exact head `5c233c0587eb456e1cebb071bdbf2b7b845d1434`;
+  its prior Runtime red is still classified as AAD 429 teardown noise. Harry's
+  exact-head review was requested again; Galin's exact-head approval remains.
+
+## 2026-07-31 #5402 runtime repair restacked and published
+
+- #5402 is published at exact head
+  `1dadddc2141d48cd8372a071150b164afb8dd070`, mergeable after merging
+  Lobster `main` `a4d3126f1f`.
+- Removed the obsolete OpenClaw 7.1 Teams attachments-test path through
+  current main's new shared scoped JS runner; `inbound-media.test.ts` remains
+  covered.
+- The legacy workspace SQLite snapshot lifecycle now disables itself when the
+  DoltLite engine flight is enabled, so a restored b-tree database cannot lock
+  the promoted engine into `orig` mode before its dedicated store restores.
+- Proof: 22/22 patches apply; current-main scoped JS and image-build harness
+  tests pass; focused SQLite snapshot tests pass 17/17.
+- Natural `Lobster-Runtime-PullRequest` is queued on the exact head.
+  `GitOps/GitHubPop` has not attached yet and review remains changes requested.
+  No ADO run was manually queued.
+
+## 2026-07-31 #5402 DoltLite ABI repair published
+
+- #5402 is published at exact head
+  `c57dd51ddc7e3b45c0c0fc73f7034bc722eab0f2`, mergeable after merging
+  Lobster `main` `7c498cf76d`.
+- Runtime build `174676690` attached naturally and is queued. GitHubPop is red
+  pending the user's exact-head proof of presence; review remains changes
+  requested pending Harry/Galin/Ryan refresh.
+- The prior image failure was a deterministic native loader failure:
+  DoltLite omits SQLite's optional column-origin/table/database metadata ABI.
+  The better-sqlite3 image build now removes those unsupported calls while
+  retaining result names and declared types.
+- The top-level `@agents/tools` package, lockfile, and all native wrapper
+  development manifests are bumped together to `0.0.3`, clearing the G1
+  version gate.
+- Proof: 22/22 OpenClaw patches apply; DoltLite adapter 13/13; SQLite lifecycle
+  19/19; terminal projection 42/42; Agent Tools payload, boundary, typecheck,
+  lint, build, package, consumer, built-plugin, and container-patch contracts
+  pass on Linux; rustfmt and diff hygiene pass.
+- #5646 remains code-ready at `5c233c0587eb456e1cebb071bdbf2b7b845d1434`;
+  its last red Runtime result was AAD 429 throttling during lease teardown, not
+  a branch behavior regression. No ADO run was manually queued.
+
+## 2026-07-31 #5402 and #5646 repaired
+
+- #5402 is published at exact head
+  `529f35e5164961aa94da654126e7612f17e60612`, mergeable against current
+  Lobster `main` `58f052fed2`.
+- The promotion stack now contains 22 sequentially applicable patches. Current
+  main's cron-drain patch remains `0024`; the 7.1 regression-alignment patch is
+  renumbered to `0025` and both are re-derived in Docker order.
+- Fixed Linux SQLite directory durability (`fsync` through a read-only directory
+  descriptor), retained the current-main Agent Tools version bump, and refreshed
+  PR body/proof. Natural Runtime build `174666622` is queued.
+- #5646 is published at exact head
+  `5c233c0587eb456e1cebb071bdbf2b7b845d1434`, mergeable, with natural Runtime
+  build `174665166` queued.
+- #5646 now rejects cached Agent routes, drains invalid established Agent
+  routes, and terminates active relays when Candidate reconciliation fails or
+  invalidates the binding. Focused Plex Candidate 12/12, Agent 9/9, and runtime
+  policy 9/9 tests pass.
+- Both PRs still require fresh exact-head review and GitHubPop. No ADO run was
+  manually queued.
+
+## 2026-07-31 #5402 replacement head published
+
+- Published exact head `e1985e480a4ff1f0f5dc2cf3ea302a7fb9831dec`
+  on `promoteclaw/openclaw-2026.7.1`; GitHub reports it mergeable.
+- Repaired all four prior Runtime failure surfaces: OpenClaw 7.1 node
+  regressions/`screen_record` authorization, DoltLite `StatementSync.columns()`,
+  pre-stop Docker log attachment, and delayed candidate-wake cancellation of a
+  fresh replacement pipe.
+- Proof is green: 20/20 patches apply normally to pristine v2026.7.1, patched
+  node tests 102/102, approval forwarders 42/42, DoltLite adapter 13/13, and the
+  candidate-wake ordering regression.
+- PR body and proof comment are current:
+  `https://microsoft.ghe.com/bic/lobster/pull/5402#issuecomment-211683711`.
+- Natural Runtime build `174625579` attached and is queued with Detect and Repo
+  validation running. GitHubPop requires user proof-of-presence on this exact
+  head; review state remains `CHANGES_REQUESTED`. No ADO run was manually
+  queued.
+
+## 2026-07-30 #5402 omitted patch files restored
+
+- Exact-head Runtime build `174603902` exposed a real promotion-owned failure:
+  Docker referenced three patch-added tests/source files that the 7.1
+  re-derivation had accidentally omitted from patches 0014 and 0016.
+- Restored the sensitivity-label regression test and the complete
+  `memory.list` implementation/test hunks. Full 18-patch applicability remains
+  green; 16 memory RPC assertions pass on Linux and 4 sensitivity-label
+  assertions pass under Node 24.15.
+- Published head `559dbfd1c3c4a57cfb4cdbe989121d104ee4827a`.
+  PR body and proof comment are refreshed.
+- Natural CI attached: `Lobster-Runtime-PullRequest` is queued with Detect and
+  Repo validation running. `GitOps/GitHubPop` is red while the required Runtime
+  result is pending. No ADO run was manually queued.
+
+## 2026-07-30 #5402 failed-CI repair republished
+
+- Published merge head `13c6c3ff65baea2dd3df3157fcb089f5eee6c3e3`
+  after merging current Lobster `main` `6f5305b3b0`.
+- Re-derived patch 0008 against the sequential post-0007 OpenClaw v2026.7.1
+  tree; all 18 patches now apply cleanly to pristine pin
+  `2d2ddc43d0dcf71f31283d780f9fe9ff4cc04fe4`.
+- Repaired the failed Adapter lanes: Node 24.x is installed for tests, shared
+  state and snapshot-plugin SQLite paths are distinguished, and the Docker
+  builder stages the compile-time patch fixture. Focused proof passed 42 path
+  tests, 16 SQLite tests, and 24 patched cron tests.
+- Main's Agent Tools 0.0.1 bump clears the unversioned-package blocker. Also
+  restored two missing skill-routing invariants and made the container patch
+  script Windows-safe; Linux package validation completed through
+  `npm run validate`, with the separate native rerun requiring CI's Cargo token.
+- PR body/proof and Galin/Harry/Ryan review requests are refreshed. The PR is
+  mergeable but still `CHANGES_REQUESTED`; required checks had not attached at
+  the first refresh. No ADO run was manually queued.
+
+## 2026-07-30 13:32 PDT #5402 repair published and Runtime attached
+
+- Repaired and published #5402 at exact head `376554ec60957ad4188ede17957eae453b0c269e`,
+  including current `main` `bf4aa7b001`.
+- Re-derived the OpenClaw 2026.7.1 stack to 18 cleanly applicable patches and
+  removed obsolete patch 0015 because 7.1 provides the newer hook-channel
+  behavior natively.
+- Added the default-on SQLite lifecycle rollback switch
+  `dd8b8a2c-e577-422d-ae7f-033a9c3ddd7b`, covering restore, snapshot,
+  Gateway quiescing, final-checkpoint failure behavior, `shutdown_ready`, and
+  passport release as one coherent legacy rollback.
+- Closed Harry's remaining review findings: exact `screen_record`
+  authorization, explicit `node:sqlite` test prerequisites, current 7.1
+  re-derive docs, and refreshed PR patch/head inventory.
+- Focused proof is green: patch drift 18/18, SQLite lifecycle 16/16,
+  kill-switch projection 2/2, terminal projection 39/39, patched OpenClaw 526
+  assertions on Windows, and memory RPC 16/16 under WSL Node 24.15.
+- GitHub reports the PR mergeable. Natural Runtime build `174555458` attached
+  and is queued; GitHubPop is the expected just-in-time failure while Runtime
+  and requested re-reviews from Harry, Galin, and Ryan remain outstanding.
+- No ADO action was manually queued or rerun.
+
+## 2026-07-29 19:25 PDT #5460 Runtime attached and approved
+
+- #5460 natural Runtime `174424816` attached and is queued on internal exact
+  head `3c11c572b4`.
+- Galin approved the exact head; the PR is mergeable, overall approved, and has
+  zero unresolved conversations. Harry's latest approval remains on the prior
+  head, so no branch churn is appropriate while Runtime drains.
+- #6086, #6060, and #5646 remain Runtime-green and final-gate blocked. #5402
+  and #4648 remain conflicting with protected concurrent work.
+- No branch changed and no ADO action was manually queued or rerun.
+
+## 2026-07-29 19:20 PDT #5460 current-main restack published
+
+- Refreshed the five priority fronts. #6086, #6060, and #5646 remain
+  mergeable, conversation-clean, and Runtime-green; their remaining blockers
+  are GitHubPop plus #6086's stale Harry review state. #5402 and #4648 remain
+  conflicting and protected by concurrent dirty work.
+- Advanced the next independent internal front, #5460, in clean worktree
+  `C:\src\lobster-offline-node-remediation`.
+- Merging current `main` produced three conflicts at the same node-operator
+  prompt insertion point. Resolved them by preserving both current
+  `Nodes.invoke` guidance and #5460's offline Scout Desktop reconnect
+  instruction in TypeScript, JavaScript, and the committed bundle.
+- Published internal exact head `3c11c572b4`. The post-merge PR delta remains
+  five files with +65 lines and no unrelated changes.
+- Focused proof is green: nodes-code-mode 25/25, catalog-inventory 32/32, and
+  diff hygiene. The broader packaging validator is not Windows-portable:
+  normal MSYS mode rewrites `/app` container paths, while disabling conversion
+  prevents its Python host-path reads. The passing nodes suite directly checks
+  the committed bundle's offline-recovery contract.
+- Posted proof and requested exact-head review from Galin and Harry. The PR is
+  mergeable and review-required; GitHubPop is present and Runtime has not
+  attached yet.
+- No ADO action was manually queued or rerun.
+
+## 2026-07-29 19:10 PDT #5422 validated locally but held
+
+- Refreshed the priority fronts:
+  - #6086 remains exact-head Runtime-green with zero unresolved conversations;
+    GitHubPop and Harry's stale original-head review state remain.
+  - #6060 and #5646 remain approved, conversation-clean, and Runtime-green;
+    only GitHubPop remains.
+  - #5402 and #4648 remain Runtime-red/conflicting and protected by concurrent
+    dirty worktrees; no branch was changed.
+- Probed #5422 before recognizing it as part of the externally managed
+  MAC/MOS3 admin lane. Its clean worktree merged current `main` with one
+  mechanical conflict in `lobster_runtime/src/lib.rs`; the resolution preserves
+  both inherited kill-switch annotations.
+- Preserved the validated restack as local-only commit `52b924b400`. Focused
+  proof is green: Runtime availability 11/11, Scout MOS3 availability 7/7,
+  schema flag tests 2/2, rustfmt, and diff hygiene. The first Windows run hit
+  current-main's unrelated `confined_manifest_store` dead-code warnings; direct
+  Cargo execution with lint severity capped allowed the branch-owned suites to
+  run.
+- Did not publish or request review. PR #5422 is fork-backed from
+  `giodl/lobster`, so publishing would violate the internal-head rule and would
+  not restore natural Runtime attachment. The admin lane is externally managed.
+- No ADO action was manually queued or rerun.
+
+## 2026-07-29 18:30 PDT #4648 conflict probe blocked by concurrent work
+
+- Audited #5402 and #4648 worktrees after the green fronts became gate-only.
+  Both #5402 worktrees remain dirty and protected.
+- The clean exact-head #4648 repair worktree was safe to probe, but merging
+  current `main` produced nine semantic conflict files, including
+  `src/openclaw_container/src/gateway_lifecycle_tests.rs`, which has concurrent
+  dirty work in `C:\src\lobster-pr-4648`.
+- Aborted the merge and restored `C:\src\lobster-4648-repair` clean at published
+  head `41c0201f44`. #4648 needs coordinated reconciliation with the owner of
+  the lifecycle-test work before any restack or publish.
+- No branch was published and no ADO action was manually queued or rerun.
+
+## 2026-07-29 18:16 PDT full authored-queue audit
+
+- Live Gio-authored Lobster queue is 16 open PRs.
+- Hosted Control UI topology changed under another owner: #6088 and #6113 were
+  closed at 16:59 PDT. #6121 is now a main-based draft front at `aff75f4a4b`,
+  mergeable but `CHANGES_REQUESTED`, with natural Runtime queued. #6116 remains
+  an approved neutral child based on the closed #6113 branch. Do not modify
+  this externally managed lane.
+- Lower standalone fronts:
+  - #5422 is approved but now conflicting, with Runtime still missing.
+  - #5460 is approved but conflicting; its old Runtime failed only OpenClaw
+    Adapter quality/unit leaves already classified as shared main noise.
+  - #5481 is mergeable with requested changes and Runtime missing.
+  - #5947 is an approved mergeable draft whose old Runtime failed one Rust E2E
+    shard; #6169 remains its approved neutral child. Feeds are externally
+    managed, so do not advance either.
+- Scout stack remains parked behind #5491:
+  #5506 approved/neutral, #5571 and #5572 mergeable with missing Runtime and
+  stale requested-change states.
+- No branch changed and no ADO action was manually queued or rerun.
+
+## 2026-07-29 17:36 PDT #5646 Runtime green
+
+- #5646 natural Runtime `174398205` completed fully green with all 31 checks
+  successful on exact-head approved, conversation-clean `179a706745`.
+- #5646 now waits only for GitHubPop. #6060 is in the same state. #6086 is
+  Runtime-green and exact-head Galin-approved, but additionally needs Harry's
+  stale original-head requested-change state refreshed.
+- #5402's dirty worktrees remain protected and #4648 remains wait-only pending
+  diff-scoped review disposition. No branch changed and no ADO action was
+  manually queued or rerun.
+
+## 2026-07-29 16:42 PDT #5646 hold; #4648 now conflicting
+
+- #5646 Runtime `174398205` remains healthy with 16 leaves green, 14 E2E
+  leaves in progress, and no failures.
+- #4648 is now conflicting with current `main`. Its only requested-change
+  finding remains outside the PR diff, so do not restack or add unrelated
+  harness churn until Harry provides a diff-scoped disposition.
+- #6086 and #6060 remain Runtime-green. No branch changed and no ADO action was
+  manually queued or rerun.
+
+## 2026-07-29 16:09 PDT #5646 approved and Runtime active
+
+- Galin approved #5646 exact head `179a706745`; all conversations remain
+  resolved.
+- Natural Runtime `174398205` is active with 11 leaves green, five build/test
+  leaves in progress, and no failures.
+- #6086 and #6060 remain Runtime-green at their exact heads and wait on
+  non-code gates. No branch changed and no ADO action was manually queued.
+
+## 2026-07-29 15:58 PDT #5646 Runtime attached
+
+- Natural required Runtime `174398205` attached to mergeable #5646 exact head
+  `179a706745` and is queued. GitHubPop has the expected user-presence failure.
+- #5646 remains conversation-clean and awaits Galin's exact-head review.
+- #6086 remains Runtime-green and conversation-clean, blocked only by Harry's
+  stale original-head requested-change state and GitHubPop.
+- No branch changed and no ADO job was manually queued or rerun.
+
+## 2026-07-29 15:38 PDT #6086 green; #5646 restacked
+
+- #6086 Runtime `174384781` completed fully green with all 52 Runtime checks
+  successful on exact head `cba8bf2708`. The remaining gates are Harry's stale
+  original-head requested-change state and GitHubPop.
+- With that CI consumer drained, merged current `main` into the clean #5646
+  worktree. The only conflicts were shared insertion points for feature flags
+  and ECS inventory; the resolution retains both exact-user Candidate admission
+  and current-main exec approval mode.
+- Published mergeable #5646 exact head `179a706745`. Focused proof is green:
+  Candidate schema 5/5, Candidate Plex routing 11/11, feature-flag tests
+  132/132, ECS settings inventory, formatting, and diff hygiene.
+- Requested Galin's exact-head review. Required checks had not attached at the
+  first post-push refresh. No ADO job was manually queued or rerun.
+
+## 2026-07-29 15:12 PDT #6086 Runtime active
+
+- #6086 Runtime `174384781` is actively draining: 44 Runtime leaves are green,
+  seven E2E shards are in progress, and no leaf is red.
+- Exact head `cba8bf2708` remains mergeable, Galin-approved, and
+  conversation-clean. Harry's stale original-head requested-change state and
+  GitHubPop remain the non-Runtime gates.
+- Other priority fronts are unchanged. No branch changed and no ADO action was
+  manually queued or rerun.
+
+## 2026-07-29 14:49 PDT #6086 exact-head approval
+
+- #6086 received a fresh Galin approval on exact head `cba8bf2708` at
+  14:43 PDT and remains mergeable with zero unresolved conversations.
+- Harry's requested-change state is still stale from the original
+  `d7b6f80f19` head. Natural required Runtime `174384781` remains queued and
+  GitHubPop remains the ordinary user-presence failure.
+- #6060 is unchanged: exact-head approved and Runtime-green, waiting only for
+  GitHubPop. #5646 and #5402 remain conflicting; #4648 still awaits Harry's
+  diff-scoped re-review.
+- No branch changed and no ADO job was manually queued or rerun.
+
+## 2026-07-29 14:27 PDT #6086 published after shared-main repair
+
+- Shared-main web projection fix #6192 landed as `875710e8dc`. Merged fresh
+  `main` into the held #6086 worktree and published exact head `cba8bf2708`.
+- Focused PromoteClaw, job, FRE 301/302, Scout CLI, web projection, and diff
+  proof is green. Current main's unrelated Windows-only dead-code lint required
+  capping lint severity for the focused Rust behavior runs.
+- Posted proof, requested Galin/Harry exact-head review, and left all
+  conversations resolved. Natural required Runtime `174384781` attached and is
+  queued; GitHubPop remains the ordinary user-presence failure.
+- #6060 remains exact-head approved and Runtime-green, waiting only for
+  GitHubPop. #5646 and #5402 remain conflicting. #4648 remains blocked on
+  Harry's out-of-diff requested-change state.
+- No ADO job was manually queued or rerun.
+
+## 2026-07-29 13:45 PDT #6086 prepared behind main fix
+
+- Classified #6086 Runtime `174364901`: Repo Validation was the now-disabled
+  shared kill-switch policy gate, and the web projection test fails identically
+  on current `main` because it serializes 18 fields while asserting 17.
+- Merged current `main` / #6187 locally into the clean #6086 worktree,
+  producing prepared head `690a93703b`. Focused PromoteClaw, job, FRE 301/302,
+  Scout CLI, and diff checks are green.
+- Do not push this held merge while shared-main fix #6192 remains open.
+  #6192 is approved, GitHubPop-green, and near terminal Runtime; merge its
+  eventual main commit before publishing one replacement #6086 head.
+- No ADO job was manually queued or rerun.
+
+## 2026-07-29 13:14 PDT #6060 Runtime green
+
+- #6060 natural required Runtime `174368694` completed successfully on
+  exact-head approved, conversation-clean `bab71c50d4`.
+- The only remaining required gate is `GitOps/GitHubPop`, which needs user
+  proof-of-presence. Do not change the branch.
+- #6086 Runtime `174364901` remains queued. No other priority front changed and
+  no ADO action was manually queued.
+
+## 2026-07-29 13:02 PDT review-ready hold
+
+- #6060 received exact-head Galin approval at `bab71c50d4`; all conversations
+  remain resolved and natural Runtime `174368694` remains queued.
+- #6086 remains exact-head Galin-approved and conversation-clean at
+  `722ffbfb80`; Runtime `174364901` remains queued. Harry's stale
+  requested-change state has not refreshed.
+- No other priority front changed. Hold all branch publishes and manual ADO
+  actions while both natural Runtime runs are active.
+
+## 2026-07-29 12:47 PDT #6060 review closeout
+
+- Published #6060 exact head `bab71c50d4`, addressing all five live design
+  conversations: normative publication/runtime fail-closed policy, an initial
+  P99 <= 1 ms acceptance target, blocking device-auth bypass proof across every
+  entry path, per-flag before/after route preservation, and structured inline
+  denial findings for editable pages.
+- Replied to and resolved all five conversations and requested exact-head
+  review. Natural required Runtime build `174368694` attached and is queued.
+- #6086 exact head `722ffbfb80` received Galin approval and Runtime `174364901`
+  remains queued. Both PRs are mergeable. Hold all further publishes while
+  these natural runs are active; no ADO run was manually queued.
+
+## 2026-07-29 12:32 PDT scheduled front refresh
+
+- #6086 exact-head natural Runtime build `174364901` attached and is queued on
+  `722ffbfb80`. The PR is mergeable; do not publish or manually queue while it
+  runs.
+- #4648's new requested-change finding is outside the PR diff. Fresh
+  `origin/main` and exact PR branch both resolve
+  `evals/lobsterbench/tools/smoke-test.ts` to blob
+  `14e31170b420895e2316a0159d90c033bdd05729`; its history is #5525/#5620.
+  Posted exact evidence and requested Harry's diff-scoped re-review rather than
+  adding unrelated harness churn.
+- #6060 remains Runtime-green and mergeable but lacks exact-head approval.
+  #5646 and #5402 remain conflicting; #5402's dirty worktrees remain protected.
+- No branch was changed and no ADO run was manually queued.
+
 ## 2026-07-29 10:13 PDT live Lobster PR gate refresh
 
 - Live authored queue is 18 open Lobster PRs. #5424 merged on 2026-07-28 and
@@ -132,7 +689,7 @@
 - Published the repaired Scout chain in dependency order without manually
   queueing ADO:
   `#5491 e3ee308ffa -> #5506 afa6de3478 -> #5571 96c30498d1 ->
-  #5572 55593ba719`.
+#5572 55593ba719`.
 - Narrowed #5506 to its unique typed Scout capability inventory after merged
   #5075 superseded the durable-approval/proto half. Capability compilation and
   formatting pass; the focused Rust test remains blocked only by current-main's
@@ -198,7 +755,7 @@
 - Gio authorized committing and pushing up to four PRs. Published the full
   Scout chain without manually queueing ADO:
   `#5491 a841dbc937 -> #5506 6489c58588 -> #5571 67f29b06f4 ->
-  #5572 dd5481c7c4`.
+#5572 dd5481c7c4`.
 - #5506's only merge conflict preserved both current-main's sensitivity-label
   proxy-pipe handler and the child's native approval outcome contract.
 - All four worktrees are clean and match their internal Lobster branches.
@@ -911,20 +1468,17 @@
 
 ## Current Session
 
-- Last updated: 2026-07-16.
-- Last agent: Codex.
-- Current focus: PR-loop merge operations. OpenClaw maintainer landings should
-  use the WSL `/root/src/openclaw-workflow` wrapper flow documented below;
-  Lobster ADO guidance from earlier notes still applies when operating Lobster
-  PRs.
-- Active branch / PR: open authored Lobster PRs include #4362, #4298, #4297,
-  #4272, #4220, #4092, and #4064. Recent handoff PRs #4206, #4247, and #3749
-  are merged; #4044 is closed/parked.
-- Known dirty state: `claws-hapi` already has unrelated project notes and
-  assets modified outside this project. Do not revert them. Lobster #4044
-  worktree `C:\src\lobster-feeds-named-management` is clean after push.
-- Blocking question: none. Do not manually queue ADO; rely on automatic check
-  attachment after pushes.
+- Last updated: 2026-07-30.
+- Last agent: GitHub Copilot CLI.
+- Current focus: Lobster #5402 OpenClaw 2026.7.1 promotion review and natural
+  required-CI attachment after failed-run repair.
+- Active branch / PR: `bic/lobster#5402`,
+  `promoteclaw/openclaw-2026.7.1`, exact head `559dbfd1c3`.
+- Known dirty state: implementation worktree
+  `C:\src\lobster-pr5402-reviewfix` is clean and pushed. `claws-hapi` may have
+  unrelated project-note changes; do not revert them.
+- Blocking question: wait for queued `Lobster-Runtime-PullRequest` completion,
+  GitHubPop refresh, and exact-head reviewer refresh. Do not manually queue ADO.
 - 2026-07-21 Lobster merge push:
   - #4297 rebuilt on current main at `3350fcdc68`; PullRequest CI is green.
     Proof comment `206557181`; remaining gates are GitHubPop, Build Validation,
@@ -2324,6 +2878,7 @@ between scopes`) to reset both install mutations before starting a new Add
   2026-06-26 at head `04701b9ce`, merge commit `afbe9b0f`; review approved.
 - Lobster #3685 `feat(policy): select tenant feed sources`: merged on
   2026-06-28 at head `7f9ac3455`, merge commit `9c6f4072`.
+
 ## 2026-07-26 11:56 PDT #4648 second lane and #5646 local design repair
 
 - #5402 replacement build `173854035` is active at exact head `bc87c276bc`;
@@ -2337,6 +2892,7 @@ between scopes`) to reset both install mutations before starting a new Add
   claims are server-selected and fenced by both role and flight generations;
   pause, abort, expiry, and audience changes immediately supersede stale
   Candidate claims while durable routes drain normally. Hold it behind #5541.
+
 ## 2026-07-26 12:15 PDT local #5424 and #5541 review repairs
 
 - Fixed #5424's unpublished rollback inventory defects and committed local
@@ -2718,9 +3274,9 @@ between scopes`) to reset both install mutations before starting a new Add
     already covered by the PR body's stated Scope ("does not infer group or
     wildcard expansion") plus the existing tested `wildcardAllowSelectors`
     signal.
-  Left 2 threads open with a precise, undone action statement since they are
-  real (if optional) code-required asks that were not implemented on the
-  current exact head:
+    Left 2 threads open with a precise, undone action statement since they are
+    real (if optional) code-required asks that were not implemented on the
+    current exact head:
   - #5571 `paths_tests.rs:814` (Nit) — drop the brittle
     `"Never issue an unfiltered"` prose pin from
     `shipped_session_history_skill_uses_native_visibility_scoped_tools_only`,
@@ -2730,14 +3286,14 @@ between scopes`) to reset both install mutations before starting a new Add
     feeds `configuredCapabilities`, so a differently-cased/aliased deny entry
     dedupes with its normalized allow counterpart instead of showing as its
     own `selector` row.
-  All three PRs' `Lobster-Runtime-PullRequest` context reads `skipping`
-  (neutral) on the live head, per `gh pr checks`; per stacked topology, this
-  is not being read as proof that any child's own delta is Runtime-green.
-  Also reconfirmed via `gh api graphql` reviews/comments that harryf's
-  automated peer-review `CHANGES_REQUESTED` on #5571/#5572 targets
-  `feature_flags.rs`/`runtime.rs` ECS declarations outside each PR's exact
-  child diff, already rebutted by a prior `giodl` PR comment with merge-base
-  evidence — consistent with, not newly resolved by, this pass.
+    All three PRs' `Lobster-Runtime-PullRequest` context reads `skipping`
+    (neutral) on the live head, per `gh pr checks`; per stacked topology, this
+    is not being read as proof that any child's own delta is Runtime-green.
+    Also reconfirmed via `gh api graphql` reviews/comments that harryf's
+    automated peer-review `CHANGES_REQUESTED` on #5571/#5572 targets
+    `feature_flags.rs`/`runtime.rs` ECS declarations outside each PR's exact
+    child diff, already rebutted by a prior `giodl` PR comment with merge-base
+    evidence — consistent with, not newly resolved by, this pass.
 
 ## 2026-07-27 09:33 PDT #5571/#5572 local surgical fixes for the two left-open nits
 
@@ -2760,7 +3316,7 @@ between scopes`) to reset both install mutations before starting a new Add
   Proposed post-push reply (not yet posted) for
   https://microsoft.ghe.com/bic/lobster/pull/5571#discussion_r84851611:
   "Published at exact head `<new-sha>`: dropped the `\"Never issue an
-  unfiltered\"` prose pin from
+unfiltered\"` prose pin from
   `shipped_session_history_skill_uses_native_visibility_scoped_tools_only`,
   keeping only the tool-identifier/argument-key assertions. Verified the
   doc still satisfies every remaining pin. Resolving."
@@ -2774,9 +3330,9 @@ between scopes`) to reset both install mutations before starting a new Add
   `selector` row. Added a regression test, "catalog inventory dedupes a
   normalized deny alias against its allow entry", to
   `catalog-inventory.test.mjs`. Ran the official `just
-  catalog-inventory-plugin-test` recipe: 33/33 pass (32 pre-existing + 1
+catalog-inventory-plugin-test` recipe: 33/33 pass (32 pre-existing + 1
   new). `git diff --check` is clean; no unrelated file was touched (`git
-  diff --stat` shows exactly `inventory.ts`, `inventory.js`,
+diff --stat` shows exactly `inventory.ts`, `inventory.js`,
   `catalog-inventory.test.mjs`, +32/-2). Proposed post-push reply (not yet
   posted) for
   https://microsoft.ghe.com/bic/lobster/pull/5572#discussion_r84851621:
@@ -2785,7 +3341,7 @@ between scopes`) to reset both install mutations before starting a new Add
   `configuredCapabilities`, so a deny alias like `\"Bash\"` dedupes with its
   normalized allow counterpart `\"exec\"` instead of appearing as its own
   row. Added a regression test (`catalog inventory dedupes a normalized deny
-  alias against its allow entry`); `just catalog-inventory-plugin-test`
+alias against its allow entry`); `just catalog-inventory-plugin-test`
   33/33. Resolving."
 - Neither thread's reply text has been posted; both threads remain open on
   the live (unpushed) head exactly as before. #5506 needed no further code
@@ -2797,3 +3353,38 @@ between scopes`) to reset both install mutations before starting a new Add
   #5572 depends on #5571's branch), confirm natural Runtime attaches, then
   post the two proposed replies above with the real published SHAs and
   resolve those two threads.
+
+## 2026-07-27 #5491 browser rollback fix prepared locally
+
+- Prepared Harry's exact-head rollback request for #5491 in
+  `C:\src\lobster-scout-exec-observability` as local-only commit
+  `db0b003a86` (`Gate host exec approval hardening`); nothing was pushed and
+  no ADO action was queued.
+- Reused `openclaw_host_exec_approval_broker_enabled` as the browser rollback
+  control. Flag on preserves one-time-only host/node/system-run approvals;
+  flag off or probe failure restores legacy persistent approval behavior.
+- Projected the flag through `/v1/me/web-feature-flags` and threaded it
+  through App, ChatPage, Settings, saved-rule matching, inventory
+  normalization, seeding, and persistence.
+- Validation is clean: approval-rule and feature-flag probe tests 68/68,
+  focused ChatPage rollback tests 2/2, Runtime web-feature-flags tests 26/26,
+  TypeScript type-check, Biome format check, and `git diff --check`.
+- Keep the commit local until publishing/restacking the Scout chain
+  #5491 -> #5506 -> #5571 -> #5572 is explicitly chosen.
+
+## 2026-07-29 Scout rollback stack published and current-main-restacked
+
+- #6086 merged, then #5491's rollback fix was published and reconciled with
+  current main at exact head `8aea172caa`.
+- Preserved the shared broker ECS rollback behavior and adapted the integrated
+  Permissions dialog test to current-main QueryClient requirements.
+- Validation passed: Runtime web-feature-flags 30/30, focused approval web
+  tests, TypeScript type-check, Biome format, and diff hygiene.
+- Propagated the parent through the full internal stack without rewriting
+  history: #5506 `ac56d9437d`, #5571 `a85ba1f369`, #5572 `d15ce58bec`.
+- Preserved the #5571 prose-pin cleanup and #5572 normalized deny-alias dedupe;
+  #5572 validation passed catalog inventory 34/34 and Permissions card 3/3.
+- Posted exact-head proof and requested refreshed reviews. #5491 natural
+  Runtime is queued; child Runtime contexts are neutral. No ADO run was
+  manually queued.
+- #5646 and #5460 remain Runtime-green and blocked only on user/review gates.

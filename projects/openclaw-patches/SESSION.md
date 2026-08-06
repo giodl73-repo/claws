@@ -18,7 +18,7 @@
 
 ## Current Session
 
-- Last updated: 2026-07-26 06:41 PT
+- Last updated: 2026-07-30 10:40 PT
 - Last agent: Codex
 - Current focus: Maintain the four active patch PRs at maintainer-review
   readiness without merging anything; gather the missing real behavior proof
@@ -206,6 +206,58 @@
   validation remains blocked by incomplete dependency install/private feed auth
   in `C:\src\openclaw-memory-list`. Do not add this to the 2026.7.1 inventory
   unless PR #6043 lands or becomes the active patch-set baseline.
+- Lobster issue #6149 is a reasonable OpenClaw ask only as a maintainer-decided
+  write-capable Gateway surface, not as one bundled downstream patch. Live
+  duplicate search on 2026-07-30 found no OpenClaw `memory.delete` issue or PR.
+  Filed the factored upstream issues openclaw/openclaw#116484 for the public
+  `memory.delete` contract and #116485 for safe deletion/persistence semantics,
+  both linked from Lobster comment #211175086. These depend on the #115303 /
+  #115330 / #115331 persisted-memory read/discovery decisions before any PR
+  should land.
+- Lobster issue #6156 is a reasonable Lobster UX/integration ask, but the
+  OpenClaw feature request appears stale against current OpenClaw `main`
+  (`26f107071e85991de8c7f39ba8388194d34b3c0b`). Current main already exposes
+  nullable per-session `thinkingLevel` through `sessions.patch`, projects
+  `thinkingLevel` / `thinkingLevels` / `thinkingOptions` in session rows, passes
+  it into chat execution, and maps it to provider payloads such as OpenAI
+  `reasoning_effort` and Anthropic `thinking.budget_tokens`. Posted Lobster
+  comment #211175521 advising Carmen to try the existing `thinkingLevel`
+  contract first and treat any gap as an OpenClaw pin promotion/backport need,
+  not a duplicate upstream `reasoningEffort` issue.
+- Posted the latest maintainer/client status back to Carmen's Lobster issue
+  #6044 in comment #211177081. Current state: #115303 / #115330 / #115331 are
+  open and maintainer-labeled; PR #115323 is the external implementation
+  candidate but blocked on owner decision, real Gateway proof, and whether
+  existing `agents.workspace.list` / `agents.workspace.get` should be used
+  instead of a dedicated `memory.list`; draft PR #115329 remains parked. Patch
+  `0014-memory-list-gateway-rpc` is not droppable until OpenClaw accepts and
+  releases either a dedicated method or an approved workspace-read pattern that
+  Lobster can consume.
+- Posted Lobster #6044 follow-up comment #211178046 asking Carmen/Lobster to
+  spike `agents.workspace.list` plus `agents.workspace.get` for the memory
+  viewer before pushing another OpenClaw PR shape. The requested evidence is
+  whether existing operator-read workspace APIs can enumerate/read `memory/`
+  and optional root `MEMORY.md`, and if not, exactly which gap justifies a
+  dedicated `memory.list` Gateway method.
+- Corrected the #6044 spike comment in place after source audit: current
+  OpenClaw exposes `agents.files.list` / `agents.files.get` /
+  `agents.files.set`, not `agents.workspace.list/get`, and current
+  `agents.files.*` is capped to UI-owned root files such as `MEMORY.md` rather
+  than daily `memory/YYYY-MM-DD*.md` notes. Filed OpenClaw #116494 to decide
+  whether a complete scoped `agents.files.*` memory expansion should replace
+  dedicated `memory.list` / `memory.delete` methods. Linked #116494 from
+  Lobster #6044 comment #211181271 and Lobster #6149 comment #211181351.
+- Carmen's Lobster issues #6336 / #6337 / #6338 form a separate memory-write
+  governance stack, not duplicates of the Gateway viewer/delete work. Live
+  search on 2026-07-30 found no existing OpenClaw issues/PRs for the exact
+  `memory-core` write-tool, protected memory raw-write bypass, or
+  non-interactive standing-consent asks. Filed OpenClaw #116499 to decide
+  `memory-core` semantic write tools (`memory_store` / `memory_forget`),
+  #116500 to decide protected memory path write enforcement across raw
+  mutation vectors, and #116501 to decide standing consent for background
+  memory writers such as dreaming/promotion. Linked them back from Lobster
+  #6336 comment #211185626, #6337 comment #211185716, and #6338 comment
+  #211185846. No PRs should be filed until maintainers decide these contracts.
 
 ## Session Checkpoints
 

@@ -64,7 +64,7 @@ integration is proposed.
 - Evidence after fix: one file passed, eight tests passed.
 - Additional checks: targeted Oxfmt passed; targeted Oxlint passed with zero
   warnings and zero errors; `pnpm tsgo:core` passed; `codex review
-  --uncommitted` returned no actionable correctness findings.
+--uncommitted` returned no actionable correctness findings.
 - Broad-gate exception: delegated `node scripts/check-changed.mjs` reached
   Blacksmith Testbox `tbx_01ky50qwp8m408m77hc2g5w061` but stopped on the
   unrelated current-main max-lines baseline, which requires removing entries

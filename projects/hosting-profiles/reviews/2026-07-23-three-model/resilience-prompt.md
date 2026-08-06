@@ -3,6 +3,7 @@ package as an adversarial runtime, reliability, and security reviewer. Do not
 modify files.
 
 Artifacts:
+
 - RFC 0018 and its readiness v1 sidecar spec in
   `/root/src/openclaw-rfcs-0018-refresh`.
 - RFC 0023 and its hosting-profile v1 sidecar spec in

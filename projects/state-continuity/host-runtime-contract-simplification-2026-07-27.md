@@ -15,11 +15,11 @@ unnecessary.
 
 ## Existing implementation
 
-| PR | Exclusive diff | Contract role | Simplification verdict |
-| --- | ---: | --- | --- |
-| openclaw/openclaw#112385 | 929 added LOC | Recovery-point composition | Keep narrow; add no host coordination. |
-| openclaw/openclaw#112865 | 961 added LOC | Offline final capture and shared recovery journal | Keep narrow; the shared journal already removes duplicate persistence. |
-| openclaw/openclaw#112896 | 1,542 added, 3 removed LOC | Offline accepted restore plus Gateway admission | Reuse its one durable ready record; do not add a second restore state machine or `admit` operation. |
+| PR                       |             Exclusive diff | Contract role                                     | Simplification verdict                                                                              |
+| ------------------------ | -------------------------: | ------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| openclaw/openclaw#112385 |              929 added LOC | Recovery-point composition                        | Keep narrow; add no host coordination.                                                              |
+| openclaw/openclaw#112865 |              961 added LOC | Offline final capture and shared recovery journal | Keep narrow; the shared journal already removes duplicate persistence.                              |
+| openclaw/openclaw#112896 | 1,542 added, 3 removed LOC | Offline accepted restore plus Gateway admission   | Reuse its one durable ready record; do not add a second restore state machine or `admit` operation. |
 
 ## Smallest composition
 

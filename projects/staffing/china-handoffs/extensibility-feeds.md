@@ -76,19 +76,19 @@ one team absorb every layer.
 
 ## Partners and dependencies
 
-| Partner | Contribution and decisions needed |
-| --- | --- |
-| MOS3/MAC | Registry authority, title/acquisition contracts, Personal/TenantPersonal publish authorization, feed composition, RBAC, package-defense and tenant controls. |
-| Lobster/Scout | Microsoft-hosted integration, effective-feed projection, product UX, feature rollout, E2E, diagnostics, and operational readiness. |
-| OpenClaw | Generic signed-feed consumption, exact-version install behavior, refresh/follow lifecycle, policy and conformance primitives. |
-| ClawHub | Publisher identity, signed publisher feeds, catalog snapshots/query/change transport, community discovery. |
-| Admin & Governance | Tenant/global approval, exceptions, audit, effective-state explanation, Partner Center and M365 auth decisions. |
-| Frontend Product Engineering | Coherent discovery, library, follow, install, blocked-state, freshness, and admin experiences. |
-| Infrastructure & Engineering Systems | E2E environments, reliability gates, tracing, dashboards, and developer velocity. |
-| Security | Signing, provenance, RBAC, package-defense, revocation, local execution, and auth-boundary review. |
-| Data Science & Insights | Adoption funnels, search quality, publisher activity, feed freshness, failures, and community signals. |
-| Technical Community Manager | Publisher onboarding, contribution patterns, issue routing, and extension opportunities from the community. |
-| Operations & TPM | Cross-team decisions, external dependencies, rollout readiness, and last-mile follow-through. |
+| Partner                              | Contribution and decisions needed                                                                                                                            |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| MOS3/MAC                             | Registry authority, title/acquisition contracts, Personal/TenantPersonal publish authorization, feed composition, RBAC, package-defense and tenant controls. |
+| Lobster/Scout                        | Microsoft-hosted integration, effective-feed projection, product UX, feature rollout, E2E, diagnostics, and operational readiness.                           |
+| OpenClaw                             | Generic signed-feed consumption, exact-version install behavior, refresh/follow lifecycle, policy and conformance primitives.                                |
+| ClawHub                              | Publisher identity, signed publisher feeds, catalog snapshots/query/change transport, community discovery.                                                   |
+| Admin & Governance                   | Tenant/global approval, exceptions, audit, effective-state explanation, Partner Center and M365 auth decisions.                                              |
+| Frontend Product Engineering         | Coherent discovery, library, follow, install, blocked-state, freshness, and admin experiences.                                                               |
+| Infrastructure & Engineering Systems | E2E environments, reliability gates, tracing, dashboards, and developer velocity.                                                                            |
+| Security                             | Signing, provenance, RBAC, package-defense, revocation, local execution, and auth-boundary review.                                                           |
+| Data Science & Insights              | Adoption funnels, search quality, publisher activity, feed freshness, failures, and community signals.                                                       |
+| Technical Community Manager          | Publisher onboarding, contribution patterns, issue routing, and extension opportunities from the community.                                                  |
+| Operations & TPM                     | Cross-team decisions, external dependencies, rollout readiness, and last-mile follow-through.                                                                |
 
 ### Terms used in this brief
 

@@ -11,20 +11,19 @@ generic config ownership work.
 
 ## Active Notes
 
-| Area | File |
-| ---- | ---- |
+| Area                             | File         |
+| -------------------------------- | ------------ |
 | Current session and resume state | `SESSION.md` |
 
 ## Active Work
 
-| Repo | PR / Issue | Branch | Status | Purpose |
-| ---- | ---------- | ------ | ------ | ------- |
-| `bic/lobster` | [#6041](https://microsoft.ghe.com/bic/lobster/pull/6041) | `user/giodl/control-ui-hosting-design` | Draft design | Host the OpenClaw Control UI in Lobster with Lobster-owned auth, rollout, and enforced settings lockdown. |
-| `bic/lobster` | [#6088](https://microsoft.ghe.com/bic/lobster/pull/6088) | `user/giodl/control-ui-hosting-runtime` | Draft implementation | Optional `/openclaw` static Control UI mount, version-matched asset staging, runtime host policy bootstrap, and hosted Gateway route. |
-| `bic/lobster` | [#6113](https://microsoft.ghe.com/bic/lobster/pull/6113) | `user/giodl/control-ui-rollout-gate` | Draft stacked on #6088 | Process-scope ECS rollout gate for `/openclaw`, default hidden with live per-request rollback. |
-| `bic/lobster` | [#6116](https://microsoft.ghe.com/bic/lobster/pull/6116) | `user/giodl/control-ui-root-cutover` | Draft stacked on #6113 | Separate process-scope ECS gate for redirecting `/` to `/openclaw/`, preserving `/web/` rollback and `/?health=1`. |
-| `openclaw/openclaw` | [#115423](https://github.com/openclaw/openclaw/issues/115423) | n/a | Open umbrella issue | Host-controlled Control UI surface for embedded and managed deployments. |
-| `openclaw/openclaw` | [#115408](https://github.com/openclaw/openclaw/pull/115408) | `user/giodl/control-ui-host-policy-main` | Draft main PR | Canonical generic opt-in host Control UI policy. |
+| Repo                | PR / Issue                                                    | Branch                                   | Status                      | Purpose                                                                                                                                                                                                                                                                             |
+| ------------------- | ------------------------------------------------------------- | ---------------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bic/lobster`       | [#6060](https://microsoft.ghe.com/bic/lobster/pull/6060)      | `user/giodl/control-ui-hosting-design`   | Review/CI active            | Host the OpenClaw Control UI in Lobster with Lobster-owned auth, rollout, and enforced settings lockdown.                                                                                                                                                                           |
+| `bic/lobster`       | [#6121](https://microsoft.ghe.com/bic/lobster/pull/6121)      | `user/giodl/control-ui-surgical-routes`  | Draft all-in-one preview PR | Hosted `/openclaw`, Control UI staging, runtime host policy bootstrap, hosted Gateway route, default-off ECS rollout/replacement gates for `/chat`, `/sessions`, and `/settings`, and Lobster image patch `0019-hosted-control-ui-policy.patch`. Supersedes closed #6088 and #6113. |
+| `bic/lobster`       | [#6116](https://microsoft.ghe.com/bic/lobster/pull/6116)      | `user/giodl/control-ui-root-cutover`     | Separate draft follow-up    | Separate process-scope ECS gate for redirecting `/` to `/openclaw/`, preserving `/web/` rollback and `/?health=1`.                                                                                                                                                                  |
+| `openclaw/openclaw` | [#115423](https://github.com/openclaw/openclaw/issues/115423) | n/a                                      | Open umbrella issue         | Host-controlled Control UI surface for embedded and managed deployments.                                                                                                                                                                                                            |
+| `openclaw/openclaw` | [#115408](https://github.com/openclaw/openclaw/pull/115408)   | `user/giodl/control-ui-host-policy-main` | Draft main PR               | Canonical generic opt-in host Control UI policy.                                                                                                                                                                                                                                    |
 
 ## Delivery Shape
 

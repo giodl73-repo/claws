@@ -333,7 +333,8 @@
 - Lobster draft PR #12 was reauthored across the current library entrypoint and centralized Gateway preparation lifecycle, then force-with-lease pushed at `e766e17935bf28c3c4234d91e1113a25250998a4`.
 - Lobster remains a six-file fork-only adapter. Its body now points to OpenClaw PR #107026 and RFC #34 and labels all prior review/format evidence as historical; exact-head Rust formatting, tests, Clippy, and integration validation remain pending.
 - The damaged obsolete Windows worktree `C:\src\openclaw-managed-config-slice1` still shows widespread uncommitted deletions and was intentionally left untouched. The clean OpenClaw PR worktree is `/root/src/openclaw-managed-config-slice1` in WSL.
-+
+
+*
 
 ## 2026-07-23 Three-agent review repair
 

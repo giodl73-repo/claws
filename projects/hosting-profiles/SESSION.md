@@ -205,7 +205,7 @@
   - [Fork PR 173](https://github.com/giodl73-repo/openclaw/pull/173), branch
     `user/giodl/hosting-profile-catalog`, exact head `99449434cb4c`, exports
     immutable profile descriptors and adds local `hosting profiles
-    list|inspect` commands with human and versioned JSON output.
+list|inspect` commands with human and versioned JSON output.
   - The commands do not load config or plugins, contact a Gateway, evaluate
     readiness, infer active selection, or mutate state. Runtime condition names
     are tested against the catalog definitions.

@@ -42,13 +42,13 @@ SDK-only slice is insufficient.
 
 ## Compare
 
-| Candidate | Decision | Reason |
-| --- | --- | --- |
-| New Gateway `host-provider` role | Avoid | Reopens role, protocol, auth, broadcast, presence, queue, and compatibility surfaces for one optional carrier. |
-| Gateway-authenticated plugin upgrade | Avoid for peer identity | Existing auth can protect a route but does not prove the narrower O12 peer identity. |
-| Plugin-authenticated upgrade route | Reuse | The external plugin already owns route auth, upgrade acceptance, socket lifetime, and cleanup. |
-| Narrow `reverse-provider-dispatch` SDK subpath | Add | It is the missing legal import boundary for the already-tested generic contracts. |
-| Generic host bus or connection manager | Avoid | It duplicates the plugin lifecycle and speculates beyond the one provider-dispatch carrier. |
+| Candidate                                      | Decision                | Reason                                                                                                         |
+| ---------------------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------- |
+| New Gateway `host-provider` role               | Avoid                   | Reopens role, protocol, auth, broadcast, presence, queue, and compatibility surfaces for one optional carrier. |
+| Gateway-authenticated plugin upgrade           | Avoid for peer identity | Existing auth can protect a route but does not prove the narrower O12 peer identity.                           |
+| Plugin-authenticated upgrade route             | Reuse                   | The external plugin already owns route auth, upgrade acceptance, socket lifetime, and cleanup.                 |
+| Narrow `reverse-provider-dispatch` SDK subpath | Add                     | It is the missing legal import boundary for the already-tested generic contracts.                              |
+| Generic host bus or connection manager         | Avoid                   | It duplicates the plugin lifecycle and speculates beyond the one provider-dispatch carrier.                    |
 
 RFC 6455 leaves application authentication and authorization outside the
 WebSocket framing protocol. The installed `ws` dependency's `noServer` /

@@ -64,15 +64,15 @@ section metadata. This avoids hardcoding every control into one page.
 
 Suggested sections:
 
-| Section | Example coverage |
-| --- | --- |
-| Tools | tool allow/deny, elevated defaults, safe-bin trusted dirs, agent-to-agent |
-| Sandbox | allowed modes, default posture, escalation behavior |
-| Model and network | model/provider restrictions, network posture, remote access |
-| Gateway | gateway access, proxy behavior, runtime gates |
-| Channels | ingress/egress channel rules, channel-specific controls |
-| Data and auth | credential handling, storage, identity, data movement |
-| Exec approvals | approval evidence, scope, missing/invalid artifact behavior |
+| Section           | Example coverage                                                           |
+| ----------------- | -------------------------------------------------------------------------- |
+| Tools             | tool allow/deny, elevated defaults, safe-bin trusted dirs, agent-to-agent  |
+| Sandbox           | allowed modes, default posture, escalation behavior                        |
+| Model and network | model/provider restrictions, network posture, remote access                |
+| Gateway           | gateway access, proxy behavior, runtime gates                              |
+| Channels          | ingress/egress channel rules, channel-specific controls                    |
+| Data and auth     | credential handling, storage, identity, data movement                      |
+| Exec approvals    | approval evidence, scope, missing/invalid artifact behavior                |
 | Plugins and feeds | plugin allow/deny, tenant feed requirements, public-feed bypass prevention |
 
 Descriptor fields:
@@ -96,14 +96,14 @@ document.
 
 Suggested scopes:
 
-| Scope | Purpose |
-| --- | --- |
-| Deployment/global | minimum floor for all tenants |
-| Tenant | tenant-selected override, equal-or-stricter than deployment |
-| User personal | personal override, equal-or-stricter than tenant effective |
-| Agent | agent-specific narrowing |
-| Channel | channel-specific narrowing |
-| Workspace/session | local or temporary overlay, if supported by the spec |
+| Scope             | Purpose                                                     |
+| ----------------- | ----------------------------------------------------------- |
+| Deployment/global | minimum floor for all tenants                               |
+| Tenant            | tenant-selected override, equal-or-stricter than deployment |
+| User personal     | personal override, equal-or-stricter than tenant effective  |
+| Agent             | agent-specific narrowing                                    |
+| Channel           | channel-specific narrowing                                  |
+| Workspace/session | local or temporary overlay, if supported by the spec        |
 
 The editor should only show controls valid for the selected section and scope.
 For example, channel controls should not appear in a pure tool posture editor

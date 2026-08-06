@@ -12,10 +12,10 @@ host otherwise builds around `/ready`.
 
 ## Ownership
 
-| Track | Contract owner | First facilities |
-| --- | --- | --- |
-| Runtime operations | RFC 0018 | transition watch, condition inspection, startup wait, explanations |
-| Profile conformance | RFC 0023 | profile list/inspect/validate, conformance report, packaged release gate |
+| Track                      | Contract owner                                  | First facilities                                                              |
+| -------------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------- |
+| Runtime operations         | RFC 0018                                        | transition watch, condition inspection, startup wait, explanations            |
+| Profile conformance        | RFC 0023                                        | profile list/inspect/validate, conformance report, packaged release gate      |
 | Diagnostics and operations | Existing Doctor, telemetry, and update surfaces | remediation, support bundle capture, transition telemetry, upgrade comparison |
 
 Readiness remains observational. These facilities may inspect, wait, explain,
