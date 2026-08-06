@@ -198,6 +198,13 @@ Validation:
   `C:\src\lobster-promote-633-pinfix` passed the exact Python SDL test, the
   targeted Rust adapter test, `git diff --check`, and
   `just openclaw-patches-check --offline`.
+- The clean 30-file current-promote candidate at `3d09706faaf8` now has the
+  same Dockerized OpenClaw JS proof class: after refreshing repo-local auth
+  with `just rust-auth`, `just openclaw-js-unit-tests` passed msteams
+  patched-source tests, upstream evidence/readiness/hosting scoped tests, and
+  vendored m365mail tests. It remains a candidate rather than the default path
+  until wake-only Cron, Channel Participant, and the per-thread Teams route
+  update are accepted as initial carries.
 - Feed/promotion evidence on 2026-08-06: the latest scheduled ingest run
   `175490098` (`Lobster-Ingest-Upstream`, `20260806.18`) resolved the default
   target to `openclaw@2026.7.1-2`, found it already in

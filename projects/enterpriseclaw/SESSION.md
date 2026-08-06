@@ -1592,6 +1592,14 @@
   `just openclaw-patches-check --offline`; it is structurally valid but not
   the default image path until the team accepts wake-only Cron, Channel
   Participant, and the per-thread Teams route update as initial carries.
+- 2026-08-06 follow-up: the 30-file current-promote candidate at
+  `C:\src\lobster-promote-633` now also passed
+  `just openclaw-js-unit-tests` in WSL. The first attempt failed before tests
+  with Azure Artifacts `401` for `@types/sanitize-html`; after refreshing
+  repo-local auth with `just rust-auth`, `npm view @types/sanitize-html
+  version` returned `2.16.1`, and the Dockerized rerun passed msteams
+  patched-source tests, upstream evidence/readiness/hosting scoped tests, and
+  vendored m365mail tests. The worktree stayed clean.
 
 ## Session Checkpoints
 

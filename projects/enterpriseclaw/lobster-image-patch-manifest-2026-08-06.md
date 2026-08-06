@@ -87,12 +87,21 @@ Patch files:
 - Worktree: `C:\src\lobster-promote-633`
 - Branch: `promoteclaw/openclaw-2026.6.33`
 - Head: `3d09706faaf8d47306be3fa334f48dc5e53f5138`
-- Status: structurally valid candidate, not yet the default image path
+- Status: structurally valid and Dockerized-JS-validated candidate, not yet
+  the default image path
 - Structural gate:
   `wsl -d Ubuntu-24.04 -- bash -lc 'cd /mnt/c/src/lobster-promote-633 && just openclaw-patches-check --offline'`
   passed. It reported all 30 patches documented, applied by Dockerfile order,
   covered by the shared scoped Vitest runner, and pinned to `openclaw 2026.6.33`
   / `v2026.6.33` / `7af0cfc9c548`.
+- Dockerized JS gate:
+  `wsl -d Ubuntu-24.04 -- bash -lc 'cd /mnt/c/src/lobster-promote-633 && just openclaw-js-unit-tests'`
+  passed after refreshing repo-local auth with `just rust-auth`. The first
+  attempt reached the m365mail dependency stage and failed with Azure
+  Artifacts `401` for `@types/sanitize-html`; after token refresh,
+  `npm view @types/sanitize-html version` resolved `2.16.1`, and the rerun
+  passed msteams patched-source tests, upstream evidence/readiness/hosting
+  scoped tests, and vendored m365mail tests.
 
 Patch files:
 
