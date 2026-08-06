@@ -1507,6 +1507,24 @@
   GitHub reports the new head, mergeable, with Socket checks passing and CI
   attaching; keep watching for concrete CI/review failures before any further
   restack.
+- 2026-08-06 follow-up: #100960 command inventory was restacked from fork head
+  `8e72d20247b3adbd447fd738338ab3a93319ca5f` to
+  `321a1a4fed537f4ca530c8134427a415eefe3bba` on current `upstream/main`
+  `05e3ce11aca70c6896d6a06047a663c90850449c`. The rebase completed cleanly
+  in `C:\src\openclaw-pr100960-tools-commands-main` and was pushed only to the
+  fork branch `giodl73-repo/openclaw:user/giodl/cli-catalog-review-hardening`
+  with an exact force-with-lease against the old head. Local structural
+  validation passed `git range-diff` with all four commits patch-equivalent,
+  `git diff --check upstream/main..HEAD`, and conflict-marker search over
+  touched files. Focused Vitest was not rerun locally because this Windows
+  checkout lacks `node_modules`; the dirty older WSL proof checkout was not
+  reused. The PR body now records the restack/proof boundary, and exact-head
+  ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/100960#issuecomment-5208249311`.
+  GitHub checks are still attaching; at last check only `[code]smith` was
+  visible and skipped. Next upstream action is to watch CI and the refreshed
+  ClawSweeper verdict, then keep #104158/#104159/#104160 draft until the
+  parent maintainer-scope decision is resolved.
 
 ## Session Checkpoints
 

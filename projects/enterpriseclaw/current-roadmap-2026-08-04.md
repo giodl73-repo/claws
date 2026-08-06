@@ -203,6 +203,20 @@ Validation:
 
 Upstream PR #100960 follow-up work on 2026-08-04:
 
+- 2026-08-06 restack: clean worktree
+  `C:\src\openclaw-pr100960-tools-commands-main` rebased the four-commit
+  command inventory branch from
+  `8e72d20247b3adbd447fd738338ab3a93319ca5f` to
+  `321a1a4fed537f4ca530c8134427a415eefe3bba` on `upstream/main`
+  `05e3ce11aca70c6896d6a06047a663c90850449c`. `git range-diff` showed all
+  four commits patch-equivalent; `git diff --check upstream/main..HEAD` and
+  conflict-marker search passed. Focused Vitest was not rerun locally because
+  this checkout has no dependency materialization, and the older WSL proof
+  checkout is dirty and on a pre-restack head. The branch was force-updated
+  only on the fork with an exact lease, the PR body was corrected to describe
+  the proof boundary, and `@clawsweeper re-review` was requested at
+  `https://github.com/openclaw/openclaw/pull/100960#issuecomment-5208249311`.
+  Watch CI/review before restacking the draft command children.
 - Clean worktree: `C:\src\openclaw-pr100960-command-inventory-clean` on
   `enterpriseclaw/pr100960-command-inventory-clean`.
 - Commit `e48cbbcedf3` narrows the command inventory slice so it no longer
