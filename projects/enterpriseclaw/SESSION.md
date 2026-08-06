@@ -1525,6 +1525,25 @@
   visible and skipped. Next upstream action is to watch CI and the refreshed
   ClawSweeper verdict, then keep #104158/#104159/#104160 draft until the
   parent maintainer-scope decision is resolved.
+- 2026-08-06 follow-up: #112896 restored recovery-point admission was
+  restacked again after GitHub `main` advanced to
+  `05e3ce11aca70c6896d6a06047a663c90850449c`. The rebase completed cleanly in
+  `C:\src\openclaw-pr112896-restack-current` with no conflicts and was pushed
+  only to the fork branch
+  `giodl73-repo/openclaw:user/giodl/rfc-0013-restored-admission` at
+  `6dae5e228e6106d1029849a47aca90cccbe50be2`, using an exact
+  force-with-lease from `fa0e5093debeeacfba48bf7ae82e7a84b82d8ff7`. Local
+  structural validation passed `git range-diff` with all 50 commits
+  patch-equivalent, `git diff --check upstream/main..HEAD`, and
+  conflict-marker search over touched files. Focused Vitest remains unavailable
+  in this fresh Windows clone because `node_modules/.bin/vitest` is absent
+  after dependency materialization failed on private feed auth. The PR body was
+  updated from `projects/enterpriseclaw/pr-bodies/openclaw-112896.md`, and
+  exact-head ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5208282043`.
+  GitHub checks are still attaching; at last check only `[code]smith` was
+  visible and skipped, and merge state still reported `BEHIND` pending
+  recalculation.
 
 ## Session Checkpoints
 
