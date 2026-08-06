@@ -1472,6 +1472,24 @@
   package-wide feed `E404`, so image materialization remains blocked until the
   Lobster feed exposes `openclaw` or an approved alternate signed package source
   is selected.
+- 2026-08-06 follow-up: the Lobster feed blocker is now narrowed to normal
+  quarantine policy rather than missing upstream/public package availability.
+  ADO ingest run `175490098` (`Lobster-Ingest-Upstream`, `20260806.18`) resolved
+  its default target to `openclaw@2026.7.1-2`, found it already in
+  `M365-Lobster-Upstream`, and promoted it to `@quarantine`. ADO promotion run
+  `175419491` (`Lobster-Promote-OpenClaw-LTS-Packages`, `20260806.1`) listed
+  `openclaw@2026.6.33` in upstream quarantine but skipped it as age `2d` under
+  the required `7d` quarantine gate; it promoted/published 28 older eligible
+  versions and skipped those already present on the Lobster feed. The Lobster
+  runtime feed still returns `E404` for `openclaw@2026.6.33`, while public npm
+  has the tarball at
+  `https://registry.npmjs.org/openclaw/-/openclaw-2026.6.33.tgz`. Do not queue
+  Day0 promotion without an approved work item; next image action remains to
+  rerun `scripts/ensure-openclaw-image.sh` from
+  `C:\src\lobster-promote-633-pinfix` after the feed exposes `2026.6.33` or an
+  approved alternate source is selected. #112896 remains at exact head
+  `8f64c26f5c35699a2cf8ad4375f55c77a3083b61` with no visible failed checks and
+  queued/pending GitHub checks.
 
 ## Session Checkpoints
 

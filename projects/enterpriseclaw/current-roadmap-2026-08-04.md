@@ -25,7 +25,7 @@ selected release and are retired by proof.
 | 2 | Reconstruct signed upstream `v2026.6.33` | Base is deterministic and recorded; `lobster/rebase-v2026.6.33` remains metadata-only |
 | 3 | Replay the reduced Lobster adoption layer | The downstream replay branch has one ordered patch stack with no stale patchers, no duplicate replacements, and focused tests for each island |
 | 4 | Validate OpenClaw runtime | Targeted readiness, hosting, channel, node, Cron, Teams, memory, approval, and UI tests pass against the exact replay tree |
-| 5 | Validate package/container image | Dockerized JS proof is green and remote-harness/NuGet auth blockers are repaired and pushed to the `giodl` fork; latest fork head `e97922975f` also aligns the package-pin contract tests to signed `openclaw@2026.6.33`. Final image materialization is blocked on Lobster npm feed publication for `openclaw@2026.6.33`. |
+| 5 | Validate package/container image | Dockerized JS proof is green and remote-harness/NuGet auth blockers are repaired and pushed to the `giodl` fork; latest fork head `e97922975f` also aligns the package-pin contract tests to signed `openclaw@2026.6.33`. Final image materialization is blocked on Lobster npm feed publication for `openclaw@2026.6.33`: the Lobster runtime feed returns `E404`, while ADO promotion run `175419491` saw `2026.6.33` in upstream quarantine but skipped it as age 2d under the 7-day gate. |
 | 6 | Validate Lobster adapter | Lobster can select the image, read readiness/hosting signals, route to the fork, roll back, and keep managed policy/fleet authority downstream |
 | 7 | Publish migration PR | Only after the exact image digest, source tree, adapter proof, rollback proof, and deletion ledger are recorded |
 
@@ -188,6 +188,18 @@ Validation:
   `C:\src\lobster-promote-633-pinfix` passed the exact Python SDL test, the
   targeted Rust adapter test, `git diff --check`, and
   `just openclaw-patches-check --offline`.
+- Feed/promotion evidence on 2026-08-06: the latest scheduled ingest run
+  `175490098` (`Lobster-Ingest-Upstream`, `20260806.18`) resolved the default
+  target to `openclaw@2026.7.1-2`, found it already in
+  `M365-Lobster-Upstream`, and promoted it to `@quarantine`. The latest
+  scheduled promotion run `175419491` (`Lobster-Promote-OpenClaw-LTS-Packages`,
+  `20260806.1`) enumerated `openclaw@2026.6.33` in upstream quarantine but
+  skipped it as `age: 2d (required: 7d)`, while promoting/publishing 28
+  eligible older versions and skipping those already present on the Lobster
+  feed. Public npm reports `openclaw@2026.6.33` exists with tarball
+  `https://registry.npmjs.org/openclaw/-/openclaw-2026.6.33.tgz`, but Lobster
+  image materialization must use the configured Lobster feed unless an explicit
+  alternate package source is approved.
 
 Upstream PR #100960 follow-up work on 2026-08-04:
 
@@ -484,9 +496,12 @@ Upstream PR #104160 current-main restack on 2026-08-05:
 
 ## Next Execution Order
 
-1. Publish/promote `openclaw@2026.6.33` to the Lobster npm feed, or choose a
-   package pin that already exists and revalidate the Docker patch queue against
-   that exact signed source tag. Latest image materialization reached the feed
+1. Let normal quarantine promotion publish `openclaw@2026.6.33` to the Lobster
+   npm feed after the 7-day gate, or get an approved Day0 work item before
+   manually queueing `Lobster-Promote-OpenClaw-LTS-Packages` with
+   `specificVersion=2026.6.33 day0Override=true`. Do not queue Day0 without
+   that work item. The package exists in upstream quarantine but is not yet in
+   the Lobster runtime feed, so latest image materialization reached the feed
    and failed with npm `ETARGET` for `openclaw@2026.6.33`.
 2. Re-run `just openclaw-js-unit-tests` only if the patch queue changes, then
    rerun `scripts/ensure-openclaw-image.sh` from
