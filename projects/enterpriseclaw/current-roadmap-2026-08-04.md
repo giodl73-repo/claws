@@ -25,7 +25,7 @@ selected release and are retired by proof.
 | 2 | Reconstruct signed upstream `v2026.6.33` | Base is deterministic and recorded; `lobster/rebase-v2026.6.33` remains metadata-only |
 | 3 | Replay the reduced Lobster adoption layer | The downstream replay branch has one ordered patch stack with no stale patchers, no duplicate replacements, and focused tests for each island |
 | 4 | Validate OpenClaw runtime | Targeted readiness, hosting, channel, node, Cron, Teams, memory, approval, and UI tests pass against the exact replay tree |
-| 5 | Validate package/container image | Dockerized JS proof is green and remote-harness/NuGet auth blockers are repaired and pushed to the `giodl` fork at `bf72332b7172`; final image materialization is blocked on Lobster npm feed publication for `openclaw@2026.6.33` |
+| 5 | Validate package/container image | Dockerized JS proof is green and remote-harness/NuGet auth blockers are repaired and pushed to the `giodl` fork; latest fork head `e97922975f` also aligns the package-pin contract tests to signed `openclaw@2026.6.33`. Final image materialization is blocked on Lobster npm feed publication for `openclaw@2026.6.33`. |
 | 6 | Validate Lobster adapter | Lobster can select the image, read readiness/hosting signals, route to the fork, roll back, and keep managed policy/fleet authority downstream |
 | 7 | Publish migration PR | Only after the exact image digest, source tree, adapter proof, rollback proof, and deletion ledger are recorded |
 
@@ -182,6 +182,12 @@ Validation:
 - The repair set was committed as
   `bf72332b7172e68892bbbfe8724e8e1fc9a962ff` and pushed only to the `giodl`
   fork remote on branch `promoteclaw/openclaw-2026.6.33`.
+- Follow-up commit `e97922975f` on the same `giodl` fork branch aligns the
+  Python SDL and Rust adapter package-pin contract tests with signed
+  `openclaw@2026.6.33`. Validation from the clean sibling worktree
+  `C:\src\lobster-promote-633-pinfix` passed the exact Python SDL test, the
+  targeted Rust adapter test, `git diff --check`, and
+  `just openclaw-patches-check --offline`.
 
 Upstream PR #100960 follow-up work on 2026-08-04:
 
@@ -484,7 +490,7 @@ Upstream PR #104160 current-main restack on 2026-08-05:
    and failed with npm `ETARGET` for `openclaw@2026.6.33`.
 2. Re-run `just openclaw-js-unit-tests` only if the patch queue changes, then
    rerun `scripts/ensure-openclaw-image.sh` from
-   `C:\src\lobster-promote-633` at fork commit `bf72332b7172` and record the
+   `C:\src\lobster-promote-633-pinfix` at fork commit `e97922975f` and record the
    exact image digest.
 3. Run Lobster adapter validation against the exact image: readiness RPC,
    hosting profile selection, route/rollback, and managed-policy boundaries.

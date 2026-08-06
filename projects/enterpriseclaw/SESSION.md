@@ -1455,6 +1455,23 @@
   `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5207826740`.
   `gh pr checks` currently reports the Socket checks passing and no visible
   failed check; keep watching CI/review before any further restack.
+- 2026-08-06 follow-up: Lobster fork branch
+  `giodl/promoteclaw/openclaw-2026.6.33` advanced from
+  `bf72332b7172e68892bbbfe8724e8e1fc9a962ff` to
+  `e97922975f` (`Align OpenClaw 2026.6.33 package pin checks`) from the clean
+  sibling worktree `C:\src\lobster-promote-633-pinfix`; no push was made to
+  `bic/lobster`. The commit updates only the Python SDL and Rust adapter
+  package-pin assertions from `2026.6.11` to signed `2026.6.33`. Validation
+  passed: exact Python SDL package test, targeted Rust adapter test
+  `openclaw_mcp_config_aligns_client_catalog_timeout_with_server_wait`,
+  `git diff --check`, and `just openclaw-patches-check --offline`. The
+  original `C:\src\lobster-promote-633` checkout is not a safe commit surface
+  right now because it has unrelated staged changes and unresolved conflict
+  entries; continue image-intake work from the clean sibling or a fresh
+  worktree. A fresh `npm view openclaw@2026.6.33 version --json` still returns
+  package-wide feed `E404`, so image materialization remains blocked until the
+  Lobster feed exposes `openclaw` or an approved alternate signed package source
+  is selected.
 
 ## Session Checkpoints
 
