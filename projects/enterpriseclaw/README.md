@@ -86,6 +86,10 @@ decision or action.
 | Area-level implementation packages and work-item decomposition | `implementation-packages/README.md` |
 | Fork branch, patch queue, phase, release, and upstream-promotion plan | `fork-execution-plan-2026-08-02.md` |
 | Live PRE-001 fork sync, protection, checkout, and baseline record | `fork-preflight-2026-08-02.md` |
+| Current fork/image, upstream-source, RFC, and patch execution roadmap | `current-roadmap-2026-08-04.md` |
+| Final Lobster size, code-area, ProxyPipe, work, and ownership assessment | `lobster-final-assessment-2026-08-04.md` |
+| Current Lobster plugin and patch disposition ledger | `lobster-plugin-patch-disposition-2026-08-05.md` |
+| Lobster/OpenClaw operational issue, merged-fix, and workaround audit | `lobster-openclaw-operational-issue-audit-2026-08-05.md` |
 | EVID-002 hosting-profile source classification and proof boundary | `evid-002-hosting-profile-classification-2026-08-03.md` |
 | Full `.craft/roles` review of the fork execution plan | `fork-execution-plan-role-review-2026-08-02.md` |
 | Concrete proposed fork, upstream, Lobster, Rust, and deletion PR stack | `fork-pr-plan-2026-08-02.md` |

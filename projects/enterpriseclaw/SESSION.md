@@ -26,10 +26,90 @@
 
 ## Current Session
 
-- Last updated: 2026-08-04
+- Last updated: 2026-08-06
 - Last agent: GitHub Copilot CLI
-- Current focus: migrate the controlled EnterpriseClaw fork from its
-  August-main baseline to signed OpenClaw `v2026.6.33`, then rebuild Lobster's
+- Presentation: the authoritative shared Peter/Vincent deck is the 19-slide
+  OneDrive presentation `EnterpriseClaw - Peter and Vincent - 2026-08-05.pptx`.
+  Edit it surgically in PowerPoint; never regenerate or replace it with
+  `presentation-materials/enterpriseclaw-meeting-2026-08-05.pptx`, which is a
+  stale 16-slide generated copy. The shared deck preserves Galin's restored
+  "Identity first, then retrieval" memory-authority slide. Its Claws slide now
+  frames five Microsoft business use cases: Assistant, Chief of Staff, Customer
+  Service, Sales, and Expense Report. Business groups own each role and
+  workflow; platform teams provide approved capabilities, data access, policy,
+  and evaluation. A subtle corner note retains the option to keep plugins
+  external and list them as requirements-style dependencies. The main narrative
+  still follows Omar's six topics rather than leading with Lobster problems:
+  State / SQL + Dolt, Memory, Memory ACL, Mail Authentication, Node / Rust, and
+  Claws. The hosted Control UI, dashboards, widgets, hidden routes, and read-only
+  settings remain in the main discussion. The appendix explains all 27 original
+  physical Lobster PR #6839 patch inputs, keeps ProxyPipe as technical
+  reference, explains why owner-specific RFCs exist without making the RFC
+  portfolio the meeting agenda, and now closes with a Lobster plugin portfolio
+  slide sourced from `bic/lobster` `origin/main` at `9f2109311b`. The final
+  appendix sequence ends with Plugin Portfolio, ProxyPipe Reference, Why
+  Multiple Proposals, Hosted UX, and Managed Configuration. That inventory
+  shows 18 Lobster-baked source packages grouped into code/work surfaces,
+  runtime/collaboration, and governance/operations: 16 active in the curated
+  manifest and 2 present but disabled. Policy, Diagnostics OTEL, and OpenClaw
+  Remote Harness are shown separately as external OpenClaw extensions loaded by
+  Lobster.
+- Plugin and patch disposition:
+  `lobster-plugin-patch-disposition-2026-08-05.md` classifies all 19 current-main
+  Lobster source packages and all 31 physical current-main patch files at
+  `a9ebb9ba0d`, numbered through `0032` because `0020` is absent.
+  It preserves the 27-input presentation generation while distinguishing the
+  earlier 29-file snapshot, 30-file `0031` snapshot, current `0032` generation,
+  31-file live PR #6839 head, and newer two-patch brokered-Teams branch. Its
+  primary outcome is to converge on OpenClaw main's Code Mode and pursue
+  trusted namespace-provider dependencies rather than one registration plugin
+  per namespace. The private
+  evidence repository at
+  `https://github.com/giodl73-repo/lobster-plugins-and-patches` is published at
+  `7993291` with five exact portable patches,
+  six sanitized source-rich excerpts, clean-room contracts, and exact Git tree
+  identities for all 19 plugin packages. Gio Della-Libera and Omar Shahine
+  approved limited disclosure of bounded Lobster source intended for OpenClaw
+  upstream on 2026-08-06. The first admitted upstream candidate is the tested
+  generic Turn Timezone calendar/context core; private state endpoints,
+  registration, shared contracts, and product-specific behavior remain
+  excluded. Catalog now points to public RFC #32 and OpenClaw PR #100960 plus
+  follow-ups #104158-#104160 rather than duplicating Lobster source. The
+  upstream-candidate tranche also includes tested generic scoped-capability
+  binding and Context Budget token-estimation code, plus authoritative public
+  source pointers for Snapshot/scale-to-zero, Rust Node RFC #54, and hosted
+  Control UI issue #115423 with PRs #115408/#116013. Its
+  shareable ProxyPipe decomposition
+  now covers all semantic families, carrier mechanics, plugin dependencies,
+  durable ownership, and frame-by-frame retirement. Its EnterpriseClaw upstream
+  contract map records all 23 filed RFC PRs (nine merged, ten open for review,
+  and four drafts), the Lobster behavior each can replace, remaining focused
+  asks, and downstream-only managed-product boundaries. All 18
+  `.craft/roles/claws` perspectives reviewed the repository with no blocking
+  security, privacy, provenance, or source-admission findings. The reviewed
+  version now distinguishes RFC acceptance from shipped behavior, current
+  plugin state from target disposition, upstream merge from downstream patch
+  deletion, and ProxyPipe retirement from patch retirement. It is now a
+  complete Lobster guide rather than only a plugin/patch inventory: architecture
+  and scale, implemented-versus-proposed work, durable ownership boundaries,
+  and an executive keep/upstream/retire scorecard are included. The new
+  `0032-channel-participant-capability-surface` patch is represented as
+  summary-only Lobster Teams behavior with a generic origin/capability contract
+  extraction opportunity. The remaining evidence layer is complete: a
+  31-patch and eight-family ProxyPipe deletion ledger, source-safe operational
+  pressure record, all-plugin capability catalog including support packages,
+  current/target Mermaid architecture diagrams, and a reproducible maintenance
+  procedure are published.
+- Operational audit:
+  `lobster-openclaw-operational-issue-audit-2026-08-05.md` classifies the
+  captured active/resolved Lobster issues, merged fixes, commit pressure, and
+  25-patch ledger into lifecycle/recovery, cron continuity, operation
+  settlement, session/memory, approval/authority, Teams identity, and
+  version/config families. Its executive framing treats "agent hung" as a
+  symptom requiring owner-native state rather than a single model defect.
+- Current focus: deliver the Peter/Vincent Lobster plugin-and-patch assessment,
+  then continue migrating the controlled EnterpriseClaw fork from its
+  August-main baseline to signed OpenClaw `v2026.6.33` and rebuilding Lobster's
   downstream adoption layer without granting release or runtime authority.
   The release reconstruction is complete at
   `14664331451c5235c053ceb268ba69d91993c06d`; its deterministic runtime result
@@ -42,10 +122,39 @@
   separating upstream candidates, Lobster-only adoption, contract evidence,
   temporary carries, splits, and deletions. A separate replay branch has
   completed the six-patch Teams island and eight-patch Cron island, plus
-  config/prompt, node output, memory RPC, and capability-token commits. It is
-  currently rebasing `0022-node-exec-deadlines`; sensitivity, reduced-stack
-  generation, container/adapter validation, publication, and protected-branch
-  migration remain pending.
+  config/prompt, node output, memory RPC, and capability-token commits. It has
+  now completed hosted-control/readiness replay integration at
+  `b15569e12b4e`, trusted node-invoke session binding at `47592abb4cd`,
+  structured node command policy compatibility at `5a99974ff9e`, and scoped
+  Enterprise test stability at `91b47e6856a`.
+  A 25-file OpenClaw replay artifact was generated under
+  `C:\src\openclaw-pr6839-v6633-rebase\.artifacts\enterpriseclaw-reduced-patches-v2026.6.33-91b47e6`.
+  Lobster PR #6839's image branch now carries a 26-file Docker patch queue
+  against fresh-clone signed `v2026.6.33` commit
+  `7af0cfc9c5488e03c4e2f528bdc7ac9f7778b35e`: one upstream evidence-slice
+  base patch plus 25 residual Lobster patches. `just openclaw-patches-check`
+  and `just openclaw-js-unit-tests` pass in the Lobster worktree. The
+  subsequent `just ensure-openclaw-image` attempt reached final runtime
+  dependency materialization and failed with npm `ETARGET` because the Lobster
+  feed did not resolve `openclaw@2026.6.33`; no updated image digest exists
+  yet. Container image completion, Lobster adapter validation,
+  publication, and protected-branch migration remain pending. The current
+  execution map is
+  `projects/enterpriseclaw/current-roadmap-2026-08-04.md`.
+  Upstream PR prep resumed on 2026-08-05: #112865 final-capture P1/P2 findings
+  were repaired and pushed to fork head `cea9611c29f47be87e1fc9067876af5ab95d07a6`.
+  #104158 live-node command inventory was restacked on #100960 current parent
+  `7cb8c5b38755cbe367597e97e24dd3a594bfc933`, validated in clean WSL proof,
+  and pushed to fork head `4e4cfc9d09742aa2cf46171559e2f826a75f88be`.
+  #104159 command prompt projection was then restacked on #104158, validated in
+  clean WSL proof, and pushed to fork head
+  `6cd9b578207fc53a960f966b0f5cd7c0605aa2db`. #104160 generated docs/prompt
+  guard was restacked on #104159, validated in clean WSL proof, and pushed to
+  fork head `d4cc71e1a7e8cc2bb89f97f671af7e22b32da12e`. These PRs have updated
+  proof bodies and exact-head ClawSweeper re-review requests. Next command-stack
+  work is to watch #100960/#104158/#104159/#104160 durable verdicts and then
+  decide whether to mark draft children ready or wait for maintainer-requested
+  live proof.
 - Architecture context: The target architecture now has thirteen major swim
   lanes.
   Each lane records goals, responsibilities, conceptual pieces, contracts,
@@ -471,21 +580,62 @@
 - Active branch / PR: controlled metadata branch
   `lobster/rebase-v2026.6.33` is local at `92917f9bedf`. Downstream replay is
   local on `lobster/pr6839-v2026.6.33-rebase`; its latest clean commit is
-  `e6baed3c3d7` and it has in-progress `0022-node-exec-deadlines` changes.
-  Nothing from this migration has been pushed. Protected
+  `b15569e12b4e` and the OpenClaw replay worktree is clean. Nothing from this
+  migration has been pushed. Protected
   `lobster/integration` remains unchanged at
-  `5c51773ab91f2de8047f27c538f550d8ae55fc29`.
+  `5c51773ab91f2de8047f27c538f550d8ae55fc29`. The active source-only
+  command-inventory stack is now pushed as #100960
+  `7cb8c5b38755cbe367597e97e24dd3a594bfc933`, #104158
+  `86404936ced1ec141eb3fa312e06f56475e8fee0`, #104159
+  `eec8e3e41c51bf8724b705e84f6376107ae61d7d`, and #104160
+  `3f95c85a3656ae3bf37bc7d278b32d280db1da17`. #100960 now repairs the
+  ClawSweeper tools-namespace finding by reserving `tools` as core-owned,
+  keeping commands-only plugin registrations out of descriptor-shaped records,
+  clarifying the SDK docs, and restoring the run-main reserved-root test
+  expectation for `tools commands`. #104158 now carries that parent
+  tools-reservation repair plus a child repair at `86404936ced`: normalize the
+  requested node ID before the Gateway query/response check, sanitize live node
+  command IDs plus invocation hints before Markdown terminal output, and reject
+  blank `--node` before Gateway query or JSON output. #104159 was then restacked
+  on #104158 `428b3854796` and repaired at `eec8e3e41c5` for prompt-boundary
+  findings: full projection cap, prompt visibility enforcement, safe node
+  argument hints, unknown plugin descriptor semantics, and compaction prompt
+  parity. #104160 was then restacked on #104159 `eec8e3e41c5` and repaired at
+  `3f95c85a3656` for docs/prompt follow-up findings: keep docs_map
+  publish/package-owned, normalize private command gates in the generator,
+  preserve generated live-node CLI flag documentation, cap aggregate command
+  prompt guidance, and hide host CLI routes in Code Mode. Live status after the
+  pushes: #100960 is non-draft and has active CI plus a fresh ClawSweeper
+  re-review requested on `7cb8c5b3875`; #104158 remains draft with new checks
+  and ClawSweeper re-review requested on `86404936ced`. #104159 and #104160 remain draft on
+  their prior repaired heads and will need restack decisions after #100960 and
+  #104158 settle. Their stale labels may still say `needs proof` until label
+  automation or maintainer review catches up. #112896 is now repaired and
+  pushed at
+  `62fa80c1fe20` on `user/giodl/rfc-0013-restored-admission`; it replaces the
+  restored-admission `OPENCLAW_*` carrier with a hidden explicit Gateway CLI
+  lifecycle handoff, keeps env count at `520/520`, has an updated proof body
+  at `projects/enterpriseclaw/pr-bodies/openclaw-112896.md`, and has a fresh
+  `@clawsweeper re-review` request. It remains non-draft but still
+  `CONFLICTING` / `DIRTY` against current `main`, with Gateway-owner/RFC
+  decisions still required.
 - Known dirty state: The wider checkout contains unrelated user changes.
   Preserve them. `projects/openclaw-design/` and this area are coherent
-  documentation additions. The fork-only EC-026 proof is in
+  documentation additions. This session added
+  `current-roadmap-2026-08-04.md` and checkpoint
+  `sessions/20260804T213544Z-codex.md`. The fork-only EC-026 proof is in
   `C:\src\openclaw-rust-node` on
   `user/giodl/ec026-rust-node-evidence`. The protected-effect simulation is
   untracked in `C:\src\openclaw-protected-effect-sim` on
-  `user/giodl/ec-protected-effect-sim`.
-- Blocking question: complete the `0022` residual analysis, rebase
-  context-derived sensitivity and its Teams bridge, generate the reduced patch
-  stack, remove the stale request-timeout patcher, and obtain OpenClaw,
-  container, and Lobster adapter proof before publishing a migration PR.
+  `user/giodl/ec-protected-effect-sim`. The earlier
+  `C:\src\openclaw-pr100960-command-inventory` worktree was dirtied by a
+  failed dependency install under unsupported Node `v24.14.0`; use the clean
+  `-clean` worktree for #100960 continuation.
+- Blocking question: compare the 22-file generated artifact against Lobster PR
+  #6839's original 27 inputs, resolve excluded `0014`, `0020`, `0021`, `0023`,
+  `0025`, and `0027`, remove stale timeout patcher/scripts, and obtain
+  OpenClaw changed-source, container/image, Lobster adapter, rollback, and
+  deletion-ledger proof before publishing a migration PR.
 
 ## Resume Checklist
 
@@ -510,6 +660,14 @@
 
 ## Open Threads
 
+- Lobster draft #7055 is now updated to exact head `9722894b1e`: GitHub
+  reports the branch `MERGEABLE` but still `BLOCKED` because it remains
+  draft/changes-requested. The latest repair fixed the scoped Teams unit-test
+  false-green, added hosted readiness/Gateway lifecycle documentation, removed
+  stale dropped-patch filename references, and passed `git diff --check`,
+  `bash -n`, stale-name `rg`, and `just openclaw-patches-check`. Remaining
+  known block is external Lobster consumption-feed / production-image
+  availability for `openclaw@2026.6.33`.
 - Retain PRE-001 run `30773428781` as vanilla baseline evidence with its known
   `native-i18n` inventory-drift failure.
 - Keep BOOT-001, the 55-source inventory, the Wave 0 definition gate, B3
@@ -521,6 +679,187 @@
 - Build EVID-002 from #113422 followed by #114636 as one evidence-only feature
   stack with separate source identities. Preserve unprofiled compatibility and
   stop again before release/runtime authority.
+- Watch #100960 at exact head `7cb8c5b3875`: pushed to fork branch
+  `user/giodl/cli-catalog-review-hardening` after repairing the latest
+  ClawSweeper exact-head finding by making the run-main test assert that
+  `tools commands` skips plugin CLI registration. Validation passed the touched
+  focused test, global `oxfmt --check` for the edited file, and `git diff
+  --check`. Broader Windows focused Vitest still fails unrelated path/config
+  tests, and exact local runtime proof is blocked by `run-node`/build
+  materialization failing on private feed `@trycua/cua-driver@0.14.1` without
+  auth. Re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/100960#issuecomment-5192321111`.
+  Do not reintroduce public plugin descriptor effect/exposure fields or
+  descriptor-shaped records for commands-only registrations, and keep `tools`
+  core-owned.
+- #104158 is repaired and pushed at `86404936ced` on
+  `user/giodl/commands-upstream-node`. It carries the #100960 tools
+  core-owned/reserved-root repair content, then fixes the exact-head
+  ClawSweeper findings by rejecting blank `--node` values before Gateway query
+  or JSON output. Earlier live-node repairs still normalize `--node` before
+  `node.describe` and response identity validation, and sanitize live node
+  command IDs plus invocation hints before Markdown terminal output. `oxfmt
+  --check` and `git diff --check` passed. Focused Vitest is still blocked
+  locally by stale `@openclaw/fs-safe/config` dependency skew
+  (`configureFsSafeNative` missing) before tests execute. PR body proof was
+  updated for exact head `86404936ced`, GitHub Real behavior proof restarted,
+  and exact ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/104158#issuecomment-5192429026`.
+  Keep the PR draft until the exact-head durable verdict arrives and
+  maintainers decide whether this inventory duplicates `nodes describe`.
+- #104159 is repaired and pushed at `eec8e3e41c5` on
+  `user/giodl/commands-upstream-prompt`; it is now restacked on #104158
+  `428b3854796`. The repair caps the complete model-visible projection,
+  requires node `prompt` visibility, omits hostile node argument hints, avoids
+  reading absent plugin descriptor risk/effect fields, and carries command
+  inventory into compacted system prompt rebuilds. WSL validation passed 124
+  prompt/command tests, 10 projection tests, 12 embedded prompt tests, 6
+  targeted compaction prompt tests, `oxfmt --check`, `git diff --check`, and
+  `pnpm deadcode:exports`. PR body file `pr-bodies/openclaw-104159.md` is live
+  on GitHub; Real behavior proof is running on the new head and exact
+  ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/104159#issuecomment-5188564109`
+  with ack
+  `https://github.com/openclaw/openclaw/pull/104159#issuecomment-5188564534`.
+  It still has no live provider/model conversation proof.
+- #104160 is repaired and pushed at `3f95c85a3656` on
+  `user/giodl/commands-upstream-docs`; it is now restacked on #104159
+  `eec8e3e41c5`. The repair keeps docs_map publish/package-owned, removes the
+  duplicate docs-map script/check wiring, normalizes both private command gates
+  in the command reference generator, preserves generated live-node CLI flag
+  documentation, caps command prompt guidance, and hides host CLI routes in Code
+  Mode. WSL validation passed 4 Vitest shards / 114 tests, `pnpm
+  docs:commands:check`, `oxfmt --check`, `git diff --check`, and `pnpm
+  deadcode:exports`. PR body file `pr-bodies/openclaw-104160.md` is live on
+  GitHub; exact ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/104160#issuecomment-5188702737`
+  with ack
+  `https://github.com/openclaw/openclaw/pull/104160#issuecomment-5188703160`.
+  It remains draft pending parent readiness and exact durable review.
+- #112896 is repaired and pushed at `62fa80c1fe20` on
+  `user/giodl/rfc-0013-restored-admission`. It removes
+  `OPENCLAW_RFC0013_RESTORED_ADMISSION_FILE` and routes restored admission
+  through hidden CLI option `--restore-admission-descriptor`, plumbed into
+  `GatewayServerOptions.restoredAdmissionDescriptorPath`. WSL validation on
+  Node `v24.15.0` passed no-carrier grep, `oxfmt --check`, env count
+  `520/520`, `git diff --check`, 65 gateway CLI option tests, and 63
+  restored-admission/startup tests. PR body file
+  `pr-bodies/openclaw-112896.md` is live on GitHub; Real behavior proof passed
+  on the new head and exact ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5189592020`
+  with ack
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5189592627`.
+  It remains non-draft but merge-conflicting/dirty against current `main`, and
+  still needs the Gateway Protocol/restored-admission ownership decision before
+  merge readiness.
+- #112385 is repaired and pushed at `041c3d5807` on
+  `user/giodl/rfc-0013-recovery-points`. The narrow repair internalizes the
+  `recoveryPointOwnerInventorySchema` value and matching
+  `RecoveryPointOwnerInventory` type, then removes the stale unused-export
+  Knip suppression for `src/snapshot/recovery-point.ts`. The follow-up
+  `6aca04e9abf885954ddff5a85faba2d5fdd1c4b6` commit updates the slice for
+  current main's stable-stringify package move and derives the test-only owner
+  inventory type from the public function signature instead of re-exporting
+  the private type. Commit
+  `041c3d580746cbf88eb8f8b05ebf8618d7571634` switches that import to current
+  main's resolver-supported `@openclaw/normalization-core` barrel. The PR body
+  now records the exact head and local
+  validation limitation: `git diff --check` passed, but full focused OpenClaw
+  validation was blocked because this Windows checkout uses Node `v24.14.0`,
+  the portable OpenClaw Node is above the supported range, WSL is unavailable,
+  and the branch predates current-main `packages/normalization-core`. GitHub
+  merge-commit CI is the source of truth for this head. `@clawsweeper
+  re-review` was requested for the prior head at
+  `https://github.com/openclaw/openclaw/pull/112385#issuecomment-5193773759`
+  and for the current head at
+  `https://github.com/openclaw/openclaw/pull/112385#issuecomment-5193947811`.
+  The larger owner-path decision remains tied to #112865 or maintainer
+  acceptance of the stacked recovery boundary.
+- #112865 is repaired and pushed at `cea9611c29f` on
+  `user/giodl/rfc-0013-final-capture`. It now derives final-capture agent
+  paths from the state owner's registered database inventory, pins the
+  recovery-point repository before aggregate publication, syncs the recovery
+  journal directory on every open, rejects aggregate manifest byte rewrites on
+  replay, rejects recovery-journal pathname replacement before SQLite DDL, and
+  makes the hidden stdin command exact protocol-owned stdout from startup. WSL
+  validation on Ubuntu 24.04 / Node `v24.15.0` passed focused Vitest for
+  startup policy, recovery-journal race, command failure JSON, and real source
+  CLI stdin/stdout JSON; `tsgo`; `pnpm deadcode:exports`; `oxfmt --check`; and
+  `git diff --check`. PR body proof is updated for exact head
+  `cea9611c29f47be87e1fc9067876af5ab95d07a6`, and `@clawsweeper re-review`
+  was requested at
+  `https://github.com/openclaw/openclaw/pull/112865#issuecomment-5194817503`.
+  It remains non-draft and merge-state `DIRTY`; owner acceptance of closure
+  evidence, inventory ownership, host-protected semantics, and main-branch
+  conflict resolution is still required. Do not move the branch head while the
+  fresh ClawSweeper exact-head review for `cea9611c29f` is
+  active. Local hygiene: `C:\src\openclaw-pr112865-clean-repair` is no longer
+  a reliable Windows worktree after a failed Node/pnpm/long-path cleanup;
+  pushed branch state and WSL validation state are authoritative.
+- #113421 is restacked on #104018 head `a8098928a6b` and pushed to our fork
+  branch `user/giodl/readiness-core-owner-adoption` at
+  `5dc65b066fb923b5389098c005914c5956e913a1`. The restack resolved current
+  main conflicts in cron/state DB owners by preserving current stale-job,
+  quarantine, Kysely-cache, and schema behavior while adding readiness
+  lifecycle publication. WSL validation in `/tmp/openclaw-pr104018-merge2` on
+  Node `v24.15.0` passed 120 focused readiness/Gateway/status/ready assertions,
+  test tsgo, `pnpm deadcode:exports`, `PROTOCOL_SINCE_BASE_SHA=b7f9cd0a01671f7be5fc34b4bd4bf6770603f480 pnpm
+  protocol:check`, full-tree `oxfmt --check`, and `git diff --check`; after
+  the parent baseline fix, WSL `pnpm plugin-sdk:api:check` and `git diff
+  --check` passed at `a53f16878cc`. A follow-up exact-head repair at
+  `5dc65b066fb` isolates the lazy-cron readiness test from ambient
+  `OPENCLAW_SKIP_CRON`, fixing the GitHub `checks-node-compact-small-12`
+  failure; WSL passed the targeted skip-cron run, full
+  `src/gateway/server-cron-lazy.test.ts`, `oxfmt --check`, and `git diff
+  --check`. PR body proof was synced on GitHub, and `@clawsweeper re-review`
+  was requested at
+  `https://github.com/openclaw/openclaw/pull/113421#issuecomment-5195959081`.
+  CI/review is running on the new head. Owner approval is still required for
+  the bounded V1 readiness/plugin SDK contract.
+- #113422 Standard Hosting Profiles is restacked on #113421
+  `5dc65b066fb` and pushed to our fork branch
+  `user/giodl/standard-hosting-profiles-owner-adoption` at
+  `bcc53177ec49f853a9068451d5eda443cee0f15f`. WSL validation in
+  `/tmp/openclaw-pr104018-merge2` passed focused `server-cron-lazy`,
+  `server/readiness`, and `docker-e2e-plan` Vitest shards, test `tsgo`,
+  `pnpm deadcode:exports`, `pnpm docs:list`, touched-file `oxfmt --check`,
+  and `git diff --check`. Package acceptance remains locally blocked because
+  the WSL image lacks `zip` and Ubuntu apt mirrors returned hash mismatches.
+  PR body proof was synced on GitHub, and `@clawsweeper re-review` was
+  requested at
+  `https://github.com/openclaw/openclaw/pull/113422#issuecomment-5195969188`.
+  Next readiness-stack work is to watch #104018/#113421/#113422 durable
+  verdicts, then restack #114636 on #113422.
+- #104018 readiness parent is restacked on current upstream/main
+  `9ef94e4ef93` and pushed to our fork branch
+  `user/giodl/readiness-profiles-upstream` at
+  `a8098928a6b4276a78e3b29c6db76f5aeaef2f9f`. The restack preserves current
+  main's expanded status payload, appends Gateway RPC `ready` without shifting
+  older method indices, and carries the readiness result through health/status
+  projections. A follow-up protocol fix moved Android `Ready("ready")` to the
+  generated Gateway method tail after GitHub's bundled protocol check caught
+  the stale order. A second follow-up refreshed the generated Plugin SDK API
+  baseline hash for the intended `module/plugin-entry` readiness surface after
+  GitHub caught the stale manifest. WSL validation in
+  `/tmp/openclaw-pr104018-merge2` on Node
+  `v24.15.0` passed focused readiness/Gateway/protocol/startup/status tests,
+  `PROTOCOL_SINCE_BASE_SHA=b7f9cd0a01671f7be5fc34b4bd4bf6770603f480 pnpm
+  protocol:check`, test tsgo, `pnpm deadcode:exports`, `oxfmt --check` on 15
+  touched files, `pnpm plugin-sdk:api:check`, and `git diff --check`. PR body
+  proof is updated from
+  `projects/enterpriseclaw/pr-bodies/openclaw-104018.md`, and
+  `@clawsweeper re-review` was requested for the original restack at
+  `https://github.com/openclaw/openclaw/pull/104018#issuecomment-5195241324`
+  for the protocol-tail fix at
+  `https://github.com/openclaw/openclaw/pull/104018#issuecomment-5195305560`,
+  and for the baseline fix at
+  `https://github.com/openclaw/openclaw/pull/104018#issuecomment-5195540330`.
+  Live GitHub shows no failed or pending checks at `a8098928a6b`, but durable
+  review/merge-state remains to settle before moving #113422/#114636.
+- #100960 is non-draft at `7cb8c5b3875` on
+  `user/giodl/cli-catalog-review-hardening`; live status is `BEHIND` with new
+  CI and ClawSweeper re-review running after the reserved-root test repair.
+  Wait for the durable verdict before moving dependent command-inventory PRs.
 - Review the target architecture through runtime-owner, hobbyist, enterprise
   operator, security, and skeptical-simplicity roles.
 - Review lane boundaries and identify responsibilities that are duplicated,
@@ -570,6 +909,510 @@
   projection layers rather than contract removal.
 - Run the standalone fleet rollout and recovery simulation to challenge
   EC-021 owner checkpoints/restore and EC-034 fleet convergence/containment.
+- 2026-08-05 upstream PR prep update: #104159 command prompt projection is
+  repaired and pushed at `31a1422983736db10ed528305d2452b4a85bedad` on our
+  fork branch `user/giodl/commands-upstream-prompt`. The repair caps the fully
+  rendered command-inventory prompt section, restricts default node prompt
+  guidance to generic-node-invoke-compatible commands, and adds typed
+  compaction `commandInventory` propagation. WSL validation passed the focused
+  prompt/projection/system/embedded/compaction Vitest set, test tsgo,
+  `pnpm deadcode:exports`, `oxfmt --check` on 8 touched files, and
+  `git diff --check`; Windows commit used `--no-verify` only because this
+  checkout lacks dependencies. The PR body was synced from
+  `projects/enterpriseclaw/pr-bodies/openclaw-104159.md`, and ClawSweeper
+  re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/104159#issuecomment-5194369294`.
+  #112385 at `041c3d5807` now has visible checks green including
+  `openclaw/ci-gate` but remains `BEHIND`. Active EnterpriseClaw upstream prep
+  count remains 11 PRs: command stack #100960/#104158/#104159/#104160,
+  readiness/hosting stack #104018/#113421/#113422/#114636, and
+  checkpoint/restore stack #112385/#112865/#112896.
+- 2026-08-05 follow-up: #104160 generated command reference/docs guard is
+  repaired and pushed at `d7c0abb33737a9e596567c08bc6d8cb680b4de4a` on our
+  fork branch `user/giodl/commands-upstream-docs`. It is restacked on #104159
+  `31a1422983736db10ed528305d2452b4a85bedad`, preserves the rendered prompt
+  cap and generic-node-invoke filtering, carries Code Mode state through
+  compacted prompt rebuilds, keeps plugin-owned descendants reachable under
+  `tools`, and tracks private QA/experimental Claws descriptor gates in docs
+  freshness. WSL validation passed focused Vitest, `pnpm
+  docs:commands:check`, test tsgo, `pnpm deadcode:exports`, `oxfmt --check`,
+  and `git diff --check`. The PR body was synced from
+  `projects/enterpriseclaw/pr-bodies/openclaw-104160.md`, and ClawSweeper
+  re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/104160#issuecomment-5194573817`.
+  The PR remains draft; PR context/evidence was still running immediately
+  after push.
+- 2026-08-05 follow-up: #104018 readiness parent was restacked and pushed at
+  `a8098928a6b4276a78e3b29c6db76f5aeaef2f9f` on our fork branch
+  `user/giodl/readiness-profiles-upstream`. Validation ran from clean WSL
+  checkout `/tmp/openclaw-pr104018-merge2`: focused Vitest readiness/Gateway
+  method/method-list/status/ready/protocol/startup-quarantine suites passed,
+  `pnpm protocol:check` passed with
+  `PROTOCOL_SINCE_BASE_SHA=b7f9cd0a01671f7be5fc34b4bd4bf6770603f480`,
+  `node scripts/run-tsgo.mjs -p test/tsconfig/tsconfig.test.src.json
+  --incremental --tsBuildInfoFile
+  .artifacts/tsgo-cache/test-src-pr104018-restack.tsbuildinfo` passed,
+  `pnpm deadcode:exports` passed with 0 entries, `oxfmt --check` passed on 15
+  touched files, `pnpm plugin-sdk:api:check` passed after the baseline refresh,
+  and `git diff --check` passed. PR body was synced from
+  `projects/enterpriseclaw/pr-bodies/openclaw-104018.md`, and ClawSweeper
+  re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/104018#issuecomment-5195540330`.
+  Active EnterpriseClaw upstream prep count remains 11 PRs; one of those,
+  #104018, is now in watch/CI-review rather than repair.
+- 2026-08-05 follow-up: #113421 readiness core-owner adoption is repaired and
+  pushed at `65c55a973e2086b96c3175c69ba43a8f8bee8c19` on our fork branch
+  `user/giodl/readiness-core-owner-adoption`. The repair moves provider-auth
+  snapshot serialization helpers into `src/agents/model-provider-auth-state.ts`
+  so `src/agents/model-provider-auth.ts` stays under the `max-lines` ratchet.
+  WSL validation passed focused provider-auth Vitest, test `tsgo`,
+  `pnpm deadcode:exports`, touched-file `oxfmt --check`, and `git diff
+  --check`; GitHub CI now shows #113421 green including `openclaw/ci-gate`.
+  Re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/113421#issuecomment-5196895321`.
+- 2026-08-05 follow-up: #113422 Standard Hosting Profiles is repaired and
+  restacked on #113421 `65c55a973e2`, then pushed at
+  `af311608a342f815014f1591b07683c5c38ddb01` on our fork branch
+  `user/giodl/standard-hosting-profiles-owner-adoption`. The repair adds the
+  missing hosting docs hint and makes the exported-write EACCES test accept
+  either recognized fail-closed guard ordering while still preserving the
+  existing config file. WSL validation passed focused config/schema tests, the
+  full previously failing runtime/config group, touched-file `oxfmt --check`,
+  and `git diff --check`. Re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/113422#issuecomment-5196895642`.
+  Fresh GitHub CI at this head currently reports several compact-shard
+  failures, but the workflow is still in progress and `gh` cannot expose failed
+  logs until it is terminal; this is the active next investigation.
+- 2026-08-05 follow-up: #114636 hosting profile inspection/conformance tooling
+  is restacked on #113422 `af311608a34`, repaired, and pushed at
+  `2b1b62d52f60038e74737e5ddefeab8159e0f1ea` on our fork branch
+  `user/giodl/hosting-profile-conformance-artifact`. The repair makes
+  `writeDockerOpenAiProviderConfigFile` internal so `pnpm deadcode:exports`
+  passes without a Knip exception. WSL validation on exact head `2b1b62d52f6`
+  passed `oxfmt --check` for the edited script, `git diff --check`,
+  `pnpm deadcode:exports`, test `tsgo`, and focused hosting/profile Vitest
+  across 4 shards / 98 tests; earlier in the same restack `pnpm docs:list`
+  passed. The PR body was updated with current stack SHAs and proof, and
+  re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/114636#issuecomment-5197038832`.
+  GitHub CI is now running on the new head.
+- 2026-08-05 follow-up: #113422 was repaired again for compact-shard Vitest
+  hangs and pushed to our fork at `b1444c990774de008c550d34c1862ee05e602e4a`.
+  The fix moves `HOSTING_PROFILE_IDS`, `HOSTING_PROFILE_ENV`, and
+  `HOSTING_PROFILE_CONTRACT_VERSION` into lightweight `src/hosting/types.ts`
+  so config schema imports do not pull the full hosting profile/Gateway graph.
+  WSL validation on exact head passed the formerly hanging gateway auth suites,
+  the combined focused gateway proof (3 files / 126 tests),
+  `pnpm deadcode:exports`, test `tsgo`, touched-file `oxfmt --check`, and
+  `git diff --check`. Re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/113422#issuecomment-5197636828`.
+  GitHub reported the fast checks green while several longer CI shards were
+  still running.
+- 2026-08-05 follow-up: #114636 was restacked on #113422 `b1444c99077`,
+  repaired for the new constant import split, and pushed to our fork branch
+  `user/giodl/hosting-profile-conformance-artifact` at
+  `715c7beb967e3b200573cbf7c2ed5579d9877ef3`. WSL validation on exact head
+  passed focused hosting/profile Vitest across 4 shards / 98 tests,
+  `pnpm deadcode:exports`, test `tsgo`, `pnpm docs:list`, touched-file
+  `oxfmt --check`, and `git diff --check`. Re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/114636#issuecomment-5197725045`.
+  GitHub CI is queued/running on the new head.
+- 2026-08-05 follow-up: #114636 CI repair is pushed to our fork branch
+  `user/giodl/hosting-profile-conformance-artifact` at
+  `3b5fbfd842598db0dfe8e05b0c65f91a05d609d0`. It classifies the new
+  `hosting` and `hosting profiles` command groups as JSON-output N/A
+  namespaces, updates changed-target routing for
+  `scripts/e2e/docker-openai-seed.ts` to include `test/scripts/docker-e2e-plan.test.ts`,
+  and keeps the malformed hosting-profile conformance fixture type-compatible
+  while preserving the invalid-payload assertion. WSL validation on Ubuntu
+  24.04 / Node `v24.15.0` / pnpm `11.15.1` passed install,
+  root-command-descriptions Vitest, the two selected routing tests that covered
+  the failed CI assertions, test-root `tsgo`, touched-file `oxfmt --check`, and
+  `git diff --check`. A full local `test/scripts/test-projects.test.ts` run on
+  WSL exceeded the local 120s Vitest timeout in two large routing tests, but
+  both selected tests passed with a larger local timeout and no assertion
+  failures. Proof and exact-head ClawSweeper re-review were posted at
+  `https://github.com/openclaw/openclaw/pull/114636#issuecomment-5199000870`.
+  GitHub CI is running on the new head; next EnterpriseClaw upstream prep is to
+  watch #114636, then move to the checkpoint/restore dirty restacks
+  #112865/#112896 unless #114636 reports a new failure.
+- 2026-08-05 follow-up: #114636 is now green on GitHub at
+  `3b5fbfd842598db0dfe8e05b0c65f91a05d609d0` with no pending or failing
+  checks visible. #112865 final capture is restacked on current upstream main
+  `d28371e95d709d520ce1a039bd5e660b103b53e7` and pushed to our fork branch
+  `user/giodl/rfc-0013-final-capture` at
+  `b9dc7f038058f82e402c3025500019edcfb14758`. The restack replaces stale
+  stable-stringify imports with `@openclaw/normalization-core`, updates
+  final-capture tests to current state schema modules, and preserves the prior
+  exact stdout and journal-replacement hardening. WSL exact-head validation on
+  Ubuntu 24.04 / Node `v24.15.0` passed focused Vitest across 4 shards / 55
+  tests, test-src `tsgo`, `pnpm deadcode:exports`, touched-file
+  `oxfmt --check`, and `git diff --check`. Proof and exact-head ClawSweeper
+  re-review were posted at
+  `https://github.com/openclaw/openclaw/pull/112865#issuecomment-5199211143`.
+  GitHub CI is running on #112865; next checkpoint/restore work is #112896
+  after #112865 settles, unless #112865 reports a new failure.
+- 2026-08-05 follow-up: #112896 restored recovery-point admission is repaired
+  and pushed to our fork branch `user/giodl/rfc-0013-restored-admission` at
+  `05cc435c76897cb3ab27f8a04d03a950262e9539`. The repair keeps the stack on
+  #112865 head `b9dc7f038058f82e402c3025500019edcfb14758`, binds final
+  capture to registered agent database paths instead of reconstructing only the
+  canonical path, fails closed for ambiguous same-agent registered paths,
+  rejects `gateway.restore.status` after restart drain begins, and removes the
+  test-only production export of `RecoveryPointOwnerInventory`. WSL validation
+  on Ubuntu 24.04 / Node `v24.15.0` / pnpm `11.15.1` passed restored/final
+  recovery-point Vitest, recovery-point composition Vitest, restored-admission
+  Gateway Vitest, test-src `tsgo`, `pnpm deadcode:exports`, touched-file
+  `oxfmt --check`, and `git diff --check`. Proof and exact-head ClawSweeper
+  re-review were posted at
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5199392714`.
+  GitHub quick checks on #112896 are running/pending after the push. #112865
+  now has GitHub CI failures in `check-lint` and
+  `checks-node-compact-small-6`, making #112865 the next active repair before
+  considering the checkpoint/restore stack settled.
+- 2026-08-06 follow-up: #112865 final capture is repaired again and pushed to
+  our fork branch `user/giodl/rfc-0013-final-capture` at
+  `32cd8e68b2d539dc0d6c9b3ef2821c3275961a20`. The CI repair fixes the
+  GitHub `check-lint` no-floating-promises failure in
+  `src/snapshot/recovery-journal.test.ts` and the
+  `checks-node-compact-small-6` JSON-output decision failure for hidden
+  `backup capture-final`. WSL validation on Ubuntu 24.04 / Node `v24.15.0` /
+  pnpm `11.15.1` passed focused CLI and recovery-journal Vitest, test-src
+  `tsgo`, `pnpm deadcode:exports`, touched-file `oxfmt --check`, `oxlint`,
+  and `git diff --check`. PR body proof was updated and exact-head
+  ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/112865#issuecomment-5199467253`.
+  GitHub CI is still running on the new head; the formerly failed jobs were
+  pending at last check. #112896 remains clean at
+  `05cc435c76897cb3ab27f8a04d03a950262e9539`; a rebase attempt exposed the
+  historical restored-admission protocol/catalog conflict set, and a tiny
+  cherry-pick is not sufficient because the branch is behind the current
+  command-catalog test shape. Next checkpoint/restore work is a deliberate
+  full #112896 restack/repair after #112865 CI reports its durable verdict.
+- 2026-08-06 follow-up: #112896 restored recovery-point admission is fully
+  restacked on #112865 exact head
+  `32cd8e68b2d539dc0d6c9b3ef2821c3275961a20` and pushed to our fork branch
+  `user/giodl/rfc-0013-restored-admission` at
+  `caa040b3fbe4feca5258767a2010735f77fcc33e`. The restack resolves the current
+  protocol schema-module layout, replaces stale stable-stringify imports with
+  `@openclaw/normalization-core`, updates restored fixtures to register agent
+  databases under the final-capture invariant from #112865, wires
+  `readPreparedGatewayModelCatalog` through `server-start.ts`, and updates the
+  protocol registry guard to the new 55-module owner list. WSL validation on
+  Ubuntu 24.04 / Node `v24.15.0` / pnpm `11.15.1` passed restored/final
+  recovery-point Vitest, gateway restored/suspension/restore method Vitest, CLI
+  gateway/backup Vitest, gateway restore protocol Vitest, test-src `tsgo`,
+  `pnpm deadcode:exports`, `PROTOCOL_SINCE_BASE_SHA=... pnpm protocol:check`,
+  touched-file `oxfmt --check`, `git diff --check`, and the conflict-marker
+  check. PR body proof was updated and exact-head ClawSweeper re-review was
+  requested at
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5199758826`.
+  GitHub quick checks are queued/running on the new head; #112896 still needs
+  durable CI verdict after #112865's pending `check-lint` completes.
+- 2026-08-06 follow-up: #112896 restored recovery-point admission was rebased
+  again onto current `upstream/main`
+  `c37ba84f662aca1b2d384846ee59654e88ddfc50` and pushed only to our fork
+  branch `user/giodl/rfc-0013-restored-admission` at
+  `1651d28c53e2a3b5b3adc5f60c7848b1448f179b`. The rebase resolves the
+  `server-startup-finish.ts` startup wiring conflict by preserving both
+  `readChatStartupProjection: chatMetadataLifecycle.readStartup` and
+  `getHealthCache: healthState.getHealthCache`. WSL validation on Ubuntu
+  24.04 / Node `v24.15.0` / pnpm `11.15.1` passed restored/final
+  recovery-point Vitest, gateway restored/suspension/restore method Vitest,
+  CLI gateway/backup Vitest, gateway restore protocol Vitest, test-src
+  `tsgo`, `pnpm deadcode:exports`, `PROTOCOL_SINCE_BASE_SHA=... pnpm
+  protocol:check`, touched-file `oxfmt --check`, `git diff --check
+  upstream/main..HEAD`, and the conflict-marker check. A post-rebase merge
+  probe against `upstream/main` returned `Already up to date.` PR body proof
+  was updated and exact-head ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5199867946`.
+  GitHub CI is running on the new head and initially reported merge-state
+  `BEHIND` despite local `HEAD...upstream/main` showing ahead 47 / behind 0,
+  so the next step is to watch for GitHub recalculation and any new CI failures.
+- 2026-08-06 follow-up: #100960 command inventory review hardening is repaired
+  and pushed only to our fork branch
+  `user/giodl/cli-catalog-review-hardening` at
+  `8e72d20247b3adbd447fd738338ab3a93319ca5f`. The repair filters plugin
+  descriptors under reserved core command roots (`auth`, `tool`, `tools`),
+  adds a regression covering `tools` and `auth` descriptors while preserving an
+  allowed nested plugin descriptor, and fixes the initial flatMap typing issue
+  that failed GitHub prod/test type checks. Exact-head runtime proof showed
+  `tools commands` registered in the command inventory, `gateway status`
+  inspectable, six plugin descriptor commands emitted with zero reserved-root
+  leaks, and head `8e72d20247b3adbd447fd738338ab3a93319ca5f`. WSL validation
+  passed focused plugin/catalog Vitest, `pnpm deadcode:exports`, core
+  production `tsgo`, touched-file `oxfmt --check`, and `git diff --check`;
+  local core-test `tsgo` exceeded the local timeout, so GitHub remains the
+  durable broad test-type signal. PR body proof was updated and exact-head
+  ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/100960#issuecomment-5200057957`.
+  Live GitHub state after the push showed no failures and pending CI only.
+- 2026-08-06 follow-up: #112896 restored recovery-point admission received two
+  CI repairs and is now pushed only to our fork branch
+  `user/giodl/rfc-0013-restored-admission` at
+  `b12397b86185cd8688c0a4d31f2987e3eece5437`. First,
+  `f20777d853bc59df90eee8675bc794b01146bb4e` removed the stale
+  recovery-point test alias and classified hidden `backup restore-accepted` as
+  JSON-output N/A, fixing GitHub `check-lint` and
+  `checks-node-compact-small-6`. Then
+  `b12397b86185cd8688c0a4d31f2987e3eece5437` repaired the Windows hosted-runner
+  ACL metadata failure by keeping fail-closed ACL verification, allowing slower
+  PowerShell ACL inspection, and preserving the underlying cause in thrown
+  errors. WSL validation passed focused root-command JSON classification
+  Vitest, recovery-point Vitest, touched-file oxlint, local SQLite snapshot
+  repository Vitest (`63 passed / 3 skipped`), `oxfmt --check`, production
+  core `tsgo`, and `git diff --check`. PR body proof was updated and exact-head
+  ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5200095131`.
+  Live GitHub state after the push showed no failures and pending CI only.
+- 2026-08-06 follow-up: the command-owner child stack has been restacked on
+  the repaired #100960 parent and pushed only to our fork branches. #104158
+  `user/giodl/commands-upstream-node` is now at
+  `a7ce8e8aaefa3da34b8396c6fd4ed691798241fe`, restacked on #100960
+  `8e72d20247b3adbd447fd738338ab3a93319ca5f`; WSL validation used matching
+  tree `2ad8553f0b11796c4707aa4eb6ffe705f88be747` and passed focused
+  live-node/list/catalog Vitest, broader catalog/plugin/inspect Vitest,
+  touched-file `oxfmt --check`, `git diff --check`, and
+  `pnpm deadcode:exports`. #104159 `user/giodl/commands-upstream-prompt` is
+  now at `64d72f94e5db3509a1c4d0ed7f680d9eaa16e1bb`, restacked on #104158
+  `a7ce8e8aaefa3da34b8396c6fd4ed691798241fe`; WSL validation used matching
+  tree `1e2b2d93d5fcd545f6f53dbcc0f5582205b28083` and passed prompt,
+  projection, embedded prompt, and compaction Vitest (`137 passed`),
+  touched-file `oxfmt --check`, `git diff --check`, and
+  `pnpm deadcode:exports`, while local broad test-source `tsgo` exceeded the
+  180s timeout without diagnostics. #104160
+  `user/giodl/commands-upstream-docs` is now at
+  `42da0fbd0365179ee3ea5c555634ebc186e0007b`, restacked on #104159
+  `64d72f94e5db3509a1c4d0ed7f680d9eaa16e1bb`; WSL validation used matching
+  tree `34fd86d3558b10e8f8922f8e4cea2134feed2850` and passed
+  `pnpm docs:commands:check`, focused generator/workflow/prompt/compaction
+  Vitest, touched-file `oxfmt --check`, `git diff --check`, and
+  `pnpm deadcode:exports`. PR bodies were updated and exact-head
+  ClawSweeper review was requested and acknowledged at
+  `https://github.com/openclaw/openclaw/pull/104158#issuecomment-5200216174`,
+  `https://github.com/openclaw/openclaw/pull/104159#issuecomment-5200216214`,
+  and `https://github.com/openclaw/openclaw/pull/104160#issuecomment-5200216240`.
+  Live GitHub state after these pushes: #100960/#104158/#104159/#104160 show
+  no failures and no pending checks; the three child PRs remain draft, with
+  #104160 still `UNSTABLE`. #112896 is clean with one pending check.
+- 2026-08-06 follow-up: the full EnterpriseClaw upstream PR matrix was
+  refreshed after the command-stack review acknowledgements and the #112385
+  cancelled `label` workflow rerun. All eleven PRs now show no failed checks:
+  #100960 `8e72d20247b3adbd447fd738338ab3a93319ca5f`, #104158
+  `a7ce8e8aaefa3da34b8396c6fd4ed691798241fe`, #104159
+  `64d72f94e5db3509a1c4d0ed7f680d9eaa16e1bb`, #104160
+  `42da0fbd0365179ee3ea5c555634ebc186e0007b`, #104018
+  `a8098928a6b4276a78e3b29c6db76f5aeaef2f9f`, #113421
+  `65c55a973e2086b96c3175c69ba43a8f8bee8c19`, #113422
+  `b1444c990774de008c550d34c1862ee05e602e4a`, #114636
+  `3b5fbfd842598db0dfe8e05b0c65f91a05d609d0`, #112385
+  `041c3d5807ec4214d51ce1d90a0b44246d1584b4`, #112865
+  `32cd8e68b2d539dc0d6c9b3ef2821c3275961a20`, and #112896
+  `b12397b86185cd8688c0a4d31f2987e3eece5437`. #112896 is the only
+  remaining active wait: one pending check and `BEHIND` merge state. Next work
+  is to let the current check finish, then restack #112896 on current
+  `upstream/main` only if the behind state remains or CI/review requests it.
+- 2026-08-06 follow-up: #112896 restored recovery-point admission was restacked
+  again after `upstream/main` advanced to
+  `941e68bcf5696e624fc0be63ef162b34a4225e0c` and pushed only to our fork
+  branch `user/giodl/rfc-0013-restored-admission` at
+  `b0b4afe0acc3f5a582459a22e61c87becac9ffe2`. The rebase completed with no
+  conflicts and local `HEAD...upstream/main` now reports ahead 49 / behind 0.
+  WSL validation on exact head `b0b4afe0acc` passed snapshot/restored/final
+  recovery-point/recovery-journal Vitest (`30 passed`),
+  gateway/restored-admission/startup Vitest (`121 passed`), CLI/root-command
+  and gateway-protocol Vitest (`90 passed`), test-source `tsgo`,
+  `pnpm deadcode:exports`, `pnpm protocol:check`, touched-file `oxfmt`,
+  touched-file `oxlint`, and `git diff --check`. PR body proof was updated and
+  exact-head ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5200433415`.
+  The full eleven-PR EnterpriseClaw matrix now shows no failed checks:
+  #100960/#104158/#104159/#104160, #104018/#113421/#113422/#114636, and
+  #112385/#112865/#112896. #112896 is the only active wait, with GitHub checks
+  still running and merge state `BLOCKED`.
+- 2026-08-06 follow-up: Lobster image-branch cleanup for the signed
+  `openclaw@2026.6.33` replay now removes the stale
+  `patch-openclaw-request-timeout.mjs` carry because upstream 2026.6.33 already
+  owns bundle-MCP request-timeout behavior. Local Lobster validation passed the
+  pipeline SDL validator, the focused SDL regression, two targeted Rust adapter
+  tests, Python compile checks, changed-file `git diff --check`, and
+  `just openclaw-patches-check --offline` with 26 documented Docker-applied
+  patches. `just rust-auth` refreshed `.env.cargo-auth`, after which
+  `npm view openclaw@2026.6.33` reached the feed but returned npm `E404`
+  (`No match found for version 2026.6.33`). A parallel
+  `just openclaw-js-unit-tests` attempt timed out at 10 minutes and no Docker
+  container remained running afterward; existing `just dev-no-auth`/Gateway
+  helper processes were unrelated and left alone. The next image step is to get
+  `openclaw@2026.6.33` published/visible in the Lobster feed, then rerun JS
+  unit image proof and `just ensure-openclaw-image`.
+- 2026-08-06 follow-up: #112896 restored recovery-point admission is repaired
+  for the prior ClawSweeper findings, rebased on current `upstream/main`
+  `ddcc3fbd80bfa163a458f1d8e8318d3d911bf424`, and pushed only to our fork
+  branch `user/giodl/rfc-0013-restored-admission` at
+  `84871899d55ccd122f978612c7d2787c58cad291`. The repair appends
+  `gateway.restore.status` after the existing advertised method tail, syncs the
+  generated Android protocol catalog, and replaces restored source-path agent
+  registry rows with destination-runtime registrations before writing the
+  committed restore receipt. WSL validation on exact head passed snapshot /
+  restored / final / recovery-journal Vitest (`31 passed`), gateway
+  method-list / restored / suspension / restore / startup Vitest
+  (`146 passed`), CLI/root-command/protocol Vitest (`90 passed`), test-source
+  `tsgo`, `pnpm deadcode:exports`, `pnpm protocol:check`, touched-file
+  `oxfmt`, touched-file `oxlint`, and `git diff --check`. PR body proof was
+  updated and exact-head ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5200712222`;
+  ClawSweeper acknowledged at
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5200712468`.
+  GitHub CI is running on the new head with no failures visible at last check;
+  merge state still reports `BEHIND` while local `HEAD...upstream/main` is
+  ahead 50 / behind 0, so the next upstream action is to watch CI and merge-state
+  recalculation before restacking again.
+- 2026-08-06 follow-up: #112896 was refreshed again after `upstream/main`
+  advanced to `355c107c093767cb14c1463b8e3a7dd9764a7359`. The restack rebased
+  cleanly and was pushed only to our fork branch
+  `user/giodl/rfc-0013-restored-admission` at exact head
+  `89345a007267af4c50b8d3d735fab50ec7dea96b` using a force-with-lease against
+  prior fork head `84871899d55ccd122f978612c7d2787c58cad291`. Exact-head WSL
+  validation passed snapshot/restored/final/recovery-journal Vitest
+  (`31 passed`), gateway method-list/restored/suspension/restore/startup Vitest
+  (`146 passed`), CLI/root-command/protocol Vitest (`90 passed`), test-source
+  `tsgo`, `pnpm deadcode:exports`, `pnpm protocol:check`, touched-file
+  `oxfmt`, touched-file `oxlint`, and `git diff --check`. PR body proof was
+  updated and exact-head ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5200769564`.
+  GitHub now reports the PR head as `89345a007267af4c50b8d3d735fab50ec7dea96b`
+  with no failures and multiple checks running; merge state still reports
+  `BEHIND`, so the immediate next action is to watch CI/review and only rebase
+  again if GitHub keeps the behind state after recalculation.
+- 2026-08-06 matrix refresh: the tracked eleven EnterpriseClaw upstream PRs
+  still have zero visible failed checks. Ten PRs have no pending checks:
+  #100960, #104158, #104159, #104160, #104018, #113421, #113422, #114636,
+  #112385, and #112865. #112896 is the only active wait at exact head
+  `89345a007267af4c50b8d3d735fab50ec7dea96b`, with GitHub reporting
+  `BEHIND` and 66 checks pending/running after the fork push.
+- 2026-08-06 follow-up: #112896 was restacked once more after `upstream/main`
+  advanced to `874c63318b590a3567a49d36066d79d211f8be08`
+  (`fix(skills): remove regex correction capture; self-learning is
+  reviewer-only`). The rebase completed cleanly and was pushed only to our fork
+  branch `user/giodl/rfc-0013-restored-admission` at exact head
+  `ebe486dae3cad495c73259c5ee04cc042292fe8b`, using a force-with-lease against
+  prior fork head `89345a007267af4c50b8d3d735fab50ec7dea96b`. Exact-head WSL
+  validation passed snapshot/restored/final/recovery-journal Vitest
+  (`31 passed`), gateway method-list/restored/suspension/restore/startup Vitest
+  (`146 passed`), CLI/root-command/protocol Vitest (`90 passed`), test-source
+  `tsgo`, `pnpm deadcode:exports`, `pnpm protocol:check`, touched-file
+  `oxfmt`, touched-file `oxlint`, and `git diff --check`. PR body proof was
+  updated and exact-head ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5200827362`.
+  GitHub now reports the PR head as `ebe486dae3cad495c73259c5ee04cc042292fe8b`
+  with no failures, 74 pending/running checks, and merge state `BLOCKED`; local
+  `HEAD...upstream/main` is ahead 50 / behind 0. The Lobster image path remains
+  blocked because `npm view openclaw@2026.6.33 version --json` still returns
+  feed `E404`.
+- 2026-08-06 matrix refresh: the tracked eleven EnterpriseClaw upstream PRs
+  still have zero visible failed checks. Ten PRs have no pending checks:
+  #100960, #104158, #104159, #104160, #104018, #113421, #113422, #114636,
+  #112385, and #112865. #112896 is the only active CI wait at exact head
+  `ebe486dae3cad495c73259c5ee04cc042292fe8b`, with 74 pending/running checks
+  and merge state `BLOCKED` immediately after the latest fork push.
+- 2026-08-06 follow-up: live refresh still shows #112896 at fork/current PR
+  head `ebe486dae3cad495c73259c5ee04cc042292fe8b`, local `HEAD...upstream/main`
+  ahead 50 / behind 0 against `874c63318b590a3567a49d36066d79d211f8be08`, no
+  visible failures, and GitHub checks still running; the final live check in
+  the previous turn showed 40 pending/running checks. The tracked upstream stack
+  remains failure-free; #104158/#104159/#104160 are clean but still draft and
+  should stay draft unless maintainers explicitly accept source-harness proof
+  or ask us to mark them ready. The Lobster feed gate still blocks image
+  materialization: `npm view openclaw@2026.6.33 version --json` returns feed
+  `E404`. `current-roadmap-2026-08-04.md` was refreshed with the current
+  readiness/hosting heads, command/checkpoint heads, timeout-patcher deletion
+  state, and next execution order.
+- 2026-08-06 follow-up: live refresh still shows #112896 at exact head
+  `ebe486dae3cad495c73259c5ee04cc042292fe8b`, local branch current with
+  `upstream/main` (`874c63318b590a3567a49d36066d79d211f8be08`) at ahead 50 /
+  behind 0, no visible failures, and merge state `BLOCKED` while CI drains.
+  Pending/running checks dropped to 26. The tracked eleven-PR matrix remains
+  failure-free, with ten PRs at zero pending checks. `openclaw@2026.6.33` still
+  returns feed `E404`, so Lobster image materialization remains externally
+  gated.
+- 2026-08-06 follow-up: live refresh still shows #112896 unchanged at exact
+  head `ebe486dae3cad495c73259c5ee04cc042292fe8b`, local branch current with
+  `upstream/main` at ahead 50 / behind 0, zero visible failures, and merge state
+  `BLOCKED`; pending/running checks have drained to 13. The full tracked
+  eleven-PR matrix remains failure-free, with ten PRs at zero pending checks and
+  #104158/#104159/#104160 still draft. The Lobster package gate still blocks:
+  `npm view openclaw@2026.6.33 version --json` returns `E404`.
+- 2026-08-06 follow-up: #112896 remains unchanged at exact head
+  `ebe486dae3cad495c73259c5ee04cc042292fe8b`, current with `upstream/main`
+  `874c63318b590a3567a49d36066d79d211f8be08` at local ahead 50 / behind 0.
+  GitHub still reports zero visible failures and merge state `BLOCKED`; pending
+  checks have drained to 5. The full tracked eleven-PR matrix remains
+  failure-free, with ten PRs at zero pending checks. The Lobster npm feed issue
+  now appears package-wide in the configured feed: both
+  `npm view openclaw@2026.6.33 version --json` and
+  `npm view openclaw versions --json` return `E404`, so image materialization
+  remains blocked until the feed exposes `openclaw` or an alternate signed
+  package source is selected.
+- 2026-08-06 follow-up: #112896 has now drained to zero pending checks and zero
+  visible failures at exact head `ebe486dae3cad495c73259c5ee04cc042292fe8b`;
+  GitHub merge state reports `UNSTABLE`, not an active CI failure. Lobster patch
+  drift is now the main risk: `C:\src\lobster-pr5402-reviewfix` carries the
+  26-file reduced queue, `C:\src\lobster-promote-633` carries 28 patch files on
+  `promoteclaw/openclaw-2026.6.33`, and `C:\src\lobster-pr6839-fix` shows the
+  older 32-file PR #6839 queue with unresolved OpenClaw container conflicts.
+  Live GHE state also shows Lobster #6839 at 8 failed checks and changes
+  requested, and Lobster #5402 at 3 failed checks and changes requested. The
+  immediate next work should be a 32-to-28/26 patch intake ledger: classify the
+  two `promoteclaw/openclaw-2026.6.33` adds (`agent-harness-host-adapter`,
+  `msteams-native-audience-route`) and the 32-file legacy additions/restores
+  before accepting them into the 2026.6.33 image path.
+- 2026-08-06 follow-up: the patch-count risk is now recorded in
+  `lobster-patch-intake-2026-08-06.md`. The clean
+  `C:\src\lobster-promote-633` branch is the intake base with 28 patch files.
+  The conflicted 32-file `C:\src\lobster-pr6839-fix` tree is a candidate-delta
+  source only, not the target image branch. Already-accepted current-main adds
+  are `0029-agent-harness-host-adapter.patch` and
+  `0030-msteams-native-audience-route.patch`; the only small 32-only
+  investigate-now candidate is `0031-cron-wake-only-payload-kind.patch`.
+  Sensitivity, retry/session-init, DoltLite/SQLite, test-order, per-send
+  sensitivity, and 2026.6.11 correction patches stay out unless current Lobster
+  dependency proof exists.
+- 2026-08-06 follow-up: the clean 28-patch promote branch passed
+  `just openclaw-patches-check --offline` in WSL. The gate reported all 28
+  patches documented in `README.md`, applied by Dockerfile order, covered by
+  shared scoped Vitest runner registration, and pinned consistently to
+  `openclaw 2026.6.33` / `v2026.6.33` / `7af0cfc9c548`. A clean-branch `rg`
+  search found no current `payload.kind`, literal `kind: "wake"`, `wake-only`,
+  `CronWake`, or retained-wake caller in `src`, `scripts`, `docs`, or
+  `.pipelines`, so default action is to keep `0031-cron-wake-only-payload-kind`
+  out unless a current Lobster caller or failing fixture proves the dependency.
+- 2026-08-06 follow-up: the clean 28-patch Lobster promote branch now has
+  Dockerized OpenClaw JS proof green: msteams patched-source tests, upstream
+  evidence/readiness/hosting scoped tests, and vendored m365mail tests passed.
+  Two image-build blockers were repaired locally in
+  `C:\src\lobster-promote-633`: the remote-harness Docker stage now uses an
+  explicit temporary npmrc for npm install/prune, and `scripts/build-openclaw.sh`
+  preserves fresh caller package/feed tokens over stale `.env.cargo-auth`
+  values. `scripts/ensure-openclaw-image.sh` then advanced through
+  remote-harness npm and NuGet and failed only at final runtime dependency
+  materialization with npm `ETARGET` because the Lobster feed does not expose
+  `openclaw@2026.6.33`. No final image digest exists yet. The current working
+  answer to the 32-patch pressure is to keep the validated 28-patch queue
+  frozen unless a current Lobster caller or failing fixture proves a 32-only
+  dependency.
+- 2026-08-06 follow-up: the validated Lobster image-intake repair set was
+  committed in `C:\src\lobster-promote-633` as
+  `bf72332b7172e68892bbbfe8724e8e1fc9a962ff` (`Stabilize OpenClaw
+  2026.6.33 image intake`) and pushed only to the fork remote
+  `giodl:promoteclaw/openclaw-2026.6.33`; `origin/bic/lobster` was not pushed.
+  The current worktree is clean and one commit ahead of `origin`. The
+  rechecked cheap gate passed:
+  `wsl -d Ubuntu-24.04 -- bash -lc 'cd /mnt/c/src/lobster-promote-633 && just openclaw-patches-check --offline'`.
+  A live feed check still returns `E404` for `openclaw@2026.6.33`, so image
+  materialization remains blocked on package/feed availability. The tracked
+  eleven upstream OpenClaw PRs show zero failed checks and zero pending checks;
+  all report GitHub merge state `UNSTABLE`, and #104158/#104159/#104160 remain
+  draft by policy.
 
 ## Session Checkpoints
 
