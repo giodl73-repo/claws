@@ -1584,6 +1584,14 @@
   `0033` through `0035`. Do not advertise or build a "31 physical patch" fork
   until a 31st file is named, cleanly applied to `v2026.6.33`, validated, and
   assigned a deletion condition.
+- 2026-08-06 manifest checkpoint: `lobster-image-patch-manifest-2026-08-06.md`
+  records the two exact Lobster image manifest choices. The authenticated
+  Lobster npm feed probe after `just rust-auth` still returns `E404 No match
+  found for version 2026.6.33`, so image materialization remains externally
+  gated. The 30-file current-promote candidate passed
+  `just openclaw-patches-check --offline`; it is structurally valid but not
+  the default image path until the team accepts wake-only Cron, Channel
+  Participant, and the per-thread Teams route update as initial carries.
 
 ## Session Checkpoints
 

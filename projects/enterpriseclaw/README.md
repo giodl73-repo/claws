@@ -87,6 +87,7 @@ decision or action.
 | Fork branch, patch queue, phase, release, and upstream-promotion plan | `fork-execution-plan-2026-08-02.md` |
 | Live PRE-001 fork sync, protection, checkout, and baseline record | `fork-preflight-2026-08-02.md` |
 | Current fork/image, upstream-source, RFC, and patch execution roadmap | `current-roadmap-2026-08-04.md` |
+| Exact Lobster image patch manifest choices for 28-file and 30-file paths | `lobster-image-patch-manifest-2026-08-06.md` |
 | Final Lobster size, code-area, ProxyPipe, work, and ownership assessment | `lobster-final-assessment-2026-08-04.md` |
 | Current Lobster plugin and patch disposition ledger | `lobster-plugin-patch-disposition-2026-08-05.md` |
 | Lobster/OpenClaw operational issue, merged-fix, and workaround audit | `lobster-openclaw-operational-issue-audit-2026-08-05.md` |

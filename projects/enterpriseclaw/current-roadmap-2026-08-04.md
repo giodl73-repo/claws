@@ -70,6 +70,9 @@ smallest portable owner delta with an exact deletion target.
 Current intake ledger:
 `projects/enterpriseclaw/lobster-patch-intake-2026-08-06.md`.
 
+Exact image patch manifest choices:
+`projects/enterpriseclaw/lobster-image-patch-manifest-2026-08-06.md`.
+
 The v2026.6.33 replay currently carries these downstream islands:
 
 | Island | Current replay state | Roadmap disposition |
@@ -522,7 +525,8 @@ Upstream PR #104160 current-main restack on 2026-08-05:
    Lobster image path, or promote the clean 30-file current-main parity queue
    only after accepting wake-only Cron and Channel Participant as intentional
    carries. Do not create or advertise a 31-file fork until the extra file is
-   named and proven.
+   named and proven. The exact choices are recorded in
+   `lobster-image-patch-manifest-2026-08-06.md`.
 2. Let normal quarantine promotion publish `openclaw@2026.6.33` to the Lobster
    npm feed after the 7-day gate, or get an approved Day0 work item before
    manually queueing `Lobster-Promote-OpenClaw-LTS-Packages` with
