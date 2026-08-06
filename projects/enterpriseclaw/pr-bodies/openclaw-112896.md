@@ -6,9 +6,11 @@ Non-normative host follow-on evidence (Microsoft access): https://microsoft.ghe.
 
 Stacked on: https://github.com/openclaw/openclaw/pull/112865
 
-Exact current head: `8f64c26f5c35699a2cf8ad4375f55c77a3083b61`
+Exact current head: `fa0e5093debeeacfba48bf7ae82e7a84b82d8ff7`
 
 Previous full proof head: `ebe486dae3cad495c73259c5ee04cc042292fe8b`
+
+Previous review-repair head: `8f64c26f5c35699a2cf8ad4375f55c77a3083b61`
 
 ## What problem this solves
 
@@ -104,6 +106,16 @@ not linked after dependency materialization failed on private feed auth for
 `@openclaw/fs-safe@0.5.2`; GitHub CI is the current package-materialized
 validation for this exact head.
 
+2026-08-06 second rebase-only update:
+The branch was rebased cleanly onto current upstream `main`
+`d3558460d5a34f2f2e5bc24aeaf425ec0882fbe2` and pushed to exact head
+`fa0e5093debeeacfba48bf7ae82e7a84b82d8ff7`. Local validation in the same fresh
+Windows clone passed `git diff --check upstream/main..HEAD` and a
+conflict-marker search over all touched files. No source conflicts were
+resolved in this rebase. Focused Vitest remains blocked in this clone because
+dependency materialization failed on private feed auth for `@openclaw/fs-safe`;
+GitHub CI is the current package-materialized validation for this exact head.
+
 Exact steps or command run after this patch:
 
 1. `pnpm exec vitest run src/snapshot/restored-recovery-point.test.ts src/snapshot/final-recovery-point.test.ts src/snapshot/recovery-point.test.ts src/snapshot/recovery-journal.test.ts`
@@ -148,6 +160,7 @@ current-restack deadcode exports: passed with 0 entries
 current-restack protocol registry/generation/since/native diff check: passed
 current-restack touched oxfmt, oxlint, and diff check: passed
 follow-up review repair diff check and conflict-marker search: passed
+second rebase-only update diff check and conflict-marker search: passed
 snapshot restored/final/recovery-point tests: 29 passed
 gateway restored/suspension/restore method tests: 50 passed
 CLI gateway/backup tests: 80 passed

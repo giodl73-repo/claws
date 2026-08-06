@@ -1490,6 +1490,23 @@
   approved alternate source is selected. #112896 remains at exact head
   `8f64c26f5c35699a2cf8ad4375f55c77a3083b61` with no visible failed checks and
   queued/pending GitHub checks.
+- 2026-08-06 follow-up: #112896 restored recovery-point admission was restacked
+  again after GitHub `main` advanced to
+  `d3558460d5a34f2f2e5bc24aeaf425ec0882fbe2`. The rebase completed cleanly in
+  `C:\src\openclaw-pr112896-restack-current` with no conflicts and was pushed
+  only to the fork branch
+  `giodl73-repo/openclaw:user/giodl/rfc-0013-restored-admission` at
+  `fa0e5093debeeacfba48bf7ae82e7a84b82d8ff7`, using an exact force-with-lease
+  from `8f64c26f5c35699a2cf8ad4375f55c77a3083b61`. Local
+  `git diff --check upstream/main..HEAD` and conflict-marker search over
+  touched files passed; local focused Vitest remains blocked in this fresh
+  clone by private feed auth for `@openclaw/fs-safe`. The PR body was updated
+  from `projects/enterpriseclaw/pr-bodies/openclaw-112896.md`, and exact-head
+  ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5208190063`.
+  GitHub reports the new head, mergeable, with Socket checks passing and CI
+  attaching; keep watching for concrete CI/review failures before any further
+  restack.
 
 ## Session Checkpoints
 
