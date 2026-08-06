@@ -1568,6 +1568,13 @@
   Next upstream action is to watch GitHub checks and ClawSweeper verdicts,
   then restack dependent draft command PRs only after parent state stabilizes
   or maintainers ask for exact-head draft proof.
+- 2026-08-06 stop decision: pause upstream PR restack churn here. The current
+  working assumption is that the Lobster/OpenClaw image path should likely
+  restart from a fork line carrying the 31-patch queue explicitly, rather than
+  continuing to treat the existing patch-count drift as incidental. Keep the
+  latest fork-only upstream PR restacks as parked source/proof state, but do
+  not continue restacking unless a concrete CI/review failure or maintainer
+  request appears.
 
 ## Session Checkpoints
 
