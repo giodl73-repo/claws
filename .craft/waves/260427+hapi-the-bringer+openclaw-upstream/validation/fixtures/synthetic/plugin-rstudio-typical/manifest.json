@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "rstudio plugin (science)",
   "contributes": {
-    "tools": [
-      "rstudio/run-script"
-    ],
-    "skills": [
-      "rstudio/run-script"
-    ]
+    "tools": ["rstudio/run-script"],
+    "skills": ["rstudio/run-script"]
   }
 }

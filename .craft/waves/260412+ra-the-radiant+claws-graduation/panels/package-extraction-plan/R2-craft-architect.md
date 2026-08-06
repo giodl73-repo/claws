@@ -12,6 +12,7 @@
 **Status: PARTIAL**
 
 The plan's Package Map (lines 34-67) correctly consolidates to 10+7. The merges are sound:
+
 - forma = readers + IR (correct — reader returns IR types, inseparable)
 - workspace = detect + discover + normalize (correct — one concern)
 - crypto = crypto + audit-chain (correct — 200-line wrapper isn't a package)
@@ -77,6 +78,7 @@ The questionable merge is **execution = engine + skill-resolver**. Skill resolut
 ### Does the dependency graph avoid diamonds?
 
 **Cannot fully verify.** The dependency graph (lines 79-103) is incomplete — it shows rough structure but not the precise edges for all 17 packages. Specifically:
+
 - `@craftworks/governance` depends on `@craftworks/crypto` (for hashing). Does it also depend on `@craftworks/context`? If so, does anything else create a diamond through both paths?
 - `@craftworks/execution` merges skill-resolver. Skill-resolver originally depended on `@craftworks/forma` (oc-ir). Does execution now depend on forma? If so, the graph has an undocumented edge.
 
@@ -102,17 +104,17 @@ Headline H1 (line 6) says "Each of the 12 design/compiler/ areas maps to one npm
 
 ## Summary
 
-| Finding | Status | Severity |
-|---------|--------|----------|
-| C01 — Consolidate to domain-based packages | PARTIAL | Must-address |
-| C02 — Canonical import path | UNRESOLVED | Must-address |
-| C03 — Compatibility manifest | UNRESOLVED | Must-address |
-| C04 — Gateway startup benchmark | UNRESOLVED | Must-address |
-| C05 — Governance as one package | RESOLVED | -- |
-| C06 — Public npm from Phase 1 | PARTIAL | Must-address |
-| N01 — compilation-host orphaned | NEW | Must-address |
-| N02 — Budget in governance consumer impact | NEW | Warning |
-| N03 — Headline mismatch | NEW | Note |
+| Finding                                    | Status     | Severity     |
+| ------------------------------------------ | ---------- | ------------ |
+| C01 — Consolidate to domain-based packages | PARTIAL    | Must-address |
+| C02 — Canonical import path                | UNRESOLVED | Must-address |
+| C03 — Compatibility manifest               | UNRESOLVED | Must-address |
+| C04 — Gateway startup benchmark            | UNRESOLVED | Must-address |
+| C05 — Governance as one package            | RESOLVED   | --           |
+| C06 — Public npm from Phase 1              | PARTIAL    | Must-address |
+| N01 — compilation-host orphaned            | NEW        | Must-address |
+| N02 — Budget in governance consumer impact | NEW        | Warning      |
+| N03 — Headline mismatch                    | NEW        | Note         |
 
 **Total: 5 Must-address, 1 Warning, 1 Note**
 

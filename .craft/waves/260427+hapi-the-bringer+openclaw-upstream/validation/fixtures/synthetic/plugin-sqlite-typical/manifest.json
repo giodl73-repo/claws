@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "sqlite plugin (data)",
   "contributes": {
-    "tools": [
-      "sqlite/query",
-      "sqlite/exec"
-    ],
-    "skills": [
-      "sqlite/query",
-      "sqlite/exec"
-    ]
+    "tools": ["sqlite/query", "sqlite/exec"],
+    "skills": ["sqlite/query", "sqlite/exec"]
   }
 }

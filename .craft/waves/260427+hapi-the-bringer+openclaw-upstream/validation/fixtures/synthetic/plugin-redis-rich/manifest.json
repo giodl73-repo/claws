@@ -4,18 +4,9 @@
   "version": "0.1.0",
   "description": "redis plugin (data)",
   "contributes": {
-    "tools": [
-      "redis/get",
-      "redis/set",
-      "redis/flushdb"
-    ],
-    "skills": [
-      "redis/get",
-      "redis/set"
-    ],
-    "workflows": [
-      "redis-flow.lobster"
-    ],
+    "tools": ["redis/get", "redis/set", "redis/flushdb"],
+    "skills": ["redis/get", "redis/set"],
+    "workflows": ["redis-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "apple-reminders plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "apple-reminders/create-reminder"
-    ]
+    "tools": ["apple-reminders/create-reminder"]
   }
 }

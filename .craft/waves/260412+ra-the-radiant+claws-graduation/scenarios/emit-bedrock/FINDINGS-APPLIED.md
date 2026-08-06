@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **API compliance**: target API version declaration and schema validation, service limit awareness and overflow handling, configurable severity-to-filter-strength mapping
 - **Unmappable rules**: unmappable rule detection and reporting, environment-specific value parameterization, deployment instructions alongside output
 - **Zero-import enforcement**: description field must use product name, human-readable topic policy names, filter internal terminology from word lists

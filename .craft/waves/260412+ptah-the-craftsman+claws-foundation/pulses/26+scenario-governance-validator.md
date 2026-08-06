@@ -4,7 +4,14 @@ slug: scenario-governance-validator
 plan: claws-test-framework
 depends_on: [23, 5]
 governing_roles: [claws:skill-author, claws:ciso, craft:dragon]
-scenario_codes: [test/scenario-runner-basic, test/scenario-runner-declared-vs-actual, test/governance-validator-tier2, test/governance-validator-fail-mode, test/governance-validator-obo]
+scenario_codes:
+  [
+    test/scenario-runner-basic,
+    test/scenario-runner-declared-vs-actual,
+    test/governance-validator-tier2,
+    test/governance-validator-fail-mode,
+    test/governance-validator-obo,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 12
@@ -94,6 +101,7 @@ Create the @bic/claws-test package scaffolding and implement two of the four tes
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/skill-author.md` -- test ergonomics, validation result clarity, fixture patterns
 - `.craft/roles/claws/ciso.md` -- governance check completeness, fail-mode rules, trust boundary enforcement
 - `.craft/roles/craft/dragon.md` -- SDK architecture, eval framework reuse, type safety

@@ -95,6 +95,7 @@ npm run build
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/ciso.md` — governance policy, compliance requirements, injection defense
 - `.craft/roles/craft/dragon.md` — security review, threat modeling, layered defense validation
 - `.craft/roles/claws/compliance.md` — regulatory alignment, supply chain governance, audit requirements
@@ -102,6 +103,7 @@ Load these role files before starting:
 ## Review Amendments (R1)
 
 ### Architect: Full Pipeline L2 Test
+
 - [ ] Add 1 L2 test: full parse → extract → analyze on SOC2 fixture workspace
 - [ ] Validates all 29 rules fire correctly on a realistic workspace, not just unit fixtures
 - [ ] Update test_tiers: L2_e2e: 1

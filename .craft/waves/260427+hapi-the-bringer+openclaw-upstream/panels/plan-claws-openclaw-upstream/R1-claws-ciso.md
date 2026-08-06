@@ -1,9 +1,11 @@
 # Plan Review · claws-openclaw-upstream · R1
+
 **Reviewer**: claws:ciso
 **Date**: 2026-04-27
 **Verdict**: APPROVE-WITH-WARNINGS
 
 ## Summary
+
 The plan delivers four critical governance packages upstream with sound approval-handle binding and fail-closed R5 enforcement at generation time. Two structural risks remain: audit events lack plugin-source attribution (weakening forensics), and the OC-7 merger assumes all plugins complete their pre-auth phase (fails conjunctive invariant if one crashes mid-emission). Both are fixable pre-merge; neither blocks the gateway-level governance model.
 
 ## Findings
@@ -25,6 +27,7 @@ The plan delivers four critical governance packages upstream with sound approval
 3. **Trust-set key rotation policy deferred** — The plan mentions `keyId` in approval-handle binding to support rotation, but no rotation policy (grace period, old-key acceptance window, revocation timeline) is specified. This is out-of-scope per the wave and deferred to follow-up, but should be flagged in the H5 OC-7 PR description as a "follow-up: trust-set rotation policy" note. The framework supports it; the policy does not.
 
 ## Strengths
+
 - **Approval-handle binding is cryptographically sound**: The 8-field canonical evaluation order (signature → providerId → contentHash → sequenceNumber → approverPrincipal → keyId → ttl → nonce) is enforced in both the validator and the test matrix; replay and handle-swap are blocked by design.
 - **R5 fail-closed is non-negotiable at generation time**: The generator refuses to emit R5 + failOpen pairs; downstream plugins that escape this gate (via manual JSON tampering) still have per-provider `postAudit` defensein-depth.
 - **Audit trail is hash-chained and tamper-evident within rotation windows**: The `append` + `verify` round-trip in guardrails/audit/chain.ts uses RFC 8785 JCS canonicalization (byte-identical across platforms), ensuring forensic auditors can detect tampering.

@@ -23,6 +23,7 @@ checkpoint_gate: false
 # Pulse 46: @openclaw/audit-chain Standalone Package
 
 ## Objective
+
 **Execution context**: This pulse executes within the `craftworks/openclaw-governance` standalone monorepo (https://github.com/gim-home/openclaw-governance), NOT the claws repo. The test_scope paths (packages/...) are relative to that repo root. During wave execution, the openclaw-governance repo must be cloned and set up before these pulses can run.
 
 @openclaw/audit-chain standalone package (~20KB). Hash-chained JSONL audit trails with HMAC-SHA256 integrity verification, write-ahead log (WAL) for crash recovery, and export to SARIF/CEF/JSON/syslog formats.
@@ -30,6 +31,7 @@ checkpoint_gate: false
 This is a clean-room implementation with OC-native APIs, powered by agent-sdk audit patterns. Zero `@craftworks/*` or `@claws/*` imports -- the package must be fully standalone and publishable to npm under the `@openclaw` scope with an MIT license.
 
 ## Deliverables
+
 - [ ] `packages/audit-chain/package.json` — MIT license, zero peer deps, @openclaw/audit-chain
 - [ ] `packages/audit-chain/src/chain.ts` — hash-chained JSONL: append, verify, prune, query
 - [ ] `packages/audit-chain/src/wal.ts` — write-ahead log for crash recovery
@@ -45,6 +47,7 @@ This is a clean-room implementation with OC-native APIs, powered by agent-sdk au
 - [ ] L3 acceptance: standalone npm install test (documented)
 
 ## Acceptance Criteria
+
 - [ ] Package has zero `@craftworks/*` and zero `@claws/*` imports
 - [ ] HMAC-SHA256 chain verification detects any tampered entry
 - [ ] WAL enables crash recovery without data loss
@@ -54,14 +57,18 @@ This is a clean-room implementation with OC-native APIs, powered by agent-sdk au
 - [ ] README documents HMAC key provisioning, storage, and rotation requirements
 
 ## Governing Roles
+
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — system-wide architecture constraints
 - `.craft/roles/claws/founder.md` — OpenClaw upstream contribution standards
 
 ## Dependencies
+
 None — this is the foundation package for upstream contributions.
 
 ## Test Gates
+
 - [ ] L0 unit (8 tests): append creates entry, verify passes on clean chain, verify detects tamper, prune removes old entries, WAL persists state, crash recovery works, CEF format, syslog format
 - [ ] L1 integration (3 tests): append + verify round-trip, WAL recovery after crash sim, multi-format export pipeline
 - [ ] L2 e2e (1 test): standalone install + usage scenario

@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "anthropic plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "anthropic/chat"
-    ]
+    "tools": ["anthropic/chat"]
   }
 }

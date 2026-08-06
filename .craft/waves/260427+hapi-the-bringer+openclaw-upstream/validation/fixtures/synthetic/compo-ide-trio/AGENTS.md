@@ -6,6 +6,7 @@ trust: composition
 # compo-ide-trio
 
 Composition workspace bringing together 3 plugin(s):
+
 - `plugins/github/`
 - `plugins/gitlab/`
 - `plugins/jira/`

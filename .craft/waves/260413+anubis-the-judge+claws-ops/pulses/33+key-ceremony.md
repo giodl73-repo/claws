@@ -4,7 +4,8 @@ slug: key-ceremony
 plan: claws-key-management
 depends_on: [30]
 governing_roles: [claws:ciso, craft:architect]
-scenario_codes: [compliance-evidence/S04, governance-rules/S12, fleet-operations/S04, fleet-operations/S05]
+scenario_codes:
+  [compliance-evidence/S04, governance-rules/S12, fleet-operations/S04, fleet-operations/S05]
 stage: implementation
 test_tiers:
   L0_unit: 6

@@ -56,6 +56,7 @@ The sidecar resolver handles: locating `.claws` in the workspace directory, pars
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- monorepo structure, detection heuristics split from FORMA (M-02)
 - `.craft/roles/claws/platform-eng.md` -- SDK sidecar conventions, workspace detection patterns
 

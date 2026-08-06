@@ -7,6 +7,7 @@ Benchmark GraphQL query response times against a stored baseline to detect perfo
 The benchmark runner executes all discoverable GraphQL queries from `test-suites` and `client-web` against the running server, records response times, and compares them against a stored baseline using configurable thresholds.
 
 **Scripts involved:**
+
 - `.scripts/gql-validate/bench-validate.sh` — entry point (auth, server check, report)
 - `.scripts/gql-validate/bench-runner.mjs` — benchmark engine (discovery, execution, comparison)
 
@@ -15,6 +16,7 @@ The benchmark runner executes all discoverable GraphQL queries from `test-suites
 ### 1. Running Server
 
 The Alkemio server must be running:
+
 ```bash
 pnpm run start:services  # infrastructure
 pnpm start:dev           # server
@@ -33,6 +35,7 @@ If missing or expired, the benchmark script will attempt to re-authenticate usin
 ### 3. Pipeline Config
 
 Ensure `.claude/pipeline/.env` has:
+
 - `PIPELINE_USER` / `PIPELINE_PASSWORD` — service account credentials
 - `GRAPHQL_NON_INTERACTIVE_ENDPOINT` — API endpoint
 - `TEST_SUITES_GRAPHQL_DIR` / `CLIENT_WEB_GRAPHQL_DIR` — source repo paths
@@ -68,18 +71,18 @@ Default thresholds: 2x multiplier, 500ms absolute delta.
 
 ## Exit Codes
 
-| Code | Meaning |
-|------|---------|
+| Code | Meaning                                           |
+| ---- | ------------------------------------------------- |
 | `0`  | All queries within thresholds (or baseline saved) |
-| `1`  | Fatal error (auth failure, server unreachable) |
-| `2`  | Regressions detected |
+| `1`  | Fatal error (auth failure, server unreachable)    |
+| `2`  | Regressions detected                              |
 
 ## Output Files
 
-| File | Purpose |
-|------|---------|
-| `.claude/pipeline/benchmarks/baseline.json` | Stored baseline timings (per-query + aggregate stats) |
-| `.claude/pipeline/benchmarks/report.json` | Comparison report with regressions and per-query results |
+| File                                        | Purpose                                                  |
+| ------------------------------------------- | -------------------------------------------------------- |
+| `.claude/pipeline/benchmarks/baseline.json` | Stored baseline timings (per-query + aggregate stats)    |
+| `.claude/pipeline/benchmarks/report.json`   | Comparison report with regressions and per-query results |
 
 ### Baseline schema
 
@@ -93,8 +96,13 @@ Default thresholds: 2x multiplier, 500ms absolute delta.
   },
   "aggregate_stats": {
     "total_queries": 166,
-    "avg_ms": 211, "p50_ms": 36, "p90_ms": 167, "p95_ms": 423, "p99_ms": 1602,
-    "min_ms": 7, "max_ms": 12805
+    "avg_ms": 211,
+    "p50_ms": 36,
+    "p90_ms": 167,
+    "p95_ms": 423,
+    "p99_ms": 1602,
+    "min_ms": 7,
+    "max_ms": 12805
   }
 }
 ```

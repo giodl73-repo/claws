@@ -105,15 +105,15 @@ MVP capabilities:
 
 MVP source families:
 
-| Family | First-pass source |
-|---|---|
-| `bootstrap` | `systemPromptReport.injectedWorkspaceFiles` and static workspace scan |
-| `skills` | skills status/list output plus `systemPromptReport.skills` |
-| `tools` | `systemPromptReport.tools` and tool schema/list sizes |
-| `memory` | `MEMORY.md`, `memory/*.md`, and memory injection budgets |
-| `transcript` | session store/transcript usage where available |
-| `runtime` | current-turn runtime context and context-engine estimates |
-| `providerUsage` | normalized usage/cost fields when available |
+| Family          | First-pass source                                                     |
+| --------------- | --------------------------------------------------------------------- |
+| `bootstrap`     | `systemPromptReport.injectedWorkspaceFiles` and static workspace scan |
+| `skills`        | skills status/list output plus `systemPromptReport.skills`            |
+| `tools`         | `systemPromptReport.tools` and tool schema/list sizes                 |
+| `memory`        | `MEMORY.md`, `memory/*.md`, and memory injection budgets              |
+| `transcript`    | session store/transcript usage where available                        |
+| `runtime`       | current-turn runtime context and context-engine estimates             |
+| `providerUsage` | normalized usage/cost fields when available                           |
 
 Out of scope for MVP:
 
@@ -143,7 +143,7 @@ oc-path-backed patches, policy checks, and explicit human approval.
   "schemaVersion": 1,
   "workspace": {
     "root": "oc://workspace",
-    "openclawVersion": "2026.x"
+    "openclawVersion": "2026.x",
   },
   "summary": {
     "estimatedTokens": 48210,
@@ -151,8 +151,8 @@ oc-path-backed patches, policy checks, and explicit human approval.
     "estimateMethod": "chars-div-4",
     "largestFamilies": [
       { "family": "skills", "estimatedTokens": 18120 },
-      { "family": "memory", "estimatedTokens": 9900 }
-    ]
+      { "family": "memory", "estimatedTokens": 9900 },
+    ],
   },
   "contributions": [
     {
@@ -165,10 +165,10 @@ oc-path-backed patches, policy checks, and explicit human approval.
       "source": "static-scan",
       "usage": {
         "lastUsedAt": "2026-05-25T10:00:00Z",
-        "runs30d": 2
+        "runs30d": 2,
       },
-      "signals": ["large", "low-recent-use"]
-    }
+      "signals": ["large", "low-recent-use"],
+    },
   ],
   "recommendations": [
     {
@@ -177,9 +177,9 @@ oc-path-backed patches, policy checks, and explicit human approval.
       "target": "oc://skills/email-drafter/SKILL.md",
       "message": "Skill is large and rarely used in the last 30 days.",
       "estimatedSavingsTokens": 2800,
-      "action": "review"
-    }
-  ]
+      "action": "review",
+    },
+  ],
 }
 ```
 

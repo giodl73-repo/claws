@@ -13,7 +13,13 @@ description: >
 expect:
   dag:
     nodes: ["fleet", "team-alpha", "team-beta", "ws-1", "ws-2"]
-    edges: [["fleet", "team-alpha"], ["fleet", "team-beta"], ["team-alpha", "ws-1"], ["team-beta", "ws-2"]]
+    edges:
+      [
+        ["fleet", "team-alpha"],
+        ["fleet", "team-beta"],
+        ["team-alpha", "ws-1"],
+        ["team-beta", "ws-2"],
+      ]
   serialization:
     format: "json"
     deterministic: true

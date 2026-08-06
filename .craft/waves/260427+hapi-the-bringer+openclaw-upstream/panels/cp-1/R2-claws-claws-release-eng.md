@@ -6,10 +6,10 @@
 
 ## R1 BLOCKers — verification
 
-| # | Title | Status | Notes |
-|---|---|---|---|
-| B4 | regen-script stub vs CI-gate claim | CLOSED-VIA-DOWNGRADE | Plan + script TSDoc both reword to advisory-only; script `main()` now does real work. Two stale companion artifacts still cite the old contract — see N1, N2. |
-| B5 | PR-1 false zero-hits attestation | CLOSED | Checklist semantics, NEVER-SAFE list, scan-pr-body.sh, and PR-1 re-attestation all line up. Could not run script myself (Bash blocked in this sandbox); verified by inspection. |
+| #   | Title                              | Status               | Notes                                                                                                                                                                           |
+| --- | ---------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| B4  | regen-script stub vs CI-gate claim | CLOSED-VIA-DOWNGRADE | Plan + script TSDoc both reword to advisory-only; script `main()` now does real work. Two stale companion artifacts still cite the old contract — see N1, N2.                   |
+| B5  | PR-1 false zero-hits attestation   | CLOSED               | Checklist semantics, NEVER-SAFE list, scan-pr-body.sh, and PR-1 re-attestation all line up. Could not run script myself (Bash blocked in this sandbox); verified by inspection. |
 
 ### B4 evidence
 
@@ -30,7 +30,7 @@
 
 - **N1 (HC-NOTE)** `PROGRESS.md:147-148` still describes `regen-lint-evidence.ts` as "stub for pre-PR-push refresh ... surface contract defined, full pipeline TODO". After the B4 downgrade this is doubly stale: it isn't a stub anymore (main() is implemented), and "full pipeline TODO" reads as work outstanding. Suggest: replace with "advisory script — `gh`-CLI issue-count summary printed to stdout for pre-PR-push human review (not CI-gated)".
 - **N2 (HC-NOTE)** `pulses/04+pr1-openclaw-workspace.md:95` carries an L3 acceptance test "`regen-lint-evidence.ts` produces identical EVIDENCE.md when issue counts unchanged" — but the downgraded script no longer writes EVIDENCE.md, only prints counts. Test contract is unenforceable as written. Either drop the test or rewrite to "deterministic stdout when issue counts unchanged".
-- **N3 (HC-NOTE)** `pulses/04+pr1-openclaw-workspace.md:149` "Issue citations **must** be regenerated pre-push" reads as a precondition; downgrade made it advisory. Soften to "Issue citations *should* be refreshed pre-push (advisory)" to match the new contract.
+- **N3 (HC-NOTE)** `pulses/04+pr1-openclaw-workspace.md:149` "Issue citations **must** be regenerated pre-push" reads as a precondition; downgrade made it advisory. Soften to "Issue citations _should_ be refreshed pre-push (advisory)" to match the new contract.
 - **N4 (HC-NOTE)** `UG-upstream.amend.md:419` "PR-1 description regenerates these counts pre-push via `scripts/regen-lint-evidence.ts`" — wording survives but implies the script does the regen. Cosmetic clarification: "the author re-pulls counts via the advisory script, then manually edits EVIDENCE.md" if the spec wants to be explicit.
 
 None of N1-N4 are blocking; they are documentation drift, not contract drift. The plan + script + checklist (the artifacts that gate behavior) are internally consistent.

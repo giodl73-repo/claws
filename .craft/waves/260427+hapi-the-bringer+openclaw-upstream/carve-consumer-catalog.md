@@ -9,15 +9,16 @@
 
 The contribution wave consolidates to **3 upstream PRs** by folding the two surgical fixes into their parent contracts:
 
-| PR | What ships | Killer step |
-|---|---|---|
-| **PR-1: `@openclaw/workspace`** | package + lint + oc:// URIs + JSONC byte-identity + sentinel guard + **stripFrontMatter raw-preserve** (folded from former PR-2) | byte-stability foundation across the 9-file workspace surface |
-| **PR-2: LKG contract** | `LKGStore` types + reference impl + 326 adversarial scenarios | **the carrier** — per-file content-addressing, backend-agnostic, recovery built-in |
-| **PR-3: PolicyIR + `ctx.lkgFingerprint` + hook merger** | PolicyIR types + ctx extension + runtime helpers + **conjunctive AND merger fix** (folded from former PR-4) | **end-to-end policy chain-of-custody** |
+| PR                                                      | What ships                                                                                                                       | Killer step                                                                        |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **PR-1: `@openclaw/workspace`**                         | package + lint + oc:// URIs + JSONC byte-identity + sentinel guard + **stripFrontMatter raw-preserve** (folded from former PR-2) | byte-stability foundation across the 9-file workspace surface                      |
+| **PR-2: LKG contract**                                  | `LKGStore` types + reference impl + 326 adversarial scenarios                                                                    | **the carrier** — per-file content-addressing, backend-agnostic, recovery built-in |
+| **PR-3: PolicyIR + `ctx.lkgFingerprint` + hook merger** | PolicyIR types + ctx extension + runtime helpers + **conjunctive AND merger fix** (folded from former PR-4)                      | **end-to-end policy chain-of-custody**                                             |
 
 Strategic frame: **every policy decision is anchored to the LKG-fingerprinted state of the workspace at a known point in time.** PR-1 makes the workspace files byte-stable inputs. PR-2 makes the workspace state content-addressable. PR-3 anchors decisions to a specific PolicyIR version and preserves chain-of-custody at enforcement.
 
 Folded drafts in `pr-drafts/superseded/` with FOLDED notes:
+
 - `superseded/PR-2-stripfrontmatter-raw-preserve.md` → folded into `PR-1.md`
 - `superseded/PR-4-hook-merger-conjunctive.md` → folded into `v2-policy-ir.md`
 
@@ -50,21 +51,22 @@ Why the pivot:
   checkpoint requests + #40245 shared workspace). The LKG framing
   matches the latter.
 - The downstream code we built (`@bic/openclaw-snap`, e2e tests, R5-
-  lowering, content-addressing) all survives — it becomes a *consumer*
+  lowering, content-addressing) all survives — it becomes a _consumer_
   of the LKG primitive rather than a parallel system.
 
 Vocabulary changes:
 
-| Old (v2-snap-contract framing)        | New (v2-lkg-contract framing)              |
-|---------------------------------------|--------------------------------------------|
-| `SnapshotStore`                       | `LKGStore`                                 |
-| `Snapshot`                            | `LKGVersion` / `LKGFingerprint`            |
-| `capture(workspace)` (workspace-level) | per-file LKG promote on validate           |
-| `RefStore` (HEAD/STAGE/history)        | (gone — collapses into LKG state per file) |
-| `ctx.snapshotId`                      | `ctx.lkgFingerprint` (or just hash)        |
+| Old (v2-snap-contract framing)                                  | New (v2-lkg-contract framing)                                    |
+| --------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `SnapshotStore`                                                 | `LKGStore`                                                       |
+| `Snapshot`                                                      | `LKGVersion` / `LKGFingerprint`                                  |
+| `capture(workspace)` (workspace-level)                          | per-file LKG promote on validate                                 |
+| `RefStore` (HEAD/STAGE/history)                                 | (gone — collapses into LKG state per file)                       |
+| `ctx.snapshotId`                                                | `ctx.lkgFingerprint` (or just hash)                              |
 | Workspace-shaped lifecycle (promote/rollback/discard CLI verbs) | per-file, validator-driven (no user-facing CLI surface upstream) |
 
 What stays:
+
 - All downstream code in `@bic/openclaw-snap` (vocabulary rename,
   semantically unchanged)
 - Per-file sha256 verification (S01 fix), atomic write (S49 fix),
@@ -76,36 +78,39 @@ What stays:
 
 What's dropped from upstream-PR scope (still kept downstream as
 enterprise tooling):
+
 - The 9-verb `claws snap *` CLI surface (capture/promote/rollback/
   discard/etc.) — supervisor-facing, not upstream-shaped
 - "Workspace as one bundle" abstraction (LKG is per-file)
 - "Staging" as a first-class concept
 
 Future LKG consumers (each a separate follow-on PR or wave):
+
 - PolicyIR (`policy-ir.json`) — register an LKG tracker
 - Hook output files
 - Session checkpoints (#13700, #17211, #58028, #60864)
 - Shared workspace files (#40245)
-- Cross-agent concurrent writes (#29947) is a *separate* problem, not
+- Cross-agent concurrent writes (#29947) is a _separate_ problem, not
   LKG-shaped
 
 Documents driving the pivot:
+
 - `pr-drafts/v2-lkg-contract.md` — the new pre-RFC (replaces v2-snap-contract.md)
 - `pr-drafts/superseded/v2-snap-contract.md` — old draft preserved for history
 - `lobster-vault/Tech/OpenClaw/specs/architecture/last-known-good.md` — LKG architecture spec
 - `lobster-vault/Tech/OpenClaw/guides/internals/08-last-known-good.md` — at-a-glance guide
 
-The rest of this document is the *original* carve impact assessment
+The rest of this document is the _original_ carve impact assessment
 from 2026-04-29 (pre-pivot). Most of it is still useful — the consumer
 DAG, the per-package risk assessment, and the test-shipping order — but
 the v2-shape mappings should be read with the LKG vocabulary.
 
 ## Public API surface (what each package exports today)
 
-| Package | Subpath exports |
-|---|---|
-| `@bic/openclaw-snap` | `.`, `./cli-handlers` |
-| `@bic/openclaw-policy` | `.`, `./runtime`, `./types`, `./cli-handlers`, `./nonce-store`, `./seq-counter`, `./trust-set` |
+| Package                    | Subpath exports                                                                                    |
+| -------------------------- | -------------------------------------------------------------------------------------------------- |
+| `@bic/openclaw-snap`       | `.`, `./cli-handlers`                                                                              |
+| `@bic/openclaw-policy`     | `.`, `./runtime`, `./types`, `./cli-handlers`, `./nonce-store`, `./seq-counter`, `./trust-set`     |
 | `@bic/openclaw-guardrails` | `.`, `./audit`, `./approvals`, `./budget`, `./identity`, `./siem`, `./secrets`, `./handle-binding` |
 
 ## Inter-package dependency graph
@@ -134,18 +139,18 @@ the v2-shape mappings should be read with the LKG vocabulary.
 
 ### `@bic/openclaw-snap`
 
-| File | Subpath used | What it does |
-|---|---|---|
-| `packages/claws/src/cli.ts` | `.` | claws CLI verb dispatch |
-| `packages/claws/src/commands/snap-serve.ts` | `.` | claws-side `snap-serve` subcommand wrapper |
+| File                                        | Subpath used | What it does                               |
+| ------------------------------------------- | ------------ | ------------------------------------------ |
+| `packages/claws/src/cli.ts`                 | `.`          | claws CLI verb dispatch                    |
+| `packages/claws/src/commands/snap-serve.ts` | `.`          | claws-side `snap-serve` subcommand wrapper |
 
 **Total: 2 production consumers.** Both internal to the claws monorepo.
 
 ### `@bic/openclaw-policy`
 
-| File | Subpath used | What it does |
-|---|---|---|
-| `packages/claws/src/cli.ts` | `.` | claws CLI verb dispatch (9-verb policy subcommand group) |
+| File                        | Subpath used | What it does                                             |
+| --------------------------- | ------------ | -------------------------------------------------------- |
+| `packages/claws/src/cli.ts` | `.`          | claws CLI verb dispatch (9-verb policy subcommand group) |
 
 **Total: 1 production consumer** (plus 6+ e2e/integration test files exercising the package).
 
@@ -153,16 +158,16 @@ the v2-shape mappings should be read with the LKG vocabulary.
 
 Used heavily by **openclaw-snap and openclaw-policy** (the inter-package dep graph above):
 
-| File | Subpath used |
-|---|---|
-| `packages/openclaw-snap/src/server/audit.ts` | `./audit` |
-| `packages/openclaw-policy/src/nonce-store/persistent-store.ts` | `./audit` |
-| `packages/openclaw-policy/src/emit/emit-audit-chain.ts` | `./audit` |
-| `packages/openclaw-policy/src/ops/verify-audit.ts` | `./audit` |
-| `packages/openclaw-policy/src/ops/types.ts` | `./audit` |
-| `packages/openclaw-policy/src/cli-handlers/doctor.ts` | `./audit` |
-| `packages/openclaw-policy/src/cli-handlers/verify.ts` | `./audit` |
-| `packages/openclaw-policy/src/trust-set/loader.ts` | `./audit` |
+| File                                                           | Subpath used |
+| -------------------------------------------------------------- | ------------ |
+| `packages/openclaw-snap/src/server/audit.ts`                   | `./audit`    |
+| `packages/openclaw-policy/src/nonce-store/persistent-store.ts` | `./audit`    |
+| `packages/openclaw-policy/src/emit/emit-audit-chain.ts`        | `./audit`    |
+| `packages/openclaw-policy/src/ops/verify-audit.ts`             | `./audit`    |
+| `packages/openclaw-policy/src/ops/types.ts`                    | `./audit`    |
+| `packages/openclaw-policy/src/cli-handlers/doctor.ts`          | `./audit`    |
+| `packages/openclaw-policy/src/cli-handlers/verify.ts`          | `./audit`    |
+| `packages/openclaw-policy/src/trust-set/loader.ts`             | `./audit`    |
 
 **Total: 8 production consumers across snap + policy.** All using the `./audit` subpath only (audit chain, audit entries, verify, sinks).
 
@@ -171,16 +176,19 @@ Used heavily by **openclaw-snap and openclaw-policy** (the inter-package dep gra
 ### `openclaw-snap` → conforms to v2 `SnapshotStore`
 
 **Drop:**
+
 - `src/cli-handlers/serve.ts` (the `snap serve` daemon CLI handler) → folds into upstream's `openclaw snap serve` CLI verb when contract lands
 - `src/server/handlers.ts`, `src/server/audit.ts`, `src/server/index.ts`, `src/server/startServer.ts` (HTTP server scaffolding) → folds into upstream's reference plugin under `extensions/snapshot/`
 
 **Keep:**
+
 - `src/store/filesystemStore.ts`, `src/store/inMemoryStore.ts` (the `SnapshotStore` impl bodies)
 - `src/canonical.ts` (canonical hashing — composes with PR-1's `@openclaw/workspace/canonicalize`)
 - `src/types.ts` (will conform to v2 `SnapshotStore` types after local-fork swap)
 - `src/error.ts` (`SnapshotErrorCode` enum already aligned with v2 — verify and pin)
 
 **External consumer impact:**
+
 - `packages/claws/src/cli.ts` → UPDATE. The CLI dispatch needs to point at the new `SnapshotStore` impl entry instead of the daemon-shape registry.
 - `packages/claws/src/commands/snap-serve.ts` → UPDATE OR REMOVE. The "claws-side snap-serve" wrapper either becomes a thin wrapper over `openclaw snap serve` (when upstream lands) OR gets removed if the upstream verb is sufficient.
 
@@ -189,10 +197,12 @@ Used heavily by **openclaw-snap and openclaw-policy** (the inter-package dep gra
 ### `openclaw-policy` → conforms to v2 `PolicyGenerator<CapabilityManifest>`
 
 **Drop:**
+
 - `src/cli-handlers/*` (the 9-verb subcommand) → moves to a downstream `claws/src/commands/policy-*.ts` set; reshape per the trim plan
 - The R0-R5 tier system as separate first-class fields → encoded into PolicyIR `denyRules` per `realigned-story.md` "PolicyIR is generic; downstream R5-lowering"
 
 **Keep:**
+
 - `src/generator/`, `src/compile/`, `src/emit/` (the parse/compile/emit pipeline; emits v2 PolicyIR shape)
 - `src/governance/`, `src/compliance/` (rule families that encode into PolicyIR `denyRules`)
 - `src/runtime/` (the lock-point ABI helpers — composes with v2 `policy-ir-runtime`)
@@ -200,6 +210,7 @@ Used heavily by **openclaw-snap and openclaw-policy** (the inter-package dep gra
 - `src/ops/`, `src/migrate.ts`, `src/fs-pipeline.ts` (downstream pipeline)
 
 **External consumer impact:**
+
 - `packages/claws/src/cli.ts` → UPDATE. CLI dispatch may need to track the cli-handlers/ relocation.
 
 **Risk: MEDIUM.** One consumer file, but the package is large (6.2k LoC) and the carve internally restructures the PolicyIR shape. Many internal test files will need updating in lockstep.
@@ -209,17 +220,21 @@ Used heavily by **openclaw-snap and openclaw-policy** (the inter-package dep gra
 Per `guardrails-adapter.md` (R2 amendment), the carve is mostly ADDITIVE:
 
 **Add:**
+
 - `src/openclaw-adapter.ts` (~50 LoC) — `toTrustedToolPolicy(provider): PluginTrustedToolPolicyRegistration`
 - `src/policy-runtime/policy-plugin.ts` (~120 LoC) — registered upstream plugin shell with cache + `evaluate(event, ctx)` lifecycle
 - `src/policy-runtime/cache.ts` (~60 LoC) — bounded-LRU cache module per the runtime decisions
 
 **Delete:**
+
 - `src/shell-exec-provider.ts` (~78 LoC) — duplicates upstream's native `~/.openclaw/exec-approvals.json` consumer
 
 **Keep (the 7 subpaths stay UNCHANGED):**
+
 - `audit/`, `approvals/`, `budget/`, `identity/`, `siem/`, `secrets/`, `handle-binding/` — these continue to ship as the claws governance bundle. snap + policy continue importing from `@bic/openclaw-guardrails/audit` exactly as today.
 
 **External consumer impact:**
+
 - `ShellExecProvider` has **zero external consumers** — verified by grep. Only 3 files reference it: the file itself, its export from index.ts, and one default-export-coverage test. Safe to delete.
 - `./audit` subpath: snap (1 file) + policy (8 files) consume this. **No changes required** — the subpath continues to ship.
 
@@ -243,6 +258,7 @@ Two E2E test suites exercise the chain at the v2-prototype seam:
 - `v2-prototype/tests/v2-chain-lkg.integration.test.ts` — **LKG-shaped composition** (the upstream-aligned shape after the pivot): `openclaw-policy` → `policy-ir.json` → `openclaw-lkg` (FS) **or** `openclaw-lkg-git` (git-backed) → `policy-runtime/buildPolicyPluginFromLKG` → same R5/soul enforcement. **10 tests = 5 scenarios × 2 backends** via `describe.each`. The same chain composes through either backend, which is the load-bearing claim of the pivot.
 
 E2E scenarios covered by the LKG suite (per backend):
+
 1. R5 tool blocked via PolicyIR `denyRule` (R5-lowering proves out at the wire).
 2. Non-R5 tool returns no decision (chain continues).
 3. Soul deny via `tag` fires on argument substring.
@@ -250,32 +266,33 @@ E2E scenarios covered by the LKG suite (per backend):
 5. Plugin fails closed when no LKG has been observed yet (`'no last-known-good PolicyIR yet'`).
 
 Backend-specific tests in `openclaw-lkg-git/tests/lkg-git.integration.test.ts`:
+
 - 9 tests covering promote=commit, recover=`git checkout HEAD --`, audit/recovery-notice hooks, gitignore handling, no-LKG-yet, register validation, **`getEntry` cache for synchronous plugin-shell access**, and a **multi-agent merge** scenario (two branches both promote LKG-good edits; a third party's `git merge` resolves cleanly). Multi-agent merge is the key unlock vs rclone's last-writer-wins on OneDrive-backed workspaces.
 
 ### LKG adversarial scenario coverage (326 across 18 waves, 75 categories)
 
 The LKG primitive is tested beyond happy-path through eighteen waves of adversarial scenarios in `v2-prototype/tests/v2-chain-lkg-adversarial-{,2..18}.integration.test.ts`. The waves probe distinct surfaces:
 
-| Wave | File | Categories | Tests |
-|---|---|---|---|
-| 1 | `v2-chain-lkg-adversarial.integration.test.ts` | L tamper · R recovery · V validators · P plugin-shell · G git-backend · X path hygiene | 24 |
-| 2 | `v2-chain-lkg-adversarial-2.integration.test.ts` | C concurrency · A audit observability · E I/O failures · B boundaries · M multi-agent merge · N no-LKG-initial | 19 |
-| 3 | `v2-chain-lkg-adversarial-3.integration.test.ts` | S schema evolution · Q PolicyIR shape · Z performance/scale · F filesystem oddities | 18 |
-| 4 | `v2-chain-lkg-adversarial-4.integration.test.ts` | EI error injection · CR crash recovery · GD git dedup parity · GW git worktree edges | 15 |
-| 5 | `v2-chain-lkg-adversarial-5.integration.test.ts` | SEC security (symlinks/special-chars/TOCTOU) · OBS audit completeness · ENC encoding edges · GIT2 advanced git states · PV PolicyIR↔LKG bridge · FP fingerprint determinism | 24 (2 POSIX-only skipped on Windows) |
-| 6 | `v2-chain-lkg-adversarial-6.integration.test.ts` | LIM limits/quotas · T time/clock · MT multi-tracker independence · REG registration edges · FAULT lightweight synthetic failures | 19 |
-| 7 | `v2-chain-lkg-adversarial-7.integration.test.ts` | WK workspace-shape · MULT multi-process simulation · DET determinism/replay · CIR non-serializable parse shapes · EXT SDK extension boundary · DEG degenerate validator outputs | 21 |
-| 8 | `v2-chain-lkg-adversarial-8.integration.test.ts` | HK hook ordering · REC recovery edges · PROM promote-time edges · NRM path normalization | 16 |
-| 9 | `v2-chain-lkg-adversarial-9.integration.test.ts` | STR stress/soak · JSON shape edges · FAIL failure isolation · INIT initialization order | 16 |
-| 10 | `v2-chain-lkg-adversarial-10.integration.test.ts` | ERR error message quality · EXH outcome exhaustiveness · AS API surface coverage · BACK backwards-compat shape locks | 17 |
-| 11 | `v2-chain-lkg-adversarial-11.integration.test.ts` | ARCH architectural invariants — every test runs against BOTH backends via `describe.each` (FS + git) | 36 (18 invariants × 2 backends) |
-| 12 | `v2-chain-lkg-adversarial-12.integration.test.ts` | WIRE upstream config-LKG byte-format parity · MIG migration story · REPL audit-log replay · DIAG diagnostics / introspection | 17 |
-| 13 | `v2-chain-lkg-adversarial-13.integration.test.ts` | CHAIN multi-LKG composition · XDEP cross-tracker dependencies · ORD promotion ordering · POOL plugin pool isolation | 17 |
-| 14 | `v2-chain-lkg-adversarial-14.integration.test.ts` | MET metrics aggregation · TEL telemetry semantics · HEALTH health/readiness from getEntry · RATE rate-of-recovery as health signal | 16 |
-| 15 | `v2-chain-lkg-adversarial-15.integration.test.ts` | REF HEAD ref movement between observes · PACK packed vs loose objects · GC git-gc / pruning · RBASE rebase / amend / cherry-pick across LKG commits | 13 |
-| 16 | `v2-chain-lkg-adversarial-16.integration.test.ts` | CONF upstream config-LKG conformance (synthesized fixtures) · TS type-shape exhaustiveness · FUZZ generated random inputs | 14 |
-| 17 | `v2-chain-lkg-adversarial-17.integration.test.ts` | PROP property-based forall assertions · CORP replay corpus · STAB stability across multiple runs | 12 |
-| 18 | `v2-chain-lkg-adversarial-18.integration.test.ts` | DOC documented examples are runnable · TYPE TypeScript type-level tests · FINAL public-export shape lock | 12 |
+| Wave | File                                              | Categories                                                                                                                                                                      | Tests                                |
+| ---- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| 1    | `v2-chain-lkg-adversarial.integration.test.ts`    | L tamper · R recovery · V validators · P plugin-shell · G git-backend · X path hygiene                                                                                          | 24                                   |
+| 2    | `v2-chain-lkg-adversarial-2.integration.test.ts`  | C concurrency · A audit observability · E I/O failures · B boundaries · M multi-agent merge · N no-LKG-initial                                                                  | 19                                   |
+| 3    | `v2-chain-lkg-adversarial-3.integration.test.ts`  | S schema evolution · Q PolicyIR shape · Z performance/scale · F filesystem oddities                                                                                             | 18                                   |
+| 4    | `v2-chain-lkg-adversarial-4.integration.test.ts`  | EI error injection · CR crash recovery · GD git dedup parity · GW git worktree edges                                                                                            | 15                                   |
+| 5    | `v2-chain-lkg-adversarial-5.integration.test.ts`  | SEC security (symlinks/special-chars/TOCTOU) · OBS audit completeness · ENC encoding edges · GIT2 advanced git states · PV PolicyIR↔LKG bridge · FP fingerprint determinism     | 24 (2 POSIX-only skipped on Windows) |
+| 6    | `v2-chain-lkg-adversarial-6.integration.test.ts`  | LIM limits/quotas · T time/clock · MT multi-tracker independence · REG registration edges · FAULT lightweight synthetic failures                                                | 19                                   |
+| 7    | `v2-chain-lkg-adversarial-7.integration.test.ts`  | WK workspace-shape · MULT multi-process simulation · DET determinism/replay · CIR non-serializable parse shapes · EXT SDK extension boundary · DEG degenerate validator outputs | 21                                   |
+| 8    | `v2-chain-lkg-adversarial-8.integration.test.ts`  | HK hook ordering · REC recovery edges · PROM promote-time edges · NRM path normalization                                                                                        | 16                                   |
+| 9    | `v2-chain-lkg-adversarial-9.integration.test.ts`  | STR stress/soak · JSON shape edges · FAIL failure isolation · INIT initialization order                                                                                         | 16                                   |
+| 10   | `v2-chain-lkg-adversarial-10.integration.test.ts` | ERR error message quality · EXH outcome exhaustiveness · AS API surface coverage · BACK backwards-compat shape locks                                                            | 17                                   |
+| 11   | `v2-chain-lkg-adversarial-11.integration.test.ts` | ARCH architectural invariants — every test runs against BOTH backends via `describe.each` (FS + git)                                                                            | 36 (18 invariants × 2 backends)      |
+| 12   | `v2-chain-lkg-adversarial-12.integration.test.ts` | WIRE upstream config-LKG byte-format parity · MIG migration story · REPL audit-log replay · DIAG diagnostics / introspection                                                    | 17                                   |
+| 13   | `v2-chain-lkg-adversarial-13.integration.test.ts` | CHAIN multi-LKG composition · XDEP cross-tracker dependencies · ORD promotion ordering · POOL plugin pool isolation                                                             | 17                                   |
+| 14   | `v2-chain-lkg-adversarial-14.integration.test.ts` | MET metrics aggregation · TEL telemetry semantics · HEALTH health/readiness from getEntry · RATE rate-of-recovery as health signal                                              | 16                                   |
+| 15   | `v2-chain-lkg-adversarial-15.integration.test.ts` | REF HEAD ref movement between observes · PACK packed vs loose objects · GC git-gc / pruning · RBASE rebase / amend / cherry-pick across LKG commits                             | 13                                   |
+| 16   | `v2-chain-lkg-adversarial-16.integration.test.ts` | CONF upstream config-LKG conformance (synthesized fixtures) · TS type-shape exhaustiveness · FUZZ generated random inputs                                                       | 14                                   |
+| 17   | `v2-chain-lkg-adversarial-17.integration.test.ts` | PROP property-based forall assertions · CORP replay corpus · STAB stability across multiple runs                                                                                | 12                                   |
+| 18   | `v2-chain-lkg-adversarial-18.integration.test.ts` | DOC documented examples are runnable · TYPE TypeScript type-level tests · FINAL public-export shape lock                                                                        | 12                                   |
 
 **Findings raised through the adversarial waves:**
 
@@ -335,13 +352,13 @@ of cwd. ~10 LoC. No new packages, no new contracts.
 
 **Ryan Gregg's answers (received 2026-04-29):**
 
-| Question | Answer |
-|---|---|
-| Mount path | FUSE flights mount at `/home/node/.openclaw`. Set `OPENCLAW_WORKSPACE_ROOT=/home/node/.openclaw` for Aether-container deploys. |
-| `.openclaw/` subdir collision | Safe. "Nothing like that exists today" — no Aether state reserves `.openclaw/snapshots/`. |
-| `rename(tmp, target)` atomicity | Preserved. rclone translates rename → single PATCH on driveItem — atomic at the Graph API level. Our `writeAtomic` pattern works end-to-end through FUSE→rclone→OneDrive. |
-| Concurrent-writer semantics | **Last-writer-wins.** rclone has no ETag / conditional-PUT validation. Multi-instance gateway sharing refs through OneDrive is NOT safe without our own coordination layer. |
-| rclone cache mode | (not directly answered — derive from PR config; non-blocking for the carve.) |
+| Question                        | Answer                                                                                                                                                                      |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mount path                      | FUSE flights mount at `/home/node/.openclaw`. Set `OPENCLAW_WORKSPACE_ROOT=/home/node/.openclaw` for Aether-container deploys.                                              |
+| `.openclaw/` subdir collision   | Safe. "Nothing like that exists today" — no Aether state reserves `.openclaw/snapshots/`.                                                                                   |
+| `rename(tmp, target)` atomicity | Preserved. rclone translates rename → single PATCH on driveItem — atomic at the Graph API level. Our `writeAtomic` pattern works end-to-end through FUSE→rclone→OneDrive.   |
+| Concurrent-writer semantics     | **Last-writer-wins.** rclone has no ETag / conditional-PUT validation. Multi-instance gateway sharing refs through OneDrive is NOT safe without our own coordination layer. |
+| rclone cache mode               | (not directly answered — derive from PR config; non-blocking for the carve.)                                                                                                |
 
 **Critical operational note from Ryan:** production today is **blob_sync**,
 not FUSE. blob_sync replicates `/home/node/.openclaw/workspace` and
@@ -351,6 +368,7 @@ wall clock by the blob_sync interval. Our `filesystemStore` works fine
 on either (writes go to local container fs; blob_sync replicates async).
 
 **LWW implication for our refs design:**
+
 - Local dev (single dev → single process touching refs at a time): ✓ fine
 - One openclaw container reading + claws CLI writing same workspace: ✓ usually fine (capture+promote is human-paced; stale read for seconds is acceptable)
 - Multi-instance gateway sharing refs through OneDrive: ✗ NOT safe — silent overwrite. Needs lock file, refs service, or DB-backed RefStore.

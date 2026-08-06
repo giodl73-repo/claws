@@ -58,6 +58,7 @@ The 12 checks validate: (1) schema conformance, (2) required field presence, (3)
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/testing.md` -- validation patterns, check design, assertion conventions
 - `.craft/roles/claws/platform-eng.md` -- SDK validation module patterns
 

@@ -45,6 +45,7 @@ This context shapes every subsequent phase. Gaps are only gaps if the codebase d
 Walk through the spec as a user, mapping each distinct journey from entry point to outcome.
 
 For each flow, identify:
+
 - **Entry point** -- how the user arrives (direct navigation, link, redirect, notification)
 - **Decision points** -- where the flow branches based on user action or system state
 - **Happy path** -- the intended journey when everything works
@@ -72,6 +73,7 @@ For each gap, formulate a specific question. Vague questions ("what about errors
 **Bad:** "What about rate limiting?"
 
 For each question, include:
+
 - The question itself
 - Why it matters (what breaks or degrades if left unspecified)
 - A default assumption if it goes unanswered

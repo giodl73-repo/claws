@@ -20,7 +20,7 @@ The plan specifies "specific -> wildcard -> global resolution order as Aether PR
 
 **Risk**: Aether resolves per-server; if the sim skips the server dimension, tests pass but production breaks when two servers expose tools with the same name at different risk levels (e.g., `read-file` on sharepoint vs. filesystem).
 
-**Recommendation**: The aether-sim runner must implement (server, tool) -> (server, *) -> (*, *) three-tier lookup. Add at least one L1 scenario where two servers expose the same tool name at different risk levels to validate the resolution chain is not flattened.
+**Recommendation**: The aether-sim runner must implement (server, tool) -> (server, _) -> (_, *) three-tier lookup. Add at least one L1 scenario where two servers expose the same tool name at different risk levels to validate the resolution chain is not flattened.
 
 ---
 
@@ -149,17 +149,17 @@ The role's fail-mode policy is clear: R1-R2 fail-open, R3-R4 configurable, R5 fa
 
 ## Summary
 
-| ID | Sev | Pulse | Theme |
-|----|-----|-------|-------|
-| F-01 | W | 50 | aether-sim resolution must include server dimension |
-| F-02 | M | 50 | No latency budget or scaling test for policy resolution |
-| F-03 | M | 51 | Blob verification has no timeout, risks startup hang |
-| F-04 | W | 51 | HMAC key distribution not addressed, risks DoS on restart |
-| F-05 | M | 52 | Fleet override bypassed by double-gate design |
-| F-06 | W | 50 | mcpServer field population and join strategy unspecified |
-| F-07 | N | 50 | OpenClaw adapter not listed as edit target for 5th artifact |
-| F-08 | W | 51 | Empty-manifest attack bypasses integrity verification |
-| F-09 | W | 52 | No documented fail-mode when GuardrailProvider throws |
+| ID   | Sev | Pulse | Theme                                                       |
+| ---- | --- | ----- | ----------------------------------------------------------- |
+| F-01 | W   | 50    | aether-sim resolution must include server dimension         |
+| F-02 | M   | 50    | No latency budget or scaling test for policy resolution     |
+| F-03 | M   | 51    | Blob verification has no timeout, risks startup hang        |
+| F-04 | W   | 51    | HMAC key distribution not addressed, risks DoS on restart   |
+| F-05 | M   | 52    | Fleet override bypassed by double-gate design               |
+| F-06 | W   | 50    | mcpServer field population and join strategy unspecified    |
+| F-07 | N   | 50    | OpenClaw adapter not listed as edit target for 5th artifact |
+| F-08 | W   | 51    | Empty-manifest attack bypasses integrity verification       |
+| F-09 | W   | 52    | No documented fail-mode when GuardrailProvider throws       |
 
 **Must-fix (M)**: 3 -- F-02, F-03, F-05
 **Warning (W)**: 5 -- F-01, F-04, F-06, F-08, F-09

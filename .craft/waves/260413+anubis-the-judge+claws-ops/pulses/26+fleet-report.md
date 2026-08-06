@@ -54,6 +54,7 @@ Fleet report is the executive visibility layer: it answers "what is the governan
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/compliance.md` — compliance reporting requirements, framework coverage, audit formats
 - `.craft/roles/claws/platform-eng.md` — fleet architecture, aggregation patterns
 

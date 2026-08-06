@@ -65,6 +65,7 @@ Address three THOTH-FINDINGS from the Anubis wave security review:
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/ciso.md` — adversarial threat model, cache integrity requirements, injection defense patterns
 - `.craft/roles/claws/founder.md` — product security posture, acceptable false-positive rate for adversarial guard
 

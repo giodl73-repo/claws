@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "description": "redis plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "redis/get",
-      "redis/set"
-    ]
+    "tools": ["redis/get", "redis/set"]
   }
 }

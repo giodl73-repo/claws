@@ -45,6 +45,7 @@ consumers that rely on section-level addressing via HTTP.
 
 **Recommendation**: Replace `#` fragment syntax in HTTP routes with path segments
 or query parameters. Three options:
+
 1. Path-encoded: `/api/oc/TOOLS.md/Tools/send-email` (cleanest, needs route parsing)
 2. Query parameter: `/api/oc/TOOLS.md?section=Tools&item=send-email`
 3. Colon separator: `/api/oc/TOOLS.md:Tools/send-email` (mirrors oc:// but URL-safe)
@@ -206,6 +207,7 @@ logical addressing scheme -- only the HTTP mapping changes.
 **What**: The plan correctly places chunk assembly, validation, workspace-edit,
 and cache logic in claws-sdk. However, several claws-serve route files contain
 non-trivial orchestration:
+
 - Pulse 33 (allow-all handler in claws-serve): R5 exclusion logic and
   `still_gated` response construction
 - Pulse 31 (patch routes): routes "through validation, write, incremental
@@ -302,6 +304,7 @@ and both should converge on a single union type.
 **Location**: All 71 pulse files; wave.yaml checkpoints
 **What**: Every `depends_on` reference in the reviewed pulse files points to a
 pulse that exists and is assigned to an earlier or same checkpoint. Specifically:
+
 - Pulse 23 depends on [21, 22, 66] -- all in CP-5, pulse 66 is correctly listed before 23
 - Pulse 27 depends on [23] -- same checkpoint, correct order
 - Pulse 30 depends on [29, 23, 66] -- pulse 29 is CP-6, 23 and 66 are CP-5
@@ -316,13 +319,13 @@ ordering in wave.yaml respects the dependency graph.
 
 ## Summary
 
-| Severity | Count | Finding IDs |
-|----------|-------|-------------|
-| BLOCKER | 1 | F-01 |
-| HIGH | 2 | F-02, F-03 |
-| MEDIUM | 5 | F-04, F-05, F-06, F-07, F-08 |
-| LOW | 2 | F-10, F-11 |
-| POSITIVE | 1 | F-12 |
+| Severity | Count | Finding IDs                  |
+| -------- | ----- | ---------------------------- |
+| BLOCKER  | 1     | F-01                         |
+| HIGH     | 2     | F-02, F-03                   |
+| MEDIUM   | 5     | F-04, F-05, F-06, F-07, F-08 |
+| LOW      | 2     | F-10, F-11                   |
+| POSITIVE | 1     | F-12                         |
 
 **Block CP-5 start on**: F-01 (HTTP fragment syntax). Without this fix, the entire
 Layer 1 API is unimplementable.

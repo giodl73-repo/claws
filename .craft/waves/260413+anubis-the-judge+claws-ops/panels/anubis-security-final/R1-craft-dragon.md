@@ -61,6 +61,7 @@ Between the `unlink()` of the stale lock and the `writeFile(..., { flag: 'wx' })
 **Files**: `claws-sdk/src/config/bypass.ts` and `claws-sdk/src/init/bypass.ts`
 
 Two separate bypass evaluation modules exist:
+
 - `config/bypass.ts:25-62` — `evaluateBypass()`: pure function, returns state + audit event object
 - `init/bypass.ts:51-93` — `checkBypass()`: async, writes to audit chain directly
 
@@ -150,10 +151,10 @@ The `globToRegex` function converts glob patterns to regex. While the function i
 
 ## Summary
 
-| Severity | Count |
-|----------|-------|
-| M (Must fix) | 5 |
-| W (Warning) | 5 |
-| N (Note) | 2 |
+| Severity     | Count |
+| ------------ | ----- |
+| M (Must fix) | 5     |
+| W (Warning)  | 5     |
+| N (Note)     | 2     |
 
 **Key invariant risks**: The audit chain lacks cryptographic chaining (D-02), bypass evaluation is split across two modules that could diverge (D-04), and the raise-only risk invariant is not enforced at the amendment boundary (D-01). The file-lock TOCTOU race (D-03) and key rotation rollback leak (D-05) are structural issues that compound under concurrent access.

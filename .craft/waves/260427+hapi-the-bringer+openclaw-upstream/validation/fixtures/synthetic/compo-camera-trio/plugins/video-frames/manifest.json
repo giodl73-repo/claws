@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "video-frames plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "video-frames/extract"
-    ]
+    "tools": ["video-frames/extract"]
   }
 }

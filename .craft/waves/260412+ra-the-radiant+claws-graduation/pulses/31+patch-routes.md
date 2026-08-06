@@ -63,6 +63,7 @@ Response format: success returns 200 with the updated chunk JSON. Validation fai
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — SDK-owns-logic rule, thin HTTP adapter pattern, error mapping conventions
 - `.craft/roles/claws/platform-eng.md` — route handler patterns, middleware composition, response format
 

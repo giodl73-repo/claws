@@ -55,8 +55,8 @@ import "@dialpad/dialtone/css";
 Import the theme you want to use and set it via the `setTheme` function:
 
 ```js
-import { setTheme } from '@dialpad/dialtone/themes/config';
-import DpLight from '@dialpad/dialtone/themes/dp-light';
+import { setTheme } from "@dialpad/dialtone/themes/config";
+import DpLight from "@dialpad/dialtone/themes/dp-light";
 setTheme(DpLight);
 ```
 
@@ -75,9 +75,9 @@ There is an optional second parameter to `setTheme` that allows you to set the t
 when you want to apply the theme to the root element of the shadow DOM rather than the document root. If you do not set this parameter the theme will be applied to the document root.
 
 ```js
-import { setTheme } from '@dialpad/dialtone/themes/config';
-import DpLight from '@dialpad/dialtone/themes/dp-light';
-setTheme(DpLight, document.querySelector('#my-shadow-root-host'));
+import { setTheme } from "@dialpad/dialtone/themes/config";
+import DpLight from "@dialpad/dialtone/themes/dp-light";
+setTheme(DpLight, document.querySelector("#my-shadow-root-host"));
 ```
 
 ##### Set theme manually by importing files
@@ -91,36 +91,36 @@ a semantic brand tokens file which is named after a brand and theme 'tokens-dp-l
 
 ```css
 @import "@dialpad/dialtone/tokens/tokens-base-light.css" // Base light theme
-@import "@dialpad/dialtone/tokens/tokens-dp-light.css" // Dialpad light brand
+  @import "@dialpad/dialtone/tokens/tokens-dp-light.css"; // Dialpad light brand
 ```
 
 - JavaScript
 
 ```js
-import "@dialpad/dialtone/tokens/tokens-base-light.css" // Base light theme
-import "@dialpad/dialtone/tokens/tokens-dp-light.css" // Dialpad light brand
+import "@dialpad/dialtone/tokens/tokens-base-light.css"; // Base light theme
+import "@dialpad/dialtone/tokens/tokens-dp-light.css"; // Dialpad light brand
 ```
 
 #### Dialtone icons
 
 ```js
 // Named import
-import { DtIconArrowUp } from '@dialpad/dialtone-icons/vue3';
-import { DtIllustrationBlankSpace } from '@dialpad/dialtone-icons/vue3';
+import { DtIconArrowUp } from "@dialpad/dialtone-icons/vue3";
+import { DtIllustrationBlankSpace } from "@dialpad/dialtone-icons/vue3";
 
 // Default import (Preferred if using webpack as it is tree-shakeable by default)
-import DtIconArrowUp from '@dialpad/dialtone-icons/vue3/arrow-up';
-import DtIllustrationBlankSpace from '@dialpad/dialtone-icons/vue3/blank-space';
+import DtIconArrowUp from "@dialpad/dialtone-icons/vue3/arrow-up";
+import DtIllustrationBlankSpace from "@dialpad/dialtone-icons/vue3/blank-space";
 ```
 
 #### Dialtone Vue components
 
 ```js
 // Named import
-import { DtButton } from "@dialpad/dialtone/vue"
+import { DtButton } from "@dialpad/dialtone/vue";
 
 // Default import (Preferred if using webpack as it is tree-shakeable by default)
-import { DtButton } from "@dialpad/dialtone/vue/lib/button"
+import { DtButton } from "@dialpad/dialtone/vue/lib/button";
 ```
 
 > **Note:** Dialtone Vue 2 has been deprecated. Please migrate to Dialtone Vue. The latest version of Dialtone that still supports Vue 2 is 9.154.0.
@@ -224,16 +224,16 @@ pulling entire bundles):
 
 ### Available packages
 
-| Name                                                             | Description                                                                                                                                        | Version                                                                                                   |
-|------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
-| [Dialtone](README.md)                                            | Combined package containing the latest versions of the libraries for ease of use                                                                   | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Fdialtone?logo=npm&color=7C52FF)                  |
-| [Dialtone CSS](packages/dialtone-css/README.md)                  | Classes or styles used within Dialtone should be stored here and documented on our site under `apps/dialtone-documentation`                        | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Fdialtone-css?logo=npm&color=7C52FF)              |
-| [Dialtone emojis](packages/dialtone-emojis/README.md)            | Emoji assets                                                                                                                                       | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Fdialtone-emojis?logo=npm&color=7C52FF)           |
-| [Dialtone icons](packages/dialtone-icons/README.md)              | Resources needed to implement icons on your application that conform to Dialpad’s design principles and best practices                             | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Fdialtone-icons?logo=npm&color=7C52FF)            |
-| [Dialtone tokens](packages/dialtone-tokens/README.md)            | Design tokens for Dialpad's design system Dialtone and everything related to building and publishing them                                          | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Fdialtone-tokens?logo=npm&color=7C52FF)           |
-| [Dialtone Vue](packages/dialtone-vue/README.md)                  | Vue components library to simplify and standardize the use of common UI patterns and behaviour across all Dialpad projects                         | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Fdialtone-vue?logo=npm&color=7C52FF)              |
-| [ESlint plugin](packages/eslint-plugin-dialtone/README.md)       | ESLint plugin containing rules to help developers maintain dialtone recommended practices                                                          | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Feslint-plugin-dialtone?logo=npm&color=7C52FF)    |
-| [Stylelint plugin](packages/stylelint-plugin-dialtone/README.md) | StyleLint plugin containing rules to help developers maintain dialtone recommended practices for CSS                                               | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Fstylelint-plugin-dialtone?logo=npm&color=7C52FF) |
+| Name                                                             | Description                                                                                                                 | Version                                                                                                   |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| [Dialtone](README.md)                                            | Combined package containing the latest versions of the libraries for ease of use                                            | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Fdialtone?logo=npm&color=7C52FF)                  |
+| [Dialtone CSS](packages/dialtone-css/README.md)                  | Classes or styles used within Dialtone should be stored here and documented on our site under `apps/dialtone-documentation` | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Fdialtone-css?logo=npm&color=7C52FF)              |
+| [Dialtone emojis](packages/dialtone-emojis/README.md)            | Emoji assets                                                                                                                | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Fdialtone-emojis?logo=npm&color=7C52FF)           |
+| [Dialtone icons](packages/dialtone-icons/README.md)              | Resources needed to implement icons on your application that conform to Dialpad’s design principles and best practices      | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Fdialtone-icons?logo=npm&color=7C52FF)            |
+| [Dialtone tokens](packages/dialtone-tokens/README.md)            | Design tokens for Dialpad's design system Dialtone and everything related to building and publishing them                   | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Fdialtone-tokens?logo=npm&color=7C52FF)           |
+| [Dialtone Vue](packages/dialtone-vue/README.md)                  | Vue components library to simplify and standardize the use of common UI patterns and behaviour across all Dialpad projects  | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Fdialtone-vue?logo=npm&color=7C52FF)              |
+| [ESlint plugin](packages/eslint-plugin-dialtone/README.md)       | ESLint plugin containing rules to help developers maintain dialtone recommended practices                                   | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Feslint-plugin-dialtone?logo=npm&color=7C52FF)    |
+| [Stylelint plugin](packages/stylelint-plugin-dialtone/README.md) | StyleLint plugin containing rules to help developers maintain dialtone recommended practices for CSS                        | ![NPM Version](https://img.shields.io/npm/v/%40dialpad%2Fstylelint-plugin-dialtone?logo=npm&color=7C52FF) |
 
 ## Contributing
 
@@ -298,7 +298,7 @@ One of the main benefits of adding Nx to our PNPM workspace is speed via caching
 Running commands via NX will enable us to do several things:
 
 - Set up the project dependencies to other projects command,
-if they need to run before a specific command.
+  if they need to run before a specific command.
 - Improve the speed of the command execution by saving its output to cache.
 - Run the command on the [affected](https://nx.dev/nx-api/nx/documents/affected) projects only.
 
@@ -466,8 +466,8 @@ automatically release all packages that need to be released following the next s
 
 In case you need to release earlier than the next scheduled date, you can trigger the release via `Run workflow` on [GitHub](https://github.com/dialpad/dialtone/actions/workflows/release.yml).
 
-  1. Select `staging` branch.
-  2. Select the `package` that you want to release or leave it empty to release all of them.
+1. Select `staging` branch.
+2. Select the `package` that you want to release or leave it empty to release all of them.
 
 This will trigger the [release action](.github/workflows/release.yml), release changes on `staging` and automatically publish the selected packages following the next steps:
 

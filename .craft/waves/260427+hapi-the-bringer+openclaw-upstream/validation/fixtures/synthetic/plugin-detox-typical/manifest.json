@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "detox plugin (mobile)",
   "contributes": {
-    "tools": [
-      "detox/run-test"
-    ],
-    "skills": [
-      "detox/run-test"
-    ]
+    "tools": ["detox/run-test"],
+    "skills": ["detox/run-test"]
   }
 }

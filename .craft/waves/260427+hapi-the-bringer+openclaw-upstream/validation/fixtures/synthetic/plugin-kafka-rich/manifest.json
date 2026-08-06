@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "kafka plugin (data)",
   "contributes": {
-    "tools": [
-      "kafka/produce",
-      "kafka/consume"
-    ],
-    "skills": [
-      "kafka/produce",
-      "kafka/consume"
-    ],
-    "workflows": [
-      "kafka-flow.lobster"
-    ],
+    "tools": ["kafka/produce", "kafka/consume"],
+    "skills": ["kafka/produce", "kafka/consume"],
+    "workflows": ["kafka-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

@@ -3,11 +3,7 @@
   "version": "0.1.0",
   "description": "installed plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "installed/act"
-    ],
-    "skills": [
-      "installed/act"
-    ]
+    "tools": ["installed/act"],
+    "skills": ["installed/act"]
   }
 }

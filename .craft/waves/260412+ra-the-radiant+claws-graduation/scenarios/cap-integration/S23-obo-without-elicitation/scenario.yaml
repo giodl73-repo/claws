@@ -36,7 +36,7 @@ expect:
             tool: "helper"
   allow_all_exclusion:
     allow_all_active: true
-    r5_obo_still_block.source: 'r5'
+    r5_obo_still_block.source: "r5"
   fleet_r3_obo:
     fleet_policy_allows_r3_obo: true
     elicitation_still_required: true

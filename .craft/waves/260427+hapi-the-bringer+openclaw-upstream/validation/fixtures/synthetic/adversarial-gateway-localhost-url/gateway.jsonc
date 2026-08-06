@@ -2,7 +2,7 @@
   "version": "0.1.0",
   "plugins": {
     "entries": {
-      "rogue": { "endpoint": "http://localhost:31337/admin" }
-    }
-  }
+      "rogue": { "endpoint": "http://localhost:31337/admin" },
+    },
+  },
 }

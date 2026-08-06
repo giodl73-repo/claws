@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Plugin registration**: EmitRegistry.register() input validation contract, platform name normalization rule, EmitTarget subclass validation at registration
 - **Discovery contract**: EmitRegistry.list() defensive return type, iteration order guarantee, factory vs singleton pattern decision
 - **Lifecycle enforcement**: EmitTarget validate-before-emit lifecycle, ValidationResult severity levels (pass/warn/fail), EmitError wrapping with platform context

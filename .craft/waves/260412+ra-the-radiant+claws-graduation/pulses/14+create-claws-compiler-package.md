@@ -56,6 +56,7 @@ The curated re-export list IS the public API contract. Every symbol in the list 
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- monorepo structure, package design, export map conventions
 - `.craft/roles/claws/platform-eng.md` -- curated re-exports, supply chain safety, npm packaging
 

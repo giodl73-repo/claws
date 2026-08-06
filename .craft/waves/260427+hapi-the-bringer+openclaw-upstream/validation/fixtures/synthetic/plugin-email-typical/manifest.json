@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "email plugin (communication)",
   "contributes": {
-    "tools": [
-      "email/send-email",
-      "email/read-inbox"
-    ],
-    "skills": [
-      "email/send-email",
-      "email/read-inbox"
-    ]
+    "tools": ["email/send-email", "email/read-inbox"],
+    "skills": ["email/send-email", "email/read-inbox"]
   }
 }

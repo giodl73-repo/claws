@@ -33,7 +33,7 @@ Carve `@bic/openclaw-snap` out of `claws-serve/` per the kept/dropped/merged rou
 - [ ] HTTP-only surface — top-level exports: `SnapshotStore` (interface), `inMemoryStore`, `filesystemStore`, `startServer`, `StartServerOptions`. NO library-first `readWorkingTree`/`computeDraft`/`applyCheckout`/`clearStage` (reverted from spec)
 - [ ] Promote precondition via S42 scenario fixture: 409 POLICY_NOT_GENERATED / POLICY_IR_MALFORMED / POLICY_IR_INCONSISTENT matrix handled
 - [ ] `claws-sdk/packages/snap/src/cli-handlers/` — stub files for 11 verbs (stage-on/stage-off merged, status, diff-staged, discard-stage, upload, list, diff, checkout, promote, rollback, discard, serve) — thin argv→HTTP-client→render (architect W1 closure)
-- [ ] Route table execution (steward ground-truth): `claws-serve/src/routes/` — **kept** routes (snapshot.ts, new /v1/resolve, /v1/healthz from health/status/events merge) migrate to snap package; **dropped-kept-internal** routes (6 chunks-*.ts files per fresh disk count, + compile, classify, diagnostics, diff, invalidate, loop-*, sessions, session-config, trust, allow-all, ir, ir-resolution, tensions, governance, batch, workqueue, schedule, patch-chunks, oc-generic, workspace-schema, admin-reset, error-sanitize) remain in claws-serve/ for bic/claws-internal product
+- [ ] Route table execution (steward ground-truth): `claws-serve/src/routes/` — **kept** routes (snapshot.ts, new /v1/resolve, /v1/healthz from health/status/events merge) migrate to snap package; **dropped-kept-internal** routes (6 chunks-_.ts files per fresh disk count, + compile, classify, diagnostics, diff, invalidate, loop-_, sessions, session-config, trust, allow-all, ir, ir-resolution, tensions, governance, batch, workqueue, schedule, patch-chunks, oc-generic, workspace-schema, admin-reset, error-sanitize) remain in claws-serve/ for bic/claws-internal product
 - [ ] Peer-dep on `@bic/openclaw-workspace` (for /canonicalize promote precondition + /path for /v1/resolve)
 - [ ] Peer-dep on `@bic/openclaw-guardrails/audit` (audit events on promote/rollback)
 - [ ] Peer-dep on `@bic/openclaw-guardrails/identity` (caller-identity types)
@@ -47,6 +47,7 @@ Carve `@bic/openclaw-snap` out of `claws-serve/` per the kept/dropped/merged rou
 If this pulse surfaces a gap in the proposal spec (main spec, one of the 4 package specs, or the plan) — **the amendment lands inside this pulse's commit**. No deferral, no follow-up pulse. Amendment SHA = pulse SHA.
 
 Commit-message convention for in-pulse amendments:
+
 ```
 <pulse-type>(<pulse-slug>): <summary>
 

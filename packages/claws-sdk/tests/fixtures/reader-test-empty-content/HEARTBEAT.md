@@ -1,3 +1,0 @@
-# Heartbeat
-
-No schedules defined.

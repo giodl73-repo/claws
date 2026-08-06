@@ -5,7 +5,29 @@ plan: claws-openclaw-upstream
 checkpoint: cp-4
 depends_on: [01, 06, 07]
 governing_roles: [claws:gateway-eng, claws:compliance, claws:ciso, claws:claws-release-eng]
-addresses_findings: [F-26, F-27, F-28, F-29, F-30, F-31, F-32, F-33, F-34, F-35, F-36, F-37, F-44, F-47, F-48, F-49, F-62, POL-R5-001..004, POL-RS-001..003, ADP-PR-001..005]
+addresses_findings:
+  [
+    F-26,
+    F-27,
+    F-28,
+    F-29,
+    F-30,
+    F-31,
+    F-32,
+    F-33,
+    F-34,
+    F-35,
+    F-36,
+    F-37,
+    F-44,
+    F-47,
+    F-48,
+    F-49,
+    F-62,
+    POL-R5-001..004,
+    POL-RS-001..003,
+    ADP-PR-001..005,
+  ]
 addresses_headlines: [H3]
 ---
 
@@ -18,6 +40,7 @@ Open PR-4 against `github.com/openclaw/openclaw` adding `@openclaw/policy` (gene
 ## Deliverables
 
 ### Upstream PR
+
 - [ ] PR-4 opened at `github.com/openclaw/openclaw` with title: `feat: add @openclaw/policy + openclaw policy subcommand group (9 verbs)`
 - [ ] PR description leads with core-not-extension justification: "policy generation produces the gateway plugin that enforces governance at runtime; cannot be a third-party extension because the generated plugin's registration shape must match upstream's contract"
 - [ ] PR description embeds bot-preempt checklist + CITES `docs/upstream/guides/adapter-audits.md` § 2 (emitted-plugin registration audit) verdict
@@ -27,6 +50,7 @@ Open PR-4 against `github.com/openclaw/openclaw` adding `@openclaw/policy` (gene
 - [ ] `package.json` `name` flipped to `@openclaw/policy`; license `MIT`
 
 ### Generator-side invariants (per F-26 HC-BLOCK + F-30)
+
 - [ ] `packages/openclaw-policy/src/generate/validate.ts` — refuses to emit when TOOLS.md declares `R5 + failOpen: true` (F-26)
 - [ ] Generation-time error includes `oc://TOOLS.md/Tools/<name>` URI (F-28)
 - [ ] `IRREVERSIBLE_EXTERNAL` capability clamps tier to R5 minimum (F-29)
@@ -34,9 +58,11 @@ Open PR-4 against `github.com/openclaw/openclaw` adding `@openclaw/policy` (gene
 - [ ] PolicyIR includes `effectiveSensitivity` field per tool (F-32)
 
 ### Runtime defense-in-depth (per F-27)
+
 - [ ] Emitted plugin treats R5 as fail-closed at runtime regardless of IR `failOpen` flag — defense against hand-edited JSON IR
 
 ### CLI subcommand group (9 verbs)
+
 - [ ] `openclaw policy check [--file SOUL.md]` — parse + validate; diagnostics only
 - [ ] `openclaw policy generate` — write `.openclaw/policy/{policy-ir.json, gateway-plugin.ts, audit-manifest.json}`
 - [ ] `openclaw policy watch` — re-run check on save
@@ -49,12 +75,14 @@ Open PR-4 against `github.com/openclaw/openclaw` adding `@openclaw/policy` (gene
 - [ ] CLI handler shape matches upstream's dispatcher (yargs / oclif / Commander / custom — confirmed in adapter-audits.md § 2 per F-35)
 
 ### Runtime-gated enforcement model contributions (per F-44, F-47, F-48, F-49)
+
 - [ ] `before_agent_start` hook compares workspace's current `snapshotId` against last promoted `snapshotId`; emits `requireApproval` when drift detected
 - [ ] Audit entry for unauthorized-mutation includes `oc://` URI of mutated file (F-47)
 - [ ] Multiple-mutation case: each file's drift reported separately (F-48)
 - [ ] Comparison cost bounded — only files in policy-relevant set checked (F-49)
 
 ### CI / public-API obligations
+
 - [ ] `docs/.generated/plugin-sdk-api-baseline.sha256` refreshed
 - [ ] `docs/sdk-overview.md` table updated
 - [ ] Swift protocol models regenerated for new gateway HTTP surface from `policy comply` and `policy report` (F-15)
@@ -62,6 +90,7 @@ Open PR-4 against `github.com/openclaw/openclaw` adding `@openclaw/policy` (gene
 - [ ] Zero `@microsoft/*` import gate green
 
 ### Internal verification before pushing
+
 - [ ] `pnpm --filter @openclaw/policy test` green
 - [ ] `pnpm --filter @openclaw/policy build` green
 - [ ] `pnpm --filter @openclaw/policy tsc --noEmit` green

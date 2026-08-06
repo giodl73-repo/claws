@@ -4,18 +4,9 @@
   "version": "0.1.0",
   "description": "terraform plugin (infra)",
   "contributes": {
-    "tools": [
-      "terraform/plan",
-      "terraform/apply",
-      "terraform/destroy"
-    ],
-    "skills": [
-      "terraform/plan",
-      "terraform/apply"
-    ],
-    "workflows": [
-      "terraform-flow.lobster"
-    ],
+    "tools": ["terraform/plan", "terraform/apply", "terraform/destroy"],
+    "skills": ["terraform/plan", "terraform/apply"],
+    "workflows": ["terraform-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

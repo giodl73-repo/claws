@@ -4,14 +4,7 @@
   "version": "0.1.0",
   "description": "postgres plugin (data)",
   "contributes": {
-    "tools": [
-      "postgres/query",
-      "postgres/exec",
-      "postgres/migrate"
-    ],
-    "skills": [
-      "postgres/query",
-      "postgres/exec"
-    ]
+    "tools": ["postgres/query", "postgres/exec", "postgres/migrate"],
+    "skills": ["postgres/query", "postgres/exec"]
   }
 }

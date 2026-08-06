@@ -61,6 +61,7 @@ All assembly logic lives in claws-sdk. Routes in pulses 24-27 call `assembleChun
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- SDK-owns-logic rule, type design, cross-module integration
 - `.craft/roles/claws/gateway-eng.md` -- chunk format spec, governance data flow, atomic snapshot design
 

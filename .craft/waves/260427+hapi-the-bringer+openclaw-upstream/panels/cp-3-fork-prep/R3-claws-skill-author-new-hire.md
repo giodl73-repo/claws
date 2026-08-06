@@ -59,7 +59,7 @@ The two lenses converge surprisingly often: every plugin-shape inconsistency SA 
 
 ## Cross-cutting
 
-**Plugin-shape consistency** — three out of three CLI-surface substrates (pinch, oc-doctor, policy) use the global-Map registry pattern; LKG uses an instance-store pattern for legitimate multi-tenant reasons. The pattern is *almost* uniform; calling out LKG's divergence in its barrel comment closes the only real gap. Registries' helper surface (`register*` / `get*` / `list*` / `_clear*`) is identical and that's the part SA cares about most.
+**Plugin-shape consistency** — three out of three CLI-surface substrates (pinch, oc-doctor, policy) use the global-Map registry pattern; LKG uses an instance-store pattern for legitimate multi-tenant reasons. The pattern is _almost_ uniform; calling out LKG's divergence in its barrel comment closes the only real gap. Registries' helper surface (`register*` / `get*` / `list*` / `_clear*`) is identical and that's the part SA cares about most.
 
 **Type-erasure round-trip** — `LintRule<TOptions>` on register, `LintRule<unknown>` on retrieve. Same pattern in `PolicyGeneratorSpec`. LKG handles it best (full recovery via instance methods). For pinch + policy: a typed-getter overload (`getLintRule<T>(id): LintRule<T> | null` behind a docstring "caller asserts the type matches their registration") would close 90% of the friction. Not blocking; just rough edges.
 

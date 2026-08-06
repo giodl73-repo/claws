@@ -10,10 +10,10 @@ Covers Better Auth integration with Convex: server setup, client hooks, triggers
 
 **Context-aware adapter** — generated `getAuth(ctx)` auto-selects:
 
-| Context | Adapter | Behavior |
-|---------|---------|----------|
-| Query/Mutation (`ctx.db`) | Direct DB | No `runQuery`/`runMutation` wrapper |
-| Action/HTTP | HTTP adapter | Uses `ctx.run*` APIs |
+| Context                   | Adapter      | Behavior                            |
+| ------------------------- | ------------ | ----------------------------------- |
+| Query/Mutation (`ctx.db`) | Direct DB    | No `runQuery`/`runMutation` wrapper |
+| Action/HTTP               | HTTP adapter | Uses `ctx.run*` APIs                |
 
 **Entrypoint**: `getAuth(ctx)` everywhere (query, mutation, action, HTTP).
 
@@ -26,32 +26,32 @@ Two-step validation for every request (SSR or WebSocket):
 
 JWT validity doesn't guarantee access. Session lookup is the source of truth — deleting the session immediately invalidates access.
 
-| Component | Storage | Invalidatable | Default Lifetime |
-|-----------|---------|---------------|------------------|
-| JWT | Cookie (signed) | No (stateless) | 15 min |
-| Session | Convex DB | Yes (stateful) | 30 days |
+| Component | Storage         | Invalidatable  | Default Lifetime |
+| --------- | --------------- | -------------- | ---------------- |
+| JWT       | Cookie (signed) | No (stateless) | 15 min           |
+| Session   | Convex DB       | Yes (stateful) | 30 days          |
 
 ### SSR vs Client
 
-| | SSR (HTTP) | Client (WebSocket) |
-|---|---|---|
-| Transport | HTTP per query | Persistent connection |
-| Token source | Cookie / fetch from `/api/auth/convex/token` | WebSocket handshake |
-| Validation | Per request | Once at connection, then cached |
-| JWKS impact | +100-400ms per request (if dynamic) | +100-400ms blocking handshake (if dynamic) |
+|              | SSR (HTTP)                                   | Client (WebSocket)                         |
+| ------------ | -------------------------------------------- | ------------------------------------------ |
+| Transport    | HTTP per query                               | Persistent connection                      |
+| Token source | Cookie / fetch from `/api/auth/convex/token` | WebSocket handshake                        |
+| Validation   | Per request                                  | Once at connection, then cached            |
+| JWKS impact  | +100-400ms per request (if dynamic)          | +100-400ms blocking handshake (if dynamic) |
 
 **Static JWKS** (recommended): instant validation. **Dynamic JWKS**: +100-400ms network calls.
 
 ### Auth States
 
-| Scenario | JWT | Session | Result |
-|----------|-----|---------|--------|
-| Normal | Valid | Valid | 200 OK |
-| Sign out | Deleted | Deleted | 401 |
-| Admin revokes session | Valid | Deleted | 401 on next request |
-| JWT expired, session valid | Expired | Valid | Auto-refresh → 200 |
-| JWT expired, session expired | Expired | Expired | 401 |
-| User banned | Valid | Valid (banned) | 403 |
+| Scenario                     | JWT     | Session        | Result              |
+| ---------------------------- | ------- | -------------- | ------------------- |
+| Normal                       | Valid   | Valid          | 200 OK              |
+| Sign out                     | Deleted | Deleted        | 401                 |
+| Admin revokes session        | Valid   | Deleted        | 401 on next request |
+| JWT expired, session valid   | Expired | Valid          | Auto-refresh → 200  |
+| JWT expired, session expired | Expired | Expired        | 401                 |
+| User banned                  | Valid   | Valid (banned) | 403                 |
 
 Client auto-refreshes expired JWTs with 60s leeway.
 
@@ -77,14 +77,12 @@ On local Convex, `add auth --yes` also finishes the first auth bootstrap pass: g
 
 ```ts
 // convex/functions/auth.config.ts
-import { getAuthConfigProvider } from 'kitcn/auth/config';
-import { getEnv } from '../lib/get-env';
+import { getAuthConfigProvider } from "kitcn/auth/config";
+import { getEnv } from "../lib/get-env";
 
 export default {
   providers: [
-    getEnv().JWKS
-      ? getAuthConfigProvider({ jwks: getEnv().JWKS })
-      : getAuthConfigProvider(),
+    getEnv().JWKS ? getAuthConfigProvider({ jwks: getEnv().JWKS }) : getAuthConfigProvider(),
   ],
 } satisfies AuthConfig;
 ```
@@ -106,10 +104,10 @@ apps use `convex/functions/auth.ts`.
 
 ```ts
 // convex/functions/auth.ts
-import { convex } from 'kitcn/auth';
-import { getEnv } from '../lib/get-env';
-import authConfig from './auth.config';
-import { defineAuth } from './generated/auth';
+import { convex } from "kitcn/auth";
+import { getEnv } from "../lib/get-env";
+import authConfig from "./auth.config";
+import { defineAuth } from "./generated/auth";
 
 export default defineAuth(() => ({
   emailAndPassword: {
@@ -171,29 +169,32 @@ Three options — cRPC (recommended), plain Convex, or Hono:
 
 ```ts
 // convex/functions/http.ts — cRPC option
-import { authMiddleware } from 'kitcn/auth/http';
-import { createHttpRouter } from 'kitcn/server';
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { getEnv } from '../lib/get-env';
-import { getAuth } from './generated/auth';
+import { authMiddleware } from "kitcn/auth/http";
+import { createHttpRouter } from "kitcn/server";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { getEnv } from "../lib/get-env";
+import { getAuth } from "./generated/auth";
 
 const app = new Hono();
-app.use('/api/*', cors({
-  origin: getEnv().SITE_URL,
-  allowHeaders: ['Content-Type', 'Authorization', 'Better-Auth-Cookie'],
-  exposeHeaders: ['Set-Better-Auth-Cookie'],
-  credentials: true,
-}));
+app.use(
+  "/api/*",
+  cors({
+    origin: getEnv().SITE_URL,
+    allowHeaders: ["Content-Type", "Authorization", "Better-Auth-Cookie"],
+    exposeHeaders: ["Set-Better-Auth-Cookie"],
+    credentials: true,
+  }),
+);
 app.use(authMiddleware(getAuth));
 export default createHttpRouter(app, httpRouter);
 ```
 
 ```ts
 // convex/functions/http.ts - plain Convex option
-import { registerRoutes } from 'kitcn/auth/http';
-import { httpRouter } from 'convex/server';
-import { getAuth } from './generated/auth';
+import { registerRoutes } from "kitcn/auth/http";
+import { httpRouter } from "convex/server";
+import { getAuth } from "./generated/auth";
 
 const http = httpRouter();
 
@@ -219,11 +220,13 @@ JWKS=...
 ```
 
 Local Convex:
+
 1. `init --yes`, `dev`, and `add auth --yes` drive the first auth bootstrap when they own the flow.
 2. While `kitcn dev` is running on backend `convex`, later edits to `convex/.env` auto-sync.
 3. For the normal local path, `SITE_URL` should stay on `http://localhost:3000`.
 
 Convex remote / repair:
+
 1. Use `npx kitcn env push` when the target deployment is already active.
 2. Use `npx kitcn env push --prod` for production sync.
 3. Use `npx kitcn env push --rotate` when you want fresh keys plus fresh `JWKS`.
@@ -231,6 +234,7 @@ Convex remote / repair:
 5. Use `npx kitcn env default set ... --type <dev|preview|prod>` for project defaults that should apply to new deployments.
 
 Concave manual lane:
+
 1. Use `npx kitcn --backend concave auth jwks` when you need a manual static `JWKS` payload.
 2. Use `npx kitcn --backend concave auth jwks --rotate` when you need rotation plus export.
 3. `kitcn auth jwks` only prints `JWKS=...`. Save that value into env yourself.
@@ -240,20 +244,20 @@ Concave manual lane:
 ## Server Helpers
 
 ```ts
-import { getAuthUserIdentity, getAuthUserId, getSession, getHeaders } from 'kitcn/auth';
+import { getAuthUserIdentity, getAuthUserId, getSession, getHeaders } from "kitcn/auth";
 ```
 
-| Helper | Returns | Use case |
-|--------|---------|----------|
-| `getAuthUserIdentity(ctx)` | `{ userId, sessionId, subject }` or null | Full identity |
-| `getAuthUserId(ctx)` | `Id<'user'>` or null | Just user ID |
-| `getSession(ctx)` | `{ id, userId, activeOrganizationId, expiresAt }` or null | Session doc |
-| `getHeaders(ctx)` | `Headers` with Authorization + x-forwarded-for | Forward to external APIs |
+| Helper                     | Returns                                                   | Use case                 |
+| -------------------------- | --------------------------------------------------------- | ------------------------ |
+| `getAuthUserIdentity(ctx)` | `{ userId, sessionId, subject }` or null                  | Full identity            |
+| `getAuthUserId(ctx)`       | `Id<'user'>` or null                                      | Just user ID             |
+| `getSession(ctx)`          | `{ id, userId, activeOrganizationId, expiresAt }` or null | Session doc              |
+| `getHeaders(ctx)`          | `Headers` with Authorization + x-forwarded-for            | Forward to external APIs |
 
 ```ts
 // Common pattern
 const userId = await getAuthUserId(ctx);
-if (!userId) throw new CRPCError({ code: 'UNAUTHORIZED' });
+if (!userId) throw new CRPCError({ code: "UNAUTHORIZED" });
 const user = await ctx.orm.query.user.findFirst({ where: { id: userId } });
 ```
 
@@ -261,17 +265,19 @@ const user = await ctx.orm.query.user.findFirst({ where: { id: userId } });
 
 ```ts
 convex({
-  authConfig,              // required
-  jwks: process.env.JWKS,  // static JWKS for fast validation
+  authConfig, // required
+  jwks: process.env.JWKS, // static JWKS for fast validation
   jwt: {
     expirationSeconds: 60 * 60 * 4, // default 15 min
     definePayload: ({ user, session }) => ({
-      name: user.name, email: user.email, role: user.role,
+      name: user.name,
+      email: user.email,
+      role: user.role,
       sessionId: session.id, // always added automatically
     }),
   },
-  options: { basePath: '/custom/auth/path' }, // if non-default
-})
+  options: { basePath: "/custom/auth/path" }, // if non-default
+});
 ```
 
 Default `definePayload` includes all user fields except `id` and `image`, plus `sessionId` and `iat`.
@@ -284,11 +290,11 @@ Default `definePayload` includes all user fields except `id` and `image`, plus `
 
 ```ts
 // src/lib/convex/auth-client.ts
-import { inferAdditionalFields } from 'better-auth/client/plugins';
-import { createAuthClient } from 'better-auth/react';
-import { convexClient } from 'kitcn/auth/client';
-import { createAuthMutations } from 'kitcn/react';
-import type { Auth } from '@convex/auth-shared';
+import { inferAdditionalFields } from "better-auth/client/plugins";
+import { createAuthClient } from "better-auth/react";
+import { convexClient } from "kitcn/auth/client";
+import { createAuthMutations } from "kitcn/react";
+import type { Auth } from "@convex/auth-shared";
 
 export const authClient = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_SITE_URL!,
@@ -312,26 +318,30 @@ Rule:
    `convex/.env` `SITE_URL`, and the app dev script together.
 
 **Social:**
+
 ```ts
 const signInSocial = useMutation(useSignInSocialMutationOptions());
-signInSocial.mutate({ callbackURL: window.location.origin, provider: 'google' });
+signInSocial.mutate({ callbackURL: window.location.origin, provider: "google" });
 ```
 
 **Email/password** (requires `emailAndPassword: { enabled: true }` in server config):
+
 ```ts
-const signIn = useMutation(useSignInMutationOptions({ onSuccess: () => router.push('/') }));
+const signIn = useMutation(useSignInMutationOptions({ onSuccess: () => router.push("/") }));
 signIn.mutate({ callbackURL: window.location.origin, email, password });
 
-const signUp = useMutation(useSignUpMutationOptions({ onSuccess: () => router.push('/') }));
+const signUp = useMutation(useSignUpMutationOptions({ onSuccess: () => router.push("/") }));
 signUp.mutate({ callbackURL: window.location.origin, email, name, password });
 ```
 
 ### Sign Out
 
 ```ts
-const signOut = useMutation(useSignOutMutationOptions({
-  onSuccess: () => router.push('/login'),
-}));
+const signOut = useMutation(
+  useSignOutMutationOptions({
+    onSuccess: () => router.push("/login"),
+  }),
+);
 signOut.mutate();
 ```
 
@@ -343,12 +353,12 @@ signOut.mutate();
 
 All from `kitcn/react`:
 
-| Hook | Returns | Description |
-|------|---------|-------------|
-| `useAuth()` | `{ hasSession, isAuthenticated, isLoading }` | Full auth state |
-| `useMaybeAuth()` | `boolean` | Has token (optimistic, may not be verified) |
-| `useIsAuth()` | `boolean` | Server-verified authentication |
-| `useAuthGuard()` | `() => boolean` | Guard mutations, returns true if blocked |
+| Hook             | Returns                                      | Description                                 |
+| ---------------- | -------------------------------------------- | ------------------------------------------- |
+| `useAuth()`      | `{ hasSession, isAuthenticated, isLoading }` | Full auth state                             |
+| `useMaybeAuth()` | `boolean`                                    | Has token (optimistic, may not be verified) |
+| `useIsAuth()`    | `boolean`                                    | Server-verified authentication              |
+| `useAuthGuard()` | `() => boolean`                              | Guard mutations, returns true if blocked    |
 
 ### useAuthGuard
 
@@ -356,12 +366,12 @@ All from `kitcn/react`:
 const guard = useAuthGuard();
 const handleClick = () => {
   if (guard()) return; // blocked — not authenticated
-  createPost.mutate({ title: 'New Post' });
+  createPost.mutate({ title: "New Post" });
 };
 
 // Or with callback — only runs if authenticated:
 guard(async () => {
-  await createPost.mutateAsync({ title: 'New Post' });
+  await createPost.mutateAsync({ title: "New Post" });
 });
 ```
 
@@ -369,12 +379,12 @@ guard(async () => {
 
 All from `kitcn/react`:
 
-| Component | Renders when |
-|-----------|-------------|
-| `MaybeAuthenticated` | Has session token (optimistic) |
-| `Authenticated` | Server-verified authenticated |
-| `MaybeUnauthenticated` | No session token (optimistic) |
-| `Unauthenticated` | Server-verified not authenticated |
+| Component              | Renders when                      |
+| ---------------------- | --------------------------------- |
+| `MaybeAuthenticated`   | Has session token (optimistic)    |
+| `Authenticated`        | Server-verified authenticated     |
+| `MaybeUnauthenticated` | No session token (optimistic)     |
+| `Unauthenticated`      | Server-verified not authenticated |
 
 ```tsx
 <MaybeAuthenticated><Dashboard /></MaybeAuthenticated>
@@ -394,6 +404,7 @@ All from `kitcn/react`:
 ```
 
 For `@convex-dev/auth` (React Native):
+
 ```tsx
 import { ConvexProviderWithAuth } from 'kitcn/react';
 <ConvexProviderWithAuth client={convex} useAuth={useAuthFromConvexDev}>
@@ -491,12 +502,12 @@ Auth triggers (`defineAuth(...).triggers`) handle auth lifecycle events. DB trig
 
 Nested `{ create, update, delete, change }` per table, matching ORM `defineTriggers` pattern:
 
-| Hook | Signature | Return |
-|------|-----------|--------|
-| `create.before` | `(data, ctx) => void \| { data } \| false` | Merge / cancel |
-| `create.after` | `(doc, ctx) => void` | Side effects |
-| `update.before` | `(update, ctx) => void \| { data } \| false` | Merge / cancel |
-| `update.after` | `(newDoc, ctx) => void` | Sync changes |
-| `delete.before` | `(doc, ctx) => void \| { data } \| false` | Guard / cancel |
-| `delete.after` | `(doc, ctx) => void` | Cleanup |
-| `change` | `(change, ctx) => void` | Cross-operation |
+| Hook            | Signature                                    | Return          |
+| --------------- | -------------------------------------------- | --------------- |
+| `create.before` | `(data, ctx) => void \| { data } \| false`   | Merge / cancel  |
+| `create.after`  | `(doc, ctx) => void`                         | Side effects    |
+| `update.before` | `(update, ctx) => void \| { data } \| false` | Merge / cancel  |
+| `update.after`  | `(newDoc, ctx) => void`                      | Sync changes    |
+| `delete.before` | `(doc, ctx) => void \| { data } \| false`    | Guard / cancel  |
+| `delete.after`  | `(doc, ctx) => void`                         | Cleanup         |
+| `change`        | `(change, ctx) => void`                      | Cross-operation |

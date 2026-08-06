@@ -57,6 +57,7 @@ All business logic lives in claws-sdk. claws-serve only calls `parseWorkspace(di
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- SDK-owns-logic rule, type design conventions
 - `.craft/roles/claws/gateway-eng.md` -- workspace file structure, lossless parsing requirements
 

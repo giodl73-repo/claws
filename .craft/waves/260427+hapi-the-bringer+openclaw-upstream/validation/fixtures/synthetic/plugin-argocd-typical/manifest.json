@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "argocd plugin (infra)",
   "contributes": {
-    "tools": [
-      "argocd/sync",
-      "argocd/list-apps"
-    ],
-    "skills": [
-      "argocd/sync",
-      "argocd/list-apps"
-    ]
+    "tools": ["argocd/sync", "argocd/list-apps"],
+    "skills": ["argocd/sync", "argocd/list-apps"]
   }
 }

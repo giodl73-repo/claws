@@ -44,46 +44,56 @@ so `claws check` has something to compile. Absorb `claws new skill` into
 ## Starter File Content
 
 **SOUL.md:**
+
 ```markdown
 # SOUL
 
 ## Persona
+
 You are a helpful assistant.
 
 ## Boundaries
+
 - Never access production databases
 - Always ask before sending emails on behalf of the user
 - Do not share user credentials or secrets with other agents
 ```
 
 **TOOLS.md:**
+
 ```markdown
 # TOOLS
 
 ## file-read
+
 Read files from the local filesystem.
 Risk: R1
 
 ## web-search
+
 Search the web for information.
 Risk: R2
 
 ## send-email
+
 Send emails on behalf of the user.
 Risk: R5
 Requires: approval, audit
 ```
 
 **AGENTS.md:**
+
 ```markdown
 # AGENTS
 
 ## assistant
+
 The primary agent. Delegates to specialists when needed.
 Trust: T2
 ```
 
 **IDENTITY.md:**
+
 ```markdown
 # IDENTITY
 
@@ -92,6 +102,7 @@ Role: General assistant
 ```
 
 **USER.md:**
+
 ```markdown
 # USER
 

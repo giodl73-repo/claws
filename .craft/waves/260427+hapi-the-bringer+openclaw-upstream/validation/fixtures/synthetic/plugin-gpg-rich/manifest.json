@@ -4,18 +4,9 @@
   "version": "0.1.0",
   "description": "gpg plugin (security)",
   "contributes": {
-    "tools": [
-      "gpg/encrypt",
-      "gpg/decrypt",
-      "gpg/sign"
-    ],
-    "skills": [
-      "gpg/encrypt",
-      "gpg/decrypt"
-    ],
-    "workflows": [
-      "gpg-flow.lobster"
-    ],
+    "tools": ["gpg/encrypt", "gpg/decrypt", "gpg/sign"],
+    "skills": ["gpg/encrypt", "gpg/decrypt"],
+    "workflows": ["gpg-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

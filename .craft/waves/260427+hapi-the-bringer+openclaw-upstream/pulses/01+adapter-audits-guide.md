@@ -5,7 +5,8 @@ plan: claws-openclaw-upstream
 checkpoint: cp-1
 depends_on: []
 governing_roles: [claws:gateway-eng, claws:compliance, claws:claws-repo-steward]
-addresses_findings: [F-33, F-34, F-35, F-36, F-37, F-38, F-39, F-40, F-41, F-42, F-43, F-45, F-46, ADP-AS-001..006]
+addresses_findings:
+  [F-33, F-34, F-35, F-36, F-37, F-38, F-39, F-40, F-41, F-42, F-43, F-45, F-46, ADP-AS-001..006]
 addresses_headlines: [H6]
 ---
 

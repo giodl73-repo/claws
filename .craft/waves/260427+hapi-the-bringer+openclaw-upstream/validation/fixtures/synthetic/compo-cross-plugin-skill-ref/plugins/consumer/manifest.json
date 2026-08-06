@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "consumer plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "consumer/use"
-    ]
+    "tools": ["consumer/use"]
   }
 }

@@ -14,10 +14,17 @@ expect:
     target_package: "@craftworks/emit-cursor"
     target_workspaces: "cursor-only"
     packages_modified: ["@craftworks/emit-cursor"]
-    packages_untouched: ["@craftworks/emit-oc", "@craftworks/emit-cc",
-      "@craftworks/emit-copilot", "@craftworks/emit-bedrock",
-      "@craftworks/emit-langgraph", "@craftworks/emit-crewai",
-      "@craftworks/forma", "@craftworks/crypto"]
+    packages_untouched:
+      [
+        "@craftworks/emit-oc",
+        "@craftworks/emit-cc",
+        "@craftworks/emit-copilot",
+        "@craftworks/emit-bedrock",
+        "@craftworks/emit-langgraph",
+        "@craftworks/emit-crewai",
+        "@craftworks/forma",
+        "@craftworks/crypto",
+      ]
   non_cursor_workspaces:
     modified: false
   post_broadcast:

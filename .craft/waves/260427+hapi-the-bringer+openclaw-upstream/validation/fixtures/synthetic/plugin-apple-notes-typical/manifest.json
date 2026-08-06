@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "apple-notes plugin (productivity)",
   "contributes": {
-    "tools": [
-      "apple-notes/read-note",
-      "apple-notes/create-note"
-    ],
-    "skills": [
-      "apple-notes/read-note",
-      "apple-notes/create-note"
-    ]
+    "tools": ["apple-notes/read-note", "apple-notes/create-note"],
+    "skills": ["apple-notes/read-note", "apple-notes/create-note"]
   }
 }

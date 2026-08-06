@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "whatsapp plugin (communication)",
   "contributes": {
-    "tools": [
-      "whatsapp/send-message",
-      "whatsapp/list-chats"
-    ],
-    "skills": [
-      "whatsapp/send-message",
-      "whatsapp/list-chats"
-    ]
+    "tools": ["whatsapp/send-message", "whatsapp/list-chats"],
+    "skills": ["whatsapp/send-message", "whatsapp/list-chats"]
   }
 }

@@ -1,6 +1,6 @@
 ---
 description: Work heavyweight framework or library tasks with planning-first research, selective deep analysis, and rigorous handoff
-argument-hint: '[task description | spec path | issue id/link]'
+argument-hint: "[task description | spec path | issue id/link]"
 disable-model-invocation: true
 name: major-task
 metadata:

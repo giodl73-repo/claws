@@ -52,7 +52,7 @@ Create `claws-sdk/packages/guardrails/` with default export (GuardrailProvider +
   - `/siem` CEF/NDJSON/syslog format: 4 tests
   - `/secrets` default-rule coverage (AWS/GCP/Azure/GitHub/private-key/JWT): 5 tests
   - Default-export interface contracts (including 5 supporting types): 4 tests
-  = 36 L0 tests total
+    = 36 L0 tests total
 - [ ] L1 integration tests itemized: 2 audit↔canonicalize chain tests, 2 approvals↔canonicalize HandleBinding tests, 2 identity↔budget (per-tenant budget via principal) tests, 2 siem↔audit export round-trip tests = 8 L1 tests
 - [ ] Peer-dep declarations: `/audit` + `/approvals` declare `@bic/openclaw-workspace` peer in package.json
 - [ ] After this pulse, `C:\src\openclaw-governance\` is archivable (all content absorbed; confirmed by diff)
@@ -63,6 +63,7 @@ Create `claws-sdk/packages/guardrails/` with default export (GuardrailProvider +
 If this pulse surfaces a gap in the proposal spec (main spec, one of the 4 package specs, or the plan) — **the amendment lands inside this pulse's commit**. No deferral, no follow-up pulse. Amendment SHA = pulse SHA.
 
 Commit-message convention for in-pulse amendments:
+
 ```
 <pulse-type>(<pulse-slug>): <summary>
 

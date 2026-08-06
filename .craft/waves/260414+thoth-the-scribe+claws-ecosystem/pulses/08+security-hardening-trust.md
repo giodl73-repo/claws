@@ -62,6 +62,7 @@ Address four THOTH-FINDINGS related to trust model integrity:
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/ciso.md` — trust model integrity, monotonic security guarantees, publish restriction enforcement
 - `.craft/roles/claws/founder.md` — product security posture, trust tier semantics, gap-fill risk model
 

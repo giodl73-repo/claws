@@ -119,6 +119,7 @@ Pulse 63 adds a `displayLabel` computed property to `ApprovalRequestEvent` that 
 ### F-11 [MEDIUM] Pulse 63 acceptance criterion "Existing approval event consumers continue to work" contradicts the breaking changes in deliverables
 
 The acceptance criteria state: "Existing approval event consumers continue to work (additive change, no breaking removals)." Yet the deliverables describe:
+
 - Making `createApprovalRequest()` session parameter required (F-09)
 - Adding `sessionId` and `sessionType` as required fields on `ApprovalRequestEvent` (while CL-12 marks them optional)
 - Adding a computed `displayLabel` property (F-10)
@@ -131,19 +132,19 @@ These three changes collectively break existing consumers. The acceptance criter
 
 ## Findings Summary
 
-| ID | Severity | Category | Pulse(s) | Description |
-|----|----------|----------|----------|-------------|
-| F-01 | MEDIUM | SDK-owns-logic | 60 | Tool resolver correctly in claws-sdk (PASS) |
-| F-02 | MEDIUM | SDK-owns-logic | 62 | TUI correctly consumes serve, not SDK (PASS) |
-| F-03 | HIGH | Dependency inversion | 63 | @openclaw/approval-events must NOT import from claws-sdk |
-| F-04 | HIGH | Backward compat | 60 | ToolCall.context session fields must be optional per CL-11 |
-| F-05 | LOW | Spec alignment | 60 | sessionStatus intentionally excluded from ToolCall.context -- document |
-| F-06 | MEDIUM | Dependency chain | 60 | depends_on [22, 23] -- pulse 23 dependency may be wrong target |
-| F-07 | MEDIUM | Dependency chain | 63 | Missing dependency on pulse that established ApprovalRequestEvent |
-| F-08 | LOW | Dependency chain | 62 | Correct and minimal deps (PASS) |
-| F-09 | HIGH | Backward compat | 63 | createApprovalRequest() session param must be optional, not required |
-| F-10 | MEDIUM | Architecture | 63 | displayLabel should be a helper function, not a computed property |
-| F-11 | MEDIUM | Consistency | 63 | Deliverables contradict the "no breaking changes" acceptance criterion |
+| ID   | Severity | Category             | Pulse(s) | Description                                                            |
+| ---- | -------- | -------------------- | -------- | ---------------------------------------------------------------------- |
+| F-01 | MEDIUM   | SDK-owns-logic       | 60       | Tool resolver correctly in claws-sdk (PASS)                            |
+| F-02 | MEDIUM   | SDK-owns-logic       | 62       | TUI correctly consumes serve, not SDK (PASS)                           |
+| F-03 | HIGH     | Dependency inversion | 63       | @openclaw/approval-events must NOT import from claws-sdk               |
+| F-04 | HIGH     | Backward compat      | 60       | ToolCall.context session fields must be optional per CL-11             |
+| F-05 | LOW      | Spec alignment       | 60       | sessionStatus intentionally excluded from ToolCall.context -- document |
+| F-06 | MEDIUM   | Dependency chain     | 60       | depends_on [22, 23] -- pulse 23 dependency may be wrong target         |
+| F-07 | MEDIUM   | Dependency chain     | 63       | Missing dependency on pulse that established ApprovalRequestEvent      |
+| F-08 | LOW      | Dependency chain     | 62       | Correct and minimal deps (PASS)                                        |
+| F-09 | HIGH     | Backward compat      | 63       | createApprovalRequest() session param must be optional, not required   |
+| F-10 | MEDIUM   | Architecture         | 63       | displayLabel should be a helper function, not a computed property      |
+| F-11 | MEDIUM   | Consistency          | 63       | Deliverables contradict the "no breaking changes" acceptance criterion |
 
 ---
 

@@ -15,7 +15,8 @@ expect:
   prevention: "`claws drift` reads resolved versions via package manager CLI (`npm ls --json`, `pnpm list --json`, `yarn info --json`) rather than traversing node_modules."
 
 simulate:
-  failures: ["Drift detection compares declared semver ranges instead of resolved lock file versions"]
+  failures:
+    ["Drift detection compares declared semver ranges instead of resolved lock file versions"]
   halt: null
   budget: null
 

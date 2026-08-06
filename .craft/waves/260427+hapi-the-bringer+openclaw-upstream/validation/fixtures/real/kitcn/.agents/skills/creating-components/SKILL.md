@@ -237,12 +237,7 @@ export type AccordionRootProps = React.ComponentProps<"div"> & {
   setOpen: (open: boolean) => void;
 };
 
-export const Root = ({
-  children,
-  open,
-  setOpen,
-  ...props
-}: AccordionRootProps) => (
+export const Root = ({ children, open, setOpen, ...props }: AccordionRootProps) => (
   <AccordionContext.Provider value={{ open, setOpen }}>
     <div {...props}>{children}</div>
   </AccordionContext.Provider>
@@ -277,9 +272,7 @@ export type AccordionTriggerProps = React.ComponentProps<"button"> & {
 
 export const Trigger = ({ asChild, ...props }: AccordionTriggerProps) => (
   <AccordionContext.Consumer>
-    {({ open, setOpen }) => (
-      <button onClick={() => setOpen(!open)} {...props} />
-    )}
+    {({ open, setOpen }) => <button onClick={() => setOpen(!open)} {...props} />}
   </AccordionContext.Consumer>
 );
 ```
@@ -299,9 +292,7 @@ export type AccordionContentProps = React.ComponentProps<"div"> & {
 };
 
 export const Content = ({ asChild, ...props }: AccordionContentProps) => (
-  <AccordionContext.Consumer>
-    {({ open }) => <div {...props} />}
-  </AccordionContext.Consumer>
+  <AccordionContext.Consumer>{({ open }) => <div {...props} />}</AccordionContext.Consumer>
 );
 ```
 
@@ -867,8 +858,7 @@ function Item({
   size = "default",
   asChild = false,
   ...props
-}: React.ComponentProps<"div"> &
-  VariantProps<typeof itemVariants> & { asChild?: boolean }) {
+}: React.ComponentProps<"div"> & VariantProps<typeof itemVariants> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "div";
   return (
     <Comp
@@ -1137,11 +1127,7 @@ type StepperProps = {
   onValueChange: (value: number) => void;
 };
 
-export const Stepper = ({
-  value: controlledValue,
-  defaultValue,
-  onValueChange,
-}: StepperProps) => {
+export const Stepper = ({ value: controlledValue, defaultValue, onValueChange }: StepperProps) => {
   const [value, setValue] = useControllableState({
     prop: controlledValue, // The controlled value prop
     defaultProp: defaultValue, // Default value for uncontrolled mode
@@ -1216,9 +1202,7 @@ export type CardRootProps = React.ComponentProps<"div"> & {
   variant?: "default" | "outlined";
 };
 
-export const CardRoot = ({ variant = "default", ...props }: CardRootProps) => (
-  <div {...props} />
-);
+export const CardRoot = ({ variant = "default", ...props }: CardRootProps) => <div {...props} />;
 ```
 
 ### Common HTML Attribute Types

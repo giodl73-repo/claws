@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "microsoft-teams plugin (work)",
   "contributes": {
-    "tools": [
-      "microsoft-teams/send-message",
-      "microsoft-teams/create-meeting"
-    ],
-    "skills": [
-      "microsoft-teams/send-message",
-      "microsoft-teams/create-meeting"
-    ],
-    "workflows": [
-      "microsoft-teams-flow.lobster"
-    ],
+    "tools": ["microsoft-teams/send-message", "microsoft-teams/create-meeting"],
+    "skills": ["microsoft-teams/send-message", "microsoft-teams/create-meeting"],
+    "workflows": ["microsoft-teams-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

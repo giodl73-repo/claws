@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "dbt plugin (data)",
   "contributes": {
-    "tools": [
-      "dbt/run-model",
-      "dbt/test"
-    ],
-    "skills": [
-      "dbt/run-model",
-      "dbt/test"
-    ]
+    "tools": ["dbt/run-model", "dbt/test"],
+    "skills": ["dbt/run-model", "dbt/test"]
   }
 }

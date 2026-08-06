@@ -2,10 +2,12 @@
 
 ## 2026-08-06 active PR repair pass
 
-- #7268: implemented the missing `IPprStore.LoadAllDegradableAsync()` delegation,
-  merged current `main`, preserved session-token Cosmos reads alongside main's
-  typed partition keys, and published exact head `b55381a18a`. The PR is
-  mergeable; natural Runtime, exact-head re-review, and GitHubPop remain.
+- #7268: implemented the missing `IPprStore.LoadAllDegradableAsync()` delegation
+  and merged current `main`. Replacement Runtime `175501339` then exposed typed
+  Cosmos cache-key and standalone Docker-context integration defects; exact head
+  `c6cca966d1` normalizes string/JSON partition scopes, adds regression coverage,
+  and copies the stored-procedure contract into the image build. The PR is
+  mergeable; replacement Runtime, exact-head re-review, and GitHubPop remain.
 - #6116: removed the duplicated root health response in favor of the canonical
   health handler and published exact head `ea0b87812b`. The draft PR is
   mergeable; natural Runtime, exact-head re-review, and GitHubPop remain.
@@ -13,10 +15,15 @@
   manually queued. Formatting and diff checks passed.
 - #7039 remains exact-head approved and mergeable at `c9bcd176d1`; its only
   required blocker is human GitHubPop, while Runtime has not attached.
-- #6839 remains mergeable at `5fe59d5e8b`. Its natural Runtime is now active:
-  image builds, static checks, Rust/JS unit lanes, and repo validation are green;
-  the remaining E2E shards are still running. GitHubPop and exact-head re-review
-  remain external gates.
+- #6839 Runtime `175491685` passed image/static/unit gates but exposed an invalid
+  post-build cron bundle in three E2E lanes. The patcher now preserves the async
+  channel-helper signature, accepts 6.11's reserved-id create-job shape, and
+  syntax-checks every rewritten bundle. Published exact head `1119c5bee8`;
+  natural replacement Runtime, GitHubPop, and exact-head re-review remain.
+- #7055 is restacked and mergeable at `3d09706faa`: current `main` is merged,
+  all 30 patches were re-derived, stale 6.33 executable contracts and hard-gate
+  evidence were repaired, and focused Python/Rust/Vitest proof passes. Runtime
+  is queued; production feed/image acceptance and human gates remain external.
 
 ## 2026-08-04 #6839 latest Runtime result
 

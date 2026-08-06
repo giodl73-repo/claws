@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "fastlane plugin (mobile)",
   "contributes": {
-    "tools": [
-      "fastlane/screenshot",
-      "fastlane/deploy-ios"
-    ],
-    "skills": [
-      "fastlane/screenshot",
-      "fastlane/deploy-ios"
-    ],
-    "workflows": [
-      "fastlane-flow.lobster"
-    ],
+    "tools": ["fastlane/screenshot", "fastlane/deploy-ios"],
+    "skills": ["fastlane/screenshot", "fastlane/deploy-ios"],
+    "workflows": ["fastlane-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

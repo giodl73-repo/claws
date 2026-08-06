@@ -135,6 +135,7 @@ Same issue in Pulse 36 (loop-memory-sync) for `claws-serve/src/routes/loop-memor
 Expected gates per wave plan: 6, 12, 18, 20, 28, 34, 39, 44, 55, 59.
 
 Actual `checkpoint_gate: true` values found:
+
 - Pulse 6: `checkpoint_gate: true` -- CORRECT (CP-1 gate)
 - Pulse 12: `checkpoint_gate: true` -- CORRECT (CP-2 gate)
 - Pulse 18: `checkpoint_gate: true` -- CORRECT (CP-3 gate)
@@ -185,6 +186,7 @@ Pulse 56 depends on Pulse 30 (validation layer from CP-6). Pulse 57 depends on 5
 ### F-21 [MEDIUM] 14 pulses lack L2/L3 tests, including several with non-trivial cross-module integration
 
 Pulses with ZERO L2 + L3 tests:
+
 - Pulse 2 (forma-sidecar-resolver): L2=0, L3=0
 - Pulse 3 (formir-types): L2=0, L3=0
 - Pulse 4 (crypto-internalize): L2=0, L3=0
@@ -235,31 +237,31 @@ The file sets diverge: Pulse 1 has USER.md, skills/, lobster.yaml. Pulse 22 has 
 
 ## Findings Summary
 
-| ID | Severity | Category | Pulse(s) | Description |
-|----|----------|----------|----------|-------------|
-| F-01 | HIGH | Dependency chain | 7 | Missing dependency on Pulse 6 (compileGuard) |
-| F-02 | HIGH | Dependency chain | 8 | Transitive gap on Pulse 6 via Pulse 7 |
-| F-03 | MEDIUM | Dependency chain | 9 | Missing direct dependency on Pulse 3 for GovernanceIR types |
-| F-04 | MEDIUM | Dependency chain | 11 | Declares 2 of 10 dependencies it orchestrates |
-| F-05 | LOW | Documentation | 29 | Wrong pulse slug in dependency description |
-| F-06 | LOW | Documentation | 30 | Wrong pulse slug in dependency description |
-| F-07 | LOW | Documentation | 32 | Wrong pulse slug in dependency description |
-| F-08 | LOW | Documentation | 41 | Wrong module name in dependency description |
-| F-09 | MEDIUM | Dependency chain | -- | No cycles detected (PASS) |
-| F-10 | MEDIUM | Package boundary | 38, 40 | Business logic in claws-serve (workqueue-store, skills scanning) |
-| F-11 | MEDIUM | Package boundary | 42 | Fleet aggregation logic in route handler |
-| F-12 | MEDIUM | Package boundary | 33 | Batch orchestration logic in route handler |
-| F-13 | LOW | Package boundary | 43 | Correct pattern (PASS) |
-| F-14 | MEDIUM | Package boundary | 56-59 | Plan name `claws-tui` for VS Code extension pulses is misleading |
-| F-15 | HIGH | SDK-owns-logic | 35, 36 | Loop sync PATCH orchestration in claws-serve routes |
-| F-16 | MEDIUM | SDK-owns-logic | 34 | Health check lifecycle logic in claws-serve |
-| F-17 | HIGH | Checkpoint gating | all | All 10 gates correctly marked (PASS) |
-| F-18 | HIGH | Checkpoint gating | 6 | CP-1 gate missing deps on Pulses 2, 4, 5 |
-| F-19 | MEDIUM | Cross-checkpoint | 21 | CP-5 start has no dependency on CP-4 gate |
-| F-20 | LOW | Cross-checkpoint | 56-59 | Correct cross-CP deps (PASS) |
-| F-21 | MEDIUM | Test coverage | 17, 55, 59 | Missing L2 on massive extraction; missing L3 on CP-9/CP-10 gates |
-| F-22 | LOW | Test coverage | gates | 8 of 10 gate pulses have L3 tests (PASS for those 8) |
-| F-23 | MEDIUM | Structural clarity | 1, 22 | Two different "9 OC file" sets across compiler and serve |
+| ID   | Severity | Category           | Pulse(s)   | Description                                                      |
+| ---- | -------- | ------------------ | ---------- | ---------------------------------------------------------------- |
+| F-01 | HIGH     | Dependency chain   | 7          | Missing dependency on Pulse 6 (compileGuard)                     |
+| F-02 | HIGH     | Dependency chain   | 8          | Transitive gap on Pulse 6 via Pulse 7                            |
+| F-03 | MEDIUM   | Dependency chain   | 9          | Missing direct dependency on Pulse 3 for GovernanceIR types      |
+| F-04 | MEDIUM   | Dependency chain   | 11         | Declares 2 of 10 dependencies it orchestrates                    |
+| F-05 | LOW      | Documentation      | 29         | Wrong pulse slug in dependency description                       |
+| F-06 | LOW      | Documentation      | 30         | Wrong pulse slug in dependency description                       |
+| F-07 | LOW      | Documentation      | 32         | Wrong pulse slug in dependency description                       |
+| F-08 | LOW      | Documentation      | 41         | Wrong module name in dependency description                      |
+| F-09 | MEDIUM   | Dependency chain   | --         | No cycles detected (PASS)                                        |
+| F-10 | MEDIUM   | Package boundary   | 38, 40     | Business logic in claws-serve (workqueue-store, skills scanning) |
+| F-11 | MEDIUM   | Package boundary   | 42         | Fleet aggregation logic in route handler                         |
+| F-12 | MEDIUM   | Package boundary   | 33         | Batch orchestration logic in route handler                       |
+| F-13 | LOW      | Package boundary   | 43         | Correct pattern (PASS)                                           |
+| F-14 | MEDIUM   | Package boundary   | 56-59      | Plan name `claws-tui` for VS Code extension pulses is misleading |
+| F-15 | HIGH     | SDK-owns-logic     | 35, 36     | Loop sync PATCH orchestration in claws-serve routes              |
+| F-16 | MEDIUM   | SDK-owns-logic     | 34         | Health check lifecycle logic in claws-serve                      |
+| F-17 | HIGH     | Checkpoint gating  | all        | All 10 gates correctly marked (PASS)                             |
+| F-18 | HIGH     | Checkpoint gating  | 6          | CP-1 gate missing deps on Pulses 2, 4, 5                         |
+| F-19 | MEDIUM   | Cross-checkpoint   | 21         | CP-5 start has no dependency on CP-4 gate                        |
+| F-20 | LOW      | Cross-checkpoint   | 56-59      | Correct cross-CP deps (PASS)                                     |
+| F-21 | MEDIUM   | Test coverage      | 17, 55, 59 | Missing L2 on massive extraction; missing L3 on CP-9/CP-10 gates |
+| F-22 | LOW      | Test coverage      | gates      | 8 of 10 gate pulses have L3 tests (PASS for those 8)             |
+| F-23 | MEDIUM   | Structural clarity | 1, 22      | Two different "9 OC file" sets across compiler and serve         |
 
 ---
 

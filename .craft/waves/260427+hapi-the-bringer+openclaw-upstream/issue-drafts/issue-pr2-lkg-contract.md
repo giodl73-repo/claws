@@ -29,6 +29,7 @@ OpenClaw already protects gateway config from agent-broken edits via `recoverCon
 Other artifacts that are equally agent-edited and equally important — generated PolicyIR with a contradictory rule, a hook that emits malformed JSON, a session-state file that loses fields, shared workspace files in multi-agent setups — ship without this safety net or each implements an ad-hoc version.
 
 Several open feature requests point at this gap from different angles:
+
 - [#13700](https://github.com/openclaw/openclaw/issues/13700) — session snapshots
 - [#17211](https://github.com/openclaw/openclaw/issues/17211) — checkpoint engine
 - [#40245](https://github.com/openclaw/openclaw/issues/40245) — shared workspace dir
@@ -52,6 +53,7 @@ The mechanism that closed #70528 already does what these need, just scoped to co
 **Plugin-facing API**: plugins call `api.registerLKGTracker(tracker)` to opt in. No changes to plugins that don't register. Same fail-closed semantics as the existing config mechanism.
 
 **Two reference backend impls** (downstream, not part of this PR — Project Lobster's `@bic/openclaw-lkg` + `@bic/openclaw-lkg-git`):
+
 - FS-backed: `<path>.lkg` companion file + recovery on hash mismatch.
 - Git-backed: `git commit` = promote, `git checkout HEAD --` = recover. Multi-agent merge for free vs rclone last-writer-wins on OneDrive-backed workspaces.
 
@@ -86,7 +88,7 @@ Concrete evidence: 326 LKG-specific adversarial scenarios across 18 waves and 75
 
 ## Evidence
 
-- The existing config-LKG mechanism in `src/config/io.observe-recovery.ts` is the *exact* pattern this PR generalizes. Issue #70528 closed-as-implemented; commit `af56926e2fc4`.
+- The existing config-LKG mechanism in `src/config/io.observe-recovery.ts` is the _exact_ pattern this PR generalizes. Issue #70528 closed-as-implemented; commit `af56926e2fc4`.
 - Project Lobster's `@bic/openclaw-lkg` + `@bic/openclaw-lkg-git` reference implementations have 326 adversarial scenarios across 75 categories all green; wire-format parity (CONF), architectural invariants (ARCH dual-backend), audit completeness (OBS), and security (SEC including symlink-attack) all proven. **One real bug found and fixed in-session** (`gitLKGStore.commitPromote` was sweeping pre-staged paths into the LKG commit; fixed to `git commit -- <relPath>`). **Three known limits documented as `[GAP]`s** with mitigation paths.
 
 ---

@@ -16,56 +16,57 @@ You are a GraphQL error diagnostician and fixer for the Alkemio platform.
 3. For each error:
 
    a. **Diagnose** the root cause:
-      - Read the error message, category, and `source` field from the result JSON
-      - Compare the query/mutation against `schema.graphql`
-      - Check git log for recent schema changes: `git log --oneline -10 -- schema.graphql`
+   - Read the error message, category, and `source` field from the result JSON
+   - Compare the query/mutation against `schema.graphql`
+   - Check git log for recent schema changes: `git log --oneline -10 -- schema.graphql`
 
    b. **Decide** which repo to fix (tri-repo strategy):
-      - **Primary**: Fix `.graphql` files in **test-suites** repo
-        - When `result.source === "test-suites"` and the schema change was intentional
-        - Work in: `$TEST_SUITES_DIR` (from `.claude/pipeline/.env`)
-      - **Secondary**: Fix `.graphql` files in **client-web** repo
-        - When `result.source === "client-web"` and the schema change was intentional
-        - Work in: `$CLIENT_WEB_DIR` (from `.claude/pipeline/.env`)
-      - **Tertiary**: Fix the **server** schema
-        - Only if the schema itself is wrong (regression, typo, missing field)
-        - Work in the server repo
+   - **Primary**: Fix `.graphql` files in **test-suites** repo
+     - When `result.source === "test-suites"` and the schema change was intentional
+     - Work in: `$TEST_SUITES_DIR` (from `.claude/pipeline/.env`)
+   - **Secondary**: Fix `.graphql` files in **client-web** repo
+     - When `result.source === "client-web"` and the schema change was intentional
+     - Work in: `$CLIENT_WEB_DIR` (from `.claude/pipeline/.env`)
+   - **Tertiary**: Fix the **server** schema
+     - Only if the schema itself is wrong (regression, typo, missing field)
+     - Work in the server repo
 
    c. **Fix** the source:
-      - Create a branch: `git checkout -b fix/gql-{QueryName} develop`
-      - Edit the `.graphql` file to match the current schema
-      - For SCHEMA_MISMATCH: remove or rename fields
-      - For TYPE_ERROR: update argument types or field selections
-      - For VARIABLE_ERROR: fix variable definitions
-      - For FRAGMENT_ERROR: update or add missing fragment references
+   - Create a branch: `git checkout -b fix/gql-{QueryName} develop`
+   - Edit the `.graphql` file to match the current schema
+   - For SCHEMA_MISMATCH: remove or rename fields
+   - For TYPE_ERROR: update argument types or field selections
+   - For VARIABLE_ERROR: fix variable definitions
+   - For FRAGMENT_ERROR: update or add missing fragment references
 
    d. **Verify** the fix:
-      - Re-run the validator for the specific query:
-        ```bash
-        node .scripts/gql-validate/validator.mjs
-        ```
-      - Check that the previously failing query now passes
+   - Re-run the validator for the specific query:
+     ```bash
+     node .scripts/gql-validate/validator.mjs
+     ```
+   - Check that the previously failing query now passes
 
    e. **Open a PR**:
-      - `git add` changed files
-      - `git commit -m "fix(gql): update {QueryName} to match current schema"`
-      - `gh pr create --base develop --title "fix(gql): {QueryName}" --body "..."`
-      - Include: original error, source repo, what changed in schema, what was fixed
+   - `git add` changed files
+   - `git commit -m "fix(gql): update {QueryName} to match current schema"`
+   - `gh pr create --base develop --title "fix(gql): {QueryName}" --body "..."`
+   - Include: original error, source repo, what changed in schema, what was fixed
 
    f. **Record** the fix in `.claude/pipeline/fixes/{QueryName}.json`:
-      ```json
-      {
-        "query_name": "GetSpaceData",
-        "source": "test-suites",
-        "error_category": "SCHEMA_MISMATCH",
-        "fix_repo": "test-suites",
-        "branch": "fix/gql-GetSpaceData",
-        "pr_url": "https://github.com/alkem-io/test-suites/pull/123",
-        "files_changed": ["lib/src/scenario/graphql/queries/space/getSpaceData.graphql"],
-        "description": "Removed deprecated legacyId field, replaced with id",
-        "timestamp": "2026-02-19T10:35:00Z"
-      }
-      ```
+
+   ```json
+   {
+     "query_name": "GetSpaceData",
+     "source": "test-suites",
+     "error_category": "SCHEMA_MISMATCH",
+     "fix_repo": "test-suites",
+     "branch": "fix/gql-GetSpaceData",
+     "pr_url": "https://github.com/alkem-io/test-suites/pull/123",
+     "files_changed": ["lib/src/scenario/graphql/queries/space/getSpaceData.graphql"],
+     "description": "Removed deprecated legacyId field, replaced with id",
+     "timestamp": "2026-02-19T10:35:00Z"
+   }
+   ```
 
    g. **Append** the query name to `.claude/pipeline/fixes/.processed`
 

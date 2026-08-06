@@ -66,6 +66,7 @@ Create `claws-sdk` and `claws-cli` packages in the monorepo with correct package
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, package boundaries, build system integration
 - `.craft/roles/claws/platform-eng.md` — claws platform conventions, FORMA sidecar layout, workspace structure
 
@@ -76,6 +77,7 @@ None — this is the first pulse in the wave.
 ## Review Amendments (R1)
 
 ### C07: Windows Path Normalization
+
 - [ ] Add `claws-sdk/src/util/path.ts` with `normalizePath()` converting backslashes to forward slashes
 - [ ] All file path operations in claws-sdk use normalizePath() — never raw path.join()
 - [ ] L0 test: Windows-style `C:\src\workspace\SOUL.md` normalizes to `C:/src/workspace/SOUL.md`

@@ -61,6 +61,7 @@ This is the CP-1 gate pulse. All prior infrastructure (readers, sidecar, IR, cry
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/security.md` -- R5 fail-closed principle, non-negotiable security baseline
 - `.craft/roles/craft/architect.md` -- enforcement layer placement, guard pattern, error design
 - `.craft/roles/claws/platform-eng.md` -- SDK error patterns, typed error hierarchy

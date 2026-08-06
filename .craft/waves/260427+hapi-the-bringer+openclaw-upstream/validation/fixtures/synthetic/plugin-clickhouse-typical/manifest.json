@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "clickhouse plugin (data)",
   "contributes": {
-    "tools": [
-      "clickhouse/query",
-      "clickhouse/insert"
-    ],
-    "skills": [
-      "clickhouse/query",
-      "clickhouse/insert"
-    ]
+    "tools": ["clickhouse/query", "clickhouse/insert"],
+    "skills": ["clickhouse/query", "clickhouse/insert"]
   }
 }

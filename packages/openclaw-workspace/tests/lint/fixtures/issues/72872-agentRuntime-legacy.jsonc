@@ -1,9 +1,0 @@
-{
-  "version": "2026.4.24",
-  "gateway": { "dmPolicy": {} },
-  "agents": {
-    "defaults": {
-      "agentRuntime": "v3"
-    }
-  }
-}

@@ -7,6 +7,7 @@ install path.
 After changing plugins or auth fields in `<functionsDir>/auth.ts`, refresh
 auth-owned schema blocks with `bunx kitcn add auth --schema --yes`. Keep
 `bunx kitcn dev` running as the local Convex + codegen loop.
+
 ### 8.B.1 Auth client + auth server helpers
 
 **Create:** `src/lib/convex/auth-client.ts`
@@ -24,11 +25,8 @@ export const authClient = createAuthClient({
   plugins: [convexClient()],
 });
 
-export const {
-  useSignInMutationOptions,
-  useSignOutMutationOptions,
-  useSignUpMutationOptions,
-} = createAuthMutations(authClient);
+export const { useSignInMutationOptions, useSignOutMutationOptions, useSignUpMutationOptions } =
+  createAuthMutations(authClient);
 ```
 
 **Create:** `src/lib/convex/auth-server.ts`
@@ -36,16 +34,11 @@ export const {
 ```ts
 import { convexBetterAuthReactStart } from "kitcn/auth/start";
 
-export const {
-  handler,
-  getToken,
-  fetchAuthQuery,
-  fetchAuthMutation,
-  fetchAuthAction,
-} = convexBetterAuthReactStart({
-  convexUrl: import.meta.env.VITE_CONVEX_URL!,
-  convexSiteUrl: import.meta.env.VITE_CONVEX_SITE_URL!,
-});
+export const { handler, getToken, fetchAuthQuery, fetchAuthMutation, fetchAuthAction } =
+  convexBetterAuthReactStart({
+    convexUrl: import.meta.env.VITE_CONVEX_URL!,
+    convexSiteUrl: import.meta.env.VITE_CONVEX_SITE_URL!,
+  });
 ```
 
 ### 8.B.2 Auth API endpoint

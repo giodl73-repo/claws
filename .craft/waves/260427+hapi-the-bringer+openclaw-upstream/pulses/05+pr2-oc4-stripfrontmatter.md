@@ -18,6 +18,7 @@ Open PR-2 against `github.com/openclaw/openclaw` modifying `src/agents/workspace
 ## Deliverables
 
 ### Upstream PR
+
 - [ ] PR-2 opened at `github.com/openclaw/openclaw` with title: `fix(workspace): preserve original bytes in stripFrontMatter for round-trip`
 - [ ] PR description leads with core-not-extension justification (governance round-trip is core; alternative would be a third-party fork)
 - [ ] PR description includes filled-out bot-preempt checklist
@@ -25,15 +26,18 @@ Open PR-2 against `github.com/openclaw/openclaw` modifying `src/agents/workspace
 - [ ] Existing call sites unchanged (they read `.content`, ignore new `.raw`)
 
 ### Test
+
 - [ ] `src/agents/__tests__/workspace.test.ts` — new test: round-trip on templated SOUL.md emits byte-identical bytes via `result.raw`
 - [ ] Existing tests still pass (non-breaking)
 
 ### CI / public-API obligations
+
 - [ ] CHANGELOG entry appended at end-of-section
 - [ ] No baseline hash refresh expected (internal helper, not exported public API — but verify with bot-preempt checklist anyway)
 - [ ] No sdk-overview table change expected
 
 ### Internal verification before pushing
+
 - [ ] `pnpm test src/agents/__tests__/workspace.test.ts` green
 - [ ] `pnpm tsc --noEmit` green
 - [ ] No new diagnostic codes introduced

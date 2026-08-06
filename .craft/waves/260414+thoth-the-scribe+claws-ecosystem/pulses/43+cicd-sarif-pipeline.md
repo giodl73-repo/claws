@@ -23,11 +23,13 @@ checkpoint_gate: false
 # Pulse 43: SARIF Pipeline for GitHub Code Scanning
 
 ## Objective
+
 SARIF generation for GitHub Code Scanning. `claws pinch --diff $BASE --format sarif` produces SARIF 2.1.0 with ruleId, severity, file:line:column location, and fix suggestion. The action uploads SARIF via gh CLI to Code Scanning so violations appear as inline PR annotations.
 
 The pipeline has 4 stages: Stage 0 (pre-commit), Stage 1 (PR check), Stage 2 (CD gate), Stage 3 (fleet cron). The action is a composite action (shell scripts wrapping the claws CLI), keeping the implementation portable and dependency-free.
 
 ## Deliverables
+
 NOTE: bats (Bash Automated Testing System) must be available globally. Install via `npm install -g bats` or OS package manager.
 
 - [ ] `claws-action/action.yml` — GitHub Action metadata: inputs (stage, format, fail-on, warn-only, framework, cache), outputs (sarif-file, violation-count, exit-code), branding
@@ -42,6 +44,7 @@ NOTE: bats (Bash Automated Testing System) must be available globally. Install v
 - [ ] `claws-cli/tests/cicd/cicd-sarif-pipeline.accept.test.ts` — L3: CLI acceptance — runs `claws pinch --diff HEAD~1 --format sarif` on fixture workspace, verifies SARIF output file and exit code per stage
 
 ## Acceptance Criteria
+
 - [ ] `claws pinch --diff $BASE --format sarif` produces valid SARIF 2.1.0 JSON
 - [ ] SARIF output includes ruleId, severity, file:line:column location, and fix suggestion for each violation
 - [ ] Composite action parses all declared inputs (stage, format, fail-on, warn-only, framework, cache)
@@ -50,14 +53,18 @@ NOTE: bats (Bash Automated Testing System) must be available globally. Install v
 - [ ] Example workflow demonstrates minimal PR check with SARIF upload
 
 ## Governing Roles
+
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — system-wide architecture constraints
 - `.craft/roles/claws/platform-eng.md` — CI/CD platform engineering standards
 
 ## Dependencies
+
 None — this is the foundation pulse for the CI/CD action.
 
 ## Test Gates
+
 - [ ] L0 unit (4 tests): SARIF output has correct ruleId, SARIF severity mapping, action input parsing, action input parsing validates required fields (stage, format)
 - [ ] L1 integration (2 tests): SARIF generation + upload pipeline, Stage 0+1 wiring
 - [ ] L2 e2e (1 test): full action run on fixture workspace

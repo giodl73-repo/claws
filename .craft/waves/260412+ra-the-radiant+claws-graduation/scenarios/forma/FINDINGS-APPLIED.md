@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Type ownership**: forma must define its own types, not re-export from compiler-sdk; .d.ts files must not reference compiler-sdk paths
 - **Dependency isolation**: crypto as peer dependency (not dev), transitive dependency audit in CI, dynamic import scanning alongside static
 - **IR contract**: public IR field contract excluding compiler internals, deterministic key ordering in serialize(), Zod-validated deserialization

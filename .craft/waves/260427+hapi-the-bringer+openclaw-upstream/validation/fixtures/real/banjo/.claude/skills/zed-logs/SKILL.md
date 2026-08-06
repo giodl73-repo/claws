@@ -33,11 +33,11 @@ tail -f ~/Library/Logs/Zed/Zed.log | grep -i agent
 
 ## Common Issues
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| `UnknownField` | Missing field in param struct | Add field or `ignore_unknown_fields = true` |
-| `not registered` | Config key mismatch | Check `agent_servers` key in Zed settings |
-| No output | Agent crashed on startup | Run `./zig-out/bin/banjo` manually to see error |
+| Error            | Cause                         | Fix                                             |
+| ---------------- | ----------------------------- | ----------------------------------------------- |
+| `UnknownField`   | Missing field in param struct | Add field or `ignore_unknown_fields = true`     |
+| `not registered` | Config key mismatch           | Check `agent_servers` key in Zed settings       |
+| No output        | Agent crashed on startup      | Run `./zig-out/bin/banjo` manually to see error |
 
 ## Zed Config Location
 

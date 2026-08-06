@@ -137,9 +137,7 @@ Record a visual demonstration of the key feature of this PR using screenshots an
      });
 
      // Verify the final screenshot exists to ensure all steps completed
-     expect(
-       fs.existsSync(path.join(screenshotDir, "03-final-result.png")),
-     ).toBe(true);
+     expect(fs.existsSync(path.join(screenshotDir, "03-final-result.png"))).toBe(true);
    });
    ```
 

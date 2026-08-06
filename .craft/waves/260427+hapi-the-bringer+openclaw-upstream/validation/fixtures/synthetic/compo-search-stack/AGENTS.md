@@ -6,6 +6,7 @@ trust: composition
 # compo-search-stack
 
 Composition workspace bringing together 3 plugin(s):
+
 - `plugins/google-search/`
 - `plugins/brave-search/`
 - `plugins/semantic-search/`

@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "email plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "email/send-email"
-    ]
+    "tools": ["email/send-email"]
   }
 }

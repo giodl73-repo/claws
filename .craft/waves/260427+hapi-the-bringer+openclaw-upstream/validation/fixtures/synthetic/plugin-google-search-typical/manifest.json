@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "google-search plugin (search)",
   "contributes": {
-    "tools": [
-      "google-search/web-search"
-    ],
-    "skills": [
-      "google-search/web-search"
-    ]
+    "tools": ["google-search/web-search"],
+    "skills": ["google-search/web-search"]
   }
 }

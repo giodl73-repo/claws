@@ -234,20 +234,20 @@ Three I want explicit airtime in the next checkpoint:
 
 ## Ask list (priority-ordered)
 
-| ask | severity | who | when |
-| --- | --- | --- | --- |
-| Chained `prevHash` on `LKGAuditRecord` (Concern #4) | BLOCK | upstream PR-2 | before merge |
-| `LKGStore.purgePath(path)` for GDPR scrub (Concern #3) | BLOCK (EU) | upstream PR-2 | v1 minimum |
-| Per-tenant sentinel rotation (Concern #7) | BLOCK (multi-tenant) | upstream PR-1 amendment | v1 |
-| `--allow-enumeration` on `openclaw-policy evaluate` (Concern #5) | BLOCK | upstream PR-3 | before enterprise CLI ship |
-| Sign or LKG-track `workspace.json` (Concern #6) | BLOCK (Purview) | claws fork or governance layer | v1 |
-| FedRAMP-Moderate scope-note on `policyId` hash-only (Concern #2) | WARN | upstream PR-3 doc | before merge |
-| `requireAttestation` constructor flag on `FsLKGStore` (Concern #8) | WARN | upstream PR-2 | v0 if cheap |
-| Audit-emission rate-limit / SIEM coalescing (Concern #1) | WARN | downstream Sentinel rules | before Microsoft customer #1 |
-| Recovery-on-sentinel-DoS runbook (Concern #1) | WARN | wave artifact | before merge |
-| Single-store-per-tenant warning at `FsLKGStore` construction (Concern #9) | NIT | upstream PR-2 | opportunistic |
-| Microsoft deployment guide: doctor auto-apply prohibition | NIT | claws docs | before customer #1 |
-| Deployment guide: `.openclaw/` ACL hardening on rclone-FUSE | NIT | claws docs | before customer #1 |
+| ask                                                                       | severity             | who                            | when                         |
+| ------------------------------------------------------------------------- | -------------------- | ------------------------------ | ---------------------------- |
+| Chained `prevHash` on `LKGAuditRecord` (Concern #4)                       | BLOCK                | upstream PR-2                  | before merge                 |
+| `LKGStore.purgePath(path)` for GDPR scrub (Concern #3)                    | BLOCK (EU)           | upstream PR-2                  | v1 minimum                   |
+| Per-tenant sentinel rotation (Concern #7)                                 | BLOCK (multi-tenant) | upstream PR-1 amendment        | v1                           |
+| `--allow-enumeration` on `openclaw-policy evaluate` (Concern #5)          | BLOCK                | upstream PR-3                  | before enterprise CLI ship   |
+| Sign or LKG-track `workspace.json` (Concern #6)                           | BLOCK (Purview)      | claws fork or governance layer | v1                           |
+| FedRAMP-Moderate scope-note on `policyId` hash-only (Concern #2)          | WARN                 | upstream PR-3 doc              | before merge                 |
+| `requireAttestation` constructor flag on `FsLKGStore` (Concern #8)        | WARN                 | upstream PR-2                  | v0 if cheap                  |
+| Audit-emission rate-limit / SIEM coalescing (Concern #1)                  | WARN                 | downstream Sentinel rules      | before Microsoft customer #1 |
+| Recovery-on-sentinel-DoS runbook (Concern #1)                             | WARN                 | wave artifact                  | before merge                 |
+| Single-store-per-tenant warning at `FsLKGStore` construction (Concern #9) | NIT                  | upstream PR-2                  | opportunistic                |
+| Microsoft deployment guide: doctor auto-apply prohibition                 | NIT                  | claws docs                     | before customer #1           |
+| Deployment guide: `.openclaw/` ACL hardening on rclone-FUSE               | NIT                  | claws docs                     | before customer #1           |
 
 The substrates are well-built. The gaps are the gaps a CISO sees because
 they shape which boxes get ticked on which compliance attestation. Most are

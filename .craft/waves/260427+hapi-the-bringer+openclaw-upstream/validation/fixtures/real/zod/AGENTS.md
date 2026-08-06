@@ -89,7 +89,8 @@ git push <contributor> pr-<N>:<headRefName> --force-with-lease   # for amends
 ```
 
 Notes:
-- Do NOT use `gh pr checkout --detach` for this — it moves your *current* working tree into detached HEAD instead of creating a worktree.
+
+- Do NOT use `gh pr checkout --detach` for this — it moves your _current_ working tree into detached HEAD instead of creating a worktree.
 - Husky pre-commit runs biome format/lint via lint-staged; pre-push runs the full vitest suite. Both are fast and act as a safety net — don't bypass with `--no-verify` unless you have a specific reason.
 - **Preserve contributor commits.** Never `git reset --hard` or otherwise rewrite history that erases the contributor's work, even if you're rewriting the actual change. They need to stay in the PR's commit list to get credit on the merged PR. If their approach was wrong, add a `Revert "..."` commit (or just a plain commit that undoes those lines) and then add your replacement commit on top. Force-pushing a single clobbering commit strips them from the GitHub contributors graph.
 - When done, clean up: `git worktree remove ~/.cursor/worktrees/zod/pr-<N>` and `git branch -D pr-<N>` (and optionally `git remote remove <contributor>`).

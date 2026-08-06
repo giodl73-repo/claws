@@ -83,15 +83,15 @@ The simplest test for whether something is a different Place: **Can you interact
 
 #### Dialtone-Specific Place Examples
 
-| UI Element           | Blocking? | Place?  | Why                                          |
-| -------------------- | --------- | ------- | -------------------------------------------- |
-| DtModal              | Yes       | Yes     | Can't interact with page behind              |
-| DtPopover            | No        | No      | Can click away, non-blocking                 |
-| DtDropdown           | No        | No      | Can click away, non-blocking                 |
-| DtToast              | No        | No      | Overlays page, doesn't block interaction     |
-| DtModal (fullscreen) | Yes       | Yes     | Entire viewport changes, blocks all content  |
-| Storybook canvas     | No        | No      | Controls panel coexists                      |
-| VuePress doc page    | No        | No      | Sidebar and content coexist                  |
+| UI Element           | Blocking? | Place? | Why                                         |
+| -------------------- | --------- | ------ | ------------------------------------------- |
+| DtModal              | Yes       | Yes    | Can't interact with page behind             |
+| DtPopover            | No        | No     | Can click away, non-blocking                |
+| DtDropdown           | No        | No     | Can click away, non-blocking                |
+| DtToast              | No        | No     | Overlays page, doesn't block interaction    |
+| DtModal (fullscreen) | Yes       | Yes    | Entire viewport changes, blocks all content |
+| Storybook canvas     | No        | No     | Controls panel coexists                     |
+| VuePress doc page    | No        | No     | Sidebar and content coexist                 |
 
 #### Labeling Conventions
 
@@ -153,32 +153,32 @@ The tables are the truth. Every breadboard produces these:
 
 ### UI Affordances Table
 
-| #   | Place | Component  | Affordance       | Control | Wires Out | Returns To |
-| --- | ----- | ---------- | ---------------- | ------- | --------- | ---------- |
-| U1  | P1    | DtButton   | `size` prop      | render  | —         | —          |
-| U2  | P1    | DtButton   | click event      | click   | -> N1     | —          |
-| U3  | P1    | DtButton   | default slot     | render  | —         | —          |
+| #   | Place | Component | Affordance   | Control | Wires Out | Returns To |
+| --- | ----- | --------- | ------------ | ------- | --------- | ---------- |
+| U1  | P1    | DtButton  | `size` prop  | render  | —         | —          |
+| U2  | P1    | DtButton  | click event  | click   | -> N1     | —          |
+| U3  | P1    | DtButton  | default slot | render  | —         | —          |
 
 ### Code Affordances Table
 
-| #   | Place | Component         | Affordance               | Control  | Wires Out | Returns To |
-| --- | ----- | ----------------- | ------------------------ | -------- | --------- | ---------- |
-| N1  | P1    | useButton         | `handleClick()`          | call     | —         | -> U1      |
-| N2  | P2    | gulpfile          | `compileLess()`          | build    | -> N3     | —          |
-| N3  | P2    | style-dictionary  | `transformTokens()`      | build    | —         | —          |
+| #   | Place | Component        | Affordance          | Control | Wires Out | Returns To |
+| --- | ----- | ---------------- | ------------------- | ------- | --------- | ---------- |
+| N1  | P1    | useButton        | `handleClick()`     | call    | —         | -> U1      |
+| N2  | P2    | gulpfile         | `compileLess()`     | build   | -> N3     | —          |
+| N3  | P2    | style-dictionary | `transformTokens()` | build   | —         | —          |
 
 ### Data Stores Table
 
-| #   | Place | Store                | Description                        |
-| --- | ----- | -------------------- | ---------------------------------- |
-| S1  | P2    | `tokens.json`        | Source token definitions           |
-| S2  | P2    | `variables.less`     | Generated Less variables from build|
+| #   | Place | Store            | Description                         |
+| --- | ----- | ---------------- | ----------------------------------- |
+| S1  | P2    | `tokens.json`    | Source token definitions            |
+| S2  | P2    | `variables.less` | Generated Less variables from build |
 
 ### Column Definitions
 
 | Column         | Description                                                               |
 | -------------- | ------------------------------------------------------------------------- |
-| **#**          | Unique ID (P for Places, U for UI, N for Code, S for Stores)             |
+| **#**          | Unique ID (P for Places, U for UI, N for Code, S for Stores)              |
 | **Place**      | Which Place this affordance belongs to (containment)                      |
 | **Component**  | Which Vue component, composable, or build tool owns this                  |
 | **Affordance** | The specific thing you can act upon                                       |
@@ -315,10 +315,10 @@ The build pipeline (Nx tasks, gulp, style-dictionary) is the critical bridge bet
 
 ### Two flows: Consumer and Contributor
 
-| Flow              | What it tracks                   | Wiring                        |
-| ----------------- | -------------------------------- | ----------------------------- |
-| **Consumer**      | Using components/utilities       | Props -> Component -> Renders |
-| **Contributor**   | Adding/modifying design system   | Source -> Build -> Output     |
+| Flow            | What it tracks                 | Wiring                        |
+| --------------- | ------------------------------ | ----------------------------- |
+| **Consumer**    | Using components/utilities     | Props -> Component -> Renders |
+| **Contributor** | Adding/modifying design system | Source -> Build -> Output     |
 
 ### Every component prop that renders needs a style source
 
@@ -429,12 +429,12 @@ Each slice needs a concrete demo:
 
 Each slice should correspond to one PR:
 
-| #   | Slice           | Mechanism           | Demo                      | Branch                           |
-| --- | --------------- | ------------------- | ------------------------- | -------------------------------- |
-| V1  | Core component  | Basic render        | "Renders in Storybook"    | `feat/DLT-XXXX-component-v1`    |
-| V2  | Variants        | Props + styles      | "All variants visible"    | `feat/DLT-XXXX-component-v2`    |
-| V3  | Interaction     | Events + a11y       | "Click and keyboard work" | `feat/DLT-XXXX-component-v3`    |
-| V4  | Documentation   | VuePress + examples | "Docs page complete"      | `docs/DLT-XXXX-component-v4`    |
+| #   | Slice          | Mechanism           | Demo                      | Branch                       |
+| --- | -------------- | ------------------- | ------------------------- | ---------------------------- |
+| V1  | Core component | Basic render        | "Renders in Storybook"    | `feat/DLT-XXXX-component-v1` |
+| V2  | Variants       | Props + styles      | "All variants visible"    | `feat/DLT-XXXX-component-v2` |
+| V3  | Interaction    | Events + a11y       | "Click and keyboard work" | `feat/DLT-XXXX-component-v3` |
+| V4  | Documentation  | VuePress + examples | "Docs page complete"      | `docs/DLT-XXXX-component-v4` |
 
 ### Visualizing Slices in Mermaid
 
@@ -454,55 +454,55 @@ When breadboarding Dialtone features, map affordances to these layers:
 
 ### Component Layer (U + N affordances)
 
-| Dialtone Pattern                        | Affordance Type                |
-| --------------------------------------- | ------------------------------ |
-| Vue `<template>` elements               | render, click, type, scroll    |
-| Component props                         | render (reactive)              |
-| Component events (emits)                | click, call                    |
-| Component slots                         | render (injection)             |
-| Composables (`use*()`)                  | call, computed                 |
-| Validators (prop validators)            | call                           |
-| `computed()` properties                 | computed                       |
-| `watch()` / `watchEffect()`            | observe                        |
-| `provide()` / `inject()`              | call, observe                  |
+| Dialtone Pattern             | Affordance Type             |
+| ---------------------------- | --------------------------- |
+| Vue `<template>` elements    | render, click, type, scroll |
+| Component props              | render (reactive)           |
+| Component events (emits)     | click, call                 |
+| Component slots              | render (injection)          |
+| Composables (`use*()`)       | call, computed              |
+| Validators (prop validators) | call                        |
+| `computed()` properties      | computed                    |
+| `watch()` / `watchEffect()`  | observe                     |
+| `provide()` / `inject()`     | call, observe               |
 
 ### CSS Layer (N affordances)
 
-| Dialtone Pattern                        | Affordance Type                |
-| --------------------------------------- | ------------------------------ |
-| Utility classes (`.d-*`)                | render (class binding)         |
-| Component classes (`.d-btn`, etc.)      | render                         |
-| Less mixins                             | build                          |
-| CSS custom properties (`--dt-*`)        | render (consumed by classes)   |
-| Responsive variations                   | render (media query)           |
+| Dialtone Pattern                   | Affordance Type              |
+| ---------------------------------- | ---------------------------- |
+| Utility classes (`.d-*`)           | render (class binding)       |
+| Component classes (`.d-btn`, etc.) | render                       |
+| Less mixins                        | build                        |
+| CSS custom properties (`--dt-*`)   | render (consumed by classes) |
+| Responsive variations              | render (media query)         |
 
 ### Token Layer (N + S affordances)
 
-| Dialtone Pattern                        | Affordance Type                |
-| --------------------------------------- | ------------------------------ |
-| Token JSON source files                 | source (S)                     |
-| style-dictionary transforms             | build                          |
-| Generated CSS variables                 | build output (S)               |
-| Generated Less variables                | build output (S)               |
-| Platform outputs (iOS, Android)         | build output (S)               |
+| Dialtone Pattern                | Affordance Type  |
+| ------------------------------- | ---------------- |
+| Token JSON source files         | source (S)       |
+| style-dictionary transforms     | build            |
+| Generated CSS variables         | build output (S) |
+| Generated Less variables        | build output (S) |
+| Platform outputs (iOS, Android) | build output (S) |
 
 ### Build Pipeline (N affordances)
 
-| Dialtone Pattern                        | Affordance Type                |
-| --------------------------------------- | ------------------------------ |
-| Nx task orchestration                   | build                          |
-| gulp tasks (dialtone-css)               | build                          |
-| style-dictionary (dialtone-tokens)      | build                          |
-| PostCSS plugins                         | build                          |
-| `build-dialtone-vue-docs.mjs`           | build                          |
+| Dialtone Pattern                   | Affordance Type |
+| ---------------------------------- | --------------- |
+| Nx task orchestration              | build           |
+| gulp tasks (dialtone-css)          | build           |
+| style-dictionary (dialtone-tokens) | build           |
+| PostCSS plugins                    | build           |
+| `build-dialtone-vue-docs.mjs`      | build           |
 
 ### Documentation Layer (U + S affordances)
 
-| Dialtone Pattern                        | Affordance Type                |
-| --------------------------------------- | ------------------------------ |
-| VuePress markdown pages                 | render                         |
-| Live component examples                 | render, click, type            |
-| Props/events tables (auto-generated)    | render                         |
-| Storybook stories                       | render, click, type            |
-| `site-nav.json` sidebar entries         | render (navigation)            |
-| MCP server data (`data.ts`)             | source (S)                     |
+| Dialtone Pattern                     | Affordance Type     |
+| ------------------------------------ | ------------------- |
+| VuePress markdown pages              | render              |
+| Live component examples              | render, click, type |
+| Props/events tables (auto-generated) | render              |
+| Storybook stories                    | render, click, type |
+| `site-nav.json` sidebar entries      | render (navigation) |
+| MCP server data (`data.ts`)          | source (S)          |

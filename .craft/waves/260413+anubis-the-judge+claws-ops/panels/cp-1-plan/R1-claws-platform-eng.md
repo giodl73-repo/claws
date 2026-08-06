@@ -86,6 +86,7 @@ This will create two color modules. Pulse 03 (formatters) depends on Pulse 04 (c
 **Pulses**: 03, 04, 06
 
 The pulse plans describe deliverables as if they are net-new files, but several already exist:
+
 - `claws-cli/src/output/color.ts` (Pulse 04 creates `claws-cli/src/color/`)
 - `claws-cli/src/output/errors.ts` (Pulse 04 creates `claws-cli/src/errors/`)
 - `claws-cli/src/output/format-default.ts` (Pulse 03 creates `claws-cli/src/format/`)
@@ -134,12 +135,12 @@ None of the e2e pulse plans mention cleanup strategy. On fleet CI machines, accu
 
 The exit criteria specify "L0: 25+ unit tests passing, L1: 5+ integration, L2: 3 e2e loops." Adding up the per-pulse test tier counts:
 
-| Tier | Sum | Gate |
-|------|-----|------|
-| L0 | 3+8+8+6+4+5 = 34 | 25+ |
-| L1 | 0+2+2+0+0+2 = 6 | 5+ |
-| L2 | 0+0+0+0+0+0+1+1+1 = 3 | 3 |
-| L3 | 0+0+0+0+0+0+0+0+1 = 1 | n/a |
+| Tier | Sum                   | Gate |
+| ---- | --------------------- | ---- |
+| L0   | 3+8+8+6+4+5 = 34      | 25+  |
+| L1   | 0+2+2+0+0+2 = 6       | 5+   |
+| L2   | 0+0+0+0+0+0+1+1+1 = 3 | 3    |
+| L3   | 0+0+0+0+0+0+0+0+1 = 1 | n/a  |
 
 The numbers add up, but the L0 margin is thin (34 planned vs 25 gate). If any pulse agent writes fewer tests than planned, the gate still passes. More importantly, the formatter tests (8 tests for 4 formatters, 2 each) are extremely thin -- a SARIF formatter that handles tool metadata, rule index, and file locations needs more than 2 unit tests. The config loader gets 5 L0 tests for schema validation, defaults, platform detect, and bypass -- also thin for a module that needs to handle malformed JSON, permission errors, missing files, and encoding issues.
 
@@ -201,19 +202,19 @@ This is a foundation concern -- if `--ci` mode is not designed into the base CLI
 
 ## Summary
 
-| ID | Sev | Pulse | Issue |
-|----|-----|-------|-------|
-| M-01 | Major | 03 | SARIF paths not normalized for Windows |
-| M-02 | Major | 01 | Fixture location ambiguous across packages |
-| M-03 | Major | 06 | Config loader is SDK logic, not CLI |
-| W-01 | Warning | 04 | FORCE_COLOR missing, dual color module risk |
-| W-02 | Warning | 03,04,06 | Existing code at planned deliverable paths |
-| W-03 | Warning | 03 | CSV lacks BOM/CRLF specification |
-| W-04 | Warning | 07-09 | No temp dir cleanup strategy for e2e |
-| W-05 | Warning | all | L0 test gate too low for foundation |
-| N-01 | Note | 02 | Gateway sim eval loading clarification |
-| N-02 | Note | 03,04 | Risk vs severity color mapping unclear |
-| N-03 | Note | 09 | Depends on claws init from CP-2 |
-| N-04 | Note | all | No --ci flag in foundation |
+| ID   | Sev     | Pulse    | Issue                                       |
+| ---- | ------- | -------- | ------------------------------------------- |
+| M-01 | Major   | 03       | SARIF paths not normalized for Windows      |
+| M-02 | Major   | 01       | Fixture location ambiguous across packages  |
+| M-03 | Major   | 06       | Config loader is SDK logic, not CLI         |
+| W-01 | Warning | 04       | FORCE_COLOR missing, dual color module risk |
+| W-02 | Warning | 03,04,06 | Existing code at planned deliverable paths  |
+| W-03 | Warning | 03       | CSV lacks BOM/CRLF specification            |
+| W-04 | Warning | 07-09    | No temp dir cleanup strategy for e2e        |
+| W-05 | Warning | all      | L0 test gate too low for foundation         |
+| N-01 | Note    | 02       | Gateway sim eval loading clarification      |
+| N-02 | Note    | 03,04    | Risk vs severity color mapping unclear      |
+| N-03 | Note    | 09       | Depends on claws init from CP-2             |
+| N-04 | Note    | all      | No --ci flag in foundation                  |
 
 The three Majors (M-01, M-02, M-03) should be resolved before implementation begins. The Warnings should be addressed in pulse plan amendments. The Notes are advisory for pulse agents.

@@ -4,14 +4,7 @@
   "version": "0.1.0",
   "description": "obsidian plugin (productivity)",
   "contributes": {
-    "tools": [
-      "obsidian/read-note",
-      "obsidian/write-note",
-      "obsidian/link-graph"
-    ],
-    "skills": [
-      "obsidian/read-note",
-      "obsidian/write-note"
-    ]
+    "tools": ["obsidian/read-note", "obsidian/write-note", "obsidian/link-graph"],
+    "skills": ["obsidian/read-note", "obsidian/write-note"]
   }
 }

@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "npm plugin (developer)",
   "contributes": {
-    "tools": [
-      "npm/publish",
-      "npm/search"
-    ],
-    "skills": [
-      "npm/publish",
-      "npm/search"
-    ],
-    "workflows": [
-      "npm-flow.lobster"
-    ],
+    "tools": ["npm/publish", "npm/search"],
+    "skills": ["npm/publish", "npm/search"],
+    "workflows": ["npm-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

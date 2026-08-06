@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Re-export stability**: re-exports must preserve old function names (not just new names), re-exported packages must be regular dependencies (not devDeps), class re-exports must be pass-through (not wrapper constructors)
 - **Subpath migration**: each subpath export entry must be updated or shimmed (not left pointing at removed code), compat layer needs both exports map and physical dist/ shims for legacy TS resolution, explicit subpath entries for compat shims (no wildcards)
 - **Type safety**: audit transitively exposed types in .d.ts (not just explicit exports), Extension Contract Rule 4 must apply to compiler-sdk compat layer, test re-export resolution with and without TS path aliases

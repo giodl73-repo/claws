@@ -4,7 +4,8 @@ slug: skill-kit-standalone
 plan: claws-skill-kit
 depends_on: [24]
 governing_roles: [claws:skill-author, craft:architect]
-scenario_codes: [skill-kit/install-clean-project, skill-kit/no-behavioral-change, skill-kit/tier2-migration]
+scenario_codes:
+  [skill-kit/install-clean-project, skill-kit/no-behavioral-change, skill-kit/tier2-migration]
 stage: implementation
 test_tiers:
   L0_unit: 3
@@ -68,6 +69,7 @@ Finalize @bic/claws-skill-kit as a standalone npm package (~35KB) with zero tran
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/skill-author.md` -- adoption friction, migration path, getting-started experience
 - `.craft/roles/craft/architect.md` -- package boundaries, dependency rules, size budgets
 
@@ -86,4 +88,5 @@ npm run build
 ## Review Amendments (R1)
 
 ### C02: Moved to CP-2
+
 - [ ] Update frontmatter: `checkpoint: 2`

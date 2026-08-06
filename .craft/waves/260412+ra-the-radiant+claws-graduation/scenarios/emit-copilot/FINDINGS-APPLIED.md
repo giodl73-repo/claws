@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Size awareness**: size-aware instruction generation with priority ranking (Copilot has ~8KB effective context limit), warn when output exceeds effective size limit
 - **Visibility control**: visibility filtering for public-repo governance, sensitive governance details must not appear in .github/ directory
 - **Output format**: section-delimited merge with existing instructions, deep merge for VS Code settings, enforce canonical .github/ output path

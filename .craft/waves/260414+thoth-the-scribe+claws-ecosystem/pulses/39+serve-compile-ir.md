@@ -48,6 +48,7 @@ Build the POST /compile and GET /ir endpoints with a shared CompilationHost. POS
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/architect.md` — system-level design authority for claws packages
 - `.craft/roles/claws/platform-eng.md` — implementation patterns and CompilationHost design
 

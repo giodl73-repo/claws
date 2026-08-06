@@ -6,6 +6,7 @@ trust: composition
 # compo-tool-id-collision
 
 Composition workspace bringing together 2 plugin(s):
+
 - `plugins/plug-a/`
 - `plugins/plug-b/`
 

@@ -19,40 +19,41 @@ versioning, time-travel API, diff API, and the patch errors E2E gate.
 
 ### Batch 1 (parallel — depend only on CP-5 pulses)
 
-| Agent | Pulse | Slug | Depends on | Notes |
-|-------|-------|------|------------|-------|
-| alpha | 29 | workspace-edit | 22 | Workspace edit primitives |
-| bravo | 32 | incremental-cache | 21 | Incremental compilation cache |
+| Agent | Pulse | Slug              | Depends on | Notes                         |
+| ----- | ----- | ----------------- | ---------- | ----------------------------- |
+| alpha | 29    | workspace-edit    | 22         | Workspace edit primitives     |
+| bravo | 32    | incremental-cache | 21         | Incremental compilation cache |
 
 P29 depends on P22 (CP-5). P32 depends on P21 (CP-5).
 
 ### Batch 2 (depends on batch 1)
 
-| Agent | Pulse | Slug | Depends on | Notes |
-|-------|-------|------|------------|-------|
-| charlie | 30 | validation-layer | 29, 23, 66 | Schema + governance validation |
+| Agent   | Pulse | Slug             | Depends on | Notes                          |
+| ------- | ----- | ---------------- | ---------- | ------------------------------ |
+| charlie | 30    | validation-layer | 29, 23, 66 | Schema + governance validation |
 
 P30 depends on P29 (batch 1) + P23, P66 (CP-5).
 
 ### Batch 3 (depends on batch 2)
 
-| Agent | Pulse | Slug | Depends on | Notes |
-|-------|-------|------|------------|-------|
-| delta | 31 | patch-routes | 29, 30 | PATCH HTTP routes |
-| echo | 67 | dry-run-patch | 30, 31 | Dry-run mode for patches |
+| Agent | Pulse | Slug          | Depends on | Notes                    |
+| ----- | ----- | ------------- | ---------- | ------------------------ |
+| delta | 31    | patch-routes  | 29, 30     | PATCH HTTP routes        |
+| echo  | 67    | dry-run-patch | 30, 31     | Dry-run mode for patches |
 
 **Note:** P67 depends on P31 which is in the same batch. Dispatch sequentially:
+
 - **3a:** delta → P31 (patch-routes)
 - **3b:** echo → P67 (dry-run-patch) — after P31 done
 
 ### Batch 4 (depends on batch 3)
 
-| Agent | Pulse | Slug | Depends on | Notes |
-|-------|-------|------|------------|-------|
-| foxtrot | 33 | allow-all | 31 | Allow-all governance bypass |
-| golf | 68 | batch-edits | 31, 67 | Batch edit operations |
-| hotel | 69 | workspace-versioning | 31, 32 | Workspace version management |
-| india | 34 | patch-errors-e2e | 31, 32 | Patch error E2E, `checkpoint_gate: true` |
+| Agent   | Pulse | Slug                 | Depends on | Notes                                    |
+| ------- | ----- | -------------------- | ---------- | ---------------------------------------- |
+| foxtrot | 33    | allow-all            | 31         | Allow-all governance bypass              |
+| golf    | 68    | batch-edits          | 31, 67     | Batch edit operations                    |
+| hotel   | 69    | workspace-versioning | 31, 32     | Workspace version management             |
+| india   | 34    | patch-errors-e2e     | 31, 32     | Patch error E2E, `checkpoint_gate: true` |
 
 P33 depends on P31. P68 depends on P31 + P67. P69 depends on P31 + P32.
 P34 depends on P31 + P32.
@@ -62,15 +63,15 @@ Dispatch: foxtrot (P33), hotel (P69), india (P34) after 3a; golf (P68) after 3b.
 
 ### Batch 5 (depends on batch 4)
 
-| Agent | Pulse | Slug | Depends on | Notes |
-|-------|-------|------|------------|-------|
-| juliet | 70 | time-travel-api | 32, 69 | Time-travel workspace queries |
+| Agent  | Pulse | Slug            | Depends on | Notes                         |
+| ------ | ----- | --------------- | ---------- | ----------------------------- |
+| juliet | 70    | time-travel-api | 32, 69     | Time-travel workspace queries |
 
 ### Batch 6 (depends on batch 5)
 
-| Agent | Pulse | Slug | Depends on | Notes |
-|-------|-------|------|------------|-------|
-| kilo | 71 | diff-api | 66, 70 | Diff between workspace versions |
+| Agent | Pulse | Slug     | Depends on | Notes                           |
+| ----- | ----- | -------- | ---------- | ------------------------------- |
+| kilo  | 71    | diff-api | 66, 70     | Diff between workspace versions |
 
 ## Review Panel
 

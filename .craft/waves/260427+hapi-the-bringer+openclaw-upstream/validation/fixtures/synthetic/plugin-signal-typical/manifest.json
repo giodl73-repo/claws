@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "signal plugin (communication)",
   "contributes": {
-    "tools": [
-      "signal/send-message",
-      "signal/list-conversations"
-    ],
-    "skills": [
-      "signal/send-message",
-      "signal/list-conversations"
-    ]
+    "tools": ["signal/send-message", "signal/list-conversations"],
+    "skills": ["signal/send-message", "signal/list-conversations"]
   }
 }

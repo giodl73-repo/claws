@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "selenium plugin (testing)",
   "contributes": {
-    "tools": [
-      "selenium/driver-session",
-      "selenium/screenshot"
-    ],
-    "skills": [
-      "selenium/driver-session",
-      "selenium/screenshot"
-    ],
-    "workflows": [
-      "selenium-flow.lobster"
-    ],
+    "tools": ["selenium/driver-session", "selenium/screenshot"],
+    "skills": ["selenium/driver-session", "selenium/screenshot"],
+    "workflows": ["selenium-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

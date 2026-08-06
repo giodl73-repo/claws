@@ -1,3 +1,0 @@
-# Identity
-
-No sections defined.

@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Dependency contract**: emit-oc dependency must be codegen-only, codegen as peer dependency for dedup, IR completeness validation before emission
 - **Output isolation**: emitted code must use platform-native imports only, runtime error messages must be platform-native, emitted package.json must be craftworks-free
 - **Zero-import enforcement**: type-only imports also violate zero-import rule, zero-import scan must cover comments and strings, provenance stripping in emitted output

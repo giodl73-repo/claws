@@ -126,9 +126,9 @@ The 5-week estimate covers core internalization. Fleet compatibility testing (mi
 
 The freemium boundary is operationally sound for single-workspace use. The two MUST findings address fleet-scale gaps that must be designed (not necessarily implemented) during graduation planning. Mixed-tier fleet operations (M-01) and sidecar ownership (M-02) are the kind of problems that cost 3x to fix if discovered after the free tier is published. The WARN findings are implementation details that can be resolved during Phase 2-3, but each should be captured as a deliverable or scenario to prevent it from falling through the cracks.
 
-| Severity | Count |
-|----------|-------|
-| MUST     | 2     |
-| WARN     | 5     |
-| NOTE     | 3     |
-| **Total**| **10**|
+| Severity  | Count  |
+| --------- | ------ |
+| MUST      | 2      |
+| WARN      | 5      |
+| NOTE      | 3      |
+| **Total** | **10** |

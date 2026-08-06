@@ -57,6 +57,7 @@ This module reuses patterns from compiler-sdk integrity/ for cryptographic opera
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, cryptographic module patterns
 - `.craft/roles/claws/ciso.md` — encryption standards, key derivation requirements, vault security model
 

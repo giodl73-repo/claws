@@ -76,6 +76,7 @@ GatewaySim must support loading a plugin, registering its hooks (before_tool_cal
 ## fromWorkspace() Verbose Mode (SA-01)
 
 When `verbose: true`, fromWorkspace() logs:
+
 1. Detected OC files (which of the 9 were found)
 2. Parsed governance rules with risk tiers
 3. Generated plugin file path
@@ -84,7 +85,7 @@ When `verbose: true`, fromWorkspace() logs:
 This is the skill author's debugger — they see the pipeline, not just the result.
 
 ```ts
-const sim = await GatewaySim.fromWorkspace('./my-oc', { verbose: true });
+const sim = await GatewaySim.fromWorkspace("./my-oc", { verbose: true });
 // [claws] Detected: SOUL.md, TOOLS.md, AGENTS.md, USER.md (4/9 files)
 // [claws] Rules: 12 tools (3×R1, 2×R2, 3×R3, 2×R4, 2×R5)
 // [claws] Plugin: /tmp/claws-sim-abc123/index.ts
@@ -94,19 +95,22 @@ const sim = await GatewaySim.fromWorkspace('./my-oc', { verbose: true });
 ## Use Cases Beyond Testing
 
 ### Skill Author Self-Validation
+
 ```ts
-const sim = await GatewaySim.fromWorkspace('./my-oc-workspace');
-const result = await sim.fireToolCall('send-email', { to: 'user@example.com' });
+const sim = await GatewaySim.fromWorkspace("./my-oc-workspace");
+const result = await sim.fireToolCall("send-email", { to: "user@example.com" });
 console.log(result.report.toString());
 // send-email: BLOCKED (G-ELICIT-GATE, R5, 2.3ms) — elicitation required
 ```
+
 `@bic/claws-test` is a devDependency. The `claws test --sim` CLI command is the production-facing surface (F-02).
 
 ### Compare Any Two Workspaces
+
 ```ts
 // Before/after on any workspace pair — not locked to our fixtures
-const before = await GatewaySim.fromWorkspace('./workspace-v1');
-const after = await GatewaySim.fromWorkspace('./workspace-v2');
+const before = await GatewaySim.fromWorkspace("./workspace-v1");
+const after = await GatewaySim.fromWorkspace("./workspace-v2");
 const diff = SimReport.diff(before.report, after.report);
 console.log(diff.toString());
 // send-email: BLOCKED → ALLOWED (REGRESSION!)
@@ -114,18 +118,21 @@ console.log(diff.toString());
 ```
 
 ### Upgrade Regression Detection (Doctor)
+
 ```ts
-const before = await GatewaySim.fromSnapshot('.claws/snapshots/v0.36');
-const after = await GatewaySim.fromWorkspace('.');
+const before = await GatewaySim.fromSnapshot(".claws/snapshots/v0.36");
+const after = await GatewaySim.fromWorkspace(".");
 const diff = SimReport.diff(before.report, after.report);
 if (diff.hasRegressions()) {
   console.error(`${diff.severity()} regression: ${diff.regressions.length} tools`);
   process.exit(1);
 }
 ```
+
 **Snapshot format** (PU-02): `.claws/snapshots/{version}/` contains `plugin.ts`, `report.json` (SimReport.toJSON()), `meta.json` (claws version, policy hash, timestamp). `claws build --snapshot` creates one.
 
 ### CI Pre-Submit Gate
+
 ```bash
 claws build && claws test --sim --assert-no-regressions
 # Exit 0 = clean, 1 = regressions, 2 = error
@@ -153,6 +160,7 @@ claws build && claws test --sim --assert-no-regressions
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/gateway-eng.md` — gateway runtime model, hook lifecycle, audit event schema
 - `.craft/roles/craft/architect.md` — testing infrastructure patterns, module boundaries
 - `.craft/roles/claws/ciso.md` — fail-closed guarantees, degraded mode, audit integrity

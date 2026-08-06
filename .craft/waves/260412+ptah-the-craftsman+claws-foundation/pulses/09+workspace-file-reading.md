@@ -90,10 +90,10 @@ with InputResolver for source resolution and CGR provenance tracking.
 
 ## Governing Roles
 
-| Role | File | Focus |
-|------|------|-------|
-| craft:dragon | `.craft/roles/craft/dragon.md` | SDK architecture, compiler-sdk import boundary, error collection design |
-| claws:gateway-eng | `.craft/roles/claws/gateway-eng.md` | InputResolver source resolution, CGR provenance, 9-file coverage |
+| Role              | File                                | Focus                                                                   |
+| ----------------- | ----------------------------------- | ----------------------------------------------------------------------- |
+| craft:dragon      | `.craft/roles/craft/dragon.md`      | SDK architecture, compiler-sdk import boundary, error collection design |
+| claws:gateway-eng | `.craft/roles/claws/gateway-eng.md` | InputResolver source resolution, CGR provenance, 9-file coverage        |
 
 ## Dependencies
 
@@ -123,5 +123,6 @@ npm run build
 ## Review Amendments (R1)
 
 ### Architect: Compiler-SDK Reader Canary
+
 - [ ] Add canary import test: `import { readOCWorkspaceViaFORMA } from '@craftworks/compiler-sdk/astro/workspace'`
 - [ ] If compiler-sdk changes the reader interface, this test breaks immediately

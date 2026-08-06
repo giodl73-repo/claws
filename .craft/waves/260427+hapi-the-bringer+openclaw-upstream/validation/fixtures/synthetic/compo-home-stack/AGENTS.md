@@ -6,6 +6,7 @@ trust: composition
 # compo-home-stack
 
 Composition workspace bringing together 2 plugin(s):
+
 - `plugins/openhue/`
 - `plugins/homekit/`
 

@@ -158,10 +158,10 @@ THE fit check is the single table comparing all shapes against all requirements.
 ```markdown
 ## Fit Check
 
-| Req | Requirement                 | Status    | A    | B    | C    |
-| --- | --------------------------- | --------- | ---- | ---- | ---- |
-| R0  | Works with all theme modes  | Core goal | pass | pass | pass |
-| R1  | No breaking API changes     | Must-have | pass | fail | pass |
+| Req | Requirement                     | Status    | A    | B    | C    |
+| --- | ------------------------------- | --------- | ---- | ---- | ---- |
+| R0  | Works with all theme modes      | Core goal | pass | pass | pass |
+| R1  | No breaking API changes         | Must-have | pass | fail | pass |
 | R2  | Tokens remain platform-agnostic | Must-have | fail | pass | pass |
 
 **Notes:**
@@ -310,10 +310,10 @@ Use **CURRENT** to describe the existing system. This provides a baseline for un
 
 A mechanism can be described at a high level without being concretely understood. The **Flag** column tracks this:
 
-| Part   | Mechanism                                            |  Flag   |
-| ------ | ---------------------------------------------------- | :-----: |
-| **F1** | Add new token set to `$metadata.json` build order    |         |
-| **F2** | Responsive utility class generation via PostCSS      | flagged |
+| Part   | Mechanism                                         |  Flag   |
+| ------ | ------------------------------------------------- | :-----: |
+| **F1** | Add new token set to `$metadata.json` build order |         |
+| **F2** | Responsive utility class generation via PostCSS   | flagged |
 
 - **Empty** = mechanism is understood — we know concretely how to build it
 - **flagged** = flagged unknown — we've described WHAT but don't yet know HOW
@@ -441,12 +441,12 @@ Each vertical slice should map to:
 
 Each slice should correspond to one PR:
 
-| #   | Slice          | Mechanism            | Demo                    | Branch                          |
-| --- | -------------- | -------------------- | ----------------------- | ------------------------------- |
-| V1  | Token layer    | Token definition     | "Token values in build" | `feat/DLT-XXXX-feature-v1`     |
-| V2  | CSS utilities  | Utility class output | "Class works in CSS"    | `feat/DLT-XXXX-feature-v2`     |
-| V3  | Vue component  | Component API        | "Component renders"     | `feat/DLT-XXXX-feature-v3`     |
-| V4  | Documentation  | VuePress page        | "Docs page live"        | `docs/DLT-XXXX-feature-v4`     |
+| #   | Slice         | Mechanism            | Demo                    | Branch                     |
+| --- | ------------- | -------------------- | ----------------------- | -------------------------- |
+| V1  | Token layer   | Token definition     | "Token values in build" | `feat/DLT-XXXX-feature-v1` |
+| V2  | CSS utilities | Utility class output | "Class works in CSS"    | `feat/DLT-XXXX-feature-v2` |
+| V3  | Vue component | Component API        | "Component renders"     | `feat/DLT-XXXX-feature-v3` |
+| V4  | Documentation | VuePress page        | "Docs page live"        | `docs/DLT-XXXX-feature-v4` |
 
 ## Example
 
@@ -459,22 +459,22 @@ shaping: true
 
 ## Requirements (R)
 
-| ID  | Requirement                                        | Status    |
-| --- | -------------------------------------------------- | --------- |
-| R0  | Overlays trap focus and restore on close           | Core goal |
-| R1  | Works with both modal and non-modal patterns       | Must-have |
-| R2  | No breaking changes to existing DtModal/DtPopover  | Must-have |
-| R3  | Stacking context managed automatically             | Must-have |
+| ID  | Requirement                                       | Status    |
+| --- | ------------------------------------------------- | --------- |
+| R0  | Overlays trap focus and restore on close          | Core goal |
+| R1  | Works with both modal and non-modal patterns      | Must-have |
+| R2  | No breaking changes to existing DtModal/DtPopover | Must-have |
+| R3  | Stacking context managed automatically            | Must-have |
 
 ---
 
 ## A: Per-component focus trap via directive
 
-| Part | Mechanism                                           | Flag |
-| ---- | --------------------------------------------------- | :--: |
-| A1   | `v-focus-trap` directive with configurable options  |      |
-| A2   | Each overlay component opts in via directive        |      |
-| A3   | Stack managed via CSS `z-index` tokens              |      |
+| Part | Mechanism                                          | Flag |
+| ---- | -------------------------------------------------- | :--: |
+| A1   | `v-focus-trap` directive with configurable options |      |
+| A2   | Each overlay component opts in via directive       |      |
+| A3   | Stack managed via CSS `z-index` tokens             |      |
 
 ## B: Shared composable with centralized overlay manager
 
@@ -489,12 +489,12 @@ shaping: true
 
 ## Fit Check
 
-| Req | Requirement                                        | Status    | A    | B    |
-| --- | -------------------------------------------------- | --------- | ---- | ---- |
-| R0  | Overlays trap focus and restore on close           | Core goal | pass | pass |
-| R1  | Works with both modal and non-modal patterns       | Must-have | pass | pass |
-| R2  | No breaking changes to existing DtModal/DtPopover  | Must-have | pass | pass |
-| R3  | Stacking context managed automatically             | Must-have | fail | pass |
+| Req | Requirement                                       | Status    | A    | B    |
+| --- | ------------------------------------------------- | --------- | ---- | ---- |
+| R0  | Overlays trap focus and restore on close          | Core goal | pass | pass |
+| R1  | Works with both modal and non-modal patterns      | Must-have | pass | pass |
+| R2  | No breaking changes to existing DtModal/DtPopover | Must-have | pass | pass |
+| R3  | Stacking context managed automatically            | Must-have | fail | pass |
 
 **Notes:**
 

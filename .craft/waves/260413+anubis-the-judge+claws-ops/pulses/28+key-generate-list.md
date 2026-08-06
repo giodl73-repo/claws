@@ -4,7 +4,14 @@ slug: key-generate-list
 plan: claws-key-management
 depends_on: []
 governing_roles: [claws:ciso, craft:architect]
-scenario_codes: [governance-rules/S12, compliance-evidence/S04, compliance-evidence/S06, obo-elicitation/S01, obo-elicitation/S07]
+scenario_codes:
+  [
+    governance-rules/S12,
+    compliance-evidence/S04,
+    compliance-evidence/S06,
+    obo-elicitation/S01,
+    obo-elicitation/S07,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 6

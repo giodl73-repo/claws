@@ -402,7 +402,7 @@ N/A — feature delivery. The "root cause" of consumer drift is the absence of a
 - **Risk**: rollback complexity if a regression surfaces post-merge.
   - **Mitigation**: revert is contained — three thin layers (contract types + reference plugin + conformance test), each in its own file/directory. No trunk consumers depend on the contract until follow-up work registers PolicyIR / session / hook trackers; this PR is a foundation.
 - **Risk**: maintainer pushback on "another file-recovery abstraction when config already works."
-  - **Mitigation**: the framing of this PR is explicit — *generalize what already works*, not *introduce something parallel*. The conformance test is the proof. The first reference consumer (configured in a follow-up) is the existing config code, byte-identical in behavior.
+  - **Mitigation**: the framing of this PR is explicit — _generalize what already works_, not _introduce something parallel_. The conformance test is the proof. The first reference consumer (configured in a follow-up) is the existing config code, byte-identical in behavior.
 
 ---
 

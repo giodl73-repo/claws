@@ -52,6 +52,7 @@ Build the code lens provider for per-section aggregate governance summaries and 
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/architect.md` — system-level design authority for claws packages
 - `.craft/roles/claws/platform-eng.md` — implementation patterns and tension detection design
 

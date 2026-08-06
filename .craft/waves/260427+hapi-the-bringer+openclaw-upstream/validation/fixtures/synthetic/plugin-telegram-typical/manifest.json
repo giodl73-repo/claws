@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "telegram plugin (communication)",
   "contributes": {
-    "tools": [
-      "telegram/send-message",
-      "telegram/get-updates"
-    ],
-    "skills": [
-      "telegram/send-message",
-      "telegram/get-updates"
-    ]
+    "tools": ["telegram/send-message", "telegram/get-updates"],
+    "skills": ["telegram/send-message", "telegram/get-updates"]
   }
 }

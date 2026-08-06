@@ -9,15 +9,15 @@
       "github-bot": {
         "kind": "extension",
         "auth": {
-          "token": "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-        }
+          "token": "ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        },
       },
       "slack-notifier": {
         "kind": "extension",
         "auth": {
-          "token": "xoxb-AAAAAAAAAAAAAAAA"
-        }
-      }
-    }
-  }
+          "token": "xoxb-AAAAAAAAAAAAAAAA",
+        },
+      },
+    },
+  },
 }

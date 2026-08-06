@@ -23,9 +23,11 @@ checkpoint_gate: false
 # Pulse 30: Badge Generation
 
 ## Objective
+
 Implement badge metadata generation with tier-aware qualifiers and inconsistency detection. Badges are the user-facing governance signal — they communicate a skill's governance posture at a glance.
 
 **Tier-Aware Qualifiers**:
+
 - **DECLARED** badges display a "self-reported" qualifier — the skill author has declared governance metadata but it hasn't been verified by compilation. Users should understand this is attestation, not verification.
 - **TYPED** badges display the tier without qualifier — decorators are present and type-checked but not fully compiled.
 - **VERIFIED** badges display a "verified" seal — the skill has been fully compiled with all governance checks passing.
@@ -33,6 +35,7 @@ Implement badge metadata generation with tier-aware qualifiers and inconsistency
 **Supply Chain Badge**: Independent of the governance tier. Indicates whether the published artifact is signed (build provenance verified) or unsigned (no cryptographic attestation of build origin). A DECLARED skill can be signed (the manifest is signed, even though governance is self-reported), and a VERIFIED skill could theoretically be unsigned (verified locally but published without signing).
 
 **Inconsistency Detection**: Flags contradictions in governance metadata:
+
 - **Risk-OBO contradiction** — R1 (minimal risk) skill claiming OBO transact capability is flagged. Low-risk skills shouldn't need to act on behalf of users for financial transactions.
 - **Data-tier mismatch** — CONFIDENTIAL data label with DECLARED tier is flagged. Sensitive data should require at least TYPED governance.
 
@@ -41,6 +44,7 @@ Implement badge metadata generation with tier-aware qualifiers and inconsistency
 **Namespace boundary**: Badge generation lives in claws-sdk (the `claws` namespace). Badge rendering for ClawHub display is a separate concern in the `clawhub` namespace.
 
 ## Deliverables
+
 - [ ] `claws-sdk/src/maker/badge.ts` — badge metadata generation: tier, qualifier, risk, OBO, data labels, supply chain fields
 - [ ] `claws-sdk/src/maker/badge-consistency.ts` — inconsistency detection: risk-OBO contradiction, data-tier mismatch flagging
 - [ ] `claws-sdk/src/maker/badge-types.ts` — BadgeMetadata, BadgeQualifier, BadgeStaleness, BadgePolicy types
@@ -48,6 +52,7 @@ Implement badge metadata generation with tier-aware qualifiers and inconsistency
 - [ ] `claws-sdk/tests/maker/badge-consistency.integration.test.ts` — L1: risk-OBO contradiction detected (1), data-tier mismatch detected (1)
 
 ## Acceptance Criteria
+
 - [ ] DECLARED badge displays "self-reported" qualifier
 - [ ] VERIFIED badge displays "verified" seal
 - [ ] Supply chain badge (signed/unsigned) is independent of governance tier
@@ -61,14 +66,18 @@ Implement badge metadata generation with tier-aware qualifiers and inconsistency
 - [ ] `npx tsc --noEmit` exits 0
 
 ## Governing Roles
+
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — overall claws architecture and SDK boundaries
 - `.craft/roles/claws/platform-eng.md` — implementation patterns, cross-platform concerns
 
 ## Dependencies
+
 - Pulse 29 (maker-publish) — manifest and tier evaluation used by badge generation
 
 ## Test Gates
+
 - [ ] L0 unit (6 tests): DECLARED renders "self-reported", VERIFIED renders "verified", supply chain independent of tier, R1+transact OBO flagged, pre-badge skill renders no badge, claws/clawhub namespace boundary
 - [ ] L1 integration (2 tests): risk-OBO contradiction detected, data-tier mismatch detected
 - [ ] `npm run build` exits 0

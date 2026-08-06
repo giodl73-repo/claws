@@ -4,18 +4,9 @@
   "version": "0.1.0",
   "description": "linear plugin (productivity)",
   "contributes": {
-    "tools": [
-      "linear/create-issue",
-      "linear/list-issues",
-      "linear/close-issue"
-    ],
-    "skills": [
-      "linear/create-issue",
-      "linear/list-issues"
-    ],
-    "workflows": [
-      "linear-flow.lobster"
-    ],
+    "tools": ["linear/create-issue", "linear/list-issues", "linear/close-issue"],
+    "skills": ["linear/create-issue", "linear/list-issues"],
+    "workflows": ["linear-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

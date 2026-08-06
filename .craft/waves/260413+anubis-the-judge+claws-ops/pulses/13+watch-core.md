@@ -56,6 +56,7 @@ This pulse builds the watch engine only — the auto-analyze and auto-recompile 
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/gateway-eng.md` — OC file formats, watch semantics, incremental parse
 - `.craft/roles/craft/navigator.md` — cross-module integration, event-driven architecture
 

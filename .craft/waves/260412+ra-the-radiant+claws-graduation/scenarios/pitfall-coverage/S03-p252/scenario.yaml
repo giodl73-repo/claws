@@ -15,7 +15,10 @@ expect:
   prevention: "`claws check --package --transitive` runs `npm ls --all` on packed tarballs and fails if compiler-sdk appears anywhere in the transitive dependency tree."
 
 simulate:
-  failures: ["Transitive dependency through shared utility package pulls compiler-sdk into standalone package's dependency tree"]
+  failures:
+    [
+      "Transitive dependency through shared utility package pulls compiler-sdk into standalone package's dependency tree",
+    ]
   halt: null
   budget: null
 

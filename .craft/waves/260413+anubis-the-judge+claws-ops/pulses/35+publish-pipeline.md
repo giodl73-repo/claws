@@ -4,7 +4,17 @@ slug: publish-pipeline
 plan: claws-publish
 depends_on: [30, 32, 34]
 governing_roles: [claws:founder, claws:ciso, craft:architect]
-scenario_codes: [governance-rules/S12, fleet-operations/S04, fleet-operations/S05, fleet-operations/S10, compliance-evidence/S04, compliance-evidence/S06, identity-bridge/S02, loss-aware-emission/S03]
+scenario_codes:
+  [
+    governance-rules/S12,
+    fleet-operations/S04,
+    fleet-operations/S05,
+    fleet-operations/S10,
+    compliance-evidence/S04,
+    compliance-evidence/S06,
+    identity-bridge/S02,
+    loss-aware-emission/S03,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 8

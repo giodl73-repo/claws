@@ -10,6 +10,7 @@
 ## Lens Applied
 
 Every finding below is evaluated through the skill-author lens:
+
 - Can I adopt this in 5 minutes without reading a 40-page doc?
 - Does the generated code produce usable workspaces?
 - Is the feedback clear enough to act on?
@@ -44,8 +45,9 @@ Fix: Align `REQUIRED_FIELDS` with the actual template schema: `['policy', 'frame
 **File**: `claws-sdk/src/init/platform-detect.ts:39-40, 71`
 
 The marker list includes `*.csproj` and `*.sln` for dotnet detection, but line 71 explicitly skips any marker containing `*`:
+
 ```typescript
-if (marker.file.includes('*')) continue;
+if (marker.file.includes("*")) continue;
 ```
 
 Impact: Dotnet workspaces are **never detected** — they always get `platform: 'unknown'`. A .NET skill author running `claws init` in a project with `MyApp.csproj` sees "unknown platform" even though dotnet is in the supported list. This is confusing and makes the platform detection feature feel broken for an entire language ecosystem.
@@ -60,7 +62,7 @@ Fix: Either implement glob matching for `*.csproj`/`*.sln` (e.g., use `readdir` 
 
 The debouncer resets the timer on every new event. If a file changes continuously (e.g., a formatter running, log tailing), the batch never fires. There's no maximum latency cap.
 
-Impact: In a busy workspace with frequent saves, a skill author could wait indefinitely for watch feedback. The 300ms window only fires 300ms after the *last* event, not the first. A rapid sequence of 20 saves over 2 seconds produces zero feedback for 2.3 seconds.
+Impact: In a busy workspace with frequent saves, a skill author could wait indefinitely for watch feedback. The 300ms window only fires 300ms after the _last_ event, not the first. A rapid sequence of 20 saves over 2 seconds produces zero feedback for 2.3 seconds.
 
 Recommendation: Add a `maxWaitMs` (e.g., 2000ms) that forces a flush regardless of new events. The current design is correct for normal use but fragile under load.
 
@@ -164,31 +166,31 @@ The BYPASS_ACTIVATED audit event records `type`, `timestamp`, and `env` but not 
 
 ## Summary by Module
 
-| Module | Verdict | Key Issue |
-|--------|---------|-----------|
-| init/orchestrator | FAIL | M-01: configOverrides not applied |
-| init/templates | PASS | Well-structured, good policy content |
-| init/platform-detect | FAIL | M-03: dotnet never detected |
-| init/uninstall | PASS | Clean backup/restore flow |
-| init/bypass | PASS | Solid fleet policy check (N-08 is minor) |
-| init/gitignore-update | PASS | Correct idempotent behavior |
-| init/sidecar-scaffold | PASS | Clean, delegates to CLAWS_SIDECAR_LAYOUT |
-| watch/watcher | PASS | Good architecture (W-03 is a limitation) |
-| watch/debounce | PASS | Correct semantics (W-01 is edge case) |
-| watch/content-hash | PASS | BOM + CRLF normalization is right |
-| watch/event-normalizer | PASS | Clean NTFS dedup |
-| watch/incremental | PASS | Solid caching design |
-| watch/auto-analyze | PASS | Diff-based output is excellent for DX |
-| watch/auto-recompile | PASS | Works as designed (N-07 noted) |
-| watch/cache-invalidation | PASS | Correct hash-driven invalidation |
-| doctor/orchestrator | PASS | Clean aggregation |
-| doctor/checks | FAIL | M-02: policy-syntax vs template mismatch |
-| doctor/migrate | PASS | Good backup-before-migrate pattern |
-| amend/validate | PASS | Trust tier enforcement is correct |
-| amend/preview | PASS | Good diff model (N-05 is minor) |
-| amend/apply | PASS | Lossless OC fidelity maintained |
-| amend/amend | PASS | Clean pipeline orchestration |
-| CLI commands | PASS | Thin adapters, good error rendering |
+| Module                   | Verdict | Key Issue                                |
+| ------------------------ | ------- | ---------------------------------------- |
+| init/orchestrator        | FAIL    | M-01: configOverrides not applied        |
+| init/templates           | PASS    | Well-structured, good policy content     |
+| init/platform-detect     | FAIL    | M-03: dotnet never detected              |
+| init/uninstall           | PASS    | Clean backup/restore flow                |
+| init/bypass              | PASS    | Solid fleet policy check (N-08 is minor) |
+| init/gitignore-update    | PASS    | Correct idempotent behavior              |
+| init/sidecar-scaffold    | PASS    | Clean, delegates to CLAWS_SIDECAR_LAYOUT |
+| watch/watcher            | PASS    | Good architecture (W-03 is a limitation) |
+| watch/debounce           | PASS    | Correct semantics (W-01 is edge case)    |
+| watch/content-hash       | PASS    | BOM + CRLF normalization is right        |
+| watch/event-normalizer   | PASS    | Clean NTFS dedup                         |
+| watch/incremental        | PASS    | Solid caching design                     |
+| watch/auto-analyze       | PASS    | Diff-based output is excellent for DX    |
+| watch/auto-recompile     | PASS    | Works as designed (N-07 noted)           |
+| watch/cache-invalidation | PASS    | Correct hash-driven invalidation         |
+| doctor/orchestrator      | PASS    | Clean aggregation                        |
+| doctor/checks            | FAIL    | M-02: policy-syntax vs template mismatch |
+| doctor/migrate           | PASS    | Good backup-before-migrate pattern       |
+| amend/validate           | PASS    | Trust tier enforcement is correct        |
+| amend/preview            | PASS    | Good diff model (N-05 is minor)          |
+| amend/apply              | PASS    | Lossless OC fidelity maintained          |
+| amend/amend              | PASS    | Clean pipeline orchestration             |
+| CLI commands             | PASS    | Thin adapters, good error rendering      |
 
 ## Blocking Issues for CP-2 Exit
 

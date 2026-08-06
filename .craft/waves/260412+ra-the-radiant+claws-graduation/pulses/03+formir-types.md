@@ -56,6 +56,7 @@ This is a type-only pulse -- no runtime logic. The types must be precise enough 
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- monorepo structure, IR type patterns, barrel export conventions
 - `.craft/roles/craft/type-system.md` -- strict typing discipline, discriminated unions, field type design
 

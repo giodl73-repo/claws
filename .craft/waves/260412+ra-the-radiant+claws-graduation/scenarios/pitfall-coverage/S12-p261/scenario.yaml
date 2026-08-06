@@ -15,7 +15,10 @@ expect:
   prevention: "`claws upgrade --fleet` snapshots package-lock.json before modification, classifies failures as transient vs permanent, and escalates rollback failures as critical with 'manual intervention required' status."
 
 simulate:
-  failures: ["Fleet upgrade modifies package-lock.json before npm install, leaving corrupted state when install fails"]
+  failures:
+    [
+      "Fleet upgrade modifies package-lock.json before npm install, leaving corrupted state when install fails",
+    ]
   halt: null
   budget: null
 

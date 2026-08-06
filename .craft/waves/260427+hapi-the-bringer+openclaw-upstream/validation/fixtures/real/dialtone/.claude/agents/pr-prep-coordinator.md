@@ -76,19 +76,23 @@ Generate a markdown report with these sections:
 ## PR Readiness Report
 
 ### Blocking (must fix before PR)
+
 - [ ] <issue description>
 
 ### Warnings (should fix)
+
 - [ ] <issue description>
 
 ### Info (nice to know)
+
 - <context for reviewers>
 
 ### Cross-Package Impact
+
 | Package         | Changed | Build Status | Notes |
-|-----------------|---------|-------------|-------|
-| dialtone-tokens | Yes     | PASS        |       |
-| ...             |         |             |       |
+| --------------- | ------- | ------------ | ----- |
+| dialtone-tokens | Yes     | PASS         |       |
+| ...             |         |              |       |
 ```
 
 Include one row per package in the dependency chain. Use PASS/FAIL/-- for build status.

@@ -5,7 +5,27 @@ plan: claws-openclaw-upstream
 checkpoint: cp-3
 depends_on: [01, 04, 05]
 governing_roles: [claws:ciso, claws:compliance, claws:gateway-eng, claws:claws-release-eng]
-addresses_findings: [F-38, F-39, F-40, F-41, F-42, F-44, F-45, F-46, F-47, F-48, F-49, F-57, F-58, F-59, F-60, F-61, B3, W6]
+addresses_findings:
+  [
+    F-38,
+    F-39,
+    F-40,
+    F-41,
+    F-42,
+    F-44,
+    F-45,
+    F-46,
+    F-47,
+    F-48,
+    F-49,
+    F-57,
+    F-58,
+    F-59,
+    F-60,
+    F-61,
+    B3,
+    W6,
+  ]
 addresses_headlines: [H2]
 ---
 
@@ -18,6 +38,7 @@ Open PR-2 against `github.com/openclaw/openclaw` adding `@openclaw/guardrails` (
 ## Deliverables
 
 ### Upstream PR
+
 - [ ] PR-2 opened at `github.com/openclaw/openclaw` with title: `feat: add @openclaw/guardrails (GuardrailProvider + FileIngestProvider + 6 runtime subpaths)`
 - [ ] PR description leads with core-not-extension justification: "governance must be core because adversarial-plugin defense requires gateway-level enforcement"
 - [ ] PR description embeds bot-preempt checklist + CITES `docs/upstream/guides/adapter-audits.md` § 3 (audit-stream wire-shape) verdict
@@ -27,18 +48,21 @@ Open PR-2 against `github.com/openclaw/openclaw` adding `@openclaw/guardrails` (
 - [ ] `package.json` `name` flipped to `@openclaw/guardrails`; license `MIT`
 
 ### Audit-attribution invariant (per W6 / amendment §6)
+
 - [ ] `AuditEntrySummary.sourcePluginId: string` is NON-OPTIONAL
 - [ ] `ProviderRegistryImpl.postAudit()` overrides plugin-supplied `sourcePluginId` with authenticated caller's id
 - [ ] Plugin-supplied attribution treated as hint, not ground truth (adversarial-plugin defense per amendment §6.3)
 - [ ] Lenient mode flag (`--lenient`) accepts pre-v0.2 audit entries without `sourcePluginId`; default is strict
 
 ### Approval lifecycle audit events (per W3 / amendment §5)
+
 - [ ] Every approval handle emits `approval_issued` at issue time
 - [ ] Resolution emits `approval_resolved` with `resolution: 'approved' | 'denied' | 'modified'`
 - [ ] TTL expiry without resolution emits `approval_expired` with `wasUsed: false`
 - [ ] All three events flow into the hash-chained audit log
 
 ### CI / public-API obligations
+
 - [ ] `docs/.generated/plugin-sdk-api-baseline.sha256` refreshed
 - [ ] `docs/sdk-overview.md` table updated with new package
 - [ ] No Swift protocol model changes expected (no gateway protocol surface)
@@ -46,6 +70,7 @@ Open PR-2 against `github.com/openclaw/openclaw` adding `@openclaw/guardrails` (
 - [ ] Zero `@microsoft/*` import gate green (CI-enforced)
 
 ### Internal verification before pushing
+
 - [ ] `pnpm --filter @openclaw/guardrails test` green
 - [ ] `pnpm --filter @openclaw/guardrails build` green
 - [ ] `pnpm --filter @openclaw/guardrails tsc --noEmit` green

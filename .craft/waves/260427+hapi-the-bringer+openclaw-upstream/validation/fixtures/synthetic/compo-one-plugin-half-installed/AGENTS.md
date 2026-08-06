@@ -6,6 +6,7 @@ trust: composition
 # compo-one-plugin-half-installed
 
 Composition workspace bringing together 2 plugin(s):
+
 - `plugins/installed/`
 - `plugins/partial/`
 

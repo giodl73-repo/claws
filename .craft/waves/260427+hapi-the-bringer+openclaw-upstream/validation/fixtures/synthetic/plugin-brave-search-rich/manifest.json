@@ -4,15 +4,9 @@
   "version": "0.1.0",
   "description": "brave-search plugin (search)",
   "contributes": {
-    "tools": [
-      "brave-search/web-search"
-    ],
-    "skills": [
-      "brave-search/web-search"
-    ],
-    "workflows": [
-      "brave-search-flow.lobster"
-    ],
+    "tools": ["brave-search/web-search"],
+    "skills": ["brave-search/web-search"],
+    "workflows": ["brave-search-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

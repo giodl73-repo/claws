@@ -8,8 +8,8 @@
 
 ## Plan summary
 
-| Plan | Headlines | Status |
-|---|---|---|
+| Plan                      | Headlines                                                                                                                                                                                                                                                                                         | Status |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | `claws-openclaw-upstream` | H1: `@openclaw/workspace` merged · H2: `@openclaw/guardrails` merged · H3: `@openclaw/policy` + 9-verb subcommand group merged · H4: `@openclaw/snap` + 11-verb subcommand group merged · H5: OC-4 + OC-7 surgical PRs merged · H6: bot pre-empt checklist + adapter audits as reusable artifacts | Active |
 
 ## Stage checklist
@@ -103,6 +103,7 @@ bug classes — full table in the new plan). Detection-only in PR-1;
 class-by-class fixers ship in follow-up PRs.
 
 Catalog corrections applied 2026-04-28 after issue-tracker evidence pull:
+
 - DROPPED `OC_CFG_BOM_PRESENT` (#14998 shows `$schema` editor convention is legitimate; can't treat metadata markers as defects).
 - ADDED `OC_CFG_REDACTED_PLACEHOLDER` (ERROR) — 10 evidence issues, data-corruption class.
 - ADDED `OC_CFG_LEGACY_FIELD` (WARN) — split from DEPRECATED; covers known-migrated-away fields with auto-migration available.
@@ -132,6 +133,7 @@ comma consistency, schema-rule gating, did-you-mean for unknown-field).
 
 **Lint surface complete claws-side as of 2026-04-28.** All 13 rules
 implemented + tested:
+
 - Per-rule coverage: 26 tests (positive + negative for each code) — green
 - Real-config issue replay: 12 fixtures + tests, one per evidence-cited
   issue (#14998, #20478, #22272, #31251, #48415, #59070, #60334, #61683,
@@ -141,6 +143,7 @@ implemented + tested:
 - **43 lint tests total, all passing**; `tsc --noEmit` clean
 
 Companion artifacts:
+
 - `tests/lint/fixtures/EVIDENCE.md` — frozen evidence snapshot (27
   distinct issue numbers cited across 7 evidence-backed bug classes)
 - `tests/lint/fixtures/openclaw-test-schema.ts` — minimal openclaw-shaped
@@ -151,6 +154,7 @@ Companion artifacts:
   compare against `EVIDENCE.md` and decide whether to manually refresh.
 
 **Spec amendment landed 2026-04-28 (v0.3 of `UG-upstream.amend.md`)**:
+
 - §12 — Workspace lint diagnostic catalog: 13-code normative table with
   severity, source (AST/Schema/both), engine semantics, evidence base,
   oc:// URI weaving rules
@@ -163,6 +167,7 @@ Companion artifacts:
   16 atoms (3 retained + 6 from v0.2 + 7 from v0.3)
 
 **Scenarios stage Phase 6 landed 2026-04-28**:
+
 - 15 scenarios SC-37..SC-51 covering schema-DI semantics, oc:// URI
   population, 12 issue replays (one per evidence-cited issue), and the
   fixer-roadmap contract
@@ -193,6 +198,7 @@ session:
 - **B7** did-you-mean distance-3 cap untested → 2 boundary tests added (distance-3 accepts suggestion; distance-4 rejects, falls through to "gateway will reject" message).
 
 Plus 3 cross-confirmed HC-WARNs:
+
 - repo-steward W1 hook-count citation rot (36→35 in adapter-audits.md §2.1)
 - repo-steward W4 + release-eng W1 index.ts JSDoc out of sync with exports
 - release-eng W1 PR-1 "earns its keep" table missing `/lint` and `/ast/jsonc`
@@ -200,6 +206,7 @@ Plus 3 cross-confirmed HC-WARNs:
 Final state: `tsc --noEmit` clean, **47/47 lint tests passing** (was 43, +4 new tests for B6/B7), `scan-pr-body.sh` exits 0 on PR-1. Ready for R2 re-pass before cp-2 opens.
 
 **cp-1 prep guides landed 2026-04-28** at `docs/upstream/guides/`:
+
 - `adapter-audits.md` (20.3KB) — emitted-plugin registration audit
   cites `hook-types.ts:936-942` (PluginHookRegistration shape) +
   Commander v14.0.3 CLI dispatcher; audit-stream wire-shape audit has
@@ -222,12 +229,13 @@ that routed to "Adapter-audits guide" or "Bot-preempt-checklist" is
 applied.
 
 Next stages (resume now possible):
+
 - cp-1 closure: spawn cp-1 review panel (gateway-eng, compliance,
   release-eng, repo-steward, architect, testing) at `panels/cp-1/` and
   collect verdicts before flipping cp-1 → completed in `wave.yaml`
 - After cp-1 closes, cp-2 opens PR-1 (single upstream PR: workspace + lint
-  + oc://config URI scheme + doctor migration emit) at
-  `github.com/openclaw/openclaw`
+  - oc://config URI scheme + doctor migration emit) at
+    `github.com/openclaw/openclaw`
 
 **LKG pivot — E2E story landed 2026-04-30**:
 
@@ -274,6 +282,7 @@ scenarios across 16 categories in
   parity · GW git worktree edges
 
 Findings raised:
+
 - **Real bug fixed (GW3)**: `gitLKGStore.commitPromote()` was using
   `git commit -m msg` (no path arg), which would sweep pre-staged
   unrelated paths into the LKG commit in shared-repo / multi-agent
@@ -296,7 +305,8 @@ roll-up + total count to 238 LKG-touching tests), `PROGRESS.md`
 (this entry).
 
 **Total LKG-touching coverage: 238 tests (209 v2-prototype + 20 FS
-+ 9 git).**
+
+- 9 git).**
 
 **LKG adversarial wave 5 landed 2026-04-30** (post wave-1-4 fold-in):
 
@@ -313,6 +323,7 @@ appropriately skipped on Windows.
 
 **No new HC findings raised** — wave 5 is invariant-locking, not
 bug-finding. Eight additional contract invariants pinned:
+
 - OBS5 — git audit `commitSha` is set only for `outcome=promoted`,
   null for `valid|recovered`. Audit anchor for promote events.
 - OBS3 — RecoveryNotice fields cross-link to the corresponding
@@ -332,10 +343,11 @@ bug-finding. Eight additional contract invariants pinned:
   plugin cache; new IR flows through.
 
 **Cumulative state**: 100 LKG adversarial scenarios across 5 waves
-+ 22 categories. **231/233 v2-prototype tests green** (2 POSIX-only
-skipped); **29/29 LKG-package tests green**. **Total LKG-touching
-coverage: 260 tests.** 1 real bug found and fixed (F-118 GW3); 1
-known [GAP] locked in (F-119 CR4); 14+ contract invariants pinned.
+
+- 22 categories. **231/233 v2-prototype tests green** (2 POSIX-only
+  skipped); **29/29 LKG-package tests green**. **Total LKG-touching
+  coverage: 260 tests.** 1 real bug found and fixed (F-118 GW3); 1
+  known [GAP] locked in (F-119 CR4); 14+ contract invariants pinned.
 
 Wave docs touched (this update): `pr-drafts/v2-lkg-contract.md`
 (category list + invariants + count to 231), `carve-consumer-
@@ -370,6 +382,7 @@ hardening (e.g., add a sequence counter to clobbered paths) is
 intentional.
 
 Additional invariants pinned by wave 6:
+
 - LIM1 — 1000 trackers in one store register and observe in
   parallel without cross-talk. Registry scales.
 - LIM2 — 5MB single-file LKG promote+recover preserves bytes
@@ -391,19 +404,21 @@ Additional invariants pinned by wave 6:
   pollution into the LKG flow. Promote completes normally.
 
 **Cumulative state**: 119 LKG adversarial scenarios across 6 waves
-+ 27 categories. **250/252 v2-prototype tests green** (2 POSIX-only
-skipped); **29/29 LKG-package tests green**. **Total LKG-touching
-coverage: 279 tests.** 1 real bug found and fixed (F-118 GW3); 2
-known [GAP]s locked in (F-119 CR4 FS-tamper-detect-on-recover-only;
-F-120 T2 clobbered-collision-under-frozen-clock); 22+ contract
-invariants pinned.
+
+- 27 categories. **250/252 v2-prototype tests green** (2 POSIX-only
+  skipped); **29/29 LKG-package tests green**. **Total LKG-touching
+  coverage: 279 tests.** 1 real bug found and fixed (F-118 GW3); 2
+  known [GAP]s locked in (F-119 CR4 FS-tamper-detect-on-recover-only;
+  F-120 T2 clobbered-collision-under-frozen-clock); 22+ contract
+  invariants pinned.
 
 Wave docs touched (this update): `pr-drafts/v2-lkg-contract.md`
 (category list + 2 [GAP]s + invariants + count to 250),
 `carve-consumer-catalog.md` (wave 6 row + 2 [GAP]s + count to 279),
 `PROGRESS.md` (this entry), `scenarios/scenarios.md` (SC-27 added),
 `scenarios/FINDINGS.md` (Phase 7 wave 6 entry — F-120 HC-NOTE row
-+ wave 6 invariants).
+
+- wave 6 invariants).
 
 **LKG adversarial wave 7 landed 2026-04-30** (post wave-6 fold-in):
 
@@ -430,6 +445,7 @@ for their own verification. Documented as `MULT1 [GAP]` so a
 future hardening is intentional.
 
 Additional invariants pinned by wave 7:
+
 - WK1, WK4 — companion files (`.lkg`, `.clobbered.<ts>`) live
   next to their target. Sibling trackers in the same dir don't
   collide; same-basename trackers in different dirs each get
@@ -459,18 +475,20 @@ Additional invariants pinned by wave 7:
   `issues.length`.
 
 **Cumulative state**: 140 LKG adversarial scenarios across 7 waves
-+ 37 categories. **271/273 v2-prototype tests green** (2 POSIX-only
-skipped); **29/29 LKG-package tests green**. **Total LKG-touching
-coverage: 300 tests.** 1 real bug found and fixed (F-118 GW3); 3
-known [GAP]s locked in (F-119, F-120, F-121); 30+ contract
-invariants pinned.
+
+- 37 categories. **271/273 v2-prototype tests green** (2 POSIX-only
+  skipped); **29/29 LKG-package tests green**. **Total LKG-touching
+  coverage: 300 tests.** 1 real bug found and fixed (F-118 GW3); 3
+  known [GAP]s locked in (F-119, F-120, F-121); 30+ contract
+  invariants pinned.
 
 Wave docs touched (this update): `pr-drafts/v2-lkg-contract.md`
 (category list + 3 [GAP]s + invariants + count to 271),
 `carve-consumer-catalog.md` (wave 7 row + 3 [GAP]s + count to 300),
 `PROGRESS.md` (this entry), `scenarios/scenarios.md` (SC-28 added),
 `scenarios/FINDINGS.md` (Phase 7 wave 7 entry — F-121 HC-NOTE row
-+ wave 7 invariants).
+
+- wave 7 invariants).
 
 **LKG adversarial wave 8 landed 2026-04-30** (post wave-7 fold-in):
 
@@ -495,6 +513,7 @@ forward slashes regardless of platform separator).
 
 **No new HC findings raised.** Wave 8 is invariant-locking. Eight
 additional contract invariants pinned:
+
 - HK1 — audit fires exactly once per observe call across all
   outcomes (promoted/valid/recovered/skipped/failed). No double-
   firing, no missing fire.
@@ -524,10 +543,11 @@ additional contract invariants pinned:
   commit-shape stability.
 
 **Cumulative state**: 156 LKG adversarial scenarios across 8 waves
-+ 41 categories. **287/289 v2-prototype tests green** (2 POSIX-only
-skipped); **29/29 LKG-package tests green**. **Total LKG-touching
-coverage: 316 tests.** 1 real bug fixed; 3 [GAP]s locked in;
-40+ contract invariants pinned.
+
+- 41 categories. **287/289 v2-prototype tests green** (2 POSIX-only
+  skipped); **29/29 LKG-package tests green**. **Total LKG-touching
+  coverage: 316 tests.** 1 real bug fixed; 3 [GAP]s locked in;
+  40+ contract invariants pinned.
 
 **LKG adversarial wave 9 landed 2026-04-30** (post wave-8 fold-in):
 
@@ -547,9 +567,10 @@ rejection).
 **No new HC findings raised.** Wave 9 is invariant-locking.
 
 **Cumulative state**: 172 LKG adversarial scenarios across 9 waves
-+ 45 categories. **303/305 v2-prototype tests green**; **29/29
-LKG-package tests green**. **Total LKG-touching coverage: 332
-tests.**
+
+- 45 categories. **303/305 v2-prototype tests green**; **29/29
+  LKG-package tests green**. **Total LKG-touching coverage: 332
+  tests.**
 
 **LKG adversarial wave 10 landed 2026-04-30** (post wave-9 fold-in):
 
@@ -574,9 +595,10 @@ enum set is fixed at the 4 documented codes; LKGObservation
 discriminated union per-variant fields stable.
 
 **Cumulative state**: 189 LKG adversarial scenarios across 10 waves
-+ 49 categories. **320/322 v2-prototype tests green**; **29/29
-LKG-package tests green**. **Total LKG-touching coverage: 349
-tests.**
+
+- 49 categories. **320/322 v2-prototype tests green**; **29/29
+  LKG-package tests green**. **Total LKG-touching coverage: 349
+  tests.**
 
 **LKG adversarial wave 11 landed 2026-04-30** (post wave-10
 fold-in):
@@ -591,6 +613,7 @@ boundary holds and a hypothetical future S3 / IPFS / etc. backend
 could satisfy the same contract without API changes.
 
 **Wave 11 invariants pinned (every one is dual-backend):**
+
 - ARCH1 — LKGObservation outcome SET is identical across backends
   (no `committed` / `blob-stored` / etc. leak through).
 - ARCH2 — LKGFingerprint shape is identical; `hash` is the load-
@@ -616,7 +639,7 @@ could satisfy the same contract without API changes.
 - ARCH12 — `LKGFingerprint.hash` is deterministic for identical
   bytes across backends.
 - **ARCH13 — `LKGStore` keys are EXACTLY `register / observe /
-  readLastKnownGood / getEntry`. No work-tree-specific API
+readLastKnownGood / getEntry`. No work-tree-specific API
   (`commit()`, `branch()`, `checkout()`) leaks through the surface
   on either backend.** This is the load-bearing abstraction lock.
 - ARCH14 — All four contract methods are present and callable.
@@ -649,6 +672,7 @@ pre-RFC), **MIG** migration story (config-LKG → @bic/openclaw-lkg),
 
 **No new HC findings.** Wave 12 is upstream-alignment-and-
 introspection. Eight additional invariants pinned:
+
 - WIRE1 — `<path>.lkg` companion is `<full target path>.lkg`,
   no prefix transform. Verified against multiple path shapes
   including Windows backslash paths.
@@ -701,6 +725,7 @@ audit hooks; one plugin's crashing audit doesn't affect another).
 
 **No new HC findings.** Wave 13 is composition-and-isolation
 locks. Eight invariants pinned:
+
 - CHAIN3 — partial-chain failure (B invalid, no LKG → skipped)
   does NOT block A or C from progressing in the same store.
 - CHAIN5 — 50 trackers each recover to THEIR OWN bytes after a
@@ -846,18 +871,18 @@ making the change intentional.
 
 ## 18-wave campaign — final session summary 2026-04-30
 
-| Stat | Count |
-|---|---|
-| LKG adversarial waves | **18** |
-| LKG adversarial scenarios | **326** |
-| Categories | **75** |
-| v2-prototype tests | **457/459** (2 POSIX-only skipped) |
-| LKG-FS package tests | **20/20** |
-| LKG-git package tests | **9/9** |
-| **Total LKG-touching coverage** | **486 tests** |
-| Real bugs found and fixed | **1** (F-118 GW3) |
-| Known [GAP]s locked in | **3** (F-119 CR4, F-120 T2, F-121 MULT1) |
-| Contract invariants pinned | **100+** |
+| Stat                            | Count                                    |
+| ------------------------------- | ---------------------------------------- |
+| LKG adversarial waves           | **18**                                   |
+| LKG adversarial scenarios       | **326**                                  |
+| Categories                      | **75**                                   |
+| v2-prototype tests              | **457/459** (2 POSIX-only skipped)       |
+| LKG-FS package tests            | **20/20**                                |
+| LKG-git package tests           | **9/9**                                  |
+| **Total LKG-touching coverage** | **486 tests**                            |
+| Real bugs found and fixed       | **1** (F-118 GW3)                        |
+| Known [GAP]s locked in          | **3** (F-119 CR4, F-120 T2, F-121 MULT1) |
+| Contract invariants pinned      | **100+**                                 |
 
 **The 75 categories, organized:**
 
@@ -893,6 +918,7 @@ making the change intentional.
   PV PolicyIR↔LKG bridge
 
 **Wave docs synced through wave 18:**
+
 - `pr-drafts/v2-lkg-contract.md` — DOWNSTREAM EVIDENCE block
   reflects 326 scenarios / 75 categories / 457 tests / 3 [GAP]s
   / 100+ invariants
@@ -926,15 +952,16 @@ invariants).
 
 After the LKG-as-carrier reframing, the contribution wave consolidates by folding the two surgical fixes into their parent contract PRs. Same upstream LoC envelope; cleaner narrative seams.
 
-| PR | What ships | Killer step |
-|---|---|---|
-| **PR-1: `@openclaw/workspace`** | workspace package + lint + oc:// URIs + JSONC byte-identical chokepoint + `__OPENCLAW_REDACTED__` sentinel guard + **stripFrontMatter raw-preserve** (folded from former PR-2) | **byte-stability foundation** across the 9-file workspace surface — JSONC writes preserve comments, sentinel guard refuses corrupt writes, frontmatter raw-preserve enables content-addressing of `.md` workspace files |
-| **PR-2: LKG contract** (`v2-lkg-contract.md`) | `LKGStore` types + reference impl + 326 adversarial scenarios across 75 categories | **the carrier** — every workspace file becomes content-addressed via per-file LKG fingerprints; abstraction boundary proven backend-agnostic via dual-backend `describe.each([fs, git])`; recovery-on-invalid is a free byproduct |
+| PR                                                                          | What ships                                                                                                                                                                                   | Killer step                                                                                                                                                                                                                                                                                                                                          |
+| --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **PR-1: `@openclaw/workspace`**                                             | workspace package + lint + oc:// URIs + JSONC byte-identical chokepoint + `__OPENCLAW_REDACTED__` sentinel guard + **stripFrontMatter raw-preserve** (folded from former PR-2)               | **byte-stability foundation** across the 9-file workspace surface — JSONC writes preserve comments, sentinel guard refuses corrupt writes, frontmatter raw-preserve enables content-addressing of `.md` workspace files                                                                                                                              |
+| **PR-2: LKG contract** (`v2-lkg-contract.md`)                               | `LKGStore` types + reference impl + 326 adversarial scenarios across 75 categories                                                                                                           | **the carrier** — every workspace file becomes content-addressed via per-file LKG fingerprints; abstraction boundary proven backend-agnostic via dual-backend `describe.each([fs, git])`; recovery-on-invalid is a free byproduct                                                                                                                    |
 | **PR-3: PolicyIR + `ctx.lkgFingerprint` + hook merger** (`v2-policy-ir.md`) | PolicyIR types + `ctx.lkgFingerprint` extension + `loadPolicyIR/readPolicyIR/validatePolicyIR/getCurrentPolicyIR` runtime helpers + **conjunctive AND merger fix** (folded from former PR-4) | **end-to-end policy chain-of-custody** — types contract for the artifact + LKG anchor for TOCTOU defense at decision time + enforcement merger so plugin-A's approval requirement isn't silently dropped by plugin-B. One PR, one story: every policy decision is anchored to a known LKG fingerprint, every plugin's approval requirement survives. |
 
 Plus one downstream-only: `claws-guardrails` adapter (no upstream PR by design — `PluginTrustedToolPolicyRegistration` already ships upstream at `src/plugins/host-hooks.ts:65-72`).
 
 **Folded drafts moved to `pr-drafts/superseded/`** with FOLDED notes pointing at their merged location:
+
 - `superseded/PR-2-stripfrontmatter-raw-preserve.md` → folded into `PR-1.md` section 6
 - `superseded/PR-4-hook-merger-conjunctive.md` → folded into `v2-policy-ir.md` "Hook approval-merger fix" section
 

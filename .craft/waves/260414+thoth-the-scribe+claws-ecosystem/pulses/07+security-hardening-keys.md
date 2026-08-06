@@ -69,6 +69,7 @@ Address four THOTH-FINDINGS related to key material security:
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/ciso.md` — key material security, file permission requirements, heap safety
 - `.craft/roles/claws/platform-eng.md` — Node.js Buffer patterns, file permission APIs, rotation state machine
 

@@ -41,19 +41,19 @@ single-knob full invalidation.
 
 ## Scenario Findings Applied
 
-| Finding | Severity | Disposition in this pulse |
-|---------|----------|---------------------------|
-| incremental/S01-F02 | major | **AC** — canonical fixture sized for 80% reduction |
-| incremental/S01-F07 | warning | **Out of scope** (documented future optimization — IR-identity) |
-| incremental/S01-F08 | note | **AC + L0 test** — deterministic JSON snapshot for `stageTimings` |
-| incremental/S02-F02 | major | **AC** — 80% wall-clock reduction on SOUL edit critical path |
-| incremental/S02-F05 | warning | **AC + L3 test** — semantically meaningful SOUL edits verifiable in emit |
-| incremental/S02-F06 | warning | **AC** — canonical SOUL format documented in fixture |
-| incremental/S02-F07 | note | **AC + L0 parametrized test** — per-stage scoping for all 9 readers |
-| incremental/S03-F03 | major | **AC + test hook** — deterministic `compiler.version` override |
-| incremental/S03-F05 | warning | **AC + L2 benchmark** — rotation overhead <10% of baseline |
-| incremental/S03-F06 | warning | **Out of scope** (deferred — surgical key-only rotation) |
-| incremental/S03-F08 | note | **AC + L2 test** — `cache clear` and key rotation converge |
+| Finding             | Severity | Disposition in this pulse                                                |
+| ------------------- | -------- | ------------------------------------------------------------------------ |
+| incremental/S01-F02 | major    | **AC** — canonical fixture sized for 80% reduction                       |
+| incremental/S01-F07 | warning  | **Out of scope** (documented future optimization — IR-identity)          |
+| incremental/S01-F08 | note     | **AC + L0 test** — deterministic JSON snapshot for `stageTimings`        |
+| incremental/S02-F02 | major    | **AC** — 80% wall-clock reduction on SOUL edit critical path             |
+| incremental/S02-F05 | warning  | **AC + L3 test** — semantically meaningful SOUL edits verifiable in emit |
+| incremental/S02-F06 | warning  | **AC** — canonical SOUL format documented in fixture                     |
+| incremental/S02-F07 | note     | **AC + L0 parametrized test** — per-stage scoping for all 9 readers      |
+| incremental/S03-F03 | major    | **AC + test hook** — deterministic `compiler.version` override           |
+| incremental/S03-F05 | warning  | **AC + L2 benchmark** — rotation overhead <10% of baseline               |
+| incremental/S03-F06 | warning  | **Out of scope** (deferred — surgical key-only rotation)                 |
+| incremental/S03-F08 | note     | **AC + L2 test** — `cache clear` and key rotation converge               |
 
 Spec-resolved findings (S01-F01, F03, F04, F05, F06; S02-F01, F03, F04, F08;
 S03-F01, F02, F04, F07) land via the §IS.1 + §IS.7 contract amendments in
@@ -64,211 +64,211 @@ CL-04 v1.2 and are verified by the ACs below.
 ### Stage cache layer (CL-04 §IS.1–§IS.6)
 
 - [ ] `claws-sdk/src/compiler/host/stage-cache.ts` — NEW. `StageCache`
-  class wrapping one on-disk directory per stage under
-  `.claws/cache/stages/<stage-name>/`. Methods: `get(key)`, `set(key, value)`,
-  `has(key)`, `clear()`. Cache key derivation per §IS.1: SHA-256 of
-  normalized input content + `compiler.version` + `keySchemaVersion` + (emit
-  only) signing-key identity. *(covers S01-F01/F06, S03-F02/F07)*
+      class wrapping one on-disk directory per stage under
+      `.claws/cache/stages/<stage-name>/`. Methods: `get(key)`, `set(key, value)`,
+      `has(key)`, `clear()`. Cache key derivation per §IS.1: SHA-256 of
+      normalized input content + `compiler.version` + `keySchemaVersion` + (emit
+      only) signing-key identity. _(covers S01-F01/F06, S03-F02/F07)_
 - [ ] `claws-sdk/src/compiler/host/stage-cache-key.ts` — NEW. Pure key
-  derivation, exported for unit tests. Encodes `{contentHash, compilerVersion,
-  keySchemaVersion, signingKeyId?}` into the on-disk cache key string. The
-  `keySchemaVersion` constant lives here (bumped when derivation changes).
+      derivation, exported for unit tests. Encodes `{contentHash, compilerVersion,
+keySchemaVersion, signingKeyId?}` into the on-disk cache key string. The
+      `keySchemaVersion` constant lives here (bumped when derivation changes).
 - [ ] `claws-sdk/src/compiler/host/stage-cache-mtime.ts` — NEW. `mtimeFastPath`
-  helper: stat input, compare against stored mtime, return `"unchanged"` |
-  `"changed"` | `"missing"`. Only re-hashes content when mtime differs.
-  *(covers S01-F04)*
+      helper: stat input, compare against stored mtime, return `"unchanged"` |
+      `"changed"` | `"missing"`. Only re-hashes content when mtime differs.
+      _(covers S01-F04)_
 - [ ] `claws-sdk/src/compiler/host/stage-deps.ts` — NEW. Static dependency
-  graph per §IS.3: readers (9 leaves) → `modelToIR` (aggregator) →
-  `baselineAnalysis` → `enforceR5` → `emit` + `validate`. Exposes
-  `upstreamOf(stage): StageName[]` and `downstreamOf(stage): StageName[]`
-  for invalidation walks. Downstream cache keys MUST fold in all upstream
-  IR byte-hashes. *(covers S01-F03, S02-F04)*
+      graph per §IS.3: readers (9 leaves) → `modelToIR` (aggregator) →
+      `baselineAnalysis` → `enforceR5` → `emit` + `validate`. Exposes
+      `upstreamOf(stage): StageName[]` and `downstreamOf(stage): StageName[]`
+      for invalidation walks. Downstream cache keys MUST fold in all upstream
+      IR byte-hashes. _(covers S01-F03, S02-F04)_
 - [ ] `claws-sdk/src/compiler/host/compile.ts` — MODIFY. When the compile-level
-  cache misses (§IS.5), run the per-stage path: for each reader, consult its
-  stage cache; on hit short-circuit, on miss read + parse. Then run
-  `modelToIR` / `baselineAnalysis` / `enforceR5` / `emit` / `validate` with
-  downstream cache keys that include upstream byte-hashes. Populate
-  `stageTimings` entries for every stage (fresh or cached, per §IS.4).
-  Preserve the existing compile-level short-circuit: compile-cache hit
-  bypasses stage caches and synthesizes `stageTimings` with
-  `cacheHit: true, durationMs: 0`.
+      cache misses (§IS.5), run the per-stage path: for each reader, consult its
+      stage cache; on hit short-circuit, on miss read + parse. Then run
+      `modelToIR` / `baselineAnalysis` / `enforceR5` / `emit` / `validate` with
+      downstream cache keys that include upstream byte-hashes. Populate
+      `stageTimings` entries for every stage (fresh or cached, per §IS.4).
+      Preserve the existing compile-level short-circuit: compile-cache hit
+      bypasses stage caches and synthesizes `stageTimings` with
+      `cacheHit: true, durationMs: 0`.
 
 ### stageTimings type + serialization (CL-04 §IS.4)
 
 - [ ] `claws-sdk/src/compiler/host/types.ts` — MODIFY. Add `StageName` union
-  (14 stages: 9 readers + 5 downstream), `StageTiming` interface (`stage`,
-  `cacheHit`, `durationMs`, `byteHash`), and `readonly stageTimings:
-  readonly StageTiming[]` on `CompileResult`. Match CL-04 §IS.4 exactly.
+      (14 stages: 9 readers + 5 downstream), `StageTiming` interface (`stage`,
+      `cacheHit`, `durationMs`, `byteHash`), and `readonly stageTimings:
+readonly StageTiming[]` on `CompileResult`. Match CL-04 §IS.4 exactly.
 - [ ] `claws-sdk/src/compiler/host/stage-timings-serialize.ts` — NEW.
-  `serializeStageTimings(timings, {roundDurations?: boolean})` returns a
-  deterministic JSON string (sorted keys, stable stage order from the union
-  declaration). *(covers S01-F08 — snapshot friendliness)*
+      `serializeStageTimings(timings, {roundDurations?: boolean})` returns a
+      deterministic JSON string (sorted keys, stable stage order from the union
+      declaration). _(covers S01-F08 — snapshot friendliness)_
 
 ### Atomic emit + principle observability (CL-04 §IS.7)
 
 - [ ] `claws-sdk/src/compiler/emit/atomic-write.ts` — NEW.
-  `atomicWrite(path, bytes)` writes to `<path>.tmp-<pid>-<nonce>`, then
-  renames. `sweepStaleTempfiles(emitDir)` called at the start of emit to
-  clear orphans from prior interrupted runs. *(covers watch/S03-F02, F07
-  via §IS.7; also used by pulse 81/82)*
+      `atomicWrite(path, bytes)` writes to `<path>.tmp-<pid>-<nonce>`, then
+      renames. `sweepStaleTempfiles(emitDir)` called at the start of emit to
+      clear orphans from prior interrupted runs. _(covers watch/S03-F02, F07
+      via §IS.7; also used by pulse 81/82)_
 - [ ] `claws-sdk/src/compiler/emit/emit.ts` — MODIFY. Replace all direct
-  `writeFile` calls in the emit path with `atomicWrite`. No in-place writes
-  allowed in emit. Sweep stale tempfiles on entry.
+      `writeFile` calls in the emit path with `atomicWrite`. No in-place writes
+      allowed in emit. Sweep stale tempfiles on entry.
 - [ ] Principle observability is a verify-only obligation here: the existing
-  OC and CC emitters (pulses 7, 8) already render principles inline. This
-  pulse's L3 test asserts a newly added SOUL principle appears in emit
-  output. *(covers S02-F03, F05)*
+      OC and CC emitters (pulses 7, 8) already render principles inline. This
+      pulse's L3 test asserts a newly added SOUL principle appears in emit
+      output. _(covers S02-F03, F05)_
 
 ### Test hooks
 
 - [ ] `claws-sdk/src/compiler/host/compiler-version.ts` — NEW. Exposes
-  `getCompilerVersion()` reading `process.env.CLAWS_COMPILER_VERSION_OVERRIDE`
-  when set AND `process.env.NODE_ENV === 'test'`, else the package version.
-  The override is test-only — production builds ignore it. *(covers S03-F03)*
+      `getCompilerVersion()` reading `process.env.CLAWS_COMPILER_VERSION_OVERRIDE`
+      when set AND `process.env.NODE_ENV === 'test'`, else the package version.
+      The override is test-only — production builds ignore it. _(covers S03-F03)_
 - [ ] `claws-sdk/tests/fixtures/canonical-oc-workspace/` — NEW canonical
-  fixture sized so the 80% wall-clock target is meaningful (non-trivial
-  SOUL with 6+ principles, 20+ tools, 10+ agents, a lobster federation with
-  3+ handlers). Every stage must do real enough work that ≤2ms cached-hit
-  reads demonstrate short-circuit, not bookkeeping. *(covers S01-F02, S02-F06)*
+      fixture sized so the 80% wall-clock target is meaningful (non-trivial
+      SOUL with 6+ principles, 20+ tools, 10+ agents, a lobster federation with
+      3+ handlers). Every stage must do real enough work that ≤2ms cached-hit
+      reads demonstrate short-circuit, not bookkeeping. _(covers S01-F02, S02-F06)_
 
 ### Tests (10 L0 / 3 L1 / 2 L2 / 3 L3)
 
 - [ ] `claws-sdk/tests/compiler/host/stage-cache-key.unit.test.ts` — L0 (3):
-  same inputs → same key; different `compiler.version` → different key;
-  `keySchemaVersion` mismatch → different key.
+      same inputs → same key; different `compiler.version` → different key;
+      `keySchemaVersion` mismatch → different key.
 - [ ] `claws-sdk/tests/compiler/host/stage-cache-mtime.unit.test.ts` — L0 (2):
-  unchanged mtime skips re-hash; changed mtime forces re-hash (content
-  authoritative, mtime is only a hint).
+      unchanged mtime skips re-hash; changed mtime forces re-hash (content
+      authoritative, mtime is only a hint).
 - [ ] `claws-sdk/tests/compiler/host/stage-deps.unit.test.ts` — L0 (2):
-  `downstreamOf('soul')` includes `modelToIR`, `baselineAnalysis`,
-  `enforceR5`, `emit`, `validate`; readers have no upstream.
+      `downstreamOf('soul')` includes `modelToIR`, `baselineAnalysis`,
+      `enforceR5`, `emit`, `validate`; readers have no upstream.
 - [ ] `claws-sdk/tests/compiler/host/stage-cache-per-reader.unit.test.ts` —
-  L0 (1, parametrized over all 9 readers): each reader's cache key is
-  scoped to its own input file hash; changing another reader's input does
-  not invalidate it. *(covers S02-F07)*
+      L0 (1, parametrized over all 9 readers): each reader's cache key is
+      scoped to its own input file hash; changing another reader's input does
+      not invalidate it. _(covers S02-F07)_
 - [ ] `claws-sdk/tests/compiler/host/stage-timings-serialize.unit.test.ts` —
-  L0 (1): deterministic JSON output; sorted keys; round-trip stable across
-  invocations. *(covers S01-F08)*
+      L0 (1): deterministic JSON output; sorted keys; round-trip stable across
+      invocations. _(covers S01-F08)_
 - [ ] `claws-sdk/tests/compiler/emit/atomic-write.unit.test.ts` — L0 (1):
-  SIGINT during write leaves no partial at the target path; stale
-  tempfile sweep clears orphans.
+      SIGINT during write leaves no partial at the target path; stale
+      tempfile sweep clears orphans.
 - [ ] `claws-sdk/tests/compiler/host/compile-incremental.integration.test.ts`
-  — L1 (3): second compile after no edit populates `stageTimings` with all
-  cacheHit:true; downstream cache key includes upstream byte-hash; key
-  rotation invalidates every stage.
+      — L1 (3): second compile after no edit populates `stageTimings` with all
+      cacheHit:true; downstream cache key includes upstream byte-hash; key
+      rotation invalidates every stage.
 - [ ] `claws-sdk/tests/compiler/host/compile-incremental.e2e.test.ts` — L2
-  (2): full incremental compile wall-clock ≥80% lower than from-scratch
-  on canonical fixture; rotation overhead <10% of baseline. *(covers
-  S02-F02, S03-F05)*
+      (2): full incremental compile wall-clock ≥80% lower than from-scratch
+      on canonical fixture; rotation overhead <10% of baseline. _(covers
+      S02-F02, S03-F05)_
 - [ ] `claws-sdk/tests/compiler/host/compile-incremental.accept.test.ts` —
-  L3 (3): scenario acceptance for incremental/S01 (lobster-only), S02
-  (SOUL-only principle reflected in emit), S03 (key rotation invalidates
-  all + `cache clear` produces identical from-scratch state).
+      L3 (3): scenario acceptance for incremental/S01 (lobster-only), S02
+      (SOUL-only principle reflected in emit), S03 (key rotation invalidates
+      all + `cache clear` produces identical from-scratch state).
 
 ## Acceptance Criteria
 
 ### Per-stage cache architecture (CL-04 §IS.1–§IS.3)
 
 - [ ] Each of the 9 reader stages has its own cache entry under
-  `.claws/cache/stages/<stage>/`; entries are scoped by the SHA-256 content
-  hash of **only** that stage's input file (not a workspace-wide hash).
-  *(incremental/S01-F01)*
+      `.claws/cache/stages/<stage>/`; entries are scoped by the SHA-256 content
+      hash of **only** that stage's input file (not a workspace-wide hash).
+      _(incremental/S01-F01)_
 - [ ] Cache keys are SHA-256 of `{contentHash, compiler.version,
-  keySchemaVersion}` for readers and `{...reader fields, signingKeyId}` for
-  emit. Non-emit stages do NOT include signing-key identity. *(S01-F06,
-  S03-F02, S03-F07)*
+keySchemaVersion}` for readers and `{...reader fields, signingKeyId}` for
+      emit. Non-emit stages do NOT include signing-key identity. _(S01-F06,
+      S03-F02, S03-F07)_
 - [ ] Each cache entry on disk carries its `keySchemaVersion`; a read with
-  mismatched schema version forces a cache miss rather than deserializing
-  an incompatible payload. *(S03-F07)*
+      mismatched schema version forces a cache miss rather than deserializing
+      an incompatible payload. _(S03-F07)_
 - [ ] Downstream stage cache keys (`modelToIR`, `baselineAnalysis`,
-  `enforceR5`, `emit`, `validate`) include the `byteHash` outputs of ALL
-  upstream stages they consume. A stale upstream IR MUST cause every
-  downstream stage to miss. *(S01-F03, S02-F04)*
+      `enforceR5`, `emit`, `validate`) include the `byteHash` outputs of ALL
+      upstream stages they consume. A stale upstream IR MUST cause every
+      downstream stage to miss. _(S01-F03, S02-F04)_
 - [ ] Cache lookup uses mtime fast-path: `stat` the input, compare stored
-  mtime, only re-hash content when mtime differs. Content hash remains the
-  authoritative correctness check. *(S01-F04)*
+      mtime, only re-hash content when mtime differs. Content hash remains the
+      authoritative correctness check. _(S01-F04)_
 
 ### `stageTimings` contract (CL-04 §IS.4)
 
 - [ ] `CompileResult.stageTimings` type matches CL-04 §IS.4 exactly:
-  `readonly stageTimings: readonly StageTiming[]` where `StageTiming = {
-  readonly stage: StageName; readonly cacheHit: boolean; readonly
-  durationMs: number; readonly byteHash: string }`.
+      `readonly stageTimings: readonly StageTiming[]` where `StageTiming = {
+readonly stage: StageName; readonly cacheHit: boolean; readonly
+durationMs: number; readonly byteHash: string }`.
 - [ ] `StageName` union contains all 14 stages in this order: `soul`,
-  `tools`, `agents`, `memory`, `identity`, `user`, `heartbeat`, `skills`,
-  `lobster`, `modelToIR`, `baselineAnalysis`, `enforceR5`, `emit`,
-  `validate`. Order is part of the contract so iterator-based consumers
-  are deterministic.
+      `tools`, `agents`, `memory`, `identity`, `user`, `heartbeat`, `skills`,
+      `lobster`, `modelToIR`, `baselineAnalysis`, `enforceR5`, `emit`,
+      `validate`. Order is part of the contract so iterator-based consumers
+      are deterministic.
 - [ ] `stageTimings` is always populated — both when per-stage caches serve
-  the compile AND when the compile-level cache short-circuits (synthesized
-  with `cacheHit:true, durationMs:0`). *(§IS.4, §IS.5)*
+      the compile AND when the compile-level cache short-circuits (synthesized
+      with `cacheHit:true, durationMs:0`). _(§IS.4, §IS.5)_
 - [ ] `byteHash` on each `StageTiming` equals the stage's effective cache
-  key input hash, providing traceability from a timing entry back to the
-  on-disk cache file. *(watch/S02-F06 spec-resolved; reinforced here)*
+      key input hash, providing traceability from a timing entry back to the
+      on-disk cache file. _(watch/S02-F06 spec-resolved; reinforced here)_
 - [ ] `serializeStageTimings()` output is deterministic: same input → same
-  bytes, sorted keys, stage order from the union declaration. *(S01-F08)*
+      bytes, sorted keys, stage order from the union declaration. _(S01-F08)_
 - [ ] Cached-hit stages report `durationMs ≤ 2` on the canonical fixture —
-  the hit path itself is fast (mtime stat + manifest read), not fake
-  zero-reported durations. *(incremental scenarios wall-clock contract)*
+      the hit path itself is fast (mtime stat + manifest read), not fake
+      zero-reported durations. _(incremental scenarios wall-clock contract)_
 
 ### Dependency graph + invalidation (CL-04 §IS.2–§IS.3)
 
 - [ ] Editing one reader's input file invalidates exactly that reader's
-  cache entry; the other 8 readers cacheHit on the next compile.
+      cache entry; the other 8 readers cacheHit on the next compile.
 - [ ] Downstream stages (`modelToIR`, `baselineAnalysis`, `enforceR5`,
-  `emit`, `validate`) ALWAYS re-run on any reader cache miss — they MUST
-  NOT cacheHit when any upstream byte-hash has changed. *(S01-F03, S02-F04)*
+      `emit`, `validate`) ALWAYS re-run on any reader cache miss — they MUST
+      NOT cacheHit when any upstream byte-hash has changed. _(S01-F03, S02-F04)_
 - [ ] Key rotation (either `compiler.version` bump OR audit-chain signing
-  key rotation) invalidates ALL 9 readers AND all 5 downstream stages on
-  the next compile — the effective cache key for every stage includes key
-  identity as required by §IS.1. *(S03-F01, F02)*
+      key rotation) invalidates ALL 9 readers AND all 5 downstream stages on
+      the next compile — the effective cache key for every stage includes key
+      identity as required by §IS.1. _(S03-F01, F02)_
 - [ ] `claws cache clear` (pulse 79) and key rotation converge: after
-  either, the next compile produces identical emit output and identical
-  `stageTimings` structure (all `cacheHit:false`). *(S03-F08)*
+      either, the next compile produces identical emit output and identical
+      `stageTimings` structure (all `cacheHit:false`). _(S03-F08)_
 
 ### Wall-clock targets (canonical fixture)
 
 - [ ] Canonical fixture is documented and sized so the 80% reduction
-  target is meaningful: non-trivial SOUL, tools, agents, lobster content
-  such that from-scratch compile is ≥100ms and the 8 cached readers'
-  combined ≤16ms is a small fraction. *(S01-F02, S02-F06)*
+      target is meaningful: non-trivial SOUL, tools, agents, lobster content
+      such that from-scratch compile is ≥100ms and the 8 cached readers'
+      combined ≤16ms is a small fraction. _(S01-F02, S02-F06)_
 - [ ] Lobster-only edit: second compile wall-clock ≥80% lower than
-  from-scratch baseline on canonical fixture. *(incremental/S01)*
+      from-scratch baseline on canonical fixture. _(incremental/S01)_
 - [ ] SOUL-only edit: second compile wall-clock ≥80% lower than
-  from-scratch baseline on canonical fixture. *(S02-F02)*
+      from-scratch baseline on canonical fixture. _(S02-F02)_
 - [ ] Key rotation: second compile wall-clock within ±10% of from-scratch
-  baseline — not significantly faster (would indicate partial caching bug)
-  and not significantly slower (would indicate rotation overhead).
-  *(S03-F05)*
+      baseline — not significantly faster (would indicate partial caching bug)
+      and not significantly slower (would indicate rotation overhead).
+      _(S03-F05)_
 
 ### Atomic emit + principle observability (CL-04 §IS.7)
 
 - [ ] Every emit path uses tempfile-plus-rename (`<target>.tmp-<pid>-<nonce>`);
-  zero remaining in-place writes in the emit pipeline.
+      zero remaining in-place writes in the emit pipeline.
 - [ ] Stale tempfile sweep runs at emit start; orphans from prior
-  interrupted compiles are removed before new emit.
+      interrupted compiles are removed before new emit.
 - [ ] A semantically meaningful new SOUL principle (e.g. a new list item
-  with non-trivial text) is observable in emit output — rendered as a
-  generated comment, exported constant, or runtime-queryable metadata.
-  *(S02-F03, F05)*
+      with non-trivial text) is observable in emit output — rendered as a
+      generated comment, exported constant, or runtime-queryable metadata.
+      _(S02-F03, F05)_
 - [ ] After audit-chain key rotation with all 9 inputs unchanged, emit
-  output bytes MUST differ from the pre-rotation bytes (signatures
-  embedded in output). Byte-identical emit across a rotation is a test
-  failure. *(S03-F04, already spec'd in §IS.7)*
+      output bytes MUST differ from the pre-rotation bytes (signatures
+      embedded in output). Byte-identical emit across a rotation is a test
+      failure. _(S03-F04, already spec'd in §IS.7)_
 
 ### Test hooks + fixtures
 
 - [ ] `CLAWS_COMPILER_VERSION_OVERRIDE` env var changes the effective
-  `compiler.version` ONLY when `NODE_ENV=test`; production builds ignore
-  it. Unit test asserts both directions. *(S03-F03)*
+      `compiler.version` ONLY when `NODE_ENV=test`; production builds ignore
+      it. Unit test asserts both directions. _(S03-F03)_
 - [ ] Parametrized per-reader scoping test exercises all 9 readers with
-  the same assertion template (change one input → only that reader
-  invalidates). *(S02-F07)*
+      the same assertion template (change one input → only that reader
+      invalidates). _(S02-F07)_
 
 ### Quality gates
 
 - [ ] `claws-sdk` per-file coverage 95/90/95/95 (stmts/branches/funcs/lines)
-  on new files.
+      on new files.
 - [ ] `cd claws-sdk && npx tsc --noEmit` exits 0.
 - [ ] `cd claws-sdk && npx vitest run --project unit --coverage` passes.
 - [ ] `cd claws-sdk && npx vitest run --project integration` passes.
@@ -325,8 +325,8 @@ StageName` discriminator. Pulse 80 emits:
 - `cache.write` with `stage` set at the end of each stage's run on a
   successful path only. On compile failure (enforce denied, emit throws,
   validate rejects), NO stage-level `cache.write` fires and NO stage
-  cache entry is persisted. *(CL-14 §9.3 `cache.write` success-only rule,
-  hot-reload/S01-F07)*
+  cache entry is persisted. _(CL-14 §9.3 `cache.write` success-only rule,
+  hot-reload/S01-F07)_
 
 Emission is opt-in: absent `CompileOptions.events`, the compiler MUST NOT
 allocate a bus or emit events (§9.3 zero-cost-when-unused).

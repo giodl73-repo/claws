@@ -6,6 +6,7 @@ trust: composition
 # compo-todo-trio
 
 Composition workspace bringing together 3 plugin(s):
+
 - `plugins/todoist/`
 - `plugins/things/`
 - `plugins/apple-reminders/`

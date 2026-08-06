@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "flutter plugin (mobile)",
   "contributes": {
-    "tools": [
-      "flutter/run",
-      "flutter/build-apk"
-    ],
-    "skills": [
-      "flutter/run",
-      "flutter/build-apk"
-    ]
+    "tools": ["flutter/run", "flutter/build-apk"],
+    "skills": ["flutter/run", "flutter/build-apk"]
   }
 }

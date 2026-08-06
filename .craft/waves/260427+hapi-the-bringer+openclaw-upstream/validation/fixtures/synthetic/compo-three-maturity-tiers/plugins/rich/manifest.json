@@ -3,11 +3,7 @@
   "version": "0.1.0",
   "description": "rich plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "rich/orchestrate"
-    ],
-    "skills": [
-      "rich/orchestrate"
-    ]
+    "tools": ["rich/orchestrate"],
+    "skills": ["rich/orchestrate"]
   }
 }

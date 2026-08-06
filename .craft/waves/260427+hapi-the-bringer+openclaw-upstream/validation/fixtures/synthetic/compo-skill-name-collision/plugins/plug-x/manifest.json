@@ -3,11 +3,7 @@
   "version": "0.1.0",
   "description": "plug-x plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "plug-x/summarize"
-    ],
-    "skills": [
-      "plug-x/summarize"
-    ]
+    "tools": ["plug-x/summarize"],
+    "skills": ["plug-x/summarize"]
   }
 }

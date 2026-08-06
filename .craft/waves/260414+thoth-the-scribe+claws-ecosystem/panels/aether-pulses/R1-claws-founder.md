@@ -125,11 +125,11 @@ The secondary concern is **community impact of mandatory governance**: blob veri
 
 ### Severity Tally
 
-| Severity | Count | IDs |
-|----------|-------|-----|
-| Must-fix (M) | 3 | F1, F2, F5 |
-| Worth-fixing (W) | 3 | F3, F4, F6 |
-| Noted (N) | 2 | F8, F9 |
+| Severity         | Count | IDs        |
+| ---------------- | ----- | ---------- |
+| Must-fix (M)     | 3     | F1, F2, F5 |
+| Worth-fixing (W) | 3     | F3, F4, F6 |
+| Noted (N)        | 2     | F8, F9     |
 
 ### Verdict
 

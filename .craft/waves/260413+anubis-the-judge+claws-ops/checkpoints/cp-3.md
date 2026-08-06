@@ -11,23 +11,28 @@ review_panel: [claws:gateway-eng, claws:platform-eng, craft:architect, claws:cis
 ## Dispatch Plan
 
 ### Batch 1 (parallel)
+
 - Pulse 19: snap-save-restore — save manifest with SHA-256 hashes, restore with integrity verification
 - Pulse 20: fleet-scan — workspace discovery via marker files, 3-state classification
 
 ### Batch 2 (depends on batch 1)
+
 - Pulse 21: snap-diff — governance-aware semantic diff (compile both snapshots, compare IR)
 - Pulse 22: fleet-drift — SHA-256 hash baseline comparison, severity classification
 - Pulse 23: fleet-broadcast — policy push with manifest atomicity, partial failure retry
 
 ### Batch 3 (depends on batch 2)
+
 - Pulse 24: snap-promote — pinch gate verification, fleet registry signing, provenance chain
 - Pulse 25: fleet-kill — 3 kill paths (sentinel + sidecar + SIGTERM), deny-all semantics, audit
 - Pulse 26: fleet-report — compliance matrix (workspace × framework), CSV + JSON output
 
 ### Batch 4 (depends on batch 3)
+
 - Pulse 27: e2e-fleet-loop — scan 3 fixtures → broadcast policy → drift detect → snap save → kill → verify audit
 
 ## Exit Criteria
+
 - [ ] `claws snap save` captures claws.json + policies + IR + cache with per-file SHA-256
 - [ ] `claws snap restore` verifies integrity, aborts on tamper, restores byte-identical
 - [ ] `claws snap diff` shows semantic changes (tool risk, policy, violations), not file diffs

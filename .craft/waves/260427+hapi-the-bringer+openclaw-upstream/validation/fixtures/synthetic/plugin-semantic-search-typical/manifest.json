@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "semantic-search plugin (search)",
   "contributes": {
-    "tools": [
-      "semantic-search/index",
-      "semantic-search/query"
-    ],
-    "skills": [
-      "semantic-search/index",
-      "semantic-search/query"
-    ]
+    "tools": ["semantic-search/index", "semantic-search/query"],
+    "skills": ["semantic-search/index", "semantic-search/query"]
   }
 }

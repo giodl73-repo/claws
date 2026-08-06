@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "zoom plugin (work)",
   "contributes": {
-    "tools": [
-      "zoom/create-meeting"
-    ],
-    "skills": [
-      "zoom/create-meeting"
-    ]
+    "tools": ["zoom/create-meeting"],
+    "skills": ["zoom/create-meeting"]
   }
 }

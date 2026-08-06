@@ -13,6 +13,7 @@ Evaluating whether 25-package extraction serves the open-source community or fra
 ## Findings
 
 ### F01 — Open-sourcing building blocks is the moat, not the risk [M]
+
 **Severity**: Must-address
 **Category**: Strategic positioning
 
@@ -21,6 +22,7 @@ The plan says extracted packages like @craftworks/oc-readers and @craftworks/cry
 **Recommendation**: Phase 1-2 leaf and core packages should target public npm from day one. Crypto, normalize, oc-readers, oc-ir are foundational and non-controversial. Gate the governance/execution packages if needed, but the readers are table stakes.
 
 ### F02 — 25 packages is ecosystem fragmentation, not ecosystem building [M]
+
 **Severity**: Must-address
 **Category**: Community experience
 
@@ -29,6 +31,7 @@ A contributor who wants to read OC workspaces today installs one package. Under 
 **Recommendation**: Consolidate to 8-10 packages that map to user-facing capabilities, not internal architecture. @craftworks/oc-toolkit (readers + IR + normalize + detect), @craftworks/governance (primitives + runtime), @craftworks/codegen (framework + all emitters), @craftworks/eval (framework + rubric), @craftworks/crypto (stays small), @craftworks/audit (chain + budget). Users pick by what they want to DO, not by which internal module the code came from.
 
 ### F03 — "Can the user rm -rf and walk away?" test fails at 25 deps [W]
+
 **Severity**: Warning
 **Category**: Vendor lock-in
 
@@ -37,6 +40,7 @@ The founder lens asks: can the user uninstall this? With 25 @craftworks/ package
 **Recommendation**: The "independently installable" claim needs an asterisk. Document the transitive depth for each package. Packages with 3+ transitive @craftworks/ deps are not independently installable in any meaningful sense — they're modules of a framework.
 
 ### F04 — No contributor experience section [M]
+
 **Severity**: Must-address
 **Category**: Community friction
 
@@ -45,6 +49,7 @@ The plan has scope, deliverables, and dependency graph. It has zero mention of h
 **Recommendation**: Add a "Contributor Experience" section: single repo, single `npm test` runs all, single issue tracker, cross-package CI, how to add a new test to an extracted package, how to verify backward compat.
 
 ### F05 — ~15 weeks is optimistic for 25 package extractions [W]
+
 **Severity**: Warning
 **Category**: Timeline
 
@@ -53,6 +58,7 @@ Each package extraction involves: package.json, move source, move tests, update 
 **Recommendation**: Budget 20 weeks and build in a consolidation checkpoint after Phase 2. If Phase 2 reveals that boundaries are messier than expected, that's the natural decision point to merge packages and reduce from 25 to 10-12.
 
 ### F06 — The @openclaw/* upstream contribution story is absent [M]
+
 **Severity**: Must-address
 **Category**: Ecosystem strategy
 
@@ -61,6 +67,7 @@ The plan extracts into @craftworks/ scope. But the founder's mandate includes up
 **Recommendation**: Define the relationship explicitly. Either (a) @craftworks/ packages ARE the upstream candidates, renamed to @openclaw/ when contributed, or (b) @openclaw/ packages are purpose-built subsets. The community needs to know which packages are "ours" vs "craftworks-internal."
 
 ### F07 — Per-platform emitters as 7 separate packages is premature [N]
+
 **Severity**: Note
 **Category**: Granularity
 
@@ -69,6 +76,7 @@ The plan extracts into @craftworks/ scope. But the founder's mandate includes up
 **Recommendation**: Bundle all emitters into @craftworks/codegen. If dynamic loading is needed later (third-party emitters), define a plugin interface within the single package.
 
 ### F08 — "Bug fixes propagate automatically through npm semver" is a promise, not a mechanism [W]
+
 **Severity**: Warning
 **Category**: Maintenance
 
@@ -80,8 +88,8 @@ H3 validates that "Bug fix in @craftworks/oc-readers -> npm update in @claws/com
 
 The extraction idea is sound — claws graduation needs it. But 25 packages optimizes for internal architecture rather than community experience. The founder lens says: if a contributor would be confused by the package map, the boundaries are wrong. Consolidate to 8-10 user-facing capability bundles, publish core packages to public npm from Phase 1, define the upstream @openclaw/* relationship, and add a contributor experience section. The 15-week timeline is tight; budget 20 with a Phase 2 checkpoint.
 
-| Severity | Count |
-|----------|-------|
-| Must-address | 4 |
-| Warning | 3 |
-| Note | 1 |
+| Severity     | Count |
+| ------------ | ----- |
+| Must-address | 4     |
+| Warning      | 3     |
+| Note         | 1     |

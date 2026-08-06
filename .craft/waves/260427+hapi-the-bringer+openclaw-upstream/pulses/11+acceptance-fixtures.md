@@ -28,7 +28,7 @@ This pulse is INTERNAL to our monorepo; runs after all upstream PRs merge so fix
 - [ ] `bot-preempt/03+scope-validate/` — F-03: unknown OperatorScope rejected
 - [ ] `bot-preempt/04+register-collision/` — F-04: (pluginId, registrationId) uniqueness
 - [ ] `bot-preempt/05+input-malformed/` — F-05: malformed placement/ttlMs/idempotencyKey rejected
-- [ ] `bot-preempt/06+proto-pollution/` — F-06: __proto__ pollution rejected
+- [ ] `bot-preempt/06+proto-pollution/` — F-06: **proto** pollution rejected
 - [ ] `bot-preempt/07+jumbo-payload/` — F-07: payload >1MB rejected
 - [ ] `bot-preempt/08+symbol-spread/` — F-08: Symbol-tagged variant survives spread
 - [ ] `bot-preempt/09+pr-description-audit/` — F-09: regex-scan PR body opens with mandated justification
@@ -115,9 +115,9 @@ This pulse is INTERNAL to our monorepo; runs after all upstream PRs merge so fix
 
 - [ ] If `packages/claws-sdk/tests/accept/scenarios.accept.test.ts` doesn't exist, create:
   ```typescript
-  import { resolve } from 'path';
-  import { runFromManifest } from '#e2e-lib/manifest-runner.js';
-  runFromManifest(resolve(__dirname, 'scenarios/manifest.yaml'));
+  import { resolve } from "path";
+  import { runFromManifest } from "#e2e-lib/manifest-runner.js";
+  runFromManifest(resolve(__dirname, "scenarios/manifest.yaml"));
   ```
 
 ## Verification Gate

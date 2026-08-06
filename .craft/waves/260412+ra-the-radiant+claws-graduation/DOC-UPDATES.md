@@ -32,13 +32,13 @@ Completion checklist: every doc surface touched by Ra I + Ra II, with status.
 
 ## Plan File Status
 
-| Plan | Before | After | Notes |
-|------|--------|-------|-------|
-| `claws-sdk-graduation` | Draft | **Implemented** | CP-1..CP-7 delivered (Ra I Phase 55) |
-| `claws-cap-integration` | Draft | **Implemented** | 43 serve routes landed across CP-5, CP-6, CP-7 |
-| `claws-compile-dx` | Draft | **Implemented** | watch + incremental + cache CLI + event bus (pulses 79-83) |
-| `claws-pre-extraction-packaging` | Draft | **Implemented** | 4 @bic/openclaw-* packages delivered across CP-8..CP-12 (Ra II Phase 56) |
-| `craftworks-package-extraction` | Draft | **Superseded** | Ra I CP-3 invalidated its premise; superseded header added |
+| Plan                             | Before | After           | Notes                                                                    |
+| -------------------------------- | ------ | --------------- | ------------------------------------------------------------------------ |
+| `claws-sdk-graduation`           | Draft  | **Implemented** | CP-1..CP-7 delivered (Ra I Phase 55)                                     |
+| `claws-cap-integration`          | Draft  | **Implemented** | 43 serve routes landed across CP-5, CP-6, CP-7                           |
+| `claws-compile-dx`               | Draft  | **Implemented** | watch + incremental + cache CLI + event bus (pulses 79-83)               |
+| `claws-pre-extraction-packaging` | Draft  | **Implemented** | 4 @bic/openclaw-* packages delivered across CP-8..CP-12 (Ra II Phase 56) |
+| `craftworks-package-extraction`  | Draft  | **Superseded**  | Ra I CP-3 invalidated its premise; superseded header added               |
 
 ## Indexes
 

@@ -5,6 +5,7 @@ The GQL pipeline validates GraphQL operations from `test-suites` and `client-web
 ## Pipeline Components
 
 ### AST Schema Validation (offline)
+
 Validates operations against the schema without a running server. Catches field mismatches, type errors, and deprecations.
 
 ```bash
@@ -15,6 +16,7 @@ node .scripts/gql-validate/validator.mjs --source client-web
 Results: `.claude/pipeline/results/<QueryName>.json`
 
 ### Live Execution Validation (requires running server)
+
 Executes queries against the live server to catch runtime errors: resolver crashes, auth failures, missing dependencies.
 
 ```bash
@@ -27,6 +29,7 @@ bash .scripts/gql-validate/live-validate.sh client-web
 ```
 
 Results are organized by phase:
+
 - `.claude/pipeline/live-results/<source>/phase-1/<Query>.json` — variable-free queries
 - `.claude/pipeline/live-results/<source>/phase-2/<Query>.json` — parameterized queries
 - `.claude/pipeline/live-results/<source>/skipped/<Query>.json` — mutations, subscriptions, unresolvable vars
@@ -37,15 +40,15 @@ Summary: `.claude/pipeline/live-results/_summary.json`
 
 All pipeline state lives under `.claude/pipeline/`:
 
-| Directory   | Purpose                              | Written by  | Read by         |
-|-------------|--------------------------------------|-------------|-----------------|
-| `results/`  | AST validation results (JSON per query) | runner   | fixer           |
-| `results/test-suites/` | Results for test-suites operations | runner | fixer |
-| `results/client-web/`  | Results for client-web operations  | runner | fixer |
-| `live-results/` | Live execution results by phase  | runner      | fixer           |
-| `fixes/`    | Fix summaries with PR URLs (JSON)    | fixer       | reviewer        |
-| `reviews/`  | Review decisions (JSON)              | reviewer    | fixer (rejects) |
-| `signals/`  | Inter-agent trigger files            | hooks       | all             |
+| Directory              | Purpose                                 | Written by | Read by         |
+| ---------------------- | --------------------------------------- | ---------- | --------------- |
+| `results/`             | AST validation results (JSON per query) | runner     | fixer           |
+| `results/test-suites/` | Results for test-suites operations      | runner     | fixer           |
+| `results/client-web/`  | Results for client-web operations       | runner     | fixer           |
+| `live-results/`        | Live execution results by phase         | runner     | fixer           |
+| `fixes/`               | Fix summaries with PR URLs (JSON)       | fixer      | reviewer        |
+| `reviews/`             | Review decisions (JSON)                 | reviewer   | fixer (rejects) |
+| `signals/`             | Inter-agent trigger files               | hooks      | all             |
 
 ### Multi-Source Fragment Isolation
 
@@ -84,7 +87,7 @@ Each source repo gets its **own isolated fragment namespace**. This is critical 
     {
       "message": "Cannot query field 'legacyId' on type 'Space'",
       "category": "SCHEMA_MISMATCH",
-      "locations": [{"line": 5, "column": 7}]
+      "locations": [{ "line": 5, "column": 7 }]
     }
   ],
   "deprecations": [
@@ -115,13 +118,13 @@ Each source repo gets its **own isolated fragment namespace**. This is critical 
 
 ## Error Categories
 
-| Category          | Meaning                                     | Fix approach                        |
-|-------------------|---------------------------------------------|-------------------------------------|
-| SCHEMA_MISMATCH   | Field in query doesn't exist in schema      | Remove or rename field              |
-| TYPE_ERROR        | Field type differs from expected            | Update type annotation or transform |
-| DEPRECATED        | Query uses deprecated field                 | Replace with successor field        |
-| VARIABLE_ERROR    | Missing or wrong variable types             | Fix variable definitions            |
-| FRAGMENT_ERROR    | Unknown or unused fragment reference        | Fix fragment spread or definition   |
+| Category        | Meaning                                | Fix approach                        |
+| --------------- | -------------------------------------- | ----------------------------------- |
+| SCHEMA_MISMATCH | Field in query doesn't exist in schema | Remove or rename field              |
+| TYPE_ERROR      | Field type differs from expected       | Update type annotation or transform |
+| DEPRECATED      | Query uses deprecated field            | Replace with successor field        |
+| VARIABLE_ERROR  | Missing or wrong variable types        | Fix variable definitions            |
+| FRAGMENT_ERROR  | Unknown or unused fragment reference   | Fix fragment spread or definition   |
 
 ## Tri-Repo Fix Strategy
 
@@ -149,11 +152,13 @@ The fixer operates across three repositories:
 Operations come from two source repos:
 
 **test-suites** (`$TEST_SUITES_DIR`):
+
 - `lib/src/scenario/graphql/queries/` — query files
 - `lib/src/scenario/graphql/mutations/` — mutation files
 - `lib/src/scenario/graphql/fragments/` — shared fragments
 
 **client-web** (`$CLIENT_WEB_DIR`):
+
 - `src/**/*.graphql` — operations and fragments (mixed files, 43 files contain both)
 - Excludes `src/core/apollo/generated/` (codegen output)
 

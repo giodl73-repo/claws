@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "video-frames plugin (media)",
   "contributes": {
-    "tools": [
-      "video-frames/extract"
-    ],
-    "skills": [
-      "video-frames/extract"
-    ]
+    "tools": ["video-frames/extract"],
+    "skills": ["video-frames/extract"]
   }
 }

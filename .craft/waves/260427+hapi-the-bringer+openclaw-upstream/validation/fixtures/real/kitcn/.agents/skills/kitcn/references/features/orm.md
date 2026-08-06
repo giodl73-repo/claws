@@ -80,9 +80,7 @@ parentId: text().references((): AnyColumn => commentsTable.id, {
 // - revision.pageLocaleId -> pageLocales.id
 // - pageLocales.currentRevisionId -> pageLocaleRevisions.id
 // - pageLocales.publishedRevisionId -> pageLocaleRevisions.id
-currentRevisionId: id("pageLocaleRevisions").references(
-  () => pageLocaleRevisions.id
-);
+currentRevisionId: id("pageLocaleRevisions").references(() => pageLocaleRevisions.id);
 
 // Table-level (foreignKey builder, for non-id references)
 import { foreignKey } from "kitcn/orm";
@@ -93,10 +91,7 @@ import { foreignKey } from "kitcn/orm";
 
 ```ts
 import { check, gt, isNotNull } from "kitcn/orm";
-(t) => [
-  check("age_over_18", gt(t.age, 18)),
-  check("email_present", isNotNull(t.email)),
-];
+(t) => [check("age_over_18", gt(t.age, 18)), check("email_present", isNotNull(t.email))];
 ```
 
 ## Indexes
@@ -119,24 +114,22 @@ import { index, searchIndex, vectorIndex } from 'kitcn/orm';
 ```ts
 import { defineSchema } from "kitcn/orm";
 
-export default defineSchema({ users, posts, tags, postsTags }).relations(
-  (r) => ({
-    users: {
-      posts: r.many.posts(),
-    },
-    posts: {
-      author: r.one.users({ from: r.posts.authorId, to: r.users.id }),
-      // optional: false → non-nullable return type
-      // alias: 'author' → disambiguate multiple relations to same table
-      // where: { published: true } → predefined filter
-    },
-    // Many-to-many via join table
-    postsTags: {
-      post: r.one.posts({ from: r.postsTags.postId, to: r.posts.id }),
-      tag: r.one.tags({ from: r.postsTags.tagId, to: r.tags.id }),
-    },
-  })
-);
+export default defineSchema({ users, posts, tags, postsTags }).relations((r) => ({
+  users: {
+    posts: r.many.posts(),
+  },
+  posts: {
+    author: r.one.users({ from: r.posts.authorId, to: r.users.id }),
+    // optional: false → non-nullable return type
+    // alias: 'author' → disambiguate multiple relations to same table
+    // where: { published: true } → predefined filter
+  },
+  // Many-to-many via join table
+  postsTags: {
+    post: r.one.posts({ from: r.postsTags.postId, to: r.posts.id }),
+    tag: r.one.tags({ from: r.postsTags.tagId, to: r.tags.id }),
+  },
+}));
 ```
 
 Plugin relation composition:
@@ -183,22 +176,22 @@ const userRelations = defineRelationsPart({ users, posts }, (r) => ({
 Polymorphism is schema-first via a discriminator column builder.
 
 ```ts
-import { boolean, convexTable, discriminator, id, index, integer, text } from 'kitcn/orm';
+import { boolean, convexTable, discriminator, id, index, integer, text } from "kitcn/orm";
 
 const auditLogs = convexTable(
-  'audit_logs',
+  "audit_logs",
   {
     timestamp: integer().notNull(),
     actionType: discriminator({
-      as: 'details', // optional, default "details"
+      as: "details", // optional, default "details"
       variants: {
         role_change: {
-          targetUserId: id('users'),
+          targetUserId: id("users"),
           oldRole: text().notNull(),
           newRole: text().notNull(),
         },
         document_update: {
-          documentId: id('documents'),
+          documentId: id("documents"),
           version: integer().notNull(),
           changes: text().notNull(),
         },
@@ -211,14 +204,15 @@ const auditLogs = convexTable(
     }),
   },
   (t) => [
-    index('by_action_ts').on(t.actionType, t.timestamp),
-    index('by_role_target').on(t.actionType, t.targetUserId),
-    index('by_doc').on(t.actionType, t.documentId),
-  ]
+    index("by_action_ts").on(t.actionType, t.timestamp),
+    index("by_role_target").on(t.actionType, t.targetUserId),
+    index("by_doc").on(t.actionType, t.documentId),
+  ],
 );
 ```
 
 Behavior:
+
 - Storage and writes are flat (`actionType`, `targetUserId`, `documentId`, ...)
 - Reads synthesize nested discriminated data at `details` (or custom `as`)
 - `withVariants: true` auto-loads all `one()` relations on discriminator tables
@@ -231,7 +225,7 @@ const rows = await ctx.orm.query.audit_logs.findMany({
 });
 
 for (const row of rows) {
-  if (row.actionType === 'role_change') {
+  if (row.actionType === "role_change") {
     row.details.targetUserId;
     row.details.oldRole;
   }
@@ -239,6 +233,7 @@ for (const row of rows) {
 ```
 
 Rules:
+
 - One `discriminator(...)` discriminator column per table (current limit)
 - Variant keys become discriminator literals
 - Variant fields are generated as nullable physical columns
@@ -257,9 +252,7 @@ Rules:
 ## Schema Definition
 
 ```ts
-import {
-  defineSchema,
-} from "kitcn/orm";
+import { defineSchema } from "kitcn/orm";
 
 // defineSchema takes tables map (not relations)
 export default defineSchema(tables, {
@@ -280,7 +273,7 @@ export default defineSchema(tables, {
     posts: r.many.posts(),
   },
   posts: {
-      author: r.one.users({ from: r.posts.authorId, to: r.users.id }),
+    author: r.one.users({ from: r.posts.authorId, to: r.users.id }),
   },
 }));
 ```
@@ -337,7 +330,7 @@ Use select-pipeline distinct instead:
 const page = await ctx.orm.query.todos
   .select()
   .where({ projectId })
-  .distinct({ fields: ['status'] })
+  .distinct({ fields: ["status"] })
   .paginate({ cursor: null, limit: 100 });
 ```
 
@@ -407,8 +400,7 @@ await ctx.orm.query.users.findMany({
 
 ```ts
 const admins = await ctx.orm.query.users.findMany({
-  where: (users, { and, eq, isNotNull }) =>
-    and(eq(users.role, "admin"), isNotNull(users.email)),
+  where: (users, { and, eq, isNotNull }) => and(eq(users.role, "admin"), isNotNull(users.email)),
 });
 ```
 
@@ -424,8 +416,7 @@ return await ctx.orm.query.characters
   .findMany({
     where: (_characters, { predicate }) =>
       predicate((char) => {
-        if (input.category && !char.categories?.includes(input.category))
-          return false;
+        if (input.category && !char.categories?.includes(input.category)) return false;
         if (input.minScore && char.score < input.minScore) return false;
         return true;
       }),
@@ -459,12 +450,7 @@ Each search index searches ONE field with optional equality filter fields.
 ### Search schema
 
 ```ts
-import {
-  convexTable,
-  defineSchema,
-  searchIndex,
-  text,
-} from "kitcn/orm";
+import { convexTable, defineSchema, searchIndex, text } from "kitcn/orm";
 
 export const articles = convexTable(
   "articles",
@@ -477,7 +463,7 @@ export const articles = convexTable(
   (t) => [
     searchIndex("search_content").on(t.content).filter(t.category, t.author),
     searchIndex("search_title").on(t.title),
-  ]
+  ],
 );
 ```
 
@@ -669,9 +655,7 @@ Search mode supports `search.filters` plus base-table object `where`. For predic
 **Option 1: Add more filterFields** (recommended)
 
 ```ts
-searchIndex("search_content")
-  .on(t.content)
-  .filter(t.category, t.author, t.status, t.dateGroup);
+searchIndex("search_content").on(t.content).filter(t.category, t.author, t.status, t.dateGroup);
 ```
 
 **Option 2: Separate query paths**
@@ -770,10 +754,7 @@ import { eq } from "kitcn/orm";
 import { user } from "./schema";
 
 // Basic
-await ctx.orm
-  .update(user)
-  .set({ name: "Updated" })
-  .where(eq(user.id, input.id));
+await ctx.orm.update(user).set({ name: "Updated" }).where(eq(user.id, input.id));
 
 // Returning
 const [updated] = await ctx.orm
@@ -784,10 +765,7 @@ const [updated] = await ctx.orm
 
 // Unset a field
 import { unsetToken } from "kitcn/orm";
-await ctx.orm
-  .update(user)
-  .set({ nickname: unsetToken })
-  .where(eq(user.id, input.id));
+await ctx.orm.update(user).set({ nickname: unsetToken }).where(eq(user.id, input.id));
 
 // Update without .where() throws — use .allowFullScan() to opt in
 await ctx.orm.update(user).set({ role: "member" }).allowFullScan();
@@ -799,10 +777,7 @@ await ctx.orm.update(user).set({ role: "member" }).allowFullScan();
 await ctx.orm.delete(user).where(eq(user.id, input.id));
 
 // Returning
-const [deleted] = await ctx.orm
-  .delete(user)
-  .where(eq(user.id, input.id))
-  .returning();
+const [deleted] = await ctx.orm.delete(user).where(eq(user.id, input.id)).returning();
 
 // Delete all (use with care)
 await ctx.orm.delete(user).allowFullScan();
@@ -819,16 +794,13 @@ const user = convexTable(
     slug: text().notNull(),
     deletionTime: integer(),
   },
-  () => [deletion("scheduled", { delayMs: 60_000 })]
+  () => [deletion("scheduled", { delayMs: 60_000 })],
 );
 
 // Per-query overrides
 await ctx.orm.delete(user).where(eq(user.id, id)).hard(); // immediate
 await ctx.orm.delete(user).where(eq(user.id, id)).soft(); // mark deleted
-await ctx.orm
-  .delete(user)
-  .where(eq(user.id, id))
-  .scheduled({ delayMs: 60_000 });
+await ctx.orm.delete(user).where(eq(user.id, id)).scheduled({ delayMs: 60_000 });
 
 // Cancel scheduled delete: clear/change deletionTime before worker runs
 ```
@@ -892,7 +864,7 @@ export const secrets = convexTable.withRLS(
       for: "delete",
       using: (ctx) => eq(t.ownerId, ctx.viewerId),
     }),
-  ]
+  ],
 );
 ```
 
@@ -945,25 +917,25 @@ export default defineSchema({ comments, posts })
     },
   }))
   .triggers({
-  comments: {
-    create: {
-      after: async (doc, ctx) => {
-        await ctx.orm
-          .update(posts)
-          .set({ lastCommentAt: new Date() })
-          .where(eq(posts.id, doc.postId));
+    comments: {
+      create: {
+        after: async (doc, ctx) => {
+          await ctx.orm
+            .update(posts)
+            .set({ lastCommentAt: new Date() })
+            .where(eq(posts.id, doc.postId));
+        },
+      },
+      delete: {
+        after: async (doc, ctx) => {
+          await ctx.orm
+            .update(posts)
+            .set({ lastCommentAt: new Date() })
+            .where(eq(posts.id, doc.postId));
+        },
       },
     },
-    delete: {
-      after: async (doc, ctx) => {
-        await ctx.orm
-          .update(posts)
-          .set({ lastCommentAt: new Date() })
-          .where(eq(posts.id, doc.postId));
-      },
-    },
-  },
-});
+  });
 ```
 
 ### change payload
@@ -974,15 +946,15 @@ export default defineSchema({ comments })
     comments: {},
   }))
   .triggers({
-  comments: {
-    change: async (change, ctx) => {
-      change.id; // always present
-      change.operation; // 'insert' | 'update' | 'delete'
-      change.oldDoc; // null on insert
-      change.newDoc; // null on delete
+    comments: {
+      change: async (change, ctx) => {
+        change.id; // always present
+        change.operation; // 'insert' | 'update' | 'delete'
+        change.oldDoc; // null on insert
+        change.newDoc; // null on delete
+      },
     },
-  },
-});
+  });
 ```
 
 ### Aggregate triggers
@@ -995,10 +967,10 @@ export default defineSchema({ postLikes })
     postLikes: {},
   }))
   .triggers({
-  postLikes: {
-    change: aggregatePostLikes.trigger,
-  },
-});
+    postLikes: {
+      change: aggregatePostLikes.trigger,
+    },
+  });
 ```
 
 ### `withoutTriggers`
@@ -1078,7 +1050,7 @@ export const post = convexTable(
     index("by_author_created").on(t.authorId, t.createdAt),
     searchIndex("search_title").on(t.title).filter(t.authorId),
     deletion("scheduled", { delayMs: 60_000 }),
-  ]
+  ],
 );
 
 const tables = { user, post };
@@ -1122,23 +1094,23 @@ export default defineSchema(tables, {
 
 All from `kitcn/orm`:
 
-| Builder                         | TS Type       | Convex                 | Notes                                      |
-| ------------------------------- | ------------- | ---------------------- | ------------------------------------------ |
-| `text()`                        | `string`      | `v.string()`           |                                            |
-| `textEnum(['a','b'] as const)`  | `'a' \| 'b'`  | `v.string()`           | Runtime-validated                          |
-| `integer()`                     | `number`      | `v.number()`           | Float64                                    |
-| `boolean()`                     | `boolean`     | `v.boolean()`          |                                            |
-| `bigint()`                      | `bigint`      | `v.int64()`            |                                            |
-| `timestamp()`                   | `Date`        | `v.number()`           | `.defaultNow()` for createdAt              |
-| `timestamp({ mode: 'string' })` | `string`      | `v.number()`           |                                            |
-| `date()`                        | `string`      | `v.string()`           | YYYY-MM-DD, or `{ mode: 'date' }` → `Date` |
-| `id('table')`                   | `Id<'table'>` | `v.id('table')`        | Typed reference                            |
-| `vector(dims)`                  | `number[]`    | `v.array(v.float64())` | For vectorIndex                            |
-| `bytes()`                       | `ArrayBuffer` | `v.bytes()`            |                                            |
-| `unionOf(text(), integer())`    | `string \| number` | `v.union(...)`    | Builder-only scalar union sugar            |
-| `objectOf(text().notNull())`    | `Record<string, string>` | `v.record(...)` | Homogeneous record values                  |
-| `json<T>()`                     | `T`           | `v.any()`              | Type-only, no runtime validation           |
-| `custom(validator)`             | inferred      | any `v.*`              | Full Convex validator                      |
+| Builder                         | TS Type                  | Convex                 | Notes                                      |
+| ------------------------------- | ------------------------ | ---------------------- | ------------------------------------------ |
+| `text()`                        | `string`                 | `v.string()`           |                                            |
+| `textEnum(['a','b'] as const)`  | `'a' \| 'b'`             | `v.string()`           | Runtime-validated                          |
+| `integer()`                     | `number`                 | `v.number()`           | Float64                                    |
+| `boolean()`                     | `boolean`                | `v.boolean()`          |                                            |
+| `bigint()`                      | `bigint`                 | `v.int64()`            |                                            |
+| `timestamp()`                   | `Date`                   | `v.number()`           | `.defaultNow()` for createdAt              |
+| `timestamp({ mode: 'string' })` | `string`                 | `v.number()`           |                                            |
+| `date()`                        | `string`                 | `v.string()`           | YYYY-MM-DD, or `{ mode: 'date' }` → `Date` |
+| `id('table')`                   | `Id<'table'>`            | `v.id('table')`        | Typed reference                            |
+| `vector(dims)`                  | `number[]`               | `v.array(v.float64())` | For vectorIndex                            |
+| `bytes()`                       | `ArrayBuffer`            | `v.bytes()`            |                                            |
+| `unionOf(text(), integer())`    | `string \| number`       | `v.union(...)`         | Builder-only scalar union sugar            |
+| `objectOf(text().notNull())`    | `Record<string, string>` | `v.record(...)`        | Homogeneous record values                  |
+| `json<T>()`                     | `T`                      | `v.any()`              | Type-only, no runtime validation           |
+| `custom(validator)`             | inferred                 | any `v.*`              | Full Convex validator                      |
 
 ### Operators
 

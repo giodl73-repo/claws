@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "todoist plugin (productivity)",
   "contributes": {
-    "tools": [
-      "todoist/create-task",
-      "todoist/list-tasks"
-    ],
-    "skills": [
-      "todoist/create-task",
-      "todoist/list-tasks"
-    ],
-    "workflows": [
-      "todoist-flow.lobster"
-    ],
+    "tools": ["todoist/create-task", "todoist/list-tasks"],
+    "skills": ["todoist/create-task", "todoist/list-tasks"],
+    "workflows": ["todoist-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

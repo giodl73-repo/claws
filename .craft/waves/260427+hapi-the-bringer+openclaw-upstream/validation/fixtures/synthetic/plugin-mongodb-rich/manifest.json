@@ -4,18 +4,9 @@
   "version": "0.1.0",
   "description": "mongodb plugin (data)",
   "contributes": {
-    "tools": [
-      "mongodb/find",
-      "mongodb/insert",
-      "mongodb/delete-many"
-    ],
-    "skills": [
-      "mongodb/find",
-      "mongodb/insert"
-    ],
-    "workflows": [
-      "mongodb-flow.lobster"
-    ],
+    "tools": ["mongodb/find", "mongodb/insert", "mongodb/delete-many"],
+    "skills": ["mongodb/find", "mongodb/insert"],
+    "workflows": ["mongodb-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

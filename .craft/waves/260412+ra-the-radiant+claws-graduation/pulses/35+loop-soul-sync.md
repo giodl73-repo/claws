@@ -59,6 +59,7 @@ This is a HEAVY pulse. The soul-sections parser must handle arbitrary SOUL.md st
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, SDK-owns-logic rule
 - `.craft/roles/claws/platform-eng.md` — workspace file parsing patterns, GovernanceIR integration
 

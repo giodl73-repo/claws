@@ -4,7 +4,17 @@ slug: validation-layer
 plan: claws-cap-integration
 depends_on: [29, 23, 66]
 governing_roles: [craft:architect, claws:platform-eng, claws:ciso]
-scenario_codes: [cap-integration/S03, cap-integration/S04, cap-integration/S21, cap-integration/S22, cap-integration/S23, cap-integration/S24, cap-integration/S27, S32]
+scenario_codes:
+  [
+    cap-integration/S03,
+    cap-integration/S04,
+    cap-integration/S21,
+    cap-integration/S22,
+    cap-integration/S23,
+    cap-integration/S24,
+    cap-integration/S27,
+    S32,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 10
@@ -30,6 +40,7 @@ Build the write-time validation pipeline that enforces R5/fleet/governance rules
 Risk classification is read from GovernanceIR, not re-derived. Single source: the compile pipeline.
 
 Key enforcement points:
+
 - **R5 enforcement**: Tools classified as R5 (highest risk) cannot be toggled via any write path. R5 lock is absolute and non-negotiable.
 - **Fleet lock check**: Fail-closed on missing fleet policy (P-272). If the fleet policy file is absent or unparseable, all edits are denied. No silent fallback to permissive.
 - **Governance validation via GovernanceIR**: Each edit is checked against the compiled GovernanceIR for governance violations before writing.
@@ -74,6 +85,7 @@ The PatchError union covers 8 error codes: `R5_LOCKED`, `FLEET_LOCKED`, `GOVERNA
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — pipeline design, error type conventions, fail-closed patterns
 - `.craft/roles/claws/platform-eng.md` — SDK validation patterns, GovernanceIR integration
 - `.craft/roles/claws/ciso.md` — R5 enforcement, fleet lock security, governance deny rules

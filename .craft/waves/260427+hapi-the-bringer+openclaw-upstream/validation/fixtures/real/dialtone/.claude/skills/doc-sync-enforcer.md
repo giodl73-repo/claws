@@ -14,16 +14,16 @@ Updates `packages/dialtone-docs/src/content/` files to reflect source code chang
 
 ## Source → Doc Mapping
 
-| Source path | Doc file(s) in `packages/dialtone-docs/src/content/` |
-|---|---|
-| `packages/dialtone-tokens/` | `development/development-design-tokens.md`, `architecture/architecture-design-token-pipeline.md` |
-| `packages/dialtone-css/` | `development/development-css-utilities.md` |
-| `packages/dialtone-vue/` | `development/development-component-workflow.md`, `reference/reference-component-api-patterns.md`, `reference/reference-accessibility-checklist.md`, `development/development-testing.md` |
-| `packages/dialtone-icons/` | `development/development-icons.md` |
-| `.github/workflows/` | `workflows/workflow-ci-pipeline.md` |
-| Release config changes | `workflows/workflow-release-process.md` |
-| Branch strategy changes | `workflows/workflow-branch-strategy.md` |
-| Commit convention changes | `workflows/workflow-conventional-commits.md` |
+| Source path                 | Doc file(s) in `packages/dialtone-docs/src/content/`                                                                                                                                     |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/dialtone-tokens/` | `development/development-design-tokens.md`, `architecture/architecture-design-token-pipeline.md`                                                                                         |
+| `packages/dialtone-css/`    | `development/development-css-utilities.md`                                                                                                                                               |
+| `packages/dialtone-vue/`    | `development/development-component-workflow.md`, `reference/reference-component-api-patterns.md`, `reference/reference-accessibility-checklist.md`, `development/development-testing.md` |
+| `packages/dialtone-icons/`  | `development/development-icons.md`                                                                                                                                                       |
+| `.github/workflows/`        | `workflows/workflow-ci-pipeline.md`                                                                                                                                                      |
+| Release config changes      | `workflows/workflow-release-process.md`                                                                                                                                                  |
+| Branch strategy changes     | `workflows/workflow-branch-strategy.md`                                                                                                                                                  |
+| Commit convention changes   | `workflows/workflow-conventional-commits.md`                                                                                                                                             |
 
 ## Workflow
 

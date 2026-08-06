@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Drift detection**: compare resolved versions from lock file (not declared ranges), use package manager CLI for version resolution (not node_modules traversal), distinguish missing (not installed) from mismatched (wrong version)
 - **Platform manifest**: define manifest format (JSON schema) with version range syntax, support known-breaking annotations for version pairs, per-workspace manifest version pinning for split-version states
 - **Emitter broadcast**: detectPlatforms() must return all platforms (not just primary), broadcast must pin exact versions to prevent dependency cascade, per-workspace rollback on compilation failure

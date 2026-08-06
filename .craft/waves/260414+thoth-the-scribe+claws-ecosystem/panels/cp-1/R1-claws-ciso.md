@@ -22,19 +22,18 @@ CP-1 introduces foundational security infrastructure: secrets vault (AES-256-GCM
 
 ```typescript
 export function verifyPkce(codeVerifier: string, codeChallenge: string): boolean {
-  const expected = createHash('sha256')
-    .update(codeVerifier)
-    .digest('base64url');
-  return expected === codeChallenge;  // <-- timing oracle
+  const expected = createHash("sha256").update(codeVerifier).digest("base64url");
+  return expected === codeChallenge; // <-- timing oracle
 }
 ```
 
 The `===` operator on strings leaks timing information proportional to the length of the matching prefix. An attacker who can measure response times could theoretically recover the code challenge byte-by-byte. This is the same class of vulnerability that `timingSafeEqual` (already imported and used in `rotate.ts`) prevents.
 
 **Fix**: Use `timingSafeEqual` with fixed-length Buffer comparison:
+
 ```typescript
-const expectedBuf = Buffer.from(expected, 'utf-8');
-const actualBuf = Buffer.from(codeChallenge, 'utf-8');
+const expectedBuf = Buffer.from(expected, "utf-8");
+const actualBuf = Buffer.from(codeChallenge, "utf-8");
 if (expectedBuf.length !== actualBuf.length) return false;
 return timingSafeEqual(expectedBuf, actualBuf);
 ```
@@ -47,18 +46,20 @@ return timingSafeEqual(expectedBuf, actualBuf);
 **Severity**: M (Major)
 
 `validateJwtClaims` checks `exp` with clock skew tolerance but does not validate:
+
 - `iat` (issued-at) — a token from the distant future should be rejected
 - `nbf` (not-before) — token used before its validity window should be rejected
 
 An attacker who obtains a token with `nbf` set far in the future (pre-positioning) or `iat` from the past (replay) will pass validation. Enterprise OIDC deployments routinely set `nbf`.
 
 **Fix**: Add `nbf` and `iat` validation with the same `CLOCK_SKEW_TOLERANCE`:
+
 ```typescript
 if (claims.nbf !== undefined && claims.nbf > now + CLOCK_SKEW_TOLERANCE) {
-  throw new Error('JWT is not yet valid (nbf)');
+  throw new Error("JWT is not yet valid (nbf)");
 }
 if (claims.iat !== undefined && claims.iat > now + CLOCK_SKEW_TOLERANCE) {
-  throw new Error('JWT issued-at is in the future');
+  throw new Error("JWT issued-at is in the future");
 }
 ```
 
@@ -71,9 +72,9 @@ if (claims.iat !== undefined && claims.iat > now + CLOCK_SKEW_TOLERANCE) {
 
 ```typescript
 export function verifyKeyMaterial(a: string, b: string): boolean {
-  const bufA = Buffer.from(a, 'utf-8');
-  const bufB = Buffer.from(b, 'utf-8');
-  if (bufA.length !== bufB.length) return false;  // <-- timing leak
+  const bufA = Buffer.from(a, "utf-8");
+  const bufB = Buffer.from(b, "utf-8");
+  if (bufA.length !== bufB.length) return false; // <-- timing leak
   return timingSafeEqual(bufA, bufB);
 }
 ```
@@ -81,6 +82,7 @@ export function verifyKeyMaterial(a: string, b: string): boolean {
 The early return on length mismatch is measurably faster than the `timingSafeEqual` path. While `timingSafeEqual` requires equal-length buffers, the length check itself becomes a timing oracle that reveals whether the attacker's guess has the correct length. For key material comparison this is a meaningful information leak.
 
 **Fix**: Pad both buffers to the same length (max of the two) before comparison, or HMAC both values with a random nonce and compare the HMACs:
+
 ```typescript
 const maxLen = Math.max(bufA.length, bufB.length);
 const paddedA = Buffer.alloc(maxLen);
@@ -100,9 +102,10 @@ return bufA.length === bufB.length && timingSafeEqual(paddedA, paddedB);
 `publishToRegistry` and `queryRegistry` send Bearer tokens to `credentials.endpoint` without verifying the URL scheme is HTTPS. The Anthropic provider warns on HTTP (line 102-108 of `anthropic-provider.ts`) but the registry client does not. A misconfigured or MITM-downgraded endpoint would leak the registry API token in plaintext.
 
 **Fix**: Validate the endpoint URL before any fetch:
+
 ```typescript
-if (!credentials.endpoint.startsWith('https://')) {
-  throw new Error('Registry endpoint must use HTTPS — refusing to send credentials over HTTP');
+if (!credentials.endpoint.startsWith("https://")) {
+  throw new Error("Registry endpoint must use HTTPS — refusing to send credentials over HTTP");
 }
 ```
 
@@ -158,6 +161,7 @@ More critically, if two processes both detect a stale lock simultaneously, both 
 **Severity**: W (Warning)
 
 While the code correctly warns via `warnPlaintextKeyStorage` and applies `chmod(0o600)`, the `.env` file at `.claws/keys/.env` contains raw key material in `KEY_NAME=value` format. This file:
+
 1. May be inadvertently committed to git (no `.gitignore` entry verified)
 2. Survives process termination with key material on disk
 3. Is not scrubbed/zeroed on key deletion — `removeFromEnvFile` rewrites the file but does not overwrite the old content with zeros first
@@ -178,6 +182,7 @@ The API key is read from `process.env` and cached in `this.clientApiKey` as a st
 While this is the standard pattern for the Anthropic SDK (which also holds the key), minimizing additional copies of sensitive material reduces exposure in heap dumps.
 
 **Fix**: Compare keys using a hash rather than storing the raw key:
+
 ```typescript
 private clientApiKeyHash: string | undefined;
 // In getClient():
@@ -198,9 +203,10 @@ this.clientApiKeyHash = keyHash;
 This means an attacker can embed prompt injection in USER.md or MEMORY.md and the LLM extraction will follow the injected instructions. USER.md is especially dangerous because it contains user-authored content.
 
 **Fix**: Apply `withAdversarialGuard` in `buildSystemPrompt`:
+
 ```typescript
 export function buildSystemPrompt(source: string): string {
-  const base = [/* existing prompt lines */].join('\n');
+  const base = [/* existing prompt lines */].join("\n");
   return withAdversarialGuard(base);
 }
 ```
@@ -226,14 +232,14 @@ This is a defense-in-depth concern — the Buffer zeroing reduces exposure windo
 **Severity**: W (Warning)
 
 ```typescript
-  if (currentTier === 0) {
-    return {
-      compatible: true,
-      currentTier: 0,
-      policyTier,
-      reason: 'Workspace has no readable trust tier — broadcast allowed',
-    };
-  }
+if (currentTier === 0) {
+  return {
+    compatible: true,
+    currentTier: 0,
+    policyTier,
+    reason: "Workspace has no readable trust tier — broadcast allowed",
+  };
+}
 ```
 
 If a workspace's `claws.json` is corrupted, missing, or has an invalid trust tier, the broadcast is allowed. This fails open. An attacker who can corrupt or delete `claws.json` in a workspace can bypass all trust tier restrictions for that workspace.
@@ -289,16 +295,16 @@ The DER length encoder handles 1-byte and 2-byte lengths but not 3-byte or 4-byt
 
 ## Scorecard
 
-| Category | Assessment |
-|----------|-----------|
-| Crypto algorithm choices | Strong: AES-256-GCM, Argon2id, Ed25519, S256 PKCE |
-| Key hygiene | Good with gaps: timing leaks (M-01, M-03), missing vault chmod (M-05) |
-| Trust model integrity | Solid: monotonic tightening correct, but fails open on unreadable tier (W-07) |
-| Race condition mitigation | Adequate: file lock with O_EXCL is correct, TOCTOU on stale reclaim (W-02) |
-| Secrets management | Good: vault encryption solid, env storage needs scrubbing (W-03) |
-| Adversarial resistance | Strong for file-specific prompts, missing on generic path (W-05) |
-| Audit trail | Incomplete: rotation not audit-logged (N-05) |
-| HTTPS enforcement | Partial: LLM endpoint warns, registry client silent (M-04) |
+| Category                  | Assessment                                                                    |
+| ------------------------- | ----------------------------------------------------------------------------- |
+| Crypto algorithm choices  | Strong: AES-256-GCM, Argon2id, Ed25519, S256 PKCE                             |
+| Key hygiene               | Good with gaps: timing leaks (M-01, M-03), missing vault chmod (M-05)         |
+| Trust model integrity     | Solid: monotonic tightening correct, but fails open on unreadable tier (W-07) |
+| Race condition mitigation | Adequate: file lock with O_EXCL is correct, TOCTOU on stale reclaim (W-02)    |
+| Secrets management        | Good: vault encryption solid, env storage needs scrubbing (W-03)              |
+| Adversarial resistance    | Strong for file-specific prompts, missing on generic path (W-05)              |
+| Audit trail               | Incomplete: rotation not audit-logged (N-05)                                  |
+| HTTPS enforcement         | Partial: LLM endpoint warns, registry client silent (M-04)                    |
 
 **Must-fix before merge**: M-01, M-02, M-04, M-05, W-05
 **Should-fix**: M-03, W-01, W-07

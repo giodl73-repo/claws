@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "description": "notion plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "notion/read-page",
-      "notion/write-page"
-    ]
+    "tools": ["notion/read-page", "notion/write-page"]
   }
 }

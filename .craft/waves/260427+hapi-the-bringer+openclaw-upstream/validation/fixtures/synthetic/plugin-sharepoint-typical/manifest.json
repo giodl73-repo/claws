@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "sharepoint plugin (work)",
   "contributes": {
-    "tools": [
-      "sharepoint/read-doc",
-      "sharepoint/write-doc"
-    ],
-    "skills": [
-      "sharepoint/read-doc",
-      "sharepoint/write-doc"
-    ]
+    "tools": ["sharepoint/read-doc", "sharepoint/write-doc"],
+    "skills": ["sharepoint/read-doc", "sharepoint/write-doc"]
   }
 }

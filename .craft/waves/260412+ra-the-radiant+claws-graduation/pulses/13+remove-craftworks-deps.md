@@ -57,6 +57,7 @@ Validation: `grep -r '@craftworks' src/compile/ src/emit/ src/governance/` retur
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- monorepo structure, dependency management, barrel export conventions
 - `.craft/roles/claws/platform-eng.md` -- SDK internalization patterns, import rewiring strategy
 

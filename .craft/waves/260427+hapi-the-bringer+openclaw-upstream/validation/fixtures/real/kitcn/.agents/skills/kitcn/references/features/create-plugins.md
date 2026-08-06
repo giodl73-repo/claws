@@ -25,19 +25,18 @@ Use middleware-scoped access with one runtime primitive:
 
 ```ts
 // app code
-import { MyPlugin } from '@kitcn/my-plugin';
-import { createPluginsMyPluginCaller } from './generated/plugins/my-plugin.runtime';
-import { privateMutation } from './lib/crpc';
+import { MyPlugin } from "@kitcn/my-plugin";
+import { createPluginsMyPluginCaller } from "./generated/plugins/my-plugin.runtime";
+import { privateMutation } from "./lib/crpc";
 
 export const myPlugin = MyPlugin.configure({
   enabled: true,
 });
 
-export const myProcedure = privateMutation.use(myPlugin.middleware())
-  .mutation(async ({ ctx }) => {
-    const caller = createPluginsMyPluginCaller(ctx);
-    await caller.doWork({});
-  });
+export const myProcedure = privateMutation.use(myPlugin.middleware()).mutation(async ({ ctx }) => {
+  const caller = createPluginsMyPluginCaller(ctx);
+  await caller.doWork({});
+});
 ```
 
 Plugin packages should define their runtime entry with `definePlugin('<key>', ...)` from `kitcn/plugins` and expose a named plugin value such as `ResendPlugin`.
@@ -83,8 +82,8 @@ Expected shape:
 Canonical install:
 
 ```ts
-import { defineSchema } from 'kitcn/orm';
-import { myExtension } from '../lib/plugins/my-plugin/schema';
+import { defineSchema } from "kitcn/orm";
+import { myExtension } from "../lib/plugins/my-plugin/schema";
 
 export default defineSchema(tables).extend(myExtension());
 ```

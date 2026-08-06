@@ -4,7 +4,18 @@ slug: ts-codegen
 plan: claws-sdk-graduation
 depends_on: [7]
 governing_roles: [craft:codegen, craft:type-system, claws:platform-eng]
-scenario_codes: [codegen/S01, codegen/S02, codegen/S03, codegen/S04, emit-bedrock/S01, emit-copilot/S01, emit-crewai/S01, emit-cursor/S01, emit-langgraph/S01]
+scenario_codes:
+  [
+    codegen/S01,
+    codegen/S02,
+    codegen/S03,
+    codegen/S04,
+    emit-bedrock/S01,
+    emit-copilot/S01,
+    emit-crewai/S01,
+    emit-cursor/S01,
+    emit-langgraph/S01,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 6
@@ -59,6 +70,7 @@ The codegen produces: handler functions (typed request→response), configuratio
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/codegen.md` -- code generation patterns, TS emitter conventions, output validation
 - `.craft/roles/craft/type-system.md` -- strict typing in generated code, no `any`, discriminated unions
 - `.craft/roles/claws/platform-eng.md` -- SDK codegen module patterns

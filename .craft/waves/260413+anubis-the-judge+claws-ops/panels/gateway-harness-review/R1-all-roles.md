@@ -194,16 +194,16 @@ The plan mentions `claws build && claws test --sim --assert-no-regressions` as a
 
 ## Summary
 
-| Role | Findings | Severities |
-|------|----------|------------|
-| Founder | 3 | M, W, W |
-| CISO | 3 | M, M, W |
-| Compliance | 2 | M, W |
-| Gateway-Eng | 3 | M, M, W |
-| Skill Author | 3 | M, W, N |
-| New Hire | 3 | M, W, N |
-| Power User | 3 | M, W, N |
-| Platform-Eng | 3 | M, W, W |
+| Role         | Findings | Severities |
+| ------------ | -------- | ---------- |
+| Founder      | 3        | M, W, W    |
+| CISO         | 3        | M, M, W    |
+| Compliance   | 2        | M, W       |
+| Gateway-Eng  | 3        | M, M, W    |
+| Skill Author | 3        | M, W, N    |
+| New Hire     | 3        | M, W, N    |
+| Power User   | 3        | M, W, N    |
+| Platform-Eng | 3        | M, W, W    |
 
 **Total**: 23 findings (8M, 8W, 4N, 3W)
 

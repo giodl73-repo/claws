@@ -4,18 +4,9 @@
   "version": "0.1.0",
   "description": "obsidian plugin (productivity)",
   "contributes": {
-    "tools": [
-      "obsidian/read-note",
-      "obsidian/write-note",
-      "obsidian/link-graph"
-    ],
-    "skills": [
-      "obsidian/read-note",
-      "obsidian/write-note"
-    ],
-    "workflows": [
-      "obsidian-flow.lobster"
-    ],
+    "tools": ["obsidian/read-note", "obsidian/write-note", "obsidian/link-graph"],
+    "skills": ["obsidian/read-note", "obsidian/write-note"],
+    "workflows": ["obsidian-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

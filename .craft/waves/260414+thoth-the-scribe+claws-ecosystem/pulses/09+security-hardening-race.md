@@ -57,6 +57,7 @@ Address two THOTH-FINDINGS related to race conditions and module divergence:
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/ciso.md` — TOCTOU threat model, file locking security requirements
 - `.craft/roles/claws/platform-eng.md` — Node.js fs.open flags, O_EXCL semantics, module consolidation patterns
 

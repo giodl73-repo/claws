@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "gnuplot plugin (science)",
   "contributes": {
-    "tools": [
-      "gnuplot/plot"
-    ],
-    "skills": [
-      "gnuplot/plot"
-    ]
+    "tools": ["gnuplot/plot"],
+    "skills": ["gnuplot/plot"]
   }
 }

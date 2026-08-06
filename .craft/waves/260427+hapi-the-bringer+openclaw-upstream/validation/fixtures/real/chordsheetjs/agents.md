@@ -36,15 +36,15 @@ Always work test-driven:
 
 ### Commands
 
-| Command | When to use |
-|---------|-------------|
-| `yarn test` | Before committing - runs lint + all tests |
-| `yarn lint` | Quick check for code style issues |
-| `yarn lint:fix` | Fix auto-fixable lint issues |
-| `yarn build` | After changing `.pegjs` grammar files |
-| `yarn build -f` | Force rebuild (regenerate all parsers) |
-| `yarn build -r` | Build release files (for publishing) |
-| `yarn release [major\|minor\|patch]` | Full release to npm (see below) |
+| Command                              | When to use                               |
+| ------------------------------------ | ----------------------------------------- |
+| `yarn test`                          | Before committing - runs lint + all tests |
+| `yarn lint`                          | Quick check for code style issues         |
+| `yarn lint:fix`                      | Fix auto-fixable lint issues              |
+| `yarn build`                         | After changing `.pegjs` grammar files     |
+| `yarn build -f`                      | Force rebuild (regenerate all parsers)    |
+| `yarn build -r`                      | Build release files (for publishing)      |
+| `yarn release [major\|minor\|patch]` | Full release to npm (see below)           |
 
 ### When to Run What
 
@@ -118,6 +118,7 @@ yarn release [major|minor|patch]
 ```
 
 This command handles the full release process:
+
 1. Runs all checks (lint + tests)
 2. Builds all release files
 3. Bumps the version in `package.json`

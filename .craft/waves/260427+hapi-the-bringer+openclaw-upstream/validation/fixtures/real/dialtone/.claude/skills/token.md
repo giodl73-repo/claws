@@ -10,11 +10,11 @@ Token hierarchy, naming conventions, dark mode requirements, and reference synta
 
 ### 1. Determine the Correct Location
 
-| Token Purpose | File Location |
-| --- | --- |
-| Global color, space, font, shadow | `tokens/base/default.json` + `tokens/base/dark.json` |
-| Component-specific (e.g., button background) | `tokens/components/<component>/` |
-| Brand theming (e.g., Dialpad vs TalkDesk) | `tokens/theme/<brand>/` |
+| Token Purpose                                | File Location                                        |
+| -------------------------------------------- | ---------------------------------------------------- |
+| Global color, space, font, shadow            | `tokens/base/default.json` + `tokens/base/dark.json` |
+| Component-specific (e.g., button background) | `tokens/components/<component>/`                     |
+| Brand theming (e.g., Dialpad vs TalkDesk)    | `tokens/theme/<brand>/`                              |
 
 ### 2. Token References
 
@@ -28,21 +28,21 @@ Tokens reference other tokens using curly-brace syntax: `"{dtColor.neutral.900}"
 
 ## Spacing Scale Reference
 
-| Token | Value |
-| --- | --- |
-| `dtSpace0` | 0px |
-| `dtSpace100` | 2px |
-| `dtSpace200` | 4px |
-| `dtSpace300` | 6px |
-| `dtSpace400` | 8px |
-| `dtSpace450` | 10px |
-| `dtSpace500` | 12px |
-| `dtSpace550` | 14px |
-| `dtSpace600` | 16px |
-| `dtSpace650` | 20px |
-| `dtSpace700` | 24px |
-| `dtSpace750` | 32px |
-| `dtSpace800` | 48px |
+| Token        | Value |
+| ------------ | ----- |
+| `dtSpace0`   | 0px   |
+| `dtSpace100` | 2px   |
+| `dtSpace200` | 4px   |
+| `dtSpace300` | 6px   |
+| `dtSpace400` | 8px   |
+| `dtSpace450` | 10px  |
+| `dtSpace500` | 12px  |
+| `dtSpace550` | 14px  |
+| `dtSpace600` | 16px  |
+| `dtSpace650` | 20px  |
+| `dtSpace700` | 24px  |
+| `dtSpace750` | 32px  |
+| `dtSpace800` | 48px  |
 
 ## Verification
 

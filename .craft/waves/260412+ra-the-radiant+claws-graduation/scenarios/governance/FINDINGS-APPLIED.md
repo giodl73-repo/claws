@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Unified import**: re-export ordering (primitives before runtime before budget), named re-exports only for tree-shaking, subpath exports alongside root re-exports
 - **Name collision prevention**: exported name collision audit during merge, internal module boundaries preserved after merge, .d.ts must preserve JSDoc comments on re-export
 - **PolicyWalker consistency**: G-rule evaluation order G01-G29 sequential, depth-first pre-order traversal, equivalence comparison by decision + gate ID (not message text)

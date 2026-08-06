@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "matrix plugin (communication)",
   "contributes": {
-    "tools": [
-      "matrix/send-message",
-      "matrix/list-rooms"
-    ],
-    "skills": [
-      "matrix/send-message",
-      "matrix/list-rooms"
-    ],
-    "workflows": [
-      "matrix-flow.lobster"
-    ],
+    "tools": ["matrix/send-message", "matrix/list-rooms"],
+    "skills": ["matrix/send-message", "matrix/list-rooms"],
+    "workflows": ["matrix-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

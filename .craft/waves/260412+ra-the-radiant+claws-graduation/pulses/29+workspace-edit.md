@@ -71,6 +71,7 @@ Key invariant: after any edit, re-reading the file and diffing against the origi
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, module separation, barrel export conventions
 - `.craft/roles/claws/platform-eng.md` — SDK module patterns, OC file invariants, lossless write guarantees
 

@@ -65,6 +65,7 @@ Target: single-file edit → recompile completes in <200ms (40ms typical, 200ms 
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — cache design patterns, dependency graph conventions, performance budgets
 - `.craft/roles/claws/platform-eng.md` — CompilationHost integration, phase pipeline architecture
 

@@ -4,15 +4,9 @@
   "version": "0.1.0",
   "description": "matlab plugin (science)",
   "contributes": {
-    "tools": [
-      "matlab/run-script"
-    ],
-    "skills": [
-      "matlab/run-script"
-    ],
-    "workflows": [
-      "matlab-flow.lobster"
-    ],
+    "tools": ["matlab/run-script"],
+    "skills": ["matlab/run-script"],
+    "workflows": ["matlab-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

@@ -12,27 +12,27 @@
 
 ## Metrics
 
-| Metric | Value |
-|--------|-------|
-| Commits | 115 |
-| Plans | 11 (10 closed + 1 naming) |
-| Checkpoints | 5 |
-| Pulses | 31 |
-| Tests | 453 (362 pass + 82 skill-kit + 9 expected-fail) |
-| Acceptance | 65/74 scenarios (87.8%) |
-| Review findings | 37 Majors fixed across 3 checkpoint reviews |
-| Copilot threads | 53 resolved |
-| Packages | 4 new (claws-sdk, claws-cli, claws-skill-kit, claws-test) |
+| Metric          | Value                                                     |
+| --------------- | --------------------------------------------------------- |
+| Commits         | 115                                                       |
+| Plans           | 11 (10 closed + 1 naming)                                 |
+| Checkpoints     | 5                                                         |
+| Pulses          | 31                                                        |
+| Tests           | 453 (362 pass + 82 skill-kit + 9 expected-fail)           |
+| Acceptance      | 65/74 scenarios (87.8%)                                   |
+| Review findings | 37 Majors fixed across 3 checkpoint reviews               |
+| Copilot threads | 53 resolved                                               |
+| Packages        | 4 new (claws-sdk, claws-cli, claws-skill-kit, claws-test) |
 
 ## Wave Breakdown
 
-| CP | Name | Pulses | Key Deliverable |
-|----|------|--------|-----------------|
-| CP-1 | Foundation | P01-P05 | Packages, GovernanceIR, FailMode<R>, HMAC signing |
-| CP-2 | Detect + Parse + Skill-Kit | P06-P12, P23-P25 | 7-platform detection, 9-file parser, intent extraction, @bic/claws-skill-kit |
-| CP-3 | Rules + Emit | P13-P19 | 32 governance rules, gateway plugin emitter, workflow inversion, loss-aware routing |
-| CP-4 | CLI + Test Framework | P20-P22, P26-P28 | claws compile/check/build commands, GovernanceValidator, SecurityScanner |
-| CP-5 | Acceptance Harness | P29-P31 | 5 scenario runners, 74 workspace fixtures, manifest-driven acceptance suite |
+| CP   | Name                       | Pulses           | Key Deliverable                                                                     |
+| ---- | -------------------------- | ---------------- | ----------------------------------------------------------------------------------- |
+| CP-1 | Foundation                 | P01-P05          | Packages, GovernanceIR, FailMode<R>, HMAC signing                                   |
+| CP-2 | Detect + Parse + Skill-Kit | P06-P12, P23-P25 | 7-platform detection, 9-file parser, intent extraction, @bic/claws-skill-kit        |
+| CP-3 | Rules + Emit               | P13-P19          | 32 governance rules, gateway plugin emitter, workflow inversion, loss-aware routing |
+| CP-4 | CLI + Test Framework       | P20-P22, P26-P28 | claws compile/check/build commands, GovernanceValidator, SecurityScanner            |
+| CP-5 | Acceptance Harness         | P29-P31          | 5 scenario runners, 74 workspace fixtures, manifest-driven acceptance suite         |
 
 ## Mythological Parallel
 

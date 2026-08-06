@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "vitest plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "vitest/run"
-    ]
+    "tools": ["vitest/run"]
   }
 }

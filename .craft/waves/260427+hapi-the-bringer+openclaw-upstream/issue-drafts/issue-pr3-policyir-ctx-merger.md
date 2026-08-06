@@ -49,6 +49,7 @@ Why fix all three together: they're the same chain-of-custody story at different
 **Killer step**: `ctx.lkgFingerprint` thread-through closes the TOCTOU window. The gateway resolves the current LKG fingerprint of the PolicyIR file at hook-invocation time and threads it into `PluginHookToolContext`. Plugin caches keyed on `(sessionKey, lkgFingerprint.hash)`; cache miss triggers reload via `loadPolicyIR`. Stale replicas evict and reload automatically.
 
 **Defense in depth via two anchors**:
+
 - `policyId = sha256(jcs(body))` — content-canonical identity that survives re-serialization. Detects body tampering even if the on-disk bytes look fresh.
 - `LKGFingerprint.hash = sha256(rawBytes)` — bytes-on-disk integrity check enforced by the LKG store at observe time.
 

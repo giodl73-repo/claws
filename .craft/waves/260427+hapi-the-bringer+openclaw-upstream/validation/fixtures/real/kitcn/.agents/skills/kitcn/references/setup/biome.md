@@ -64,7 +64,7 @@ Exception: type-only imports from `generated/auth` need `biome-ignore`:
 
 ```ts
 // biome-ignore lint/style/noRestrictedImports: types
-import type { getAuth } from '../functions/generated/auth';
+import type { getAuth } from "../functions/generated/auth";
 ```
 
 ### Adding Exceptions
@@ -73,7 +73,7 @@ Use `biome-ignore` inline comments for legitimate rule violations:
 
 ```ts
 // biome-ignore lint/style/noRestrictedImports: types
-import type { ActionCtx } from './_generated/server';
+import type { ActionCtx } from "./_generated/server";
 ```
 
 ### Full Config
@@ -82,11 +82,7 @@ import type { ActionCtx } from './_generated/server';
 {
   "extends": ["ultracite/core", "ultracite/react", "ultracite/next"],
   "files": {
-    "includes": [
-      "!**/_generated",
-      "!**/generated",
-      "!**/convex/shared/api.ts"
-    ]
+    "includes": ["!**/_generated", "!**/generated", "!**/convex/shared/api.ts"],
   },
   "overrides": [
     {
@@ -101,20 +97,22 @@ import type { ActionCtx } from './_generated/server';
                 "paths": {
                   "convex/values": {
                     "importNames": ["ConvexError"],
-                    "message": "Use CRPCError from 'kitcn/crpc' instead."
+                    "message": "Use CRPCError from 'kitcn/crpc' instead.",
                   },
                   "convex/react": "Use useCRPC from '@/lib/convex/crpc' instead.",
-                  "convex/nextjs": "Use caller from '@/lib/convex/rsc' or createContext({ headers }).caller from '@/lib/convex/server' instead."
+                  "convex/nextjs": "Use caller from '@/lib/convex/rsc' or createContext({ headers }).caller from '@/lib/convex/server' instead.",
                 },
-                "patterns": [{
-                  "group": ["**/../convex/**"],
-                  "message": "Use @convex/* alias instead of relative convex imports."
-                }]
-              }
-            }
-          }
-        }
-      }
+                "patterns": [
+                  {
+                    "group": ["**/../convex/**"],
+                    "message": "Use @convex/* alias instead of relative convex imports.",
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
     },
     {
       // convex/ cannot import from src/ or _generated/server
@@ -128,24 +126,24 @@ import type { ActionCtx } from './_generated/server';
                 "paths": {
                   "convex/values": {
                     "importNames": ["ConvexError"],
-                    "message": "Use CRPCError from 'kitcn/crpc' instead."
-                  }
+                    "message": "Use CRPCError from 'kitcn/crpc' instead.",
+                  },
                 },
                 "patterns": [
                   {
                     "group": ["@/*", "**/src/**"],
-                    "message": "Convex files cannot import from src/."
+                    "message": "Convex files cannot import from src/.",
                   },
                   {
                     "group": ["**/_generated/server*"],
-                    "message": "Use convex/functions/generated/server instead of _generated/server."
-                  }
-                ]
-              }
-            }
-          }
-        }
-      }
+                    "message": "Use convex/functions/generated/server instead of _generated/server.",
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
     },
     {
       // convex/shared/ is client-importable, so restrict its imports
@@ -159,32 +157,31 @@ import type { ActionCtx } from './_generated/server';
                 "patterns": [
                   {
                     "group": ["@/*", "**/src/**"],
-                    "message": "Convex files cannot import from src/."
+                    "message": "Convex files cannot import from src/.",
                   },
                   {
                     "group": ["**/convex/lib/**", "../lib/**"],
-                    "message": "convex/shared cannot import from convex/lib."
+                    "message": "convex/shared cannot import from convex/lib.",
                   },
                   {
                     "group": ["**/convex/routers/**", "../routers/**"],
-                    "message": "convex/shared cannot import from convex/routers."
+                    "message": "convex/shared cannot import from convex/routers.",
                   },
                   {
                     "group": ["**/_generated/server*"],
-                    "message": "Use convex/functions/generated/server instead of _generated/server."
+                    "message": "Use convex/functions/generated/server instead of _generated/server.",
                   },
                   {
                     "group": ["**/../functions/*"],
-                    "message": "convex/shared cannot import from convex/functions."
-                  }
-                ]
-              }
-            }
-          }
-        }
-      }
-    }
-  ]
+                    "message": "convex/shared cannot import from convex/functions.",
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    },
+  ],
 }
 ```
-

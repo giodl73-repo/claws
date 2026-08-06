@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "openhue plugin (home)",
   "contributes": {
-    "tools": [
-      "openhue/set-light",
-      "openhue/list-lights"
-    ],
-    "skills": [
-      "openhue/set-light",
-      "openhue/list-lights"
-    ],
-    "workflows": [
-      "openhue-flow.lobster"
-    ],
+    "tools": ["openhue/set-light", "openhue/list-lights"],
+    "skills": ["openhue/set-light", "openhue/list-lights"],
+    "workflows": ["openhue-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

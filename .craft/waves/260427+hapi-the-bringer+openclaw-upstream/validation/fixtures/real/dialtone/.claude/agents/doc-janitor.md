@@ -38,6 +38,7 @@ Search the entire repo (excluding .git, node_modules, dist) for files matching t
 **Iteration/TODO artifacts:** `ITERATION_*.md`, `SKILLS_TODO*.md`, `TODO_*.md`
 
 For each file found, print:
+
 ```bash
 echo -e "\033[0;33m   📄 Found: $filepath\033[0m" >&2
 ```
@@ -47,6 +48,7 @@ echo -e "\033[0;33m   📄 Found: $filepath\033[0m" >&2
 For each candidate file:
 
 1. **Check if it exists on the base branch:**
+
    ```bash
    git show $BASE:$filepath 2>/dev/null
    ```
@@ -59,6 +61,7 @@ For each candidate file:
    - References to PRs, commits, or branches
 
 3. **Cross-reference with git history:**
+
    ```bash
    git log --oneline $BASE..HEAD
    ```
@@ -94,6 +97,7 @@ Print a colored summary:
 ```
 
 Use these colors:
+
 - Red (`\033[0;31m`) for files being deleted
 - Yellow (`\033[0;33m`) for files needing review
 - Green (`\033[0;32m`) for files being kept
@@ -104,15 +108,18 @@ Use these colors:
 ### Step 5 — Execute cleanup
 
 **Plan files** (`PLAN-*.md`, `PLAN.md`, `*-plan.md`, `implementation-plan.md`):
+
 - `DONE` → auto-delete. The work is committed and the plan served its purpose.
 - `STALE` / `ACTIVE` / `UNKNOWN` → **leave alone**. Report to the user. Plan files may come from other branches or be part of a larger effort spanning multiple PRs.
 
 **All other artifacts** (session, context, cleanup, backup, TODO, verification):
+
 - `STALE`, `DONE`, or `BACKUP` → auto-delete.
 - `UNKNOWN` → ask the user.
 - `ACTIVE` → leave alone.
 
 For each deletion:
+
 1. Delete the file with `rm`
 2. If the file is tracked by git, also run `git rm` to stage the deletion
 3. Print each deletion:

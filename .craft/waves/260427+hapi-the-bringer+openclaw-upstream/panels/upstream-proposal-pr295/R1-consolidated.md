@@ -6,13 +6,13 @@
 
 ## Panel verdicts
 
-| # | Persona | Verdict | Headline concern |
-|---|---|---|---|
-| 05 | The hobbyist | APPROVE-WITH-WARNINGS | PR-3 merger fix is a behavior footgun for users with multiple plugins installed — needs release-notes story + `openclaw doctor` improvement |
-| 07 | The enterprise IT admin | APPROVE-WITH-WARNINGS | Multi-tenant LKG isolation unspecified; merger widening needs deprecation window; sentinel guard is literal-only |
-| 08 | The compliance officer | APPROVE-WITH-WARNINGS | Multi-tenant isolation MUST be explicit (top priority); contract-level signing hook needed for SOC 2 / FedRAMP; the 3 [GAP]s need compensating-control runbooks |
-| 10 | The skill connector author | APPROVE-WITH-WARNINGS | `LKGTracker<T>` should be `LKGTracker<TParsed, TIssue>`; `LKGFingerprint` leaks 7 POSIX `node:fs` fields; `ApprovalDescriptor[]` ergonomics; zero plugin-author code examples |
-| 13 | The upstream maintainer | **REQUEST-CHANGES** | PR-2 reads as refactor-only (auto-rejected); PR-3 bundles 3 deltas (one-thing-per-PR); `ctx.lkgFingerprint` field-shape vs `getCurrentLKGFingerprint()` accessor not justified; 10-PR cap math against existing hapi wave |
+| #   | Persona                    | Verdict               | Headline concern                                                                                                                                                                                                          |
+| --- | -------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 05  | The hobbyist               | APPROVE-WITH-WARNINGS | PR-3 merger fix is a behavior footgun for users with multiple plugins installed — needs release-notes story + `openclaw doctor` improvement                                                                               |
+| 07  | The enterprise IT admin    | APPROVE-WITH-WARNINGS | Multi-tenant LKG isolation unspecified; merger widening needs deprecation window; sentinel guard is literal-only                                                                                                          |
+| 08  | The compliance officer     | APPROVE-WITH-WARNINGS | Multi-tenant isolation MUST be explicit (top priority); contract-level signing hook needed for SOC 2 / FedRAMP; the 3 [GAP]s need compensating-control runbooks                                                           |
+| 10  | The skill connector author | APPROVE-WITH-WARNINGS | `LKGTracker<T>` should be `LKGTracker<TParsed, TIssue>`; `LKGFingerprint` leaks 7 POSIX `node:fs` fields; `ApprovalDescriptor[]` ergonomics; zero plugin-author code examples                                             |
+| 13  | The upstream maintainer    | **REQUEST-CHANGES**   | PR-2 reads as refactor-only (auto-rejected); PR-3 bundles 3 deltas (one-thing-per-PR); `ctx.lkgFingerprint` field-shape vs `getCurrentLKGFingerprint()` accessor not justified; 10-PR cap math against existing hapi wave |
 
 **Net stance**: 4 of 5 personas vote APPROVE-WITH-WARNINGS. The upstream maintainer (the one whose vote actually closes a PR upstream) votes REQUEST-CHANGES. The package is structurally good; specific HC-BLOCKs from the maintainer + cross-cutting WARNs need to close before any of the 3 PRs open at `openclaw/openclaw`.
 
@@ -43,6 +43,7 @@ The PR-1 substrate guard rejects the literal string `"__OPENCLAW_REDACTED__"` at
 ### XC-4 — PR-3 bundles 3 deltas (HC-BLOCK from upstream maintainer)
 
 Upstream maintainer flags PR-3 as violating one-thing-per-PR culture (PolicyIR types + `ctx.lkgFingerprint` extension + hook merger AND fix = three separately-reviewable changes). Recommends splitting:
+
 - PR-3a: PolicyIR types contract (additive)
 - PR-3b: `ctx.lkgFingerprint` extension (additive)
 - PR-3c: hook merger conjunctive AND (behavior change)
@@ -54,6 +55,7 @@ Counter-argument from the package: they're the same chain-of-custody story at di
 ### XC-5 — Audit-trail correlation across LKG recovery (IT admin W3 + compliance officer W2)
 
 When LKG recovery fires mid-session, the audit trail should let SIEM stitch:
+
 - The bad-bytes fingerprint that triggered recovery
 - The good-bytes fingerprint that was restored
 - The clobbered-file path (so forensics can read the bad bytes)
@@ -77,10 +79,12 @@ The package punts signing to "operator-territory layered on top." Compliance off
 ### 05 — Hobbyist · APPROVE-WITH-WARNINGS
 
 **Strengths called out**:
+
 - PR-1's byte-stable workspace files is "exactly the bug I hit twice last month"
 - PR-2 is invisibly served by the existing config recovery (already shipped)
 
 **Warnings**:
+
 - PR-3 merger fix is a behavior change for users with plugin combos
 - Microsoft-isms in the pre-RFCs (`Sensitivity` enum spelling, Agent365-only authorship example, OneDrive-primary multi-agent framing) need cleanup before `#clawtributors` sees them
 
@@ -91,6 +95,7 @@ The package punts signing to "operator-territory layered on top." Compliance off
 **Strengths called out**: substrate-level corruption guard (PR-1's sentinel rejection) and conjunctive merger (PR-3) close the two failure modes that wake the IT admin up at night.
 
 **5 HC-WARNs**:
+
 - W1 — `ApprovalDescriptor[]` widening needs deprecation window or feature flag (third-party Swift apps can't take single-day cutover)
 - W2 — Sentinel guard literal-only; needs shared registry
 - W3 — LKG audit-trail correlation across mid-session recovery underspecified for SIEM stitching
@@ -102,6 +107,7 @@ The package punts signing to "operator-territory layered on top." Compliance off
 **Strengths called out**: 326-scenario evidence base is "the strongest I've seen from this contributor wave" — strong enough for an external auditor.
 
 **5 HC-WARNs**:
+
 - W1 — Rename "defense-in-depth" to "two-axis integrity" + add normative MUST-check-both rule
 - W2 — Extend `LKGObservation`-recovered for HIPAA §164.312(b) forensic reconstruction
 - W3 — The 3 documented `[GAP]`s need compensating-control runbooks (they're audit findings until they do)
@@ -115,6 +121,7 @@ The package punts signing to "operator-territory layered on top." Compliance off
 **Strengths called out**: substrate is the right shape; declarative registration; content-addressed; backend-agnostic. `policyId = sha256(jcs(body))` is the right cache-key choice (just export the canonicalizer so plugins don't re-implement it).
 
 **4 ergonomic warnings**:
+
 - W1 — `LKGTracker<T>` should be `LKGTracker<TParsed, TIssue>` so plugin authors keep their typed issues at the validation boundary
 - W2 — `LKGFingerprint` 11-field shape leaks `node:fs` (`dev`, `ino`, `mode`, `nlink`, `uid`, `gid`, `mtimeMs`, `ctimeMs`); split into universal `{hash, bytes, observedAt}` + optional `fsStat?:` appendix BEFORE non-FS backends ship
 - W3 — `ApprovalDescriptor | ApprovalDescriptor[]` widening looks small at the merger but ripples ugly `Array.isArray` discrimination through every approval-rendering plugin; ship a `normalizeApprovals` helper from the SDK
@@ -125,11 +132,13 @@ The package punts signing to "operator-territory layered on top." Compliance off
 **Note**: the upstream-maintainer agent reviewed against an older state of the vault (the proposals/ flat-file layout from before the restructure this PR makes), which produced one HC-BLOCK around "vault inconsistency" that's an artifact of the agent's reading state, not a real proposal defect. The OTHER findings are substantive and worth treating seriously.
 
 **Substantive HC-BLOCKs**:
+
 - B2 — PR-2 reads as **refactor-only** (auto-rejected per PR_WORKFLOW.md): generalizes `recoverConfigFromLastKnownGood` into a contract WITHOUT migrating the existing consumer or registering a second consumer in the same wave. Recommend: include the config-LKG migration in PR-2, OR include a second consumer (PolicyIR's tracker registration) in the same PR.
 - B3 — PR-3 **bundles 3 deltas** violating one-thing-per-PR culture. See XC-4.
 - B4 — `ctx.lkgFingerprint` as a field-shape extension hasn't been justified over an accessor-shape `getCurrentLKGFingerprint(path)` API. Recommend: spell out the accessor alternative and why field-shape wins.
 
 **HC-WARNs**:
+
 - "modernization" is Microsoft-shaped framing — community will read it as marketing. Pick a less loaded word.
 - 10-PR cap math: claws has 6 PRs in flight in the existing hapi wave; 3 more from this package puts the contributor at 9 against the 10-cap. Tight. Coordinate with the hapi wave maintainer before opening any of these.
 - `flock(2)`-on-FUSE for the git-backed LKG impl unresolved (raised in `downstream-lkg-git-backend.md`); should resolve before the FS-backed reference plugin ships, since the test matrix would benefit from that gating answer.
@@ -156,6 +165,7 @@ Once these are addressed, revisit verdicts. The maintainer is the gating reviewe
 ## Files
 
 Per-persona reviews:
+
 - [[05-hobbyist.md]]
 - [[07-enterprise-it-admin.md]]
 - [[08-compliance-officer.md]]

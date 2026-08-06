@@ -56,6 +56,7 @@ This is the foundation for all downstream snapshot operations (diff, promote) an
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, SDK-owns-logic rule
 - `.craft/roles/claws/platform-eng.md` — workspace layout, .claws/ directory conventions
 

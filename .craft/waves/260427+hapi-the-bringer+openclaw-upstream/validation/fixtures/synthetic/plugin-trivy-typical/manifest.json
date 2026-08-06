@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "trivy plugin (security)",
   "contributes": {
-    "tools": [
-      "trivy/scan-image",
-      "trivy/scan-fs"
-    ],
-    "skills": [
-      "trivy/scan-image",
-      "trivy/scan-fs"
-    ]
+    "tools": ["trivy/scan-image", "trivy/scan-fs"],
+    "skills": ["trivy/scan-image", "trivy/scan-fs"]
   }
 }

@@ -6,10 +6,10 @@ move to the Lobster/OpenClaw upstream spec tree.
 
 ## Current candidates
 
-| Package | Working name | Purpose |
-|---|---|---|
-| Enterprise Feeds | `@openclaw/enterprise-feeds` | Let an organization curate ClawHub and private skill/plugin sources without replacing the public marketplace. |
-| Context budget | `@openclaw/context-budget` | Explain token/context usage and produce reviewable optimization recommendations without autonomous prompt or skill rewrites. |
+| Package          | Working name                 | Purpose                                                                                                                      |
+| ---------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Enterprise Feeds | `@openclaw/enterprise-feeds` | Let an organization curate ClawHub and private skill/plugin sources without replacing the public marketplace.                |
+| Context budget   | `@openclaw/context-budget`   | Explain token/context usage and produce reviewable optimization recommendations without autonomous prompt or skill rewrites. |
 
 See [implementation-plan.md](implementation-plan.md) for proposed PR order and
 review questions. See [enterprise-feeds-wave-plan.md](enterprise-feeds-wave-plan.md)

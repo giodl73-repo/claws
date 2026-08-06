@@ -25,6 +25,7 @@ checkpoint_gate: false
 # Pulse 31: Badge Staleness
 
 ## Objective
+
 Implement staleness detection and tier downgrade logic for governance badges. Badges are not permanent — they reflect the governance state at a specific point in time. When the underlying skill changes, badges must be re-evaluated.
 
 **Handler Modification Detection**: After a VERIFIED build, if the skill's `handler.ts` is modified, the manifest signature becomes invalid. The staleness detector compares the current handler hash against the hash stored in `.claws-manifest.json`. A mismatch triggers an automatic pinch downgrade from VERIFIED to TYPED — the decorators are still present (so it's not DECLARED), but the verified compilation is stale.
@@ -36,10 +37,12 @@ Implement staleness detection and tier downgrade logic for governance badges. Ba
 **Badge Re-Validation**: Running `claws build --skill` re-compiles the governance checks and, if all pass, restores the VERIFIED badge. This is the path from TYPED back to VERIFIED after handler modifications.
 
 **Pitfall coverage**:
+
 - P-226: Badge staleness detection must handle concurrent edits gracefully
 - P-227: Per-version badge storage must not leak badge state across versions
 
 ## Deliverables
+
 - [ ] `claws-sdk/src/maker/badge-staleness.ts` — handler hash comparison, signature validation, tier downgrade logic, per-version badge storage
 - [ ] `claws-sdk/tests/maker/badge-staleness.unit.test.ts` — L0: handler edit invalidates VERIFIED (1), frontmatter edit preserves DECLARED (1), per-version badge independence (1), re-verification restores VERIFIED (1)
 - [ ] `claws-sdk/tests/maker/badge-lifecycle.integration.test.ts` — L1: DECLARED to TYPED to VERIFIED transitions (1), per-version badge query (1)
@@ -49,6 +52,7 @@ Implement staleness detection and tier downgrade logic for governance badges. Ba
 - [ ] `claws-sdk/tests/fixtures/stale-verified-skill/` — VERIFIED skill with modified handler.ts (handler hash differs from manifest)
 
 ## Acceptance Criteria
+
 - [ ] Handler modification after VERIFIED build triggers downgrade to TYPED
 - [ ] Frontmatter-only edits preserve DECLARED tier (no downgrade)
 - [ ] Per-version badge storage: v1.0.0 and v1.1.0 have independent badges
@@ -63,14 +67,18 @@ Implement staleness detection and tier downgrade logic for governance badges. Ba
 - [ ] `npx tsc --noEmit` exits 0
 
 ## Governing Roles
+
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — overall claws architecture and SDK boundaries
 - `.craft/roles/claws/ciso.md` — security posture, supply chain integrity, trust boundaries
 
 ## Dependencies
+
 - Pulse 30 (badge-generation) — badge metadata types and generation logic
 
 ## Test Gates
+
 - [ ] L0 unit (4 tests): handler edit invalidates VERIFIED, frontmatter edit preserves DECLARED, per-version badge independence, re-verification restores VERIFIED
 - [ ] L1 integration (2 tests): DECLARED to TYPED to VERIFIED transitions, per-version badge query
 - [ ] L2 e2e (1 test): full staleness lifecycle (VERIFIED, edit handler, TYPED, rebuild, VERIFIED)

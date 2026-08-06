@@ -1,9 +1,6 @@
 {
   "permissions": {
-    "allow": [
-      "Skill(doc-sync-enforcer)",
-      "Agent(doc-janitor)"
-    ]
+    "allow": ["Skill(doc-sync-enforcer)", "Agent(doc-janitor)"]
   },
   "hooks": {
     "PreToolUse": [

@@ -33,6 +33,7 @@ agents).
 
 Routes through the same write-time validation layer as chunk PATCHes. Session config
 edits are subject to:
+
 - R5 enforcement (cannot add R5 tool to a cron session's allowlist without explicit
   pre-authorization that includes elicitation gate)
 - Fleet policy (fleet-locked tools stay locked per-session)

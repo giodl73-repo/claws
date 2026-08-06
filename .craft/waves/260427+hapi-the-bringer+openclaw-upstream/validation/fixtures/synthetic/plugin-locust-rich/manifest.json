@@ -4,15 +4,9 @@
   "version": "0.1.0",
   "description": "locust plugin (testing)",
   "contributes": {
-    "tools": [
-      "locust/start-load"
-    ],
-    "skills": [
-      "locust/start-load"
-    ],
-    "workflows": [
-      "locust-flow.lobster"
-    ],
+    "tools": ["locust/start-load"],
+    "skills": ["locust/start-load"],
+    "workflows": ["locust-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

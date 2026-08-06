@@ -24,57 +24,57 @@ policy). Two independent tracks converge at the CP-3 gate.
 
 ### Batch 1 — Two independent tracks (parallel)
 
-| Pulse | Slug | Depends On | Track |
-|-------|------|-----------|-------|
-| 21 | pinch-profiles | — | PRESS |
-| 27 | maker-scaffold | — | Maker |
+| Pulse | Slug           | Depends On | Track |
+| ----- | -------------- | ---------- | ----- |
+| 21    | pinch-profiles | —          | PRESS |
+| 27    | maker-scaffold | —          | Maker |
 
 ### Batch 2 — Depends on track roots (parallel)
 
-| Pulse | Slug | Depends On | Track |
-|-------|------|-----------|-------|
-| 22 | quality-matrix | 21 | PRESS |
-| 23 | governance-cost-estimator | 21 | PRESS |
-| 24 | dead-code-merge | 21 | PRESS |
-| 28 | maker-annotate-import | 27 | Maker |
+| Pulse | Slug                      | Depends On | Track |
+| ----- | ------------------------- | ---------- | ----- |
+| 22    | quality-matrix            | 21         | PRESS |
+| 23    | governance-cost-estimator | 21         | PRESS |
+| 24    | dead-code-merge           | 21         | PRESS |
+| 28    | maker-annotate-import     | 27         | Maker |
 
 ### Batch 3 — Mid-track convergence (parallel)
 
-| Pulse | Slug | Depends On | Track |
-|-------|------|-----------|-------|
-| 25 | context-dag | 21, 22 | PRESS |
-| 29 | maker-publish | 27, 28 | Maker |
+| Pulse | Slug          | Depends On | Track |
+| ----- | ------------- | ---------- | ----- |
+| 25    | context-dag   | 21, 22     | PRESS |
+| 29    | maker-publish | 27, 28     | Maker |
 
 ### Batch 4 — PRESS pipeline + Badge start (parallel)
 
-| Pulse | Slug | Depends On | Track |
-|-------|------|-----------|-------|
-| 26 | context-press | 21–25 | PRESS |
-| 30 | badge-generation | 29 | Badge |
+| Pulse | Slug             | Depends On | Track |
+| ----- | ---------------- | ---------- | ----- |
+| 26    | context-press    | 21–25      | PRESS |
+| 30    | badge-generation | 29         | Badge |
 
 ### Batch 5 — Badge sequence (sequential)
 
-| Pulse | Slug | Depends On | Track |
-|-------|------|-----------|-------|
-| 31 | badge-staleness | 30 | Badge |
+| Pulse | Slug            | Depends On | Track |
+| ----- | --------------- | ---------- | ----- |
+| 31    | badge-staleness | 30         | Badge |
 
 ### Batch 6 — Gate (depends on all)
 
-| Pulse | Slug | Depends On |
-|-------|------|-----------|
-| 32 | badge-enterprise-policy | 21–31 |
+| Pulse | Slug                    | Depends On |
+| ----- | ----------------------- | ---------- |
+| 32    | badge-enterprise-policy | 21–31      |
 
 **Checkpoint gate**: Pulse 32 (`checkpoint_gate: true`)
 
 ## Review Panel
 
-| Role | Cluster | Focus |
-|------|---------|-------|
-| craft:architect | design | PRESS pipeline stages, maker API surface, badge model |
-| claws:ciso | security | Badge enterprise policy, publish signing, tier enforcement |
-| claws:founder | product | Maker UX, scaffold templates, publish workflow |
-| claws:platform-eng | platform | DAG storage, pinch profiles, context compression |
-| craft:testing | quality | L0–L3 coverage, dual-track integration, fidelity scores |
+| Role               | Cluster  | Focus                                                      |
+| ------------------ | -------- | ---------------------------------------------------------- |
+| craft:architect    | design   | PRESS pipeline stages, maker API surface, badge model      |
+| claws:ciso         | security | Badge enterprise policy, publish signing, tier enforcement |
+| claws:founder      | product  | Maker UX, scaffold templates, publish workflow             |
+| claws:platform-eng | platform | DAG storage, pinch profiles, context compression           |
+| craft:testing      | quality  | L0–L3 coverage, dual-track integration, fidelity scores    |
 
 ## Coverage Requirements
 

@@ -4,18 +4,9 @@
   "version": "0.1.0",
   "description": "xcode-build plugin (mobile)",
   "contributes": {
-    "tools": [
-      "xcode-build/build",
-      "xcode-build/archive",
-      "xcode-build/simulator-list"
-    ],
-    "skills": [
-      "xcode-build/build",
-      "xcode-build/archive"
-    ],
-    "workflows": [
-      "xcode-build-flow.lobster"
-    ],
+    "tools": ["xcode-build/build", "xcode-build/archive", "xcode-build/simulator-list"],
+    "skills": ["xcode-build/build", "xcode-build/archive"],
+    "workflows": ["xcode-build-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

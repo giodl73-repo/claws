@@ -59,6 +59,7 @@ Present the plan to the user before making changes:
 ### 4. Apply Code Fixes
 
 For each code fix:
+
 - Read the target file
 - Apply the edit
 - Track the change for the commit message
@@ -68,6 +69,7 @@ Make all independent edits in parallel where possible.
 ### 5. Reply to Reviewers
 
 For each comment:
+
 - **Code fixes**: Reply confirming the fix was applied (e.g., "Fixed in this push — [brief description of change]")
 - **Clarifications**: Reply with the answer
 - **Discussion items**: Flag to user for their input before replying
@@ -81,6 +83,7 @@ gh api repos/dialpad/dialtone/pulls/{PR_NUMBER}/comments/{COMMENT_ID}/replies -f
 ### 6. Commit and Push (with confirmation)
 
 Ask the user if they want to commit and push. If yes:
+
 - Stage only the modified files (never `git add -A`)
 - Use commit message format: `chore: NO-JIRA address PR #N review comments`
 - Follow all commit rules from `/commit` skill (no Co-Authored-By, no --no-verify)

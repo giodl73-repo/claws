@@ -9,9 +9,9 @@
   /* Tools: deliberate redundancy in the comments — verifying the
      parser handles both line and block comments at multiple positions. */
   "tools": [
-    { "id": "read-file", "risk": "R1" },     // safe, no-op-ish
-    { "id": "write-file", "risk": "R3" },    // mutating
-    { "id": "send-email", "risk": "R5" },    // operator-gated
+    { "id": "read-file", "risk": "R1" }, // safe, no-op-ish
+    { "id": "write-file", "risk": "R3" }, // mutating
+    { "id": "send-email", "risk": "R5" }, // operator-gated
   ],
 
   "denyRules": [

@@ -107,9 +107,9 @@ Including the 25-week full-graduation estimate alongside the 5-week freemium est
 
 The plan's architecture is directionally correct — "extends, never forks" is the right relationship between free and paid tiers. The three MUST findings address risks that would compound into significant maintenance burden if unresolved: reader divergence (M-01), missing platform detection (M-02), and underestimated normalization work (M-03). The WARN findings represent architectural trade-offs that should be documented as decisions, not left implicit. Resolve the three MUSTs and document the WARNs before moving to implementation.
 
-| Severity | Count |
-|----------|-------|
-| MUST     | 3     |
-| WARN     | 5     |
-| NOTE     | 3     |
-| **Total**| **11**|
+| Severity  | Count  |
+| --------- | ------ |
+| MUST      | 3      |
+| WARN      | 5      |
+| NOTE      | 3      |
+| **Total** | **11** |

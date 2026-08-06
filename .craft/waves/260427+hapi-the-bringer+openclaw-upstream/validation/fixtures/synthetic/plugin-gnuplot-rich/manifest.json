@@ -4,15 +4,9 @@
   "version": "0.1.0",
   "description": "gnuplot plugin (science)",
   "contributes": {
-    "tools": [
-      "gnuplot/plot"
-    ],
-    "skills": [
-      "gnuplot/plot"
-    ],
-    "workflows": [
-      "gnuplot-flow.lobster"
-    ],
+    "tools": ["gnuplot/plot"],
+    "skills": ["gnuplot/plot"],
+    "workflows": ["gnuplot-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

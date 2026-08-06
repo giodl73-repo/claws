@@ -87,9 +87,9 @@ intermediate queryable form before governance analysis.
 
 ## Governing Roles
 
-| Role | File | Focus |
-|------|------|-------|
-| craft:dragon | `.craft/roles/craft/dragon.md` | SDK architecture, two-pass design, cross-reference resolution correctness |
+| Role            | File                              | Focus                                                                                 |
+| --------------- | --------------------------------- | ------------------------------------------------------------------------------------- |
+| craft:dragon    | `.craft/roles/craft/dragon.md`    | SDK architecture, two-pass design, cross-reference resolution correctness             |
 | craft:architect | `.craft/roles/craft/architect.md` | GovernanceAST → CapabilityManifest projection, queryable manifest design, type safety |
 
 ## Dependencies

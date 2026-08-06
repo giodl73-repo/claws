@@ -24,6 +24,7 @@ checkpoint_gate: false
 # Pulse 48: @openclaw/siem-emitter and @openclaw/secret-scanner
 
 ## Objective
+
 **Execution context**: This pulse executes within the `craftworks/openclaw-governance` standalone monorepo (https://github.com/gim-home/openclaw-governance), NOT the claws repo. The test_scope paths (packages/...) are relative to that repo root. During wave execution, the openclaw-governance repo must be cloned and set up before these pulses can run.
 
 Two standalone packages: @openclaw/siem-emitter (~5KB) and @openclaw/secret-scanner (~4KB).
@@ -35,6 +36,7 @@ Secret-scanner provides credential leak detection with regex patterns for API ke
 Both packages have zero `@craftworks/*` imports and are publishable standalone under the `@openclaw` scope with MIT licenses.
 
 ## Deliverables
+
 - [ ] `packages/siem-emitter/package.json` — MIT license
 - [ ] `packages/siem-emitter/src/emitter.ts` — multi-format event emission dispatcher
 - [ ] `packages/siem-emitter/src/formats/cef.ts` — CEF format serializer
@@ -56,6 +58,7 @@ Both packages have zero `@craftworks/*` imports and are publishable standalone u
 - [ ] `claws-cli/tests/upstream/upstream-siem-scanner.accept.test.ts` — L3: CLI acceptance — runs siem-emitter and secret-scanner CLI entry points on fixture workspace, verifies NDJSON/CEF/syslog/SARIF output and scan report with masked secrets
 
 ## Acceptance Criteria
+
 - [ ] Both packages have zero `@craftworks/*` and zero `@claws/*` imports
 - [ ] SIEM-emitter produces valid CEF, NDJSON, syslog RFC 5424, and SARIF 2.1.0 output
 - [ ] Same event serialized to all 4 formats produces correct output for each
@@ -65,14 +68,18 @@ Both packages have zero `@craftworks/*` imports and are publishable standalone u
 - [ ] Scan results never contain full secret values — only masked previews
 
 ## Governing Roles
+
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — system-wide architecture constraints
 - `.craft/roles/claws/founder.md` — OpenClaw upstream contribution standards
 
 ## Dependencies
+
 - Pulse 46 (upstream-audit-chain) — audit-chain export formats inform siem-emitter serializers
 
 ## Test Gates
+
 - [ ] L0 unit (9 tests): dispatch to correct format (2), CEF format, NDJSON format, syslog format, SARIF format, pattern detection, entropy threshold, high entropy flagged, scan result masks secret values (first 4 chars + ***)
 - [ ] L1 integration (3 tests): siem-emitter same event in 4 formats, audit-chain + siem-emitter pipeline, secret-scanner on fixture workspace
 - [ ] L2 e2e (2 tests): standalone install + usage for each package

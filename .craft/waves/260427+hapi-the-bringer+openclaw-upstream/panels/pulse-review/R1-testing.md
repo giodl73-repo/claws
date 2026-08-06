@@ -30,13 +30,13 @@
 
 ## Tier Aggregate Counts
 
-| Tier | Pulse-Sum | Target | Status |
-|------|-----------|--------|--------|
-| L0 | ~50 | 30 | ✓ +67% |
-| L1 | ~39 | 24 | ✓ +63% |
-| L2 | ~11 | 8 | ✓ +38% |
-| L3 | 4 | 8 | ⚠ −50% |
-| **Total** | **104** | **70** | ✓ +49% (counting pulses 04–12 TDD sections + pulse 12 manifest) |
+| Tier      | Pulse-Sum | Target | Status                                                          |
+| --------- | --------- | ------ | --------------------------------------------------------------- |
+| L0        | ~50       | 30     | ✓ +67%                                                          |
+| L1        | ~39       | 24     | ✓ +63%                                                          |
+| L2        | ~11       | 8      | ✓ +38%                                                          |
+| L3        | 4         | 8      | ⚠ −50%                                                          |
+| **Total** | **104**   | **70** | ✓ +49% (counting pulses 04–12 TDD sections + pulse 12 manifest) |
 
 L3 shortfall is compliance-rubric-specific, not risk-wide. Per-PR acceptance gates (W2 post-merge verification) can bridge.
 
@@ -45,6 +45,7 @@ L3 shortfall is compliance-rubric-specific, not risk-wide. Per-PR acceptance gat
 ## Fixture Path Convention Validation (Pulse 12)
 
 Pulse 12 specifies 6 series under `packages/claws-sdk/tests/accept/scenarios/`:
+
 - `bot-preempt/` — 13 fixtures, runners: `[simulation]` ✓
 - `governance/` — 11 fixtures, runners: `[simulation, forward]` ✓
 - `adapter/` — 4 fixtures, runners: `[contract, simulation]` ✓
@@ -62,7 +63,7 @@ Manifest includes runner declarations. Naming convention `{series}/{number}+{slu
 
 - **Pulse 07 Audit-Stream Wire-Shape (F-38)**: Declared as "HARD DEPENDENCY: pulse 01 adapter-audits.md must publish verdict FIRST." Pulse 07 gate checks for adapter-audits.md presence + audit-stream keyword. But does it verify the VERDICT is "OK to land"? Recommend: pulse 07 gate asserts `grep -q "verdict.*OK to land" docs/upstream/guides/adapter-audits.md`.
 
-- **Pulse 10 Compliance Rubrics (F-71..F-75)**: Declared as "TBD location upstream" in pulse 10 scope. Pulse 12 has 2 fixtures (`compliance/01+soc2-cc61/`, `compliance/02+hipaa-312/`) but doesn't specify *how* the rubric files are sourced (upstream post-merge? copied? generated?). Recommend: pulse 12 gate asserts rubric files exist at expected location upstream OR locally post-merge.
+- **Pulse 10 Compliance Rubrics (F-71..F-75)**: Declared as "TBD location upstream" in pulse 10 scope. Pulse 12 has 2 fixtures (`compliance/01+soc2-cc61/`, `compliance/02+hipaa-312/`) but doesn't specify _how_ the rubric files are sourced (upstream post-merge? copied? generated?). Recommend: pulse 12 gate asserts rubric files exist at expected location upstream OR locally post-merge.
 
 ---
 

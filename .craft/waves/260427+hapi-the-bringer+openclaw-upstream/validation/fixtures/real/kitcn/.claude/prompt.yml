@@ -6,7 +6,7 @@ beforeStart:
     header: 🚨 STOP - FIRST TOOL CALL MUST BE TodoWrite
     instructions:
       - DO NOT analyze. DO NOT read files. DO NOT edit. DO NOT load skills yet.
-      - 'FIRST ACTION: TodoWrite with todo below as in_progress'
+      - "FIRST ACTION: TodoWrite with todo below as in_progress"
       - Condition NO → mark completed → proceed
       - Condition YES → work through steps → mark completed → proceed
       - Skipping TodoWrite = FAILED to follow instructions
@@ -28,11 +28,11 @@ beforeComplete:
       - Condition NO → mark completed and skip
       - Condition YES → in_progress → verify → completed
       - NEVER git commit unless explicitly asked
-      - 'NEVER `bun dev` or `bun run build` unless explicitly asked'
+      - "NEVER `bun dev` or `bun run build` unless explicitly asked"
     todos:
-      - 'Test Browser (IF new features, styling, visual bugs, state changes. SKIP trivial markup, non-UI): Skill(dev-browser)'
-      - 'Typecheck (IF updated .ts files): Bash `bun typecheck`'
-      - 'Lint: Bash `bun lint:fix`'
+      - "Test Browser (IF new features, styling, visual bugs, state changes. SKIP trivial markup, non-UI): Skill(dev-browser)"
+      - "Typecheck (IF updated .ts files): Bash `bun typecheck`"
+      - "Lint: Bash `bun lint:fix`"
       - |
         ce-compound (SKIP if trivial):
         CRITICAL: After completing this request, you MUST evaluate whether it produced extractable knowledge.

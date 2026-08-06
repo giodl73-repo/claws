@@ -25,7 +25,7 @@ checkpoint_gate: false
 
 ## Objective
 
-Update the approval event model to carry session context per the CL-12 amendment. Today, approval requests identify the requesting agent but not which session initiated the request. This means approval UX shows generic messages like "Agent wants to send-email" when it should show "Daily Triage (cron) wants to send-email" -- giving approvers critical context about *why* a tool is being invoked and *what kind of session* is requesting it. Session type union is defined inline in the @bic approval-events package, not imported from @craftworks/*.
+Update the approval event model to carry session context per the CL-12 amendment. Today, approval requests identify the requesting agent but not which session initiated the request. This means approval UX shows generic messages like "Agent wants to send-email" when it should show "Daily Triage (cron) wants to send-email" -- giving approvers critical context about _why_ a tool is being invoked and _what kind of session_ is requesting it. Session type union is defined inline in the @bic approval-events package, not imported from @craftworks/*.
 
 This pulse updates `ApprovalRequestEvent` to include `sessionId` and `sessionType`, updates the `createApprovalRequest()` helper in `@bic/approval-events` to accept session context as an optional field in the existing options object, and updates the CL-12 schema to include the new fields. The approval UX rendering (which consumes these events) will automatically gain session context without further changes.
 
@@ -56,6 +56,7 @@ This pulse updates `ApprovalRequestEvent` to include `sessionId` and `sessionTyp
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, SDK-owns-logic rule, event schema conventions
 - `.craft/roles/claws/gateway-eng.md` — approval event model, CL-12 schema, session context integration
 

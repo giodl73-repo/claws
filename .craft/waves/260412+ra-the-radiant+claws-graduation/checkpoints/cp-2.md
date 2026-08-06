@@ -3,7 +3,15 @@ checkpoint: 2
 name: "Emit + Compile — Emitters, Validator, Cache, Host"
 pulse_range: [7, 8, 9, 10, 11, 12]
 depends_on_cp: 1
-review_panel: [craft:architect, craft:codegen, craft:conformance, craft:perf-stress, claws:platform-eng, craft:testing]
+review_panel:
+  [
+    craft:architect,
+    craft:codegen,
+    craft:conformance,
+    craft:perf-stress,
+    claws:platform-eng,
+    craft:testing,
+  ]
 tag: ra-cp-2
 ---
 
@@ -20,37 +28,37 @@ compiler can read → analyze → emit → validate → cache.
 
 ### Batch 1 (parallel — depend only on CP-1)
 
-| Agent | Pulse | Slug | Depends on | Notes |
-|-------|-------|------|------------|-------|
-| alpha | 07 | emit-oc-target | 1, 3, 6 | OC workspace emitter |
-| bravo | 10 | eval-validator | 1, 3 | Validation framework |
+| Agent | Pulse | Slug           | Depends on | Notes                |
+| ----- | ----- | -------------- | ---------- | -------------------- |
+| alpha | 07    | emit-oc-target | 1, 3, 6    | OC workspace emitter |
+| bravo | 10    | eval-validator | 1, 3       | Validation framework |
 
 Pulse 7 needs readers (P01), IR (P03), and R5 (P06, all CP-1).
 Pulse 10 needs readers (P01) and IR (P03).
 
 ### Batch 2 (depends on batch 1)
 
-| Agent | Pulse | Slug | Depends on | Notes |
-|-------|-------|------|------------|-------|
-| charlie | 08 | emit-claude-code | 6, 7 | Claude Code target emitter |
-| delta | 09 | ts-codegen | 7 | TypeScript code generation |
+| Agent   | Pulse | Slug             | Depends on | Notes                      |
+| ------- | ----- | ---------------- | ---------- | -------------------------- |
+| charlie | 08    | emit-claude-code | 6, 7       | Claude Code target emitter |
+| delta   | 09    | ts-codegen       | 7          | TypeScript code generation |
 
 Pulse 8 needs R5 (P06) and OC emitter (P07).
 Pulse 9 needs OC emitter (P07).
 
 ### Batch 3 (depends on all prior in CP-2)
 
-| Agent | Pulse | Slug | Depends on | Notes |
-|-------|-------|------|------------|-------|
-| echo | 11 | cache-compile | 1-10 | Compilation cache layer |
+| Agent | Pulse | Slug          | Depends on | Notes                   |
+| ----- | ----- | ------------- | ---------- | ----------------------- |
+| echo  | 11    | cache-compile | 1-10       | Compilation cache layer |
 
 Pulse 11 depends on all pulses 1-10.
 
 ### Batch 4 — Gate (depends on all)
 
-| Agent | Pulse | Slug | Depends on | Notes |
-|-------|-------|------|------------|-------|
-| foxtrot | 12 | compile-pipeline-e2e | 1-11 | Full pipeline E2E, `checkpoint_gate: true` |
+| Agent   | Pulse | Slug                 | Depends on | Notes                                      |
+| ------- | ----- | -------------------- | ---------- | ------------------------------------------ |
+| foxtrot | 12    | compile-pipeline-e2e | 1-11       | Full pipeline E2E, `checkpoint_gate: true` |
 
 ## Review Panel
 

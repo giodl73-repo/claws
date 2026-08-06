@@ -24,13 +24,17 @@ The kill module writes the sentinel to `.claws/KILL` (constant `KILL_SENTINEL_FI
 **Impact**: Fleet compliance reports show 0 killed workspaces even when kills are active. The platform-eng has no visibility into kill status from `claws report --fleet`. The compliance matrix and summary statistics are incorrect.
 
 **Fix**: Change `report.ts:readKillStatus()` to use `readSentinel()` from `kill.ts` instead of reading a hardcoded wrong path:
-```ts
-import { readSentinel } from './kill.js';
 
-async function readKillStatus(workspacePath: string, classification: string): Promise<'active' | 'killed' | 'unknown'> {
+```ts
+import { readSentinel } from "./kill.js";
+
+async function readKillStatus(
+  workspacePath: string,
+  classification: string,
+): Promise<"active" | "killed" | "unknown"> {
   const sentinel = await readSentinel(workspacePath);
-  if (sentinel !== null) return 'killed';
-  return classification === 'GOVERNED' ? 'active' : 'unknown';
+  if (sentinel !== null) return "killed";
+  return classification === "GOVERNED" ? "active" : "unknown";
 }
 ```
 
@@ -46,9 +50,11 @@ Both `computeWorkspaceHash()` and `computeBundleHash()` sort file paths using `l
 **Impact**: Cross-platform fleet operations where snapshots are saved on one machine and promoted/verified on another. Provenance chain breaks silently. The bundleHash in provenance.json depends on sort order, so promoted snapshots verified on a different locale will show as tampered.
 
 **Fix**: Use byte-order comparison for deterministic sorting:
+
 ```ts
 .sort((a, b) => (a.relativePath < b.relativePath ? -1 : a.relativePath > b.relativePath ? 1 : 0))
 ```
+
 Or use `localeCompare` with an explicit invariant locale: `.localeCompare(b, 'en')`.
 
 ---
@@ -77,6 +83,7 @@ The `diff()` function reads manifests in the verification loop (line 345), then 
 **Impact**: Performance issue, not correctness. At fleet scale where snapshots may be large (hundreds of governance files), this doubles the manifest read time unnecessarily.
 
 **Fix**: Capture the manifests from the verification loop and reuse them:
+
 ```ts
 const manifests = new Map<string, SnapshotManifest>();
 for (const name of [baseName, targetName]) {
@@ -99,10 +106,13 @@ const targetManifest = manifests.get(targetName)!;
 **Impact**: Weekly `claws drift` across 47 workspaces takes 47x longer than necessary. The platform-eng's "detect drift before it causes incidents" workflow is slower than it should be.
 
 **Fix**: Use `runParallel` from `runner.ts` with the fleet's concurrency setting (default 8) to parallelize drift detection:
+
 ```ts
 const { results } = await runParallel(
-  workspacePaths.map(p => ({ path: p })),
-  async (item) => { /* compute hash, classify severity, match exception */ },
+  workspacePaths.map((p) => ({ path: p })),
+  async (item) => {
+    /* compute hash, classify severity, match exception */
+  },
   concurrency,
 );
 ```
@@ -247,14 +257,14 @@ The fallback from rename to copyFile after exhausting retries handles the case w
 
 ## Lens Checklist
 
-| Question | Assessment |
-|----------|-----------|
-| Does `claws broadcast` reliably push this to 47 workspaces? | Functionally yes, but sequentially (W-03). Atomic writes with retry are solid. Trust compat enforcement is correct. |
+| Question                                                               | Assessment                                                                                                                                                                                |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Does `claws broadcast` reliably push this to 47 workspaces?            | Functionally yes, but sequentially (W-03). Atomic writes with retry are solid. Trust compat enforcement is correct.                                                                       |
 | Does `claws drift` detect when a workspace diverges from fleet policy? | Yes -- governance hash comparison works. But sequential execution (W-01) makes it slow, exception matching is too broad (W-07), and severity classification uses naive YAML regex (W-08). |
-| Does `claws doctor --post-upgrade --fleet` handle the monthly upgrade? | Not directly in CP-3 scope, but snapshot save/restore provides the rollback mechanism for upgrade failures. |
-| Can I see fleet-wide compliance in one command? | `claws report` produces compliance matrix in CSV/JSON/table. BUT M-01 means killed workspaces show as active -- compliance posture is misreported. |
-| What happens when 3 of 47 workspaces fail the upgrade? | Snapshot restore with integrity verification provides clean rollback. Promote gate (pinch) prevents non-compliant snapshots from reaching the fleet registry. Good. |
-| Does the CI/CD pipeline work with GitHub Enterprise? | Not directly tested in CP-3 scope. |
+| Does `claws doctor --post-upgrade --fleet` handle the monthly upgrade? | Not directly in CP-3 scope, but snapshot save/restore provides the rollback mechanism for upgrade failures.                                                                               |
+| Can I see fleet-wide compliance in one command?                        | `claws report` produces compliance matrix in CSV/JSON/table. BUT M-01 means killed workspaces show as active -- compliance posture is misreported.                                        |
+| What happens when 3 of 47 workspaces fail the upgrade?                 | Snapshot restore with integrity verification provides clean rollback. Promote gate (pinch) prevents non-compliant snapshots from reaching the fleet registry. Good.                       |
+| Does the CI/CD pipeline work with GitHub Enterprise?                   | Not directly tested in CP-3 scope.                                                                                                                                                        |
 
 ---
 

@@ -4,14 +4,7 @@
   "version": "0.1.0",
   "description": "slack plugin (communication)",
   "contributes": {
-    "tools": [
-      "slack/post-message",
-      "slack/list-channels",
-      "slack/upload-file"
-    ],
-    "skills": [
-      "slack/post-message",
-      "slack/list-channels"
-    ]
+    "tools": ["slack/post-message", "slack/list-channels", "slack/upload-file"],
+    "skills": ["slack/post-message", "slack/list-channels"]
   }
 }

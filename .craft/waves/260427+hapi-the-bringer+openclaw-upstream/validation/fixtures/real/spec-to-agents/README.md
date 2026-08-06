@@ -35,6 +35,7 @@ Each specialist agent has access to domain-specific tools for their area of expe
 ![Agent Tools](assets/Agent%20Tools.png)
 
 **Tool Integration:**
+
 - **Venue Specialist**: Web Search (Bing Grounding)
 - **Budget Analyst**: Code Interpreter (Python REPL)
 - **Catering Coordinator**: Web Search (Bing Grounding)
@@ -67,6 +68,7 @@ azd up
 ```
 
 **What happens:**
+
 - ✅ Provisions Microsoft Foundry + OpenAI models
 - ✅ Generates `.env` with connection details
 - ✅ Installs Python dependencies via `uv sync`
@@ -74,11 +76,13 @@ azd up
 ### Run Locally
 
 **Interactive Console (Recommended):**
+
 ```bash
 uv run console
 ```
 
 **DevUI (Visual Interface):**
+
 ```bash
 uv run app
 ```
@@ -90,18 +94,18 @@ Then navigate to the URL shown (by default `http://localhost:8080`)
 Try this event planning request:
 
 ```
-Plan a corporate holiday party for 50 people on December 6th, 2025 in Seattle 
-with a budget of $5,000. Include venue options, catering for dietary restrictions, 
+Plan a corporate holiday party for 50 people on December 6th, 2025 in Seattle
+with a budget of $5,000. Include venue options, catering for dietary restrictions,
 and check the weather forecast.
 ```
 
 The agents will collaborate to:
+
 1. Search for suitable venues
 2. Calculate budget breakdown
 3. Recommend catering options
 4. Check weather and create calendar event
 5. Synthesize a comprehensive plan
-
 
 ## 🛠️ Project Structure
 
@@ -123,17 +127,21 @@ spec-to-agents/
 ## 🔑 Key Features
 
 ### Service-Managed Threads
+
 All agents use `store=True` for automatic conversation history management via Azure AI Service - no manual message tracking required.
 
 ### Human-in-the-Loop
+
 Framework-native `ctx.request_info()` enables pausing workflows for user input with automatic state preservation.
 
 ### Structured Output Routing
+
 Agents return Pydantic models with explicit routing decisions (`next_agent` field), enabling dynamic workflow orchestration.
 
 ## 🧪 Development
 
 **Run Tests:**
+
 ```bash
 uv run pytest
 ```
@@ -158,4 +166,3 @@ This project welcomes contributions and suggestions. Most contributions require 
 # 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-

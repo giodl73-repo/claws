@@ -4,15 +4,9 @@
   "version": "0.1.0",
   "description": "anthropic plugin (ai_ml)",
   "contributes": {
-    "tools": [
-      "anthropic/chat-complete"
-    ],
-    "skills": [
-      "anthropic/chat-complete"
-    ],
-    "workflows": [
-      "anthropic-flow.lobster"
-    ],
+    "tools": ["anthropic/chat-complete"],
+    "skills": ["anthropic/chat-complete"],
+    "workflows": ["anthropic-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

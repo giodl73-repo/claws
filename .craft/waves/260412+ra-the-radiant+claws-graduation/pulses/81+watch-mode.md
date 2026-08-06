@@ -52,7 +52,7 @@ other watch assertion.
       watcher. Observes the 9 OC inputs (`SOUL.md`, `TOOLS.md`, `AGENTS.md`,
       `MEMORY.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`, `lobster.yaml`,
       `skills/**/SKILL.md`). Exports `startWatcher(workspaceRoot, options):
-      WatcherHandle` returning `{ close(): Promise<void>, onCompile(cb) }`.
+    WatcherHandle` returning `{ close(): Promise<void>, onCompile(cb) }`.
       Uses a single chokidar instance; does NOT spawn subprocesses.
 - [ ] `claws-sdk/src/compiler/watch/debouncer.ts` (NEW) — trailing-edge
       debouncer. `createDebouncer(windowMs: number, fn: () => void | Promise<void>)`
@@ -66,7 +66,7 @@ other watch assertion.
 - [ ] `claws-sdk/src/compiler/watch/lifecycle.ts` (NEW) — SIGINT / SIGBREAK
       handlers, 2000ms cleanup budget, 1000ms double-signal force-exit timer,
       tempfile cleanup sweep. Exports `installSignalHandlers(handle):
-      () => void` returning an uninstall fn for tests.
+    () => void` returning an uninstall fn for tests.
 - [ ] `claws-sdk/src/compiler/watch/index.ts` (NEW) — barrel exports:
       `startWatcher`, `WatcherHandle`, `WatcherOptions`.
 - [ ] `claws-sdk/src/compiler/emit/atomic-write.ts` (NEW or amend pulse 7
@@ -74,7 +74,7 @@ other watch assertion.
       then `fs.rename` on success. Satisfies CL-04 §IS.7 atomic-emit MUST
       referenced by watch/S03-F02.
 - [ ] `claws-cli/src/commands/watch.ts` (NEW) — `claws watch [--debounce <ms>]
-      [--verbose]` CLI wrapper. Parses flags, resolves workspace root, calls
+    [--verbose]` CLI wrapper. Parses flags, resolves workspace root, calls
       `startWatcher`, wires summary printer to stdout, installs signal
       handlers, never prints absolute paths (always workspace-relative).
 - [ ] `claws-cli/src/commands/index.ts` — register `watch` subcommand in the
@@ -106,35 +106,35 @@ CL-01 §claws watch spec order where possible.
 
 - [ ] Default debounce window is `300ms`, configurable via `--debounce <ms>`
       flag; minimum enforced at 50ms (per CL-01 §claws watch flag table).
-      *(watch/S02-F07; spec-resolved)*
+      _(watch/S02-F07; spec-resolved)_
 - [ ] Debouncer uses trailing-edge semantics ONLY: timer resets on each fs
       event; `compile()` fires `<window>` ms AFTER the last event, never after
       the first. Leading-edge AND leading+trailing are both prohibited.
-      *(watch/S01-F01, watch/S02-F02; CL-01 §claws watch MUST)*
+      _(watch/S01-F01, watch/S02-F02; CL-01 §claws watch MUST)_
 - [ ] A 10-edit rapid-fire burst (inter-edit gap `<50ms`) coalesces into `≤3`
       compile invocations. Harness uses a monotonic clock to measure actual
       inter-edit gaps and fails the run with explicit CI-noise documentation
       if gaps stretch past 80ms, rather than loosening the bound silently.
-      *(watch/S02-F04; CL-01 §claws watch MUST)*
+      _(watch/S02-F04; CL-01 §claws watch MUST)_
 - [ ] Duplicate fs events inside the debounce window are coalesced at the
       watcher layer (chokidar deduplication). VS Code temp-file-then-rename
-      saves on Windows MUST be treated as one edit, not two. *(watch/S01-F02;
-      CL-01 §claws watch MUST)*
+      saves on Windows MUST be treated as one edit, not two. _(watch/S01-F02;
+      CL-01 §claws watch MUST)_
 
 ### Compile serialization + input freshness (watch/S02)
 
 - [ ] Compile invocations are serialized per-workspace via a compile queue
       OR each compile carries a monotonic generation number and late writes
       from stale generations are discarded. Edit #5's compile emit MUST NOT
-      overwrite edit #10's emit. *(watch/S02-F01; CL-01 §claws watch MUST)*
+      overwrite edit #10's emit. _(watch/S02-F01; CL-01 §claws watch MUST)_
 - [ ] Input files are read at compile ENTRY time, not at fs-event dispatch
       time. OS write buffering cannot cause the compile to observe a pre-edit
-      byte image. `compile()` re-stats the workspace on entry. *(watch/S02-F03;
-      CL-01 §claws watch MUST)*
+      byte image. `compile()` re-stats the workspace on entry. _(watch/S02-F03;
+      CL-01 §claws watch MUST)_
 - [ ] Every compile invocation populates `stageTimings` — not only the
       full-fresh path. The timing collector runs on every compile, including
-      mid-burst compiles that straddle debounce windows. *(watch/S02-F05;
-      CL-04 §IS.4 spec-resolved)*
+      mid-burst compiles that straddle debounce windows. _(watch/S02-F05;
+      CL-04 §IS.4 spec-resolved)_
 
 ### Cache lifetime (watch/S01)
 
@@ -142,7 +142,7 @@ CL-01 §claws watch spec order where possible.
       per-compile. The watcher creates the cache once at session start and
       reuses it across all compiles. Pulse 80's per-stage caches are the
       authoritative cache surface; pulse 81 MUST NOT reinvent cache logic.
-      *(watch/S01-F03; CL-01 §claws watch MUST)*
+      _(watch/S01-F03; CL-01 §claws watch MUST)_
 - [ ] After the first compile populates the cache, subsequent compiles on
       unchanged readers observe `cacheHit: true` via pulse 80's per-stage
       cache keys (content-hash-keyed, with upstream IR hashes per CL-04
@@ -153,48 +153,48 @@ CL-01 §claws watch spec order where possible.
 - [ ] SIGINT installs a handler that AWAITS `watcher.close()` before exiting.
       Synchronous `process.exit()` on SIGINT is prohibited — chokidar's
       native handles leak, causing `ERROR_SHARING_VIOLATION` on Windows and
-      kqueue descriptor exhaustion on macOS. *(watch/S03-F01; CL-01 §claws
-      watch MUST, step 1)*
+      kqueue descriptor exhaustion on macOS. _(watch/S03-F01; CL-01 §claws
+      watch MUST, step 1)_
 - [ ] Emit writes go through `writeAtomic`: tempfile-plus-rename, never
       in-place. An interrupted compile leaves either the old complete file
-      or the new complete file — never a partial. *(watch/S03-F02; CL-04
-      §IS.7 MUST)*
+      or the new complete file — never a partial. _(watch/S03-F02; CL-04
+      §IS.7 MUST)_
 - [ ] SIGINT handler executes the 5-step cleanup sequence in order:
       (1) stop accepting events, (2) drain OR discard in-flight compile with
       prior emit intact, (3) atomic rename guarantee, (4) tempfile sweep
       (`*.tmp-<pid>-*`) on SIGINT OR next-startup, (5) exit `0` within 2000ms.
-      *(watch/S03-F03, F07; CL-01 §claws watch MUST)*
+      _(watch/S03-F03, F07; CL-01 §claws watch MUST)_
 - [ ] Double-SIGINT (or a 1000ms fallback timeout on `watcher.close()`)
       triggers force-exit with code `1` and a logged warning. Impatient Ctrl-C
-      twice MUST NOT deadlock on a slow close. *(watch/S03-F05; CL-01 §claws
-      watch MUST)*
+      twice MUST NOT deadlock on a slow close. _(watch/S03-F05; CL-01 §claws
+      watch MUST)_
 - [ ] Windows: register for SIGBREAK alongside SIGINT. cmd.exe and
       PowerShell may send SIGBREAK where Git Bash forwards SIGINT; both are
-      clean-exit triggers. *(watch/S03-F08; CL-01 §claws watch MUST)*
+      clean-exit triggers. _(watch/S03-F08; CL-01 §claws watch MUST)_
 - [ ] Exit code is `0` on clean shutdown within 2000ms. The `130` exit code
       is reserved for watcher-leak cases and MUST NOT occur under the
-      cleanup MUST. *(watch/S03-F06; CL-01 exit-code table)*
+      cleanup MUST. _(watch/S03-F06; CL-01 exit-code table)_
 
 ### Idle + output hygiene (watch/S01)
 
 - [ ] An idle watcher (started, zero events received) exits cleanly on
       SIGINT. The event loop holds no references that block process exit
       when idle. Handler installation is symmetric with teardown — no
-      long-lived timers leak. *(watch/S01-F06; pulse AC)*
+      long-lived timers leak. _(watch/S01-F06; pulse AC)_
 - [ ] Per-change stdout summary uses WORKSPACE-RELATIVE paths, never
       absolute. Absolute paths leak `$HOME` into logs and break snapshot
       tests across machines. Summary format matches the CL-01 §claws watch
       output contract column shape (timestamp, path, verb, elapsed,
-      cacheHit N/9, diagnostics). *(watch/S01-F05; CL-01 §claws watch
-      output contract)*
+      cacheHit N/9, diagnostics). _(watch/S01-F05; CL-01 §claws watch
+      output contract)_
 - [ ] Optional `--verbose` flag surfaces per-stage timings from the
       incremental compile to stdout. Default (no `--verbose`) keeps the
-      single-line per-change summary format. *(watch/S01-F07; pulse AC)*
+      single-line per-change summary format. _(watch/S01-F07; pulse AC)_
 
 ### Event bus threading (pulse 83 seam)
 
 - [ ] `claws-cli/src/commands/watch.ts` accepts an `options.events?:
-      CompilerEventBus` parameter and threads it through to every
+    CompilerEventBus` parameter and threads it through to every
       `compile()` call in the watch session. Watch mode MUST NOT define
       new event types. Event-emission correctness is TESTED in pulse 83's
       scenario (`hot-reload/S01`); pulse 81's job is to prove threading
@@ -206,14 +206,14 @@ CL-01 §claws watch spec order where possible.
 - [ ] Output mtime assertions use a platform-aware tolerance buffer:
       NTFS 100ns resolution on Windows, APFS ns on modern macOS, HFS+ 1s on
       legacy macOS. Hard-coded 100ms buffers are prohibited (flaky on slow
-      CI). *(watch/S01-F04; test-level)*
+      CI). _(watch/S01-F04; test-level)_
 - [ ] Inter-edit-gap measurement in the coalescing test uses a monotonic
       clock (`performance.now()`), not wall clock. CI-tuned bounds documented
-      inline when the real-time gap exceeds 80ms. *(watch/S02-F04; test-level)*
+      inline when the real-time gap exceeds 80ms. _(watch/S02-F04; test-level)_
 - [ ] Cross-platform orphan detection in the SIGINT e2e test: capture
       pre-SIGINT PID set via `ps -ef` (POSIX) or `tasklist /fi "imagename
-      eq node.exe"` (Windows); assert post-exit PID set is a strict subset.
-      *(watch/S03-F04; test-level)*
+    eq node.exe"` (Windows); assert post-exit PID set is a strict subset.
+      _(watch/S03-F04; test-level)_
 
 ### Quality gates
 
@@ -229,30 +229,30 @@ CL-01 §claws watch spec order where possible.
 
 ## Scenario Findings Applied
 
-| Finding | Severity | Disposition | AC hook |
-|---------|----------|-------------|---------|
-| watch/S01-F01 | major | spec (CL-01) | Trailing-edge debounce AC |
-| watch/S01-F02 | major | spec (CL-01) | fs-event coalescing AC |
-| watch/S01-F03 | major | spec (CL-01) | Cache lifetime AC |
-| watch/S01-F04 | warning | test | mtime tolerance harness AC |
-| watch/S01-F05 | warning | spec (CL-01) | Workspace-relative paths AC |
-| watch/S01-F06 | warning | **pulse AC** | Idle watcher clean exit AC |
-| watch/S01-F07 | note | **pulse AC** | `--verbose` flag AC |
-| watch/S02-F01 | major | spec (CL-01) | Compile serialization AC |
-| watch/S02-F02 | major | spec-resolved | Trailing-edge (covered by S01-F01) |
-| watch/S02-F03 | major | spec (CL-01) | Read at compile entry AC |
-| watch/S02-F04 | warning | test | Monotonic-clock harness AC |
-| watch/S02-F05 | warning | spec-resolved | stageTimings on every invocation |
-| watch/S02-F06 | warning | spec-resolved | byteHash input identity (CL-04 §IS.4) |
-| watch/S02-F07 | note | spec-resolved | `--debounce <ms>` flag |
-| watch/S03-F01 | major | spec (CL-01) | Await watcher.close() AC |
-| watch/S03-F02 | major | spec (CL-04 §IS.7) | Atomic tempfile+rename AC |
-| watch/S03-F03 | major | spec (CL-01) | 5-step cleanup sequence AC |
-| watch/S03-F04 | major | test | Cross-platform orphan detection AC |
-| watch/S03-F05 | warning | spec (CL-01) | Double-SIGINT force-exit AC |
-| watch/S03-F06 | warning | spec-resolved | Exit-code table 0/130 |
-| watch/S03-F07 | warning | spec (CL-04 §IS.7) | Tempfile sweep AC |
-| watch/S03-F08 | note | spec (CL-01) | SIGBREAK on Windows AC |
+| Finding       | Severity | Disposition        | AC hook                               |
+| ------------- | -------- | ------------------ | ------------------------------------- |
+| watch/S01-F01 | major    | spec (CL-01)       | Trailing-edge debounce AC             |
+| watch/S01-F02 | major    | spec (CL-01)       | fs-event coalescing AC                |
+| watch/S01-F03 | major    | spec (CL-01)       | Cache lifetime AC                     |
+| watch/S01-F04 | warning  | test               | mtime tolerance harness AC            |
+| watch/S01-F05 | warning  | spec (CL-01)       | Workspace-relative paths AC           |
+| watch/S01-F06 | warning  | **pulse AC**       | Idle watcher clean exit AC            |
+| watch/S01-F07 | note     | **pulse AC**       | `--verbose` flag AC                   |
+| watch/S02-F01 | major    | spec (CL-01)       | Compile serialization AC              |
+| watch/S02-F02 | major    | spec-resolved      | Trailing-edge (covered by S01-F01)    |
+| watch/S02-F03 | major    | spec (CL-01)       | Read at compile entry AC              |
+| watch/S02-F04 | warning  | test               | Monotonic-clock harness AC            |
+| watch/S02-F05 | warning  | spec-resolved      | stageTimings on every invocation      |
+| watch/S02-F06 | warning  | spec-resolved      | byteHash input identity (CL-04 §IS.4) |
+| watch/S02-F07 | note     | spec-resolved      | `--debounce <ms>` flag                |
+| watch/S03-F01 | major    | spec (CL-01)       | Await watcher.close() AC              |
+| watch/S03-F02 | major    | spec (CL-04 §IS.7) | Atomic tempfile+rename AC             |
+| watch/S03-F03 | major    | spec (CL-01)       | 5-step cleanup sequence AC            |
+| watch/S03-F04 | major    | test               | Cross-platform orphan detection AC    |
+| watch/S03-F05 | warning  | spec (CL-01)       | Double-SIGINT force-exit AC           |
+| watch/S03-F06 | warning  | spec-resolved      | Exit-code table 0/130                 |
+| watch/S03-F07 | warning  | spec (CL-04 §IS.7) | Tempfile sweep AC                     |
+| watch/S03-F08 | note     | spec (CL-01)       | SIGBREAK on Windows AC                |
 
 ## Dependencies
 
@@ -274,6 +274,7 @@ CL-01 §claws watch spec order where possible.
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — watch lifecycle, SIGINT cleanup
   sequencing, seam with incremental cache + event bus, exit-code contract.
 - `.craft/roles/claws/platform-eng.md` — chokidar integration patterns,

@@ -13,6 +13,7 @@ Performance optimization and correctness guide for React applications. Contains 
 ## When to Apply
 
 Reference these guidelines when:
+
 - Writing or reviewing React components and hooks
 - Optimizing re-render performance
 - Refactoring state management or effect logic
@@ -20,12 +21,12 @@ Reference these guidelines when:
 
 ## Rule Categories by Priority
 
-| Priority | Category | Impact | Prefix | Rules |
-|----------|----------|--------|--------|-------|
-| 1 | Rules of React | CRITICAL | `react-rules-` | 3 |
-| 2 | Re-render Optimization | MEDIUM | `rerender-` | 13 |
-| 3 | Rendering Performance | MEDIUM | `rendering-` | 5 |
-| 4 | Advanced Patterns | LOW | `advanced-` | 2 |
+| Priority | Category               | Impact   | Prefix         | Rules |
+| -------- | ---------------------- | -------- | -------------- | ----- |
+| 1        | Rules of React         | CRITICAL | `react-rules-` | 3     |
+| 2        | Re-render Optimization | MEDIUM   | `rerender-`    | 13    |
+| 3        | Rendering Performance  | MEDIUM   | `rendering-`   | 5     |
+| 4        | Advanced Patterns      | LOW      | `advanced-`    | 2     |
 
 ## Quick Reference
 
@@ -90,6 +91,7 @@ rules/rerender-no-inline-components.md
 ```
 
 Each rule file contains:
+
 - Brief explanation of why it matters
 - Incorrect code example
 - Correct code example

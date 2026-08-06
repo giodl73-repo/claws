@@ -18,17 +18,17 @@ git diff            # if nothing staged yet
 
 ### 2. Auto-Detect Type
 
-| File pattern | Likely type |
-| --- | --- |
-| `*.vue`, component directories | `feat` (new) or `fix` (existing) |
-| `*.test.js`, `*.spec.js` | `test` |
-| `*.md`, `docs/`, `apps/dialtone-documentation/` | `docs` |
-| `*.less`, `packages/dialtone-css/` | `style` or `feat` |
-| `*.config.*`, `package.json`, build configs | `build` |
-| `.github/workflows/`, CI config | `ci` |
-| Version bumps, changelog, formatting | `chore` |
-| Performance-focused changes | `perf` |
-| Code restructuring, no behavior change | `refactor` |
+| File pattern                                    | Likely type                      |
+| ----------------------------------------------- | -------------------------------- |
+| `*.vue`, component directories                  | `feat` (new) or `fix` (existing) |
+| `*.test.js`, `*.spec.js`                        | `test`                           |
+| `*.md`, `docs/`, `apps/dialtone-documentation/` | `docs`                           |
+| `*.less`, `packages/dialtone-css/`              | `style` or `feat`                |
+| `*.config.*`, `package.json`, build configs     | `build`                          |
+| `.github/workflows/`, CI config                 | `ci`                             |
+| Version bumps, changelog, formatting            | `chore`                          |
+| Performance-focused changes                     | `perf`                           |
+| Code restructuring, no behavior change          | `refactor`                       |
 
 ### 3. Auto-Detect Scope
 

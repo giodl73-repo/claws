@@ -64,6 +64,7 @@ Complete the CapabilityManifest type with full tool, skill, agent, and workflow 
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/dragon.md` — type safety, structural completeness, invariant verification
 - `.craft/roles/claws/gateway-eng.md` — Gateway API alignment, capability manifest shape, governance analysis requirements
 - `.craft/roles/claws/ciso.md` — security classification, OBO policy enforcement, conflict resolution semantics
@@ -75,9 +76,11 @@ Pulse 03 must be complete — GovernanceIR types, FailMode<R>, and intent types 
 ## Review Amendments (R1)
 
 ### C10: Getting-Started Doc (CP-1 Gate)
+
 - [ ] Write `docs/claws/getting-started/governance-ir.md` — 1-2 pages: what is GovernanceIR, what is FailMode<R>, how to inspect the IR
 
 ### Architect: ConflictReport Type Ownership
+
 - [ ] ConflictReport type lives ONLY in `claws-sdk/src/ir/conflict-report.ts`
 - [ ] P12 (cross-file conflicts) imports from ir/, does NOT define its own
 - [ ] Remove any ConflictReport from compile/types.ts if it exists

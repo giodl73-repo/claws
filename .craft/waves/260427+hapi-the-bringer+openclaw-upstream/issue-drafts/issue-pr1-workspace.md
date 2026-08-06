@@ -73,6 +73,7 @@ New `src/commands/doctor-config-lint.ts` plugged into `src/flows/doctor-health-c
 **Frequency**: every config write — multiple per day for active users.
 
 **Consequences**:
+
 - Manual restoration of secrets from `openclaw.json.backup` (when users have one)
 - Editor extensions / human reviewers losing comment context on every save
 - Schema-drift configs failing startup with cryptic `Unrecognized key` errors instead of being caught at lint time
@@ -83,48 +84,48 @@ New `src/commands/doctor-config-lint.ts` plugged into `src/flows/doctor-health-c
 
 ### Closed-as-fixed (substrate is the through-line; consumer-side patches left this gap)
 
-| Issue | Title fragment | Fix substrate |
-|---|---|---|
-| #62281 | `configure writes __OPENCLAW_REDACTED__ literals into openclaw.json, corrupting all API keys` | consumer reject-rule |
-| #44357 | redaction-sentinel write to disk | consumer reject-rule |
-| #13495, #21573, #13210, #12078 | similar redaction-corruption variants | consumer reject-rules |
-| #31251 | `plugin install path doesn't participate in reject-rule` | gap evidence |
-| #22272, #14998, #48415, #20478, #59070, #60334, #61683 | format-loss + Unrecognized-key startup blocks | per-call-site fixes |
+| Issue                                                  | Title fragment                                                                                | Fix substrate         |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------- | --------------------- |
+| #62281                                                 | `configure writes __OPENCLAW_REDACTED__ literals into openclaw.json, corrupting all API keys` | consumer reject-rule  |
+| #44357                                                 | redaction-sentinel write to disk                                                              | consumer reject-rule  |
+| #13495, #21573, #13210, #12078                         | similar redaction-corruption variants                                                         | consumer reject-rules |
+| #31251                                                 | `plugin install path doesn't participate in reject-rule`                                      | gap evidence          |
+| #22272, #14998, #48415, #20478, #59070, #60334, #61683 | format-loss + Unrecognized-key startup blocks                                                 | per-call-site fixes   |
 
 ### Open at time of writing
 
-| Issue | Title fragment | Lint code that would catch it |
-|---|---|---|
-| #62438 | secret-ref ambiguous | `OC_CFG_SECRET_REF_AMBIGUOUS` |
-| #57567 | format-loss on update | `OC_CFG_*` round-trip preservation |
-| #65565 | `Set Default for agent fails with Unrecognized key: defaultId` | `OC_CFG_TYPE_MISMATCH` |
-| #72872 | `2026.4.24 schema validator rejects agents.defaults.agentRuntime; gates ALL CLI commands` | `OC_CFG_DEPRECATED_FIELD` |
-| #64946 | startup-block class | `OC_CFG_*` schema rules |
-| #66988 | `Raw mode silently disabled — snapshot returns raw: null` | per-config-key validation |
+| Issue  | Title fragment                                                                            | Lint code that would catch it      |
+| ------ | ----------------------------------------------------------------------------------------- | ---------------------------------- |
+| #62438 | secret-ref ambiguous                                                                      | `OC_CFG_SECRET_REF_AMBIGUOUS`      |
+| #57567 | format-loss on update                                                                     | `OC_CFG_*` round-trip preservation |
+| #65565 | `Set Default for agent fails with Unrecognized key: defaultId`                            | `OC_CFG_TYPE_MISMATCH`             |
+| #72872 | `2026.4.24 schema validator rejects agents.defaults.agentRuntime; gates ALL CLI commands` | `OC_CFG_DEPRECATED_FIELD`          |
+| #64946 | startup-block class                                                                       | `OC_CFG_*` schema rules            |
+| #66988 | `Raw mode silently disabled — snapshot returns raw: null`                                 | per-config-key validation          |
 
 ### Workspace-classifier evidence (cross-cutting)
 
-| Issue | Maps to |
-|---|---|
-| #29387 | `Bootstrap files in agentDir are silently ignored` → `OC_WS_UNKNOWN_FILE` |
-| #45760 | `add MEMORY.md to minimal bootstrap allowlist` (silent drop) → `OC_WS_UNKNOWN_FILE` |
-| #43462 | `make isMemoryPath case-insensitive for directory prefix` → `OC_WS_CASING_VIOLATION` |
+| Issue  | Maps to                                                                                    |
+| ------ | ------------------------------------------------------------------------------------------ |
+| #29387 | `Bootstrap files in agentDir are silently ignored` → `OC_WS_UNKNOWN_FILE`                  |
+| #45760 | `add MEMORY.md to minimal bootstrap allowlist` (silent drop) → `OC_WS_UNKNOWN_FILE`        |
+| #43462 | `make isMemoryPath case-insensitive for directory prefix` → `OC_WS_CASING_VIOLATION`       |
 | #45296 | `Signal binding matching is case-sensitive but session keys are lowercased` → casing-class |
 
 ### MEMORY.md content quality
 
-| Issue | Maps to |
-|---|---|
-| #73691 | `MEMORY.md grows unbounded → bootstrap overflow → Gateway freeze` (startup-block) → `OC_MEMORY_INDEX_OVER_LIMIT` |
-| #45415 | explicit feature request for size enforcement → `OC_MEMORY_HOOK_TOO_LONG` / `OC_MEMORY_INDEX_OVER_LIMIT` |
-| #67580, #67363, #68774 | dreaming promotion writes raw Candidate data → `OC_MEMORY_RAW_CANDIDATE_LEAK` |
+| Issue                  | Maps to                                                                                                          |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| #73691                 | `MEMORY.md grows unbounded → bootstrap overflow → Gateway freeze` (startup-block) → `OC_MEMORY_INDEX_OVER_LIMIT` |
+| #45415                 | explicit feature request for size enforcement → `OC_MEMORY_HOOK_TOO_LONG` / `OC_MEMORY_INDEX_OVER_LIMIT`         |
+| #67580, #67363, #68774 | dreaming promotion writes raw Candidate data → `OC_MEMORY_RAW_CANDIDATE_LEAK`                                    |
 
 ### Agents model validation
 
-| Issue | Maps to |
-|---|---|
+| Issue  | Maps to                                                                                       |
+| ------ | --------------------------------------------------------------------------------------------- |
 | #73715 | `--model anthropic/CLAUDE-OPUS-4-7 (case-mismatched) is dispatched, returns 'No text output'` | `OC_AGENTS_MODEL_NOT_APPROVED` |
-| #39811 | `Model configuration accepts unvalidated model names` | `OC_AGENTS_MODEL_NOT_APPROVED` |
+| #39811 | `Model configuration accepts unvalidated model names`                                         | `OC_AGENTS_MODEL_NOT_APPROVED` |
 
 ---
 
@@ -159,6 +160,7 @@ This is one substrate problem with multiple consumer-side surfaces, but the prop
 **Can this land as one substrate-level PR**, or do maintainers prefer it sliced?
 
 If slicing is preferred, the natural cut points are:
+
 - **PR-1a**: `@openclaw/workspace` package shipping the JSONC parser + emit + sentinel rejection (substrate-only, no consumer changes — purely additive)
 - **PR-1b**: chokepoint conversion at `src/config/mutate.ts:224` + `src/config/io.ts:1305` consuming the package (the load-bearing fix)
 - **PR-1c**: doctor lint contribution (the lint surface)

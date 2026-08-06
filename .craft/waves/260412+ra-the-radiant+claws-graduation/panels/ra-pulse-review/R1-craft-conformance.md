@@ -33,43 +33,43 @@ Collected all `scenario_codes` values from 59 pulse frontmatter blocks. Normaliz
 
 ### Coverage Matrix
 
-| Scenario | Referenced By Pulses | Status |
-|----------|---------------------|--------|
-| **S01** | 23, 25, 47, 48, 59 | COVERED |
-| **S02** | 22, 23, 24, 46 | COVERED |
-| **S03** | 30, 31, 49 | COVERED |
-| **S04** | 30, 31 | COVERED |
-| **S05** | 31, 33, 49 | COVERED |
-| **S06** | 32 | COVERED |
-| **S07** | 29, 34 | COVERED |
-| **S08** | 28, 54 | COVERED |
-| **S09** | 35, 36, 51 | COVERED |
-| **S10** | 35, 51 | COVERED |
-| **S11** | 37, 52 | COVERED |
-| **S12** | 39, 52 | COVERED |
-| **S13** | 38, 52 | COVERED |
-| **S14** | 41, 53 | COVERED |
-| **S15** | 43 | COVERED |
-| **S16** | 23 | COVERED |
-| **S17** | 32 | COVERED |
-| **S18** | 42 | COVERED |
-| **S19** | 29, 35 | COVERED |
-| **S20** | 34 | COVERED |
-| **S21** | 30, 44 (via acceptance) | COVERED |
-| **S22** | 30, 44 (via acceptance) | COVERED |
-| **S23** | 30, 44 (via acceptance) | COVERED |
-| **S24** | 30, 44 (via acceptance) | COVERED |
-| **S25** | 40, 44 (via acceptance) | COVERED |
-| **S26** | 39, 44 (via acceptance) | COVERED |
-| **S27** | 30, 42, 44 (via acceptance) | COVERED |
-| **S28** | -- | **ORPHANED** |
-| **S29** | 26 | COVERED |
-| **S30** | 27 | COVERED |
-| **S31** | -- | **ORPHANED** |
-| **S32** | -- | **ORPHANED** |
-| **S33** | 34, 54 | COVERED |
-| **S34** | 43, 44 | COVERED |
-| **S35** | 44 | COVERED |
+| Scenario | Referenced By Pulses        | Status       |
+| -------- | --------------------------- | ------------ |
+| **S01**  | 23, 25, 47, 48, 59          | COVERED      |
+| **S02**  | 22, 23, 24, 46              | COVERED      |
+| **S03**  | 30, 31, 49                  | COVERED      |
+| **S04**  | 30, 31                      | COVERED      |
+| **S05**  | 31, 33, 49                  | COVERED      |
+| **S06**  | 32                          | COVERED      |
+| **S07**  | 29, 34                      | COVERED      |
+| **S08**  | 28, 54                      | COVERED      |
+| **S09**  | 35, 36, 51                  | COVERED      |
+| **S10**  | 35, 51                      | COVERED      |
+| **S11**  | 37, 52                      | COVERED      |
+| **S12**  | 39, 52                      | COVERED      |
+| **S13**  | 38, 52                      | COVERED      |
+| **S14**  | 41, 53                      | COVERED      |
+| **S15**  | 43                          | COVERED      |
+| **S16**  | 23                          | COVERED      |
+| **S17**  | 32                          | COVERED      |
+| **S18**  | 42                          | COVERED      |
+| **S19**  | 29, 35                      | COVERED      |
+| **S20**  | 34                          | COVERED      |
+| **S21**  | 30, 44 (via acceptance)     | COVERED      |
+| **S22**  | 30, 44 (via acceptance)     | COVERED      |
+| **S23**  | 30, 44 (via acceptance)     | COVERED      |
+| **S24**  | 30, 44 (via acceptance)     | COVERED      |
+| **S25**  | 40, 44 (via acceptance)     | COVERED      |
+| **S26**  | 39, 44 (via acceptance)     | COVERED      |
+| **S27**  | 30, 42, 44 (via acceptance) | COVERED      |
+| **S28**  | --                          | **ORPHANED** |
+| **S29**  | 26                          | COVERED      |
+| **S30**  | 27                          | COVERED      |
+| **S31**  | --                          | **ORPHANED** |
+| **S32**  | --                          | **ORPHANED** |
+| **S33**  | 34, 54                      | COVERED      |
+| **S34**  | 43, 44                      | COVERED      |
+| **S35**  | 44                          | COVERED      |
 
 ### HC-BLOCK-01: Orphaned Scenarios
 
@@ -77,11 +77,11 @@ Collected all `scenario_codes` values from 59 pulse frontmatter blocks. Normaliz
 
 Three scenarios have ZERO pulse references in `scenario_codes`:
 
-| Scenario | Name | Expected Coverage |
-|----------|------|-------------------|
-| **S28** | circular-delegation | Should be covered by trust escalation (pulse 39) or validation layer (pulse 30) |
-| **S31** | identity-impersonation | Should be covered by onboard API (pulse 43) or identity endpoint (pulse 27) |
-| **S32** | stale-preauthorization-cascade | Should be covered by trust escalation (pulse 39) or fleet claws (pulse 42) |
+| Scenario | Name                           | Expected Coverage                                                               |
+| -------- | ------------------------------ | ------------------------------------------------------------------------------- |
+| **S28**  | circular-delegation            | Should be covered by trust escalation (pulse 39) or validation layer (pulse 30) |
+| **S31**  | identity-impersonation         | Should be covered by onboard API (pulse 43) or identity endpoint (pulse 27)     |
+| **S32**  | stale-preauthorization-cascade | Should be covered by trust escalation (pulse 39) or fleet claws (pulse 42)      |
 
 **Note on S21-S28 coverage**: Pulse 44 (cap-e2e-gate) has acceptance tests that bundle S21-S24 and S25-S28 as composite assertions. However, S28 (circular-delegation) is only covered by this bundled assertion in pulse 44 -- no dedicated pulse has S28 in its `scenario_codes`. While pulse 44's L3 acceptance test mentions "S25-S28 policy violations" as a single test, this is insufficient for traceability. S28 needs a dedicated `scenario_codes` entry in at least one implementation pulse.
 
@@ -107,6 +107,7 @@ This creates traceability ambiguity. Is `S02` in pulse 22 the same as `S02` in p
 ## 2. Test Tier Minimum Violations
 
 ### Minimum Requirements
+
 - Every pulse: L0 >= 2 AND L1 >= 1
 - Gate pulses (checkpoint_gate: true): L3 >= 1
 
@@ -114,11 +115,11 @@ This creates traceability ambiguity. Is `S02` in pulse 22 the same as `S02` in p
 
 **Severity: HC-BLOCK**
 
-| Pulse | L0_unit | L1_integration | Gate? | Issue |
-|-------|---------|----------------|-------|-------|
-| **12** (compile-pipeline-e2e) | **0** | **0** | YES (CP-2 gate) | L0=0, L1=0. Gate pulse with zero unit and integration tests. Has L2=4, L3=2, but violates L0>=2 and L1>=1 floor. |
-| **19** (docs-migration-guide) | **0** | 2 | No | L0=0. Violates L0>=2 floor. Documentation pulse, but still needs basic validation tests. |
-| **44** (cap-e2e-gate) | **0** | **0** | YES (CP-8 gate) | L0=0, L1=0. Gate pulse with zero unit and integration tests. Has L2=6, L3=5, but violates L0>=2 and L1>=1 floor. |
+| Pulse                         | L0_unit | L1_integration | Gate?           | Issue                                                                                                            |
+| ----------------------------- | ------- | -------------- | --------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **12** (compile-pipeline-e2e) | **0**   | **0**          | YES (CP-2 gate) | L0=0, L1=0. Gate pulse with zero unit and integration tests. Has L2=4, L3=2, but violates L0>=2 and L1>=1 floor. |
+| **19** (docs-migration-guide) | **0**   | 2              | No              | L0=0. Violates L0>=2 floor. Documentation pulse, but still needs basic validation tests.                         |
+| **44** (cap-e2e-gate)         | **0**   | **0**          | YES (CP-8 gate) | L0=0, L1=0. Gate pulse with zero unit and integration tests. Has L2=6, L3=5, but violates L0>=2 and L1>=1 floor. |
 
 **Analysis**: Pulses 12 and 44 are intentional E2E/acceptance gate pulses that write no new production code. The argument for L0=0 is that there is nothing to unit-test. However, the tier minimum exists precisely to ensure gate pulses validate prior work at every level. At minimum, a gate pulse should have L0 sanity checks (e.g., "fixture files exist", "barrel exports resolve") and L1 integration checks ("modules compose without error").
 
@@ -132,18 +133,18 @@ Pulse 19 is a documentation pulse. It should have at least L0 tests validating t
 
 Gate pulses (checkpoint_gate: true) must have L3 >= 1. Ten gate pulses:
 
-| Pulse | Gate For | L3_accept | Status |
-|-------|----------|-----------|--------|
-| 6 | CP-1 | 1 | PASS |
-| 12 | CP-2 | 2 | PASS |
-| 18 | CP-3 | 1 | PASS |
-| 20 | CP-4 | 2 | PASS |
-| 28 | CP-5 | 1 | PASS |
-| 34 | CP-6 | 3 | PASS |
-| 39 | CP-7 | 2 | PASS |
-| 44 | CP-8 | 5 | PASS |
-| **55** | **CP-9** | **0** | **FAIL** |
-| **59** | **CP-10** | **0** | **FAIL** |
+| Pulse  | Gate For  | L3_accept | Status   |
+| ------ | --------- | --------- | -------- |
+| 6      | CP-1      | 1         | PASS     |
+| 12     | CP-2      | 2         | PASS     |
+| 18     | CP-3      | 1         | PASS     |
+| 20     | CP-4      | 2         | PASS     |
+| 28     | CP-5      | 1         | PASS     |
+| 34     | CP-6      | 3         | PASS     |
+| 39     | CP-7      | 2         | PASS     |
+| 44     | CP-8      | 5         | PASS     |
+| **55** | **CP-9**  | **0**     | **FAIL** |
+| **59** | **CP-10** | **0**     | **FAIL** |
 
 Pulses 55 (tui-demo, CP-9 gate) and 59 (vscode-webview, CP-10 gate) are checkpoint gates with L3_accept = 0.
 
@@ -163,12 +164,12 @@ Pulse 55 (tui-demo) is the CP-9 gate but has only L0=2, L1=1, L2=1. This is the 
 
 All 59 pulses reference the correct plan:
 
-| Plan | Pulses | Status |
-|------|--------|--------|
-| claws-sdk-graduation | 1-16, 19-20 | CORRECT (18 pulses) |
-| craftworks-package-extraction | 17-18 | CORRECT (2 pulses) |
-| claws-cap-integration | 21-44 | CORRECT (24 pulses) |
-| claws-tui | 45-59 | CORRECT (15 pulses) |
+| Plan                          | Pulses      | Status              |
+| ----------------------------- | ----------- | ------------------- |
+| claws-sdk-graduation          | 1-16, 19-20 | CORRECT (18 pulses) |
+| craftworks-package-extraction | 17-18       | CORRECT (2 pulses)  |
+| claws-cap-integration         | 21-44       | CORRECT (24 pulses) |
+| claws-tui                     | 45-59       | CORRECT (15 pulses) |
 
 **Verdict**: PASS -- no attribution errors.
 
@@ -178,33 +179,33 @@ All 59 pulses reference the correct plan:
 
 Cross-referenced each pulse's `checkpoint` field against wave.yaml `checkpoints` section:
 
-| CP | wave.yaml pulses | Actual pulse assignments | Status |
-|----|-----------------|-------------------------|--------|
-| CP-1 | [1, 2, 3, 4, 5, 6] | 1, 2, 3, 4, 5, 6 | MATCH |
-| CP-2 | [7, 8, 9, 10, 11, 12] | 7, 8, 9, 10, 11, 12 | MATCH |
-| CP-3 | [13, 14, 15, 16, 17, 18] | 13, 14, 15, 16, 17, 18 | MATCH |
-| CP-4 | [19, 20] | 19, 20 | MATCH |
-| CP-5 | [21, 22, 23, 24, 25, 26, 27, 28] | 21, 22, 23, 24, 25, 26, 27, 28 | MATCH |
-| CP-6 | [29, 30, 31, 32, 33, 34] | 29, 30, 31, 32, 33, 34 | MATCH |
-| CP-7 | [35, 36, 37, 38, 39] | 35, 36, 37, 38, 39 | MATCH |
-| CP-8 | [40, 41, 42, 43, 44] | 40, 41, 42, 43, 44 | MATCH |
-| CP-9 | [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55] | 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55 | MATCH |
-| CP-10 | [56, 57, 58, 59] | 56, 57, 58, 59 | MATCH |
+| CP    | wave.yaml pulses                             | Actual pulse assignments                   | Status |
+| ----- | -------------------------------------------- | ------------------------------------------ | ------ |
+| CP-1  | [1, 2, 3, 4, 5, 6]                           | 1, 2, 3, 4, 5, 6                           | MATCH  |
+| CP-2  | [7, 8, 9, 10, 11, 12]                        | 7, 8, 9, 10, 11, 12                        | MATCH  |
+| CP-3  | [13, 14, 15, 16, 17, 18]                     | 13, 14, 15, 16, 17, 18                     | MATCH  |
+| CP-4  | [19, 20]                                     | 19, 20                                     | MATCH  |
+| CP-5  | [21, 22, 23, 24, 25, 26, 27, 28]             | 21, 22, 23, 24, 25, 26, 27, 28             | MATCH  |
+| CP-6  | [29, 30, 31, 32, 33, 34]                     | 29, 30, 31, 32, 33, 34                     | MATCH  |
+| CP-7  | [35, 36, 37, 38, 39]                         | 35, 36, 37, 38, 39                         | MATCH  |
+| CP-8  | [40, 41, 42, 43, 44]                         | 40, 41, 42, 43, 44                         | MATCH  |
+| CP-9  | [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55] | 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55 | MATCH  |
+| CP-10 | [56, 57, 58, 59]                             | 56, 57, 58, 59                             | MATCH  |
 
 Gate pulse validation:
 
-| CP | Expected last pulse as gate | Actual gate pulse | Status |
-|----|---------------------------|-------------------|--------|
-| CP-1 | 6 | 6 (checkpoint_gate: true) | MATCH |
-| CP-2 | 12 | 12 (checkpoint_gate: true) | MATCH |
-| CP-3 | 18 | 18 (checkpoint_gate: true) | MATCH |
-| CP-4 | 20 | 20 (checkpoint_gate: true) | MATCH |
-| CP-5 | 28 | 28 (checkpoint_gate: true) | MATCH |
-| CP-6 | 34 | 34 (checkpoint_gate: true) | MATCH |
-| CP-7 | 39 | 39 (checkpoint_gate: true) | MATCH |
-| CP-8 | 44 | 44 (checkpoint_gate: true) | MATCH |
-| CP-9 | 55 | 55 (checkpoint_gate: true) | MATCH |
-| CP-10 | 59 | 59 (checkpoint_gate: true) | MATCH |
+| CP    | Expected last pulse as gate | Actual gate pulse          | Status |
+| ----- | --------------------------- | -------------------------- | ------ |
+| CP-1  | 6                           | 6 (checkpoint_gate: true)  | MATCH  |
+| CP-2  | 12                          | 12 (checkpoint_gate: true) | MATCH  |
+| CP-3  | 18                          | 18 (checkpoint_gate: true) | MATCH  |
+| CP-4  | 20                          | 20 (checkpoint_gate: true) | MATCH  |
+| CP-5  | 28                          | 28 (checkpoint_gate: true) | MATCH  |
+| CP-6  | 34                          | 34 (checkpoint_gate: true) | MATCH  |
+| CP-7  | 39                          | 39 (checkpoint_gate: true) | MATCH  |
+| CP-8  | 44                          | 44 (checkpoint_gate: true) | MATCH  |
+| CP-9  | 55                          | 55 (checkpoint_gate: true) | MATCH  |
+| CP-10 | 59                          | 59 (checkpoint_gate: true) | MATCH  |
 
 **Verdict**: PASS -- perfect checkpoint alignment.
 
@@ -222,22 +223,22 @@ CL-10 is the primary spec for the serve API and chunk format. It is referenced e
 
 **Pulse deliverable mappings (reconstructed from pulse objectives)**:
 
-| CL-10 Section (inferred) | Covered By Pulses |
-|--------------------------|-------------------|
-| Chunk Format | 23, 24, 25, 26 |
-| Chunk Read API | 22, 24, 25, 26, 27 |
-| Chunk Write API (PATCH) | 29, 30, 31, 33, 34 |
-| Write-Time Validation Layer | 30 |
-| Incremental Compilation | 32 |
-| SSE Events | 28 |
-| Loop Sync | 35, 36 |
-| Schedule/Calendar | 37 |
-| Work Queue | 38 |
-| Trust Escalation | 39 |
-| Skills Store | 40 |
-| Audit Query | 41 |
-| Fleet Management | 42 |
-| Onboarding | 43 |
+| CL-10 Section (inferred)    | Covered By Pulses  |
+| --------------------------- | ------------------ |
+| Chunk Format                | 23, 24, 25, 26     |
+| Chunk Read API              | 22, 24, 25, 26, 27 |
+| Chunk Write API (PATCH)     | 29, 30, 31, 33, 34 |
+| Write-Time Validation Layer | 30                 |
+| Incremental Compilation     | 32                 |
+| SSE Events                  | 28                 |
+| Loop Sync                   | 35, 36             |
+| Schedule/Calendar           | 37                 |
+| Work Queue                  | 38                 |
+| Trust Escalation            | 39                 |
+| Skills Store                | 40                 |
+| Audit Query                 | 41                 |
+| Fleet Management            | 42                 |
+| Onboarding                  | 43                 |
 
 Coverage appears complete through deliverable mapping. The gap is in mechanical traceability, not substance.
 
@@ -263,17 +264,17 @@ CL-11 (GovernanceIR) is the compiled intermediate representation that drives eve
 
 ### Spec Coverage Summary
 
-| Spec | Coverage Status | Notes |
-|------|----------------|-------|
+| Spec  | Coverage Status                                | Notes                                      |
+| ----- | ---------------------------------------------- | ------------------------------------------ |
 | CL-01 | INFERRED -- graduation plan is the plan itself | Package structure defined in pulses 14, 15 |
-| CL-04 | INFERRED -- sidecar format in pulse 2 | Detection heuristics spec |
-| CL-05 | INFERRED -- codegen in pulses 7, 8, 9 | Emit target spec |
-| CL-06 | INFERRED -- R5 enforcement in pulse 6 | Fail-closed spec |
-| CL-07 | INFERRED -- audit chain in pulse 5 | Ed25519 signing spec |
-| CL-08 | INFERRED -- eval in pulse 10 | 12-check validator spec |
-| CL-10 | EXTENSIVE but not mechanically traced | See table above |
-| CL-11 | EXTENSIVE but not mechanically traced | GovernanceIR consumed by 10+ pulses |
-| CL-12 | COVERED in substance, not in frontmatter | Risk classification in connections |
+| CL-04 | INFERRED -- sidecar format in pulse 2          | Detection heuristics spec                  |
+| CL-05 | INFERRED -- codegen in pulses 7, 8, 9          | Emit target spec                           |
+| CL-06 | INFERRED -- R5 enforcement in pulse 6          | Fail-closed spec                           |
+| CL-07 | INFERRED -- audit chain in pulse 5             | Ed25519 signing spec                       |
+| CL-08 | INFERRED -- eval in pulse 10                   | 12-check validator spec                    |
+| CL-10 | EXTENSIVE but not mechanically traced          | See table above                            |
+| CL-11 | EXTENSIVE but not mechanically traced          | GovernanceIR consumed by 10+ pulses        |
+| CL-12 | COVERED in substance, not in frontmatter       | Risk classification in connections         |
 
 ---
 
@@ -281,21 +282,21 @@ CL-11 (GovernanceIR) is the compiled intermediate representation that drives eve
 
 ### Pitfalls P-270 through P-282
 
-| Pitfall | Description | Addressed By | Status |
-|---------|-------------|-------------|--------|
-| **P-270** | Unclassified tools default to R5 | Pulse 25 (connections chunks) -- explicitly mentions P-270 | COVERED |
-| **P-271** | Atomic workspace snapshot | Pulse 22 (workspace parser), Pulse 23 (chunk assembler) -- both mention P-271 | COVERED |
-| **P-272** | Fleet policy fail-closed | Pulse 30 (validation layer) -- explicitly mentions P-272 | COVERED |
-| **P-273** | Compilation queue coalescing | Pulse 32 (incremental cache) -- explicitly mentions P-273 | COVERED |
-| **P-274** | Atomic rollback on compile failure | Pulse 34 (patch errors e2e) -- explicitly mentions P-274 | COVERED |
-| **P-275** | SSE reconnection event loss | Pulse 28 (SSE events) -- explicitly mentions P-275 | COVERED |
-| **P-276** | Deny rule detection via GovernanceIR | Pulse 30 (validation layer) -- explicitly mentions P-276 | COVERED |
-| **P-277** | Deny rule provenance tagging | Pulse 30 (validation layer) -- explicitly mentions P-277 | COVERED |
-| **P-278** | Explicit timezone in HEARTBEAT.md | Pulse 37 (schedule calendar) -- explicitly mentions P-278 | COVERED |
-| **P-279** | JWT verification (5 checks) | Pulse 39 (trust escalation) -- **addresses substance** | **PARTIAL** (see HC-BLOCK-05) |
-| **P-280** | Work queue persistence | Pulse 38 (workqueue) -- explicitly mentions P-280 | COVERED |
-| **P-281** | Audit pagination | Pulse 41 (audit query) -- explicitly mentions P-281 | COVERED |
-| **P-282** | R5 exclusion from allow-all | Pulse 33 (allow-all) -- explicitly mentions P-282 | COVERED |
+| Pitfall   | Description                          | Addressed By                                                                  | Status                        |
+| --------- | ------------------------------------ | ----------------------------------------------------------------------------- | ----------------------------- |
+| **P-270** | Unclassified tools default to R5     | Pulse 25 (connections chunks) -- explicitly mentions P-270                    | COVERED                       |
+| **P-271** | Atomic workspace snapshot            | Pulse 22 (workspace parser), Pulse 23 (chunk assembler) -- both mention P-271 | COVERED                       |
+| **P-272** | Fleet policy fail-closed             | Pulse 30 (validation layer) -- explicitly mentions P-272                      | COVERED                       |
+| **P-273** | Compilation queue coalescing         | Pulse 32 (incremental cache) -- explicitly mentions P-273                     | COVERED                       |
+| **P-274** | Atomic rollback on compile failure   | Pulse 34 (patch errors e2e) -- explicitly mentions P-274                      | COVERED                       |
+| **P-275** | SSE reconnection event loss          | Pulse 28 (SSE events) -- explicitly mentions P-275                            | COVERED                       |
+| **P-276** | Deny rule detection via GovernanceIR | Pulse 30 (validation layer) -- explicitly mentions P-276                      | COVERED                       |
+| **P-277** | Deny rule provenance tagging         | Pulse 30 (validation layer) -- explicitly mentions P-277                      | COVERED                       |
+| **P-278** | Explicit timezone in HEARTBEAT.md    | Pulse 37 (schedule calendar) -- explicitly mentions P-278                     | COVERED                       |
+| **P-279** | JWT verification (5 checks)          | Pulse 39 (trust escalation) -- **addresses substance**                        | **PARTIAL** (see HC-BLOCK-05) |
+| **P-280** | Work queue persistence               | Pulse 38 (workqueue) -- explicitly mentions P-280                             | COVERED                       |
+| **P-281** | Audit pagination                     | Pulse 41 (audit query) -- explicitly mentions P-281                           | COVERED                       |
+| **P-282** | R5 exclusion from allow-all          | Pulse 33 (allow-all) -- explicitly mentions P-282                             | COVERED                       |
 
 ### HC-BLOCK-05: P-279 Not Explicitly Tagged
 
@@ -317,19 +318,19 @@ This breaks the mechanical traceability contract: a grep for "P-279" in pulses r
 
 The following 11 pulses have `scenario_codes: []`:
 
-| Pulse | Plan | CP | Purpose |
-|-------|------|----|---------|
-| 13 | claws-sdk-graduation | CP-3 | Remove craftworks deps |
-| 14 | claws-sdk-graduation | CP-3 | Create @claws/compiler package |
-| 15 | claws-sdk-graduation | CP-3 | Create @bic/claws-sdk extension |
-| 16 | claws-sdk-graduation | CP-3 | API contract tests |
-| 17 | craftworks-package-extraction | CP-3 | Extract dialect packages |
-| 18 | craftworks-package-extraction | CP-3 | Extract platform emitters |
-| 19 | claws-sdk-graduation | CP-4 | Docs migration guide |
-| 20 | claws-sdk-graduation | CP-4 | npm publish pipeline |
-| 21 | claws-cap-integration | CP-5 | Serve scaffold |
-| 45 | claws-tui | CP-9 | TUI scaffold |
-| 50 | claws-tui | CP-9 | Memory/Groups/Entitlements screens |
+| Pulse | Plan                          | CP   | Purpose                            |
+| ----- | ----------------------------- | ---- | ---------------------------------- |
+| 13    | claws-sdk-graduation          | CP-3 | Remove craftworks deps             |
+| 14    | claws-sdk-graduation          | CP-3 | Create @claws/compiler package     |
+| 15    | claws-sdk-graduation          | CP-3 | Create @bic/claws-sdk extension    |
+| 16    | claws-sdk-graduation          | CP-3 | API contract tests                 |
+| 17    | craftworks-package-extraction | CP-3 | Extract dialect packages           |
+| 18    | craftworks-package-extraction | CP-3 | Extract platform emitters          |
+| 19    | claws-sdk-graduation          | CP-4 | Docs migration guide               |
+| 20    | claws-sdk-graduation          | CP-4 | npm publish pipeline               |
+| 21    | claws-cap-integration         | CP-5 | Serve scaffold                     |
+| 45    | claws-tui                     | CP-9 | TUI scaffold                       |
+| 50    | claws-tui                     | CP-9 | Memory/Groups/Entitlements screens |
 
 **Analysis**: Pulses 13-20 are infrastructure/package/docs pulses from the graduation and extraction plans -- they do not map to cap-integration scenarios by nature (they predate the serve API). Pulses 21 and 45 are scaffold pulses that establish infrastructure for later pulses. Pulse 50 renders chunk data but has no scenario validation.
 
@@ -395,28 +396,28 @@ S21 (boundary-removal-violation) is referenced by pulse 30 as `cap-integration/S
 
 ## 8. Test Tier Summary Statistics
 
-| Tier | Total Across 59 Pulses | Average Per Pulse |
-|------|----------------------|-------------------|
-| L0 unit | 296 | 5.0 |
-| L1 integration | 162 | 2.7 |
-| L2 e2e | 44 | 0.7 |
-| L3 acceptance | 43 | 0.7 |
-| **TOTAL** | **545** | **9.2** |
+| Tier           | Total Across 59 Pulses | Average Per Pulse |
+| -------------- | ---------------------- | ----------------- |
+| L0 unit        | 296                    | 5.0               |
+| L1 integration | 162                    | 2.7               |
+| L2 e2e         | 44                     | 0.7               |
+| L3 acceptance  | 43                     | 0.7               |
+| **TOTAL**      | **545**                | **9.2**           |
 
 ### Distribution by Checkpoint
 
-| CP | Pulses | L0 | L1 | L2 | L3 | Total |
-|----|--------|----|----|----|----|-------|
-| CP-1 | 6 | 40 | 20 | 2 | 1 | 63 |
-| CP-2 | 6 | 32 | 15 | 7 | 2 | 56 |
-| CP-3 | 6 | 26 | 23 | 6 | 1 | 56 |
-| CP-4 | 2 | 2 | 4 | 3 | 2 | 11 |
-| CP-5 | 8 | 42 | 20 | 2 | 3 | 67 |
-| CP-6 | 6 | 40 | 22 | 11 | 10 | 83 |
-| CP-7 | 5 | 34 | 16 | 2 | 6 | 58 |
-| CP-8 | 5 | 20 | 11 | 7 | 10 | 48 |
-| CP-9 | 11 | 48 | 24 | 3 | 0 | 75 |
-| CP-10 | 4 | 20 | 10 | 1 | 0 | 31 |
+| CP    | Pulses | L0  | L1  | L2  | L3  | Total |
+| ----- | ------ | --- | --- | --- | --- | ----- |
+| CP-1  | 6      | 40  | 20  | 2   | 1   | 63    |
+| CP-2  | 6      | 32  | 15  | 7   | 2   | 56    |
+| CP-3  | 6      | 26  | 23  | 6   | 1   | 56    |
+| CP-4  | 2      | 2   | 4   | 3   | 2   | 11    |
+| CP-5  | 8      | 42  | 20  | 2   | 3   | 67    |
+| CP-6  | 6      | 40  | 22  | 11  | 10  | 83    |
+| CP-7  | 5      | 34  | 16  | 2   | 6   | 58    |
+| CP-8  | 5      | 20  | 11  | 7   | 10  | 48    |
+| CP-9  | 11     | 48  | 24  | 3   | 0   | 75    |
+| CP-10 | 4      | 20  | 10  | 1   | 0   | 31    |
 
 ### HC-BLOCK-06: CP-9 and CP-10 Have Zero L3 Tests
 
@@ -433,6 +434,7 @@ The entire TUI and VS Code extension surface (15 pulses) ships with zero accepta
 **Severity: HC-BLOCK**
 
 Pulse 55 (tui-demo) is the CP-9 gate for ALL TUI work (11 pulses). It has:
+
 - L0=2 (floor is 2 -- barely meets)
 - L1=1 (floor is 1 -- barely meets)
 - L2=1
@@ -449,11 +451,11 @@ A gate that validates 10 prior pulses with 4 tests and zero acceptance assertion
 
 ## Findings Severity Summary
 
-| Severity | Count | IDs |
-|----------|-------|-----|
-| HC-BLOCK | 7 | HC-BLOCK-01 through HC-BLOCK-07 |
-| HIGH | 7 | HIGH-01 through HIGH-07 |
-| MEDIUM | 6 | MEDIUM-01 through MEDIUM-06 |
+| Severity | Count | IDs                             |
+| -------- | ----- | ------------------------------- |
+| HC-BLOCK | 7     | HC-BLOCK-01 through HC-BLOCK-07 |
+| HIGH     | 7     | HIGH-01 through HIGH-07         |
+| MEDIUM   | 6     | MEDIUM-01 through MEDIUM-06     |
 
 ### Required Before Implementation
 

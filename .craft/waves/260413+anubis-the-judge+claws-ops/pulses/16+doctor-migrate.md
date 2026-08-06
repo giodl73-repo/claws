@@ -56,6 +56,7 @@ Safety is paramount: the migration system backs up the original config before ap
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/platform-eng.md` — version management, migration safety, schema evolution
 - `.craft/roles/craft/architect.md` — SDK-owns-logic rule, backup/restore patterns
 

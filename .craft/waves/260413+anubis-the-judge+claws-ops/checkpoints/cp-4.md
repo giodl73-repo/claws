@@ -11,22 +11,27 @@ review_panel: [claws:gateway-eng, claws:ciso, craft:architect, claws:skill-autho
 ## Dispatch Plan
 
 ### Batch 1 (parallel)
+
 - Pulse 28: key-generate-list — Ed25519/HMAC generation, storage tier abstraction, list display
 - Pulse 29: scaffold-core — trust tier → risk cap mapping, dependency check, pinch-clean output
 
 ### Batch 2 (depends on batch 1)
+
 - Pulse 30: key-rotate-revoke — rotation schedule, re-sign artifacts, revocation with audit event
 - Pulse 31: annotate-heuristics — keyword-anchored risk/OBO inference, confidence scoring
 - Pulse 32: scaffold-tiers — DECLARED/TYPED/VERIFIED tier flags, OBO auto-suggestion
 
 ### Batch 3 (depends on batch 2)
+
 - Pulse 33: key-ceremony — M-of-N Shamir split/reconstruct, participant tracking, threshold enforcement
 - Pulse 34: annotate-accuracy — test corpus (20 skills), accuracy bounds validation, YAML edge cases
 
 ### Batch 4 (depends on batch 3)
+
 - Pulse 35: publish-pipeline — manifest state dispatch, atomicity, fleet policy, badge freshness, key resolution
 
 ## Exit Criteria
+
 - [ ] `claws keys generate --algorithm ed25519` creates keypair in .claws/keys/
 - [ ] `claws keys rotate` generates new version, re-signs pending artifacts, archives old
 - [ ] M-of-N ceremony: reconstruct succeeds with M shares, fails with M-1

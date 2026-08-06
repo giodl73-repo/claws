@@ -64,6 +64,7 @@ This is a significant operator UX gap. Cron sessions that fail silently are the 
 The root issue is in the API (pulse 61), not just the TUI: the `SessionSummary` returned by `GET /api/sessions` does not include `lastRunStatus` at the summary level. The consumer must infer health from the nested `lastRun.status` field. Pulse 62's `SessionRow.tsx` component does not mention rendering `lastRun.status` — only the top-level `status`.
 
 **Recommendation**: Two changes are needed:
+
 1. Pulse 60: Add `lastRunStatus?: 'success' | 'error' | 'timeout'` to `SessionSummary` so the list endpoint surfaces cron health at the summary level. Cron sessions with `status: 'idle'` and `lastRunStatus: 'error'` should render distinctly from healthy idle sessions.
 2. Pulse 62: Add a visual state for "idle but last run failed": yellow or orange indicator (distinct from active-green, idle-gray, and error-red). The acceptance criteria should explicitly require: "Cron session with status=idle and lastRunStatus=error renders with a warning indicator, not gray."
 
@@ -76,6 +77,7 @@ Pulse 63 adds `displayLabel` to `ApprovalRequestEvent` as a computed property. T
 However, the derivation rule is incomplete. The pulse says `displayLabel` "returns human-friendly session identification like 'Daily Triage (cron)' or 'Main Session' based on sessionType and optional session name metadata." Where does "Daily Triage" come from? The `SessionState` from pulse 60 has `id`, `type`, `status`, `createdAt`, `lastActiveAt`, and `metadata` (optional). The session ID in CL-10 is `"cron:daily-triage"`, which is a slug, not a human name.
 
 The derivation must answer: is "Daily Triage" parsed from the session ID (strip prefix, title-case the slug)? Read from `metadata.name`? Read from the HEARTBEAT.md event title? Pulse 63 does not specify. A developer implementing `displayLabel` would produce different output depending on the derivation source:
+
 - From ID: "Cron Daily Triage (cron)" — redundant type prefix
 - From metadata.name: "Daily Triage (cron)" — requires SessionState to carry metadata.name
 - From HEARTBEAT.md event title: "Daily inbox triage (cron)" — requires a cross-reference to the schedule
@@ -92,8 +94,9 @@ Pulse 62 says session detail "renders three tabbed panels (Overview, Runs, Tools
 
 2. The Tools tab shows session-scoped tool permissions. For the main session, this is the full workspace tool set. The visual difference between "main session tools" and "workspace tools" (already shown on the Connections screen) is not explained. An operator comparing the two screens might think they are broken because they show the same data.
 
-**Recommendation**: 
-- Pulse 62 should specify: Runs tab is hidden or shows "No run history" for non-cron sessions. 
+**Recommendation**:
+
+- Pulse 62 should specify: Runs tab is hidden or shows "No run history" for non-cron sessions.
 - Tools tab for main sessions should show a note: "Main session — full workspace permissions." For other session types, show a delta view or count: "6 of 12 workspace tools enabled for this session."
 
 ### F-05: The `suspended` status in SessionState has no TUI rendering specification [HC-WARN]

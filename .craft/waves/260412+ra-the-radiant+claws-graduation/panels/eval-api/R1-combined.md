@@ -115,7 +115,7 @@ But the compile pipeline would not block. This ambiguity will confuse fleet
 admins.
 
 **Recommended**: Clarify in the plan: fleet-mandated tiers are mandatory to
-*run*, but their findings remain advisory unless the profile also sets a
+_run_, but their findings remain advisory unless the profile also sets a
 `blockOnFail: true` flag. Add this to the profile schema.
 
 ### F-07: No rate limiting on the sift endpoint (DRAGON / LOW)
@@ -135,6 +135,7 @@ Document that production deployments must use auth (API key or mTLS).
 ### F-08: Pulse 75 and 76 are in wrong dependency order (ARCHITECT / LOW)
 
 The plan scope table (line 66-70) lists:
+
 - Pulse 75: Eval API routes (POST /api/eval, GET /api/eval/results)
 - Pulse 76: Sift query endpoint (POST /api/eval/sift)
 
@@ -153,16 +154,16 @@ note explicitly that 75 and 76 are independent.
 
 **CONDITIONAL PASS** -- 3 required fixes before implementation begins.
 
-| # | Severity | Required? |
-|---|----------|-----------|
-| F-01 | HIGH | Yes -- infinite loop guard |
-| F-02 | MEDIUM | Yes -- sift attribute allowlist |
-| F-03 | MEDIUM | Yes -- custom check validation |
-| F-04 | MEDIUM | No -- clarify imports in deliverables |
-| F-05 | HIGH | Verify before P74 starts |
-| F-06 | LOW | Recommended |
-| F-07 | LOW | Recommended |
-| F-08 | LOW | Recommended |
+| #    | Severity | Required?                             |
+| ---- | -------- | ------------------------------------- |
+| F-01 | HIGH     | Yes -- infinite loop guard            |
+| F-02 | MEDIUM   | Yes -- sift attribute allowlist       |
+| F-03 | MEDIUM   | Yes -- custom check validation        |
+| F-04 | MEDIUM   | No -- clarify imports in deliverables |
+| F-05 | HIGH     | Verify before P74 starts              |
+| F-06 | LOW      | Recommended                           |
+| F-07 | LOW      | Recommended                           |
+| F-08 | LOW      | Recommended                           |
 
 The eval orchestrator placement in claws-sdk is correct -- it belongs with the
 governance IR and compilation pipeline, not in claws-serve or claws-cli. The

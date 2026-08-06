@@ -53,6 +53,7 @@ Implement `GET/PATCH /api/oc/MEMORY.md` with section-level responses via the Lay
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, SDK-owns-logic rule
 - `.craft/roles/claws/platform-eng.md` — workspace file parsing, section decomposition patterns
 

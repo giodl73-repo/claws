@@ -5,7 +5,8 @@ plan: claws-openclaw-upstream
 checkpoint: cp-1
 depends_on: []
 governing_roles: [claws:claws-release-eng, claws:ciso, claws:claws-repo-steward]
-addresses_findings: [F-01..F-16, BOT-P-001..004, BOT-V-001..004, BOT-A-001..003, BOT-B-001..003, BOT-S-001..002]
+addresses_findings:
+  [F-01..F-16, BOT-P-001..004, BOT-V-001..004, BOT-A-001..003, BOT-B-001..003, BOT-S-001..002]
 addresses_headlines: [H6]
 ---
 

@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "confluence plugin (work)",
   "contributes": {
-    "tools": [
-      "confluence/read-page",
-      "confluence/write-page"
-    ],
-    "skills": [
-      "confluence/read-page",
-      "confluence/write-page"
-    ]
+    "tools": ["confluence/read-page", "confluence/write-page"],
+    "skills": ["confluence/read-page", "confluence/write-page"]
   }
 }

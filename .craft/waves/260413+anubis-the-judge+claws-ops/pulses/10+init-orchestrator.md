@@ -55,6 +55,7 @@ The init command must be idempotent (running twice produces the same result), au
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/platform-eng.md` — platform detection, sidecar layout, cross-platform concerns
 - `.craft/roles/craft/architect.md` — SDK-owns-logic rule, monorepo structure
 

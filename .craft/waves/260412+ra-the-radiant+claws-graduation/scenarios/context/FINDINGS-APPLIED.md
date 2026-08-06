@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Structural sharing**: entry immutability or copy-on-write for shared entries, entry identity definition for structural sharing, O(n) sharing algorithm complexity per collection
 - **Memory management**: shared entry pool lifecycle (WeakRef or dispose), serialization materializes shared entries, hash algorithm versioning for sharing stability
 - **DAG integrity**: pre-add cycle detection (check-before-mutate), full cycle path in CycleDetectedError, self-loop detection as distinct error case

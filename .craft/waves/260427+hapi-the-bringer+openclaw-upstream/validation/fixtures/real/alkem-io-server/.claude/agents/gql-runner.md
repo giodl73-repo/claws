@@ -12,20 +12,24 @@ Use PROACTIVELY to run all GraphQL queries from the web client and test suites a
 ## Steps
 
 1. **Authenticate** (if no valid token):
+
    ```bash
    bash .scripts/non-interactive-login.sh
    ```
 
 2. **Run AST schema validation** (if validator exists):
+
    ```bash
    node .scripts/gql-validate/validator.mjs --source test-suites
    node .scripts/gql-validate/validator.mjs --source client-web
    ```
 
 3. **Run live validation** (requires running server):
+
    ```bash
    bash .scripts/gql-validate/live-validate.sh
    ```
+
    This executes GraphQL queries against the live server in three phases:
    - Phase 0: Discovery queries to populate entity IDs
    - Phase 1: Variable-free queries (no parameters needed)
@@ -44,11 +48,11 @@ Use PROACTIVELY to run all GraphQL queries from the web client and test suites a
 
 ## Result Statuses
 
-| Status    | Meaning |
-|-----------|---------|
-| `success` | Query executed, data returned, no errors |
-| `partial` | Query returned data AND errors (partial resolver failure) |
-| `error`   | Query failed, no data returned |
+| Status    | Meaning                                                      |
+| --------- | ------------------------------------------------------------ |
+| `success` | Query executed, data returned, no errors                     |
+| `partial` | Query returned data AND errors (partial resolver failure)    |
+| `error`   | Query failed, no data returned                               |
 | `skipped` | Query not executed (mutation/subscription/unresolvable vars) |
 
 ## Environment

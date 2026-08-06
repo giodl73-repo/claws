@@ -92,6 +92,7 @@ npm run build
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/dragon.md` — security review, threat modeling, fail-closed enforcement
 - `.craft/roles/claws/ciso.md` — governance policy, risk classification, compliance requirements
 - `.craft/roles/claws/gateway-eng.md` — OC integration patterns, plugin conventions
@@ -99,6 +100,7 @@ Load these role files before starting:
 ## Review Amendments (R1)
 
 ### Architect: analyze.ts Orchestrator Shell
+
 - [ ] Create `claws-sdk/src/compile/analyze.ts` as lightweight orchestrator shell in this pulse (not P15)
 - [ ] analyze() accepts CapabilityManifest + RuleRegistry, returns GovAnalysis
 - [ ] P14 and P15 add rules to the registry; P13 creates the orchestrator that runs them

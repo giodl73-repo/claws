@@ -4,14 +4,7 @@
   "version": "0.1.0",
   "description": "elasticsearch plugin (data)",
   "contributes": {
-    "tools": [
-      "elasticsearch/search",
-      "elasticsearch/index",
-      "elasticsearch/delete-index"
-    ],
-    "skills": [
-      "elasticsearch/search",
-      "elasticsearch/index"
-    ]
+    "tools": ["elasticsearch/search", "elasticsearch/index", "elasticsearch/delete-index"],
+    "skills": ["elasticsearch/search", "elasticsearch/index"]
   }
 }

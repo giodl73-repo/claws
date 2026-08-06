@@ -6,10 +6,10 @@
 
 ## R1 BLOCKers — verification
 
-| # | Title | Status | Notes |
-|---|---|---|---|
-| B6 | type-mismatch null-anything untested | CLOSED | Carve-out documented + companion null-as-absence rule + 2 contract tests pass |
-| B7 | distance-3 cap untested | CLOSED | Both boundary tests (dist=3 fires, dist=4 falls through) pass |
+| #   | Title                                | Status | Notes                                                                         |
+| --- | ------------------------------------ | ------ | ----------------------------------------------------------------------------- |
+| B6  | type-mismatch null-anything untested | CLOSED | Carve-out documented + companion null-as-absence rule + 2 contract tests pass |
+| B7  | distance-3 cap untested              | CLOSED | Both boundary tests (dist=3 fires, dist=4 falls through) pass                 |
 
 ### B6 evidence
 

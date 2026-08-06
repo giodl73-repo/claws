@@ -16,7 +16,10 @@ expect:
   prevention: "`claws check --package` validates each extracted package's .d.ts files contain zero references to compiler-sdk paths. CI runs standalone install fixture per Layer 1 package."
 
 simulate:
-  failures: ["Re-exported types in @craftworks/forma .d.ts files contain references to compiler-sdk/src/compile/forma-ir.ts paths"]
+  failures:
+    [
+      "Re-exported types in @craftworks/forma .d.ts files contain references to compiler-sdk/src/compile/forma-ir.ts paths",
+    ]
   halt: null
   budget: null
 

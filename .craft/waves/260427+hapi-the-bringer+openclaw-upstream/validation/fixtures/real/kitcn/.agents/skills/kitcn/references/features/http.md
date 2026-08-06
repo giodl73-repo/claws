@@ -49,7 +49,7 @@ app.use(
     allowHeaders: ["Content-Type", "Authorization", "Better-Auth-Cookie"],
     exposeHeaders: ["Set-Better-Auth-Cookie"],
     credentials: true,
-  })
+  }),
 );
 
 app.use(authMiddleware(getAuth));
@@ -81,7 +81,7 @@ export const list = publicRoute
     z.object({
       limit: z.coerce.number().optional().default(10),
       offset: z.coerce.number().optional().default(0),
-    })
+    }),
   )
   .output(z.array(todoSchema))
   .query(async ({ ctx, searchParams }) => {
@@ -113,9 +113,7 @@ export const get = publicRoute
 ```ts
 export const create = authRoute
   .post("/api/todos")
-  .input(
-    z.object({ title: z.string().min(1), description: z.string().optional() })
-  )
+  .input(z.object({ title: z.string().min(1), description: z.string().optional() }))
   .output(z.object({ id: z.string() }))
   .mutation(async ({ ctx, input }) => {
     const caller = createTodoInternalCaller(ctx);
@@ -130,7 +128,7 @@ export const update = authRoute
     z.object({
       title: z.string().optional(),
       completed: z.boolean().optional(),
-    })
+    }),
   )
   .output(z.object({ success: z.boolean() }))
   .mutation(async ({ ctx, params, input }) => {
@@ -196,7 +194,7 @@ export const upload = authRoute
       file: z.instanceof(File),
       title: z.string().optional(),
       tags: z.array(z.string()).optional(),
-    })
+    }),
   )
   .mutation(async ({ ctx, c, form }) => {
     const storageId = await ctx.storage.store(form.file);
@@ -250,14 +248,12 @@ export const withPermissions = authRoute
 ## Optional Auth
 
 ```ts
-export const publicOrAuth = optionalAuthRoute
-  .get("/api/content")
-  .query(async ({ ctx }) => {
-    const caller = createContentCaller(ctx);
-    const userId: Id<"user"> | null = ctx.userId;
-    if (userId) return caller.personalized({ userId });
-    return caller.public({});
-  });
+export const publicOrAuth = optionalAuthRoute.get("/api/content").query(async ({ ctx }) => {
+  const caller = createContentCaller(ctx);
+  const userId: Id<"user"> | null = ctx.userId;
+  if (userId) return caller.personalized({ userId });
+  return caller.public({});
+});
 ```
 
 ## Error Handling
@@ -276,10 +272,7 @@ export const download = authRoute
   .query(async ({ ctx, params, c }) => {
     const caller = createTodosCaller(ctx);
     const todos = await caller.list({ limit: 100 });
-    c.header(
-      "Content-Disposition",
-      `attachment; filename="todos.${params.format}"`
-    );
+    c.header("Content-Disposition", `attachment; filename="todos.${params.format}"`);
     c.header("Cache-Control", "no-cache");
     if (params.format === "csv") {
       const csv = [
@@ -313,20 +306,18 @@ export const redirect = publicRoute
 ```ts
 import { streamText } from "hono/streaming";
 
-export const events = publicRoute
-  .get("/api/stream")
-  .query(async ({ ctx, c }) => {
-    c.header("Content-Type", "text/event-stream");
-    c.header("Cache-Control", "no-cache");
-    return streamText(c, async (stream) => {
-      for (let i = 0; i < 10; i++) {
-        const caller = createDataCaller(ctx);
-        const data = await caller.getChunk({ index: i });
-        await stream.write(`data: ${JSON.stringify(data)}\n\n`);
-        await stream.sleep(1000);
-      }
-    });
+export const events = publicRoute.get("/api/stream").query(async ({ ctx, c }) => {
+  c.header("Content-Type", "text/event-stream");
+  c.header("Cache-Control", "no-cache");
+  return streamText(c, async (stream) => {
+    for (let i = 0; i < 10; i++) {
+      const caller = createDataCaller(ctx);
+      const data = await caller.getChunk({ index: i });
+      await stream.write(`data: ${JSON.stringify(data)}\n\n`);
+      await stream.sleep(1000);
+    }
   });
+});
 ```
 
 ### AI Streaming
@@ -367,8 +358,7 @@ export const ratelimited = publicRoute
       limit: 100,
       window: 3600000,
     });
-    if (!allowed)
-      return c.text("Rate limit exceeded", 429, { "Retry-After": "3600" });
+    if (!allowed) return c.text("Rate limit exceeded", 429, { "Retry-After": "3600" });
     const apiCaller = createApiCaller(ctx);
     const result = await apiCaller.process({ data: input.data });
     return c.json(result);
@@ -380,39 +370,36 @@ export const ratelimited = publicRoute
 ### Stripe
 
 ```ts
-export const stripeWebhook = publicRoute
-  .post("/webhooks/stripe")
-  .mutation(async ({ ctx, c }) => {
-    const stripeCaller = createStripeCaller(ctx);
-    const signature = c.req.header("stripe-signature");
-    if (!signature)
-      throw new CRPCError({ code: "BAD_REQUEST", message: "No signature" });
+export const stripeWebhook = publicRoute.post("/webhooks/stripe").mutation(async ({ ctx, c }) => {
+  const stripeCaller = createStripeCaller(ctx);
+  const signature = c.req.header("stripe-signature");
+  if (!signature) throw new CRPCError({ code: "BAD_REQUEST", message: "No signature" });
 
-    const body = await c.req.text();
-    const isValid = await stripeCaller.actions.verify({ body, signature });
-    if (!isValid)
-      throw new CRPCError({
-        code: "BAD_REQUEST",
-        message: "Invalid signature",
+  const body = await c.req.text();
+  const isValid = await stripeCaller.actions.verify({ body, signature });
+  if (!isValid)
+    throw new CRPCError({
+      code: "BAD_REQUEST",
+      message: "Invalid signature",
+    });
+
+  const event = JSON.parse(body);
+  switch (event.type) {
+    case "payment_intent.succeeded":
+      const paymentsCaller = createPaymentsCaller(ctx);
+      await paymentsCaller.markPaid({
+        paymentIntentId: event.data.object.id,
       });
-
-    const event = JSON.parse(body);
-    switch (event.type) {
-      case "payment_intent.succeeded":
-        const paymentsCaller = createPaymentsCaller(ctx);
-        await paymentsCaller.markPaid({
-          paymentIntentId: event.data.object.id,
-        });
-        break;
-      case "customer.subscription.deleted":
-        const subscriptionsCaller = createSubscriptionsCaller(ctx);
-        await subscriptionsCaller.cancel({
-          subscriptionId: event.data.object.id,
-        });
-        break;
-    }
-    return c.text("OK", 200);
-  });
+      break;
+    case "customer.subscription.deleted":
+      const subscriptionsCaller = createSubscriptionsCaller(ctx);
+      await subscriptionsCaller.cancel({
+        subscriptionId: event.data.object.id,
+      });
+      break;
+  }
+  return c.text("OK", 200);
+});
 ```
 
 ### Discord Bot
@@ -420,61 +407,57 @@ export const stripeWebhook = publicRoute
 ```ts
 import { verifyKey } from "discord-interactions";
 
-export const discordWebhook = publicRoute
-  .post("/webhooks/discord")
-  .mutation(async ({ ctx, c }) => {
-    const signature = c.req.header("X-Signature-Ed25519");
-    const timestamp = c.req.header("X-Signature-Timestamp");
-    if (!signature || !timestamp)
-      throw new CRPCError({
-        code: "UNAUTHORIZED",
-        message: "Missing signature",
-      });
-
-    const body = await c.req.text();
-    if (
-      !verifyKey(body, signature, timestamp, process.env.DISCORD_PUBLIC_KEY!)
-    ) {
-      throw new CRPCError({
-        code: "UNAUTHORIZED",
-        message: "Invalid signature",
-      });
-    }
-
-    const interaction = JSON.parse(body);
-    if (interaction.type === 1) return c.json({ type: 1 }); // PING
-    if (interaction.type === 2) {
-      const statsCaller = createStatsCaller(ctx);
-      const discordCaller = createDiscordCaller(ctx);
-      switch (interaction.data.name) {
-        case "stats":
-          const stats = await statsCaller.get({});
-          return c.json({
-            type: 4,
-            data: { content: `Users: ${stats.users}, Posts: ${stats.posts}` },
-          });
-        case "create":
-          await discordCaller.schedule.now.processCreate({
-            token: interaction.token,
-          });
-          return c.json({ type: 5 }); // DEFERRED
-        default:
-          return c.json({ type: 4, data: { content: "Unknown command" } });
-      }
-    }
-    if (interaction.type === 3) {
-      const discordCaller = createDiscordCaller(ctx);
-      await discordCaller.handleButton({
-        customId: interaction.data.custom_id,
-        userId: interaction.user.id,
-      });
-      return c.json({ type: 7, data: { content: "Done!" } });
-    }
+export const discordWebhook = publicRoute.post("/webhooks/discord").mutation(async ({ ctx, c }) => {
+  const signature = c.req.header("X-Signature-Ed25519");
+  const timestamp = c.req.header("X-Signature-Timestamp");
+  if (!signature || !timestamp)
     throw new CRPCError({
-      code: "BAD_REQUEST",
-      message: "Unknown interaction",
+      code: "UNAUTHORIZED",
+      message: "Missing signature",
     });
+
+  const body = await c.req.text();
+  if (!verifyKey(body, signature, timestamp, process.env.DISCORD_PUBLIC_KEY!)) {
+    throw new CRPCError({
+      code: "UNAUTHORIZED",
+      message: "Invalid signature",
+    });
+  }
+
+  const interaction = JSON.parse(body);
+  if (interaction.type === 1) return c.json({ type: 1 }); // PING
+  if (interaction.type === 2) {
+    const statsCaller = createStatsCaller(ctx);
+    const discordCaller = createDiscordCaller(ctx);
+    switch (interaction.data.name) {
+      case "stats":
+        const stats = await statsCaller.get({});
+        return c.json({
+          type: 4,
+          data: { content: `Users: ${stats.users}, Posts: ${stats.posts}` },
+        });
+      case "create":
+        await discordCaller.schedule.now.processCreate({
+          token: interaction.token,
+        });
+        return c.json({ type: 5 }); // DEFERRED
+      default:
+        return c.json({ type: 4, data: { content: "Unknown command" } });
+    }
+  }
+  if (interaction.type === 3) {
+    const discordCaller = createDiscordCaller(ctx);
+    await discordCaller.handleButton({
+      customId: interaction.data.custom_id,
+      userId: interaction.user.id,
+    });
+    return c.json({ type: 7, data: { content: "Done!" } });
+  }
+  throw new CRPCError({
+    code: "BAD_REQUEST",
+    message: "Unknown interaction",
   });
+});
 ```
 
 ## React Client
@@ -551,10 +534,10 @@ const updateTodo = useMutation(
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries(crpc.http.todos.list.queryFilter());
       queryClient.invalidateQueries(
-        crpc.http.todos.get.queryFilter({ params: { id: vars.params?.id } })
+        crpc.http.todos.get.queryFilter({ params: { id: vars.params?.id } }),
       );
     },
-  })
+  }),
 );
 ```
 
@@ -567,9 +550,7 @@ See [Client Methods](#client-methods) in API Reference.
 import { crpc, HydrateClient, prefetch } from "@/lib/convex/rsc";
 
 export default async function TodosPage() {
-  prefetch(
-    crpc.http.todos.list.queryOptions({ searchParams: { limit: "10" } })
-  );
+  prefetch(crpc.http.todos.list.queryOptions({ searchParams: { limit: "10" } }));
   return (
     <HydrateClient>
       <TodoList />
@@ -581,9 +562,7 @@ export default async function TodosPage() {
 ### Awaited Prefetch
 
 ```tsx
-const todo = await preloadQuery(
-  crpc.http.todos.get.queryOptions({ params: { id } })
-);
+const todo = await preloadQuery(crpc.http.todos.get.queryOptions({ params: { id } }));
 if (!todo) notFound();
 ```
 
@@ -591,10 +570,7 @@ if (!todo) notFound();
 
 ```tsx
 prefetch(
-  crpc.http.todos.list.queryOptions(
-    { searchParams: { limit: "10" } },
-    { skipUnauth: true }
-  )
+  crpc.http.todos.list.queryOptions({ searchParams: { limit: "10" } }, { skipUnauth: true }),
 );
 ```
 

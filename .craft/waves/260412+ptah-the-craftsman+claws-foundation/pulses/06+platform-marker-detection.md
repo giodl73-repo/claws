@@ -4,7 +4,18 @@ slug: platform-marker-detection
 plan: claws-detect
 depends_on: [1]
 governing_roles: [claws:platform-eng, craft:navigator]
-scenario_codes: [detect/openclaw-structural, detect/cursor-advisory, detect/claude-code-dual, detect/copilot-nested, detect/bedrock-explicit, detect/langgraph-json, detect/crewai-variants, detect/no-platform, detect/zero-config]
+scenario_codes:
+  [
+    detect/openclaw-structural,
+    detect/cursor-advisory,
+    detect/claude-code-dual,
+    detect/copilot-nested,
+    detect/bedrock-explicit,
+    detect/langgraph-json,
+    detect/crewai-variants,
+    detect/no-platform,
+    detect/zero-config,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 10
@@ -101,10 +112,10 @@ synthesizes defaults from detected platform(s).
 
 ## Governing Roles
 
-| Role | File | Focus |
-|------|------|-------|
+| Role               | File                                 | Focus                                                                                       |
+| ------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------- |
 | claws:platform-eng | `.craft/roles/claws/platform-eng.md` | 7-platform marker accuracy, structural validation heuristics, enforcement model correctness |
-| craft:navigator | `.craft/roles/craft/navigator.md` | Detection → parse pipeline threading, zero-config mode, platform context propagation |
+| craft:navigator    | `.craft/roles/craft/navigator.md`    | Detection → parse pipeline threading, zero-config mode, platform context propagation        |
 
 ## Dependencies
 

@@ -1,6 +1,6 @@
 ---
 description: Work a task end-to-end with lean context gathering, implementation, and verification
-argument-hint: '[task description | issue id/link]'
+argument-hint: "[task description | issue id/link]"
 disable-model-invocation: true
 name: task
 metadata:

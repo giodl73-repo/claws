@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "voice-call plugin (communication)",
   "contributes": {
-    "tools": [
-      "voice-call/initiate-call",
-      "voice-call/list-recent"
-    ],
-    "skills": [
-      "voice-call/initiate-call",
-      "voice-call/list-recent"
-    ],
-    "workflows": [
-      "voice-call-flow.lobster"
-    ],
+    "tools": ["voice-call/initiate-call", "voice-call/list-recent"],
+    "skills": ["voice-call/initiate-call", "voice-call/list-recent"],
+    "workflows": ["voice-call-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

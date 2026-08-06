@@ -25,6 +25,7 @@ checkpoint_gate: false
 # Pulse 25: Context DAG
 
 ## Objective
+
 Implement a content-addressed DAG (Directed Acyclic Graph) for structural sharing across multi-agent fleets. In enterprise deployments with dozens of agents, most governance content is shared — common policies, shared risk frameworks, organization-wide OBO chains. The context DAG eliminates redundant storage by identifying shared governance subgraphs and storing per-agent deltas only.
 
 **Content Addressing**: Each governance subgraph node is identified by its SHA-256 content hash. Identical policy fragments across different agents resolve to the same DAG node, regardless of which agent introduced them.
@@ -36,6 +37,7 @@ Implement a content-addressed DAG (Directed Acyclic Graph) for structural sharin
 **Storage Target**: A 47-agent fleet with 80% shared policy should achieve at least 70% storage reduction compared to individual per-agent compilation. DAG invalidation propagates correctly when shared policies change — all dependent agents' caches are invalidated.
 
 ## Deliverables
+
 - [ ] `claws-sdk/src/context/context-dag.ts` — content-addressed DAG: subgraph nodes with SHA-256 hash, duplicate subgraph deduplication, per-agent delta storage, DAG resolution to per-agent GovernanceIR
 - [ ] `claws-sdk/tests/context/context-dag.unit.test.ts` — L0: node hashing correct (1), duplicate subgraph deduplicated (1), per-agent delta stored (1), DAG invalidation on shared policy change (1)
 - [ ] `claws-sdk/tests/context/context-dag.integration.test.ts` — L1: 47-agent fleet build achieves <= 30% storage (1), resolved GovernanceIR byte-identical to individual compile (1)
@@ -45,6 +47,7 @@ Implement a content-addressed DAG (Directed Acyclic Graph) for structural sharin
 - [ ] `claws-sdk/tests/fixtures/fleet-47/` — 47-agent fixture set with 80% overlapping policies
 
 ## Acceptance Criteria
+
 - [ ] DAG nodes are identified by SHA-256 content hash
 - [ ] Identical governance subgraphs across agents are stored once
 - [ ] Per-agent deltas are stored as separate nodes referencing shared base
@@ -59,15 +62,19 @@ Implement a content-addressed DAG (Directed Acyclic Graph) for structural sharin
 - [ ] `npx tsc --noEmit` exits 0
 
 ## Governing Roles
+
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — overall claws architecture and SDK boundaries
 - `.craft/roles/claws/platform-eng.md` — implementation patterns, cross-platform concerns
 
 ## Dependencies
+
 - Pulse 21 (pinch-profiles) — profile definitions used during fleet-scale compression
 - Pulse 22 (quality-matrix) — fidelity validation for resolved GovernanceIR
 
 ## Test Gates
+
 - [ ] L0 unit (4 tests): node hashing correct, duplicate subgraph deduplicated, per-agent delta stored, DAG invalidation on shared policy change
 - [ ] L1 integration (2 tests): 47-agent fleet build achieves <= 30% storage, resolved GovernanceIR byte-identical to individual compile
 - [ ] L2 e2e (1 test): fleet-scale DAG build + resolve + invalidation

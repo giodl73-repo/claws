@@ -116,21 +116,21 @@ in JSDoc, NOT re-exported from the top-level barrel.
       (4) unsubscribe function returned by `on` detaches the listener;
       (5) throwing listener caught, compile/bus continues (error logged);
       (6) `emit()` with no listeners registered is a no-op (no allocation
-          surprises);
+      surprises);
       (7) multiple listeners on the same type invoked in registration order;
       (8) listeners for type `A` NOT invoked when type `B` fires.
 - [ ] Integration tests (2 L1) wiring the bus into a real `compile()` call
       against the canonical fixture:
       (1) success path: record every event into an ordered array, assert
-          `compile.start` first, `compile.complete` last, every reader fires
-          a matched `read.{start,complete}` pair, `enforce.{start,complete}`
-          pair fires, every target fires `emit.{start,complete}` and
-          `validate.{start,complete}` pairs, `cache.write` fires exactly
-          once on the success path;
+      `compile.start` first, `compile.complete` last, every reader fires
+      a matched `read.{start,complete}` pair, `enforce.{start,complete}`
+      pair fires, every target fires `emit.{start,complete}` and
+      `validate.{start,complete}` pairs, `cache.write` fires exactly
+      once on the success path;
       (2) failure path: inject a reader failure; assert `read.failed` fires
-          for the failing stage, downstream stages still drive their events
-          consistently, `compile.failed` fires at the tail, and NO
-          `cache.write` is emitted.
+      for the failing stage, downstream stages still drive their events
+      consistently, `compile.failed` fires at the tail, and NO
+      `cache.write` is emitted.
 - [ ] E2E test (1 L2) `event-bus-full-stage-coverage.e2e.test.ts` matching
       the hot-reload/S01 problem statement on the canonical fixture:
       event-count assertions per reader/emitter/validate registry (not
@@ -164,10 +164,10 @@ from hot-reload/S01 (post-audit dispositions) is encoded as exactly one AC.
       `(event: Extract<CompilerEvent, { type: T }>) => void` — TypeScript
       narrows the payload at the call site; a consumer calling
       `bus.on('emit.complete', ev => ev.target)` type-checks clean without
-      a manual cast. *(§9.1)*
+      a manual cast. _(§9.1)_
 - [ ] `AC-02` `on` and `once` return an unsubscribe function. Calling the
       returned function detaches the listener identically to calling `off`
-      with the same arguments. Covered by unit test (4). *(§9.1)*
+      with the same arguments. Covered by unit test (4). _(§9.1)_
 
 ### CL-14 §9.2 — event union
 
@@ -178,74 +178,74 @@ from hot-reload/S01 (post-audit dispositions) is encoded as exactly one AC.
       `emit.failed`, `validate.start`, `validate.complete`,
       `validate.failed`, `cache.hit`, `cache.miss`, `cache.write`,
       `compile.complete`, `compile.failed`. A TypeScript `switch (event.type)
-      { ... }` over the union with an exhaustiveness `never`-check MUST
+    { ... }` over the union with an exhaustiveness `never`-check MUST
       compile clean when every variant is handled and MUST error when any
-      variant is missed. *(hot-reload/S01-F02; §9.2)*
+      variant is missed. _(hot-reload/S01-F02; §9.2)_
 - [ ] `AC-04` Every field on every variant is `readonly`. The consumer
       cannot mutate a payload in-place; any attempt to assign to a field is
-      a TypeScript error. *(§9.2; §9.7)*
+      a TypeScript error. _(§9.2; §9.7)_
 - [ ] `AC-05` The `stage?` field on `cache.hit` / `cache.miss` /
       `cache.write` distinguishes compile-level cache boundaries
       (`stage` absent) from per-stage cache boundaries (`stage` present —
       one of the nine reader `StageName` values). A single `cache.*`
-      discriminator remains usable at both granularities. *(§9.2)*
+      discriminator remains usable at both granularities. _(§9.2)_
 
 ### CL-14 §9.3 — emission contract (post-audit strengthened)
 
 - [ ] `AC-06` `compile.start` fires exactly once at the top of `compile()`,
-      before any reader stage runs. *(§9.3; hot-reload/S01 problem)*
+      before any reader stage runs. _(§9.3; hot-reload/S01 problem)_
 - [ ] `AC-07` For each of the nine reader stages, `read.start` fires before
       the stage runs, and exactly one of `read.complete` or `read.failed`
-      fires after. No stage skips its pair. *(§9.3; hot-reload/S01 problem)*
+      fires after. No stage skips its pair. _(§9.3; hot-reload/S01 problem)_
 - [ ] `AC-08` `enforce.start` fires before enforcement runs. If violations
       are present, `enforce.denied` fires with the violations. `enforce.complete`
       ALWAYS fires at the tail of enforcement, regardless of whether
       `enforce.denied` fired — the pair is terminal so consumers always see
-      `enforce.complete`. *(§9.3)*
+      `enforce.complete`. _(§9.3)_
 - [ ] `AC-09` Per emit target, `emit.start` fires before the target runs,
       and exactly one of `emit.complete` or `emit.failed` fires after. No
-      target skips its pair. *(§9.3; hot-reload/S01 problem)*
+      target skips its pair. _(§9.3; hot-reload/S01 problem)_
 - [ ] `AC-10` Per validate target, `validate.start` fires before validation
       runs, and exactly one of `validate.complete` or `validate.failed`
-      fires after. No target skips its pair. *(§9.3; hot-reload/S01 problem)*
+      fires after. No target skips its pair. _(§9.3; hot-reload/S01 problem)_
 - [ ] `AC-11` `cache.hit` / `cache.miss` fire at every cache read boundary
       (compile-level and per-stage, per CL-04 §IS-1 incremental stages).
-      *(§9.3)*
+      _(§9.3)_
 - [ ] `AC-12` `cache.write` fires ONLY on the success path. If enforce
       denies OR emit throws OR validate rejects, NO `cache.write` event
       may be emitted and NO cache entry may be persisted for that target.
       An integration test covering the failure path asserts
-      `cache.write === 0` and `compile.failed === 1`. *(hot-reload/S01-F07;
-      §9.3 amendment)*
+      `cache.write === 0` and `compile.failed === 1`. _(hot-reload/S01-F07;
+      §9.3 amendment)_
 - [ ] `AC-13` `compile.complete` fires exactly once at the tail of a
       successful compile; `compile.failed` fires exactly once at the tail
       of a failed compile. Exactly one of the two fires per `compile()`
-      invocation. *(§9.3; hot-reload/S01 problem)*
+      invocation. _(§9.3; hot-reload/S01 problem)_
 - [ ] `AC-14` Every event payload carries a `workspace: string` identifier
       — the absolute workspace path (or caller-supplied content-hash
       identifier) — so fleet-mode consumers can route interleaved events
       correctly. §9.2's illustrative type definitions elide the field for
       readability; the normative contract is that every variant has
-      `workspace`. *(hot-reload/S01-F08; §9.3 amendment)*
+      `workspace`. _(hot-reload/S01-F08; §9.3 amendment)_
 - [ ] `AC-15` Every event payload carries a `monotonicNs: bigint`
       timestamp sourced from `process.hrtime.bigint()` (or equivalent
       monotonic clock), NEVER from `Date.now()` or `new Date().getTime()`.
       An optional sidecar `wallClockIso: string` MAY be populated for
       operator logs, but its correctness for duration math is NOT
-      guaranteed. *(hot-reload/S01-F09; §9.3 amendment)*
+      guaranteed. _(hot-reload/S01-F09; §9.3 amendment)_
 - [ ] `AC-16` Listener errors are caught inside the bus's `emit` call,
       logged via the compiler's logger, and MUST NOT propagate back into
       the compiler. A compile with a throwing listener registered behaves
       identically to a compile with no listener registered — `CompileResult`
       is indistinguishable in both cases. Covered by unit test (5).
-      *(hot-reload/S01-F05 resolved; §9.3)*
+      _(hot-reload/S01-F05 resolved; §9.3)_
 - [ ] `AC-17` When `CompileOptions.events` is absent, the compiler MUST NOT
       allocate a `CompilerEventBus` and MUST NOT emit events. The hook
       surface is zero-cost opt-in. An integration test asserts no bus
       allocation by running `compile()` without `options.events` and
       confirming no event-related code paths execute (e.g. via a coverage
       assertion that `bus.ts`'s `emit()` is never entered on the no-bus
-      path). *(§9.3)*
+      path). _(§9.3)_
 - [ ] `AC-18` Backpressure semantics are synchronous fire-and-forget from
       the compiler's perspective: listeners are invoked on the emitting
       thread inside the bus's `emit` call. The bus does NOT buffer events
@@ -253,8 +253,8 @@ from hot-reload/S01 (post-audit dispositions) is encoded as exactly one AC.
       callback duration — consumers needing isolation MUST run
       fire-and-forget inside their own listener (e.g. enqueue onto an
       internal async queue and return immediately). Documented in JSDoc
-      and in `docs/claws/concepts/compiler-events.md`. *(hot-reload/S01-F04;
-      §9.3 amendment)*
+      and in `docs/claws/concepts/compiler-events.md`. _(hot-reload/S01-F04;
+      §9.3 amendment)_
 
 ### CL-14 §9.4 — ordering and concurrency
 
@@ -265,14 +265,14 @@ from hot-reload/S01 (post-audit dispositions) is encoded as exactly one AC.
       first; all `read.*` pairs precede `enforce.start`; `enforce.complete`
       precedes any `emit.start`; each `emit.complete` precedes its matching
       `validate.start`; `cache.write` follows all `validate.complete`
-      events; `compile.complete` last. *(hot-reload/S01-F03 resolved; §9.4)*
+      events; `compile.complete` last. _(hot-reload/S01-F03 resolved; §9.4)_
 - [ ] `AC-20` Concurrent `compile()` calls each hold their own
       `CompilerEventBus` instance when callers supply one per compile. No
-      cross-compile interleaving on per-compile buses. *(§9.4)*
+      cross-compile interleaving on per-compile buses. _(§9.4)_
 - [ ] `AC-21` If a caller SHARES one `CompilerEventBus` across concurrent
       compiles, the bus does NOT synthesize a correlation ID — the
       `workspace` field (AC-14) IS the correlation key. Documented in
-      JSDoc. *(§9.4)*
+      JSDoc. _(§9.4)_
 
 ### CL-14 §9.5 — public subpath export (extension-only pattern)
 
@@ -281,21 +281,21 @@ from hot-reload/S01 (post-audit dispositions) is encoded as exactly one AC.
       compiled JS and `types` resolving to the compiled `.d.ts`. Resolution
       works from an external package: a fixture package importing
       `import { CompilerEventBus, CompilerEvent } from
-      '@bic/claws-sdk/compiler/events'` type-checks clean and
+    '@bic/claws-sdk/compiler/events'` type-checks clean and
       resolves the runtime module. (Post-Horus rename: same assertion
-      against `@bic/claws-sdk/compiler/events`.) *(§9.5; plan H5
-      validation)*
+      against `@bic/claws-sdk/compiler/events`.) _(§9.5; plan H5
+      validation)_
 - [ ] `AC-23` The subpath is NOT re-exported from the top-level
       `claws-sdk/src/index.ts` barrel — the events surface is extension-only
       and MUST NOT leak into the main surface's stability guarantees.
       Mirrors the §3.2 pattern for `./compiler/emit/ts-builder`.
-      *(hot-reload/S01-F10 resolved; §9.5)*
+      _(hot-reload/S01-F10 resolved; §9.5)_
 - [ ] `AC-24` JSDoc on every public export in `events/index.ts` carries the
       extension-only stability framing ("Additive-only across minor versions;
       event payload fields MAY be added; consumers MUST treat the
       `CompilerEvent` union as open-set when switching on `type` and MUST
       ignore unknown event types"). Matches the `ts-builder` JSDoc
-      precedent. *(§9.5)*
+      precedent. _(§9.5)_
 
 ### CL-14 §9.6 — Horus wave seam
 
@@ -304,17 +304,17 @@ from hot-reload/S01 (post-audit dispositions) is encoded as exactly one AC.
       internals are re-exported via `./compiler/events`. A CI lint check
       against deep-path imports from `@bic/claws-sdk/compiler/*`
       (other than `events` and `emit/ts-builder`) is added under the same
-      lint family §3.2 documented. *(§9.6; hot-reload/S01-F11 resolved)*
+      lint family §3.2 documented. _(§9.6; hot-reload/S01-F11 resolved)_
 
 ### CL-14 §9.7 — non-goals (negative contracts)
 
 - [ ] `AC-26` The bus does NOT support mutation; payload `readonly` fields
       (AC-04) enforce observer-only semantics. Not tested directly (a
-      negative behavior) but guaranteed by the type system. *(§9.7)*
+      negative behavior) but guaranteed by the type system. _(§9.7)_
 - [ ] `AC-27` The bus does NOT persist, rate-limit, or cross process
       boundaries. These are consumer concerns. Documented in
       `docs/claws/concepts/compiler-events.md` so Horus wave and
-      observability consumers know what's in their court. *(§9.7)*
+      observability consumers know what's in their court. _(§9.7)_
 
 ### Test assertion strength (audit caveat 2)
 
@@ -326,7 +326,7 @@ from hot-reload/S01 (post-audit dispositions) is encoded as exactly one AC.
       use a byte-for-byte payload snapshot — §9.3 adds `workspace` and
       `monotonicNs` to every payload and future minor versions may add
       more fields per §9.5's additive-only contract; a snapshot would be
-      brittle. *(hot-reload/S01-F06; audit caveat 2)*
+      brittle. _(hot-reload/S01-F06; audit caveat 2)_
 
 ### Coverage gate
 
@@ -410,9 +410,9 @@ disposed as **pulse** or **test** per the R1 audit. Spec-level findings
 were already landed into CL-14 v1.4 by the audit commit; this pulse
 implements them as AC above.
 
-| Finding | Severity | Audit disposition | How encoded in this pulse |
-|---------|----------|-------------------|---------------------------|
-| hot-reload/S01-F06 | warning | **test** | AC-28 — e2e asserts counts derived from reader/emitter/validate registries, not hardcoded; enforced by test harness importing the registries at test time. Audit caveat 2: the same test MUST assert payload discriminator shape, NOT byte-for-byte snapshot, because §9.3's `workspace` + `monotonicNs` additions would make a snapshot brittle. |
+| Finding            | Severity | Audit disposition | How encoded in this pulse                                                                                                                                                                                                                                                                                                                         |
+| ------------------ | -------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| hot-reload/S01-F06 | warning  | **test**          | AC-28 — e2e asserts counts derived from reader/emitter/validate registries, not hardcoded; enforced by test harness importing the registries at test time. Audit caveat 2: the same test MUST assert payload discriminator shape, NOT byte-for-byte snapshot, because §9.3's `workspace` + `monotonicNs` additions would make a snapshot brittle. |
 
 All other hot-reload/S01 findings (F01-F05, F07-F11) were **spec** or
 **spec (resolved)** dispositions — landed in CL-14 v1.4 §9 by the audit

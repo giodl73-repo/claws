@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "biopython plugin (science)",
   "contributes": {
-    "tools": [
-      "biopython/fetch-gene",
-      "biopython/blast"
-    ],
-    "skills": [
-      "biopython/fetch-gene",
-      "biopython/blast"
-    ],
-    "workflows": [
-      "biopython-flow.lobster"
-    ],
+    "tools": ["biopython/fetch-gene", "biopython/blast"],
+    "skills": ["biopython/fetch-gene", "biopython/blast"],
+    "workflows": ["biopython-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

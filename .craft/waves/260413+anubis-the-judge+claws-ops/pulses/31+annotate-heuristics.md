@@ -4,7 +4,18 @@ slug: annotate-heuristics
 plan: claws-annotate
 depends_on: []
 governing_roles: [claws:skill-author, craft:architect]
-scenario_codes: [obo-elicitation/S01, obo-elicitation/S02, obo-elicitation/S03, obo-elicitation/S04, obo-elicitation/S05, obo-elicitation/S06, obo-elicitation/S08, injection-defense/S01, injection-defense/S05]
+scenario_codes:
+  [
+    obo-elicitation/S01,
+    obo-elicitation/S02,
+    obo-elicitation/S03,
+    obo-elicitation/S04,
+    obo-elicitation/S05,
+    obo-elicitation/S06,
+    obo-elicitation/S08,
+    injection-defense/S01,
+    injection-defense/S05,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 8

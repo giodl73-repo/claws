@@ -110,9 +110,7 @@ describe("HookName", () => {
 
   beforeEach(() => {
     mockFunction = mock();
-    functionSpy = spyOn(apiModule, "functionName").mockImplementation(
-      mockFunction
-    );
+    functionSpy = spyOn(apiModule, "functionName").mockImplementation(mockFunction);
     mockFunction.mockResolvedValue(defaultResponse);
   });
 
@@ -153,9 +151,7 @@ describe("MyHook", () => {
 
   beforeEach(() => {
     mockFetchData = mock();
-    fetchDataSpy = spyOn(apiModule, "fetchData").mockImplementation(
-      mockFetchData
-    );
+    fetchDataSpy = spyOn(apiModule, "fetchData").mockImplementation(mockFetchData);
     mockFetchData.mockResolvedValue({ data: "test" });
   });
 

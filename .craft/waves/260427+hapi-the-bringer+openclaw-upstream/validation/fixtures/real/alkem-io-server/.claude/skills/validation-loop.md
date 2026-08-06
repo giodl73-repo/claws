@@ -5,6 +5,7 @@ When implementing changes that require continuous feedback (type checking, tests
 ## Overview
 
 Overmind runs three parallel processes:
+
 - **ts**: TypeScript type checking in watch mode
 - **test**: Jest in watch mode (affected tests)
 - **app**: NestJS development server with hot reload
@@ -14,6 +15,7 @@ All output is aggregated to a log file that can be monitored for errors.
 ## Log File Location
 
 The aggregated log file is at `/tmp/overmind-log.txt`. Read this file to check for:
+
 - TypeScript errors (TS codes like TS2322)
 - Test failures (FAIL, assertion errors)
 - Runtime exceptions
@@ -22,6 +24,7 @@ The aggregated log file is at `/tmp/overmind-log.txt`. Read this file to check f
 ## Validation Loop Workflow
 
 1. **Check current errors** before making changes:
+
    ```bash
    cat /tmp/overmind-log.txt | tail -50
    ```
@@ -31,6 +34,7 @@ The aggregated log file is at `/tmp/overmind-log.txt`. Read this file to check f
 3. **Wait briefly** for watchers to detect changes (~2-3 seconds)
 
 4. **Read the log** to verify fixes or identify new issues:
+
    ```bash
    cat /tmp/overmind-log.txt | tail -100
    ```
@@ -59,6 +63,7 @@ cd .scripts/overmind && overmind restart app
 ## Connecting to Individual Processes
 
 For interactive debugging:
+
 ```bash
 cd .scripts/overmind
 overmind connect ts     # TypeScript watcher
@@ -70,12 +75,14 @@ overmind connect app    # NestJS server
 ## Starting Overmind
 
 If not already running:
+
 ```bash
 cd .scripts/overmind
 ~/.local/bin/overmind start -f Procfile.dev
 ```
 
 Prerequisites:
+
 1. Docker services running: `pnpm run start:services`
 2. Migrations applied: `pnpm run migration:run`
 
@@ -114,6 +121,7 @@ bash .scripts/gql-validate/validate-queries.sh
 ### GQL Result Format
 
 Each validated operation produces a JSON file in `.claude/pipeline/results/`:
+
 - `status`: "success" or "error"
 - `errors[]`: validation errors with `category` (SCHEMA_MISMATCH, TYPE_ERROR, VARIABLE_ERROR, FRAGMENT_ERROR)
 - `deprecations[]`: deprecated field usage warnings

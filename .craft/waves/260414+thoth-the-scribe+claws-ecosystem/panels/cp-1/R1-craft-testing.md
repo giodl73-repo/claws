@@ -123,13 +123,13 @@ CP-1 delivers an exceptionally thorough test suite for the security hardening an
 
 **2 Major** findings require attention before merge (M-01 vitest project scoping, M-02 e2e double-execution). **5 Warnings** suggest maintainability improvements. The test suite is otherwise strong, thorough, and well-structured.
 
-| Metric | Value |
-|--------|-------|
-| Test files reviewed | 55 |
-| L0 (unit) tests | 14 files |
+| Metric                 | Value    |
+| ---------------------- | -------- |
+| Test files reviewed    | 55       |
+| L0 (unit) tests        | 14 files |
 | L1 (integration) tests | 19 files |
-| L2 (e2e) tests | 8 files |
-| L3 (accept) tests | 14 files |
-| Major findings | 2 |
-| Warnings | 5 |
-| Notes | 5 |
+| L2 (e2e) tests         | 8 files  |
+| L3 (accept) tests      | 14 files |
+| Major findings         | 2        |
+| Warnings               | 5        |
+| Notes                  | 5        |

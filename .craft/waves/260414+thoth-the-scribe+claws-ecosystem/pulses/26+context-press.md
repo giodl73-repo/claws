@@ -25,6 +25,7 @@ checkpoint_gate: false
 # Pulse 26: Context PRESS
 
 ## Objective
+
 Implement the PRESS compression adapter for governance context subgraphs. This is the integration pulse that wires together all prior optimization components into a unified pipeline:
 
 1. **Pinch Profile Selection** (from Pulse 21) — select the appropriate G0-G3 profile based on agent configuration or fleet policy
@@ -41,6 +42,7 @@ The pipeline is ordered: profile selection drives budget, cost estimation inform
 **Integration Coverage Hardening** (THOTH-INTEGRATION-COVERAGE): emit area at 73% and adapter area at 41% are well below the 90% target. This pulse adds 2 additional L1 integration tests to close both gaps.
 
 ## Deliverables
+
 - [ ] `claws-sdk/src/context/context-press.ts` — PRESS compression adapter: applies pinch profile, cost estimation, dead-code elimination, merge, compress, quality check in sequence
 - [ ] `claws-sdk/tests/context/context-press.unit.test.ts` — L0: PRESS compression produces output within profile budget (1), quality check rejects below-threshold output (1)
 - [ ] `claws-sdk/tests/context/context-press.integration.test.ts` — L1: full PRESS pipeline at G2 on 2400-token SKILL.md (1), round-trip fidelity check (1), compile → emit for each of 3 platform targets, verify artifact correctness (emit 73% → 90%) (1), adapter layer transforms for 4 remaining platform targets (adapter 41% → 90%) (1)
@@ -49,6 +51,7 @@ The pipeline is ordered: profile selection drives budget, cost estimation inform
 - [ ] `claws-cli/tests/context/context-press.accept.test.ts` — L3: CLI acceptance — `claws press` on 2400-token SKILL.md at G2 produces budget-compliant output with fidelity report
 
 ## Acceptance Criteria
+
 - [ ] PRESS pipeline applies all 6 stages in correct order
 - [ ] Compressed output at G2 is <= 1,100 tokens
 - [ ] Compressed output at G2 achieves >= 0.92 fidelity on all 5 quality dimensions
@@ -63,11 +66,14 @@ The pipeline is ordered: profile selection drives budget, cost estimation inform
 - [ ] `npx tsc --noEmit` exits 0
 
 ## Governing Roles
+
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — overall claws architecture and SDK boundaries
 - `.craft/roles/claws/platform-eng.md` — implementation patterns, cross-platform concerns
 
 ## Dependencies
+
 - Pulse 21 (pinch-profiles) — G0-G3 profile definitions
 - Pulse 22 (quality-matrix) — 5-dimension fidelity scoring
 - Pulse 23 (governance-cost-estimator) — token cost estimation and rule ordering
@@ -75,6 +81,7 @@ Load these role files before starting:
 - Pulse 25 (context-dag) — content-addressed DAG for fleet-scale context sharing
 
 ## Test Gates
+
 - [ ] L0 unit (2 tests): PRESS compression within profile budget, quality check rejects below-threshold output
 - [ ] L1 integration (4 tests): full PRESS pipeline at G2 on 2400-token SKILL.md, round-trip fidelity check, compile → emit for each of 3 platform targets verifying artifact correctness (emit 73% → 90%), adapter layer transforms for 4 remaining platform targets (adapter 41% → 90%)
 - [ ] L2 e2e (2 tests): fleet-scale PRESS + DAG pipeline with quality validation, full PRESS compress at G2 on 2400-token SKILL.md with quality verification

@@ -1,6 +1,6 @@
 ---
 name: shadcn-parity
-description: 'Skill: shadcn-parity'
+description: "Skill: shadcn-parity"
 metadata:
   skiller:
     source: .agents/rules/shadcn-parity.mdc

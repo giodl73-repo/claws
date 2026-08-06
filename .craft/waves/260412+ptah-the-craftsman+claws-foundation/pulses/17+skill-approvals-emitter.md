@@ -84,12 +84,14 @@ npm run build
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/gateway-eng.md` — OC integration, platform spec alignment, artifact conventions
 - `.craft/roles/craft/codegen.md` — code generation patterns, pinch compression, template rendering
 
 ## Review Amendments (R1)
 
 ### Gateway-Eng: Frozen exec-approvals Schema
+
 - [ ] Add frozen OC exec-approvals.json JSON Schema in test fixtures
 - [ ] Validate generated exec-approvals.json against frozen schema
 - [ ] Schema includes all R5 tools from manifest

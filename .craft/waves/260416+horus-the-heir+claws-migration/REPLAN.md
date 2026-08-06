@@ -14,7 +14,7 @@ The `openclaw-upstream` proposal (`docs/clawc/proposals/openclaw-upstream/`) ref
 Two constraints shaped this replan:
 
 1. **Upstream timing.** Peter's greenlight for the `@openclaw/*` scope is weeks-to-a-month+ out. We have to run as `@bic/openclaw-*` now and flip later via Ra's `--scope`.
-2. **The old aether/lobster plans don't fit.** `aether-clawc-serve-integration.md` (47k tokens) and `lobster-clawc-serve-integration.md` (38k tokens) were written against Eduardo's engine — credential-rotation taxonomies, correlation tables, dispatch circuit breakers, inline Haiku classifier tiers. That shape assumes real-repo wire-up to a specific runtime. It's wrong for Horus, which needs to prove the *proposal's* model runs E2E in a simulator before we touch any external repo.
+2. **The old aether/lobster plans don't fit.** `aether-clawc-serve-integration.md` (47k tokens) and `lobster-clawc-serve-integration.md` (38k tokens) were written against Eduardo's engine — credential-rotation taxonomies, correlation tables, dispatch circuit breakers, inline Haiku classifier tiers. That shape assumes real-repo wire-up to a specific runtime. It's wrong for Horus, which needs to prove the _proposal's_ model runs E2E in a simulator before we touch any external repo.
 
 Horus's new charter: **setup shop in `microsoft.ghe.com/bic/claws` with clean package structure, then prove the decide/track/enforce+review loop works E2E under three host shapes (openclaw / lobster / aether) via a hybrid-fidelity sim.** Wepwawet's new charter: real integration with the aether / lobster / openclaw repos using `@bic/openclaw-*`. Upstream PRs become a later wave triggered on Peter greenlight.
 
@@ -42,16 +42,16 @@ Later wave      : upstream PRs to openclaw-core      ← Peter-triggered
 
 Updated 2026-04-19: `clawc-repo-ops` inserted as CP-3, pushing later CPs by 1 (now 8 CPs total).
 
-| CP | Plan | Status | Role |
-|---|---|---|---|
-| 1 | `clawc-pre-extraction-packaging` | existing (Implemented via Ra CP-8..CP-12) | Final monorepo-side polish; 4-package tree ready to lift |
-| 2 | `clawc-repo-migration` | existing (Active) | Filter-repo into `microsoft.ghe.com/bic/claws`; `clawc` → `claws` binary rename; scrubbing via `--replace-text`; zero craftworks refs left behind |
-| 3 | `clawc-repo-ops` | **NEW** | Port doc-validation + accept-runner from craftworks into `devtools/repo-ops/`; publish atoms registry as oracle; ship no-craftworks CI gate + allowlist; scrubber + atom scaffolder |
-| 4 | `clawc-bic-operations` | existing (Draft, pulled in) | CI matrix, CODEOWNERS, branch protection, release playbook; activates CP-3 gates via 5 new workflows (doc-validation, accept-tests, atoms-oracle, no-craftworks, doctor) |
-| 5 | `claws-e2e-sim-harness` | **NEW** | Hybrid-fidelity test host + mock companion app + fixtures; real `snap serve`, real generated plugin, real CLI, in-process host + companion |
-| 6 | `claws-sim-approval-flows` | **NEW** | External approval symmetric across tools-at-risk (R5/RESTRICTED via `GuardrailProvider`) + file-ingest (RESTRICTED via `FileIngestProvider`) |
-| 7 | `claws-sim-host-presets` | **NEW** | Three preset configurations (openclaw / lobster / aether) parameterizing plans 5+6 |
-| 8 | close | — | Wave-level close, flair, doc-sync, spec-amendment merges into canonical `docs/specs/` |
+| CP  | Plan                             | Status                                    | Role                                                                                                                                                                                |
+| --- | -------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `clawc-pre-extraction-packaging` | existing (Implemented via Ra CP-8..CP-12) | Final monorepo-side polish; 4-package tree ready to lift                                                                                                                            |
+| 2   | `clawc-repo-migration`           | existing (Active)                         | Filter-repo into `microsoft.ghe.com/bic/claws`; `clawc` → `claws` binary rename; scrubbing via `--replace-text`; zero craftworks refs left behind                                   |
+| 3   | `clawc-repo-ops`                 | **NEW**                                   | Port doc-validation + accept-runner from craftworks into `devtools/repo-ops/`; publish atoms registry as oracle; ship no-craftworks CI gate + allowlist; scrubber + atom scaffolder |
+| 4   | `clawc-bic-operations`           | existing (Draft, pulled in)               | CI matrix, CODEOWNERS, branch protection, release playbook; activates CP-3 gates via 5 new workflows (doc-validation, accept-tests, atoms-oracle, no-craftworks, doctor)            |
+| 5   | `claws-e2e-sim-harness`          | **NEW**                                   | Hybrid-fidelity test host + mock companion app + fixtures; real `snap serve`, real generated plugin, real CLI, in-process host + companion                                          |
+| 6   | `claws-sim-approval-flows`       | **NEW**                                   | External approval symmetric across tools-at-risk (R5/RESTRICTED via `GuardrailProvider`) + file-ingest (RESTRICTED via `FileIngestProvider`)                                        |
+| 7   | `claws-sim-host-presets`         | **NEW**                                   | Three preset configurations (openclaw / lobster / aether) parameterizing plans 5+6                                                                                                  |
+| 8   | close                            | —                                         | Wave-level close, flair, doc-sync, spec-amendment merges into canonical `docs/specs/`                                                                                               |
 
 ## Archived (old model)
 
@@ -75,6 +75,7 @@ Wepwawet's job is swap the in-process mocks for real code against real repos. Th
 Each preset name below is the `adapterId` of a concrete `HostAdapter` implementation (CL-07 amendment §1a). The three shipping presets + one stub map 1:1 to the four adapters; preset-specific scenarios exercise the adapter shape itself, while the plan 5 behaviour suite runs under all four via plan 6's dispatcher.
 
 **openclaw** — `OpenClawVanillaAdapter`; zero-Microsoft-infra adopter shape (~5 scenarios):
+
 - `bare-plugin-loads` — plugin works with only local `.openclaw/policy/`, no snap running
 - `hot-reload-local-dev` — edit SOUL.md → `openclaw policy generate` → plugin picks up new IR without restart
 - `CLI-HITL-approval` — stdin-based approval, no companion app
@@ -82,6 +83,7 @@ Each preset name below is the `adapterId` of a concrete `HostAdapter` implementa
 - `doctor-diagnoses-missing-policy` — `openclaw doctor` surfaces missing artifacts; `openclaw policy generate` recovers
 
 **lobster** — `LobsterAdapter`; single-tenant pod + sidecar snap + supervisor (~6 scenarios):
+
 - `RO-mount-EROFS-redirect-to-stage` — direct container write rejected; `FileIngestProvider.modify + redirectPath` routes to `.openclaw/.stage/`
 - `stage-on-promote-rehydrate` — full stage → approve → `snap promote` → container rehydrate loop
 - `R5-supervisor-gate` — R5 tool in container → approvalHandle → supervisor approves → execute
@@ -90,6 +92,7 @@ Each preset name below is the `adapterId` of a concrete `HostAdapter` implementa
 - `stale-handle-sequence-mismatch-rejected` — replay of old approvalHandle fails `sequenceNumber` check
 
 **aether** — `AetherAdapter` (formalizes aether's existing `openclaw_adapter.py`, which becomes the reference implementation upstream); multi-tenant + RESTRICTED file ingest + per-tenant promote (~6 scenarios):
+
 - `tenant-isolation` — tenant A + B have separate `currentSnapshotId`s; no cross-talk
 - `RESTRICTED-file-ingest-approved` — `before_workspace_file_ingest` → FileIngestProvider review → supervisor approves → file enters context
 - `RESTRICTED-file-ingest-denied` — same shape, supervisor denies → file never enters context, audit shows denial
@@ -136,12 +139,14 @@ After CP-6 shipped clean (27 scenarios + real CLI + library layer), we re-scoped
 3. **Horus was scoped "extract + E2E sim" — both delivered.** Closing Horus at CP-6 + CP-8 (close) is honest and complete. CP-7 belongs in Wepwawet alongside the real-integration work its adapters feed into.
 
 **What moved:**
+
 - `claws-sim-host-presets` plan → stays authoritative but consumed by Wepwawet instead of Horus
 - `checkpoints/cp-7.md` → `.../wepwawet-.../checkpoints/cp-7.md`
 - Pulses 63–72 → `.../wepwawet-.../pulses/`
 - Wepwawet's CP-1 is now claws-sim-host-presets; CP-2+ resumes its original aether-real-integration charter
 
 **Reduction from 4 adapters to 2:**
+
 - Kept: AetherAdapter (real Python source to mirror), ClawsServiceAdapter (upgraded from stub to real — product)
 - Deferred: OpenClawVanillaAdapter (to a future OSS-contribution wave if/when OpenClaw ships externally), LobsterAdapter (to real lobster-integration work, if a target commits)
 

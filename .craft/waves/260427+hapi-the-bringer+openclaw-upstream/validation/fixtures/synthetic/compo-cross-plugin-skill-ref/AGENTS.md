@@ -6,6 +6,7 @@ trust: composition
 # compo-cross-plugin-skill-ref
 
 Composition workspace bringing together 2 plugin(s):
+
 - `plugins/provider/`
 - `plugins/consumer/`
 

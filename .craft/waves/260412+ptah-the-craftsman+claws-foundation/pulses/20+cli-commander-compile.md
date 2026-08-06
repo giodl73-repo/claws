@@ -71,6 +71,7 @@ Set up the Commander.js program in claws-cli with 3 command registrations (compi
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/navigator.md` -- CLI command flow, pipeline threading, progress reporting
 - `.craft/roles/claws/new-hire.md` -- first-run experience, discoverability, progressive disclosure
 
@@ -91,18 +92,21 @@ npm run build
 ## Review Amendments (R1)
 
 ### C01: claws init Command
+
 - [ ] Add `claws init` command: auto-detect platform, create minimal claws.json, create .claws/ sidecar
 - [ ] `claws init --template soc2` scaffolds with SOC2 policy template
 - [ ] Bare `claws` invocation with no config suggests running `claws init`
 - [ ] Output: "Detected: OpenClaw. Created claws.json + .claws/. Run `claws check` to check governance."
 
 ### C05: CLAWS_BYPASS Audit
+
 - [ ] CLAWS_BYPASS=1 MUST write audit event (AuditEvent with eventType: "BYPASS_ACTIVATED") to .claws/audit/chain.jsonl
 - [ ] Warning message: "Governance checks skipped" (neutral, not scolding)
 - [ ] Support granular suppression via claws.json `suppress` array (rule IDs to skip)
 - [ ] Binary bypass (CLAWS_BYPASS=1) remains as nuclear option
 
 ### C09: Error Contract for All Commands
+
 - [ ] All 4 commands (init, compile, check, build) wire through shared `output/errors.ts`
 - [ ] Error contract: WHAT happened + HOW to fix + WHERE in docs
 - [ ] Not just check — compile errors and build errors follow same format

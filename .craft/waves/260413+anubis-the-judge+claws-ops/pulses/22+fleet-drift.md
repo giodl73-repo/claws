@@ -56,6 +56,7 @@ Drift detection is the continuous compliance mechanism — it tells fleet operat
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/platform-eng.md` — fleet architecture, workspace hashing conventions
 - `.craft/roles/claws/ciso.md` — drift severity model, compliance requirements, exception governance
 

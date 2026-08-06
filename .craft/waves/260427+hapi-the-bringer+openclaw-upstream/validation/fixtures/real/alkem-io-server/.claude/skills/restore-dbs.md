@@ -7,6 +7,7 @@ When asked to restore databases or work with backup data from environments (prod
 The restore system downloads PostgreSQL backups from Scaleway S3 and restores them to the local Docker PostgreSQL container (`alkemio_dev_postgres`).
 
 **Databases available:**
+
 - `alkemio` - Main application database
 - `synapse` - Matrix/Synapse communication database
 - `kratos` - Ory Kratos identity database (optional, usually not restored)
@@ -23,11 +24,13 @@ test -f .scripts/backups/.env && echo "OK" || echo "Missing - needs setup"
 ```
 
 If missing, create from sample:
+
 ```bash
 cp .scripts/backups/.env.sample .scripts/backups/.env
 ```
 
 Required variables:
+
 - `AWS_ACCESS_KEY_ID` - Scaleway S3 access key
 - `AWS_SECRET_ACCESS_KEY` - Scaleway S3 secret key
 - `POSTGRES_USER` - PostgreSQL user (typically "synapse")
@@ -39,11 +42,13 @@ Required variables:
 ### 2. Docker Services
 
 The PostgreSQL container must be running:
+
 ```bash
 docker ps | grep alkemio_dev_postgres
 ```
 
 If not running:
+
 ```bash
 pnpm run start:services
 ```
@@ -59,14 +64,16 @@ cd .scripts/backups && bash restore_latest_backup_set.sh <environment> [restart_
 ```
 
 **Arguments:**
-| Arg | Values | Default | Description |
-|-----|--------|---------|-------------|
-| environment | prod/dev/acc/sandbox | prod | Source environment |
-| restart_services | true/false | true | Restart services after |
-| non_interactive | true/false | true | Skip confirmation prompts |
-| restore_kratos | true/false | false | Include kratos database |
+
+| Arg              | Values               | Default | Description               |
+| ---------------- | -------------------- | ------- | ------------------------- |
+| environment      | prod/dev/acc/sandbox | prod    | Source environment        |
+| restart_services | true/false           | true    | Restart services after    |
+| non_interactive  | true/false           | true    | Skip confirmation prompts |
+| restore_kratos   | true/false           | false   | Include kratos database   |
 
 **Examples:**
+
 ```bash
 # Restore prod, restart services
 bash restore_latest_backup_set.sh prod
@@ -87,6 +94,7 @@ cd .scripts/backups && bash restore_latest_backup.sh <database> <environment> [n
 ```
 
 **Examples:**
+
 ```bash
 bash restore_latest_backup.sh alkemio prod true
 bash restore_latest_backup.sh synapse dev true
@@ -95,30 +103,36 @@ bash restore_latest_backup.sh kratos acc true
 
 ## Environment Mapping
 
-| Environment | S3 Bucket | Region | Matrix Server |
-|-------------|-----------|--------|---------------|
-| prod | alkemio-s3-backups-prod-paris | fr-par | matrix.alkem.io |
-| dev | alkemio-s3-backups-dev | nl-ams | matrix-dev.alkem.io |
-| acc | alkemio-s3-backups-dev | nl-ams | matrix-acc.alkem.io |
-| sandbox | alkemio-s3-backups-dev | nl-ams | matrix-sandbox.alkem.io |
+| Environment | S3 Bucket                     | Region | Matrix Server           |
+| ----------- | ----------------------------- | ------ | ----------------------- |
+| prod        | alkemio-s3-backups-prod-paris | fr-par | matrix.alkem.io         |
+| dev         | alkemio-s3-backups-dev        | nl-ams | matrix-dev.alkem.io     |
+| acc         | alkemio-s3-backups-dev        | nl-ams | matrix-acc.alkem.io     |
+| sandbox     | alkemio-s3-backups-dev        | nl-ams | matrix-sandbox.alkem.io |
 
 ## Troubleshooting
 
 ### AWS CLI Issues
+
 The script auto-installs AWS CLI v2 if missing. If authentication fails:
+
 ```bash
 aws configure list  # Check current config
 cat ~/.aws/credentials  # Verify credentials
 ```
 
 ### Database Connection Errors
+
 Ensure container is running and healthy:
+
 ```bash
 docker exec alkemio_dev_postgres pg_isready -U synapse
 ```
 
 ### Backup Not Found
+
 List available backups:
+
 ```bash
 source .scripts/backups/.env
 aws s3 ls s3://alkemio-s3-backups-prod-paris/storage/postgres/backups/alkemio/

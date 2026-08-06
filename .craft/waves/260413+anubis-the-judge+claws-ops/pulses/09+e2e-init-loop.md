@@ -41,14 +41,7 @@ This is the checkpoint gate for CP-1 (Foundation). It proves that the entire cla
   6. Fire send-email (R5) tool call → BLOCKED
   7. Verify full pipeline from manual configuration to live enforcement
 
-  **Minimal workspace variant (R1 review SA-M03):**
-  8. Create temp dir with only SOUL.md + TOOLS.md (minimum viable OC workspace)
-  9. Manually create claws.json (T2 defaults) + .claws/ sidecar directory
-  10. Run claws check → reports violations (fewer than full workspace)
-  11. Run claws build → generates enforcement artifacts
-  12. Load generated artifacts into GatewaySim
-  13. Fire a tool call → verify enforcement works with minimal input
-  14. This exercises the platform detection fallback and validates that claws works without all 9 OC files
+  **Minimal workspace variant (R1 review SA-M03):** 8. Create temp dir with only SOUL.md + TOOLS.md (minimum viable OC workspace) 9. Manually create claws.json (T2 defaults) + .claws/ sidecar directory 10. Run claws check → reports violations (fewer than full workspace) 11. Run claws build → generates enforcement artifacts 12. Load generated artifacts into GatewaySim 13. Fire a tool call → verify enforcement works with minimal input 14. This exercises the platform detection fallback and validates that claws works without all 9 OC files
 
 - [ ] `claws-sdk/tests/accept/e2e/init-to-enforcement.accept.test.ts` — L3 acceptance test:
   1. Same sequence as L2 full workspace variant but with formal acceptance assertions
@@ -73,6 +66,7 @@ This is the checkpoint gate for CP-1 (Foundation). It proves that the entire cla
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/gateway-eng.md` — gateway enforcement, audit chain, full pipeline semantics
 - `.craft/roles/claws/skill-author.md` — init experience, config defaults, first-run UX
 

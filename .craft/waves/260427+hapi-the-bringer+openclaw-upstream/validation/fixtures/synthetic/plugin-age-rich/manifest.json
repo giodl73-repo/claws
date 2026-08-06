@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "age plugin (security)",
   "contributes": {
-    "tools": [
-      "age/encrypt",
-      "age/decrypt"
-    ],
-    "skills": [
-      "age/encrypt",
-      "age/decrypt"
-    ],
-    "workflows": [
-      "age-flow.lobster"
-    ],
+    "tools": ["age/encrypt", "age/decrypt"],
+    "skills": ["age/encrypt", "age/decrypt"],
+    "workflows": ["age-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

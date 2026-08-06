@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "jupyter plugin (science)",
   "contributes": {
-    "tools": [
-      "jupyter/execute-cell",
-      "jupyter/list-kernels"
-    ],
-    "skills": [
-      "jupyter/execute-cell",
-      "jupyter/list-kernels"
-    ]
+    "tools": ["jupyter/execute-cell", "jupyter/list-kernels"],
+    "skills": ["jupyter/execute-cell", "jupyter/list-kernels"]
   }
 }

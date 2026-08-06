@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "ssh plugin (system)",
   "contributes": {
-    "tools": [
-      "ssh/exec-remote",
-      "ssh/copy-file"
-    ],
-    "skills": [
-      "ssh/exec-remote",
-      "ssh/copy-file"
-    ],
-    "workflows": [
-      "ssh-flow.lobster"
-    ],
+    "tools": ["ssh/exec-remote", "ssh/copy-file"],
+    "skills": ["ssh/exec-remote", "ssh/copy-file"],
+    "workflows": ["ssh-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

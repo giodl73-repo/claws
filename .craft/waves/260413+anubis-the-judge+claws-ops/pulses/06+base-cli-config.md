@@ -67,6 +67,7 @@ Create the configuration loading, platform detection, and bypass management subs
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/platform-eng.md` — config schema conventions, platform detection patterns, bypass security model
 - `.craft/roles/craft/architect.md` — workspace detection patterns, Zod schema conventions
 

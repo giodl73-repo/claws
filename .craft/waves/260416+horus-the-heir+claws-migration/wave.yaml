@@ -12,12 +12,12 @@ dependsOn: [ra]
 plans:
   - clawc-pre-extraction-packaging
   - clawc-repo-migration
-  - clawc-repo-ops                    # NEW: ports doc-validation + accept-runner; atoms registry; no-craftworks gate
+  - clawc-repo-ops # NEW: ports doc-validation + accept-runner; atoms registry; no-craftworks gate
   - clawc-bic-operations
   - claws-e2e-sim-harness
   - claws-sim-approval-flows
   # claws-sim-host-presets moved to Wepwawet 2026-04-22
-  - clawc-spec-reboot              # CP-8: repo-ops validators (73.7+73.8) + package-first specs (74.5+74.6)
+  - clawc-spec-reboot # CP-8: repo-ops validators (73.7+73.8) + package-first specs (74.5+74.6)
 
 # plans_on_hold removed 2026-04-19 — 3 held plans archived to .craft/plans/_archive/
 # with status: Archived. Intent re-expressed in claws-sim-* plans (Horus) and
@@ -109,8 +109,8 @@ roles:
   - platform-eng
   - compliance
   - power-user
-  - gateway-eng         # re-added for sim plans (generated plugin + hook semantics)
-  - skill-author        # re-added for sim plans (fixture authoring)
+  - gateway-eng # re-added for sim plans (generated plugin + hook semantics)
+  - skill-author # re-added for sim plans (fixture authoring)
 
 roles_on_hold:
   # Previously assigned for the real-integration plans; resume in Wepwawet.

@@ -24,9 +24,10 @@ The exact same 9-line suppress-filter block is copy-pasted across three CLI comm
 ```ts
 const suppressSet = new Set(ctx.suppressedRules);
 const suppressed = rawAnalysis.violations.filter((v) => suppressSet.has(v.ruleId));
-const activeViolations = suppressSet.size > 0
-  ? rawAnalysis.violations.filter((v) => !suppressSet.has(v.ruleId))
-  : rawAnalysis.violations;
+const activeViolations =
+  suppressSet.size > 0
+    ? rawAnalysis.violations.filter((v) => !suppressSet.has(v.ruleId))
+    : rawAnalysis.violations;
 ```
 
 This is a domain decision (which violations are active given suppression config) living in the CLI adapter layer. The SDK's `analyze()` function should accept suppression rules and return pre-filtered results. This violates SDK-owns-logic: if a future consumer (e.g., an API server) calls the SDK, it would have to re-implement suppression filtering.
@@ -40,6 +41,7 @@ This is a domain decision (which violations are active given suppression config)
 **Files**: `claws-cli/src/output/` (4 files), `claws-cli/src/format/` (5 files)
 
 The CLI has two overlapping formatting subsystems:
+
 - `output/format-default.ts` + `output/format-json.ts` — used by the commands today
 - `format/default.ts` + `format/json.ts` + `format/sarif.ts` + `format/csv.ts` — a formatter registry with `getFormatter()`
 
@@ -82,7 +84,11 @@ const ir: GovernanceIR = {
   intents: [],
   delegationMap: [],
   conflicts: toIRConflictReport(compileConflicts),
-  compiler: { compilerVersion: COMPILER_VERSION, compiledAt: new Date().toISOString(), schemaVersion: SCHEMA_VERSION },
+  compiler: {
+    compilerVersion: COMPILER_VERSION,
+    compiledAt: new Date().toISOString(),
+    schemaVersion: SCHEMA_VERSION,
+  },
 };
 ```
 
@@ -154,11 +160,11 @@ These appear as devDependencies but no import from them exists in `claws-sdk/src
 
 ## Verdict
 
-| Severity | Count |
-|----------|-------|
-| Must-fix (M) | 3 |
-| Worth-fixing (W) | 5 |
-| Nitpick (N) | 3 |
-| **Total** | **11** |
+| Severity         | Count  |
+| ---------------- | ------ |
+| Must-fix (M)     | 3      |
+| Worth-fixing (W) | 5      |
+| Nitpick (N)      | 3      |
+| **Total**        | **11** |
 
 The package decomposition is clean and the dependency graph is correct. The three must-fix items (F-01, F-02, F-03) are all boundary violations: domain logic in the CLI, an orphaned formatting surface, and a scope split that will confuse consumers. The worth-fixing items are all instances of the same pattern: logic that should live in the SDK living in the CLI instead. None of these are blocking for CP-1 completion, but F-01 and F-03 should be addressed before the packages are published externally.

@@ -48,6 +48,7 @@ Building on the chained hash foundation from Pulse 11, this pulse implements ful
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — verification patterns, error reporting conventions
 - `.craft/roles/claws/ciso.md` — tamper detection requirements, chain integrity validation, break-point reporting
 

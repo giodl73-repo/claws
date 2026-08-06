@@ -22,9 +22,9 @@ expect:
     degraded_state: DEGRADED_R5
   tool_blocking:
     granularity: per_tool
-    r5_tool_block.source: 'r5'
+    r5_tool_block.source: "r5"
     other_tools_operational: true
-    workspace_not_lock.source: 'r5'
+    workspace_not_lock.source: "r5"
   admin_diff:
     endpoint: "GET /api/diff?from=auto:previous&to=current"
     shows_oc_changes: true

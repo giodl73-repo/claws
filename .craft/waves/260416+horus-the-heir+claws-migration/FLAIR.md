@@ -2,15 +2,15 @@
 
 ## Wave Identity
 
-| Field | Value |
-|-------|-------|
-| **Deity** | Horus |
-| **Epithet** | the Heir |
-| **Number** | XCVI |
-| **Branch** | feature/horus-the-heir |
-| **Started** | 2026-04-16 |
-| **Closed** | 2026-04-22 |
-| **Theme** | extract clawc → bic/claws + simulate governance E2E across host shapes + reboot specs into per-package trees |
+| Field       | Value                                                                                                        |
+| ----------- | ------------------------------------------------------------------------------------------------------------ |
+| **Deity**   | Horus                                                                                                        |
+| **Epithet** | the Heir                                                                                                     |
+| **Number**  | XCVI                                                                                                         |
+| **Branch**  | feature/horus-the-heir                                                                                       |
+| **Started** | 2026-04-16                                                                                                   |
+| **Closed**  | 2026-04-22                                                                                                   |
+| **Theme**   | extract clawc → bic/claws + simulate governance E2E across host shapes + reboot specs into per-package trees |
 
 ## What Shipped
 
@@ -45,8 +45,8 @@
 
 - **14 per-package doc trees** seeded at `/c/src/claws/docs/`:
   5 incubating openclaw-* (workspace, guardrails, policy, snap, lsp)
-  + 6 internal claws-* (cli, action, sdk, serve, skill-kit, test)
-  + 3 cross-cutting domains (security, upstream, repo).
+  - 6 internal claws-* (cli, action, sdk, serve, skill-kit, test)
+  - 3 cross-cutting domains (security, upstream, repo).
 - Every package carries the standard 3-file root (`README.md` +
   `ATOMS.md` + `CHANGELOG.md`) and typed subdirs (`specs/`,
   `guides/`, `pitfalls/`, `scenarios/`, optional `how-tos/` and
@@ -70,34 +70,34 @@
 
 ## Stats
 
-| Metric | Count |
-|--------|-------|
-| Plans | 7 (6 Implemented + 1 Superseded to Wepwawet) |
-| Checkpoints | 7 landed (CP-1..6 + CP-8; CP-7 moved to Wepwawet) |
-| Pulses | 77 committed |
-| Per-package doc dirs seeded | 14 |
-| Atoms in registry | 94 |
-| Orphans (all 4 oracle invariants) | 0 |
-| Scenarios landed this wave | 17 (WSP×3, WSC×3, GRD×4, SNP×3, approval-flow scenarios + audit-chain×3 + conformance×2) |
-| CL-NN specs retired | 8 |
-| CL-NN specs promoted | 2 (CL-15, CL-16) |
-| Amendments merged (pulse 73) | 5 drafts → 3 canonical specs |
-| Lines of doc authored (pulse 74.5 + 74.6) | ~12k across 90+ files |
-| Unit tests added | 27 (repo-ops + atoms-oracle + guide-deploy + doc-sync) |
+| Metric                                    | Count                                                                                    |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Plans                                     | 7 (6 Implemented + 1 Superseded to Wepwawet)                                             |
+| Checkpoints                               | 7 landed (CP-1..6 + CP-8; CP-7 moved to Wepwawet)                                        |
+| Pulses                                    | 77 committed                                                                             |
+| Per-package doc dirs seeded               | 14                                                                                       |
+| Atoms in registry                         | 94                                                                                       |
+| Orphans (all 4 oracle invariants)         | 0                                                                                        |
+| Scenarios landed this wave                | 17 (WSP×3, WSC×3, GRD×4, SNP×3, approval-flow scenarios + audit-chain×3 + conformance×2) |
+| CL-NN specs retired                       | 8                                                                                        |
+| CL-NN specs promoted                      | 2 (CL-15, CL-16)                                                                         |
+| Amendments merged (pulse 73)              | 5 drafts → 3 canonical specs                                                             |
+| Lines of doc authored (pulse 74.5 + 74.6) | ~12k across 90+ files                                                                    |
+| Unit tests added                          | 27 (repo-ops + atoms-oracle + guide-deploy + doc-sync)                                   |
 
 ## Review panels
 
 Per-CP review panels signed off at each gate; panel rosters archived
 under `panels/cp-N/`:
 
-| CP | Reviewers |
-|----|-----------|
-| CP-1 | clawc-repo-steward, clawc-release-eng, platform-eng |
-| CP-2 | clawc-repo-steward, clawc-release-eng, compliance |
-| CP-3 | clawc-repo-steward, testing, compliance |
-| CP-4 | clawc-repo-steward, clawc-release-eng, ciso |
-| CP-5 | gateway-eng, testing, architect |
-| CP-6 | gateway-eng, testing, architect, compliance |
+| CP   | Reviewers                                                             |
+| ---- | --------------------------------------------------------------------- |
+| CP-1 | clawc-repo-steward, clawc-release-eng, platform-eng                   |
+| CP-2 | clawc-repo-steward, clawc-release-eng, compliance                     |
+| CP-3 | clawc-repo-steward, testing, compliance                               |
+| CP-4 | clawc-repo-steward, clawc-release-eng, ciso                           |
+| CP-5 | gateway-eng, testing, architect                                       |
+| CP-6 | gateway-eng, testing, architect, compliance                           |
 | CP-8 | clawc-repo-steward, clawc-release-eng, architect, compliance, testing |
 
 (CP-7 moved to Wepwawet 2026-04-22; host-preset adapters straddle
@@ -121,7 +121,7 @@ sim/real boundary and belong in Wepwawet's real-integration charter.)
   to a future wave. The incubating packages are stable within
   Alpha and ready for external review when the greenlight lands.
 - `upstream/specs/UG-upstream.md` captures the graduation roadmap
-  + R5 pre-merge guard that will gate contribution PRs.
+  - R5 pre-merge guard that will gate contribution PRs.
 
 ### Blockers cleared for downstream waves
 

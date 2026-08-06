@@ -49,6 +49,7 @@ Follow this priority order:
 Before staging everything together, scan the changed files for naturally distinct concerns. If modified files clearly group into separate logical changes (e.g., a refactor in one directory and a new feature in another, or test files for a different change than source files), create separate commits for each group.
 
 Keep this lightweight:
+
 - Group at the **file level only** -- do not use `git add -p` or try to split hunks within a file.
 - If the separation is obvious (different features, unrelated fixes), split. If it's ambiguous, one commit is fine.
 - Two or three logical commits is the sweet spot. Do not over-slice into many tiny commits.
@@ -60,7 +61,8 @@ Run `git branch --show-current`. If it returns `main`, `master`, or the resolved
 Stage the relevant files. Prefer staging specific files by name over `git add -A` or `git add .` to avoid accidentally including sensitive files (.env, credentials) or unrelated changes.
 
 Write the commit message:
-- **Subject line**: Concise, imperative mood, focused on *why* not *what*. Follow the convention determined in Step 2.
+
+- **Subject line**: Concise, imperative mood, focused on _why_ not _what_. Follow the convention determined in Step 2.
 - **Body** (when needed): Add a body separated by a blank line for non-trivial changes. Explain motivation, trade-offs, or anything a future reader would need. Omit the body for obvious single-purpose changes.
 
 Use a heredoc to preserve formatting:

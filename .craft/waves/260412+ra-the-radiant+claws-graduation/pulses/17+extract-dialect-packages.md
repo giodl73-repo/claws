@@ -40,18 +40,18 @@ Extract 10 core domain packages from compiler-sdk and agent-sdk into standalone 
 
 **Scope reality check (verified by `find … | wc -l`)**: the source directories named in the extraction plan have grown since the plan's original estimates. Actual LOC:
 
-| # | Package | Source dirs | Actual LOC | Plan estimate |
-|---|---------|-------------|-----------:|--------------:|
-| 1 | `@craftworks/crypto` | `agent-sdk/src/hashing/`, `agent-sdk/src/suite/audit/` | 659 | ~800 |
-| 2 | `@craftworks/forma` | `compiler-sdk/src/astro/readers/`, `compiler-sdk/src/astro/ir/` | ~50,500 | ~2,000 |
-| 3 | `@craftworks/workspace` | `compiler-sdk/src/astro/formats/`, `compiler-sdk/src/astro/workspace/`, `agent-sdk/src/discovery/` | ~6,700 | ~1,400 |
-| 4 | `@craftworks/governance` | `compiler-sdk/src/astro/governance/`, `agent-sdk/src/govern/` | ~2,600 | ~2,200 |
-| 5 | `@craftworks/codegen` | `compiler-sdk/src/astro/emit/` (**excluding** `emit/platforms/` — those are pulse 18) | ~10,200 | ~1,500 |
-| 6 | `@craftworks/execution` | `compiler-sdk/src/astro/execution/` or equivalent task-graph dirs + `agent-sdk/src/execute/`, `agent-sdk/src/runtime/` | ~2,800 | ~2,800 |
-| 7 | `@craftworks/relax` | `compiler-sdk/src/astro/relax/`, `compiler-sdk/src/astro/relax-fill/` | ~2,000 | ~2,000 |
-| 8 | `@craftworks/context` | `compiler-sdk/src/astro/context/` | ~1,500 | ~1,500 |
-| 9 | `@craftworks/input` | `compiler-sdk/src/astro/input/`, `compiler-sdk/src/astro/read/` (if present) | ~800 | ~800 |
-| 10 | `@craftworks/eval` | `agent-sdk/src/eval/` + `compiler-sdk/src/astro/eval/` if present | ~1,200 | ~1,200 |
+| #   | Package                  | Source dirs                                                                                                            | Actual LOC | Plan estimate |
+| --- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------- | ---------: | ------------: |
+| 1   | `@craftworks/crypto`     | `agent-sdk/src/hashing/`, `agent-sdk/src/suite/audit/`                                                                 |        659 |          ~800 |
+| 2   | `@craftworks/forma`      | `compiler-sdk/src/astro/readers/`, `compiler-sdk/src/astro/ir/`                                                        |    ~50,500 |        ~2,000 |
+| 3   | `@craftworks/workspace`  | `compiler-sdk/src/astro/formats/`, `compiler-sdk/src/astro/workspace/`, `agent-sdk/src/discovery/`                     |     ~6,700 |        ~1,400 |
+| 4   | `@craftworks/governance` | `compiler-sdk/src/astro/governance/`, `agent-sdk/src/govern/`                                                          |     ~2,600 |        ~2,200 |
+| 5   | `@craftworks/codegen`    | `compiler-sdk/src/astro/emit/` (**excluding** `emit/platforms/` — those are pulse 18)                                  |    ~10,200 |        ~1,500 |
+| 6   | `@craftworks/execution`  | `compiler-sdk/src/astro/execution/` or equivalent task-graph dirs + `agent-sdk/src/execute/`, `agent-sdk/src/runtime/` |     ~2,800 |        ~2,800 |
+| 7   | `@craftworks/relax`      | `compiler-sdk/src/astro/relax/`, `compiler-sdk/src/astro/relax-fill/`                                                  |     ~2,000 |        ~2,000 |
+| 8   | `@craftworks/context`    | `compiler-sdk/src/astro/context/`                                                                                      |     ~1,500 |        ~1,500 |
+| 9   | `@craftworks/input`      | `compiler-sdk/src/astro/input/`, `compiler-sdk/src/astro/read/` (if present)                                           |       ~800 |          ~800 |
+| 10  | `@craftworks/eval`       | `agent-sdk/src/eval/` + `compiler-sdk/src/astro/eval/` if present                                                      |     ~1,200 |        ~1,200 |
 
 **Total: ~79,000 LOC moved.** The forma and codegen estimates in the plan were a pre-growth snapshot. Do not let the delta block execution — the dir boundaries are still correct, only the sizes changed. If you find a sub-directory inside a listed source dir whose target is genuinely ambiguous (e.g., an `emit/` dir that's shared between codegen and a platform), flag and ask — don't invent a rule.
 
@@ -139,22 +139,26 @@ After each tier, and one final time after Tier 3:
 ## Deliverable Summary
 
 For each of the 10 packages:
+
 - [ ] `package.json`, `tsconfig.json`, `vitest.config.ts`, `tsup.config.ts`, `src/index.ts` barrel
 - [ ] All source files moved from their source dirs into the package
 - [ ] All corresponding test files moved alongside source
 - [ ] Imports rewritten: relative `../../` → `@craftworks/{dep}`
 
 SDK thinning (applies to both compiler-sdk and agent-sdk):
+
 - [ ] `src/index.ts` replaced with re-exports from extracted packages
 - [ ] `package.json` lists extracted packages as deps
 - [ ] Existing subpath exports continue to resolve via re-export barrels
 
 Cross-cutting:
+
 - [ ] Zero `../../` imports in `packages/@craftworks/*/src/` (they're all package imports now)
 - [ ] Zero circular deps across all packages (madge)
 - [ ] Every existing consumer import path in the monorepo still resolves (grep for `@craftworks/compiler-sdk` and `@craftworks/agent-sdk` usage; none should break)
 
 New tests (on top of moved tests):
+
 - [ ] `packages/@craftworks/forma/tests/standalone.unit.test.ts` — L0: forma reader reads an OC workspace file without pulling compiler-sdk
 - [ ] `packages/@craftworks/crypto/tests/roundtrip.unit.test.ts` — L0: Ed25519 sign → verify round-trip
 - [ ] `packages/@craftworks/governance/tests/walker.unit.test.ts` — L0: policy walker traverses a rule tree
@@ -178,6 +182,7 @@ New tests (on top of moved tests):
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, package extraction patterns, backward compatibility
 - `.craft/roles/claws/platform-eng.md` — dependency graph management, workspace wiring, SDK thinning strategy
 

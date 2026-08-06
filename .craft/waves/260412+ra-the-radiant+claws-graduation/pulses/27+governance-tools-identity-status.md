@@ -62,6 +62,7 @@ Layer 3 endpoints return domain-specific JSON shapes optimized for the Companion
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- thin HTTP adapter pattern, SDK-owns-logic rule
 - `.craft/roles/claws/gateway-eng.md` -- Companion App API design, governance summary shape, tool browser requirements
 

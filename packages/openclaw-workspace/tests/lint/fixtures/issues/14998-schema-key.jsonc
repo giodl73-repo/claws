@@ -1,7 +1,0 @@
-{
-  "$schema": "https://docs.openclaw.ai/schema/openclaw.config.json",
-  "version": "2026.4.7",
-  "gateway": {
-    "dmPolicy": {}
-  }
-}

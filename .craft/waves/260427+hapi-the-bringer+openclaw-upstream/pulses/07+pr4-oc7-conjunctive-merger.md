@@ -5,7 +5,8 @@ plan: claws-openclaw-upstream
 checkpoint: cp-4
 depends_on: [01, 04, 05, 06]
 governing_roles: [claws:gateway-eng, claws:ciso, claws:claws-release-eng]
-addresses_findings: [F-17, F-18, F-19, F-20, F-21, F-22, F-23, F-24, F-25, OC7-001..005, OC7-CR-001..004]
+addresses_findings:
+  [F-17, F-18, F-19, F-20, F-21, F-22, F-23, F-24, F-25, OC7-001..005, OC7-CR-001..004]
 addresses_headlines: [H5]
 ---
 
@@ -18,12 +19,14 @@ Open PR-3 against `github.com/openclaw/openclaw` modifying `src/plugins/hooks.ts
 ## Deliverables
 
 ### Upstream PR
+
 - [ ] PR-3 opened at `github.com/openclaw/openclaw` with title: `fix(plugins): make requireApproval conjunctive across plugin chain (replace ?? with array accumulation)`
 - [ ] PR description leads with core-not-extension justification: "approval merger semantics are core gateway behavior; cannot be moved to extension without breaking the chain-of-custody invariant for R5 + RESTRICTED tools"
 - [ ] PR description embeds bot-preempt checklist
 - [ ] PR description includes upgrade note for downstream consumers (the codemod migration)
 
 ### Code change
+
 - [ ] `src/plugins/hooks.ts:889-893` — `??` replaced with array accumulation (~5 lines)
 - [ ] `src/plugins/hook-types.ts:402-410` — `requireApproval` type widened to `ApprovalDescriptor | ApprovalDescriptor[]`
 - [ ] Plugin invocation site wrapped in try/catch (per F-22 crash-safety): if a plugin throws after appending `requireApproval`, prior approvals survive; the throw is logged with `sourcePluginId` and the merger continues with remaining plugins
@@ -31,11 +34,13 @@ Open PR-3 against `github.com/openclaw/openclaw` modifying `src/plugins/hooks.ts
 - [ ] Spec-declared resolution path (per F-23): "plugin throw isolates that plugin; prior `requireApproval` descriptors survive; downstream plugins still run; final hook-result is conjunctive AND of all surviving descriptors" — documented in upstream's plugin-merger spec or hooks.ts docstring
 
 ### Migration codemod note
+
 - [ ] CHANGELOG entry includes "## Migration: requireApproval array adoption" subsection
 - [ ] Codemod note: consumers reading `hook-result.requireApproval` as a single object should now coerce: `Array.isArray(x) ? x : x ? [x] : []`
 - [ ] Note emphasizes: NO boolean was ever in scope — this is array adoption from single object, NOT field-widening from boolean
 
 ### Tests
+
 - [ ] `src/plugins/__tests__/hooks-merger.test.ts` — new tests:
   - Three-plugin merger collects all `requireApproval` descriptors (F-17)
   - Plugin-A appends approval, plugin-B throws, plugin-A's approval survives (F-22)
@@ -45,12 +50,14 @@ Open PR-3 against `github.com/openclaw/openclaw` modifying `src/plugins/hooks.ts
 - [ ] Existing tests asserting "first-wins" must update — break is the proof (F-19)
 
 ### CI / public-API obligations
+
 - [ ] `docs/.generated/plugin-sdk-api-baseline.sha256` refreshed (hook-types.ts is public surface)
 - [ ] `docs/sdk-overview.md` table NOT changed (existing entry; only field shape changed)
 - [ ] Swift protocol models regenerated for the gateway hook-result envelope shape change (per F-15) — at `apps/macos/Sources/OpenClawProtocol/GatewayModels.swift` and `apps/shared/OpenClawKit/Sources/OpenClawProtocol/GatewayModels.swift`
 - [ ] CHANGELOG entry appended at end-of-section, includes migration codemod note
 
 ### Internal verification before pushing
+
 - [ ] All upstream tests in `src/plugins/__tests__/` pass
 - [ ] `pnpm tsc --noEmit` green
 - [ ] Internal consumers (`@bic/openclaw-policy`, `@bic/openclaw-snap`) compile against widened field type — codemod gate per W1

@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "apple-reminders plugin (productivity)",
   "contributes": {
-    "tools": [
-      "apple-reminders/create-reminder",
-      "apple-reminders/list-reminders"
-    ],
-    "skills": [
-      "apple-reminders/create-reminder",
-      "apple-reminders/list-reminders"
-    ]
+    "tools": ["apple-reminders/create-reminder", "apple-reminders/list-reminders"],
+    "skills": ["apple-reminders/create-reminder", "apple-reminders/list-reminders"]
   }
 }

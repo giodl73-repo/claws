@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "cypress plugin (testing)",
   "contributes": {
-    "tools": [
-      "cypress/run-test",
-      "cypress/list-specs"
-    ],
-    "skills": [
-      "cypress/run-test",
-      "cypress/list-specs"
-    ]
+    "tools": ["cypress/run-test", "cypress/list-specs"],
+    "skills": ["cypress/run-test", "cypress/list-specs"]
   }
 }

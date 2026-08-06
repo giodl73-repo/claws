@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "storybook plugin (testing)",
   "contributes": {
-    "tools": [
-      "storybook/build",
-      "storybook/list-stories"
-    ],
-    "skills": [
-      "storybook/build",
-      "storybook/list-stories"
-    ]
+    "tools": ["storybook/build", "storybook/list-stories"],
+    "skills": ["storybook/build", "storybook/list-stories"]
   }
 }

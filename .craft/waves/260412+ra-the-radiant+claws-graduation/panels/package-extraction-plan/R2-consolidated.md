@@ -15,14 +15,14 @@ Fix the contradictions and resolve the outstanding findings, then R3 should pass
 
 ## R1 Consensus Finding Disposition
 
-| Finding | Architect | Platform-eng | Founder | Consensus |
-|---------|-----------|-------------|---------|-----------|
-| **C01** — Consolidate to 10-12 | PARTIAL | PARTIAL | PARTIAL | **PARTIAL** — Package Map is correct; 3 sections still reference old names |
-| **C02** — Canonical import path | UNRESOLVED | UNRESOLVED | UNRESOLVED | **UNRESOLVED** — No declaration of which import path is canonical |
-| **C03** — Compatibility manifest | UNRESOLVED | UNRESOLVED | UNRESOLVED | **UNRESOLVED** — No manifest, no version matrix, blocker for fleet |
-| **C04** — Gateway startup benchmark | UNRESOLVED | UNRESOLVED | UNRESOLVED | **UNRESOLVED** — No baseline measurement defined |
-| **C05** — Governance as one package | RESOLVED | RESOLVED | RESOLVED | **RESOLVED** |
-| **C06** — Public npm from Phase 1 | PARTIAL | PARTIAL | UNRESOLVED | **UNRESOLVED** — Out of Scope still defers public npm |
+| Finding                             | Architect  | Platform-eng | Founder    | Consensus                                                                  |
+| ----------------------------------- | ---------- | ------------ | ---------- | -------------------------------------------------------------------------- |
+| **C01** — Consolidate to 10-12      | PARTIAL    | PARTIAL      | PARTIAL    | **PARTIAL** — Package Map is correct; 3 sections still reference old names |
+| **C02** — Canonical import path     | UNRESOLVED | UNRESOLVED   | UNRESOLVED | **UNRESOLVED** — No declaration of which import path is canonical          |
+| **C03** — Compatibility manifest    | UNRESOLVED | UNRESOLVED   | UNRESOLVED | **UNRESOLVED** — No manifest, no version matrix, blocker for fleet         |
+| **C04** — Gateway startup benchmark | UNRESOLVED | UNRESOLVED   | UNRESOLVED | **UNRESOLVED** — No baseline measurement defined                           |
+| **C05** — Governance as one package | RESOLVED   | RESOLVED     | RESOLVED   | **RESOLVED**                                                               |
+| **C06** — Public npm from Phase 1   | PARTIAL    | PARTIAL      | UNRESOLVED | **UNRESOLVED** — Out of Scope still defers public npm                      |
 
 **Score: 1 resolved, 2 partial, 3 unresolved out of 6 consensus findings.**
 
@@ -32,11 +32,11 @@ Fix the contradictions and resolve the outstanding findings, then R3 should pass
 
 All three roles independently affirm 10+7 as the correct granularity:
 
-| Role | Verdict | Key reasoning |
-|------|---------|--------------|
-| **Architect** | 9 of 10 merges correct | Domain-based boundaries, no artificial splits, emitters as plugins |
-| **Platform-eng** | Correct for fleet ops | 17 x 47 = 799 version cells (tractable), targeted broadcast per emitter |
-| **Founder** | Right for community | Contributor-friendly catalog, emitters as natural contribution points |
+| Role             | Verdict                | Key reasoning                                                           |
+| ---------------- | ---------------------- | ----------------------------------------------------------------------- |
+| **Architect**    | 9 of 10 merges correct | Domain-based boundaries, no artificial splits, emitters as plugins      |
+| **Platform-eng** | Correct for fleet ops  | 17 x 47 = 799 version cells (tractable), targeted broadcast per emitter |
+| **Founder**      | Right for community    | Contributor-friendly catalog, emitters as natural contribution points   |
 
 ### Should any merges split?
 
@@ -49,6 +49,7 @@ All three roles independently affirm 10+7 as the correct granularity:
 ### Are the 7 emitter plugins justified?
 
 **Unanimously yes.** Each role found independent justification:
+
 - Architect: single dependency on codegen, no diamonds, clean plugin boundary
 - Platform-eng: targeted fleet operations per emitter (upgrade 5 Cursor workspaces, not all 47)
 - Founder: natural community contribution points (emit-windsurf, emit-aider as future community emitters)
@@ -60,6 +61,7 @@ These must be resolved before the plan can pass:
 ### MA-01 — Internal consistency: rewrite SDK, claws, and phase sections (All 3 roles)
 
 The plan's Package Map defines 10+7 but three sections still reference old 25-package names:
+
 - "What the SDKs Become" (lines 108-155): references oc-readers, oc-ir, platform-detect, normalize, emit-framework, context-dag, governance-primitives, compilation-host, skill-resolver, audit-chain, workspace-discovery, eval-framework, governance-runtime, budget-tracker
 - "How claws Uses This" (lines 159-178): same old names
 - "Extraction Strategy" phases (lines 183-218): 4 of 4 Phase 1 packages are wrong (only crypto exists in 10+7)
@@ -87,37 +89,38 @@ The 10+7 model has no package for compilation-host logic, but the SDK re-export 
 ### MA-06 — Add fleet test scenarios (Platform-eng)
 
 Add 3 fleet scenarios to Scenario Coverage:
+
 - `fleet/drift-detection-17-packages`
 - `fleet/targeted-broadcast`
 - `fleet/upgrade-rollback`
 
 ## Warning Findings
 
-| # | Finding | Role(s) | Description |
-|---|---------|---------|-------------|
-| W05 | Gateway startup benchmark | All 3 | Define pre-extraction baseline and 200ms threshold |
-| W06 | Budget in governance consumer impact | Architect | agent-sdk must now depend on full governance; document this |
-| W07 | No rollback strategy | Platform-eng | Define `claws doctor --rollback` for partial upgrade failures |
-| W08 | No emitter contribution guide | Founder | Plan should include emitter plugin contribution guide as deliverable |
-| W09 | MIT license not specified | Founder | Explicitly state all packages are MIT; LICENSE in every tarball |
-| W10 | Registry strategy undefined | Platform-eng | "Internal registry" is not defined (GitHub Packages? Artifactory?) |
+| #   | Finding                              | Role(s)      | Description                                                          |
+| --- | ------------------------------------ | ------------ | -------------------------------------------------------------------- |
+| W05 | Gateway startup benchmark            | All 3        | Define pre-extraction baseline and 200ms threshold                   |
+| W06 | Budget in governance consumer impact | Architect    | agent-sdk must now depend on full governance; document this          |
+| W07 | No rollback strategy                 | Platform-eng | Define `claws doctor --rollback` for partial upgrade failures        |
+| W08 | No emitter contribution guide        | Founder      | Plan should include emitter plugin contribution guide as deliverable |
+| W09 | MIT license not specified            | Founder      | Explicitly state all packages are MIT; LICENSE in every tarball      |
+| W10 | Registry strategy undefined          | Platform-eng | "Internal registry" is not defined (GitHub Packages? Artifactory?)   |
 
 ## Note Findings
 
-| # | Finding | Role | Description |
-|---|---------|------|-------------|
-| N11 | Headline says 12 areas | Architect | H1 says 12, plan delivers 10+7 |
-| N12 | Relax standalone viability | Founder | Monitor — merge into eval if zero standalone adoption after 6 months |
-| N13 | Execution + skill-resolver coupling | Architect | Monitor — split if claws skills gets unwanted execution dep |
+| #   | Finding                             | Role      | Description                                                          |
+| --- | ----------------------------------- | --------- | -------------------------------------------------------------------- |
+| N11 | Headline says 12 areas              | Architect | H1 says 12, plan delivers 10+7                                       |
+| N12 | Relax standalone viability          | Founder   | Monitor — merge into eval if zero standalone adoption after 6 months |
+| N13 | Execution + skill-resolver coupling | Architect | Monitor — split if claws skills gets unwanted execution dep          |
 
 ## Severity Summary
 
-| Severity | Count |
-|----------|-------|
+| Severity     | Count                   |
+| ------------ | ----------------------- |
 | Must-address | 6 (MA-01 through MA-06) |
-| Warning | 6 (W05 through W10) |
-| Note | 3 (N11 through N13) |
-| **Total** | **15** |
+| Warning      | 6 (W05 through W10)     |
+| Note         | 3 (N11 through N13)     |
+| **Total**    | **15**                  |
 
 ## Path to PASS
 
@@ -134,12 +137,12 @@ Estimated effort to reach PASS: ~70 minutes of plan editing. No architectural ch
 
 ## Comparison: R1 to R2
 
-| Metric | R1 | R2 | Trend |
-|--------|----|----|-------|
-| Total findings | 41 | 15 | Improved |
-| Must-address | 19 | 6 | Improved |
-| R1 consensus resolved | -- | 1/6 | Needs work |
-| Model verdict | Reject 25, propose 10-12 | Affirm 10+7 | Converging |
-| Blocking issues | Package count (25) | Internal consistency | Improved |
+| Metric                | R1                       | R2                   | Trend      |
+| --------------------- | ------------------------ | -------------------- | ---------- |
+| Total findings        | 41                       | 15                   | Improved   |
+| Must-address          | 19                       | 6                    | Improved   |
+| R1 consensus resolved | --                       | 1/6                  | Needs work |
+| Model verdict         | Reject 25, propose 10-12 | Affirm 10+7          | Converging |
+| Blocking issues       | Package count (25)       | Internal consistency | Improved   |
 
 The hard architectural question (how many packages?) is resolved. What remains is document quality and operational completeness. The plan is one revision away from approval.

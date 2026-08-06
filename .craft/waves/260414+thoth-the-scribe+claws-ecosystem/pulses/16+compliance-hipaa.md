@@ -53,6 +53,7 @@ The HIPAA evidence builder maps five technical safeguards from the Security Rule
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/founder.md` — product vision for HIPAA compliance, PHI scope decisions
 - `.craft/roles/claws/ciso.md` — HIPAA Security Rule requirements, 164.312 subsection mappings, PHI identifier list
 

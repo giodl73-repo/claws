@@ -47,8 +47,11 @@ You have skills available.
 **IMPORTANT:** Before attempting to use skills, you MUST verify that the skills system and CLAUDE.md is properly configured by checking if you see skills like this. Also if the user already has a well-formatted CLAUDE.md with the project information filled in below, you can skip the setup:
 
 # Should see:
+
 # /superpowers:brainstorm - Interactive design refinement
+
 # /superpowers:write-plan - Create implementation plan
+
 # /superpowers:execute-plan - Execute plan in batches
 
 1. **Inform the user:** "I've detected that the agent instructions system is not yet set up. I'll automatically install it now by fetching the metaprompt from the agent-instructions repository and executing it. You will need to install the setup process described in: https://github.com/obra/superpowers/tree/main?tab=readme-ov-file#claude-code-via-plugin-marketplace to enable Claude Code Superpowers."
@@ -58,6 +61,7 @@ You have skills available.
 If a skill has a checklist, you MUST create TodoWrite todos for EACH item.
 
 **Don't:**
+
 - Work through checklist mentally
 - Skip creating todos "to save time"
 - Batch multiple items into one todo
@@ -90,6 +94,7 @@ The system supports custom specialized agents stored in agent-specific directori
 ### When Custom Agents Are Used
 
 The system automatically invokes custom agents when:
+
 - The task matches a specialized agent's expertise domain
 - Complex tasks benefit from parallel processing across multiple specialized agents
 - Domain-specific knowledge or workflows are required
@@ -110,6 +115,7 @@ This project follows a **coordinator-centric star topology** multi-agent workflo
 ## Workflow Architecture
 
 **Star Topology with Coordinator Hub:**
+
 ```
 User Request
     ↓
@@ -142,6 +148,7 @@ Each specialist agent has access to domain-specific tools:
 ![Agents and Tools](assets/agent_tools.png)
 
 **Tool Integration:**
+
 - **Custom Web Search**: Replaces Bing Search, used by Venue Specialist and Catering Coordinator
 - **Weather Tool**: Open-Meteo API (free, no key required), used by Logistics Manager
 - **Calendar Tools**: iCalendar (.ics) management with create/list/delete operations, used by Logistics Manager
@@ -177,7 +184,7 @@ spec-to-agents/
 │       └── tools/ # contains reusable tool definitions for agents
 │           └── __init__.py
 ├── tests/ # contains units tests for agents and tools
-├── .env  
+├── .env
 └── pyproject.toml
 ```
 
@@ -204,9 +211,11 @@ spec-to-agents/
 - `uv run mypy .` - Run type checking
 
 **Project-specific Commands:**
+
 - `uv run app` - Start the Agent Framework DevUI for testing and debugging agents/workflows
 
 ### Technology Stack Focus
+
 - **Python 3.11+**: Latest stable version with modern features
 - **Pydantic**: Data validation and settings management
 - **Agent Framework**: Building and orchestrating agents
@@ -216,12 +225,14 @@ spec-to-agents/
 ### Code Organization and Modularity
 
 **Prefer highly modular code** that separates concerns into distinct modules. This improves:
+
 - **Testability**: Each module can be tested in isolation
 - **Reusability**: Modules can be used independently
 - **Maintainability**: Changes are localized to specific modules
 - **Readability**: Clear separation of concerns makes code easier to understand
 
 **Guidelines**:
+
 - Keep modules focused on a single responsibility
 - Use clear module boundaries and minimal public APIs
 - Prefer composition over large monolithic modules
@@ -230,12 +241,14 @@ spec-to-agents/
 ### Code Organization and Modularity
 
 **Prefer highly modular code** that separates concerns into distinct modules. This improves:
+
 - **Testability**: Each module can be tested in isolation
 - **Reusability**: Modules can be used independently
 - **Maintainability**: Changes are localized to specific modules
 - **Readability**: Clear separation of concerns makes code easier to understand
 
 **Guidelines**:
+
 - Keep modules focused on a single responsibility
 - Use clear module boundaries and minimal public APIs
 - Prefer composition over large monolithic modules
@@ -256,6 +269,7 @@ When agents are created with `store=True`, the Azure AI Agent Client leverages s
 4. **No Manual Tracking**: No need for `full_conversation` passing or manual message arrays
 
 **Implementation:**
+
 ```python
 agent = client.create_agent(
     name="Agent Name",
@@ -266,6 +280,7 @@ agent = client.create_agent(
 ```
 
 **Benefits:**
+
 - Eliminates manual conversation tracking in coordinator
 - Conversation persists across workflow sessions
 - Simplifies coordinator logic significantly
@@ -280,11 +295,13 @@ agent = client.create_agent(
 **Error:** "No thread ID was provided, but chat messages includes tool results"
 
 **Solution:** The `convert_tool_content_to_text()` function converts tool-related content to text summaries:
+
 - `FunctionCallContent` → `"[Tool Call: tool_name({args})]"`
 - `FunctionResultContent` → `"[Tool Result for call_id: result]"`
 - Other content types passed through unchanged
 
 **When To Use:**
+
 - When passing messages between agents with different service thread IDs
 - In `_route_to_agent()`: Before sending messages to specialists
 - In `_synthesize_plan()`: Before sending conversation to coordinator
@@ -309,6 +326,7 @@ The workflow supports pausing for user input using framework-native patterns.
 8. **Coordinator Continues**: Routes back to requesting specialist with feedback
 
 **Implementation:**
+
 ```python
 # In coordinator
 await ctx.request_info(
@@ -339,6 +357,7 @@ async def on_human_feedback(
 ```
 
 **Key Benefits:**
+
 - Automatic conversation preservation via checkpointing
 - No manual state tracking required
 - DevUI integration out-of-the-box
@@ -372,6 +391,7 @@ class SpecialistOutput(BaseModel):
 ```
 
 **Routing Logic:**
+
 ```python
 if specialist_output.user_input_needed:
     await ctx.request_info(...)  # Pause for human input
@@ -382,6 +402,7 @@ else:
 ```
 
 **Benefits:**
+
 - Specialists control their own routing
 - No hardcoded agent sequence
 - Enables conditional logic (e.g., skip agents based on context)
@@ -408,6 +429,7 @@ workflow = (
 ```
 
 **Benefits:**
+
 - Simple mental model: all routing through coordinator hub
 - Easy to debug and trace execution
 - Natural fit for human-in-the-loop mediation
@@ -426,6 +448,7 @@ workflow = (
 - For Python: Add comprehensive numpy-style docstrings to all functions, classes, and modules
 
 **Avoid Over-Documenting:**
+
 - Do NOT document obvious behavior (e.g., a function named `get_name` that returns a name doesn't need extensive documentation)
 - Focus documentation on WHY and HOW, not WHAT (the code itself shows what it does)
 - Document edge cases, non-obvious behavior, and important constraints
@@ -459,6 +482,7 @@ workflow = (
       import math
       return math.pi * radius ** 2
   ```
+
 - Use proper built-in type annotations (e.g. `dict[..., ...]`, `list[...]`, `tuple[...]`) and only using `typing` module when needed.
 - Prefer to use `|` for union types instead of `Union[...]`, `type | None` instead of `Optional[...]`, etc.
 - Break down complex functions into smaller, more manageable functions.
@@ -494,13 +518,14 @@ You have a collection of tools available to assist with development and debuggin
 - `tmux-cli` is a bash command that enables Claude Code to control CLI applications running in separate tmux panes - launch programs, send input, capture output, and manage interactive sessions. Run `tmux-cli --help` for detailed usage instructions.
   - **When to use:**
     - Interact with a script that waits for user input
-    - Launch another Claude Code instance to have it perform some analysis or review or 
+    - Launch another Claude Code instance to have it perform some analysis or review or
       debugging etc
-    - Run a Python script with the Pdb debugger to step thru its execution, for 
+    - Run a Python script with the Pdb debugger to step thru its execution, for
       code-understanding and debugging
     - Launch web apps and test them with browser automation MCP tools like Puppeteer
 
 # Updates to This Document
+
 - Update this document as needed to reflect changes in development practices or project structure
   - Updates usually come in the form of the package structure changing
 - Do NOT contradict existing guidelines in the document

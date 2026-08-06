@@ -19,6 +19,7 @@ panels:
 ## Wave-level verdict
 
 **Conditional ship**, with two weight classes:
+
 - **Tier A — boundary leaks (4 items)**: load-bearing, MUST close before fork. The yaml/lobster pack architecture issue is the surprise — it shipped as if `*.lobster` is a universal concept, but it's downstream-specific.
 - **Tier B — CI/build hygiene (4 items)**: mechanical, all `npm run build` + small package.json edits.
 - **Tier C — last-mile polish (~10 items)**: real but each fix is small. Mostly README parity + flag wiring + JSDoc cleanup.
@@ -41,6 +42,7 @@ panels:
 These are **claws-side starter packs masquerading as upstream content**. They reference openclaw/lobster issues, target the lobster workflow file format, and have no analogue for any other yaml dialect.
 
 **Fix options**:
+
 1. Move both packs to a claws-side `claws-rules` package (downstream-only, never ships upstream)
 2. Re-genericize the rules to NOT reference `*.lobster` specifically; make them `*.yaml`-applicable; remove the lobster-specific issue refs
 
@@ -153,13 +155,13 @@ Operators auditing 47 workspaces want to compare "are all of you on the same pol
 
 ## Tier D — simplification (~−160 LoC, refactor)
 
-| # | What | Where | LoC saved | Effort |
-|---|---|---|---|---|
-| D1 | Extract CLI helpers (`safeWrite`, `installPipeGuard`, `isClosedPipeError`, `scrubSentinel`, `SCRUB_PLACEHOLDER`, `emit`, `emitError`) → `@openclaw/oc-path/cli-helpers` | 4 CLIs | ~150 | S |
-| D2 | Hoist `_tools-md-scan.ts` to `policy-substrate/src/extensions/_shared/` | policy lint+doctor packs | ~36 | XS |
-| D3 | Add `parseForKind` dispatch helper to oc-paths-substrate | 3 CLIs + 2 tests | ~50 | XS |
-| D4 | Folded into D1 (SCRUB_PLACEHOLDER + workspace section helpers) | — | — | — |
-| D5 | Add `./test-harness` to policy-substrate | new helper | +80 | S |
+| #   | What                                                                                                                                                                    | Where                    | LoC saved | Effort |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | --------- | ------ |
+| D1  | Extract CLI helpers (`safeWrite`, `installPipeGuard`, `isClosedPipeError`, `scrubSentinel`, `SCRUB_PLACEHOLDER`, `emit`, `emitError`) → `@openclaw/oc-path/cli-helpers` | 4 CLIs                   | ~150      | S      |
+| D2  | Hoist `_tools-md-scan.ts` to `policy-substrate/src/extensions/_shared/`                                                                                                 | policy lint+doctor packs | ~36       | XS     |
+| D3  | Add `parseForKind` dispatch helper to oc-paths-substrate                                                                                                                | 3 CLIs + 2 tests         | ~50       | XS     |
+| D4  | Folded into D1 (SCRUB_PLACEHOLDER + workspace section helpers)                                                                                                          | —                        | —         | —      |
+| D5  | Add `./test-harness` to policy-substrate                                                                                                                                | new helper               | +80       | S      |
 
 **Net delta**: ~−160 LoC. Qualitative wins bigger than LoC: kills the silent CLI-helper asymmetry (only 2 of 4 CLIs have pipe-guards today), brings policy-substrate to test-harness parity.
 
@@ -180,28 +182,16 @@ Decision needed: which of these become hard-gates for fork-open vs. stay v1+?
 ## Punchlist — order of operations before fork-open
 
 **Must clear before pasting into the openclaw fork**:
+
 1. **A1-A4**: lobster/yaml boundary leaks. Move starter packs out of upstream-shipped subdirs OR de-lobster the rules. Decide before fork-prep starts.
 2. **B1**: rebuild dists for 3 packages; remove dead `oclint-rules-claws/` dist.
 3. **B2**: bump `"*"` → `"^0.1.0"` cross-substrate deps.
 4. **B3**: refresh DEPRECATED.md tombstone names.
 5. **B4**: add `prepublishOnly` scripts.
 
-**Should clear at fork-time (before opening the first PR)**:
-6. **C1**: ship 4 missing READMEs.
-7. **C4**: pinch register conflict semantics (last-writer-wins vs throws — pick one).
-8. **C5**: ship policy-substrate `./test-harness`.
-9. **C6**: `@module` JSDoc bulk-fix.
-10. **C7**: wire `requires.sdkVersion` validation through 3 registries.
-11. **C8**: `workspace.json` `version` field.
-12. **C9**: `shapeHash` in policy CLI output.
-13. **D1+D4**: extract CLI helpers (kills the silent pipe-guard asymmetry).
-14. **D2**: hoist `_tools-md-scan.ts`.
-15. **D3**: `parseForKind` helper.
+**Should clear at fork-time (before opening the first PR)**: 6. **C1**: ship 4 missing READMEs. 7. **C4**: pinch register conflict semantics (last-writer-wins vs throws — pick one). 8. **C5**: ship policy-substrate `./test-harness`. 9. **C6**: `@module` JSDoc bulk-fix. 10. **C7**: wire `requires.sdkVersion` validation through 3 registries. 11. **C8**: `workspace.json` `version` field. 12. **C9**: `shapeHash` in policy CLI output. 13. **D1+D4**: extract CLI helpers (kills the silent pipe-guard asymmetry). 14. **D2**: hoist `_tools-md-scan.ts`. 15. **D3**: `parseForKind` helper.
 
-**Discuss with maintainers / explicitly defer**:
-16. **C2/C3**: `--tier` flag wiring + CLI ergonomics standardization.
-17. **C10**: umbrella CLI dispatcher (task #182).
-18. **Tier E** items 1-5: ciso BLOCKers — decide v0 vs v1+ per item.
+**Discuss with maintainers / explicitly defer**: 16. **C2/C3**: `--tier` flag wiring + CLI ergonomics standardization. 17. **C10**: umbrella CLI dispatcher (task #182). 18. **Tier E** items 1-5: ciso BLOCKers — decide v0 vs v1+ per item.
 
 **Total estimated effort** for fork-open clearing (items 1-5): ~half-day. Fork-time items (6-15): 1-2 days. Discuss-with-maintainers items: depends on direction.
 

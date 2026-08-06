@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "mysql plugin (data)",
   "contributes": {
-    "tools": [
-      "mysql/query",
-      "mysql/exec"
-    ],
-    "skills": [
-      "mysql/query",
-      "mysql/exec"
-    ]
+    "tools": ["mysql/query", "mysql/exec"],
+    "skills": ["mysql/query", "mysql/exec"]
   }
 }

@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "helm plugin (infra)",
   "contributes": {
-    "tools": [
-      "helm/list",
-      "helm/install"
-    ],
-    "skills": [
-      "helm/list",
-      "helm/install"
-    ],
-    "workflows": [
-      "helm-flow.lobster"
-    ],
+    "tools": ["helm/list", "helm/install"],
+    "skills": ["helm/list", "helm/install"],
+    "workflows": ["helm-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

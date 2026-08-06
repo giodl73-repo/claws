@@ -70,16 +70,18 @@ The Ra wave is structurally well-organized: 71 pulse files exist, 10 checkpoints
 **Requirement**: "Do all 71 pulses have L0 >= 2 AND L1 >= 1?"
 **Findings**: Pulse 12 (compile-pipeline-e2e) has `L1_integration: 0`. Pulse 44 (cap-e2e-gate) has `L1_integration: 0`. Both are gate pulses that focus on E2E/acceptance. However, the stated requirement is L1 >= 1 for ALL 71 pulses.
 **Full inventory of L0/L1 compliance**:
+
 - All 71 pulses have L0 >= 2. PASS.
 - Pulse 12: L0=2, L1=0, L2=4, L3=2. **FAIL on L1 >= 1.**
 - Pulse 44: L0=2, L1=0, L2=6, L3=5. **FAIL on L1 >= 1.**
-**Impact**: These are E2E gate pulses that test integration at a higher level (L2/L3), so the missing L1 tests may be intentional (integration is covered at L2). But the formal requirement says L1 >= 1 for all.
-**Recommendation**: Either add 1 L1 integration test to each of pulses 12 and 44, or formally amend the testing requirement to exempt gate pulses that have L2 >= 4.
+  **Impact**: These are E2E gate pulses that test integration at a higher level (L2/L3), so the missing L1 tests may be intentional (integration is covered at L2). But the formal requirement says L1 >= 1 for all.
+  **Recommendation**: Either add 1 L1 integration test to each of pulses 12 and 44, or formally amend the testing requirement to exempt gate pulses that have L2 >= 4.
 
 ### F-09: 13 pitfalls (P-270 through P-282) mostly covered, but P-270 only in 1 pulse [MEDIUM]
 
 **Spec**: CL-10 defines P-270 through P-282 inline. These are operational pitfalls that must be addressed.
 **Pitfall coverage across pulses**:
+
 - P-270 (unclassified tools default R5): pulse 25 only
 - P-271 (atomic workspace snapshot): pulses 22, 23 (3 references)
 - P-272 (fleet fail-closed): pulses 30, 42, 44 (5 references)
@@ -93,8 +95,8 @@ The Ra wave is structurally well-organized: 71 pulse files exist, 10 checkpoints
 - P-280 (work queue persistence): pulse 38 (2 references)
 - P-281 (audit cursor pagination): pulses 41, 44 (2 references)
 - P-282 (default deny rules immutable): pulse 33 (3 references)
-**Note**: P-270 and P-279 each appear in only 1 pulse with no cross-validation in a gate pulse. P-270 (unclassified-tools-default-R5) is a security invariant that should be validated in the CP-5 or CP-6 gate.
-**Recommendation**: Add P-270 verification to pulse 28 (CP-5 gate) or pulse 34 (CP-6 gate) acceptance criteria.
+  **Note**: P-270 and P-279 each appear in only 1 pulse with no cross-validation in a gate pulse. P-270 (unclassified-tools-default-R5) is a security invariant that should be validated in the CP-5 or CP-6 gate.
+  **Recommendation**: Add P-270 verification to pulse 28 (CP-5 gate) or pulse 34 (CP-6 gate) acceptance criteria.
 
 ### F-10: Spec CL-11 and CL-12 coverage is limited to 2 pulses [MEDIUM]
 
@@ -121,16 +123,16 @@ The Ra wave is structurally well-organized: 71 pulse files exist, 10 checkpoints
 
 ## Verification Matrix
 
-| Check | Result |
-|-------|--------|
-| All 71 pulses have L0 >= 2 | **PASS** — minimum L0 is 2 (pulses 12, 19, 20, 44, 55) |
-| All 71 pulses have L1 >= 1 | **FAIL** — pulses 12 and 44 have L1 = 0 (F-08) |
-| All 10 gate pulses have L3 >= 1 | **PASS** — all 10 gates have L3 >= 1 (F-07) |
-| All 30 scenarios referenced | **PASS** — all S01-S30 appear in at least 1 pulse |
-| Plan pulse count matches wave | **FAIL** — cap-integration 37 vs 35 (F-01), tui 15 vs 16 (F-02) |
-| Specs CL-10, CL-11, CL-12 covered | **PARTIAL** — CL-10 comprehensive, CL-11/CL-12 minimal (F-10) |
-| 13 pitfalls (P-270-P-282) in pulses | **PASS** — all 13 present, 2 have thin coverage (F-09) |
-| oc:// path in write-path errors | **FAIL** — not referenced in any write-path pulse (F-05) |
+| Check                               | Result                                                          |
+| ----------------------------------- | --------------------------------------------------------------- |
+| All 71 pulses have L0 >= 2          | **PASS** — minimum L0 is 2 (pulses 12, 19, 20, 44, 55)          |
+| All 71 pulses have L1 >= 1          | **FAIL** — pulses 12 and 44 have L1 = 0 (F-08)                  |
+| All 10 gate pulses have L3 >= 1     | **PASS** — all 10 gates have L3 >= 1 (F-07)                     |
+| All 30 scenarios referenced         | **PASS** — all S01-S30 appear in at least 1 pulse               |
+| Plan pulse count matches wave       | **FAIL** — cap-integration 37 vs 35 (F-01), tui 15 vs 16 (F-02) |
+| Specs CL-10, CL-11, CL-12 covered   | **PARTIAL** — CL-10 comprehensive, CL-11/CL-12 minimal (F-10)   |
+| 13 pitfalls (P-270-P-282) in pulses | **PASS** — all 13 present, 2 have thin coverage (F-09)          |
+| oc:// path in write-path errors     | **FAIL** — not referenced in any write-path pulse (F-05)        |
 
 ---
 

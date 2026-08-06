@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "active plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "active/act"
-    ]
+    "tools": ["active/act"]
   }
 }

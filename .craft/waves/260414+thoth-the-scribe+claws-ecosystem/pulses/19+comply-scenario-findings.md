@@ -4,7 +4,18 @@ slug: comply-scenario-findings
 plan: claws-comply-audit
 depends_on: [14, 15, 16, 17, 18]
 governing_roles: [claws:founder, claws:ciso, craft:architect]
-scenario_codes: [compliance-evidence/S01, compliance-evidence/S02, compliance-evidence/S03, compliance-evidence/S04, compliance-evidence/S05, compliance-evidence/S06, fleet-operations/S04, fleet-operations/S05, fleet-operations/S10]
+scenario_codes:
+  [
+    compliance-evidence/S01,
+    compliance-evidence/S02,
+    compliance-evidence/S03,
+    compliance-evidence/S04,
+    compliance-evidence/S05,
+    compliance-evidence/S06,
+    fleet-operations/S04,
+    fleet-operations/S05,
+    fleet-operations/S10,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 4
@@ -61,6 +72,7 @@ Key technical additions in this pulse: RFC 8785 canonical JSON ensures reproduci
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/founder.md` — product vision for compliance integration, fleet compliance scope
 - `.craft/roles/claws/ciso.md` — compliance scenario requirements, evidence standards, fleet reporting
 - `.craft/roles/craft/architect.md` — cross-module integration patterns, streaming design, canonical serialization

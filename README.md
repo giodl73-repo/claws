@@ -39,7 +39,7 @@ docs/           ── Documentation. Some subtrees describe packages that have
                    source for those projects anymore. Triage / move-upstream
                    in follow-up.
 
-scripts/        ── ci/, hooks/, install-hooks.sh — repo-management scripts.
+scripts/        ── hooks/, install-hooks.sh — repo-management scripts.
 ```
 
 ## Workflow

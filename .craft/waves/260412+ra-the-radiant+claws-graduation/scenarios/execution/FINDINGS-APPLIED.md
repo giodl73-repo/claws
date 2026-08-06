@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Task graph ordering**: stable topological sort with alphabetical tie-breaking, parallel eligibility via reachability (not just direct edges), O(V+E) scheduling algorithm
 - **Failure isolation**: partial failure isolation (block dependents, not siblings), transitive block propagation with root cause tracing, report first cycle with note about additional cycles
 - **Quality gates**: gate conditions as RELAX expressions (not eval'd strings), gate evaluation at producer completion (not consumer start), gate evaluation errors fail closed (R5 principle)

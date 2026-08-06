@@ -100,9 +100,7 @@ editable: {
 editable: Partial<Record<keyof T, EditableFieldDescriptor>>;
 
 // For complex tabs, define the valid path set explicitly:
-type ConnectionsEditablePath =
-  | `tools[*].enabled`
-  | `tools[${string}].enabled`;
+type ConnectionsEditablePath = `tools[*].enabled` | `tools[${string}].enabled`;
 ```
 
 Even the flat-only version catches most mismatches. The complex version can be phased in.
@@ -118,11 +116,11 @@ CL-11 defines `RiskClassification` as a precise discriminated union that couples
 ```typescript
 // CL-11 (authoritative):
 type RiskClassification =
-  | { level: 1; label: 'read' }
-  | { level: 2; label: 'write' }
-  | { level: 3; label: 'communicate' }
-  | { level: 4; label: 'execute' }
-  | { level: 5; label: 'transact' };
+  | { level: 1; label: "read" }
+  | { level: 2; label: "write" }
+  | { level: 3; label: "communicate" }
+  | { level: 4; label: "execute" }
+  | { level: 5; label: "transact" };
 ```
 
 CL-10's governance context uses `riskLevel?: number` and `riskLabel?: string` -- two independent, uncoupled optional fields. This allows `{ riskLevel: 1, riskLabel: 'transact' }` (level/label mismatch) and `{ riskLevel: 99 }` (invalid level).
@@ -163,16 +161,16 @@ The PATCH body has an `operation` field that is one of: `set_name`, `set_descrip
 
 ```typescript
 type WorkspacePatchOperation =
-  | { operation: 'set_tool_enabled'; server: string; tool: string; enabled: boolean }
-  | { operation: 'set_name'; name: string }
-  | { operation: 'set_description'; description: string }
-  | { operation: 'set_owner'; owner: string }
-  | { operation: 'set_instructions'; instructions: string }
-  | { operation: 'add_reviewer'; reviewer: string }
-  | { operation: 'set_schedule'; schedule: ScheduleConfig }
-  | { operation: 'add_server'; server: ServerConfig }
-  | { operation: 'set_source_enabled'; sourceType: string; enabled: boolean }
-  | { operation: 'set_groups'; groups: GroupsConfig };
+  | { operation: "set_tool_enabled"; server: string; tool: string; enabled: boolean }
+  | { operation: "set_name"; name: string }
+  | { operation: "set_description"; description: string }
+  | { operation: "set_owner"; owner: string }
+  | { operation: "set_instructions"; instructions: string }
+  | { operation: "add_reviewer"; reviewer: string }
+  | { operation: "set_schedule"; schedule: ScheduleConfig }
+  | { operation: "add_server"; server: ServerConfig }
+  | { operation: "set_source_enabled"; sourceType: string; enabled: boolean }
+  | { operation: "set_groups"; groups: GroupsConfig };
 ```
 
 Each variant carries exactly the fields it needs. A `set_name` operation cannot include a `server` field.
@@ -184,6 +182,7 @@ Each variant carries exactly the fields it needs. A `set_name` operation cannot 
 **Location**: Line 456 -- `type: 'string' | 'boolean' | 'number' | 'enum' | 'date' | 'text'`
 
 The `type` field on editable descriptors is a union of six string literals. Looking at the JSON examples:
+
 - `"managedBy"` has `type: "string"` but its data is `{ name: string, role: string }` -- a nested object, not a string.
 - Knowledge sources have `type: "boolean"` for toggles, which is correct.
 - There is no `"object"` or `"array"` type for complex editable fields.
@@ -222,7 +221,7 @@ The template literal type at least enforces the colon separator at compile time.
 Trust tiers appear in both the governance summary and identity responses as plain strings. CL-11 does not define a `TrustTier` type explicitly, but the spec references T0-T4 as a classification system. CL-10 should define or reference a branded type:
 
 ```typescript
-type TrustTier = 'T0' | 'T1' | 'T2' | 'T3' | 'T4';
+type TrustTier = "T0" | "T1" | "T2" | "T3" | "T4";
 ```
 
 Without this, the API can return `"T99"` or `"high"` and the type system will not catch it.
@@ -237,10 +236,10 @@ The spec defines four SSE event types (`file_changed`, `compilation_started`, `c
 
 ```typescript
 type ServerSentEvent =
-  | { event: 'file_changed'; data: FileChangedPayload }
-  | { event: 'compilation_started'; data: CompilationStartedPayload }
-  | { event: 'compilation_complete'; data: CompilationCompletePayload }
-  | { event: 'governance_warning'; data: GovernanceWarningPayload };
+  | { event: "file_changed"; data: FileChangedPayload }
+  | { event: "compilation_started"; data: CompilationStartedPayload }
+  | { event: "compilation_complete"; data: CompilationCompletePayload }
+  | { event: "governance_warning"; data: GovernanceWarningPayload };
 ```
 
 ...the consumer has to use `as` casts or `any` to narrow the payload. This is exactly the pattern discriminated unions exist to solve.
@@ -254,7 +253,7 @@ type ServerSentEvent =
 Data sensitivity labels (`CONFIDENTIAL`, `RESTRICTED`, `INTERNAL`, `PUBLIC`) appear as strings in the JSON examples. No type constrains these to valid values. CL-10 should define:
 
 ```typescript
-type DataSensitivityLabel = 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';
+type DataSensitivityLabel = "PUBLIC" | "INTERNAL" | "CONFIDENTIAL" | "RESTRICTED";
 ```
 
 This prevents `"SECRET"` or `"high"` from leaking through as valid labels.
@@ -263,12 +262,12 @@ This prevents `"SECRET"` or `"high"` from leaking through as valid labels.
 
 ## Cross-Spec Consistency
 
-| CL-11 Type | CL-10 Usage | Status |
-|---|---|---|
-| `RiskClassification` | Reinvented as `riskLevel: number` + `riskLabel: string` | NOT REUSED -- TS-04 |
-| `RiskLevel` | Not referenced; raw numbers used | NOT REUSED -- TS-04 |
-| `AuthorizationDecision` | Not referenced anywhere in CL-10 | NOT REUSED |
-| `TrustTier` (implied T0-T4) | Raw string `"T2"` | NOT DEFINED -- TS-09 |
+| CL-11 Type                  | CL-10 Usage                                             | Status               |
+| --------------------------- | ------------------------------------------------------- | -------------------- |
+| `RiskClassification`        | Reinvented as `riskLevel: number` + `riskLabel: string` | NOT REUSED -- TS-04  |
+| `RiskLevel`                 | Not referenced; raw numbers used                        | NOT REUSED -- TS-04  |
+| `AuthorizationDecision`     | Not referenced anywhere in CL-10                        | NOT REUSED           |
+| `TrustTier` (implied T0-T4) | Raw string `"T2"`                                       | NOT DEFINED -- TS-09 |
 
 CL-10 should explicitly import and reference CL-11 types wherever governance data appears in the API surface. The Chunk API is the consumer-facing projection of the same governance model that CL-11 defines -- using different types for the same concepts creates divergence risk.
 

@@ -53,6 +53,7 @@ Snapshot names are validated: alphanumeric characters, hyphens, and underscores 
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/architect.md` — system-level design authority for claws packages
 - `.craft/roles/claws/platform-eng.md` — implementation patterns and snapshot design
 

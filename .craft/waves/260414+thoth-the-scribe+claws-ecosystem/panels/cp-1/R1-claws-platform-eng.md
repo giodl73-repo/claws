@@ -59,10 +59,11 @@ For a fleet of 47 workspaces, this is useless. I cannot identify which workspace
 **Severity**: M (Major)
 
 ```ts
-const periodLimit = period === 'daily' ? effectiveLimits.daily : effectiveLimits.monthly;
+const periodLimit = period === "daily" ? effectiveLimits.daily : effectiveLimits.monthly;
 ```
 
 When `period === 'weekly'`, this falls through to `effectiveLimits.monthly`. There is no weekly limit in `BudgetLimit` (only `daily` and `monthly`), yet `BudgetPeriod` includes `'weekly'`. The percentage computation uses the monthly limit for a weekly window, which will always under-report (weekly usage / monthly limit = artificially low percentage). Either:
+
 - Remove `'weekly'` from `BudgetPeriod` and the period-start logic, or
 - Add a `weekly` field to `BudgetLimit` and handle it in the limit selection
 
@@ -76,7 +77,7 @@ Running `claws protect budget --period weekly` on 47 workspaces will produce mis
 **Severity**: M (Major)
 
 ```ts
-let policyVersion = 'unknown';
+let policyVersion = "unknown";
 if (governedWorkspaces.length > 0) {
   policyVersion = await readPolicyVersion(governedWorkspaces[0]!.path);
 }
@@ -101,7 +102,7 @@ for (const r of restrictions) {
 }
 ```
 
-The check only compares `workspaceTier <= r.maxTrustTier` but does not inspect what risk-tier tools are actually in the policy being broadcast. The restriction says "tools above R{maxRiskTier} are blocked for workspaces at or below T{maxTrustTier}" -- but without checking the actual tool risk tiers in the policy content, this blocks *all* broadcasts to low-trust workspaces whenever any restriction exists, regardless of the tools' actual risk classification. This makes restrictions overly broad and will cause false positives during fleet upgrades.
+The check only compares `workspaceTier <= r.maxTrustTier` but does not inspect what risk-tier tools are actually in the policy being broadcast. The restriction says "tools above R{maxRiskTier} are blocked for workspaces at or below T{maxTrustTier}" -- but without checking the actual tool risk tiers in the policy content, this blocks _all_ broadcasts to low-trust workspaces whenever any restriction exists, regardless of the tools' actual risk classification. This makes restrictions overly broad and will cause false positives during fleet upgrades.
 
 ---
 
@@ -112,9 +113,7 @@ The check only compares `workspaceTier <= r.maxTrustTier` but does not inspect w
 
 ```ts
 export function verifyPkce(codeVerifier: string, codeChallenge: string): boolean {
-  const expected = createHash('sha256')
-    .update(codeVerifier)
-    .digest('base64url');
+  const expected = createHash("sha256").update(codeVerifier).digest("base64url");
   return expected === codeChallenge;
 }
 ```
@@ -237,22 +236,22 @@ Related to M-02. The terminal output for `claws protect budget --fleet` shows pe
 
 **3 changes accepted, 4 must-fix before landing:**
 
-| ID | Severity | Verdict |
-|----|----------|---------|
-| M-01 | Major | Must fix: fleet budget must surface per-workspace errors |
-| M-02 | Major | Must fix: BudgetReport needs workspace identity for fleet use |
-| M-03 | Major | Must fix: weekly period limit falls through to monthly |
-| M-04 | Major | Must fix: policy version should not come from arbitrary workspace |
-| W-01 | Warning | Should fix: publish restriction overly broad without risk-tier inspection |
-| W-02 | Warning | Should fix: PKCE comparison consistency |
-| W-03 | Warning | Should fix: self-signed cert parse failure should reject, not allow |
-| W-04 | Warning | Should fix: retry loop off-by-one |
-| W-05 | Warning | Consider: single-pass token accumulation for performance |
-| W-06 | Warning | Consider: deduplicate plaintext key storage warnings |
-| N-01 | Note | Track: JWT iat/nbf validation |
-| N-02 | Note | Clean up: remove dead readPolicyTrustTier function |
-| N-03 | Note | Track: kind-dependent risk floor for LLM gap-fills |
-| N-04 | Note | Track: CLI fleet budget needs workspace identity |
-| N-05 | Note | Noted: parallel staging cleanup race is benign |
+| ID   | Severity | Verdict                                                                   |
+| ---- | -------- | ------------------------------------------------------------------------- |
+| M-01 | Major    | Must fix: fleet budget must surface per-workspace errors                  |
+| M-02 | Major    | Must fix: BudgetReport needs workspace identity for fleet use             |
+| M-03 | Major    | Must fix: weekly period limit falls through to monthly                    |
+| M-04 | Major    | Must fix: policy version should not come from arbitrary workspace         |
+| W-01 | Warning  | Should fix: publish restriction overly broad without risk-tier inspection |
+| W-02 | Warning  | Should fix: PKCE comparison consistency                                   |
+| W-03 | Warning  | Should fix: self-signed cert parse failure should reject, not allow       |
+| W-04 | Warning  | Should fix: retry loop off-by-one                                         |
+| W-05 | Warning  | Consider: single-pass token accumulation for performance                  |
+| W-06 | Warning  | Consider: deduplicate plaintext key storage warnings                      |
+| N-01 | Note     | Track: JWT iat/nbf validation                                             |
+| N-02 | Note     | Clean up: remove dead readPolicyTrustTier function                        |
+| N-03 | Note     | Track: kind-dependent risk floor for LLM gap-fills                        |
+| N-04 | Note     | Track: CLI fleet budget needs workspace identity                          |
+| N-05 | Note     | Noted: parallel staging cleanup race is benign                            |
 
 **Fleet impact assessment**: The budget aggregation (M-01, M-02) and policy version (M-04) issues directly affect `claws protect budget --fleet` and `claws broadcast` -- these are daily/monthly fleet commands. The weekly period bug (M-03) will confuse any fleet operator using weekly cadence. The 4 Majors must be resolved before this code is broadcast to production workspaces.

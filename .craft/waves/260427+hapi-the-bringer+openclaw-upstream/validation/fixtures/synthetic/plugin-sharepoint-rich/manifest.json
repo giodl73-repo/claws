@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "sharepoint plugin (work)",
   "contributes": {
-    "tools": [
-      "sharepoint/read-doc",
-      "sharepoint/write-doc"
-    ],
-    "skills": [
-      "sharepoint/read-doc",
-      "sharepoint/write-doc"
-    ],
-    "workflows": [
-      "sharepoint-flow.lobster"
-    ],
+    "tools": ["sharepoint/read-doc", "sharepoint/write-doc"],
+    "skills": ["sharepoint/read-doc", "sharepoint/write-doc"],
+    "workflows": ["sharepoint-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

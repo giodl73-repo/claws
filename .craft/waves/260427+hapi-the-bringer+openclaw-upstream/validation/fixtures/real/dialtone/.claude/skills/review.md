@@ -39,14 +39,14 @@ If under 10 files, continue inline.
 
 For each changed file, determine which review categories apply:
 
-| File pattern | Categories |
-|---|---|
-| `*.vue` | Reuse & Duplication, Code Quality, Vue Correctness, API & Library Design, i18n & Assets, Accessibility |
-| `*.less` | CSS / Styling |
-| `*.test.js`, `*.test.ts` | Testing |
-| `*.stories.js`, `*.mdx` | Storybook |
-| JS helpers (`*_constants.js`, `validators.js`, `utils.js`, `index.js`, and similar) | Reuse & Duplication, Code Quality, API & Library Design |
-| `packages/dialtone-tokens/**/*.json` | CSS / Styling (token usage) |
+| File pattern                                                                        | Categories                                                                                             |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `*.vue`                                                                             | Reuse & Duplication, Code Quality, Vue Correctness, API & Library Design, i18n & Assets, Accessibility |
+| `*.less`                                                                            | CSS / Styling                                                                                          |
+| `*.test.js`, `*.test.ts`                                                            | Testing                                                                                                |
+| `*.stories.js`, `*.mdx`                                                             | Storybook                                                                                              |
+| JS helpers (`*_constants.js`, `validators.js`, `utils.js`, `index.js`, and similar) | Reuse & Duplication, Code Quality, API & Library Design                                                |
+| `packages/dialtone-tokens/**/*.json`                                                | CSS / Styling (token usage)                                                                            |
 
 If user specified a focus area (e.g., `/review accessibility`), only apply that category regardless of file type.
 

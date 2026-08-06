@@ -6,7 +6,33 @@ co_plans: [claws-workspace-lint]
 checkpoint: cp-2
 depends_on: [01, 02, 03]
 governing_roles: [claws:gateway-eng, claws:claws-release-eng, claws:claws-repo-steward]
-addresses_findings: [F-52, F-53, F-54, F-55, F-56, F-76, F-77, F-78, F-79, F-80, F-81, F-82, F-83, F-84, F-85, F-86, F-87, F-93, F-94, F-98, F-99, F-100, F-101, churn data on doctor-legacy-config.migrations]
+addresses_findings:
+  [
+    F-52,
+    F-53,
+    F-54,
+    F-55,
+    F-56,
+    F-76,
+    F-77,
+    F-78,
+    F-79,
+    F-80,
+    F-81,
+    F-82,
+    F-83,
+    F-84,
+    F-85,
+    F-86,
+    F-87,
+    F-93,
+    F-94,
+    F-98,
+    F-99,
+    F-100,
+    F-101,
+    churn data on doctor-legacy-config.migrations,
+  ]
 addresses_headlines: [H1]
 ---
 
@@ -17,11 +43,13 @@ addresses_headlines: [H1]
 Open PR-1 against `github.com/openclaw/openclaw` adding `@openclaw/workspace` (subpaths `/path` for oc:// URIs, `/ast` for PEG grammars + lossless emitters incl. JSONC, `/lint` for the 13-code JSONC config lint surface, `/canonicalize` for RFC 8785 JCS) AND wholesale-converting `src/config/io.ts:replaceConfigFile` from `JSON.stringify(_, null, 2)` to lossless `parse → mutate → emit` via `@openclaw/workspace/ast`. Each subpath earns its keep in the same PR.
 
 **The pitch (PR description hook — data-driven, see PR-DRAFT 1):**
+
 > 4 open + 6 closed `__OPENCLAW_REDACTED__`-corruption issues, 11 open + 2 closed `Unrecognized key` startup-block issues, plus collision/round-trip/false-positive cases all trace to the same chokepoint: `src/config/io.ts:1381` and `src/config/io.ts:2082` use `JSON.stringify` to write back user config. After this PR: lossless `parse → mutate → emit` at that chokepoint preserves comments + ordering + indent + secrets, AND a 13-code lint surface flags 27+ distinct evidence-backed config-failure patterns. Plain JSON path stays parity-or-faster than `JSON.stringify` via short-circuit detection. Plus the `oc://config/...` URI vocabulary lights up everywhere in one shot — lint findings, doctor migrations, future audit-log correlation.
 
 ## Deliverables
 
 ### `@openclaw/workspace` package
+
 - [ ] `packages/openclaw-workspace/` content copied + renamed from our `@bic/openclaw-workspace`
 - [ ] Subpath exports preserved + extended: `/path`, `/ast`, `/ast/jsonc` (NEW), `/lint` (NEW), `/canonicalize`, `/staging`, `/path-canonical`
 - [ ] **`/ast` includes a JSONC grammar** (covers today's openclaw config files; preserves comments, key ordering, indentation, blank-line layout)
@@ -31,11 +59,13 @@ Open PR-1 against `github.com/openclaw/openclaw` adding `@openclaw/workspace` (s
 - [ ] `package.json` `name` flipped to `@openclaw/workspace`; license `MIT`
 
 ### Doctor migration emit (absorbed from former PR-2 scope 2026-04-28)
+
 - [ ] `src/commands/doctor-legacy-config.migrations.ts` (14 commits/3mo hot path) emits `oc://config/...` URIs in diagnostic locations instead of `{file, line}` for config-mutation diagnostics
 - [ ] `src/commands/doctor-config-flow.ts` (16 commits/3mo) similarly migrated
 - [ ] Backward compat: existing `{kind: 'file'}` location consumers continue to work; `DiagnosticLocation` discriminated union accepts both shapes
 
 ### Wholesale conversion of `replaceConfigFile`
+
 - [ ] `src/config/io.ts:1381` — `JSON.stringify(persistedRootParsed, null, 2)` → `emit(parse(originalRaw, 'jsonc'), persistedRootParsed)` (preserves source structure)
 - [ ] `src/config/io.ts:2082` — `JSON.stringify(stampedOutputConfig, null, 2)` → same lossless emit pattern
 - [ ] `replaceConfigFileSync` callers unchanged (no signature changes; only the internal stringify body changes)
@@ -44,23 +74,27 @@ Open PR-1 against `github.com/openclaw/openclaw` adding `@openclaw/workspace` (s
 - [ ] Key ordering: user's chosen order preserved; merger ops preserve insertion order at AST level
 
 ### Diagnostic-location format extension (subpath `/path` earns its keep)
+
 - [ ] Doctor's diagnostic shape extended to accept `oc://...` URIs as a location, parallel to existing `{file, line}` form
 - [ ] Workspace-file diagnostics emit URIs via `formatOcUri()` from `@openclaw/workspace/path` (e.g., `oc://TOOLS.md/Tools/send-email/args_from`)
 - [ ] Runtime-config diagnostics now also emit `oc://config/...` URIs (this PR ships the dual-form scheme; doctor migration emit covered above)
 - [ ] Backward compat: existing diagnostic consumers (LSP, console renderers) keep working with the old shape
 
 ### Cross-OS canonicalize CI matrix (subpath `/canonicalize` earns its keep)
+
 - [ ] `.github/workflows/openclaw-workspace-cross-os.yml` runs canonicalize fixture on Linux + macOS + Windows
 - [ ] Asserts byte-identical SHA-256 across the three OSes
 - [ ] CRLF → LF normalization tested explicitly (Windows checkout doesn't drift)
 
 ### CI / public-API obligations
+
 - [ ] `docs/.generated/plugin-sdk-api-baseline.sha256` refreshed
 - [ ] `docs/sdk-overview.md` table updated with new package + diagnostic-shape extension
 - [ ] No Swift protocol model changes expected for this PR
 - [ ] CHANGELOG entry appended at end-of-section per `CLAUDE.md` rule
 
 ### Internal verification before pushing
+
 - [ ] `pnpm --filter @openclaw/workspace test` green
 - [ ] `pnpm --filter @openclaw/workspace build` green
 - [ ] `pnpm --filter @openclaw/workspace tsc --noEmit` green
@@ -70,6 +104,7 @@ Open PR-1 against `github.com/openclaw/openclaw` adding `@openclaw/workspace` (s
 ## TDD Tests
 
 ### L0 unit (`packages/openclaw-workspace/tests/unit/`) — 41 tests
+
 - oc:// URI parser (workspace form): malformed inputs, escape rules, query params (3 tests)
 - **oc://config URI parser** (absorbed from PR-2): parser round-trip, array-index form, malformed → structured error codes (3 tests, F-88..F-90)
 - **`resolveConfigUri()`**: valid path, missing path returns `{found:false}`, array out-of-bounds returns `{found:false}` not exception (2 tests, F-95..F-97)
@@ -83,11 +118,13 @@ Open PR-1 against `github.com/openclaw/openclaw` adding `@openclaw/workspace` (s
 - **Per-rule unit suite**: one positive + one negative fixture per lint code (13 tests)
 
 ### L1 integration (`packages/openclaw-workspace/tests/integration/`) — 14 tests
+
 - Cross-OS canonicalize CI matrix: same input → byte-identical SHA-256 on Linux / macOS / Windows (1 matrix, F-52)
 - CRLF → LF line-ending normalization before JCS (1 test, F-53)
 - **Real-config issue replay**: one fixture per evidence-cited issue (#14998, #20478, #22272, #31251, #48415, #59070, #60334, #61683, #62281, #62438, #65565, #72872) — fixture replays failure pattern; lint catches with expected codes (12 tests)
 
 ### L1 integration (upstream — landing in PR-1)
+
 - **`replaceConfigFile` round-trip with comments**: input is JSONC config with `// comments` and custom indentation; one field mutated; output preserves all comments + ordering + indent except the changed field (1 test — THE invariant)
 - **`replaceConfigFile` plain JSON behavior unchanged**: input has no comments, default 2-space indent; output is byte-identical to today's stringify result (1 test — backward compat proof)
 - **`doctor --fix` idempotency**: run `--fix` twice on a clean config; second run = byte-zero diff (1 test, idempotency invariant)
@@ -97,10 +134,12 @@ Open PR-1 against `github.com/openclaw/openclaw` adding `@openclaw/workspace` (s
 - **dual-shape diagnostic renderer** consumes both `{kind: 'file'}` and `{kind: 'uri'}` locations correctly (1 test, F-87)
 
 ### L2 e2e — 3 tests
+
 - Workspace-file diagnostic emitter cites `oc://` URI: hand-craft a parse error in TOOLS.md; assert diagnostic location is `oc://TOOLS.md/...` (1 test)
 - Lint engine end-to-end: parse real openclaw config → run lint → render findings via doctor surface (2 tests)
 
 ### L3 acceptance — 2 tests
+
 - `lint()` API stable shape: `LintFinding` fields don't drift across calls (1 test)
 - Severity tier conformance: every code's severity matches the catalog table (1 test)
 

@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "expo plugin (mobile)",
   "contributes": {
-    "tools": [
-      "expo/build",
-      "expo/publish"
-    ],
-    "skills": [
-      "expo/build",
-      "expo/publish"
-    ]
+    "tools": ["expo/build", "expo/publish"],
+    "skills": ["expo/build", "expo/publish"]
   }
 }

@@ -105,24 +105,28 @@ Compares Claude Code configuration against official Anthropic documentation to v
 ### Score: X/10
 
 ### Alignment with Official Recommendations
-| Practice | Status | Evidence |
-|----------|--------|----------|
-| CLAUDE.md < 500 lines | PASS/FAIL | Current: N lines |
-| Path-scoped rules used | PASS/FAIL | N rules covering N packages |
-| Skills are workflows not rules | PASS/FAIL | N skills with convention restatements |
-| context: fork where needed | PASS/FAIL | |
-| Agent memory enabled | PASS/FAIL | N/M agents have memory |
-| No redundant intent classification | PASS/FAIL | |
-| Cross-file duplication minimal | PASS/FAIL | N concepts in 3+ files |
-| Hook efficiency | PASS/FAIL | N spawns per Bash cmd |
+
+| Practice                           | Status    | Evidence                              |
+| ---------------------------------- | --------- | ------------------------------------- |
+| CLAUDE.md < 500 lines              | PASS/FAIL | Current: N lines                      |
+| Path-scoped rules used             | PASS/FAIL | N rules covering N packages           |
+| Skills are workflows not rules     | PASS/FAIL | N skills with convention restatements |
+| context: fork where needed         | PASS/FAIL |                                       |
+| Agent memory enabled               | PASS/FAIL | N/M agents have memory                |
+| No redundant intent classification | PASS/FAIL |                                       |
+| Cross-file duplication minimal     | PASS/FAIL | N concepts in 3+ files                |
+| Hook efficiency                    | PASS/FAIL | N spawns per Bash cmd                 |
 
 ### Deviations from Best Practices
+
 [List with citations to official docs]
 
 ### Justifications for Current Approach
+
 [Cited responses to reviewer concerns]
 
 ### Recommendations
+
 [Prioritized improvements]
 ```
 

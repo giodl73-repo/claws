@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "signal plugin (communication)",
   "contributes": {
-    "tools": [
-      "signal/send-message",
-      "signal/list-conversations"
-    ],
-    "skills": [
-      "signal/send-message",
-      "signal/list-conversations"
-    ],
-    "workflows": [
-      "signal-flow.lobster"
-    ],
+    "tools": ["signal/send-message", "signal/list-conversations"],
+    "skills": ["signal/send-message", "signal/list-conversations"],
+    "workflows": ["signal-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

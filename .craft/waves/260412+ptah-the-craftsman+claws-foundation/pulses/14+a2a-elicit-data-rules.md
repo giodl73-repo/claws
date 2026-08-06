@@ -98,5 +98,6 @@ npm run build
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/ciso.md` — governance policy, risk classification, A2A trust boundaries
 - `.craft/roles/craft/dragon.md` — security review, threat modeling, fail-closed enforcement

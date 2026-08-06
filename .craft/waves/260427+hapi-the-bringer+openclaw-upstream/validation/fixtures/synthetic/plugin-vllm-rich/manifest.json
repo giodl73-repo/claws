@@ -4,15 +4,9 @@
   "version": "0.1.0",
   "description": "vllm plugin (ai_ml)",
   "contributes": {
-    "tools": [
-      "vllm/generate"
-    ],
-    "skills": [
-      "vllm/generate"
-    ],
-    "workflows": [
-      "vllm-flow.lobster"
-    ],
+    "tools": ["vllm/generate"],
+    "skills": ["vllm/generate"],
+    "workflows": ["vllm-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

@@ -5,7 +5,22 @@ plan: claws-openclaw-upstream
 checkpoint: cp-5
 depends_on: [01, 06, 07, 08]
 governing_roles: [claws:gateway-eng, claws:compliance, claws:claws-release-eng]
-addresses_findings: [F-63, F-64, F-65, F-66, F-67, F-68, F-69, F-70, F-71..F-75, SS-001, SP-001..002, SHQ-001..003, SHR-001..002]
+addresses_findings:
+  [
+    F-63,
+    F-64,
+    F-65,
+    F-66,
+    F-67,
+    F-68,
+    F-69,
+    F-70,
+    F-71..F-75,
+    SS-001,
+    SP-001..002,
+    SHQ-001..003,
+    SHR-001..002,
+  ]
 addresses_headlines: [H4]
 ---
 
@@ -18,6 +33,7 @@ Open PR-5 against `github.com/openclaw/openclaw` adding `@openclaw/snap` (conten
 ## Deliverables
 
 ### Upstream PR
+
 - [ ] PR-5 opened at `github.com/openclaw/openclaw` with title: `feat: add @openclaw/snap + openclaw snap subcommand group (11 verbs + HTTP server + resolvePolicy temporal query)`
 - [ ] PR description leads with core-not-extension justification: "snapshot registry is the source of truth for which workspace bytes are in force at any moment; cannot be a third-party extension because the audit chain anchors evidence to snapshot identity"
 - [ ] PR description embeds bot-preempt checklist
@@ -27,6 +43,7 @@ Open PR-5 against `github.com/openclaw/openclaw` adding `@openclaw/snap` (conten
 - [ ] `package.json` `name` flipped to `@openclaw/snap`; license `MIT`
 
 ### CLI subcommand group (11 verbs)
+
 - [ ] `openclaw snap stage on|off` — toggle staging posture
 - [ ] `openclaw snap status` — working tree + stage + drafts + current
 - [ ] `openclaw snap diff --staged` — staged vs canonical
@@ -42,6 +59,7 @@ Open PR-5 against `github.com/openclaw/openclaw` adding `@openclaw/snap` (conten
 - [ ] `openclaw snap resolvePolicy --at <iso8601>` — e-discovery temporal query (per amendment §7, F-66)
 
 ### HTTP surface (per spec §4)
+
 - [ ] `POST /v1/snapshots` — upload pre-made snapshot
 - [ ] `GET /v1/snapshots` — list (paginated)
 - [ ] `GET /v1/snapshots/:id` — fetch
@@ -52,22 +70,26 @@ Open PR-5 against `github.com/openclaw/openclaw` adding `@openclaw/snap` (conten
 - [ ] `GET /v1/healthz` — liveness
 
 ### Audit invariants (per amendment §7.2)
+
 - [ ] `snap promote` emits `snapshot_promote` event with `{snapshotId, promotedAt, approverPrincipal, signedHandleId}` (F-64)
 - [ ] Subsequent promote emits `snapshot_supersede` against previous current (F-65)
 - [ ] Rollback emits `snapshot_rollback`
 - [ ] All events flow into the hash-chained audit log via `@openclaw/guardrails/audit`
 
 ### Temporal query (per amendment §7, F-66)
+
 - [ ] `snap resolvePolicy --at <iso8601>` walks audit chain for promote/supersede/rollback events
 - [ ] Returns `{snapshotId, policyIrPath, promotedAt, supersededAt, queriedAt, evidence: { promote_event, supersede_event }}`
 - [ ] Edge case: query before first promote → null + `{ reason: 'no policy in force at queried time' }` (F-68)
 
 ### Compliance rubric coverage (per N4, F-71..F-75)
+
 - [ ] `compliance/rubrics/soc2.yaml` (TBD location upstream) — CC6.1, CC7.2, CC7.3 traced to audit predicates
 - [ ] `compliance/rubrics/hipaa.yaml` — §164.312(a)(1), (b), (c)(1), (d), (e)(2)(ii) traced to audit predicates
 - [ ] `compliance/README.md` — per-framework gaps documented
 
 ### CI / public-API obligations
+
 - [ ] `docs/.generated/plugin-sdk-api-baseline.sha256` refreshed
 - [ ] `docs/sdk-overview.md` table updated
 - [ ] Swift protocol models regenerated for new HTTP gateway surface (F-15)
@@ -75,6 +97,7 @@ Open PR-5 against `github.com/openclaw/openclaw` adding `@openclaw/snap` (conten
 - [ ] Cross-OS snapshotId stability CI matrix added (Linux + macOS + Windows; same files → same id)
 
 ### Internal verification before pushing
+
 - [ ] `pnpm --filter @openclaw/snap test` green
 - [ ] `pnpm --filter @openclaw/snap build` green
 - [ ] `pnpm --filter @openclaw/snap tsc --noEmit` green

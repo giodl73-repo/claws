@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "todoist plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "todoist/create-task"
-    ]
+    "tools": ["todoist/create-task"]
   }
 }

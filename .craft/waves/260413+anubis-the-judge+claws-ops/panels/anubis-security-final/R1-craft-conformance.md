@@ -162,10 +162,10 @@ The `suppressions` field is `z.array(z.string())` with no format validation. Sup
 
 ## Summary
 
-| Severity | Count |
-|----------|-------|
-| M (Must fix) | 3 |
-| W (Warning) | 6 |
-| N (Note) | 3 |
+| Severity     | Count |
+| ------------ | ----- |
+| M (Must fix) | 3     |
+| W (Warning)  | 6     |
+| N (Note)     | 3     |
 
 **Key compliance gaps**: The raise-only invariant has a semantic loophole for LLM gap-fills (C-01), PBKDF2 iterations are not configurable for varying compliance requirements (C-02), and broadcast can silently loosen publish restrictions (C-03). The gated fail-mode has no gate implementation (C-04), and amendments lack defense-in-depth validation (C-05).

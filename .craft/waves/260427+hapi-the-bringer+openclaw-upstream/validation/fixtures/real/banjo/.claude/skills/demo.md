@@ -5,12 +5,14 @@ Run and debug the banjo LSP demo in Zed.
 ## Triggers
 
 Use this skill when the user says:
+
 - **"run demo"** or **"run banjo demo"** - Run the full demo
 - **"record demo"** - Run demo with screen recording enabled
 
 ## Behavior
 
 When running the demo:
+
 1. Run the demo command and capture ALL output
 2. Analyze the output for failures
 3. If failures found:
@@ -30,16 +32,19 @@ When running the demo:
 ## Commands
 
 ### Run Demo (with verification)
+
 ```bash
 cd ../hemis-demo && swift run hemis-demo banjo --editor zed --verify
 ```
 
 ### Run Demo (with recording)
+
 ```bash
 cd ../hemis-demo && swift run hemis-demo banjo --editor zed --record
 ```
 
 ### Dry Run (dump IR without executing)
+
 ```bash
 cd ../hemis-demo && swift run hemis-demo banjo --editor zed --dump-ir
 ```
@@ -49,30 +54,38 @@ cd ../hemis-demo && swift run hemis-demo banjo --editor zed --dump-ir
 hemis-demo outputs to stdout/stderr. Key patterns to look for:
 
 ### Assertion Failures
+
 ```
 [✗] FAIL: <assertion description>
 ```
+
 Action: Check the assertion in banjo.demo, verify expected state matches actual behavior.
 
 ### Keystroke Errors
+
 ```
 [keystroke] Failed to create...
 [keystroke] Warning: Unknown special key
 ```
+
 Action: Check key notation in lib/banjo.demo or lib/common.demo.
 
 ### LSP/Diagnostic Issues
+
 ```
 No diagnostics found
 Expected cursor at line X, got Y
 ```
+
 Action: Check banjo LSP is running, verify notes.db was seeded correctly.
 
 ### Setup Failures
+
 ```
 [setup] Warning: could not launch
 [window] ... (unavailable)
 ```
+
 Action: Check Zed is installed, accessibility permissions granted.
 
 ## Debugging Steps
@@ -86,16 +99,21 @@ Action: Check Zed is installed, accessibility permissions granted.
 ## Fixing Common Issues
 
 ### Cursor position assertions failing
+
 The demo inserts lines which shifts note positions. Verify:
+
 - Initial line numbers in INSERT statements match source file
 - Position math after insertions is correct (line + inserted_count)
 
 ### Popup not visible
+
 Zed's diagnostics panel may not be detected by accessibility. Try:
+
 - Increase sleep duration after opening panel
 - Check ZedQueryClient.hasVisiblePopup() logic
 
 ### Notes not appearing
+
 - Verify banjo LSP is configured in Zed
 - Check notes.db path matches banjo's expected location
 - Ensure file path in notes.db matches actual demo file path

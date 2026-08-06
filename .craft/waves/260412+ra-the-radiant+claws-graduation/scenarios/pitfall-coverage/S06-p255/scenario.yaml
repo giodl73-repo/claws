@@ -15,7 +15,10 @@ expect:
   prevention: "`claws check --exports` validates every exports map entry against actual dist/ files post-build. CI fails if any entry resolves to a missing file."
 
 simulate:
-  failures: ["Subpath exports in compiler-sdk package.json point to dist/ files that were moved to extracted packages"]
+  failures:
+    [
+      "Subpath exports in compiler-sdk package.json point to dist/ files that were moved to extracted packages",
+    ]
   halt: null
   budget: null
 

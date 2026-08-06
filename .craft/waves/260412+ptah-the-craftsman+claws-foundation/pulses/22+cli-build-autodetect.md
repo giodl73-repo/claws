@@ -4,7 +4,8 @@ slug: cli-build-autodetect
 plan: claws-cli-foundation
 depends_on: [21]
 governing_roles: [craft:navigator, claws:platform-eng]
-scenario_codes: [cli/build-openclaw, cli/build-auto-detect, cli/compile-cache-hit, cli/bypass-active]
+scenario_codes:
+  [cli/build-openclaw, cli/build-auto-detect, cli/compile-cache-hit, cli/bypass-active]
 stage: implementation
 test_tiers:
   L0_unit: 4
@@ -72,6 +73,7 @@ Implement `claws build [target]` which runs the full pipeline (parse -> extract 
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/navigator.md` -- CLI command flow, pipeline threading, progress reporting
 - `.craft/roles/claws/platform-eng.md` -- platform detection, workspace conventions, build infrastructure
 
@@ -93,6 +95,7 @@ npm run build
 ## Review Amendments (R1)
 
 ### C06: Cache in SDK, Not CLI
+
 - [ ] Cache logic lives in `claws-sdk/src/compile/cache.ts`, not CLI
 - [ ] Composite cache key: workspace file hashes + claws-sdk version + claws.json hash + rule registry fingerprint
 - [ ] CLI delegates to `CompilationCache.check()` and `CompilationCache.store()`

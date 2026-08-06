@@ -6,7 +6,7 @@
 
 ## Summary
 
-All 5 dragons are mitigatable within scope, but 3 directly threaten delivery confidence. Wave structure is sound; the gaps are in *what's not explicitly tied down* — finding orphans, missing pre-flight gates, missing contingency paths, missing PR-description language that locks the user-facing pitch.
+All 5 dragons are mitigatable within scope, but 3 directly threaten delivery confidence. Wave structure is sound; the gaps are in _what's not explicitly tied down_ — finding orphans, missing pre-flight gates, missing contingency paths, missing PR-description language that locks the user-facing pitch.
 
 ## Findings
 

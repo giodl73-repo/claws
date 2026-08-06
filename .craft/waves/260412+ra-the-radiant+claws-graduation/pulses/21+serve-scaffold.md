@@ -51,6 +51,7 @@ Business logic (CompilationHost, workspace parsing, chunk assembly) lives in cla
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- monorepo structure, SDK-owns-logic rule, thin HTTP adapter pattern
 - `.craft/roles/claws/gateway-eng.md` -- serve API design, CompilationHost integration, route conventions
 

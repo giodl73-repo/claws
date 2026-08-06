@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "sonos plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "sonos/play"
-    ]
+    "tools": ["sonos/play"]
   }
 }

@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "openhue plugin (home)",
   "contributes": {
-    "tools": [
-      "openhue/set-light",
-      "openhue/list-lights"
-    ],
-    "skills": [
-      "openhue/set-light",
-      "openhue/list-lights"
-    ]
+    "tools": ["openhue/set-light", "openhue/list-lights"],
+    "skills": ["openhue/set-light", "openhue/list-lights"]
   }
 }

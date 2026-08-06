@@ -48,6 +48,7 @@ Configure ESLint `no-restricted-imports` rules in both `claws-sdk` and `claws-cl
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — dependency boundaries, monorepo package isolation rules
 - `.craft/roles/claws/platform-eng.md` — claws sibling architecture, import boundary enforcement
 

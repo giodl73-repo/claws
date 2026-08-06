@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "whisper plugin (media)",
   "contributes": {
-    "tools": [
-      "whisper/transcribe",
-      "whisper/detect-language"
-    ],
-    "skills": [
-      "whisper/transcribe",
-      "whisper/detect-language"
-    ],
-    "workflows": [
-      "whisper-flow.lobster"
-    ],
+    "tools": ["whisper/transcribe", "whisper/detect-language"],
+    "skills": ["whisper/transcribe", "whisper/detect-language"],
+    "workflows": ["whisper-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

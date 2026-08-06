@@ -83,7 +83,7 @@ export const {
   },
   {
     name: "chat", // Prefix for all hooks
-  }
+  },
 );
 ```
 
@@ -119,7 +119,7 @@ const firstItem = useChatValue(
   {
     selector: (items) => items[0],
   },
-  []
+  [],
 );
 
 // With equality function
@@ -128,7 +128,7 @@ const items = useChatValue(
   {
     equalityFn: (a, b) => a.length === b.length,
   },
-  []
+  [],
 );
 ```
 
@@ -474,7 +474,7 @@ export const { useChatStore, useChatValue, ChatProvider } = createAtomStore(
     isOpen: atomWithCookie("chat_isOpen", true), // ✅ Direct assignment
     // ... other state
   },
-  { name: "chat" }
+  { name: "chat" },
 );
 ```
 
@@ -506,7 +506,7 @@ export const { useAppStore, useAppValue, AppProvider } = createAtomStore(
     theme: atomWithLocalStorage("app_theme", "light"),
     // ... other state
   },
-  { name: "app" }
+  { name: "app" },
 );
 ```
 

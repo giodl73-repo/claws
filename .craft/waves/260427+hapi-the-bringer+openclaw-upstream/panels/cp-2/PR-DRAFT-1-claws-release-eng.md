@@ -14,6 +14,7 @@ The fold landed cleanly. The "earns its keep four ways" pitch is the correct fra
 ### HC-WARN 1 — "70 new tests" arithmetic is asserted, never broken down
 
 Line 260 claims `42 lint plan tests + 20 prior PR-1 + 8 absorbed PR-2 = 70`. The math holds (42+20+8=70), and the 42 sub-decomposition (26 L0 + 12 L1 + 2 L2 + 2 L3) is given inline. **But** the 20 "prior PR-1 scope" tests are not enumerated in the PR-1 test plan section (lines 178–236). I count in the test plan:
+
 - Lossless conversion: F-76..F-85, F-98..F-101 → 14
 - Lint surface: 13 codes (one checkbox each) → 13
 - URI vocabulary: F-86..F-97 → 12
@@ -24,16 +25,17 @@ That's ~44 enumerated checkboxes, with 13 of them collapsing the lint surface in
 
 ### HC-WARN 2 — Codemod call-out (line 270) is too vague for a discriminated-union shift
 
-Line 270 says: *"Codemod note in CHANGELOG."* That's the entire migration story for downstream consumers reading `loc.file` directly. For a public-API discriminated union shift, release-eng wants:
+Line 270 says: _"Codemod note in CHANGELOG."_ That's the entire migration story for downstream consumers reading `loc.file` directly. For a public-API discriminated union shift, release-eng wants:
+
 - **Codemod artifact path** (e.g., `packages/openclaw-workspace/codemods/diagnostic-location-v2.ts` or jscodeshift transform)
 - **Deprecation window length** (the "automatically wrapped" claim implies a window — name it: 2 minor versions? until next major?)
 - **Detection script** so downstream consumers know when their code needs the codemod
 
-The current PR-3/PR-5 packages (guardrails, policy) are listed as `peerDependency` consumers (line 79). Those are first-party — Greptile will ask "where's the migration test that proves the wrapped `{kind:'file'}` form is consumed correctly by *external* `loc.file` readers?" Add a "Codemod" subsection under Migration / risk citing the artifact path and window.
+The current PR-3/PR-5 packages (guardrails, policy) are listed as `peerDependency` consumers (line 79). Those are first-party — Greptile will ask "where's the migration test that proves the wrapped `{kind:'file'}` form is consumed correctly by _external_ `loc.file` readers?" Add a "Codemod" subsection under Migration / risk citing the artifact path and window.
 
 ### HC-WARN 3 — `regen-lint-evidence.ts` is not cited in the PR description
 
-`scripts/regen-lint-evidence.ts` is listed as a cp-1 deliverable in `wave.yaml:314` and is referenced in `dispatch_plan` step 2 (`wave.yaml:359`) as the author's pre-push refresh tool. **PR-1 never mentions it.** The 27+ issue table (lines 9–15) cites issue numbers as of 2026-04-28; without naming the script that regenerates these counts, the citations rot silently as upstream issues close/open. Reviewers cannot independently re-run the count. **Fix**: add a footnote to the issue-citation table — e.g., *"Counts regenerated via `packages/openclaw-workspace/scripts/regen-lint-evidence.ts`; re-run before push."*
+`scripts/regen-lint-evidence.ts` is listed as a cp-1 deliverable in `wave.yaml:314` and is referenced in `dispatch_plan` step 2 (`wave.yaml:359`) as the author's pre-push refresh tool. **PR-1 never mentions it.** The 27+ issue table (lines 9–15) cites issue numbers as of 2026-04-28; without naming the script that regenerates these counts, the citations rot silently as upstream issues close/open. Reviewers cannot independently re-run the count. **Fix**: add a footnote to the issue-citation table — e.g., _"Counts regenerated via `packages/openclaw-workspace/scripts/regen-lint-evidence.ts`; re-run before push."_
 
 ### HC-NOTE 1 — Public-API addition list is incomplete vs. `package.json` exports
 
@@ -50,12 +52,12 @@ Line 194 (F-99) says JSONC path "**within 2× stringify on 1MB**; 50ms hard ceil
 
 ## "Earns its keep four ways" overlap check
 
-| Way | Independent? | Notes |
-|---|---|---|
-| 1. Lossless `replaceConfigFile` | YES | The headline; tied to `/ast/jsonc` only |
-| 2. 13-code lint surface | YES | Tied to `/lint`; cites 27+ issues |
-| 3. URI vocabulary in diagnostics | YES | Tied to `/path`; consumed by both lint findings AND doctor (workspace + config) |
-| 4. Cross-OS canonicalize | **WEAKEST** | Tied to `/canonicalize`; "CI matrix proves it" — but the only consumer in PR-1 is the matrix itself, not a real call site. Greptile may flag this as "test infrastructure justifying production code." Mitigated by F-52/F-53 evidence and forward-reference to PR-6 snap content-addressing. |
+| Way                              | Independent? | Notes                                                                                                                                                                                                                                                                                         |
+| -------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Lossless `replaceConfigFile`  | YES          | The headline; tied to `/ast/jsonc` only                                                                                                                                                                                                                                                       |
+| 2. 13-code lint surface          | YES          | Tied to `/lint`; cites 27+ issues                                                                                                                                                                                                                                                             |
+| 3. URI vocabulary in diagnostics | YES          | Tied to `/path`; consumed by both lint findings AND doctor (workspace + config)                                                                                                                                                                                                               |
+| 4. Cross-OS canonicalize         | **WEAKEST**  | Tied to `/canonicalize`; "CI matrix proves it" — but the only consumer in PR-1 is the matrix itself, not a real call site. Greptile may flag this as "test infrastructure justifying production code." Mitigated by F-52/F-53 evidence and forward-reference to PR-6 snap content-addressing. |
 
 The four ways do **not** materially overlap — each maps to a distinct subpath. Way 4 is the only one a reviewer might pick at; the existing "Cross-OS CI matrix proves it" framing is the right defense but could cite the forward consumer (PR-6 snap) explicitly to remove all doubt.
 

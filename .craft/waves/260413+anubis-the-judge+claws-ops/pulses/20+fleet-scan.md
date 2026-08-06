@@ -59,6 +59,7 @@ This scanner is the entry point for all fleet operations — drift detection, br
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/platform-eng.md` — workspace layout, fleet architecture, .claws/ conventions
 - `.craft/roles/claws/ciso.md` — governance classification, compliance requirements
 

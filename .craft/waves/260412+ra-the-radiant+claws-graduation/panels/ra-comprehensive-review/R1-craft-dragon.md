@@ -236,21 +236,21 @@ The R5 invariant is: "no write path can weaken R5 protection." Without a cross-c
 
 ## Summary
 
-| # | Severity | Finding | Pulse/Spec |
-|---|----------|---------|------------|
-| F01 | CRITICAL | Time-travel serves unprotected historical R5 state | P70 / CL-10 |
-| F02 | CRITICAL | Session config edits can widen delegated agent tools beyond delegator | P65 / CL-10 |
-| F03 | HIGH | Cron R3+ pre-auth in HEARTBEAT.md bypasses per-invocation approval | P60,65 / CL-10 |
-| F04 | HIGH | Validation short-circuit masks concurrent violations | P30 / CL-10 |
-| F05 | HIGH | Batch edits validate individually, not jointly | P68 / CL-10 |
-| F06 | HIGH | Onboard API bootstrap gap -- no GovernanceIR at first write | P43 / CL-10 |
-| F07 | HIGH | Loop partial-reject vs chunk full-reject inconsistency | P35 / CL-10 |
-| F08 | HIGH | No scenario for session type change gaining elevated access | P60 / CL-10 |
-| F09 | HIGH | Skill install quarantine window exposes declared-but-unverified risk | P40 / CL-10 |
-| F10 | MEDIUM | Allow-all response computed before recompilation reclassification | P33 / CL-10 |
-| F11 | MEDIUM | External edit violations lost on SSE disconnect | S33 / CL-10 |
-| F12 | MEDIUM | Trust escalation nonce store not persisted across restarts | P39 / CL-10 |
-| F13 | MEDIUM | No cross-cutting R5 invariant scenario across all write paths | CL-10,11 |
+| #   | Severity | Finding                                                               | Pulse/Spec     |
+| --- | -------- | --------------------------------------------------------------------- | -------------- |
+| F01 | CRITICAL | Time-travel serves unprotected historical R5 state                    | P70 / CL-10    |
+| F02 | CRITICAL | Session config edits can widen delegated agent tools beyond delegator | P65 / CL-10    |
+| F03 | HIGH     | Cron R3+ pre-auth in HEARTBEAT.md bypasses per-invocation approval    | P60,65 / CL-10 |
+| F04 | HIGH     | Validation short-circuit masks concurrent violations                  | P30 / CL-10    |
+| F05 | HIGH     | Batch edits validate individually, not jointly                        | P68 / CL-10    |
+| F06 | HIGH     | Onboard API bootstrap gap -- no GovernanceIR at first write           | P43 / CL-10    |
+| F07 | HIGH     | Loop partial-reject vs chunk full-reject inconsistency                | P35 / CL-10    |
+| F08 | HIGH     | No scenario for session type change gaining elevated access           | P60 / CL-10    |
+| F09 | HIGH     | Skill install quarantine window exposes declared-but-unverified risk  | P40 / CL-10    |
+| F10 | MEDIUM   | Allow-all response computed before recompilation reclassification     | P33 / CL-10    |
+| F11 | MEDIUM   | External edit violations lost on SSE disconnect                       | S33 / CL-10    |
+| F12 | MEDIUM   | Trust escalation nonce store not persisted across restarts            | P39 / CL-10    |
+| F13 | MEDIUM   | No cross-cutting R5 invariant scenario across all write paths         | CL-10,11       |
 
 **Critical findings (2)**: F01 and F02 represent invariant-level weaknesses where the R5 chain can be bypassed through historical reads or delegation widening. These must be addressed before implementation.
 

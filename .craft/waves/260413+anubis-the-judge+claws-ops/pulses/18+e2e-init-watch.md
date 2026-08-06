@@ -55,6 +55,7 @@ The e2e test starts from scratch: initializes a workspace with the SOC2 template
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/gateway-eng.md` — e2e test patterns, gateway-sim usage, enforcement verification
 - `.craft/roles/claws/skill-author.md` — SOC2 template expectations, tool governance semantics
 

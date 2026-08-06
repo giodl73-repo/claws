@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "youtube plugin (media)",
   "contributes": {
-    "tools": [
-      "youtube/search",
-      "youtube/get-transcript"
-    ],
-    "skills": [
-      "youtube/search",
-      "youtube/get-transcript"
-    ],
-    "workflows": [
-      "youtube-flow.lobster"
-    ],
+    "tools": ["youtube/search", "youtube/get-transcript"],
+    "skills": ["youtube/search", "youtube/get-transcript"],
+    "workflows": ["youtube-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

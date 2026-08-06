@@ -24,54 +24,90 @@ const root = flag("root", process.cwd());
 // ── Exclusions ────────────────────────────────────────────────────────────────
 
 const EXCLUDED_DIRS = new Set([
-  "node_modules", ".git", "vendor", "target", "dist", "build",
-  "__pycache__", ".next", ".cache", ".turbo", ".nuxt", ".output",
-  ".svelte-kit", ".parcel-cache", "coverage", ".pytest_cache",
-  ".mypy_cache", ".tox", "venv", ".venv", "env", ".env",
-  "bower_components", ".gradle", ".idea", ".vscode",
-  "Pods", "DerivedData", "xcuserdata",
+  "node_modules",
+  ".git",
+  "vendor",
+  "target",
+  "dist",
+  "build",
+  "__pycache__",
+  ".next",
+  ".cache",
+  ".turbo",
+  ".nuxt",
+  ".output",
+  ".svelte-kit",
+  ".parcel-cache",
+  "coverage",
+  ".pytest_cache",
+  ".mypy_cache",
+  ".tox",
+  "venv",
+  ".venv",
+  "env",
+  ".env",
+  "bower_components",
+  ".gradle",
+  ".idea",
+  ".vscode",
+  "Pods",
+  "DerivedData",
+  "xcuserdata",
 ]);
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 async function exists(p) {
-  try { await access(p); return true; } catch { return false; }
+  try {
+    await access(p);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function readJson(p) {
   try {
     return JSON.parse(await readFile(p, "utf-8"));
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 async function readText(p) {
-  try { return await readFile(p, "utf-8"); } catch { return null; }
+  try {
+    return await readFile(p, "utf-8");
+  } catch {
+    return null;
+  }
 }
 
 async function listDir(dir, { includeDotfiles = false } = {}) {
   try {
     const entries = await readdir(dir, { withFileTypes: true });
     if (includeDotfiles) return entries;
-    return entries.filter(e => !e.name.startsWith(".") || e.name === ".github");
-  } catch { return []; }
+    return entries.filter((e) => !e.name.startsWith(".") || e.name === ".github");
+  } catch {
+    return [];
+  }
 }
 
 async function listDirNames(dir) {
   const entries = await listDir(dir);
   return entries
-    .filter(e => e.isDirectory() && !EXCLUDED_DIRS.has(e.name))
-    .map(e => e.name + "/");
+    .filter((e) => e.isDirectory() && !EXCLUDED_DIRS.has(e.name))
+    .map((e) => e.name + "/");
 }
 
 async function listFileNames(dir, opts) {
   const entries = await listDir(dir, opts);
-  return entries.filter(e => e.isFile()).map(e => e.name);
+  return entries.filter((e) => e.isFile()).map((e) => e.name);
 }
 
 async function globShallow(dir, extensions) {
   const files = await listFileNames(dir);
   if (!extensions) return files;
-  return files.filter(f => extensions.some(ext => f.endsWith(ext)));
+  return files.filter((f) => extensions.some((ext) => f.endsWith(ext)));
 }
 
 // ── Project Name ──────────────────────────────────────────────────────────────
@@ -190,29 +226,51 @@ const CONFIG_FILE_FRAMEWORKS = [
 // Sourced from Vercel's frameworks.ts and Netlify's framework-info definitions.
 const NODE_FRAMEWORKS = {
   // Meta-frameworks / SSR
-  "next": "Next.js", "nuxt": "Nuxt", "@sveltejs/kit": "SvelteKit",
-  "@remix-run/node": "Remix", "remix": "Remix", "gatsby": "Gatsby",
-  "astro": "Astro", "@builder.io/qwik": "Qwik",
+  next: "Next.js",
+  nuxt: "Nuxt",
+  "@sveltejs/kit": "SvelteKit",
+  "@remix-run/node": "Remix",
+  remix: "Remix",
+  gatsby: "Gatsby",
+  astro: "Astro",
+  "@builder.io/qwik": "Qwik",
   "@tanstack/react-start": "TanStack Start",
   "@analogjs/platform": "Analog",
   // UI libraries
-  "react": "React", "vue": "Vue", "svelte": "Svelte",
-  "@angular/core": "Angular", "solid-js": "Solid",
-  "preact": "Preact", "lit": "Lit",
+  react: "React",
+  vue: "Vue",
+  svelte: "Svelte",
+  "@angular/core": "Angular",
+  "solid-js": "Solid",
+  preact: "Preact",
+  lit: "Lit",
   // Server frameworks
-  "express": "Express", "fastify": "Fastify", "hono": "Hono",
-  "koa": "Koa", "@nestjs/core": "NestJS", "h3": "H3",
-  "nitro": "Nitro", "@elysiajs/core": "Elysia", "elysia": "Elysia",
+  express: "Express",
+  fastify: "Fastify",
+  hono: "Hono",
+  koa: "Koa",
+  "@nestjs/core": "NestJS",
+  h3: "H3",
+  nitro: "Nitro",
+  "@elysiajs/core": "Elysia",
+  elysia: "Elysia",
   // Build tools
-  "vite": "Vite", "esbuild": "esbuild",
-  "webpack": "Webpack", "turbo": "Turborepo",
+  vite: "Vite",
+  esbuild: "esbuild",
+  webpack: "Webpack",
+  turbo: "Turborepo",
   // Desktop / Mobile
-  "electron": "Electron", "tauri": "Tauri",
-  "expo": "Expo", "react-native": "React Native",
+  electron: "Electron",
+  tauri: "Tauri",
+  expo: "Expo",
+  "react-native": "React Native",
   // Documentation / Static
-  "vitepress": "VitePress", "vuepress": "VuePress",
-  "@docusaurus/core": "Docusaurus", "@storybook/core": "Storybook",
-  "11ty": "Eleventy", "@11ty/eleventy": "Eleventy",
+  vitepress: "VitePress",
+  vuepress: "VuePress",
+  "@docusaurus/core": "Docusaurus",
+  "@storybook/core": "Storybook",
+  "11ty": "Eleventy",
+  "@11ty/eleventy": "Eleventy",
   // E-commerce
   "@shopify/hydrogen": "Hydrogen",
 };
@@ -224,9 +282,14 @@ const NODE_FRAMEWORK_EXCLUSIONS = {
 };
 
 const NODE_TEST_FRAMEWORKS = {
-  "jest": "Jest", "vitest": "Vitest", "mocha": "Mocha",
-  "@playwright/test": "Playwright", "cypress": "Cypress",
-  "ava": "AVA", "tap": "tap", "bun:test": "Bun test",
+  jest: "Jest",
+  vitest: "Vitest",
+  mocha: "Mocha",
+  "@playwright/test": "Playwright",
+  cypress: "Cypress",
+  ava: "AVA",
+  tap: "tap",
+  "bun:test": "Bun test",
 };
 
 async function detectLanguagesAndFrameworks() {
@@ -252,7 +315,7 @@ async function detectLanguagesAndFrameworks() {
       if (allDeps[dep]) {
         // Check exclusion rules before adding
         const exclusions = NODE_FRAMEWORK_EXCLUSIONS[fw];
-        if (exclusions && exclusions.some(ex => allDeps[ex])) continue;
+        if (exclusions && exclusions.some((ex) => allDeps[ex])) continue;
 
         const ver = allDeps[dep].replace(/[\^~>=<]/g, "").split(" ")[0];
         frameworks.push(ver ? `${fw} ${ver}` : fw);
@@ -260,7 +323,10 @@ async function detectLanguagesAndFrameworks() {
     }
 
     for (const [dep, name] of Object.entries(NODE_TEST_FRAMEWORKS)) {
-      if (allDeps[dep]) { testFramework = name; break; }
+      if (allDeps[dep]) {
+        testFramework = name;
+        break;
+      }
     }
   }
 
@@ -378,15 +444,15 @@ async function detectLanguagesAndFrameworks() {
 
   // Layer 3: Config-file-based framework confirmation/detection.
   // Catches frameworks missed by dependency scanning and confirms ambiguous cases.
-  const frameworkNames = new Set(frameworks.map(f => f.split(" ")[0]));
+  const frameworkNames = new Set(frameworks.map((f) => f.split(" ")[0]));
   const uncheckedConfigs = CONFIG_FILE_FRAMEWORKS.filter(
-    ({ framework }) => framework && !frameworkNames.has(framework)
+    ({ framework }) => framework && !frameworkNames.has(framework),
   );
   const configResults = await Promise.all(
     uncheckedConfigs.map(async ({ file, framework }) => ({
       framework,
       found: await exists(join(root, file)),
-    }))
+    })),
   );
   for (const { framework, found } of configResults) {
     if (found && !frameworkNames.has(framework)) {
@@ -443,7 +509,7 @@ async function getStructure() {
 // Helper: check a batch of candidate paths, return those that exist.
 async function filterExisting(candidates) {
   const results = await Promise.all(
-    candidates.map(async (p) => (await exists(join(root, p))) ? p : null)
+    candidates.map(async (p) => ((await exists(join(root, p))) ? p : null)),
   );
   return results.filter(Boolean);
 }
@@ -453,38 +519,67 @@ async function findEntryPoints(languages) {
 
   // Universal entry points — check root and src/ in one batch
   const universalCandidates = [
-    "index.ts", "index.js", "index.mjs", "index.tsx", "index.jsx",
-    "main.ts", "main.js", "main.mjs", "main.tsx", "main.jsx",
-    "app.ts", "app.js", "app.mjs", "app.tsx", "app.jsx",
-    "server.ts", "server.js", "server.mjs",
+    "index.ts",
+    "index.js",
+    "index.mjs",
+    "index.tsx",
+    "index.jsx",
+    "main.ts",
+    "main.js",
+    "main.mjs",
+    "main.tsx",
+    "main.jsx",
+    "app.ts",
+    "app.js",
+    "app.mjs",
+    "app.tsx",
+    "app.jsx",
+    "server.ts",
+    "server.js",
+    "server.mjs",
   ];
 
-  const allCandidates = [
-    ...universalCandidates,
-    ...universalCandidates.map(f => `src/${f}`),
-  ];
+  const allCandidates = [...universalCandidates, ...universalCandidates.map((f) => `src/${f}`)];
 
   // Language-specific candidates — add to the same batch
   if (langSet.has("Node.js") || langSet.has("TypeScript") || langSet.has("Deno")) {
     allCandidates.push(
-      "app/page.tsx", "app/page.jsx", "app/layout.tsx", "app/layout.jsx",
-      "src/app/page.tsx", "src/app/page.jsx", "src/app/layout.tsx", "src/app/layout.jsx",
-      "pages/index.tsx", "pages/index.jsx", "pages/index.js",
-      "src/pages/index.tsx", "src/pages/index.jsx",
+      "app/page.tsx",
+      "app/page.jsx",
+      "app/layout.tsx",
+      "app/layout.jsx",
+      "src/app/page.tsx",
+      "src/app/page.jsx",
+      "src/app/layout.tsx",
+      "src/app/layout.jsx",
+      "pages/index.tsx",
+      "pages/index.jsx",
+      "pages/index.js",
+      "src/pages/index.tsx",
+      "src/pages/index.jsx",
     );
   }
 
   if (langSet.has("Python")) {
     allCandidates.push(
-      "main.py", "app.py", "manage.py", "run.py", "wsgi.py", "asgi.py",
-      "src/main.py", "src/app.py",
+      "main.py",
+      "app.py",
+      "manage.py",
+      "run.py",
+      "wsgi.py",
+      "asgi.py",
+      "src/main.py",
+      "src/app.py",
     );
   }
 
   if (langSet.has("Ruby")) {
     allCandidates.push(
-      "config.ru", "config/routes.rb", "config/application.rb",
-      "bin/rails", "Rakefile",
+      "config.ru",
+      "config/routes.rb",
+      "config/application.rb",
+      "bin/rails",
+      "Rakefile",
     );
   }
 
@@ -503,7 +598,7 @@ async function findEntryPoints(languages) {
   if (langSet.has("Node.js") || langSet.has("TypeScript") || langSet.has("Deno")) {
     const pkg = await readJson(join(root, "package.json"));
     for (const field of [pkg?.main, pkg?.module]) {
-      if (field && !entryPoints.includes(field) && await exists(join(root, field))) {
+      if (field && !entryPoints.includes(field) && (await exists(join(root, field)))) {
         entryPoints.push(field);
       }
     }
@@ -513,7 +608,7 @@ async function findEntryPoints(languages) {
   if (langSet.has("Python")) {
     const srcEntries = await listDir(join(root, "src"));
     const pyMains = await filterExisting(
-      srcEntries.filter(e => e.isDirectory()).map(e => `src/${e.name}/__main__.py`)
+      srcEntries.filter((e) => e.isDirectory()).map((e) => `src/${e.name}/__main__.py`),
     );
     entryPoints.push(...pyMains);
   }
@@ -524,7 +619,7 @@ async function findEntryPoints(languages) {
     if (await exists(cmdDir)) {
       const cmds = await listDir(cmdDir);
       const goMains = await filterExisting(
-        cmds.filter(c => c.isDirectory()).map(c => `cmd/${c.name}/main.go`)
+        cmds.filter((c) => c.isDirectory()).map((c) => `cmd/${c.name}/main.go`),
       );
       entryPoints.push(...goMains);
     }
@@ -541,8 +636,19 @@ async function detectScripts() {
   // package.json scripts
   const pkg = await readJson(join(root, "package.json"));
   if (pkg?.scripts) {
-    const important = ["dev", "start", "build", "test", "lint", "serve",
-                        "preview", "typecheck", "check", "format", "migrate"];
+    const important = [
+      "dev",
+      "start",
+      "build",
+      "test",
+      "lint",
+      "serve",
+      "preview",
+      "typecheck",
+      "check",
+      "format",
+      "migrate",
+    ];
     for (const key of important) {
       if (pkg.scripts[key]) scripts[key] = pkg.scripts[key];
     }
@@ -587,7 +693,9 @@ async function extractTitle(filePath) {
     // Match first ATX heading (# Title)
     const m = content.match(/^#{1,3}\s+(.+)/m);
     return m ? m[1].trim() : null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 async function findDocs() {
@@ -595,7 +703,10 @@ async function findDocs() {
   const paths = [];
 
   function add(path) {
-    if (!seen.has(path)) { seen.add(path); paths.push(path); }
+    if (!seen.has(path)) {
+      seen.add(path);
+      paths.push(path);
+    }
   }
 
   // Root markdown files
@@ -626,7 +737,7 @@ async function findDocs() {
     paths.map(async (p) => {
       const title = await extractTitle(join(root, p));
       return title ? { path: p, title } : { path: p };
-    })
+    }),
   );
 
   return docs;
@@ -639,19 +750,39 @@ async function findTestInfra() {
   const config = [];
 
   // Test directories
-  const testDirs = ["tests", "test", "spec", "__tests__", "e2e",
-                     "integration", "src/tests", "src/test", "src/__tests__"];
+  const testDirs = [
+    "tests",
+    "test",
+    "spec",
+    "__tests__",
+    "e2e",
+    "integration",
+    "src/tests",
+    "src/test",
+    "src/__tests__",
+  ];
   for (const dir of testDirs) {
     if (await exists(join(root, dir))) dirs.push(dir + "/");
   }
 
   // Test config files
   const testConfigs = [
-    "jest.config.js", "jest.config.ts", "jest.config.mjs",
-    "vitest.config.js", "vitest.config.ts", "vitest.config.mts",
-    ".rspec", "pytest.ini", "conftest.py", "setup.cfg",
-    "phpunit.xml", "karma.conf.js", "cypress.config.js", "cypress.config.ts",
-    "playwright.config.js", "playwright.config.ts",
+    "jest.config.js",
+    "jest.config.ts",
+    "jest.config.mjs",
+    "vitest.config.js",
+    "vitest.config.ts",
+    "vitest.config.mts",
+    ".rspec",
+    "pytest.ini",
+    "conftest.py",
+    "setup.cfg",
+    "phpunit.xml",
+    "karma.conf.js",
+    "cypress.config.js",
+    "cypress.config.ts",
+    "playwright.config.js",
+    "playwright.config.ts",
   ];
   const rootFiles = await listFileNames(root, { includeDotfiles: true });
   for (const f of testConfigs) {
@@ -718,8 +849,12 @@ async function findInfrastructure() {
 
   // Environment files (signal for external dependencies)
   const envCandidates = [
-    ".env.example", ".env.sample", ".env.template", ".env.local.example",
-    ".env.development", ".env.production",
+    ".env.example",
+    ".env.sample",
+    ".env.template",
+    ".env.local.example",
+    ".env.development",
+    ".env.production",
   ];
   for (const f of envCandidates) {
     if (rootFiles.includes(f)) envFiles.push(f);
@@ -727,9 +862,12 @@ async function findInfrastructure() {
 
   // Docker / container config (reveals databases, caches, queues)
   const dockerFiles = [
-    "docker-compose.yml", "docker-compose.yaml",
-    "docker-compose.dev.yml", "docker-compose.dev.yaml",
-    "docker-compose.override.yml", "Dockerfile",
+    "docker-compose.yml",
+    "docker-compose.yaml",
+    "docker-compose.dev.yml",
+    "docker-compose.dev.yaml",
+    "docker-compose.override.yml",
+    "Dockerfile",
   ];
   for (const f of dockerFiles) {
     if (rootFiles.includes(f)) configFiles.push(f);
@@ -737,9 +875,16 @@ async function findInfrastructure() {
 
   // Deployment / infrastructure config
   const infraFiles = [
-    "fly.toml", "vercel.json", "netlify.toml", "render.yaml",
-    "railway.json", "app.yaml", "serverless.yml", "sam-template.yaml",
-    "Procfile", "nixpacks.toml",
+    "fly.toml",
+    "vercel.json",
+    "netlify.toml",
+    "render.yaml",
+    "railway.json",
+    "app.yaml",
+    "serverless.yml",
+    "sam-template.yaml",
+    "Procfile",
+    "nixpacks.toml",
   ];
   for (const f of infraFiles) {
     if (rootFiles.includes(f)) configFiles.push(f);
@@ -766,16 +911,18 @@ async function findInfrastructure() {
   for (const envFile of envFiles) {
     const content = await readText(join(root, envFile));
     if (content) {
-      if (/DATABASE_URL|DB_HOST|POSTGRES/i.test(content) && !services.includes("PostgreSQL") && !services.includes("MySQL"))
+      if (
+        /DATABASE_URL|DB_HOST|POSTGRES/i.test(content) &&
+        !services.includes("PostgreSQL") &&
+        !services.includes("MySQL")
+      )
         services.push("Database (see env config)");
-      if (/REDIS/i.test(content) && !services.includes("Redis"))
-        services.push("Redis");
+      if (/REDIS/i.test(content) && !services.includes("Redis")) services.push("Redis");
       if (/STRIPE/i.test(content)) services.push("Stripe");
       if (/OPENAI|ANTHROPIC|CLAUDE/i.test(content)) services.push("AI/LLM API");
       if (/AWS_|S3_/i.test(content) && !services.includes("S3-compatible storage"))
         services.push("AWS/S3");
-      if (/SENDGRID|MAILGUN|POSTMARK|RESEND/i.test(content))
-        services.push("Email service");
+      if (/SENDGRID|MAILGUN|POSTMARK|RESEND/i.test(content)) services.push("Email service");
       if (/TWILIO/i.test(content)) services.push("Twilio");
       if (/SENTRY/i.test(content)) services.push("Sentry");
       if (/AUTH0|CLERK|SUPABASE_/i.test(content)) services.push("Auth service");
@@ -793,25 +940,17 @@ async function findInfrastructure() {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
-  const [
-    name,
-    langInfo,
-    structure,
-    docs,
-    testInfra,
-    scripts,
-    monorepo,
-    infrastructure,
-  ] = await Promise.all([
-    detectName(),
-    detectLanguagesAndFrameworks(),
-    getStructure(),
-    findDocs(),
-    findTestInfra(),
-    detectScripts(),
-    detectMonorepo(),
-    findInfrastructure(),
-  ]);
+  const [name, langInfo, structure, docs, testInfra, scripts, monorepo, infrastructure] =
+    await Promise.all([
+      detectName(),
+      detectLanguagesAndFrameworks(),
+      getStructure(),
+      findDocs(),
+      findTestInfra(),
+      detectScripts(),
+      detectMonorepo(),
+      findInfrastructure(),
+    ]);
 
   const entryPoints = await findEntryPoints(langInfo.languages);
 
@@ -833,21 +972,23 @@ async function main() {
   process.stdout.write(JSON.stringify(inventory) + "\n");
 }
 
-main().catch(err => {
+main().catch((err) => {
   // Always exit 0 with valid JSON, even on error
-  process.stdout.write(JSON.stringify({
-    error: err.message,
-    name: basename(root),
-    languages: [],
-    frameworks: [],
-    packageManager: null,
-    testFramework: null,
-    monorepo: null,
-    structure: { topLevel: [], srcLayout: {} },
-    entryPoints: [],
-    scripts: {},
-    docs: [],
-    testInfra: { dirs: [], config: [] },
-    infrastructure: { envFiles: [], configFiles: [], services: [] },
-  }) + "\n");
+  process.stdout.write(
+    JSON.stringify({
+      error: err.message,
+      name: basename(root),
+      languages: [],
+      frameworks: [],
+      packageManager: null,
+      testFramework: null,
+      monorepo: null,
+      structure: { topLevel: [], srcLayout: {} },
+      entryPoints: [],
+      scripts: {},
+      docs: [],
+      testInfra: { dirs: [], config: [] },
+      infrastructure: { envFiles: [], configFiles: [], services: [] },
+    }) + "\n",
+  );
 });

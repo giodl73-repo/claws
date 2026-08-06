@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "dbt plugin (data)",
   "contributes": {
-    "tools": [
-      "dbt/run-model",
-      "dbt/test"
-    ],
-    "skills": [
-      "dbt/run-model",
-      "dbt/test"
-    ],
-    "workflows": [
-      "dbt-flow.lobster"
-    ],
+    "tools": ["dbt/run-model", "dbt/test"],
+    "skills": ["dbt/run-model", "dbt/test"],
+    "workflows": ["dbt-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

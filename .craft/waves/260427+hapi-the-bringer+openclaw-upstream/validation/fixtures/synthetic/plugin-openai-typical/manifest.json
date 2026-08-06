@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "openai plugin (ai_ml)",
   "contributes": {
-    "tools": [
-      "openai/chat-complete",
-      "openai/embed"
-    ],
-    "skills": [
-      "openai/chat-complete",
-      "openai/embed"
-    ]
+    "tools": ["openai/chat-complete", "openai/embed"],
+    "skills": ["openai/chat-complete", "openai/embed"]
   }
 }

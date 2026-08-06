@@ -53,6 +53,7 @@ This is the diagnostic tool that lets operators understand what changed in gover
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — SDK architecture, compilation pipeline conventions
 - `.craft/roles/claws/gateway-eng.md` — GovernanceIR structure, risk tier semantics, violation model
 

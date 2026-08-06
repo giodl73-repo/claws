@@ -4,15 +4,9 @@
   "version": "0.1.0",
   "description": "percy plugin (testing)",
   "contributes": {
-    "tools": [
-      "percy/snapshot"
-    ],
-    "skills": [
-      "percy/snapshot"
-    ],
-    "workflows": [
-      "percy-flow.lobster"
-    ],
+    "tools": ["percy/snapshot"],
+    "skills": ["percy/snapshot"],
+    "workflows": ["percy-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

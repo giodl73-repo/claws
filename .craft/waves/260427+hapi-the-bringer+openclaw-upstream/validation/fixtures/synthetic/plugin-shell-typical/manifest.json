@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "shell plugin (system)",
   "contributes": {
-    "tools": [
-      "shell/exec"
-    ],
-    "skills": [
-      "shell/exec"
-    ]
+    "tools": ["shell/exec"],
+    "skills": ["shell/exec"]
   }
 }
