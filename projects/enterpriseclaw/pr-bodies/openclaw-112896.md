@@ -6,7 +6,9 @@ Non-normative host follow-on evidence (Microsoft access): https://microsoft.ghe.
 
 Stacked on: https://github.com/openclaw/openclaw/pull/112865
 
-Exact reviewed head: `ebe486dae3cad495c73259c5ee04cc042292fe8b`
+Exact current head: `27ca7ca96736651cbdb57d1bcbb63203aa2a2f76`
+
+Previous full proof head: `ebe486dae3cad495c73259c5ee04cc042292fe8b`
 
 ## What problem this solves
 
@@ -75,6 +77,17 @@ Remove the unapproved ambient restored-admission `OPENCLAW_*` startup carrier wh
 
 Real environment tested:
 Ubuntu 24.04 WSL native checkout at `/root/src/openclaw-112896-restack`, Node `v24.15.0`, pnpm `11.15.1`, exact source head `ebe486dae3cad495c73259c5ee04cc042292fe8b`. The stack contains #112865 exact head `32cd8e68b2d539dc0d6c9b3ef2821c3275961a20` and was rebased onto current `upstream/main` (`874c63318b590a3567a49d36066d79d211f8be08`) to clear the dirty merge state.
+
+2026-08-06 rebase-only update:
+The branch was rebased again onto upstream `main`
+`9c2dbf6500f16cafc6c68edbc3144b9acf06fe56` and pushed to exact head
+`27ca7ca96736651cbdb57d1bcbb63203aa2a2f76`. The conflict resolution preserves
+upstream's exported restored-admission constants and the PR's explicit startup
+handoff / durable readiness evidence. Local `git diff --check upstream/main..HEAD`
+and conflict-marker search passed; local package-backed Vitest could not be
+rerun in the fresh Windows clone because dependency materialization failed on
+private feed auth for `@openclaw/fs-safe@0.5.2`. GitHub CI is the current
+package-materialized validation for this head.
 
 Exact steps or command run after this patch:
 

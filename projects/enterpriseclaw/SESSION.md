@@ -66,7 +66,7 @@
   per namespace. The private
   evidence repository at
   `https://github.com/giodl73-repo/lobster-plugins-and-patches` is published at
-  `3d8cf3a` with five exact portable patches,
+  `d7c4f43` with five exact portable patches,
   six sanitized source-rich excerpts, clean-room contracts, and exact Git tree
   identities for all 19 plugin packages. Gio Della-Libera and Omar Shahine
   approved limited disclosure of bounded Lobster source intended for OpenClaw
@@ -82,7 +82,11 @@
   patch-provenance ledger maps all 31 physical patch files to the 20 merged
   Lobster PRs that first added their current paths and records PR-author counts;
   PR #5053 is explicitly treated as a consolidation rather than proof of
-  original authorship. The repository's
+  original authorship. Omar Shahine's draft RFC #59 is now mapped across the
+  Cron patch family as direct for `0031`, partial for `0004`, `0006`, `0007`,
+  and `0024`, boundary-only for `0008`/`0009`, and out of scope for `0011`;
+  the evidence explicitly does not treat RFC status as shipped replacement
+  code. The repository's
   shareable ProxyPipe decomposition
   now covers all semantic families, carrier mechanics, plugin dependencies,
   durable ownership, and frame-by-frame retirement. Its EnterpriseClaw upstream
@@ -1417,6 +1421,22 @@
   eleven upstream OpenClaw PRs show zero failed checks and zero pending checks;
   all report GitHub merge state `UNSTABLE`, and #104158/#104159/#104160 remain
   draft by policy.
+- 2026-08-06 follow-up: #112896 restored recovery-point admission was restacked
+  again after `upstream/main` advanced to
+  `9c2dbf6500f16cafc6c68edbc3144b9acf06fe56`. A fresh independent clone at
+  `C:\src\openclaw-pr112896-restack-current` rebased the fork branch cleanly
+  after resolving restored-admission constant/startup-type conflicts, preserving
+  upstream's exported constants plus the PR's explicit startup handoff and
+  durable readiness evidence. The branch was pushed only to the fork
+  `giodl73-repo/openclaw:user/giodl/rfc-0013-restored-admission` at
+  `27ca7ca96736651cbdb57d1bcbb63203aa2a2f76` with an exact force-with-lease
+  from `ebe486dae3cad495c73259c5ee04cc042292fe8b`. Local `git diff --check`
+  and conflict-marker search passed. Local package-backed Vitest did not run
+  because fresh dependency materialization failed on private feed auth for
+  `@openclaw/fs-safe@0.5.2`; GitHub CI is the current package-materialized
+  proof and was queued/running at the last live check. The PR body was updated
+  and exact-head ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5207750436`.
 
 ## Session Checkpoints
 
