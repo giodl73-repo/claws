@@ -6,13 +6,15 @@ Non-normative host follow-on evidence (Microsoft access): https://microsoft.ghe.
 
 Stacked on: https://github.com/openclaw/openclaw/pull/112865
 
-Exact current head: `6dae5e228e6106d1029849a47aca90cccbe50be2`
+Exact current head: `0c2ec9392063227c93c1d3ab516d195b2de72c8e`
 
 Previous full proof head: `ebe486dae3cad495c73259c5ee04cc042292fe8b`
 
 Previous review-repair head: `8f64c26f5c35699a2cf8ad4375f55c77a3083b61`
 
 Previous rebase-only head: `fa0e5093debeeacfba48bf7ae82e7a84b82d8ff7`
+
+Previous current-main rebase-only head: `6dae5e228e6106d1029849a47aca90cccbe50be2`
 
 ## What problem this solves
 
@@ -130,6 +132,18 @@ resolved in this rebase. Focused Vitest remains blocked in this clone because
 `node_modules/.bin/vitest` is absent after dependency materialization failed on
 private feed auth; GitHub CI is the current package-materialized validation for
 this exact head.
+
+2026-08-06 fourth rebase-only update:
+The branch was rebased cleanly onto current upstream `main`
+`dcf7fadf2c03d594f455e140194044a492f1fc6e` and pushed to exact head
+`0c2ec9392063227c93c1d3ab516d195b2de72c8e`. `git range-diff
+6dae5e228e6106d1029849a47aca90cccbe50be2~50..6dae5e228e6106d1029849a47aca90cccbe50be2
+upstream/main..HEAD` showed all 50 commits patch-equivalent. Local validation
+in the same fresh Windows clone passed `git diff --check upstream/main..HEAD`
+and a conflict-marker search over all touched files. No source conflicts were
+resolved in this rebase. Focused Vitest remains unavailable in this clone
+because `node_modules/.bin/vitest` is absent; GitHub CI is the current
+package-materialized validation for this exact head.
 
 Exact steps or command run after this patch:
 

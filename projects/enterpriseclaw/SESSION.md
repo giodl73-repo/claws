@@ -1544,6 +1544,30 @@
   GitHub checks are still attaching; at last check only `[code]smith` was
   visible and skipped, and merge state still reported `BEHIND` pending
   recalculation.
+- 2026-08-06 follow-up: GitHub `main` advanced again to
+  `dcf7fadf2c03d594f455e140194044a492f1fc6e`, so the two non-draft active
+  parent PRs were restacked again on fork branches only. #100960 command
+  inventory rebased cleanly in `C:\src\openclaw-pr100960-tools-commands-main`
+  from `321a1a4fed537f4ca530c8134427a415eefe3bba` to
+  `2155498943dd4687d446b59f3df0124bba59ee51`; local `git range-diff` showed
+  all four commits patch-equivalent, `git diff --check upstream/main..HEAD`
+  passed, and conflict-marker search over touched files passed. #112896
+  restored recovery-point admission rebased cleanly in
+  `C:\src\openclaw-pr112896-restack-current` from
+  `6dae5e228e6106d1029849a47aca90cccbe50be2` to
+  `0c2ec9392063227c93c1d3ab516d195b2de72c8e`; local `git range-diff` showed
+  all 50 commits patch-equivalent, `git diff --check upstream/main..HEAD`
+  passed, and conflict-marker search over touched files passed. Focused Vitest
+  remains unavailable in both fresh Windows clones because dependencies are not
+  materialized, so GitHub CI is the package-materialized exact-head proof path.
+  PR bodies were updated and exact-head ClawSweeper re-review requests were
+  posted at
+  `https://github.com/openclaw/openclaw/pull/100960#issuecomment-5208306957`
+  and
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5208318990`.
+  Next upstream action is to watch GitHub checks and ClawSweeper verdicts,
+  then restack dependent draft command PRs only after parent state stabilizes
+  or maintainers ask for exact-head draft proof.
 
 ## Session Checkpoints
 
