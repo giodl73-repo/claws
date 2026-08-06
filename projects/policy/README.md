@@ -18,6 +18,23 @@ same Rendezvous PR plan.
 
 ## Active PRs
 
+### Hosted Control UI Policy Stack
+
+Fork-only draft stack for the hosted Control UI policy/lockdown model. The
+stack is intentionally draft while we validate the contract before upstreaming.
+
+| Repo                  | PR                                                        | Branch                                               | Status                                                                                              | Purpose                                                                                         |
+| --------------------- | --------------------------------------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| giodl73-repo/openclaw | [#196](https://github.com/giodl73-repo/openclaw/pull/196) | `user/giodl/policy-settings-constraints-contract`    | Draft open at `a1ecb05290`; fork automation failures only                                                           | Define the generic settings-constraints policy payload with hosted decision states.             |
+| giodl73-repo/openclaw | [#197](https://github.com/giodl73-repo/openclaw/pull/197) | `user/giodl/policy-settings-constraints-coverage`    | Draft open at `063310945d`; stacked on #196; fork automation failures only                                          | Derive settings constraints from Policy metadata.                                               |
+| giodl73-repo/openclaw | [#198](https://github.com/giodl73-repo/openclaw/pull/198) | `user/giodl/policy-settings-constraints-ui`          | Draft open at `309a305d16`; stacked on #197; fork automation failures only                                          | Teach Control UI settings controls to disable/annotate constrained fields.                      |
+| giodl73-repo/openclaw | [#199](https://github.com/giodl73-repo/openclaw/pull/199) | `user/giodl/policy-settings-constraints-bootstrap`   | Draft open at `20ca37d3e9`; stacked on #198; fork automation failure only                                           | Add the Control UI bootstrap carrier for policy settings constraints.                           |
+| giodl73-repo/openclaw | [#200](https://github.com/giodl73-repo/openclaw/pull/200) | `user/giodl/policy-settings-constraints-enforcement` | Draft open at `847dfed9b5`; stacked on #199; fork automation failure only                                           | Enforce resolved constraints on gateway config writes.                                          |
+| giodl73-repo/openclaw | [#201](https://github.com/giodl73-repo/openclaw/pull/201) | `user/giodl/policy-settings-constraints-runtime`     | Draft open at `7938b17a13`; stacked on #200; substantive checks passing; fork `auto-response`/`label` noise | Let the bundled Policy plugin provide active constraints using the hosted policy decision envelope. |
+| giodl73-repo/openclaw | [#202](https://github.com/giodl73-repo/openclaw/pull/202) | `user/giodl/policy-settings-constraints-examples`    | Draft open at `7ffb5b5348`; stacked on #201; local full test blocked by incomplete install                         | Add executable Policy plugin examples and docs for a hosted Control UI lockdown policy.          |
+
+### Older Policy Queue
+
 | Repo                  | PR                                                        | Branch                                   | Status                                                     | Purpose                                                                                |
 | --------------------- | --------------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | giodl73-repo/openclaw | [#3](https://github.com/giodl73-repo/openclaw/pull/3)     | `policy-sandbox-allow-modes`             | Draft open                                                 | Stack `sandbox.allowModes` on exec approvals as the P1 remainder.                      |

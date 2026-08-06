@@ -19,17 +19,92 @@
 
 ## Current Session
 
-- Last updated: 2026-07-22
+- Last updated: 2026-08-01
 - Last agent: Codex
-- Current focus: Patrick Erichsen (`Patrick-Erichsen`) is the primary reviewer
-  for RFC #42 and the complete correctness-clean implementation stack. Vince and
-  Peter remain requested only on their narrower architecture, Gateway/Control
-  UI, and trusted-automation decision surfaces. Do not start another registry
-  slice until its recorded owner and dependency gates are satisfied. The
+- Next-slice authoring checkpoint (2026-08-01): three clean fork branches are
+  pushed after the exact updater head `00f37e291db8`, without modifying the
+  existing merge branches. `user/giodl/localization-cli-shell-validation`
+  (`d9061fdc64a`) establishes shared `cli-shell` catalog ownership and
+  localizes status/health/tasks numeric validation; 41 focused tests,
+  `tsgo:core`, catalog drift, and surface disposition gates pass.
+  `user/giodl/localization-cli-acp-capability` (`b36478cb042`) stacks on it and
+  localizes ACP provenance/product wrappers plus unknown-capability guidance;
+  149 focused tests and the same gates pass. `user/giodl/localization-cli-agent-guidance`
+  (`10cd4ec7334`) stacks next and localizes bounded pre-dispatch agent/message-file,
+  timeout, session-key, target, and `/compact` guidance while leaving IDs,
+  paths, commands, provider/Gateway diagnostics, and JSON invariant; 85 focused
+  tests and the same gates pass. Do not open or rebase these branches until the
+  foundation/adoption/updater landing order is known; then publish them as
+  `O10-A`, `O11-A`, and `O11-B` with exact dependency bodies.
+- F01 exact-head landing checkpoint (2026-08-01): the official maintainer
+  review/prepare workflow rebased #111541 onto OpenClaw `main` at
+  `065d39067e1`, fixed the repository env-name ratchet by renaming the
+  package-scoped `OPENCLAW_LOCALES`/registry exports, and pushed signed exact
+  head `491a5df89666a7f808a50000ff4494ceb119a319`. The PR body matches that
+  head. Focused registry/catalog/context tests pass 51/51, the package build,
+  `tsgo:core`, formatting, docs, and `OPENCLAW_*` ratchet 517/517 pass. Hosted
+  CI run 30681993117 is green after rerunning one runner-canceled `check-lint`
+  job; the aggregate `openclaw/ci-gate` is green. `scripts/pr-prepare run
+  111541` and `scripts/pr-merge verify 111541` pass. Merge remains waiting on
+  Vince's exact-head `/allow-dependencies-change` authorization and Patrick's
+  stale GitHub changes-requested state; both were requested at comment
+  5149583221, and exact-head ClawSweeper re-review is queued. Do not restack
+  F03 until F01 actually lands.
+- Current focus: RFC 0024 is accepted and merged. Patrick Erichsen
+  (`Patrick-Erichsen`) remains the primary reviewer for the correctness-clean
+  implementation stack. Vince and Peter remain requested only on their narrower
+  Gateway/Control UI and trusted-automation decision surfaces. Land the
+  foundation and PK0 dependencies, supervise the first credentialed refresh,
+  and do not start another registry package if that rollout gate fails. The
   projected 47-entry registry is an editable source audit, not a fixed PR quota
   or a runtime registry.
-- Active branches / PRs: RFC `user/giodl/rfc-0024-localization-runtime`
-  ([#42](https://github.com/openclaw/rfcs/pull/42)); authoring exemplar
+- Review-stack closeout (2026-07-31): all Patrick and ClawSweeper findings were
+  processed, every PR body was republished against its exact head, and the
+  cumulative fork stack was rebased onto OpenClaw `main` at
+  `08305dbb94b0`. The live heads are foundation #111541
+  `5268dee87992`, contributor skill #111543 `9f6a55cd2e3`, authoring
+  exemplar #112784 `e5d59c96ee24`, adoption gate #112801 `af4567408552`,
+  updater #111542 `00f37e291db8`, TUI #111544 `08933a04b588`,
+  Gateway/Control UI #111545 `bed80b5b3f5c`, and wizard migration offer
+  #113427 `a2a7084c8ef5`.
+- Foundation CI closeout: hosted logs exposed two real integration defects.
+  The singular app-recommendation key no longer receives the plural-only
+  `count` parameter, and catalog parse diagnostics now narrow source and
+  candidate failures separately for type-aware lint. The affected 57 wizard
+  and catalog tests, the 22-test catalog suite, focused type-aware oxlint,
+  formatting, and `tsgo:core` pass locally.
+- Foundation merge-window refresh (2026-07-31): #111541 was cleanly rebased
+  onto upstream `main` at `a1b41d5ddb05` and force-pushed with an exact lease at
+  `5268dee8799293f4f43c6cf485584052fb2d3f28`. All 105 focused core, wizard,
+  and watch-path tests pass; formatting, `git diff --check`, and `tsgo:core`
+  pass. The PR body carries the exact head, and Patrick plus Vince were asked
+  for the exact-head correctness review and dependency authorization.
+- Full-stack merge-window restack (2026-07-31): F03, the authoring exemplar,
+  and the adoption gate were restacked in order onto the refreshed foundation;
+  updater, TUI, Gateway/Control UI, and the Chinese-only wizard slice remain
+  independent children of the adoption gate. Exact-lease pushes and PR-body
+  head/dependency updates are live. Local proof passes: 522 authoring tests, 41
+  adoption tests, 215 updater tests, 231 TUI unit tests plus 49 PTY scenarios,
+  71 Gateway/UI tests, and 35 wizard tests; catalog/surface gates, formatting,
+  diff checks, and the declared product typechecks pass. The first TUI PTY run
+  failed at suite startup before running a scenario; an isolated rerun passed
+  all 49. Hosted CI is running, with downstream Dependency Guard failures
+  expected until F01 lands.
+- Current-main authoring merge: upstream refactored workflow test ownership
+  while the stack was under review. The resolution preserves the new
+  `GITHUB_WORKFLOW_TEST_OWNERS` structure, adds only the localization refresh
+  workflow and CI owner edges, and passes 413 focused workflow-routing tests.
+- Remaining landing gates: current hosted CI must finish, Patrick must replace
+  the stale foundation changes-requested review with an exact-head review, and
+  a maintainer must authorize the intentional `intl-messageformat@11.2.12`
+  dependency delta with the repository's current-head dependency command.
+  Dependency Guard is expected to remain red until that authorization. The
+  wizard slice deliberately remains limited to the existing `zh-CN` and
+  `zh-TW` targets; full-wizard/all-locale expansion is deferred until the
+  shared loop succeeds in production.
+- Active branches / PRs: accepted RFC
+  [#42](https://github.com/openclaw/rfcs/pull/42), implementation tracker
+  [#113105](https://github.com/openclaw/openclaw/issues/113105), authoring exemplar
   `user/giodl/localization-authoring-exemplar`
   ([#112784](https://github.com/openclaw/openclaw/pull/112784)); surface gate
   `user/giodl/localization-surface-adoption-gate`
@@ -444,6 +519,287 @@
   schedule-only deferrals do not count. RFC #42's body points at this exact
   head, Patrick remains the primary stack reviewer, and a ClawSweeper re-review
   was requested in comment `5053996993`.
+- PK0 exact-head refresh (2026-07-22): the dependency chain is now F01
+  [#111541](https://github.com/openclaw/openclaw/pull/111541)
+  `8db13b6a306c0559a6a627143058cf349ecdfe74` -> F03
+  [#111543](https://github.com/openclaw/openclaw/pull/111543)
+  `0842d2a659b19db4eb767c1fdd5c9c2255860b49` -> G45/G46
+  [#112784](https://github.com/openclaw/openclaw/pull/112784)
+  `b2f01940080aee32775a02e15941e605970351d0` -> G47
+  [#112801](https://github.com/openclaw/openclaw/pull/112801)
+  `24b0d243d9fccb706bbbb12fcfd2396ba2ab3c8c`. All four branches were rebased
+  in order with guarded force-with-lease pushes and remain draft. Patrick is
+  requested on every PR; no Patrick review has landed yet.
+- PK0 refreshed proof: F01 passed 78 focused tests and the full monorepo build.
+  F03 passed the full documentation gate and explicit glossary comparison. The
+  17-file exemplar passed 23 focused tests, clean and fail-to-repair catalog
+  checks, direct and hosted actionlint, the full documentation gate, and the
+  full monorepo build. The seven-file G47 delta passed the live registry check,
+  14 focused tests, the two-case new-source fail-to-fix proof, actionlint, and
+  the full documentation gate. GitHub reported no failed checks on any exact
+  head at reconciliation time; broad CI remains intentionally skipped for the
+  draft fork PRs.
+- Proof boundary: Blacksmith Testbox rejected the authenticated organization
+  and brokered AWS Crabbox returned HTTP 401, so exact-head code proof used the
+  documented trusted-source WSL-local fallback. The aggregate workflow checker
+  could not bootstrap Zizmor because this WSL image lacks Python `venv`; direct
+  actionlint and hosted Workflow Sanity passed. The credentialed G45/G46
+  translation-and-publication run remains a supervised post-merge acceptance
+  gate because provider and write credentials are deliberately unavailable to
+  pull-request code. Do not start the next owner package if that first trusted
+  run fails.
+- Exact-head re-review comments: F01 `5054099468`, F03 `5054166140`, G45/G46
+  `5054255188`, and G47 `5054279577`.
+- Full original runtime-stack refresh (2026-07-22): final topology inspection
+  found F02/F04/F05 still based on the superseded F01 commit, so their unchanged
+  owner deltas were also rebased onto exact F01 `8db13b6a306`. F02
+  [#111542](https://github.com/openclaw/openclaw/pull/111542) is now
+  `644cde0069b0662b54420098e642db286f322ef1`; 4 adapter and 202 updater tests
+  pass. F04 [#111544](https://github.com/openclaw/openclaw/pull/111544) is now
+  `70bacd6a553853c9880eaa050b37d85e71eab72d`; 61 focused and all 22 PTY tests
+  pass. F05 [#111545](https://github.com/openclaw/openclaw/pull/111545) is now
+  `55dd8249e94f77431fc107e1504a36aaf5b0b773`; 110 focused tests, the Gateway
+  protocol declaration build, and Control UI source verification pass. All
+  changed-file format and diff checks pass. Guarded force-with-lease pushes and
+  exact-head PR-body refreshes completed; re-review comments are F02
+  `5054343634`, F04 `5054348376`, and F05 `5054351044`.
+- RFC acceptance (2026-07-23): Patrick confirmed in Discord that the clarified
+  RFC and rollout model “all makes sense” with a thumbs-up reaction. The
+  acceptance lifecycle created implementation tracker
+  [#113105](https://github.com/openclaw/openclaw/issues/113105), changed RFC
+  0024 to `status: accepted`, linked the tracker, and merged RFC PR
+  [#42](https://github.com/openclaw/rfcs/pull/42) at exact head
+  `267e575a67e74c6181438a74ae6199e7e3313168`. The squash commit on `main` is
+  `faf2a3a5b1acf545a9ceaa80664c0caf8bdabcfb`. GitHub `main` was verified to
+  contain the accepted status and issue URL. This is recorded as Discord
+  product-direction approval, not a fabricated GitHub review.
+- F01 ready-for-review refresh (2026-07-23): PR
+  [#111541](https://github.com/openclaw/openclaw/pull/111541) is ready at exact
+  head `80c986a800af28aea9f8af35d710e6436022b53f`. The follow-up commits replace
+  the earlier custom plural/select evaluator with ICU catalog strings rendered
+  by `intl-messageformat` 11.2.12, matching Patrick's central RFC feedback while
+  retaining OpenClaw's bounded-profile validation, immutable snapshots,
+  fallback, and bidi controls. Exact-head proof passes 45 core, 16 wizard, and
+  19 watch tests (80 total), package build, lockfile supply-chain validation,
+  the full monorepo build, and the three-line source-renderer demonstration.
+  The dependency report records four added FormatJS packages, zero removals,
+  and zero version changes. A fresh type-aware oxlint run is clean after the
+  final static-analysis-only correction. Full current-head GitHub CI is green,
+  including the aggregate `openclaw/ci-gate`; Dependency Guard is the sole
+  expected policy-only failure pending a current admin/secops override requested
+  from `@steipete`. Patrick remains the primary code reviewer. Final exact-head
+  ClawSweeper re-review was acknowledged from comment `5064292765` and is queued
+  behind the intermediate-head review lease.
+- F01 multi-model repair (2026-07-23): GPT-5.5, Claude Opus 4.7, and Gemini 3.1
+  Pro reviewed the 18-file foundation diff. Two GPT findings were reproduced and
+  fixed at `80c986a800a`: process locale resolution again honors first-nonblank
+  `LC_ALL`/`LC_MESSAGES`/`LANG` precedence (including `C`/`POSIX` English), and
+  boolean message parameters are normalized before `intl-messageformat` so
+  `false` cannot disappear and `true` cannot force whole-message fallback.
+  Forty-two focused kernel/Wizard tests, direct runtime probes, formatting,
+  oxlint, and `git diff --check` pass. Full exact-head GitHub CI is pending.
+- Progressive slice guidance refresh (2026-07-24): merged RFC #42 remains
+  unchanged; follow-up RFC PR [#49](https://github.com/openclaw/rfcs/pull/49)
+  is ready at `a6bb5d727543793b03e40ec91c9548017a32aa26` with Patrick requested. It
+  makes checked-in inventory, the public workflow index, nearest owner guidance,
+  and required `CLAUDE.md` aliases part of each adoption slice instead of a
+  final cleanup. The same PR now defines a change-type-to-gate matrix and a
+  two-phase slice lifecycle: source enrollment is not completion while required
+  generated artifacts or named review remain open, and `G47` is explicitly not
+  a repository-wide raw-string scanner. The main RFC and #49 body now share a
+  two-dimensional Mermaid adoption map using searchable implementation names.
+  All 15 current product surfaces have separate boxes and converge on one
+  adoption node. That node fans out to the owner source,
+  `localization/surfaces.json`, and the disposition-specific third record:
+  `localization/catalogs.json`, a named conforming owner pipeline, or an explicit
+  exception rationale. The same slice also shows its public workflow index and
+  nearest `AGENTS.md`/`CLAUDE.md` owner guidance. Shared-catalog and existing
+  owner-pipeline maintenance remain visibly separate.
+  A second, vertical example traces the real `wizard.completion.enable` message
+  from reviewed English through the two registry records, source-PR detection,
+  generated `zh-CN` validation, `catalogFamily`, `LocalizationContext`, and the
+  final parameterized wizard output. It explicitly identifies the checked-in
+  translation as human `bootstrap-reviewed`; the credentialed refresh remains
+  a supervised post-merge rollout gate.
+  The main RFC was reduced from 7,431 to 1,677 words by moving reference-level
+  mechanics behind the normative sidecars. Its end state is now explicit:
+  English plus 21 translation targets across 15 required surfaces means 315
+  target cells, and only 315/315 is product-complete. The prior 313-cell
+  exception was removed from the implementation and coverage sidecars;
+  platform constraints remain visible blockers rather than reducing the goal.
+  The runtime, coverage, and metadata sidecars now open with concise contract
+  and ownership summaries and reflect the RFC's accepted status. The coverage
+  spec enumerates the exact 15 implementation release-row IDs and distinguishes
+  those fixed product rows from finer-grained owner/delivery registries. The
+  main adoption diagram uses the same IDs; 15/15 match
+  `REQUIRED_LOCALIZATION_SURFACES` in the implementation evidence branch.
+  The wizard example now names every Git event: an English-only source PR runs
+  credential-free registration and drift detection; its merge to protected
+  `main` automatically starts the credentialed refresh; automation opens a
+  separate generated translation PR; strict catalog checks and review precede
+  merge and runtime rendering. This matches #112784's warning-only source-drift
+  detection and strict generated-path validation without exposing provider or
+  publisher credentials to untrusted PR code.
+  A FACES role panel using `new-hire`, `power-user`, `platform-eng`,
+  `gateway-eng`, `founder`, `ciso`, and `lorant-reviewer` found four clarity
+  gaps and no architecture contradiction. The applied fixes state that 315 is
+  the target rather than current shipped state, add generation/validation/review
+  failure behavior, preserve distinct conforming owner workflows, and place
+  owner artifact shipment between generated-PR merge and runtime rendering.
+  Durable findings are in `rfc-0024-role-review-2026-07-24.md`.
+  Exact-head validation reports 13 relative links with 0 broken, 47 unique slice
+  IDs, a clean diff check, and two recognized GitHub Mermaid render targets. Codex
+  inspected the full branch and reported no discrete correctness issue, but its
+  wrapper timed out with exit 124, so no clean-exit claim is made. ClawSweeper
+  re-review is queued; Patrick's GitHub review remains the explicit decision on
+  mandatory slice-completion wording. G47
+  [#112801](https://github.com/openclaw/openclaw/pull/112801)
+  is `1a76a2b8cc9b54496ac9acd1a0dbf68d4a9b5d6a`; F02
+  [#111542](https://github.com/openclaw/openclaw/pull/111542) is
+  `6340a469c86e7f27ee6f78d870a4771ab843f0ed`; F04
+  [#111544](https://github.com/openclaw/openclaw/pull/111544) is
+  `a2ae362a6051193f9006d0da2421d216fc1177f4`; and F05
+  [#111545](https://github.com/openclaw/openclaw/pull/111545) is
+  `69e08dd0cf1879f2d1291293dac06d0241ff17da`. Focused runtime tests, registry
+  validation, 6,163-link audit, formatting/lint, and final local Codex reviews
+  pass. Current exact-head OpenClaw CI is otherwise healthy but is blocked by
+  the expected dependency approval and a repository-wide Zizmor baseline on
+  newly changed `main` workflows; localization branches do not change those
+  flagged workflows.
+
+- Hybrid authoring exemplar refresh (2026-07-24): RFC follow-up
+  [#49](https://github.com/openclaw/rfcs/pull/49) is pushed at exact head
+  `0e19881be5a456bfcbf29a81bcc87dbcaf471b08`. It replaces the earlier
+  post-merge-only example with the accepted hybrid contract: drafts run no
+  localization lane; ready forks and non-default-base PRs receive advisory
+  drift detection; ready same-repository PRs targeting the default branch get a
+  blocking, credential-free catalog gate; and a maintainer may dispatch trusted
+  protected-main tooling to refresh the exact PR head in place. The publisher
+  validates an open/ready/same-repo/default-base lease before generation and
+  again before a force-with-lease push, stages only registry-owned generated
+  paths, never executes PR-supplied scripts/actions/dependencies, and never
+  approves or merges. Forks and cross-repository PRs retain the isolated
+  post-merge generated-PR path.
+- The executable exemplar
+  [#112784](https://github.com/openclaw/openclaw/pull/112784) is pushed at exact
+  head `7eb523febadf014dde2a8a28d7c5f4bc1fd71d04`. Its PR body, contributor/CI
+  docs, nearest script guidance, workflow, CLI, and tests describe the same
+  contract. Focused validation passes 238 tests with one Windows symlink test
+  skipped, exact formatting and lint, Bash syntax for all changed workflow
+  blocks, YAML parsing, current-catalog strict check and blocking drift probe,
+  and `git diff --check`. Two independent review findings were fixed: blocking
+  was narrowed to default-base PRs, and draft behavior was aligned with the
+  repository preflight. The final bounded Codex review reported no actionable
+  findings. The first hosted test-type run found optional YAML step inputs were
+  dereferenced without narrowing in the new workflow test; commit
+  `7eb523febadf` uses optional access, and its focused test and formatting proof
+  pass locally; the exact-head hosted `check-test-types` rerun is green. Hosted
+  `actionlint`, `localization-catalogs`, `native-i18n`, and `control-ui-i18n`
+  checks are green; the remaining `dependency-guard` failure
+  is the intentional addition of `localization-core` through `package.json`,
+  `packages/localization-core/package.json`, and `pnpm-lock.yaml`, so it needs a
+  current admin/secops approval rather than a code workaround. Vincent is
+  already requested and is a configured dependency approver; Patrick remains
+  the primary correctness reviewer. The branch is currently behind fast-moving
+  `main`, and other hosted shards are still running.
+
+- Current stack closeout (2026-07-24): PR #112784 remains at exact head
+  `7eb523febadf014dde2a8a28d7c5f4bc1fd71d04`; its accidentally flattened PR
+  body was rebuilt and now records the accepted hybrid contract and exact-head
+  hosted proof. G47 PR #112801 was restacked onto that head and is now
+  `21ac6762497217eca75670207bfa324aa8f0b126`. Review found and fixed an
+  ownership-boundary bug: one surface can no longer exclude another complete
+  declared root through an overlapping `excludedRoots` entry. Its exact-head
+  suite passes 251 tests plus surface/catalog validation, formatting, lint, and
+  diff checks; the final bounded review found no remaining actionable issue.
+  Downstream owner slices were restacked onto the corrected G47 head and pushed
+  with force-with-lease: F02 #111542 is
+  `60e0de9afa141563c51d5d99d3b7ec5be4e7ce5f` (218 focused tests), F04
+  #111544 is `acd71c77f6a1849abbeb5365bd31bf535db2c39d` (169 focused tests),
+  and F05 #111545 is `987100503e47c8f0778893073af6cf66562ceedb`
+  (51 focused tests plus Gateway protocol build). Their final bounded reviews
+  are clean. F03 #111543 remains at
+  `9f0e3e5be859517f0c230e9ddbb974c45d7048a4`; its PR body now makes the
+  progressive acceptance boundary explicit: contributor guidance only, with
+  runtime, registry, gate, and product-coverage work owned by the other named
+  slices. All seven implementation PR bodies are readable and Patrick is
+  requested as the primary reviewer. Current GitHub CI is complete on F01,
+  F03, and #112784 and still rerunning on the four freshly restacked heads.
+  `dependency-guard` is the shared expected policy failure; the additional
+  `dispatch`, `label`, `auto-response`, and `Real behavior proof` results on
+  older heads are repository automation/metadata lanes, not failed localization
+  tests. RFC follow-up #49 remains ready at
+  `0e19881be5a456bfcbf29a81bcc87dbcaf471b08` and is the normative source for
+  the ready-PR in-place refresh contract and the progressive slice roadmap.
+
+- Progressive landing decision (2026-07-24): keep all seven current PR
+  boundaries rather than restacking solely to absorb F03 into the automation
+  exemplar. The priority is a working system in flight: F01 runtime, F03 owner
+  guidance, G45/G46 same-PR authoring/refresh, G47 new-surface enforcement,
+  then the independent updater, TUI, and Gateway/Control UI owner slices.
+  Because these are cumulative contributor-fork PRs whose GitHub base must be
+  upstream `main`, downstream bot reviews currently see inherited prerequisite
+  files. Review and land one dependency, restack the next onto current `main`,
+  then rerun exact-head proof and bot review; do not treat inherited foundation
+  findings as defects in the unique owner delta. Current-head GitHub CI is
+  complete across all seven PRs with only the expected shared
+  `dependency-guard` policy decision on the code stack. ClawSweeper artifacts
+  confirm #112784 and #112801 are structurally correct but require human
+  authorization for the dependency/trusted-workflow boundary; downstream
+  artifacts mostly report the expected cumulative-stack ownership issue.
+  G47 #112801 now includes an inspectable exact-head verbose transcript proving
+  unregistered-source rejection and accepted adopted/deferred/conforming
+  dispositions (12/12 tests), plus a live one-disposition repository check.
+  Tracker #113105 was updated from the obsolete post-merge-only generated-PR
+  story to the accepted hybrid loop, the exact progressive landing/restack
+  order, the same-repository in-place rollout proof, the fork fallback, and the
+  315-cell product target.
+
+- F01 landing started (2026-07-24): #111541 remains mergeable at exact head
+  `80c986a800af28aea9f8af35d710e6436022b53f`. All 142 hosted checks are
+  complete; `openclaw/ci-gate` is green and `dependency-guard` is the sole
+  failure. The current 18-file body already includes the scoped wizard source
+  transcript, 80 focused tests, full build, and dependency report. The visible
+  `status: needs proof` label comes from the superseded 67-file cumulative
+  review rather than this head. A fresh exact-head `@clawsweeper re-review` was
+  acknowledged at comment `5074608769` and remains queued behind bot capacity.
+  A current exact-head dependency-approval request was sent to `@steipete` at
+  comment `5074609836`; Patrick remains requested as primary correctness
+  reviewer. Do not restack F03 until F01 actually lands.
+
+- O08 authoring started (2026-07-24): draft PR
+  [#113427](https://github.com/openclaw/openclaw/pull/113427) is open at exact
+  head `d7813971de1b43b31708a7e04e4d414246aeb440`, stacked from G47
+  `21ac6762497217eca75670207bfa324aa8f0b126`. Its unique 10-file delta adopts
+  four `wizard.postInstallMigration` messages while preserving provider labels,
+  paths, raw errors, commands, prompt defaults, migration execution, and config
+  results. The slice exposed and fixed the source-PR lag contract: reviewed
+  English families remain required, generated locale adapters may be empty
+  until trusted refresh, and runtime uses whole-message English fallback rather
+  than throwing. Fourteen focused tests pass; catalog detection exits 0 and
+  reports exactly the two stale wizard targets. Fresh Codex autoreview found no
+  actionable defect. Hosted changed checks could not acquire an OpenClaw
+  Blacksmith lease; the trusted local fallback reached pre-existing base noise
+  in the env-name ratchet (533 names versus budget 530), and O08 adds no
+  production env name. Tracker #113105 now links the slice. Keep the PR draft
+  and do not request Patrick until G47 lands and O08 is restacked onto main;
+  because this is a fork source PR, generated translations arrive in one
+  trusted post-merge follow-up PR.
+
+- Review and ancestry checkpoint (2026-07-25): no Patrick review, dependency
+  approval, or merge has landed. F01 #111541 remains mergeable at exact head
+  `80c986a800af28aea9f8af35d710e6436022b53f`; `dependency-guard` is its sole
+  substantive failing check, and its current-head ClawSweeper review remains
+  queued. G47 #112801 received an exact-head review that accepts its owner-gate
+  behavior proof and finds no G47-specific defect; it remains blocked on the
+  inherited dependency authorization and trusted-workflow owner decision. O08
+  #113427 received no code finding, remains draft, and needs a real exact-head
+  wizard run showing English output and generated-locale English fallback before
+  it is marked ready. Git ancestry confirms #112784 already contains current
+  F01, and #112801 contains both current F01 and #112784. Rebasing those two
+  before F01 lands would not clear Dependency Guard because their fork PRs are
+  still compared with upstream `main`; restack them mechanically after each
+  prerequisite lands.
 
 ## Resume Checklist
 

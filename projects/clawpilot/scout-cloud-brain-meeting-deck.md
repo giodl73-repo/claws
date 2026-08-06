@@ -71,10 +71,10 @@ June 25, 2026
 
 ## Decisions Needed
 
-| Question | Why it matters |
-| --- | --- |
-| Is Cloud tether separate from hosted OpenClaw capacity? | Lets Desktop stay managed even when hosted agents are unavailable. |
-| Can Desktop operate with 0, 1, or N hosted OpenClaw agents? | Avoids assuming exactly one server-side agent. |
-| Is Desktop a first-class enforcement layer? | Local files, shell, browser, clipboard, and apps need Desktop approval. |
-| What fields identify `agentMemberId`, `agentBinding`, `executionTier`, and `cloudTetherState`? | Required for routing, audit, evals, and user-visible explanations. |
-| Which degraded modes fail closed, defer, retry, or reroute? | Prevents ambiguous behavior during capacity, reset, or offline cases. |
+| Question                                                                                       | Why it matters                                                          |
+| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Is Cloud tether separate from hosted OpenClaw capacity?                                        | Lets Desktop stay managed even when hosted agents are unavailable.      |
+| Can Desktop operate with 0, 1, or N hosted OpenClaw agents?                                    | Avoids assuming exactly one server-side agent.                          |
+| Is Desktop a first-class enforcement layer?                                                    | Local files, shell, browser, clipboard, and apps need Desktop approval. |
+| What fields identify `agentMemberId`, `agentBinding`, `executionTier`, and `cloudTetherState`? | Required for routing, audit, evals, and user-visible explanations.      |
+| Which degraded modes fail closed, defer, retry, or reroute?                                    | Prevents ambiguous behavior during capacity, reset, or offline cases.   |

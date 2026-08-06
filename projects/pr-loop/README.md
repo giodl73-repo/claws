@@ -10,9 +10,10 @@ into mergeable, reviewed, useful PRs.
 
 ## Active Notes
 
-| Area            | File         |
-| --------------- | ------------ |
-| Session handoff | `SESSION.md` |
+| Area              | File         |
+| ----------------- | ------------ |
+| Session handoff   | `SESSION.md` |
+| Live chain fronts | `fronts.md`  |
 
 ## Active Work
 

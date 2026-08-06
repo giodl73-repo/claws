@@ -1,3 +1,14 @@
+# 2026-08-03 v2026.6.33 release-base reconstruction
+
+- Completed `C:\src\openclaw-lobster-release-base` branch
+  `lobster/rebase-v2026.6.33` at `14664331451c5235c053ceb268ba69d91993c06d`.
+- Reconstruction is pinned to signed base `7af0cfc9c5488e03c4e2f528bdc7ac9f7778b35e`
+  and tree `5514e91bc89fe85f3fd61e019a74ac8c83530cb9`.
+- Two empty-target reconstructions produced identical complete JSON, result
+  commit `67aab04e5e1b3c06fcf9f01e176995cf5474c217`, and tree
+  `d63d680645e4c0284436f5fb5b3bb11451b396a7`.
+- No push was performed; target worktree is clean.
+
 # 2026-07-21 PR loop live sweep
 
 - #4648 advanced to mergeable head `194cb8a0c7`. Added direct real-client

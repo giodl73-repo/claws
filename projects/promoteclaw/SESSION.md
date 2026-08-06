@@ -1,5 +1,420 @@
 # PromoteClaw Session Context
 
+## 2026-08-06 OpenClaw 2026.6.11 repair #6839
+
+- Merged current Lobster `main` twice while it advanced and published exact PR
+  head `5fe59d5e8b`. GitHub now reports the draft PR mergeable and conflict-free.
+- Re-derived patches `0002`, `0031`, `0032`, and the final 6.11 correction
+  patch `0033` against pristine `v2026.6.11`; all 33 patches apply cleanly and
+  the pinned turn-timezone, channel-guidance, and Teams-reaction contracts pass.
+- Restored the hosted Control UI Gateway request parenthesis, included the
+  wake-only regression test in its patch, and aligned Channel Participant hook
+  expectations with the new capability projection.
+- Exact patched-source proof passed 2,087 tests across 113 files, including 344
+  msteams tests, using a private WSL temp directory.
+- The PR remains draft with stale requested-change review state. Required
+  Runtime and GitHubPop checks have not attached to `5fe59d5e8b`; let them
+  attach naturally, then obtain exact-head review and human Proof of Presence.
+
+## 2026-08-05 OpenClaw 2026.6.11 repair #6839
+
+- Runtime `175287074` confirmed the duplicate-helper repair but exposed a
+  second branch-owned patch-port defect: patch `0027` injected an obsolete
+  strict-agentic fallback that referenced
+  `nextPlanningOnlyRetryInstruction`,
+  `configuredExecutionContractForLog`, and `STRICT_AGENTIC_BLOCKED_TEXT`,
+  which do not exist in OpenClaw 6.11. The resulting Gateway turn failure
+  cascaded across the eval, git-workspace, Playwright, and Rust E2E lanes.
+- Removed the complete orphaned fallback block and added a patched-tree
+  contract rejecting those pre-6.11 identifiers. Merged current `main`
+  (`9f2109311b`) and published exact head `9c4d209d06`.
+- All 31 patches apply cleanly to pristine `v2026.6.11` after the merge. The
+  required Runtime and GitHubPop contexts have not attached to the new head
+  yet; let them attach naturally and do not manually queue ADO.
+- Runtime `175236387` proved the OpenClaw image and warm-up repairs but exposed
+  a branch-owned Gateway parse failure:
+  `Identifier 'emitSessionsChanged' has already been declared`. Legacy patch
+  `0014` reintroduced an old local helper that OpenClaw 6.11 now imports from
+  `session-change-event.ts`; the failure cascaded across the Runtime E2E fanout.
+- Removed the obsolete helper hunk and added a patched-tree contract rejecting
+  any future local `emitSessionsChanged` declaration. The corrected full
+  patched-source JavaScript lane passes.
+- Merged latest `main` again and published exact head `8c13f4cb1e`; natural
+  Runtime build `175287074` is queued.
+- Earlier repair commit `a574e9cd09` and restacked head `a2ce8a7e4b` remain in
+  history on
+  `promoteclaw/openclaw-2026.6.11-2`.
+- Removed unsupported `agents.defaults.memorySearch.store.path` from both the
+  baked and dynamically generated agent configuration, and added a regression
+  contract for the OpenClaw 6.11 storage shape.
+- Corrected the Teams reaction patch so runtime-call assertions use the same
+  reaction-enabled configuration passed to the action.
+- Current `main` added AgentHarness host-adapter and native Teams audience-route
+  patches based on OpenClaw 2026.5.28. Re-derived both against the exact
+  post-`0028` 6.11 tree and moved the existing 6.11 port correction to `0031`.
+- Green exact-head proof: all 31 patches apply to pristine `v2026.6.11`; the
+  full patched-source JavaScript lane passes; all 12 focused memory-search tests
+  pass; and the production gateway warm-up completes with a 4,265-file compile
+  cache.
+- A later local image assertion saw a sibling `SKILL.md` as mode `0555` instead
+  of `0444`. This is an NTFS/WSL build-context artifact: Git records the file as
+  `100644` on both the PR and `main`, while WSL exposes it as executable before
+  Docker normalization. No unrelated WorkIQ change was added to #6839.
+- Let required `Lobster-Runtime-PullRequest` and `GitOps/GitHubPop` checks
+  attach naturally to the new exact head; do not manually queue ADO.
+
+## 2026-08-05 OpenClaw 2026.6.33 draft #7055
+
+- Opened Lobster draft PR
+  [#7055](https://microsoft.ghe.com/bic/lobster/pull/7055) from
+  `promoteclaw/openclaw-2026.6.33` at `085386f6dd`.
+- Merged current `main` into the draft branch, then repaired review findings
+  and published exact head `9722894b1e`. The conflict resolution kept main's
+  AgentHarness host-adapter and native Teams audience-route patches, renumbered
+  the 6.33-specific follow-up patches to `0031` through `0033`, and re-derived
+  `0029-agent-harness-host-adapter.patch` against the exact post-`0028`
+  `v2026.6.33` tree.
+- The branch is current with `main` and carries 28 retained patches against
+  pristine `v2026.6.33`. Earlier pre-merge proof covered PromoteClaw
+  contracts, patched-source JS tests, the adapter version contract, and diff
+  hygiene.
+- Exact-head proof after the current-main merge and review repair:
+  `git diff --check`, `bash -n
+  src/openclaw_container/scripts/run-scoped-js-unit-tests.sh`, stale dropped
+  patch-name `rg`, and `just openclaw-patches-check` passed. The runtime SDL
+  gate still fails by design because CI/feed policy expects
+  `openclaw@2026.6.11`.
+- Live PR state after push: draft, `MERGEABLE` but `BLOCKED`, review decision
+  `CHANGES_REQUESTED`, and checks had not attached yet to `9722894b1e`.
+- The PR is intentionally blocked: authenticated production image installation
+  from the `Lobster` consumption registry still reports
+  `No matching version found for openclaw@2026.6.33`, although the package is
+  visible in `M365-Lobster-Upstream @Release`.
+- Next action: wait for or repair the downstream feed republish, then rerun the
+  production image, gateway warm-up/startup, and Candidate smoke before marking
+  #7055 ready.
+
+## 2026-08-04 2026.6.33 feed refresh
+
+- Live `M365-Lobster-Upstream` packaging data now shows
+  `openclaw@2026.6.33`, published `2026-08-03T19:03:38Z`, in
+  `Local,Release,quarantine`. Because it is only about 29 hours old, its
+  `Release` visibility indicates an explicit early/day-0 promotion rather than
+  the ordinary seven-day wait.
+- No Lobster PR currently references 2026.6.33.
+- Existing 2026.6.11 draft #6839 remains at `0238fee805`. Runtime build
+  `175185366` failed because the warm-up config uses an invalid
+  `agents.defaults.memorySearch.store` shape and four msteams reaction-action
+  tests expect the pre-6.11 call shape. GitHubPop is also red and review is
+  required.
+- Next recommended action: stop further 6.11 repair churn and create a clean
+  2026.6.33 promotion branch, carrying forward the patch-port lessons and
+  focused regressions from #6839 and #5402.
+
+## 2026-07-29 #5646 Runtime green
+
+- Natural Runtime `174398205` completed with all 31 checks green on exact-head
+  approved, conversation-clean `179a706745`.
+- #5646 now waits only for GitHubPop. Do not change the branch or manually
+  queue ADO.
+
+## 2026-07-29 #5646 approved and Runtime active
+
+- Galin approved exact head `179a706745`; all conversations remain resolved.
+- Natural Runtime `174398205` has 11 green leaves, five build/test leaves in
+  progress, and no failures. Hold and do not manually queue ADO.
+
+## 2026-07-29 #5646 Runtime attached
+
+- Natural Runtime `174398205` attached to mergeable exact head `179a706745`
+  and is queued. GitHubPop is the expected user-presence failure.
+- The PR remains conversation-clean and awaits Galin's exact-head review. Hold
+  the branch and do not manually queue ADO.
+
+## 2026-07-29 #6086 green and #5646 restack
+
+- #6086 natural Runtime `174384781` completed with all 52 checks green on exact
+  head `cba8bf2708`. Only Harry's stale original-head state and GitHubPop remain.
+- Merged current `main` into #5646 after #6086 drained. Resolved the two shared
+  insertion-point conflicts by retaining both Candidate exact-user admission
+  and current-main exec approval mode.
+- Published mergeable exact head `179a706745`. Candidate schema 5/5, Plex
+  routing 11/11, feature flags 132/132, ECS inventory, formatting, and diff
+  checks pass. Fresh Galin review requested; natural Runtime has not attached
+  yet. Do not manually queue ADO.
+
+## 2026-07-29 #6086 Runtime fan-out active
+
+- Natural Runtime `174384781` has 44 green leaves and seven E2E shards still in
+  progress, with no failures.
+- Exact head `cba8bf2708` remains Galin-approved and conversation-clean. Hold
+  for terminal Runtime and Harry's stale-state refresh; do not manually queue.
+
+## 2026-07-29 #6086 exact-head approval
+
+- Galin refreshed approval on exact head `cba8bf2708`; all review conversations
+  remain resolved.
+- Harry's requested-change state remains stale from the original
+  `d7b6f80f19` head. Natural Runtime `174384781` is still queued and GitHubPop
+  remains the expected user-presence failure. Do not churn or manually queue.
+
+## 2026-07-29 #6086 final shared-main restack
+
+- Shared-main projection fix #6192 landed as `875710e8dc`. Merged fresh
+  `origin/main` into the held branch and published exact #6086 head
+  `cba8bf2708`.
+- Focused proof is green: PromoteClaw image promotion 3/3, scheduled job 4/4,
+  FRE 301 16/16, FRE 302 13/13, both Scout CLI regressions 1/1, web projection
+  closed-allowlist regression 1/1, and diff hygiene.
+- Current main has an unrelated Windows-only `dead_code` lint in
+  `confined_manifest_store.rs`; focused Rust behavior was run with lint severity
+  capped. No #6086 code was changed for that issue.
+- Posted exact-head proof and requested Galin/Harry review. Natural required
+  Runtime `174384781` attached and is queued. Do not manually queue ADO.
+
+## 2026-07-29 #6086 shared-main failure hold
+
+- Runtime `174364901` failed on two shared-main conditions: the temporary
+  kill-switch policy gate and the stale 17-field web feature projection count.
+- Current `main` commit `41e8ad9e44` disables the faulty policy gate in #6187.
+  Merged that commit locally, producing prepared #6086 head `690a93703b`; do
+  not push it yet.
+- The projection failure is reproducible on `origin/main`. Approved baseline
+  fix #6192 is open with GitHubPop green and only two Runtime shards still
+  active. Competing fixes #6194 and #6198 are also open.
+- Local proof on `690a93703b` is green: PromoteClaw image promotion 3/3,
+  scheduled job 4/4, FRE 301 16/16, FRE 302 13/13, both Scout CLI regressions
+  1/1, and diff hygiene.
+- After #6192 or an equivalent fix lands, merge fresh `main`, rerun the focused
+  proof, then push one exact head. Do not manually queue ADO.
+
+## 2026-07-29 #6086 second current-main restack
+
+- Moving Lobster `main` made approved head `380510a1cf` conflicting again.
+  Merged latest `origin/main`, preserved the reviewed image-promotion contract
+  assertions across the same test-file rename conflict, and pushed exact head
+  `722ffbfb80`.
+- Focused PromoteClaw, job, FRE 301/302, and Scout CLI contract suites remain
+  green. Posted exact-head proof and requested Galin/Harry review refresh.
+- Prior Runtime `174344958` failed Unit Tests Test 1, Repo Validation, and one
+  git-workspace Playwright lane on the superseded head. Let natural exact-head
+  Runtime attach; do not manually queue ADO.
+
+## 2026-07-29 #6086 review and current-main repair
+
+- Merged current Lobster `main` into
+  `user/giodl/openclaw-image-promotion-cleanup`, resolved the renamed
+  PromoteClaw contract-test conflict, and pushed exact head `380510a1cf`.
+- Addressed both blocking peer-review findings:
+  - added focused Scout CLI tests proving top-level help lists only supported
+    commands and removed OpenClaw/transition commands return top-level usage;
+  - documented that existing 301 still auto-triggers with
+    `validateOnly=false`, so the helper's digest and validation-receipt gates
+    apply only to operator-initiated helper runs, not the unchanged automatic
+    path.
+- Added the suggested image-digest mismatch rejection self-test.
+- Focused PromoteClaw tests, job tests, FRE 301/302 safety suites, and both new
+  Rust tests pass. Posted exact-head proof and requested Harry's re-review.
+- #6086 is now mergeable and conflict-free. Requested-change state remains
+  until re-review; exact-head required Runtime has not attached yet. No ADO run
+  was manually queued.
+
+## 2026-07-28 image-promotion scope correction #6086
+
+- Ryan's merged #6076 restored the pre-#5681 OpenClaw 301/302 deployment
+  definitions after #5681 added a forbidden script task to OneBranch release
+  pools and prematurely removed the 301 OfficialBuild trigger.
+- Opened corrective PR #6086 at `d7b6f80f19`. It leaves both production release
+  YAML files unchanged, replaces Candidate-PlexService staging with exact
+  Official build plus verified ACR digest promotion through existing 301 then
+  302 releases, and removes the nonfunctional Scout role-transition planning
+  commands while retaining the deployed compatibility read path.
+- Added release-pool regressions rejecting script, CmdLine, and PowerShell
+  tasks. Focused PromoteClaw, FRE 301/302, release-alignment, Rust compilation,
+  formatting, and diff checks pass. No ADO run was manually queued.
+- Keep image promotion additive. Preserve existing deployment triggers until
+  the replacement workflow is operationally proven and explicitly cut over.
+
+## 2026-07-27 #5402 current-main refresh
+
+- Merged `origin/main` (`3a4db10e5a`) into
+  `promoteclaw/openclaw-2026.7.1` and pushed exact head `475061cdf9`.
+  Published fixes `43d8d85716` and `2c44ca25c0` remain ancestors.
+- Regenerated `0002-msteams-lobster.patch` against pinned `v2026.7.1`,
+  carrying main's externally-brokered exec/plugin ownership, text-free pending
+  results, and generic-forwarder suppression. Regenerated
+  `0008-cron-passport-execution-fence.patch` with main's stable successor
+  occurrence token and `nextScheduledAtMs` authority request while retaining
+  the 2026.7.1 timer reservation/`lastError` behavior.
+- Green proof: full 12-patch applicability/drift gate; PromoteClaw self-tests;
+  14 generator/release-alignment tests; cron contract suites 7/7 and 13/13; and
+  `just cargo check`. The worktree is clean. PR #5402 is mergeable but blocked
+  by `CHANGES_REQUESTED`; `GitOps/GitHubPop` attached failed and natural
+  `Lobster-Runtime-PullRequest` build `174048235` attached queued/running. No
+  Azure run was manually queued.
+
+## 2026-07-27 Candidate-first safety repair #5681
+
+- Published follow-up `1c5bda8f80` after natural build `173939107` reached
+  terminal state. It adds pure generation-checked Candidate promotion
+  and Previous rollback plans, Scout `openclaw status`, `promote-candidate`, and
+  `rollback-to-previous` planning commands, and explicit former-Active
+  quarantine in rollback output. `--execute` fails closed: the audited
+  `ecsclient 0.2.0` surface is read-only and Lobster has no authenticated ECS
+  generation-CAS authoring API. Diagnostics Redis overrides are not a substitute.
+- Local proof for that follow-up: schema tests 9/9, focused Scout tests 5/5,
+  affected-crate Clippy with `-D warnings`, formatting, and diff hygiene pass.
+  Independent review findings were addressed: fail-closed status stays visible,
+  quarantine is structural rather than prose-only, and docs no longer imply an
+  operator-supplied snapshot proves authoritative freshness.
+- Published build `173939107` finished with 55 green leaves. Its only substantive
+  red leaf is unrelated live-model noise in
+  `managed_workiq_prompts_route_and_suppress_untrusted_m365_instructions_e2e`:
+  the model declined to decompress the DOCX fixture after reporting its exec and
+  code-mode paths unavailable. Replacement build `173943138` attached naturally;
+  no run was manually queued. Exact-head proof comment:
+  https://microsoft.ghe.com/bic/lobster/pull/5681#issuecomment-209733301
+
+- Published exact head `f416f4e272` after integrating current main. OpenClaw
+  Active 301 no longer subscribes to Official-build completion; Active 301/302
+  are manual-only, validate-first, main-artifact guarded, and require explicit
+  `breakGlassActiveDeployment=true` for any direct real deployment.
+- Candidate staging now machine-enforces 301 before 302: island 302 requires a
+  completed/succeeded island 301 Candidate deployment receipt for the same
+  Official build. Application health remains a separately reviewed operator
+  receipt. The governed Scout/admin role-map promotion action is still not
+  implemented and remains required before production routing moves to Candidate.
+- Proof: both PromoteClaw Node self-tests, 37/37 focused Python tests, runtime
+  pipeline SDL validation, and diff hygiene pass. Independent final read-only
+  review found no actionable issue. Natural Runtime build `173939107` attached;
+  no ADO run was manually queued and all PR review threads are resolved.
+- Live safety evidence: #5541 merge `29c628d903` produced successful Official
+  build `173892954` and successful Active-301 release `173897695`, both using the
+  pre-#5402 OpenClaw image. Missing role-map config defaults Active to physical
+  `runtime`; malformed config fails closed to `runtime` with Previous/Candidate
+  unavailable.
+
+## 2026-07-24 guarded Candidate staging draft #5681
+
+- Opened Lobster draft #5681, `user/giodl/promoteclaw-stage-candidate`, stacked
+  directly on slot PR #5541 at commit `b93c754db6`. It adds a plan-only-by-default
+  PromoteClaw helper that verifies an exact successful `main`
+  `Lobster-OpenClaw-Official` run and Candidate EV2 artifact, stages one island
+  at a time, defaults to validate-only, and requires a same-build successful
+  validation receipt before a real Candidate rollout.
+- Generated PromoteClaw PR bodies now include the post-merge Candidate staging
+  receipts. The runbook serializes 301 then 302 and explicitly leaves Active,
+  Previous, the role map, and user routing unchanged. #5646 remains a separate
+  approved per-user flighting proposal and is not a dependency of #5681.
+- Candidate ADO definitions are not registered yet because their YAML is carried
+  by #5541. A live read-only probe against pre-#5541 Official run `173613404` /
+  `26.205.05-openclaw-official` failed closed at the missing Candidate artifact;
+  no release was queued. Local proof: 6 PromoteClaw tests, 10 release-alignment
+  tests, 281 pipeline-SDL tests, Node syntax/self-tests, and diff check green.
+- #5681 was opened as the only natural admission while #5402 run `173710120`
+  remained active; no manual ADO run was queued. At creation GitHub reported the
+  draft mergeable/clean with no checks attached yet.
+
+## 2026-07-24 #5402 CI repair at b85499b557
+
+- Pushed `b85499b557` to fix both branch-owned failures from ADO `173676020`.
+  The OpenClaw production-image adversarial gate now imports the declared
+  `plugin-sdk/config-mutation` named export instead of minified `io.d`, with a
+  pipeline-contract regression. The generated memory-search compatibility
+  default now documents its inherited
+  `FeatureFlags::openclaw_model_config_enabled` off-lever, satisfying the exact
+  production kill-switch policy gate.
+- Green local proof: kill-switch policy and 13 self-tests; pipeline SDL validator
+  and 282 self-tests; shell syntax; diff check. Focused Rust execution could not
+  start without the private Cargo registry token; the Rust delta is comment-only
+  and the prior ADO adapter/Rust suites were green. Two bounded Codex commit
+  reviews timed out without output.
+- Natural replacement ADO `173710120` is queued on the repaired head. No manual
+  run was queued. Proof comment:
+  https://microsoft.ghe.com/bic/lobster/pull/5402#issuecomment-208881766
+
+## 2026-07-24 per-user OpenClaw image flighting draft
+
+- Opened stacked draft Lobster PR #5646, `user/giodl/openclaw-per-user-flighting`,
+  against #5541's `user/giodl/openclaw-dual-image-rollback` branch. Commit
+  `b0e8573be6` proposes explicit-user Candidate admission first, then named
+  cohorts and deterministic percentage expansion.
+- The contract reuses ECS per-user eligibility and #5541's atomic sticky
+  physical-service binding. Each flight is tied to the exact Candidate build
+  and role-map generation; missing, stale, malformed, expired, paused, or
+  unhealthy flight state selects Active.
+- Pause stops new Candidate assignments but does not move existing routes.
+  Real-user rollback requires a state-compatibility or restore receipt because
+  Candidate may mutate OpenClaw state. Promotion stays a separate governed slot
+  lifecycle action.
+- Ryan feedback requested on percentage ownership, sticky subject identity,
+  state-compatibility proof, health thresholds, and pause-versus-abort defaults.
+
+## 2026-07-24 OpenClaw slot terminology and lifecycle decision
+
+- Canonical design note: `openclaw-dual-image-rollback.md` now defines three
+  stable physical PlexService slots with only two production pointers:
+  **Active** and **Previous**. **Candidate** is an unpointed validation state;
+  Retiring, Quarantined, and Free are also lifecycle states rather than routing
+  aliases.
+- Promotion rotates Candidate to Active and the former Active to Previous;
+  rollback selects Previous as Active and quarantines the failed version rather
+  than blindly toggling it into the rollback role. Reclamation is gated by
+  capacity, overlap, route-drain, retention, health/soak, compatibility, and
+  provenance budgets.
+- Lobster #5541 still implements the earlier asymmetric two-slot
+  `primary` / `rollback` contract. Preserve its trusted route pinning and
+  cross-transport proof, but do not describe the branch as implementing the
+  agreed three-slot Active / Previous lifecycle until it is refactored.
+
+## 2026-07-23 #5402 current-main repair ready locally
+
+- Merged `origin/main` (`14f7329c7a`) into the promotion branch and retained
+  the earlier 2026.7.1 cron patcher repair `bf19ea5597`.
+- Local commit `de54eab006` fixes three review findings in the OpenClaw patch
+  stack: nested MCP metadata now uses `pluginMetadata.mcp`, embedded attempts
+  retain `publishedApproval`, and node exec authorization uses the prepared
+  effective cwd instead of authorizing an empty omitted workdir. The exact
+  marker/cwd regressions and both modified suites are included in the Docker
+  full-verification list.
+- Green proof: all 20 patches apply to pristine v2026.7.1; Stage 0/1/2/3 and
+  `cron-contract-check` pass; focused patched-source Vitest passed 191/191;
+  `git diff --check` passes. Docker Desktop is not running, so the local image
+  target could not start. Two `codex review --base origin/main` attempts timed
+  out without returning a result; the three earlier actionable findings were
+  all addressed and directly regression-tested.
+- Do not push #5402 yet: #5541 build `173575231` still has expensive image and
+  test jobs in progress. Its WorkspaceMembers formatter failure is prepared
+  locally as commit `13bf19dcc4` in `C:\src\lobster-openclaw-dual-image`, with
+  `just rust-workspace-fmt-check` green. Push #5541 once the current run drains,
+  then push #5402 after the replacement run is admitted/running so the shared
+  pool is not flooded. No ADO run was manually queued.
+
+## 2026-07-23 #5402 image repair and rollback posture
+
+- Diagnosed old remote-head PullRequest build `173395102`: the OpenClaw image
+  failed only in the post-build cron patcher because compiled OpenClaw 2026.7.1
+  changed the cron publication, job identity, approval visibility, and approval
+  resolver bundle shapes.
+- Local Lobster commit `bf19ea5597` adapts those four anchors and adds exact
+  2026.7.1-shaped regression fixtures. Proof passed against pristine pinned
+  source `2d2ddc43d0dc`, all 20 Lobster patches, a real upstream `pnpm build`,
+  two patcher passes, and `node openclaw.mjs --version` (`OpenClaw 2026.7.1
+(2d2ddc4)`). `just cron-contract-check`, `just openclaw-patches-check`, and
+  `git diff --check` are green. The branch is local-only while both ADO pools
+  remain at zero online agents; do not push/queue into the exhausted pool.
+- Fresh Codex review found and we accepted one publication-notification
+  idempotence issue; the amended commit adds a third-pass regression. The final
+  `codex review --commit HEAD` reported no actionable correctness issues.
+- Rollback decision: do not represent binary-version rollback as a GUID kill
+  switch. `openclaw-pool-reap` only stops the reaper; it cannot select image
+  bytes. The operational rollback is to redeploy the previous immutable
+  Official image tag through the dedicated OpenClaw EV2 release, then reap and
+  verify each Gateway warm pool on that declared tag. Before #5402 is ready,
+  add/retain explicit downgrade evidence that the previous image can boot an
+  OpenClaw home already touched by 2026.7.1; upgrade-only persisted-home smoke
+  is insufficient because OpenClaw performs SQLite/config migrations.
+
 ## 2026-07-22 #5402 OpenClaw 2026.7.1 re-derivation
 
 - Merged current `origin/main`, re-derived
@@ -48,14 +463,15 @@
 
 ## Current Session
 
-- Last updated: 2026-07-21.
+- Last updated: 2026-07-27.
 - Last agent: Copilot CLI.
-- Current focus: Drive the quarantine-cleared OpenClaw `2026.7.1` candidate
-  through patch carry-forward, CI, and acceptance while finishing the daily
-  PromoteClaw pipeline authorization.
+- Current focus: Let #5402's natural required checks attach on the refreshed
+  exact head, then obtain fresh owner review and image/startup acceptance.
 - Active branch / PR: Lobster #5402
   `https://microsoft.ghe.com/bic/lobster/pull/5402`, branch
-  `promoteclaw/openclaw-2026.7.1`, head `f64899b8f4`, draft and mergeable.
+  `promoteclaw/openclaw-2026.7.1`, head `475061cdf9`, mergeable but blocked by
+  `CHANGES_REQUESTED`; `GitOps/GitHubPop` is failed and natural
+  `Lobster-Runtime-PullRequest` build `174048235` is queued/running.
   Lobster #4528 remains open at `2026.6.11`, but is superseded as the promotion
   target and should be used only as a donor for still-relevant patch and CI
   repairs.
@@ -65,11 +481,10 @@
 - Known dirty state: PromoteClaw Lobster worktrees used this session are clean.
   `C:\src\claws-hapi` has this session note update plus unrelated existing
   dirty project notes.
-- Blocking question: #5402 leaves `@openclaw/diagnostics-otel` at `2026.5.28`
-  because `2026.7.1` is not present in the internal Release view. The retained
-  Lobster patches must be audited/re-derived against `v2026.7.1` before image,
-  persisted-home Gateway, brokered Teams/msteams, and version-visibility
-  acceptance.
+- Blocking question: #5402 needs current-head GitHubPop acceptance, fresh owner
+  review, and the natural runtime image/persisted-home/version-visibility
+  acceptance for the intentional `openclaw@2026.7.1` /
+  `@openclaw/diagnostics-otel@2026.5.28` pair.
 
 ## Resume Checklist
 
@@ -335,6 +750,18 @@ src\lobster_runtime\Cargo.toml -- --check`,
   no conflicts, `GitOps/FileAffordance` green, ADO/GitHubPop not reattached yet,
   and review still `CHANGES_REQUESTED`.
 - Define the regular cadence and owner notification format for Omar.
+- Opened ready-for-review Lobster PR #5541 (`0a8eca37b9`) for trusted dual-slot OpenClaw
+  image rollback. Primary `lobsteropenclaw` and rollback
+  `lobsteropenclawrollback` initially import the same `#imageTag#`; GUID
+  `78b0a8d4-6056-4a1a-8a86-3186aa2703a9` selects rollback for newly claimed
+  routes. Route evidence pins the trusted service across HTTP/WS/gRPC and an
+  atomic Redis claim prevents concurrent cold-start slot splits. The separate
+  301/302 releases are manual-only and validate-first; confirm the new Plex
+  identity/service registration and shared-island pool growth limit before the
+  first non-validation rollout. Local proof: `just cargo test -p lobster-plex
+--lib --no-fail-fast` (307 passed, 3 ignored), `just cargo check -p
+lobster-runtime`, `just openclaw-rollback-ev2-check`, and `git diff --check`.
+  Do not manually queue ADO; no checks were attached immediately after opening.
 - Decide whether PromoteClaw should have a small helper script to read the
   feed, compare pins, and produce a PR checklist.
 - Extend PR 4355 or its follow-up to consume the Upstream-First Release Compact:

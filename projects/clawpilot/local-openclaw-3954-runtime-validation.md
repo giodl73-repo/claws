@@ -28,37 +28,37 @@ All targeted commands passed.
 
 ## Evidence Matrix
 
-| Attempt | Result on #3954 | Evidence |
-| --- | --- | --- |
-| Create a bound Local OpenClaw session and send a prompt through the local client | Pass | `routes bound local OpenClaw sessions through the local client`; backend send is not called. |
-| Reload a cold bound Local OpenClaw session and send through the local client | Pass | `routes cold local OpenClaw sessions through the local client after loading`. |
-| Stream assistant output and commit on idle | Pass | `commits idle-flushed local OpenClaw streaming replies to the view`. |
-| Cancel a Local OpenClaw turn | Pass | `cancelTurn propagates local OpenClaw cancellation and waits for terminal release`; backend abort is not called. |
-| Delete an in-flight Local OpenClaw session | Pass | `clears active local OpenClaw state when deleting an in-flight session`. |
-| Use the Scout-managed stdio transport | Pass | `waits for a ready frame`, `frames requests over stdout`, and `emits normalized protocol events`. |
-| Discover a configured Scout-managed sidecar | Pass | `reports a configured Scout-managed sidecar as a local runtime source`. |
-| Preserve Lobster OpenClaw package metadata | Pass | `preserves Lobster OpenClaw container image metadata from the endpoint descriptor`. |
-| Start a configured sidecar | Pass | `starts a configured sidecar with piped stdio and windowless spawn options`. |
-| Construct a stdio client from sidecar streams | Pass | `constructs a stdio client from Scout-managed sidecar streams`. |
+| Attempt                                                                          | Result on #3954 | Evidence                                                                                                         |
+| -------------------------------------------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Create a bound Local OpenClaw session and send a prompt through the local client | Pass            | `routes bound local OpenClaw sessions through the local client`; backend send is not called.                     |
+| Reload a cold bound Local OpenClaw session and send through the local client     | Pass            | `routes cold local OpenClaw sessions through the local client after loading`.                                    |
+| Stream assistant output and commit on idle                                       | Pass            | `commits idle-flushed local OpenClaw streaming replies to the view`.                                             |
+| Cancel a Local OpenClaw turn                                                     | Pass            | `cancelTurn propagates local OpenClaw cancellation and waits for terminal release`; backend abort is not called. |
+| Delete an in-flight Local OpenClaw session                                       | Pass            | `clears active local OpenClaw state when deleting an in-flight session`.                                         |
+| Use the Scout-managed stdio transport                                            | Pass            | `waits for a ready frame`, `frames requests over stdout`, and `emits normalized protocol events`.                |
+| Discover a configured Scout-managed sidecar                                      | Pass            | `reports a configured Scout-managed sidecar as a local runtime source`.                                          |
+| Preserve Lobster OpenClaw package metadata                                       | Pass            | `preserves Lobster OpenClaw container image metadata from the endpoint descriptor`.                              |
+| Start a configured sidecar                                                       | Pass            | `starts a configured sidecar with piped stdio and windowless spawn options`.                                     |
+| Construct a stdio client from sidecar streams                                    | Pass            | `constructs a stdio client from Scout-managed sidecar streams`.                                                  |
 
 ## Recorded Failure / Degraded Cases
 
-| Attempt | Result on #3954 | Evidence |
-| --- | --- | --- |
-| Attach a Scout-managed sidecar before an endpoint descriptor exists | Blocked/degraded | Lifecycle tests prove the sidecar is not attached without a descriptor. |
-| Attach when runtime compatibility fails | Blocked/degraded | `does not construct a client when runtime compatibility fails`; also applies to Scout-managed stdio. |
-| Use a runtime without a manifest | Blocked/degraded | `requires a manifest`; provider status degrades when compatibility fails. |
-| Use an unsupported protocol version | Blocked/degraded | `rejects unsupported protocol versions`. |
-| Claim mismatched containment | Blocked/degraded | `rejects containment claims that do not match observed containment`. |
-| Run when fleet/provider policy blocks Local OpenClaw | Blocked/degraded | Kill switch, missing Desktop node bridge, missing containment, audit unavailable, restart limit, CPU/memory pressure, and battery saver background blocks all pass. |
-| Send while the same Local OpenClaw session is active | Rejected | `local-openclaw-session-busy`. |
-| Send attachments through Local OpenClaw | Rejected | `local-openclaw-attachments-unsupported`; local client is not invoked. |
-| Start when no sidecar command is configured | Not configured | Sidecar manager reports not configured. |
-| Start with malformed sidecar args | Args ignored | Sidecar manager ignores malformed JSON args rather than shell-splitting. |
-| Spawn missing sidecar binary | Failed/degraded | Sidecar manager records spawn error as failed status. |
-| Sidecar exits unexpectedly | Degraded/failed | First unexpected exit consumes restart budget; later exits exhaust budget. |
-| Runtime never sends ready frame | Rejected | Stdio transport times out waiting for ready. |
-| Runtime emits malformed protocol frames | Degraded event, no throw | Stdio transport reports protocol errors without throwing. |
+| Attempt                                                             | Result on #3954          | Evidence                                                                                                                                                            |
+| ------------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Attach a Scout-managed sidecar before an endpoint descriptor exists | Blocked/degraded         | Lifecycle tests prove the sidecar is not attached without a descriptor.                                                                                             |
+| Attach when runtime compatibility fails                             | Blocked/degraded         | `does not construct a client when runtime compatibility fails`; also applies to Scout-managed stdio.                                                                |
+| Use a runtime without a manifest                                    | Blocked/degraded         | `requires a manifest`; provider status degrades when compatibility fails.                                                                                           |
+| Use an unsupported protocol version                                 | Blocked/degraded         | `rejects unsupported protocol versions`.                                                                                                                            |
+| Claim mismatched containment                                        | Blocked/degraded         | `rejects containment claims that do not match observed containment`.                                                                                                |
+| Run when fleet/provider policy blocks Local OpenClaw                | Blocked/degraded         | Kill switch, missing Desktop node bridge, missing containment, audit unavailable, restart limit, CPU/memory pressure, and battery saver background blocks all pass. |
+| Send while the same Local OpenClaw session is active                | Rejected                 | `local-openclaw-session-busy`.                                                                                                                                      |
+| Send attachments through Local OpenClaw                             | Rejected                 | `local-openclaw-attachments-unsupported`; local client is not invoked.                                                                                              |
+| Start when no sidecar command is configured                         | Not configured           | Sidecar manager reports not configured.                                                                                                                             |
+| Start with malformed sidecar args                                   | Args ignored             | Sidecar manager ignores malformed JSON args rather than shell-splitting.                                                                                            |
+| Spawn missing sidecar binary                                        | Failed/degraded          | Sidecar manager records spawn error as failed status.                                                                                                               |
+| Sidecar exits unexpectedly                                          | Degraded/failed          | First unexpected exit consumes restart budget; later exits exhaust budget.                                                                                          |
+| Runtime never sends ready frame                                     | Rejected                 | Stdio transport times out waiting for ready.                                                                                                                        |
+| Runtime emits malformed protocol frames                             | Degraded event, no throw | Stdio transport reports protocol errors without throwing.                                                                                                           |
 
 ## Missing Until #3955 Or Later
 

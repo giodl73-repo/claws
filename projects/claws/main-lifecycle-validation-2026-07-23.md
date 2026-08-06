@@ -47,4 +47,3 @@ Date: 2026-07-23
 - Real ClawHub skill and plugin artifact installation in one Claw lifecycle.
 - Whole-Claw ClawHub search, publication, and installation.
 - Control UI preview/apply/status/remove behavior.
-

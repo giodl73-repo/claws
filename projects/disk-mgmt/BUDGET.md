@@ -5,10 +5,10 @@ checkout slot. Everything else is unallocated and eligible for removal.
 
 ## Reasonable GB targets
 
-| Profile | When to use | Active slots | Per worktree | Active set | Bases floor | Claws checkout cap | Keep free |
-| ------- | ----------- | ------------ | ------------ | ---------- | ----------- | ------------------ | --------- |
-| **light** | This laptop: 1–2 OpenClaw/Lobster projects + merging | 2 project + 1 merge = **3** | ~3 GB | **12 GB** | ~15 GB | **30 GB** | **≥40 GB** (warn &lt;25, critical &lt;15) |
-| **heavy** | Other laptop: 4–5 concurrent stacks + merging | 5 project + 1 merge = **6** | ~3 GB | **24 GB** | ~20 GB | **50 GB** | **≥50 GB** (warn &lt;30, critical &lt;20) |
+| Profile   | When to use                                          | Active slots                | Per worktree | Active set | Bases floor | Claws checkout cap | Keep free                                 |
+| --------- | ---------------------------------------------------- | --------------------------- | ------------ | ---------- | ----------- | ------------------ | ----------------------------------------- |
+| **light** | This laptop: 1–2 OpenClaw/Lobster projects + merging | 2 project + 1 merge = **3** | ~3 GB        | **12 GB**  | ~15 GB      | **30 GB**          | **≥40 GB** (warn &lt;25, critical &lt;15) |
+| **heavy** | Other laptop: 4–5 concurrent stacks + merging        | 5 project + 1 merge = **6** | ~3 GB        | **24 GB**  | ~20 GB      | **50 GB**          | **≥50 GB** (warn &lt;30, critical &lt;20) |
 
 ### Why these numbers
 

@@ -10,15 +10,10 @@
     "roots": ["C:\\src", "C:\\tmp"],
     "worktreeRoot": "C:\\src",
     "perWorktreeBudgetGB": 3.0,
-    "protectedBaseNames": [
-          "claws-hapi",
-          "lobster",
-          "openclaw",
-          "srcopenclaw"
-        ],
-        "optionalLongLivedNotes": [
-          "Allocate clawpilot/clawhub/clawsweeper/resonance/openclaw-rust-node only while actively working them."
-        ]
+    "protectedBaseNames": ["claws-hapi", "lobster", "openclaw", "srcopenclaw"],
+    "optionalLongLivedNotes": [
+      "Allocate clawpilot/clawhub/clawsweeper/resonance/openclaw-rust-node only while actively working them."
+    ]
   },
   "profiles": {
     "light": {

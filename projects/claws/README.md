@@ -14,15 +14,18 @@ Claws are not feeds and not raw workspace templates:
 
 ## Active Notes
 
-| Area                                       | File                                   |
-| ------------------------------------------ | -------------------------------------- |
-| Initial RFC sketch                         | `rfc-sketch.md`                        |
-| Role review                                | `role-review.md`                       |
-| Skill Memory role review                   | `skill-memory-role-review.md`         |
-| Skill Memory support-case proof            | `skill-memory-support-proof.md`       |
-| Skill Memory maintainer brief              | `skill-memory-maintainer-brief.md`    |
-| Skill Memory Lobster plugin POC            | `skill-memory-lobster-poc.md`         |
-| Skill Memory fork PR bodies                | `skill-memory-pr-bodies/`             |
+| Area                                     | File                                   |
+| ---------------------------------------- | -------------------------------------- |
+| Initial RFC sketch                       | `rfc-sketch.md`                        |
+| Role review                              | `role-review.md`                       |
+| Skill Memory role review                 | `skill-memory-role-review.md`          |
+| Skill Memory support-case proof          | `skill-memory-support-proof.md`        |
+| Skill Memory maintainer brief            | `skill-memory-maintainer-brief.md`     |
+| Skill Memory Lobster plugin POC          | `skill-memory-lobster-poc.md`          |
+| Skill Memory fork PR bodies              | `skill-memory-pr-bodies/`              |
+| Standalone Claws CLI PR plan             | `portable-standard-pr-plan.md`         |
+| End-to-end application framework design  | `e2e-application-framework-design.md`  |
+| End-to-end application framework PR plan | `e2e-application-framework-pr-plan.md` |
 
 ## M5 Rendezvous Commitment
 

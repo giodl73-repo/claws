@@ -22,11 +22,35 @@
 
 ## Current Session
 
-- Last updated: 2026-07-15.
+- Last updated: 2026-07-28.
 - Last agent: Copilot.
-- Current focus: Azure `claws-review-bot-job` now re-evaluates unchanged PR
-  heads when an authoritative maintainer responds, while preserving the
-  maintainer-decision approval gate.
+- Current focus: review guidance now checks that dangerous features have
+  independently operable kill switches and that flighting is exceptional,
+  bounded, and removed after stability.
+- 2026-07-28 targeted review on Galin's Lobster PR `#6036`:
+  - Waited for the active scheduled execution to finish, then started targeted
+    execution `claws-review-bot-job-uga7swc` with
+    `tick bic/lobster#6036 --post`, preserving the live job template, env, and
+    secret references.
+  - The execution succeeded and posted architect review comment `210375776` on
+    exact head `b7529b75f5`; no blocking findings were reported.
+  - PR #6036 was already formally approved by the peer reviewer on the same
+    exact head.
+- 2026-07-23 kill-switch and flighting review guidance:
+  - Added non-negotiable W12 for high-blast-radius features that mutate external
+    state, automate actions, affect auth/data, migrate or destroy state, alter
+    routing/providers, create fan-out, or materially increase spend/load.
+  - A valid kill switch must halt the effect without a build/deploy, operate
+    independently from flight assignment, be checked at the effect boundary,
+    document owner/safe state, and prove the disabled path with a test.
+  - Flighting is explicitly by exception: every flight needs a rollout
+    question, bounded cohort, owner, signals, expiry/review date, and removal
+    target.
+  - Stable features must remove flight assignment, fallback branches, and dead
+    code; retaining a mature flight requires current evidence and a near-term
+    removal date.
+  - The guidance does not require flags for ordinary low-risk, revert-trivial
+    changes.
 - 2026-07-16 targeted check on Lobster PR `#4890`:
   - ClawsBot had already re-evaluated Galin's response on exact head
     `1f7e89a022` in comment `203893661`: prior findings F1-F4 are resolved and
@@ -169,11 +193,10 @@
   - Early rule: comment when the classifier adds owner routing, related PR/issue
     context, severity normalization, or a concrete next action; skip when it
     would only restate an existing duplicate/validity/claimed-fix thread.
-- Active branch / PR: local branch
-  `user/giodl/clawpilot-pr-plan-files`; no PR recorded for this bot guidance
-  update.
-- Known dirty state: many pre-existing unrelated hapi notes and scratch files;
-  this update intentionally touched only `packages/claws-review-bot/voice/*`,
+- Active branch / PR: `claws-hapi` local `main`; no PR recorded for the runtime
+  guidance update.
+- Known dirty state: pre-existing unrelated project notes remain; this update
+  touches only `packages/claws-review-bot/voice/{voice,code,watches}.md`,
   `packages/claws-review-bot/tests/voice.test.ts`, and this session note.
 - Blocking question: none.
 

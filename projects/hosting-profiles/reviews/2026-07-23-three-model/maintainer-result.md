@@ -1,4 +1,5 @@
 **Findings**
+
 - `Blocking profiles only`: PR2 is not opt-in. In `openclaw-107765-rebase`, `src/gateway/server.impl.ts:1314-1348` always resolves and passes `activation`, and `src/readiness/conditions.ts:157-189` always adds `RuntimeActivationIdentified` plus top-level `activation` whenever the Gateway runs, even with no selected hosting profile. RFC 0023 says profile selection is opt-in and unprofiled installs keep the universal baseline: `openclaw-rfcs-0023-refresh/rfcs/0023/hosting-profile-v1-spec.md:62-71`, `openclaw-rfcs-0023-refresh/rfcs/0023-standard-hosting-profiles.md:171-205`. This will surprise existing `/readyz`, `/healthz`, and `status --json` consumers because PR2 changes their payload and condition set without any profile config.
 
 - `Blocking profiles only`: the public protocol/schema was not regenerated for that new payload. In `openclaw-107765-rebase`, runtime readiness now emits `activation` from `src/readiness/conditions.ts:29-38` and `src/readiness/conditions.ts:184-189`, but `packages/gateway-protocol/src/schema/snapshot.ts:64-69` still defines the canonical readiness object as only `ready`, `conditions`, `failures`, and `advisories`. `docs/cli/ready.md:25` repeats the old four-field claim. That is a concrete generated-file/doc mismatch for validators and generated clients.
@@ -19,6 +20,7 @@ The repository fit and naming are mostly good. `src/readiness/*`, `src/hosting/*
 The current two-PR sequence is not cleanly reviewable, though, because PR2 is not actually “profile-only”. It changes the canonical readiness payload, docs, schema, CLI surface, and release validation burden for unprofiled installs. It also adds a permanent blocking Docker lane in `openclaw-107765-rebase/package.json:1695`, `scripts/lib/docker-e2e-scenarios.mjs:435-440`, `.github/workflows/openclaw-release-checks.yml:902-903`, and `docs/reference/test.md:162`. That cost is defensible only after the public readiness/profile contract is stable and truly opt-in.
 
 Recommended landing shape:
+
 1. Fix PR1 first as the canonical readiness baseline: enforce provider-output validation, align workspace reasons, and either implement or explicitly relax the promised ordering contract.
 2. Rework PR2 so unprofiled installations stay byte-compatible. If activation/profile reporting is intended to be global, move that decision into PR1 and update the base schema/docs there; otherwise gate it behind selected profiles.
 3. In the profile PR, add machine-readable `profile` and `selectionSource` reporting plus the full activation summary promised by RFC 0023, then regenerate `packages/gateway-protocol` and any generated client/docs in the same change.

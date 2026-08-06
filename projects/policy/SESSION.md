@@ -12,3 +12,22 @@
   and removes the old `needs_refactoring` copy.
 - Active branch: `user/giodl/rfc-0003-policy-conformance` at
   `7770a4b`.
+
+## 2026-07-27 Lobster PR 5945 review
+
+- Reviewed `bic/lobster#5945` at exact head `0b5435373fd1ac8fe8990e2ff6f414b43cfd4567` without posting to the PR or queuing pipelines.
+- The draft changes the baked OpenClaw exec posture to `full/off`, then projects an ECS-selected `allow_all`, `auto`, or `always_ask` mode at Gateway start; it is not yet a user-selectable profile system.
+- Blocking evidence: the PR does not compile because `GatewayStartBody` test construction omits `exec_approval_mode`; required `GitOps/GitHubPop` and `Lobster-Runtime-PullRequest` checks are red.
+- Review findings: malformed-but-valid JSON can be treated as a successfully applied restrictive overlay while leaving `full/off`; no ECS rule resolves to `AlwaysAsk` despite the documented allow-all default; the Auto mapping does not select OpenClaw's normalized auto-review mode; and the gitignored ownership marker prevents reliable release to AllowAll after workspace rehydration.
+- Product recommendation: preserve the runtime projection plumbing but separate policy authority from profile preference. Emergency lockdown overrides all; tenant/operator policy defines allowed modes, default, and whether users may choose; users select only within that envelope; effective posture records provenance. Recommend `Ask` as the initial default, with Auto and Full explicitly enabled.
+- Next: keep the PR draft/request changes, split plumbing from tenant/user profile authority and any default flip, and do not post review feedback until Gio approves the wording.
+
+## 2026-07-31 Hosted Control UI Policy Stack
+
+- Last agent: Codex.
+- Current focus: fork-only draft stack `giodl73-repo/openclaw` #196-#202 for hosted Control UI policy settings constraints.
+- Active branch: `C:\src\openclaw-policy-settings-constraints-contract` on `user/giodl/policy-settings-constraints-examples` at `7ffb5b5348`.
+- Live state: #196-#202 are draft and stacked in order. #202 is mergeable; `Real behavior proof`, `actionlint`, `no-tabs`, and `dispatch` pass after the PR body was updated with exact proof labels. Current failures/noise are fork automation only (`auto-response`, `label`).
+- Cleanup decision: `registerSettingsConstraintsProvider` remains generic but is now bundled-plugin-only, so the first version is effectively first-party Policy-only while leaving a small path to future extensibility.
+- Latest update: #196-#201 were force-restacked with leases so the hosted decision vocabulary lands in the owning PRs: #196 carries the `enabled`/`readOnly`/`disabled` contract, #198 carries shared UI blocking behavior, #199 carries bootstrap normalization, #200 carries server enforcement, and #201 carries the bundled Policy provider bridge.
+- Next: wait for review/ClawSweeper feedback. If reviewers want a smaller upstream path, #202 can stay as fork-only proof while #196-#201 carry the runtime contract.

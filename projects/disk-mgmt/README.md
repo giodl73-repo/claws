@@ -7,20 +7,20 @@ families.
 
 ## Active Notes
 
-| Area | File |
-| ---- | ---- |
-| Session handoff | `SESSION.md` |
-| Laptop GB + slot budgets | `BUDGET.md` |
-| Last inventory | `last-inventory.md` |
-| Last repo inventory | `last-repos.md` |
-| Last worktree status | `last-worktree-status.md` |
-| Last worktree enforce | `last-worktree-enforce.md` |
-| Last merged-PR prune | `last-prune-merged.md` |
-| Last branch prune | `last-prune-branches.md` |
-| Last reclaim run | `last-reclaim.md` |
+| Area                                | File                                               |
+| ----------------------------------- | -------------------------------------------------- |
+| Session handoff                     | `SESSION.md`                                       |
+| Laptop GB + slot budgets            | `BUDGET.md`                                        |
+| Last inventory                      | `last-inventory.md`                                |
+| Last repo inventory                 | `last-repos.md`                                    |
+| Last worktree status                | `last-worktree-status.md`                          |
+| Last worktree enforce               | `last-worktree-enforce.md`                         |
+| Last merged-PR prune                | `last-prune-merged.md`                             |
+| Last branch prune                   | `last-prune-branches.md`                           |
+| Last reclaim run                    | `last-reclaim.md`                                  |
 | Local profile/registry (gitignored) | `local/laptop.json`, `local/active-worktrees.json` |
-| Tool docs | `../../tools/disk-mgmt/README.md` |
-| Related worktree audit | `../prs/worktrees.md` |
+| Tool docs                           | `../../tools/disk-mgmt/README.md`                  |
+| Related worktree audit              | `../prs/worktrees.md`                              |
 
 ## Goals
 
@@ -59,13 +59,13 @@ families.
 
 ## High-value reclaim targets (typical laptop)
 
-| Target | Notes |
-| ------ | ----- |
-| `%TEMP%` | Often largest quick win; use `-TempMaxAgeDays 1` when critical |
-| Docker data | Manual: `docker system prune -af --volumes` after confirming no needed containers |
-| claws worktrees | `prune-merged.ps1 -OnlyPrTerminal` then broader stale-pushed review |
-| Package caches | pnpm/npm/yarn via `reclaim.ps1` |
-| Profile caches | `.codex`, `.copilot`, `.rustup`, `%LOCALAPPDATA%\Packages` — review before delete |
+| Target          | Notes                                                                             |
+| --------------- | --------------------------------------------------------------------------------- |
+| `%TEMP%`        | Often largest quick win; use `-TempMaxAgeDays 1` when critical                    |
+| Docker data     | Manual: `docker system prune -af --volumes` after confirming no needed containers |
+| claws worktrees | `prune-merged.ps1 -OnlyPrTerminal` then broader stale-pushed review               |
+| Package caches  | pnpm/npm/yarn via `reclaim.ps1`                                                   |
+| Profile caches  | `.codex`, `.copilot`, `.rustup`, `%LOCALAPPDATA%\Packages` — review before delete |
 
 ## Safety Rules
 
@@ -78,12 +78,12 @@ families.
 
 ## Families
 
-| Family | Match signals |
-| ------ | ------------- |
+| Family  | Match signals                                                                          |
+| ------- | -------------------------------------------------------------------------------------- |
 | `claws` | openclaw, lobster, claws, clawpilot, resonance, *crawl, clawhub, promoteclaw, typeclaw |
-| `craft` | craftworks, craft-* |
-| `maxim` | MAXIM-agent* |
-| `other` | everything else under configured roots |
+| `craft` | craftworks, craft-*                                                                    |
+| `maxim` | MAXIM-agent*                                                                           |
+| `other` | everything else under configured roots                                                 |
 
 Override roots with `-Roots C:\src,D:\work` on non-default laptops.
 

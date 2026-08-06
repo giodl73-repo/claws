@@ -24,12 +24,50 @@
 
 ## Current Session
 
-- Last updated: 2026-07-10.
+- Last updated: 2026-07-28.
 - Last agent: Copilot CLI.
-- Current focus: Create the project area for a thin shared admin/config UX spine that reuses OpenClaw patterns in Lobster/Scout: descriptor-driven settings, preview-first validation, doctor-style findings, OpenClaw schema/policy bridges, governed save, and Scout CLI dry-run/JSON parity.
-- Active branch / PR: none.
+- Current focus: Evaluate making OpenClaw Control UI the primary Lobster UI, with Lobster-owned hosting/auth and secure lockdown of operator settings.
+- Active branch / PR: Lobster draft PR
+  [bic/lobster#6041](https://microsoft.ghe.com/bic/lobster/pull/6041),
+  `user/giodl/control-ui-hosting-design` at `1613e3d7be`.
 - Known dirty state: `claws-hapi` has this new project area and index updates; `C:\src\lobster` was already on unrelated dirty branch `user/giodl/openclaw-copilot-dev-validation`.
 - Blocking question: none.
+
+## 2026-07-28 Control UI Hosting Audit
+
+- OpenClaw Control UI is a separately built static application served by the
+  Gateway. It supports a configured base path, relative assets, SPA fallback,
+  bootstrap configuration, and a same-path WebSocket endpoint.
+- Lobster already proxies the OpenClaw Gateway protocol at
+  `/v1/openclaw-gateway`, but that runtime route is WebSocket-only. A hosted
+  Control UI proof needs authenticated HTTP proxying for assets/bootstrap plus
+  the existing WebSocket relay, ideally under one same-origin base path.
+- Lobster's current browser transport already identifies as
+  `openclaw-control-ui` and deliberately sends `auth: {}`. The Lobster runtime
+  JWT/origin boundary and loopback-only container Gateway are therefore the
+  existing trust seam; do not add a second browser auth system for the proof.
+- OpenClaw already has coarse `operator.read`, `operator.write`, and
+  `operator.admin` scopes. `config.set`, `config.patch`, and `config.apply` are
+  admin-only, so removing admin yields a credible all-config-read-only mode.
+- Selective settings-page lockdown is not securely supported by route hiding
+  alone. The settings navigation is static, and all config writes share the
+  broad admin scope. A real selective mode must enforce field/source authority
+  in OpenClaw and project that provenance into disabled or hidden UI controls.
+- Reuse the Managed Configuration contract rather than adding Lobster-side
+  payload parsing or a second settings registry: Lobster selects host and
+  operator sources; OpenClaw owns schema meaning, write preflight, authority
+  rejection, effective config, and inspection.
+- Cheapest evidence slice: mount the unmodified Control UI at a Lobster route,
+  proxy HTTP + WebSocket to the selected user's Gateway, issue a non-admin
+  operator connection, and prove config remains inspectable while every config
+  mutation fails server-side. A later slice can render authority-derived locks
+  for selected fields.
+- Published the complete design in Lobster draft PR 6041. Review through the
+  gateway, container/reliability, operator UX, CISO, and founder roles reduced
+  delivery from ten PRs to one disposable proof plus six PRs.
+- The revised series has two generic OpenClaw implementation PRs and four
+  Lobster PRs, with no RFC dependency. A route/mutation manifest and opaque
+  WebSocket ticket are conditional fallback mechanisms, not V1 requirements.
 
 ## Resume Checklist
 
@@ -47,6 +85,13 @@
 
 ## Open Threads
 
+- Decide whether Lobster replaces its current shell at `/` or first mounts the
+  Control UI at a gated route such as `/openclaw`; prefer the gated route for
+  lifecycle, auth, and cold-start proof.
+- Define the minimum authenticated HTTP proxy needed for Control UI static
+  assets and bootstrap config without duplicating Gateway serving behavior.
+- Decide the operator experience for unavailable pages: hide only irrelevant
+  surfaces; show governed settings read-only with lock owner and reason.
 - Decide whether the first Lobster slice starts from Policy UX control registry or a shared admin settings package.
 - Define the descriptor contract: setting id, section, scope, OpenClaw policy/config path, generated value/state, doctor/check id, exposure, apply mode, owner surface, and save contract.
 - Decide how much OpenClaw schema metadata Lobster should consume directly versus snapshot into a Lobster registry.

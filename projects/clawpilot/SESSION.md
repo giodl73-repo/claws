@@ -226,14 +226,14 @@
   user-authored context, `prepare` grants no permissions, executes no local
   action, and referenced commands require separate governed calls. Local proof:
   focused `oxfmt --check`, `node scripts/run-vitest.mjs
-  extensions/node-skills/index.test.ts src/node-host/plugin-node-host.test.ts
-  src/agents/node-plugin-tools.test.ts
-  src/plugins/contracts/plugin-sdk-subpaths.test.ts
-  src/plugins/contracts/plugin-sdk-runtime-api-guardrails.test.ts`, and
+extensions/node-skills/index.test.ts src/node-host/plugin-node-host.test.ts
+src/agents/node-plugin-tools.test.ts
+src/plugins/contracts/plugin-sdk-subpaths.test.ts
+src/plugins/contracts/plugin-sdk-runtime-api-guardrails.test.ts`, and
   `git diff --check`. Worktree uses an ignored local `node_modules` junction to
   hydrated `C:\src\openclaw-feeds-trust-cli-visibility\node_modules`; commit
   was made with `--no-verify` because the commit hook tried to run `pnpm
-  install` and failed non-interactively on the linked worktree. PR:
+install` and failed non-interactively on the linked worktree. PR:
   `https://github.com/openclaw/openclaw/pull/103827`.
 - 2026-07-10 OpenClaw #103827 scope cut: removed `node_skills_prepare` after
   deciding it was heavier than Peter's #90431-style feature slice. New head
@@ -258,7 +258,7 @@
 - 2026-07-10 #4345 review follow-up: Codeclaw requested changes because
   `host=auto` can have ambiguous explicit `host=node` override behavior under
   sandboxed configs. Amended #4345 to head `3612b3c8bf`, title `Default
-  OpenClaw exec to gateway host`: default is now `exec.host="gateway"` instead
+OpenClaw exec to gateway host`: default is now `exec.host="gateway"` instead
   of `auto`, while policy still allows `["gateway","node"]` and keeps
   `ask=always` / `security=allowlist`. This restores ordinary workspace/gateway
   exec without requiring a connected node and preserves explicit paired-node
@@ -301,7 +301,7 @@
   surface lands; comment:
   https://microsoft.ghe.com/bic/lobster/pull/4220#issuecomment-199257946.
 - Latest follow-up: `gim-home/m#4123` (`Node mode commands:
-  custom-tool.invoke for Desktop built-ins`) merged on 2026-07-09 at merge
+custom-tool.invoke for Desktop built-ins`) merged on 2026-07-09 at merge
   commit `22af21b3` from head `cf3b1fd5`. Downstream replacement node-mode
   stack remains open and clean after the merge: #4389 `1d0a9873` system.run
   governance, #4390 `8a867eab` catalog/result-trust, #4391 `27e374af` draft MCP
@@ -326,7 +326,7 @@
   and reconciles XPIA trust by stating `skills.read` / `skills.prepare` return
   user-authored skill text, not system-tier instruction. Validation passed
   focused `oxfmt --check`, `git diff --check`, and `codex review
-  --uncommitted` with no actionable docs findings. Posted response:
+--uncommitted` with no actionable docs findings. Posted response:
   `https://github.com/gim-home/m/pull/4438#issuecomment-4928592036`.
   Live #4438 after push: head `d26156d4`, checks running / merge `BLOCKED`.
 - Latest follow-up: Authored next Scout CLI stack slice `gim-home/m#4453`
@@ -342,7 +342,7 @@
   events, writes, or real Desktop IPC routing. Validation passed manifest
   verifier, verifier tests, focused Scout CLI Vitest (4 files / 34 tests), Scout
   CLI typecheck, focused `oxfmt --check`, `git diff --check`, and final `codex
-  review --base user/giodl/scout-cli-status-preflight-upstream` after fixing a
+review --base user/giodl/scout-cli-status-preflight-upstream` after fixing a
   real P2 by validating `/status` payload data before treating it as
   `ScoutCliStatus`. Live #4453 after push: open, head `ff1eb91d`, checks queued
   / `UNSTABLE`.
@@ -374,7 +374,7 @@
   Head `88c1ab38` now skips non-string/empty refs after recording the schema
   error and adds a regression in `verify-scout-cli-manifest.test.cjs`.
   Validation passed `node scripts\verify-scout-cli-manifest.mjs`, `node --test
-  scripts\verify-scout-cli-manifest.test.cjs`, `git diff --check`, and final
+scripts\verify-scout-cli-manifest.test.cjs`, `git diff --check`, and final
   `codex review --uncommitted`. Pushed to the fork PR head and posted #3786
   comment `https://github.com/gim-home/m/pull/3786#issuecomment-4921208936`.
   Live #3786 after push: head `88c1ab38`, checks running, merge `BLOCKED` due
@@ -387,14 +387,14 @@
   then #4377 was expanded to cover read-only dispatch commands `scout status`,
   `scout doctor`, `scout auth status`, `scout sessions list`, `scout mcp list`,
   and `scout skills list`; #4398 was closed as superseded. #4377 is now `Add
-  Scout CLI read-only companion dispatch`, head `bc4acb61`, retargeted to #3828,
+Scout CLI read-only companion dispatch`, head `bc4acb61`, retargeted to #3828,
   with checks requeued after retarget. Validation passed manifest verifier,
   verifier tests, focused Scout CLI Vitest (3 files / 28 tests), Scout CLI
   typecheck, focused `oxfmt --check`, `git diff --check`, and final
   `codex review --base user/giodl/scout-cli-entrypoint` with no actionable
   findings.
 - Latest follow-up: Opened Lobster stacked PR `bic/lobster#4220` (`Add
-  node-skills bridge plugin`) from worktree
+node-skills bridge plugin`) from worktree
   `C:\src\lobster-clawpilot-node-commands`, branch
   `user/giodl/lobster-node-skills-plugin`, head `b8f53ce571`, stacked on
   Lobster #4206 (`user/giodl/clawpilot-node-command-allowlist`). Scope: adds
@@ -442,7 +442,7 @@
   only skill instructions. Validation passed hydrated-toolchain focused Vitest (4
   files / 62 tests), focused `oxfmt --check`, `git diff --check`,
   changed-file type-error filtering, and final `codex review --base
-  user/giodl/node-mode-skills-catalog-read` with no actionable issues. The stack
+user/giodl/node-mode-skills-catalog-read` with no actionable issues. The stack
   was also back-propagated so #4438 architecture uses `skills.prepare` at head
   `15d16813`, and #4440 was rebased on it at head `795d45d5`.
   Full `tsc --noEmit` in the fresh worktree still reports unrelated current-main
@@ -476,7 +476,7 @@
   authoritative architecture doc matches the wire contract. Validation passed
   hydrated-toolchain focused Vitest (4 files / 57 tests after final fix),
   focused `oxfmt --check`, `git diff --check`, and final `codex review --base
-  origin/user/giodl/node-mode-skills-architecture` with no actionable issues.
+origin/user/giodl/node-mode-skills-architecture` with no actionable issues.
   Full `tsc --noEmit` in the fresh worktree still reports unrelated current-main
   telemetry type errors (`TelemetryErrorBridge.tsx`, `TelemetryErrorRouter.tsx`);
   filtering showed no errors in changed files. Direct `pnpm exec` in the fresh
@@ -521,15 +521,15 @@
   user-deny, timeout, unknown-tool preflight, scalar `toolArgs` wrapping, and
   bridge-facing sanitization. Validation passed focused node Vitest (6 files /
   896 tests), full `pnpm run typecheck`, focused `oxlint`, focused `oxfmt
-  --check`, `git diff --check`, pre-commit lint-staged, and `codex review
-  --uncommitted` with no actionable bugs. Replayed downstream replacements:
+--check`, `git diff --check`, pre-commit lint-staged, and `codex review
+--uncommitted` with no actionable bugs. Replayed downstream replacements:
   #4389 `1d0a98736`, #4390 `8a867eab`, #4391 `27e374af` draft,
   #4392 `82345e67` draft, #4393 `4e3ee691` draft, and #4394 `83a66d00`.
   #4394 auto-closed during replay but reopened successfully. Posted #4123
   response: `https://github.com/gim-home/m/pull/4123#issuecomment-4916719403`.
 - Latest follow-up: Continued the Scout Desktop CLI stack after #4377 by
   replaying old fork PR #4 as new upstream PR `gim-home/m#4398` (`Add Scout CLI
-  companion dispatch contract`). Branch
+companion dispatch contract`). Branch
   `user/giodl/scout-cli-companion-contract-upstream`, head `3ed8e575`, is
   stacked on #4377 `user/giodl/scout-cli-status-preflight-upstream`. Scope:
   mockable `ScoutCliCompanionClient`, `dispatchCommand()`, manifest lookup,
@@ -538,7 +538,7 @@
   behavior. No real companion server, Desktop IPC transport, auth token surface,
   UI behavior, or runtime command implementation beyond status preflight.
   Validation passed `node scripts\verify-scout-cli-manifest.mjs`, `node --test
-  scripts\verify-scout-cli-manifest.test.cjs`, focused Scout CLI Vitest (3 files
+scripts\verify-scout-cli-manifest.test.cjs`, focused Scout CLI Vitest (3 files
   / 21 tests), Scout CLI `tsc --noEmit`, focused `oxfmt --check`, and
   `git diff --check`. Because `C:\src\clawpilot-cli-stack` node_modules remains
   unreliable after earlier registry tarball failures, focused Vitest/typecheck/
@@ -588,7 +588,7 @@
   `818282574` -> #4391 `1d3ff8645` draft -> #4392 `3ce972eef` draft ->
   #4393 `4df0faace` draft -> #4394 `40604943`. Validation passed focused node
   Vitest (5 files / 98 tests), full `pnpm run typecheck`, focused `oxfmt
-  --check`, `git diff --check`, and no conflict markers or stale
+--check`, `git diff --check`, and no conflict markers or stale
   `url.openExternal`/app/local-app references in common/gateway/docs surfaces.
 - Latest follow-up: Addressed Lorant's final #4088 re-request about the
   trusted-host residual-risk backstop. New #4088 head `d76b0b448`
@@ -597,7 +597,7 @@
   generic 200-character collapsed preview. Added a renderer test with a long
   trusted-origin `github.com/.../issues/new?...&body=` URL and suspicious tail,
   asserting the full URL/tail is present inline before approval and no `Expand
-  details` gate is needed. Updated `docs/architecture/25-xpia-defense.md` to
+details` gate is needed. Updated `docs/architecture/25-xpia-defense.md` to
   state that URL cards render the full value inline because the origin gate does
   not inspect path/query. Validation passed focused unit Vitest
   (`PermissionCard.test.tsx`, 72 tests), full `pnpm run typecheck`, focused
@@ -614,7 +614,7 @@
   trusted-origin GitHub URL and suspicious query tail. Validation passed
   `pnpm --dir C:\src\clawpilot-review-4088-edge run build:vite` and
   `pnpm --dir C:\src\clawpilot-review-4088-edge test:e2e:file
-  e2e/gateway-node-browser-long-url.capture.test.ts --reporter=line` (1
+e2e/gateway-node-browser-long-url.capture.test.ts --reporter=line` (1
   passed). Artifact for drag/drop:
   `C:\src\clawpilot-proof-images\node-mode-pr4088-browser-long-url\pr4088-browser-long-url-approval.png`;
   summary JSON:
@@ -623,7 +623,7 @@
   `https://github.com/gim-home/m/pull/4088#issuecomment-4909138372`.
 - Latest follow-up: Continued the Scout Desktop CLI stack after #4320 by
   replaying old fork PR #3 as new upstream PR `gim-home/m#4377` (`Add Scout CLI
-  status preflight`). Branch
+status preflight`). Branch
   `user/giodl/scout-cli-status-preflight-upstream`, head `df092470`, is stacked
   on #4320 `user/giodl/scout-cli-envelope-fixtures-upstream`. Scope: typed local
   companion status model, `scout status` text/JSON output, profile/workspace
@@ -633,7 +633,7 @@
   `C:\src\clawpilot-cli-stack`: `node scripts\verify-scout-cli-manifest.mjs`,
   `node --test scripts\verify-scout-cli-manifest.test.cjs`, focused Scout CLI
   Vitest (2 files / 13 tests), Scout CLI `tsc --noEmit`, focused `oxfmt
-  --check`, and `git diff --check`. Because local `pnpm exec` attempted to
+--check`, and `git diff --check`. Because local `pnpm exec` attempted to
   repair/install incomplete dependencies and failed on registry tarball/network
   errors, the focused Vitest/typecheck/format runs used the hydrated
   `C:\src\clawpilot` toolchain against this worktree. Codex review against #4320
@@ -644,7 +644,7 @@
 - Latest follow-up: Corrected #4088 after Lorant clarified that prior head
   `4c4ade629` fixed m-code-review/Codex bugs but did not address his requested
   changes. New #4088 head `99bbfac26` (`refactor: address browser file-open
-  review`) actually addresses the checklist: removed `url.openExternal`, leaving
+review`) actually addresses the checklist: removed `url.openExternal`, leaving
   only `browser.open` plus `file.openWithDefaultApp`; extracted the trusted URL
   origin gate to `electron/desktop-node-trusted-open-origin.ts`; added anchored
   negative/positive URL-origin tests; added non-filesystem approval state-machine
@@ -690,12 +690,12 @@
   (`Node mode commands: catalog and result-trust hardening`) at `f4c70b535`,
   #4310 (`Node mode commands: route Desktop harness through node runtime`) at
   `195b3fb09` draft, #4311 (`Node mode commands: route Desktop command
-  harness`) at `9b57729b2` draft, #4312 (`Node mode commands: route Desktop
-  custom-tool harness`) at `ed308e770` draft, and #4313 (`Node mode: catalog
-  remaining Desktop harness gaps`) at `8c29c3a24`. Added replacement comments
+harness`) at `9b57729b2` draft, #4312 (`Node mode commands: route Desktop
+custom-tool harness`) at `ed308e770` draft, and #4313 (`Node mode: catalog
+remaining Desktop harness gaps`) at `8c29c3a24`. Added replacement comments
   on old closed PRs #4087/#4090/#4137/#4193/#4194/#4200. Final top-of-stack
   validation passed focused node Vitest (9 files / 121 tests), `pnpm run
-  typecheck`, focused `oxfmt --check`, `git diff --check`, and no remaining
+typecheck`, focused `oxfmt --check`, `git diff --check`, and no remaining
   `app.open`/`local-app.open` references in TypeScript/Markdown.
 - Latest follow-up: Updated #4088 PR title/body to match the narrowed scope.
   New title is `Node mode commands: browser and file open`. Body now lists only
@@ -745,8 +745,8 @@
   envelope fixtures for success, validation error, runtime unavailable, policy
   denial, and permission-required shapes; shared `serializeResult()` helper;
   fixture comparison tests. Validation passed `node
-  scripts/verify-scout-cli-manifest.mjs`, `node --test
-  scripts/verify-scout-cli-manifest.test.cjs`, `oxfmt --check`, and
+scripts/verify-scout-cli-manifest.mjs`, `node --test
+scripts/verify-scout-cli-manifest.test.cjs`, `oxfmt --check`, and
   `git diff --check`. `pnpm exec vitest run --project tools ...` could not
   complete locally because `pnpm exec` repeatedly attempted to finish dependency
   install and timed out on package tarball fetches; noted this in the PR body.
@@ -756,7 +756,7 @@
   correctness issues, noting the diff only adds result-envelope serialization
   fixtures and routes JSON output through `serializeResult()`. Local validation
   passed `node scripts/verify-scout-cli-manifest.mjs` and `node --test
-  scripts/verify-scout-cli-manifest.test.cjs`; Codex attempted TypeScript
+scripts/verify-scout-cli-manifest.test.cjs`; Codex attempted TypeScript
   tooling but the worktree still lacked complete `node_modules/.bin` because
   `pnpm exec` triggers dependency install and tarball fetch timeouts. Live #4320
   PR-agent checks now pass/skip as expected.
@@ -838,7 +838,7 @@
   github.com auth back to `giodl_microsoft` and running `gh auth setup-git`.
 - Latest follow-up: Ran Codex review on each of the five follow-up fork
   branches against #4200 base `origin/user/giodl/node-mode-remaining-desktop-
-  harness-gaps`: lifecycle, browser-special-actions, workspace-write,
+harness-gaps`: lifecycle, browser-special-actions, workspace-write,
   approval-only-surfaces, and local-app-workspace-edges. All five branches were
   still at the same head as #4200 (`3d06df2eb`), so each review found an empty
   diff and no findings. No tests were rerun because there were no branch-specific
@@ -910,7 +910,7 @@
   Captured real-app proof from temporary E2E harness on PR2 after
   `pnpm run build:vite`: a Microsoft Scout Electron app launched in mock mode,
   loaded a persisted provider-bound session (`providerId:
-  cloud:lorant-brain`, `providerKind: hosted-cloud`), and completed chat
+cloud:lorant-brain`, `providerKind: hosted-cloud`), and completed chat
   send/assistant response while sends remained on the subscribed Desktop
   backend. Artifacts are under
   `C:\src\clawpilot-proof-images\provider-routing-4197-4198\`:
@@ -1032,11 +1032,11 @@
   `fa0bb109d` with fresh checks queued (`UNSTABLE`).
 - Latest follow-up: Restacked the downstream Desktop harness PRs after #4137
   moved to `fa0bb109d`. #4193 (`Node mode commands: route Desktop command
-  harness`) was rebased cleanly in
+harness`) was rebased cleanly in
   `C:\src\clawpilot-review-4138-harness-browser-shell` onto #4137 and pushed
   to `gim-home/m:user/giodl/node-mode-harness-browser-shell` at `b5e88800b`.
   Validation passed focused node Vitest (5 files / 211 tests), `pnpm run
-  typecheck`, focused `oxfmt --check`, focused type-aware `oxlint`, and
+typecheck`, focused `oxfmt --check`, focused type-aware `oxlint`, and
   `git diff --check`; live GitHub state after push was draft/open,
   `MERGEABLE`, `CLEAN`, with all checks passing/skipping as expected. #4194
   (`Node mode commands: route Desktop custom-tool harness`) was then rebased
@@ -1080,12 +1080,12 @@
   (`producer: "desktop-node"`, `trustLevel: "untrusted-local-output"`,
   `modelContextPolicy: "wrap-before-model-context"`), and WorkIQ custom-tool
   metadata (`toolName: "workiq_list_emails"`, `allowKey:
-  "tool:workiq_list_emails"`, `groupKey: "tool:workiq_email"`). Artifacts are
+"tool:workiq_list_emails"`, `groupKey: "tool:workiq_email"`). Artifacts are
   under `C:\src\clawpilot-proof-images\node-mode-pr4090-node-help\`:
   `pr4090-node-help-real-app.gif`, `pr4090-node-help-contact-sheet.png`,
   `gateway-node-4090-node-help-results.jsonl`, debug log, and raw frame PNGs.
   Validation passed temporary-harness type-aware `oxlint`, `pnpm run
-  build:vite` (existing CSS/chunk-size warnings only),
+build:vite` (existing CSS/chunk-size warnings only),
   `pnpm test:e2e:file e2e/gateway-node-help.capture.test.ts --reporter=line`
   (1 passed), then the temporary harness was removed and worktree returned
   clean. Clean-source validation passed focused #4090 Vitest (3 files / 80
@@ -1108,7 +1108,7 @@
   Validation passed focused type-aware `oxlint` over the temporary proof files,
   `pnpm run build:vite` (existing CSS/chunk-size warnings only), and
   `pnpm test:e2e:file e2e/gateway-node-desktop-capabilities.capture.test.ts
-  --reporter=line` (1 passed). Artifacts are under
+--reporter=line` (1 passed). Artifacts are under
   `C:\src\clawpilot-proof-images\node-mode-pr4090-desktop-capabilities\`:
   `pr4090-desktop-capabilities-real-app.gif`,
   `pr4090-desktop-capabilities-contact-sheet.png`,
@@ -1129,7 +1129,7 @@
   type-aware `oxlint` over the temporary proof files, `pnpm run build:vite`
   (existing CSS/chunk-size warnings only), and
   `pnpm test:e2e:file e2e/gateway-node-system-run.capture.test.ts
-  --reporter=line` (2 passed). Artifacts are under
+--reporter=line` (2 passed). Artifacts are under
   `C:\src\clawpilot-proof-images\node-mode-pr4087-system-run\`:
   `pr4087-system-run-real-app.gif`,
   `pr4087-system-run-contact-sheet.png`, and raw frame PNGs. Posted PR
@@ -1148,7 +1148,7 @@
   `node.invoke.result ok:false`. Validation passed focused type-aware
   `oxlint` over the temporary proof files, `pnpm run build:vite`, and
   `pnpm test:e2e:file e2e/gateway-node-custom-tool.capture.test.ts
-  --reporter=line` (2 passed). Artifacts are under
+--reporter=line` (2 passed). Artifacts are under
   `C:\src\clawpilot-proof-images\node-mode-pr4123-custom-tool\`:
   `pr4123-custom-tool-real-app.gif`,
   `pr4123-custom-tool-contact-sheet.png`, and raw frame PNGs. Posted PR
@@ -1166,14 +1166,14 @@
   `file-manager` Allow -> `ok:true`; external OS open/reveal side effects were
   suppressed only for capture. Validation passed `pnpm run build:vite` and
   `pnpm test:e2e:file e2e/gateway-node-browser-local-app.capture.test.ts
-  --reporter=line` (3 passed). Artifacts are under
+--reporter=line` (3 passed). Artifacts are under
   `C:\src\clawpilot-proof-images\node-mode-pr4088-browser-local-app\`:
   `pr4088-browser-local-app-real-app.gif`,
   `pr4088-browser-local-app-contact-sheet.png`, and raw frame PNGs. Posted PR
   placeholder comment for Gio drag/drop:
   `https://github.com/gim-home/m/pull/4088#issuecomment-4878196914`.
 - Latest follow-up: Restacked #4090 (`Node mode commands: catalog and
-  result-trust hardening`) after #4087 moved to `401af0da3`. Replayed the
+result-trust hardening`) after #4087 moved to `401af0da3`. Replayed the
   single catalog commit and force-with-lease pushed
   `gim-home/m:user/giodl/node-mode-capabilities-upstream-5-trust-hardening`
   to `7e274c164`, then amended/pushed final head `ce6527f9b` with explicit
@@ -1193,7 +1193,7 @@
   `UNSTABLE` only because fresh PR-agent checks were queued and stale rows were
   cancelled.
 - Latest follow-up: Restacked #4087 (`Node mode: system.run governance
-  upgrade`) after #4123 moved to `e362e3221`. Updated upstream #4123 mirror
+upgrade`) after #4123 moved to `e362e3221`. Updated upstream #4123 mirror
   branch `gim-home/m:user/giodl/node-mode-builtins-self-tools`, replayed the
   single #4087 commit, and force-with-lease pushed
   `gim-home/m:user/giodl/node-mode-capabilities-upstream-2-filesystem-shell`
@@ -1224,7 +1224,7 @@
   command lanes via `DesktopNodeCommandExecutor`. Validation passed: focused
   Vitest 5 files / 199 tests, `pnpm run typecheck`, focused `oxfmt --check`,
   focused type-aware `oxlint --deny-warnings --type-check`, and `git diff
-  --check`. PR #4123 body was updated with the prompt behavior and proof; live
+--check`. PR #4123 body was updated with the prompt behavior and proof; live
   state immediately after push/body update was `UNSTABLE` only because fresh
   PR-agent checks were queued.
 - Latest follow-up: Corrected the node-mode built-ins stack after deciding
@@ -1337,7 +1337,7 @@
   production wiring lets Gateway `desktop.executeLocalTool({ kind: "mcp" })`
   use the same node-mode MCP runtime as raw `mcp.invoke`, and
   `desktop.executeLocalTool({ kind: "read" | "write", toolName:
-  "filesystem.read" | "filesystem.write" | "filesystem.patch" })` use the same
+"filesystem.read" | "filesystem.write" | "filesystem.patch" })` use the same
   Desktop Node filesystem executor as raw filesystem node commands. Desktop
   trusted context is supplied by the node subsystem separately from tool args,
   so Desktop/cloud callers can converge on the Desktop capability harness while
@@ -1349,10 +1349,10 @@
   command executor with exact command names and request session stamped into
   trusted context. Validation passed: focused Vitest 7 files / 225 tests,
   `pnpm run typecheck`, changed-file type-aware `oxlint
-  --deny-warnings --type-check`, changed-file `oxfmt --check`, and `git diff
-  --check`; pre-commit lint-staged also passed on the committed files. PR body
+--deny-warnings --type-check`, changed-file `oxfmt --check`, and `git diff
+--check`; pre-commit lint-staged also passed on the committed files. PR body
   title/summary now present this as `Node mode commands: route Desktop harness
-  through node runtime`. Clipboard is intentionally not part of this parity
+through node runtime`. Clipboard is intentionally not part of this parity
   proof because it is not an existing Desktop capability.
 - Latest follow-up: Rebuilt and pushed #4088 in isolated worktree
   `C:\src\clawpilot-review-4088` to follow the simplified #4086
@@ -1478,7 +1478,7 @@
 - Latest follow-up: Continued #4086 in isolated worktree
   `C:\src\clawpilot-review-4086` after the filesystem permission parity
   review. Added commit `4ca447ea4` (`refactor: extract desktop filesystem
-  permission service`) and pushed
+permission service`) and pushed
   `user/giodl/node-mode-capabilities-upstream-1-foundation`. The new
   `DesktopFilesystemPermissionService` is a narrow shared filesystem permission
   layer under node-mode for read/write/patch approval request construction,
@@ -1512,7 +1512,7 @@
   longer imply redacted metadata can hide suffix payloads, and hidden suffix
   content is denied before dispatch. Validation passed 8 focused files / 228
   tests, focused `oxfmt --check`, focused type-aware `oxlint`, `git diff
-  --check`, and `codex review --uncommitted` clean. Pushed #4088 to
+--check`, and `codex review --uncommitted` clean. Pushed #4088 to
   `cc8935af0` and posted disposition
   `https://github.com/gim-home/m/pull/4088#issuecomment-4868552825`.
   Restacked #4089 in `C:\src\clawpilot-review-4089` on #4088, fixed production
@@ -1610,7 +1610,7 @@
   `pr4090-catalog-trust.png`. Also reran the existing real Electron permission
   pipeline proof:
   `pnpm exec playwright test e2e/permission-live-chat.test.ts --project electron
-  --workers=1 --retries=0 --grep "deny both tools"` passed 1/1. Important
+--workers=1 --retries=0 --grep "deny both tools"` passed 1/1. Important
   caveat: the five PR screenshots are seeded visual proof of the actual app UI
   and Desktop Node approval card shape; execution proof remains the focused
   backend/Vitest stack already run on the branches.
@@ -1627,7 +1627,7 @@
   passed 6 files / 536 tests (`pr4090-catalog-trust.log`). Also saved a real
   Electron app permission pipeline proof on #4090:
   `pnpm exec playwright test e2e/permission-live-chat.test.ts --project electron
-  --workers=1 --retries=0 --grep "deny both tools"` passed 1/1 and is logged as
+--workers=1 --retries=0 --grep "deny both tools"` passed 1/1 and is logged as
   `pr-live-permission-chat.log`. All five review worktrees remained clean.
 - Latest follow-up: Continued the Lorant-style fine-tooth-comb review on the
   #4088-#4090 Desktop Node command PRs using isolated detached worktrees only:
@@ -1734,9 +1734,9 @@
   `codex review --base origin/main` reported no discrete actionable
   regressions. Validation passed: focused Vitest 5 files / 919 tests, focused
   type-aware `oxlint`, focused `oxfmt --check`, `pnpm run typecheck`, `git
-  diff --check`, pre-commit lint-staged on commit, and Electron visual permission-card proof
+diff --check`, pre-commit lint-staged on commit, and Electron visual permission-card proof
   `pnpm run test:e2e:file -- e2e/permission-timeline.test.ts
-  --project=electron` (3 tests passed, screenshot
+--project=electron` (3 tests passed, screenshot
   `test-screenshots/screenshot-with-output-panels-expanded.png`). Pushed both
   the fork PR head and upstream base mirror branch
   `gim-home/m:user/giodl/desktop-mcp-capability-stack` to `c26575e0f`, so
@@ -1758,7 +1758,7 @@
   Validation after the rebase passed: focused gateway/MCP suite (6 files / 217
   tests), broader Desktop Node touched-test suite (20 files / 671 tests),
   repo-wide `oxfmt --check`, full type-aware `oxlint --type-aware
-  --deny-warnings --quiet`, `git diff --check`, pre-commit lint-staged, and
+--deny-warnings --quiet`, `git diff --check`, pre-commit lint-staged, and
   `codex review --base origin/user/giodl/desktop-mcp-capability-stack` with no
   discrete actionable bugs. Live status after cleanup: #3955 `CLEAN` with all
   current checks passing; #4045 and #3854 checks passing but `BLOCKED` by normal
@@ -1956,7 +1956,7 @@
   composition, #110 browser/local-app/workspace writes, #111 shell plus M365
   mail draft composition, and #112 catalog truth/result state. The grouped fork
   mega PR is #113, titled `Node mode follow-up: command-native Desktop
-  capabilities`, with base `user/giodl/local-openclaw-switch-mega-admin-readiness`
+capabilities`, with base `user/giodl/local-openclaw-switch-mega-admin-readiness`
   (#3955 fork head) and head `user/giodl/node-mode-capability-followups`.
   No code changes were made in this step; branch state remains clean at
   `09ff87cd7`.
@@ -2003,11 +2003,11 @@
   prompts, emits the destructive approval request, runs the shell policy check,
   spawns from the sandboxed workspace cwd, and returns stdout/stderr/exit code.
   Validation passed after push: `pnpm exec vitest run --project node
-  electron/desktop-node-command-composition.test.ts
-  electron/desktop-node-shell-exec-handler.test.ts
-  electron/desktop-node-capability-executor.test.ts
-  electron/desktop-node-command-adapter.test.ts
-  electron/backend/gateway/node-commands-bridge.test.ts` (5 files / 67 tests),
+electron/desktop-node-command-composition.test.ts
+electron/desktop-node-shell-exec-handler.test.ts
+electron/desktop-node-capability-executor.test.ts
+electron/desktop-node-command-adapter.test.ts
+electron/backend/gateway/node-commands-bridge.test.ts` (5 files / 67 tests),
   focused type-aware `oxlint`, `oxfmt --write`, `git diff --check`, and
   pre-commit lint-staged. `C:\src\clawpilot` is clean and the branch is pushed
   to fork at `ccc7323b0`.
@@ -2020,12 +2020,12 @@
   preview, and rollback metadata. Added composition tests for both commands
   proving prompt generation, audited execution, file mutation, and rollback
   output. Validation passed after push: `pnpm exec vitest run --project node
-  electron/desktop-node-command-composition.test.ts
-  electron/desktop-node-filesystem-write-handler.test.ts
-  electron/desktop-node-filesystem-read-handler.test.ts
-  electron/desktop-node-capability-executor.test.ts
-  electron/desktop-node-command-adapter.test.ts
-  electron/backend/gateway/node-commands-bridge.test.ts` (6 files / 67 tests),
+electron/desktop-node-command-composition.test.ts
+electron/desktop-node-filesystem-write-handler.test.ts
+electron/desktop-node-filesystem-read-handler.test.ts
+electron/desktop-node-capability-executor.test.ts
+electron/desktop-node-command-adapter.test.ts
+electron/backend/gateway/node-commands-bridge.test.ts` (6 files / 67 tests),
   focused type-aware `oxlint`, `oxfmt --write`, `git diff --check`, and
   pre-commit lint-staged. `C:\src\clawpilot` is clean and the branch is pushed
   to fork at `720864441`.
@@ -2040,14 +2040,14 @@
   `file.openWithDefaultApp`, and `app.open` flow through the clean Node command
   names, approval prompt generation, audited execution, and shell delegate
   calls. Validation passed after push: `pnpm exec vitest run --project node
-  electron/desktop-node-command-composition.test.ts
-  electron/desktop-node-browser-handler.test.ts
-  electron/desktop-node-local-app-handler.test.ts
-  electron/backend/gateway/provider.test.ts
-  electron/backend/gateway/node-subsystem.test.ts
-  electron/backend/gateway/node-commands-bridge.test.ts
-  electron/audit-log.test.ts electron/desktop-node-command-adapter.test.ts
-  electron/desktop-node-capability-executor.test.ts` (9 files / 217 tests),
+electron/desktop-node-command-composition.test.ts
+electron/desktop-node-browser-handler.test.ts
+electron/desktop-node-local-app-handler.test.ts
+electron/backend/gateway/provider.test.ts
+electron/backend/gateway/node-subsystem.test.ts
+electron/backend/gateway/node-commands-bridge.test.ts
+electron/audit-log.test.ts electron/desktop-node-command-adapter.test.ts
+electron/desktop-node-capability-executor.test.ts` (9 files / 217 tests),
   focused type-aware `oxlint`, focused `oxfmt --check`, `git diff --check`,
   and pre-commit lint-staged. `C:\src\clawpilot` is clean and the branch is
   pushed to fork at `2b07ea239`.
@@ -2093,9 +2093,9 @@
   `getRegisteredCapabilities()`, and `DesktopNodeCommandAdapter.catalog()`
   builds the catalog without dispatching or executing a capability. Focused
   validation passed after push: `pnpm exec vitest run --project node
-  common/desktop-node-capability-catalog.test.ts
-  electron/desktop-node-command-adapter.test.ts
-  electron/desktop-node-capability-executor.test.ts` (3 files / 19 tests),
+common/desktop-node-capability-catalog.test.ts
+electron/desktop-node-command-adapter.test.ts
+electron/desktop-node-capability-executor.test.ts` (3 files / 19 tests),
   focused `oxfmt --check`, focused type-aware `oxlint` via pre-commit, and
   `git diff --check`. `C:\src\clawpilot` is clean at `7a5bf1e77`.
 - Latest follow-up: Continued implementation with commit `560eb8d3f` on
@@ -2775,7 +2775,7 @@
   cloud-agent proof PRs #45-#56. Ed Piva's PR feedback was addressed in
   `d50e05b3a` by explicitly mapping Desktop local capabilities to the
   trusted-gateway contract (`agent requests -> trusted gateway decides -> target
-  node executes`), clarifying Desktop as a governed auxiliary node rather than a
+node executes`), clarifying Desktop as a governed auxiliary node rather than a
   separate policy authority, adding node-mode invariants such as target binding,
   catalog revision, `paramsHash`, structured result/error, revocation, and
   durable audit, and clarifying that first-migration M365 service access should
@@ -3028,7 +3028,7 @@
   `electron/local-openclaw-lifecycle.test.ts`,
   `electron/local-openclaw-client.test.ts`, and
   `electron/local-openclaw-stdio-transport.test.ts`. `pnpm exec prettier
-  --check ...` was attempted but this repo has no `prettier` executable
+--check ...` was attempted but this repo has no `prettier` executable
   installed.
 - Dogfood PR8 branch `user/giodl/local-openclaw-dogfood-pr8-provider-picker` is
   stacked on Dogfood PR7, pushed to fork at `5482b02dc`, and open as fork PR
@@ -3185,7 +3185,7 @@
   IPC/local capability/entrypoint/stdio/lifecycle/executor/evals/sessions
   tests, `pnpm exec tsc --noEmit`, focused type-aware `oxlint` with only the
   pre-existing local OpenClaw polling `no-await-in-loop` warning, `pnpm exec
-  oxfmt --check`, `git diff --check`, and final `codex review --uncommitted`
+oxfmt --check`, `git diff --check`, and final `codex review --uncommitted`
   with no actionable bug found.
 - Node-mode tools PR8 branch pushed/opened on 2026-06-26:
   [giodl_microsoft/m#32](https://github.com/giodl_microsoft/m/pull/32)
@@ -3203,7 +3203,7 @@
   focused node Vitest for filesystem read/entrypoint/executor/evals/policy/IPC
   tests, `pnpm exec tsc --noEmit`, focused type-aware `oxlint` with only the
   pre-existing local OpenClaw polling `no-await-in-loop` warning, `pnpm exec
-  oxfmt --check`, and `git diff --check`. `codex review --uncommitted` was
+oxfmt --check`, and `git diff --check`. `codex review --uncommitted` was
   attempted twice and timed out both times, so the PR body calls that out
   explicitly.
 - Node-mode tools PR9 branch pushed/opened on 2026-06-26:
@@ -3225,7 +3225,7 @@
   Vitest for shell exec/filesystem read/entrypoint/executor/evals/policy/IPC
   tests, `pnpm exec tsc --noEmit`, focused type-aware `oxlint` with only the
   pre-existing local OpenClaw polling `no-await-in-loop` warning, `pnpm exec
-  oxfmt --check`, `git diff --check`, and final
+oxfmt --check`, `git diff --check`, and final
   `codex review --uncommitted` with no actionable findings.
 - Node-mode tools PR10 branch pushed/opened on 2026-06-26:
   [giodl_microsoft/m#34](https://github.com/giodl_microsoft/m/pull/34)
@@ -3242,7 +3242,7 @@
   IPC/agent-inventory/backend IPC/entrypoint/executor/evals tests, Agents panel
   unit Vitest, `pnpm exec tsc --noEmit`, focused type-aware `oxlint` with only
   the pre-existing local OpenClaw polling `no-await-in-loop` warning, `pnpm
-  exec oxfmt --check`, `git diff --check`, and final
+exec oxfmt --check`, `git diff --check`, and final
   `codex review --uncommitted` with no actionable findings.
 - Node-mode tools 10-PR stack now has contract, approval routing, executor,
   audit attribution, policy gates, evals, runtime entrypoint, `filesystem.read`,
@@ -3450,7 +3450,7 @@
   `System.Collections.Hashtable.scope` summary artifact on local submit PRs
   #35-#43. Verification: #3854 body contains `Evidence matrix:` and
   `Current proof caveat`; every PR #35-#56 body contains `## Real behavior
-  proof`, `Evidence after fix:`, and `What was not tested:`, no body contains
+proof`, `Evidence after fix:`, and `What was not tested:`, no body contains
   the broken hashtable summary, and GitHub reports all #35-#56 mergeable.
   Remaining gap intentionally called out in the PR bodies: `oxfmt --check`
   still reports formatting differences on focused local/cloud proof-stack file
@@ -3475,18 +3475,18 @@
   attached GitHub CI checks.
 - Next validation plan for #3854 proof stacks: validate the architecture claims
   one layer deeper without overclaiming product readiness. Run, in order:
-  1) local Desktop node-mode behavior transcript on the #44 stack tip covering
-  workspace-scoped `filesystem.read`, outside-workspace denial, `shell.exec`
-  approval/policy gating, and missing/disabled capability fail-closed behavior;
-  2) hosted-request source-harness transcript on the #56 stack tip covering
-  cloud-to-Desktop request envelope, approval, policy, audit replay, device
-  routing, rollout, and degraded-mode paths; 3) focused policy/audit replay
-  transcript proving correlation id, policy version, input digest, user/agent/
-  node identity, approve and deny trails; 4) feasibility check for a dev-app
-  smoke with flags to confirm provider status, Agents panel/diagnostics, and no
-  default behavior regression. If dev-app smoke is expensive or requires
-  product credentials/services, record that explicitly and keep source-harness
-  proof as the current evidence.
+  1. local Desktop node-mode behavior transcript on the #44 stack tip covering
+     workspace-scoped `filesystem.read`, outside-workspace denial, `shell.exec`
+     approval/policy gating, and missing/disabled capability fail-closed behavior;
+  2. hosted-request source-harness transcript on the #56 stack tip covering
+     cloud-to-Desktop request envelope, approval, policy, audit replay, device
+     routing, rollout, and degraded-mode paths; 3) focused policy/audit replay
+     transcript proving correlation id, policy version, input digest, user/agent/
+     node identity, approve and deny trails; 4) feasibility check for a dev-app
+     smoke with flags to confirm provider status, Agents panel/diagnostics, and no
+     default behavior regression. If dev-app smoke is expensive or requires
+     product credentials/services, record that explicitly and keep source-harness
+     proof as the current evidence.
 - #3854 additional validation results on 2026-06-27: completed the first three
   proof-deepening passes and the dev-app feasibility check. Local Desktop
   node-mode source transcript on PR44 proved workspace-scoped `filesystem.read`
@@ -3506,9 +3506,9 @@
   full GUI proof requires hidden experiments, sidecar command/env descriptor,
   containment selection, and product/dev services. The local install initially
   lacked the pnpm `.bin` shims, so `vite` was unavailable; `pnpm install
-  --frozen-lockfile` restored the pnpm layout without tracked repo changes.
+--frozen-lockfile` restored the pnpm layout without tracked repo changes.
   After repair, `pnpm exec vite --version` returned `vite/8.0.16 win32-x64
-  node-v24.14.0`, and `pnpm run build:vite` passed on PR44, producing both
+node-v24.14.0`, and `pnpm run build:vite` passed on PR44, producing both
   `dist` and `dist-electron` bundles. Remaining dev-app gap is only the full GUI
   dogfood run with sidecar/env/services. Posted #3854 validation comments with
   the additional transcripts and build-smoke proof. Also restored the #3854 PR
@@ -3858,7 +3858,7 @@
   `pnpm run typecheck`, focused type-aware `oxlint`, focused `oxfmt --check`,
   `git diff --check`, `pnpm run build:vite`, focused Electron Playwright GUI
   dogfood `pnpm exec playwright test e2e/local-openclaw-dogfood.test.ts
-  --retries=0 --workers=1`, focused E2E `oxfmt --check`, and pre-commit
+--retries=0 --workers=1`, focused E2E `oxfmt --check`, and pre-commit
   lint-staged. The GUI proof captured Agents diagnostics, browser approval,
   clipboard write/read approvals, completion screenshot, and
   `test-screenshots/local-openclaw-dogfood-sidecar.jsonl` showing executed
@@ -3884,7 +3884,7 @@
   `pnpm run typecheck`, focused type-aware `oxlint`, focused `oxfmt --check`,
   `git diff --check`, `pnpm run build:vite`, Electron Playwright dogfood
   `pnpm exec playwright test e2e/local-openclaw-dogfood.test.ts --retries=0
-  --workers=1`, and pre-commit lint-staged. GUI proof captured write, patch,
+--workers=1`, and pre-commit lint-staged. GUI proof captured write, patch,
   app-open, outside-workspace write approval screenshots, completion
   screenshot, and sidecar JSONL showing `dogfood-filesystem-write-1`,
   `dogfood-filesystem-patch-1`, `dogfood-app-open-1`, outside-workspace denial
@@ -3907,7 +3907,7 @@
   `pnpm run typecheck`, focused type-aware `oxlint`, focused `oxfmt --check`,
   `git diff --check`, `pnpm run build:vite`, Electron Playwright dogfood
   `pnpm exec playwright test e2e/local-openclaw-dogfood.test.ts --retries=0
-  --workers=1`, and pre-commit lint-staged. GUI proof captured the
+--workers=1`, and pre-commit lint-staged. GUI proof captured the
   `Create M365 mail draft` approval screenshot, completion screenshot, and
   sidecar JSONL showing `dogfood-m365-mail-draft-1`, `m365-draft-audit-...`,
   `tokenStatus:"brokered-redacted"`, raw `dogfood-m365-token-1` rejected with
@@ -3934,7 +3934,7 @@
   adapter `node:test` 4 pass), `pnpm run typecheck`, focused type-aware
   `oxlint`, focused `oxfmt --check`, `git diff --check`, `pnpm run build:vite`,
   Electron Playwright dogfood `pnpm exec playwright test
-  e2e/local-openclaw-dogfood.test.ts --retries=0 --workers=1`, and pre-commit
+e2e/local-openclaw-dogfood.test.ts --retries=0 --workers=1`, and pre-commit
   lint-staged. Comments posted on PR82 and #3854. Remaining PR83 proof gap:
   live non-Copilot model completion, live Lobster package launch, live M365
   Graph draft creation, and packaged installer/update rollback remain outside
@@ -3995,7 +3995,7 @@
   `test:local-openclaw-switch-over` lane; focused type-aware `oxlint`; focused
   `oxfmt --check`; `pnpm run typecheck`; `git diff --check`; and pre-commit
   hooks. Latest doc-only validation: focused `oxfmt --check`, `git diff
-  --check`, and pre-commit hook. Latest summary validation: focused Vitest,
+--check`, and pre-commit hook. Latest summary validation: focused Vitest,
   full `test:local-openclaw-switch-over`, focused type-aware `oxlint`, focused
   `oxfmt --check`, `pnpm run typecheck`, `git diff --check`, and pre-commit
   hook. Broad validation pass after commit 10 passed: branch clean, full
@@ -4102,7 +4102,7 @@
   `LocalOpenClawSidecarManager` only launches an operator-configured
   `SCOUT_LOCAL_OPENCLAW_SIDECAR_COMMAND` plus JSON args. #3955 body now includes
   this status. Validation passed focused doc `oxfmt --check`, `git diff
-  --check`, and pre-commit lint-staged. After push, #3955 was at `88eeeb539`;
+--check`, and pre-commit lint-staged. After push, #3955 was at `88eeeb539`;
   debounce was in progress and old agent rows were cancelled, so merge state
   was temporarily `UNSTABLE` pending fresh checks. Follow-up check showed fresh
   debounce, cache, barnacle, merit-bot, complexity-tag, and
@@ -4175,7 +4175,7 @@
   `pnpm exec vitest run --project node` over the 20 focused Desktop Node,
   gateway, audit, catalog, policy, and M365 files (347 tests); focused
   type-aware `oxlint`; focused `oxfmt --check`; and `git diff --check
-  fork/user/giodl/desktop-mcp-capability-stack..HEAD`. Pre-commit lint-staged
+fork/user/giodl/desktop-mcp-capability-stack..HEAD`. Pre-commit lint-staged
   passed on the final formatting cleanup commit.
 - Live #3955 state after push/body update: draft PR, base
   `user/giodl/desktop-mcp-capability-stack`, head
@@ -4199,7 +4199,7 @@
   policy regression test (1 file / 26 tests), full targeted Desktop Node slice
   (21 files / 674 tests), focused type-aware `oxlint` over 44 files,
   `oxfmt --check` over 52 code/doc files, and `git diff --check
-  origin/user/giodl/desktop-mcp-capability-stack..HEAD`.
+origin/user/giodl/desktop-mcp-capability-stack..HEAD`.
 - Final `codex review --base origin/user/giodl/desktop-mcp-capability-stack`
   reported no discrete actionable regressions. Force-with-lease pushed both
   fork branches to `467b72cbc`:
@@ -4225,7 +4225,7 @@
 - Validation passed in the isolated worktree: focused Vitest over gateway
   provider and Desktop capability executor tests (4 files / 142 tests),
   focused type-aware `oxlint`, focused `oxfmt --check`, and `git diff
-  --check`.
+--check`.
 - Next implementation slice: decide whether to open this branch as the first
   built-ins parity PR now, then continue with WorkIQ/M365 mutating-tool proof
   and scoped approval evidence, followed by browser MCP special actions and any
@@ -4254,7 +4254,7 @@
   merge state `UNSTABLE` only because fresh `debounce` was pending.
 - Correction/latest #4090 rebuild: replaced the old adapter-heavy catalog slice
   with one lightweight commit `7ec52625d` (`feat: add desktop node command
-  catalog`) directly over #4087 `d6e87d488`. The new shape keeps the existing
+catalog`) directly over #4087 `d6e87d488`. The new shape keeps the existing
   direct Desktop node command executor and adds only:
   `common/desktop-node-command-catalog.ts`, executor `catalog()` metadata,
   `desktop.capabilities`, bridge preflight, and result-trust output metadata.
@@ -4262,9 +4262,9 @@
   command adapter, or a parallel capability-policy layer.
 - #4090 validation after rebuild passed in `C:\src\clawpilot-review-4090`:
   `pnpm exec vitest run --project node
-  common/desktop-node-command-catalog.test.ts
-  electron/desktop-node-command-composition.test.ts
-  electron/backend/gateway/node-commands-bridge.test.ts` (3 files / 68 tests),
+common/desktop-node-command-catalog.test.ts
+electron/desktop-node-command-composition.test.ts
+electron/backend/gateway/node-commands-bridge.test.ts` (3 files / 68 tests),
   `pnpm run typecheck`, focused `oxfmt --check`, focused type-aware
   `oxlint --deny-warnings`, and `git diff --check`. Force-with-lease pushed to
   `user/giodl/node-mode-capabilities-upstream-5-trust-hardening`, updated PR

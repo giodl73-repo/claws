@@ -204,14 +204,14 @@ reviewable.
 
 It introduces:
 
-| Piece | Why it matters |
-| --- | --- |
-| Hosted agent roster | Desktop can know which cloud-hosted agents exist and whether they are healthy or eligible. |
-| Runtime routing | A session can bind to a specific runtime/provider path instead of assuming one backend. |
-| Capability envelope | Cloud requests for local work cross a typed boundary before Desktop decides anything. |
-| Policy and readiness checks | Cloud provider eligibility can depend on rollout, admin policy, device health, and feature support. |
-| Approval and audit shape | Local side effects remain reviewable even when the request starts in the cloud. |
-| Device routing and degraded mode | Cloud cannot assume a Desktop node is online, fresh, or allowed to execute local work. |
+| Piece                            | Why it matters                                                                                      |
+| -------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Hosted agent roster              | Desktop can know which cloud-hosted agents exist and whether they are healthy or eligible.          |
+| Runtime routing                  | A session can bind to a specific runtime/provider path instead of assuming one backend.             |
+| Capability envelope              | Cloud requests for local work cross a typed boundary before Desktop decides anything.               |
+| Policy and readiness checks      | Cloud provider eligibility can depend on rollout, admin policy, device health, and feature support. |
+| Approval and audit shape         | Local side effects remain reviewable even when the request starts in the cloud.                     |
+| Device routing and degraded mode | Cloud cannot assume a Desktop node is online, fresh, or allowed to execute local work.              |
 
 ## Concepts Introduced By #3953
 
@@ -623,27 +623,27 @@ of a replacement for provider choice.
 
 ## Complementary To Gateway Work
 
-| Question | Gateway cloud path | #3953 flexibility layer |
-| --- | --- | --- |
-| How does Desktop reach the cloud brain? | Route Desktop operator/node sockets to the right Gateway cluster. | Treat the cloud brain as a runtime/provider candidate. |
-| What happens when Gateway supports a surface? | Desktop can use the cloud-backed capability. | Routing can prefer or allow the cloud provider when policy/readiness pass. |
-| What happens when Gateway does not support a surface? | Desktop may hide, gate, or fail closed for that surface. | Desktop can keep the fully capable existing provider path or route local work through a governed capability gate. |
-| Who owns local authority? | Gateway can request or coordinate local work through node/control paths. | Desktop remains the trusted policy, approval, audit, and execution boundary. |
-| How do we roll out safely? | Capability flags and cloud readiness tiers. | Provider eligibility combines capability flags, policy, readiness, audit, and device state. |
+| Question                                              | Gateway cloud path                                                       | #3953 flexibility layer                                                                                           |
+| ----------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| How does Desktop reach the cloud brain?               | Route Desktop operator/node sockets to the right Gateway cluster.        | Treat the cloud brain as a runtime/provider candidate.                                                            |
+| What happens when Gateway supports a surface?         | Desktop can use the cloud-backed capability.                             | Routing can prefer or allow the cloud provider when policy/readiness pass.                                        |
+| What happens when Gateway does not support a surface? | Desktop may hide, gate, or fail closed for that surface.                 | Desktop can keep the fully capable existing provider path or route local work through a governed capability gate. |
+| Who owns local authority?                             | Gateway can request or coordinate local work through node/control paths. | Desktop remains the trusted policy, approval, audit, and execution boundary.                                      |
+| How do we roll out safely?                            | Capability flags and cloud readiness tiers.                              | Provider eligibility combines capability flags, policy, readiness, audit, and device state.                       |
 
 So this is not anti-Gateway. It is the compatibility layer that lets Gateway
 succeed without forcing every Desktop surface to wait for Gateway parity.
 
 ## Decision Pressure Table
 
-| Decision pressure | Without #3953 | With #3953 |
-| --- | --- | --- |
-| Cloud adoption | Binary switch toward the Gateway/cloud brain. | Cloud/OpenClaw becomes a selectable provider path. |
+| Decision pressure         | Without #3953                                                            | With #3953                                                                          |
+| ------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| Cloud adoption            | Binary switch toward the Gateway/cloud brain.                            | Cloud/OpenClaw becomes a selectable provider path.                                  |
 | Existing Desktop behavior | Risk of hiding or regressing surfaces that Gateway does not support yet. | The fully capable Desktop provider remains the baseline while cloud parity matures. |
-| Local authority | Local work risks becoming scattered across backend-specific branches. | Desktop owns a single local capability gate with policy, approval, and audit. |
-| Reviewability | Runtime choice is inferred from backend mode and flags. | Runtime/provider/session binding is explicit. |
-| Rollout | The product has to decide default behavior before all parity is proven. | Defaults can move later, after provider readiness and evidence improve. |
-| Future providers | Each new provider risks another integration branch. | New providers plug into the same routing and eligibility model. |
+| Local authority           | Local work risks becoming scattered across backend-specific branches.    | Desktop owns a single local capability gate with policy, approval, and audit.       |
+| Reviewability             | Runtime choice is inferred from backend mode and flags.                  | Runtime/provider/session binding is explicit.                                       |
+| Rollout                   | The product has to decide default behavior before all parity is proven.  | Defaults can move later, after provider readiness and evidence improve.             |
+| Future providers          | Each new provider risks another integration branch.                      | New providers plug into the same routing and eligibility model.                     |
 
 ## What #3953 Does Not Claim
 

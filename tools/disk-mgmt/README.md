@@ -16,10 +16,10 @@ projects. Default mode is always dry-run.
 
 See `projects/disk-mgmt/BUDGET.md` and `tools/disk-mgmt/profiles.json`.
 
-| Profile | Slots | Claws checkout cap | Keep free |
-| ------- | ----- | ------------------ | --------- |
-| `light` (1–2 projects + merge) | 3 | ~30 GB | ≥40 GB |
-| `heavy` (4–5 projects + merge) | 6 | ~50 GB | ≥50 GB |
+| Profile                        | Slots | Claws checkout cap | Keep free |
+| ------------------------------ | ----- | ------------------ | --------- |
+| `light` (1–2 projects + merge) | 3     | ~30 GB             | ≥40 GB    |
+| `heavy` (4–5 projects + merge) | 6     | ~50 GB             | ≥50 GB    |
 
 ```powershell
 .\tools\disk-mgmt\laptop.ps1

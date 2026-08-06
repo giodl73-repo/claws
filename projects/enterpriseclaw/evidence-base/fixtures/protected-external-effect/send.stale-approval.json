@@ -1,0 +1,32 @@
+{
+  "case": "approval becomes stale before dispatch",
+  "input": {
+    "action": "message.send",
+    "approved_intent_digest": "sha256:original-intent",
+    "dispatch_intent_digest": "sha256:changed-intent",
+    "approval_ref": "approval-84"
+  },
+  "changed_fields": [
+    "recipient",
+    "content"
+  ],
+  "owner_result": {
+    "dispatch": "blocked_before_effect",
+    "reason": "intent_changed_after_approval",
+    "effect_certainty": "not_effected"
+  },
+  "expected_projection": {
+    "state": "not_sent",
+    "headline": "Message not sent",
+    "detail": "The message changed after approval. Review it again before sending.",
+    "actions": [
+      "review_changes",
+      "dismiss"
+    ]
+  },
+  "expected_evidence": {
+    "approval_ref": "approval-84",
+    "dispatch_occurred": false,
+    "effect_certainty": "not_effected"
+  }
+}

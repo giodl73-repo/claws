@@ -1,0 +1,38 @@
+{
+  "case": "timeout after provider dispatch",
+  "input": {
+    "action": "message.send",
+    "operation_id": "op-message-1043",
+    "attempt_id": "attempt-1",
+    "approval_ref": "approval-85",
+    "replay": "reconcile_before_replay"
+  },
+  "transport_result": {
+    "state": "timeout_after_dispatch",
+    "provider_receipt": null
+  },
+  "owner_result": {
+    "dispatch": "unknown_effect",
+    "effect_certainty": "unknown",
+    "retry_authorized": false
+  },
+  "expected_projection": {
+    "state": "needs_attention",
+    "headline": "The provider may have received this message",
+    "detail": "Sending it again could create a duplicate. Check the provider or reconcile before retrying.",
+    "actions": [
+      "check_provider",
+      "reconcile",
+      "view_details"
+    ],
+    "forbidden_actions": [
+      "retry"
+    ]
+  },
+  "expected_evidence": {
+    "operation_id": "op-message-1043",
+    "approval_ref": "approval-85",
+    "effect_certainty": "unknown",
+    "replay": "reconcile_before_replay"
+  }
+}

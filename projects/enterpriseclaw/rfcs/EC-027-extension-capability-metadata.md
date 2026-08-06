@@ -1,0 +1,71 @@
+# RFC Scope: Extension Capability Metadata
+
+- ID: EC-027
+- Lane: Extensibility, artifacts, and release
+- Status: Scoped draft
+- Initial posture: Fork + focused RFC
+- Primary owner: Extension definition owners
+
+## Scope
+
+- Define inert metadata for plugins, skills, tools, channels, providers, and
+  host bindings: owner, version, capabilities, dependencies, compatibility,
+  lifecycle, and trust requirements.
+- Carry stable definition identity independent of display name, path, or
+  consumer-specific manifest shape.
+
+## Current Owner Baseline
+
+Current evidence is plugin-first: canonical plugin manifests, bundled metadata
+snapshots, install records, precedence, reserved-ID refusal, and security-scan
+block outcomes are source-tested. Stable identity across skill, plugin,
+provider, channel, and host-binding families remains a target, as does
+fail-closed handling of unknown required metadata on one shared inert surface.
+
+## Explicit Exclusions
+
+- Catalog as activation authority.
+- Changing the portable skill/workspace format.
+- Evaluating or satisfying declared trust requirements, owned by EC-028.
+
+## Required Outcomes
+
+- Metadata is useful without EnterpriseClaw.
+- Metadata is optional and additive; a skill remains loadable as a bare
+  SKILL.md folder.
+- Unknown optional fields and versions evolve safely; unknown required trust,
+  lifecycle, or compatibility semantics make the definition incompatible
+  rather than silently ignorable.
+- Incompatible metadata is rejected or ignored according to declared
+  compatibility rather than silently approximated.
+- Definitions remain separate from selected and active bindings.
+- Existing manifests migrate through additive adapters without requiring
+  ecosystem-wide rewrites.
+- Metadata evidence records definition owner, version, compatibility result,
+  and observation time without activating the extension.
+
+## Dependencies
+
+- EC-013 and EC-022.
+
+## Proof and Deletion Gate
+
+- Describe one skill, plugin, and provider consistently.
+- Delete duplicated consumer-specific manifests where possible.
+- Disprove the separate contract if existing skill/plugin/provider definitions
+  already expose stable, portable, inert capability metadata and
+  compatibility/trust requirements without changing baseline artifact shape
+  or adding parallel manifests.
+
+## Implementation Package Reconciliation
+
+- Treat #114782/#114783 as a plugin-family, manifest-first exemplar rather than
+  the universal schema.
+- Use merged #112773 as the portability precedent: native portable metadata and
+  strict host-specific profiles may coexist without dual runtime authority.
+- Require plugin, Claw/skill, and one unlike provider/channel/host-binding
+  fixture before proposing a shared definition envelope.
+- Generate adapters over native definitions; do not require ecosystem-wide
+  rewrites or make a catalog the semantic owner.
+- File no upstream delta until the fixtures prove stable cross-family identity
+  or unknown-required refusal is missing from current owners.

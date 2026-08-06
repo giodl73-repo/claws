@@ -80,18 +80,18 @@ start only after those prerequisite diffs are understood.
 
 ## What This PR Should Contain
 
-| Proof area | What it demonstrates |
-| --- | --- |
-| Local OpenClaw package path | Scout can connect through the local OpenClaw stdio adapter to a Gateway-compatible runtime path. |
-| Live Lobster Gateway traffic | The adapter can connect to running Lobster E2E runtimes, create Gateway sessions, send chat, normalize assistant events, and emit `turn.complete`. |
-| Rerunnable live proof | A script can run the proof and emit redacted JSON output with run id, route, accepted metadata, and completion. |
-| Runtime-level non-Copilot provider evidence | The live runtime can complete through a non-Copilot provider path, with provider kind/model/source captured without leaking credentials. |
-| Admin policy and readiness | Tenant policy can disable managed install, Windows Companion attach, package sources, and capability families. |
-| Package integrity denials | Source identity mismatch and missing fingerprint degrade before sidecar start or client attach. |
-| Lifecycle and rollback | Launch, compatibility refresh, attach, shutdown, rollback, and client clear states are visible and bounded. |
-| Local OpenClaw node-mode adapter | Local OpenClaw runtime requests are translated into the shared provider-neutral Desktop capability model. |
-| Capability composition | Local OpenClaw uses shared filesystem, shell, browser, clipboard, app/workspace, and M365 capability contracts rather than private local-only tools. |
-| Remaining gaps | Provider attestation, live Graph draft proof, packaged installer/update rollback, and Scout-managed acquisition remain explicit. |
+| Proof area                                  | What it demonstrates                                                                                                                                 |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local OpenClaw package path                 | Scout can connect through the local OpenClaw stdio adapter to a Gateway-compatible runtime path.                                                     |
+| Live Lobster Gateway traffic                | The adapter can connect to running Lobster E2E runtimes, create Gateway sessions, send chat, normalize assistant events, and emit `turn.complete`.   |
+| Rerunnable live proof                       | A script can run the proof and emit redacted JSON output with run id, route, accepted metadata, and completion.                                      |
+| Runtime-level non-Copilot provider evidence | The live runtime can complete through a non-Copilot provider path, with provider kind/model/source captured without leaking credentials.             |
+| Admin policy and readiness                  | Tenant policy can disable managed install, Windows Companion attach, package sources, and capability families.                                       |
+| Package integrity denials                   | Source identity mismatch and missing fingerprint degrade before sidecar start or client attach.                                                      |
+| Lifecycle and rollback                      | Launch, compatibility refresh, attach, shutdown, rollback, and client clear states are visible and bounded.                                          |
+| Local OpenClaw node-mode adapter            | Local OpenClaw runtime requests are translated into the shared provider-neutral Desktop capability model.                                            |
+| Capability composition                      | Local OpenClaw uses shared filesystem, shell, browser, clipboard, app/workspace, and M365 capability contracts rather than private local-only tools. |
+| Remaining gaps                              | Provider attestation, live Graph draft proof, packaged installer/update rollback, and Scout-managed acquisition remain explicit.                     |
 
 ## What This PR Should Not Contain
 

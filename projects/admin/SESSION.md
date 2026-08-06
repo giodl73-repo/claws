@@ -116,7 +116,7 @@
   policy-state primitive slice. Local proof passed
   `just cargo test admin_policy_baselines --no-fail-fast` (16 tests),
   `just cargo fmt --check`, and `git diff --check origin/main...HEAD &&
-  git diff --check`. Required ADO builds were queued:
+git diff --check`. Required ADO builds were queued:
   PullRequest `168638566`, Build Validation `168638564`. Comment posted:
   https://microsoft.ghe.com/bic/lobster/pull/2275#issuecomment-183231981.
 - Cleanup on 2026-06-18: #2270 was restacked onto refreshed #2275, resolving
@@ -125,7 +125,7 @@
   `40f7ac76a49aa68317f706b490b5976058c81a4e` preserves the current OpenClaw
   package shape and keeps `diagnostics-otel` while adding the `policy` plugin.
   Local proof passed `just openclaw-container-fmt-check` and `git diff --check
-  user/giodl/lobster-admin-policy-state...HEAD && git diff --check`; direct
+user/giodl/lobster-admin-policy-state...HEAD && git diff --check`; direct
   local adapter `cargo test` is blocked by missing private `aether-rust` cargo
   registry auth. Required ADO builds were queued as the compile/test proof
   path: PullRequest `168640785`, Build Validation `168640781`. Comment posted:
@@ -137,13 +137,13 @@
   proving Lobster materializes policy locally for OpenClaw. Local proof passed
   `just cargo test admin_policy_baselines --no-fail-fast` (18 tests),
   `just cargo fmt --check`, and `git diff --check origin/main...HEAD &&
-  git diff --check`. Fresh ADO queued: PullRequest `168655723`, Build
+git diff --check`. Fresh ADO queued: PullRequest `168655723`, Build
   Validation `168655719`. Comment posted:
   https://microsoft.ghe.com/bic/lobster/pull/2275#issuecomment-183260776.
 - Restack on 2026-06-18: #2270 was rebased onto refreshed #2275 and
   force-pushed at signed head `5ed712c4c3b130fcd8d19a9a7fbb82aeb5e772e3`.
   Local proof passed `just openclaw-container-fmt-check` and `git diff --check
-  user/giodl/lobster-admin-policy-state...HEAD && git diff --check`; direct
+user/giodl/lobster-admin-policy-state...HEAD && git diff --check`; direct
   local adapter cargo remains blocked by missing private `aether-rust` cargo
   registry auth. After ADO showed the code-mode container validator still
   expected the old plugin allowlist, the branch was amended to preserve the
@@ -151,8 +151,8 @@
   `scripts/validate-code-mode-container.sh`, and add a regression test. Local
   proof passed `bash scripts/validate-code-mode-container.sh`,
   `just openclaw-container-fmt-check`, `cargo test openclaw_plugins_override
-  --lib --no-fail-fast`, and `git diff --check
-  user/giodl/lobster-admin-policy-state...HEAD && git diff --check`. Fresh ADO
+--lib --no-fail-fast`, and `git diff --check
+user/giodl/lobster-admin-policy-state...HEAD && git diff --check`. Fresh ADO
   queued: PullRequest `168660798`, Build Validation `168660793`. Comment
   posted earlier:
   https://microsoft.ghe.com/bic/lobster/pull/2270#issuecomment-183260816.
@@ -163,7 +163,7 @@
   metadata drift when comparing OpenClaw policy identity. Local proof passed
   `just cargo test admin_policy_baselines --no-fail-fast` (21 tests),
   `just cargo fmt --check`, `git diff --check origin/main...HEAD && git diff
-  --check`, and `codex review --base origin/main`. Fresh ADO queued:
+--check`, and `codex review --base origin/main`. Fresh ADO queued:
   PullRequest `168677651`, Build Validation `168677649`. Comment posted:
   https://microsoft.ghe.com/bic/lobster/pull/2275#issuecomment-183306966.
 - Codex review closeout on 2026-06-19: #2270 was restacked onto #2275 head
@@ -176,10 +176,10 @@
   `bash scripts/validate-code-mode-container.sh`,
   `just openclaw-container-fmt-check`,
   `cd src/openclaw_container; ..\..\cargo.sh test policy_bootstrap --lib
-  --no-fail-fast`, `cargo test openclaw_plugins_override --lib
-  --no-fail-fast`, warm-up generator smoke against a temp config copy, `git
-  diff --check user/giodl/lobster-admin-policy-state...HEAD && git diff
-  --check`, and `codex review --base user/giodl/lobster-admin-policy-state`.
+--no-fail-fast`, `cargo test openclaw_plugins_override --lib
+--no-fail-fast`, warm-up generator smoke against a temp config copy, `git
+diff --check user/giodl/lobster-admin-policy-state...HEAD && git diff
+--check`, and `codex review --base user/giodl/lobster-admin-policy-state`.
   Fresh ADO queued: PullRequest `168677652`, Build Validation `168677650`.
   Comment posted:
   https://microsoft.ghe.com/bic/lobster/pull/2270#issuecomment-183306971.
@@ -209,9 +209,9 @@
   blocks `packageDefense.state=quarantined|failed` unless
   `packageDefense.exception=tenant|microsoft`, and emits allowed/warning/blocked
   preview output. Local proof passed `cd src/lobster_runtime;
-  ..\..\cargo.sh fmt --check`, `cd src/lobster_runtime; ..\..\cargo.sh test
-  scout_feed_cli --lib --no-fail-fast`, `git diff --check
-  user/giodl/lobster-admin-policy-bootstrap...HEAD`, and `git diff --check`.
+..\..\cargo.sh fmt --check`, `cd src/lobster_runtime; ..\..\cargo.sh test
+scout_feed_cli --lib --no-fail-fast`, `git diff --check
+user/giodl/lobster-admin-policy-bootstrap...HEAD`, and `git diff --check`.
   Required ADO builds were queued: PullRequest `168683619`, Build Validation
   `168683617`. Initial GitHub state: draft, mergeable, `UNSTABLE`;
   `GitOps/GitHubPop` failed, `GitOps/FileAffordance` passed, ADO queued.
@@ -306,7 +306,7 @@
   normalized-token decision matching. Added tab/newline + mixed-case regression
   coverage. Fresh local proof passed `fmt --check`,
   `cargo.sh test scout_feed_cli --lib --no-fail-fast`, `clippy --all-targets
-  --no-deps -- -D warnings`, and diff checks. Fresh ADO queued: PullRequest
+--no-deps -- -D warnings`, and diff checks. Fresh ADO queued: PullRequest
   `168801728`, Build Validation `168801725`. Comment posted:
   https://microsoft.ghe.com/bic/lobster/pull/3383#issuecomment-183636316.
 - #3383 CI formatter fix on 2026-06-19: ADO failed on the CI MS Rust formatter
@@ -633,7 +633,7 @@
   #3585 head `cb7f0ed2d9ad32bec610313726a898a860fb50cf`; PR is mergeable but
   still shows `CHANGES_REQUESTED` until reviewers refresh. Local proof passed:
   `cargo.sh fmt --check`, `cargo.sh test privileged_openclaw_tool_gates --lib
-  --no-fail-fast`, `cargo.sh test policy --lib --no-fail-fast` (109 tests),
+--no-fail-fast`, `cargo.sh test policy --lib --no-fail-fast` (109 tests),
   `cargo.sh clippy --lib -- -D warnings`, and `git diff --check`. Required ADO
   queued: PullRequest `169445321`, Build Validation `169445320`.
 - #3693 opened on 2026-06-26 from

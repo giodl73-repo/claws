@@ -1,68 +1,165 @@
 # State Continuity Session
 
-**Last updated:** 2026-07-22
+**Last updated:** 2026-07-28
 
 **Last agent:** Codex
 
-**Current focus:** Review the complete three-PR OpenClaw Portable evidence stack:
-recovery points in PR 112385, final capture in PR 112865, and restored admission
-in PR 112896. No additional OpenClaw implementation PR is needed for the current
-Portable merge sequence. Full scale-to-zero still needs a later bounded host
-wake/scheduler adapter after the Lobster owner/caller work is ready. Keep every
-implementation PR draft until Vincent and the relevant state owners accept the
-inventory, protection, acceptance-byte-set, restored-admission, and destruction-
-authority contracts.
+**GitHub body safety:** The canonical formatted body for public umbrella issue
+114145 is `openclaw-scale-to-zero-umbrella-issue-body.md`. Update the live issue
+with `gh issue edit --body-file`; do not round-trip multiline bodies through a
+PowerShell string or array. After every body mutation, compare normalized live
+text to the file and verify nonzero newlines plus rendered headings/lists.
+The canonical RFC PR 46 body is `rfc-pr-46-body.md`; the canonical OpenClaw PR
+112896 body is `openclaw-pr-112896-body.md`. Both follow the same rule.
+
+**Current focus:** Obtain owner review for RFC PR 46, now titled
+"application-consistent recovery for scale-to-zero," and the complete three-PR
+OpenClaw evidence stack: recovery points in PR 112385, final capture in PR
+112865, and restored admission in PR 112896, and the now-complete planned
+Lobster retained-wake evidence stack through fork PR 51. Public umbrella issue
+[openclaw/openclaw#114145](https://github.com/openclaw/openclaw/issues/114145)
+now centralizes the scale-to-zero outcome, operator evidence, competitor
+baseline, Microsoft Scout host boundary, and alternate-solution invitation.
+RFC head `2f290e9` now separates Gateway suspension, source-writer closure,
+capture, durable acceptance, source-compute retirement authority, restore, and
+admission readiness; composes restored admission with opt-in RFC 0018 subjects;
+and makes state-owner inventory plus recovery-journal lifecycle ownership
+normative. PR 112385 head `062f4d9` implements the resulting inventory fix: a
+closed state-owner receipt now binds owner, source runtime generation,
+inventory revision, and exact selected-agent set into recovery-point identity;
+one shared verifier rejects invalid, duplicate, traversal-shaped, and
+non-canonical inventories across the stack.
+The production activation-pinned inventory source remains an explicit
+state-owner integration decision rather than being invented in the private
+composer. The accepted three-model findings
+and the later ClawSweeper JSON-sidecar policy finding are fixed. Durable
+operation intent, result, startup, and readiness records now share one
+operation-scoped SQLite recovery journal. The RFC and all PR bodies carry real
+source-CLI/Gateway proof. No additional OpenClaw implementation PR is needed
+for this merge sequence. Full scale-to-zero still needs the bounded host
+wake/scheduler adapter after the Lobster owner/caller work is ready. RFC 0013,
+RFC PR 46, issue 114145, and `rfc-0013-follow-on-pr-plan.md` now describe three
+deferred evidence slices: an OpenClaw semantic wake receipt, host/Scout wake
+authority and cause coalescing, and readiness-gated retained delivery with
+crash replay. These must not be folded into the current three OpenClaw PRs.
+Vincent and the relevant state owners still need to accept the authoritative
+selected-agent inventory, host closure-evidence trust boundary, recovery-
+journal lifecycle, and core-versus-host restored-admission boundary.
 
 **Parent project:** [`projects/snapshot`](../snapshot/README.md). RFC 0013,
 OpenClaw PR 105718, and `openclaw backup sqlite` remain authoritative for
 SQLite capture, verification, and fresh-target restore.
 
-**Active RFC work:** [openclaw/rfcs#46](https://github.com/openclaw/rfcs/pull/46),
-branch `user/giodl/rfc-0013-continuity-sidecars`, commit `87777dd0910`, stacked
+**Active RFC work:** [openclaw/rfcs#46](https://github.com/openclaw/rfcs/pull/46), ready for review,
+branch `user/giodl/rfc-0013-continuity-sidecars`, commit `2f290e9`, stacked
 on RFC PR 20. It binds a closed owner-selected component inventory, keeps
 ordinary snapshots host-protected, defines a deterministic logical acceptance
 byte set, and links OpenClaw PRs 112385, 112865, and 112896 as non-normative
-implementation evidence for owner review. The
-RFC and live PR body now lead
+implementation evidence for owner review. The RFC and live PR body now lead
 with the safe scale-to-zero motivation, managed-host failure classes, industry
 compute-lifecycle baseline, observable outcomes, and explicit separation
-between the OpenClaw application-consistency layer and host-owned wake. Ready-
-to-file public and private umbrella issue text is in
-`issue-drafts-2026-07-22.md`; neither issue has been filed.
+between the OpenClaw application-consistency layer and host-owned wake. They
+credit Vincent's snapshot and suspension-validation work, Peter's cooperative
+suspension work, and Josh Lehman's SQLite session/transcript and restart-
+recovery work. They state that PRs 112385, 112865, and 112896 are one bounded
+implementation, not a required decomposition; maintainers may choose a smaller
+or different seam that satisfies issue 114145. The public umbrella is filed;
+the private umbrella remains a draft in `issue-drafts-2026-07-22.md`.
+The RFC and public issue now also specify autonomous cron wake and retained
+Teams/API delivery: OpenClaw owns the semantic deadline and reconciliation;
+the host owns retained ingress, alarms, wake coalescing, compute, and delivery
+replay. Wake callers cannot select recovery points, generations, or readiness,
+and central lifecycle records contain no payloads or credentials. The RFC and
+live PR body now also present one bidirectional host/runtime contract:
+OpenClaw owns suspension, offline recovery, and restored-readiness facts; the
+host owns durability, compute generations, wake, placement, and destruction.
+The RFC now recommends a concrete read-only
+`gateway.restore.status({ restoreOperationId })` Gateway Protocol method rather
+than presenting multiple equal observation alternatives. It projects the same
+durable ready record with closed `not-restored|held|ready` results,
+`operator.read` scope, exact operation/generation fencing, and no caller-owned
+`admit` method. PR 112896 now implements that method as representative
+owner-review proof, but this public cross-owner seam still requires Peter's
+confirmation before merge or ship. The implementation simplification audit is in
+`host-runtime-contract-simplification-2026-07-27.md`, and the three-lens review
+is in `gateway-restore-status-role-review-2026-07-27.md`.
 
-**Draft implementation work:** OpenClaw
+**Implementation work ready for review:** OpenClaw
 [PR 112385](https://github.com/openclaw/openclaw/pull/112385), branch
-`user/giodl/rfc-0013-recovery-points`, commit `b483d808916`, contains the first
+`user/giodl/rfc-0013-recovery-points`, commit `062f4d937b3`, contains the first
 private aggregate-recovery-point slice. It composes verified global and agent
 RFC 0013 snapshots against the state owner's exact expected-agent inventory,
-binds exact owner-manifest and artifact identities and sizes, validates a
+binds the state-owner receipt and exact owner-manifest and artifact identities
+and sizes, validates a
 closed value-free obligation vocabulary, marks ordinary composition
 `host-protected`, and derives canonical recovery-point and acceptance-set
 identities. It adds no CLI, plugin, storage, lifecycle, or restored-start
 surface.
 
-OpenClaw draft
+OpenClaw
 [PR 112865](https://github.com/openclaw/openclaw/pull/112865), branch
-`user/giodl/rfc-0013-final-capture`, commit `1ee5956dc02`, is stacked on PR 112385. Its hidden offline operation durably binds host-supplied closure
+`user/giodl/rfc-0013-final-capture`, commit `50148f20782`, is stacked on PR 112385. Its hidden offline operation durably binds host-supplied closure
 evidence to real global and selected-agent snapshots, the canonical aggregate,
-and a full acceptance inventory. Exact response-loss replay returns the same
-committed result; changed requests, partial intent, invalid inventories, and
-tampered bytes quarantine or fail closed. It does not suspend or stop Gateway,
-fence ingress, publish, accept, claim credential-free portability, or authorize
-destruction.
+and a full acceptance inventory. Intent and committed result are stored in
+OpenClaw's stable operation-scoped SQLite recovery journal rather than under
+the caller-selected artifact path. Exact response-loss replay returns
+the same committed result; changed requests, partial intent, invalid
+inventories, and tampered bytes quarantine or fail closed. It does not suspend
+or stop Gateway, fence ingress, publish, accept, claim credential-free
+portability, or authorize destruction.
 
-OpenClaw draft
+OpenClaw
 [PR 112896](https://github.com/openclaw/openclaw/pull/112896), branch
-`user/giodl/rfc-0013-restored-admission`, commit `c96cbda2364`, is stacked on
+`user/giodl/rfc-0013-restored-admission`, commit `5dc5e719e7a`, is stacked on
 PR 112865. Its hidden strict-stdin operation verifies the accepted recovery
-point before mutation, restores only into fresh canonical SQLite targets,
-durably journals exact replay, and emits a private startup descriptor. Gateway
-startup closes work admission before database preflight, reconciles the
-canonical scheduler and required owners, verifies readiness for the same
-accepted identity, and opens admission exactly once. It adds no public config,
-generic lifecycle hook, host wake scheduler, ingress mechanism, or destruction
-authority. The incremental slice is 1,407 additions and 4 deletions across 11
-files; GitHub displays the full three-PR stack while the base PR remains open.
+point before mutation, restores only into fresh canonical SQLite targets, and
+stores replay, startup, and readiness records in the same operation-scoped
+SQLite recovery journal. Gateway startup closes work admission before database
+preflight, reconciles the canonical scheduler and required owners, verifies
+readiness for the same accepted identity, and opens admission exactly once. It
+also exposes the closed, read-only `gateway.restore.status` projection from
+that same restored-start state and recovery journal; it adds no second state
+machine, status file, generic lifecycle hook, host wake scheduler, ingress
+mechanism, or destruction authority. The public method remains representative
+proof pending Peter's explicit owner approval. The exclusive slices are 1,019
+changed LOC for PR 112385, 1,014 for PR 112865, and 2,328 for PR 112896,
+including the status implementation and generated-client follow-up. GitHub
+currently displays a 4,361-line cumulative PR 112896 diff because all three upstream
+PRs target `main` while their fork branches preserve ancestry.
+The restored hold admits only an authenticated local, device-less backend
+probe so a new supervisor can call `gateway.restore.status`; its handshake is
+tracked as root work across restart. Nodes, browsers, enrollment, remote
+clients, ordinary RPCs, generic suspension, and restart drain remain closed.
+GitHub currently marks cumulative child PR 112896 conflicting after `main`
+moved beyond the exact reviewed stack. Rebase all three branches together in
+the next owner-review or merge window; do not churn only the child.
+All three live PR bodies now link issue 114145, cite only the operator issues
+relevant to their slice without claiming to close them, credit the existing
+Vincent/Peter/Josh foundations they compose, and carry the current exact-head
+proof rather than stale pre-review hashes. On the current PR 112896 head, the
+status slice passes its Gateway protocol, server, admission, request-context,
+descriptor, and Admin HTTP RPC coverage; the final handshake/suspension rerun
+passes 51 tests across six projects. Production
+core, core-test, and extension typechecks complete without findings; the
+extension-test typecheck exceeded the local command window without an error,
+so CI is authoritative. The existing private
+`OPENCLAW_RFC0013_RESTORED_ADMISSION_FILE` carrier also makes the changed-file
+gate report 521 `OPENCLAW_*` variables against the 520 budget. Do not raise
+that budget: remove or consolidate the carrier, or get an explicit owner
+decision, before merge. The CI follow-up regenerates the checked-in Swift and
+Kotlin protocol clients and removes two accidental implementation-type
+exports. Its generated diff is stable, targeted Oxfmt and type-aware Oxlint are
+clean, `pnpm tsgo:core` passes, and final `codex review --uncommitted` reports
+no actionable finding.
+Fresh GitHub CI on `b86f135e2a9` cleared the previously failing dependency and
+bundled-protocol gates. The production/test type jobs currently stop in
+unchanged `src/agents/embedded-agent-runner/run/attempt.sessions-yield.ts`
+because the merge-base copy declares unused `originalLength`; PR 112896 does
+not touch that path. Treat this as a moving-main failure, not recovery-code
+evidence, and recheck before any rebase or rerun. Head `5dc5e719e7a` also fixes
+the two branch-owned lint findings (await semantics in the handler test and the
+startup-file line cap); focused tests pass 4/4, targeted type-aware oxlint is
+clean, and the final `codex review --uncommitted` reports no actionable finding.
 
 Lobster [PR 5481](https://microsoft.ghe.com/bic/lobster/pull/5481), branch
 `user/giodl/rfc-0013-host-acceptance-contract`, commit `c313f37c49e`, is the
@@ -71,10 +168,31 @@ cross-language acceptance-set identity, permanent atomic-store contract,
 idempotent replay, conflict quarantine, and fail-closed validation. It has no
 production store, Redis authority, Gateway caller, or destruction API.
 
-**Blocking question:** Maintainers must accept the sidecar ownership boundaries,
-especially the authoritative selected-agent inventory and owner-authored
-portability receipt, before PR 112385 or later implementation surfaces become
-merge-ready or frozen for promotion.
+**Review gate:** The independent GPT-5.6-Sol, Claude Opus 4.7, and GPT-5.5
+review is recorded in `reviews/2026-07-23-three-model/README.md`. All accepted
+findings are repaired: post-intent capture failure quarantines, mutable
+scheduler/status objects are no longer hashed as owner evidence, the RFC/PRs
+describe stable generation-bound evidence without claiming credential-free
+portability, and OpenClaw-owned durable recovery records use SQLite rather than
+JSON sidecars. A real Ubuntu 24.04 WSL proof invoked both hidden source CLI
+commands against current-schema global and `main` SQLite owners, observed
+Gateway admission held during restored startup, committed the `intent`,
+`result`, `startup`, and `ready` rows, observed admission release, and shut the
+Gateway down cleanly. That complete proof was repeated successfully on exact
+child head `bee013ddaada`. The final focused matrix passed 96 tests; production
+types, targeted lint/formatting, Kysely guardrails, and the max-lines ratchet
+also pass. PR 112385 is CI-clean. On PRs 112865 and 112896 every broad CI job
+except `checks-node-compact-small-11` passes; that shard failed identically on
+the original run and two isolated reruns because unrelated
+`src/secrets/runtime.auth-migration-isolation.test.ts` hit its 120-second
+timeout after 709 tests passed. Do not change recovery code for this correlated
+upstream flake. ClawSweeper's exact-head reviews report no actionable code
+findings on either PR and rate the exact-head terminal proof sufficient.
+Maintainers must
+still accept the authoritative selected-agent inventory, host closure-evidence
+trust boundary, journal retention/migration/repair ownership, and whether
+restored admission belongs in OpenClaw core; ingress, wake, placement, and
+destruction remain host-owned.
 
 **Latest drafts:** Lobster fork PR 25 uses existing `BlobClient` ETag CAS to make
 PR 3A's acceptance/replay/quarantine decisions permanent across process, pod,
@@ -1121,6 +1239,9 @@ SafeToDestroy`, exact-source-worker and source-runtime-generation binding,
 20. Author the live Lobster final-capture caller/adopter and a generation-scoped
     provider remover before PR 3E; do not move Gateway, ingress-fence, provider,
     acceptance, or destruction ownership into OpenClaw fork PR 152.
+21. Complete PR 6A after fork PR 38 by adding permanent atomic `replaceAll`
+    adoption from Peter's shipped cron projection hooks and rehydrating the
+    existing Redis scheduler; do not add another OpenClaw scheduler or wake API.
 
 ## Resume Order
 
@@ -1238,3 +1359,281 @@ SafeToDestroy`, exact-source-worker and source-runtime-generation binding,
   gates and has no attached fork checks or review comments yet.
 - Do not wire PR 3D to `ContainerHost` until a live provider exposes a reviewed,
   idempotent remover for one exact source generation.
+
+## 2026-07-26 — Peter-pattern audit and durable wake authority
+
+- Audited current OpenClaw `main`, including Peter's cooperative suspension
+  PR 103618, post-commit cron change hints in PR 103647, lifecycle-owned
+  reconciliation cancellation in PR 104368, restored-startup reconciliation,
+  and later SQLite/restart/catch-up cron work. The consistent ownership pattern
+  is OpenClaw-authoritative SQLite state plus tracked lifecycle projections,
+  not a host-control wake RPC or a second scheduler.
+- Corrected RFC PR 46 and umbrella issue 114145 to reuse those shipped seams.
+  RFC source head is `561a299`; both public bodies now link the host evidence
+  and state that another OpenClaw PR is not expected by default.
+- Audited Lobster's production cron path. Gateway WS `cron.list`, the multi-pod
+  Redis scheduler, managed cold start, routing, retries, in-flight recovery, and
+  cold-wake E2E already exist. Redis is explicitly reconstructable state, so
+  the remaining continuity gap is permanent projection acceptance before the
+  last source generation may be removed.
+- Published fork-only draft
+  [giodl/lobster#38](https://microsoft.ghe.com/giodl/lobster/pull/38), branch
+  `user/giodl/rfc-0013-durable-wake-projection`, commit `3558244775`, stacked
+  on fork PR 28. The 199-line change content-addresses a complete cron snapshot
+  digest, monotonic projection revision, observation time, job count, and
+  optional earliest wake; final acceptance fingerprints it, conflicts
+  quarantine, and destruction authority names the exact projection.
+- The final-handoff authority advances to schema/key v2 so earlier authority
+  cannot be misread as projection-aware. Review also corrected future-deadline
+  validation to use the projection observation time, preserving later exact
+  replay after the scheduled time passes.
+- Verification: `just cargo check --lib`, `just cargo fmt`, and diff checks
+  pass. Native Windows unit-test compilation is blocked by the inherited MIP
+  test-only `windows_sys` failure; Ubuntu WSL is blocked at the private Lobster
+  Cargo registry token. The draft records both limitations.
+- PR 38 is only the authority-contract half of PR 6A. Next implement permanent
+  atomic `replaceAll` adoption and recovery of the existing Redis wake mirror;
+  then prove suspension/mutation races before moving to retained Teams/API
+  causes and shared cold-start coalescing.
+
+## 2026-07-26 — Permanent wake projection replacement and recovery
+
+- Published fork-only draft
+  [giodl/lobster#39](https://microsoft.ghe.com/giodl/lobster/pull/39), branch
+  `user/giodl/rfc-0013-wake-projection-store`, commit `3080b08351`, stacked on
+  fork PR 38. Its reviewer-facing diff is 828 additions across seven files.
+- The live Gateway cron inventory now constructs a canonical digest over
+  sorted `{jobId, enabled, nextRunAtMs}` facts. The permanent Azure Blob CAS
+  journal stores only bounded owner/receipt state, advances revisions
+  monotonically, replays identical replacements, and returns the winner to
+  stale writers so they must reread OpenClaw.
+- Recovery reuses Lobster's existing Redis `SchedulerService`; empty
+  projections clear it, future deadlines restore it, and already-due deadlines
+  return `Due` without manufacturing a later time. Corrupt permanent state
+  fails before Redis is touched.
+- Fixed PR 38's focused destruction-binding test to inspect the actual accepted
+  authorization rather than asking its intentionally persistence-free memory
+  store to perform a lifecycle transition. PR 38 head is now `14426ed63a`.
+- Verification: format and diff checks, `just cargo check --lib`, strict
+  `just cargo clippy --lib -- -D warnings`, and six focused
+  `wake_projection` tests pass. Local-only native-Windows test compilation
+  scaffolding was removed before commit.
+- RFC PR 46 source head `9eed5eb`, its PR body, and umbrella issue 114145 now
+  link both PRs 38 and 39. They state plainly that live OpenClaw hook-to-journal
+  wiring remains before PR 6A is complete; Teams/API retained causes and shared
+  wake coalescing remain PRs 6B/6C.
+- The next-source audit found that Peter's `cron_reconciled`/`cron_changed`
+  seams are plugin API hooks, not Gateway WS events. The correct live adapter is
+  a baked in-container Lobster plugin using the documented single-flight loop
+  against a bounded authenticated host endpoint. That endpoint needs explicit
+  abort/supersession authority because transport disconnect alone cannot prove
+  a stale server-side write did not commit; do not add invented cron events to
+  Lobster's Rust Gateway WS client.
+
+## 2026-07-26 — Durable cron projection cancellation authority
+
+- Published fork-only draft
+  [giodl/lobster#41](https://microsoft.ghe.com/giodl/lobster/pull/41), branch
+  `user/giodl/rfc-0013-cron-projection-adapter`, commit `c30e2fd770`, stacked
+  on fork PR 39. Its reviewer-facing diff is 666 additions and 21 deletions
+  across two files, including a 243-line sibling transaction fixture.
+- Advanced the permanent wake-projection object from schema v1 to v2 while
+  preserving v1 receipt reads and upgrading on the first transactional write.
+  `prepare_replace_all` creates non-authoritative pending state;
+  `commit_prepared` and `abort_prepared` race on the same Blob ETag; a newer
+  prepare supersedes the old attempt; contradictory attempt replay fails
+  closed. Accepted reads and Redis rehydration ignore pending attempts.
+- Review fixed two edge cases before publication: an aborted first attempt
+  still permits legacy direct revision-zero replacement, and preparing against
+  a schema-v1 accepted receipt writes schema v2 rather than an invalid v1
+  object containing pending fields.
+- Verification: `just cargo fmt`, `git diff --check`, `just cargo check --lib`,
+  and strict `just cargo clippy --lib -- -D warnings` pass. Focused unit-test
+  execution is blocked before tests run by five inherited unresolved
+  `windows_sys` references in `mip/engine/staging.rs`; the compiler reports no
+  diagnostic in either changed file. No local dependency workaround is kept.
+- RFC source head is now `cf3cdd8`; RFC PR 46, umbrella issue 114145, and fork
+  PR 39 all link PR 41. They state that this closes the cancellation authority
+  prerequisite but does not claim the production endpoint, scoped auth,
+  storage bootstrap, ECS rollout, or final hook-to-protocol adapter.
+- Next stack the baked-disabled Lobster plugin and bounded host protocol on PR 41. Keep production bootstrap separate until the region-pinned origin,
+  permanent-store construction, and container-scoped authentication decisions
+  are owner-reviewed.
+
+## 2026-07-26 — Baked-disabled OpenClaw cron projection plugin
+
+- Published fork-only draft
+  [giodl/lobster#42](https://microsoft.ghe.com/giodl/lobster/pull/42), branch
+  `user/giodl/rfc-0013-cron-projection-plugin`, commit `dda5fa818e`, stacked on
+  fork PR 41. The reviewer-facing diff is 700 additions and one deletion across
+  11 files; 297 added lines are dependency-free behavioral tests.
+- The image-present plugin uses Peter's shipped `cron_reconciled` baseline and
+  `cron_changed` reread hint. It projects only sorted `{jobId, enabled,
+nextRunAtMs?}` facts, clears on disabled reconciliation, cancels stale work,
+  and waits for tracked work before Gateway shutdown.
+- The client implements the bounded prepare/commit/abort wire contract over
+  HTTPS with container-scoped bearer authentication. It handles stale revision
+  supersession, indeterminate prepare cleanup, and the explicit commit-wins
+  outcome without claiming that a later client abort can reverse accepted CAS
+  authority.
+- The plugin is absent from `plugins.allow` and `plugins.load.paths` and has
+  `enabled:false`; this draft cannot activate the feature. Production endpoint,
+  permanent-store construction, scoped token projection, ECS enablement, and
+  due-at-recovery readiness remain a final PR 6A slice.
+- Verification: `just cron-projection-plugin-test` passes 12/12; the exact
+  plugin packaging/inventory stage of `just code-mode-container-check` passes;
+  `git diff --check` passes. The wider plugin suite cannot start in this
+  isolated worktree because the optional sibling `agent-tools` checkout is
+  absent.
+- RFC source head `2013782`, RFC PR 46, umbrella issue 114145, and fork PRs 38,
+  39, and 41 now link PR 42. The PR body points directly to the public problem,
+  competitor/Scout evidence, relevant OpenClaw issue, and Peter's shipped hook
+  PRs while leaving alternative maintainer implementations explicitly welcome.
+
+## 2026-07-26 — Trusted proxy-pipe cron projection wiring
+
+- Published fork-only draft
+  [giodl/lobster#43](https://microsoft.ghe.com/giodl/lobster/pull/43), branch
+  `user/giodl/rfc-0013-cron-projection-wiring`, commit `7b9b74b1a8`, stacked
+  on fork PR 42. The reviewer-facing diff is 974 additions and 10 deletions
+  across 12 files; 289 added lines are focused sibling/adapter tests.
+- Deleted the assumed public callback/auth decision. The baked-disabled plugin
+  calls the existing loopback-only adapter bridge at `127.0.0.1:18791`; the
+  adapter forwards fixed prepare/commit/abort operations over Peter's existing
+  proxy pipe. Trusted `RuntimeContainerContext` supplies tenant, user,
+  provider, Gateway role, and cron capability; request bodies cannot choose
+  identity, storage, or execution authority.
+- Runtime validation accepts only bounded complete wake facts, computes the
+  canonical digest/earliest future wake, and maps the operation to PR 41's
+  Blob CAS journal. Both the cron scheduler and valid permanent Blob
+  account/container configuration are required; absence returns unavailable.
+- Review caught and fixed a correctness gap before publication: durable commit
+  alone did not rebuild the temporary Redis wake mirror. Every accepted-receipt
+  path now rehydrates PR 39's existing scheduler before success—prepare replay,
+  commit install/replay, and abort-after-commit—so a scheduler failure after
+  durable acceptance is healed by retry instead of being mistaken for success.
+- Verification: `just cargo check --lib` and strict `just cargo clippy --lib`
+  pass; `just cron-projection-plugin-test` passes 13/13; plugin packaging and
+  exact inventory pass through `just code-mode-container-check`; `git diff
+--check` passes. Focused Rust test binaries remain blocked before execution
+  by inherited Windows-only workspace defects (`windows_sys` MIP imports,
+  Unix-only `aether-priv-bridge`, and baseline OpenClaw adapter test/import
+  failures); no unrelated workaround is included.
+- RFC source head is now `d075a24`. RFC PR 46, umbrella issue 114145, PRs 39,
+  41, and 42 all link PR 43 and explain that maintainers may replace the exact
+  composition. Competitor/Scout evidence, the concrete cron report, Peter's
+  hook PRs, Vincent's review role, and Josh Lehman's SQLite relevance remain
+  visible.
+- PR 6A has one owner-reviewed activation/lifecycle slice left: provision the
+  permanent Blob container, add/project the per-user ECS flag through the
+  shared Gateway start overlay, and route PR 39's explicit already-`Due`
+  recovery outcome into retained-cause runtime readiness/sleep veto. The
+  plugin remains feature-off until all of those controls are proven.
+
+## 2026-07-26 — Default-off cron projection activation boundary
+
+- Published fork-only draft
+  [giodl/lobster#45](https://microsoft.ghe.com/giodl/lobster/pull/45), branch
+  `user/giodl/rfc-0013-cron-projection-activation`, commit `6051a7a242`,
+  stacked on fork PR 43. The reviewer-facing diff is 340 additions and 15
+  deletions across 15 files; 208 additions are focused tests/assertions,
+  including inline start-option tests.
+- Provisioned the private `cron-wake-projections-v1` container under the
+  existing runtime Blob account and added an explicit user-scoped
+  `Option<bool>` ECS flag. Only `Some(true)` projects activation through the
+  shared Gateway `extra_env` path; null/false remains inactive.
+- Added child allowlisting and managed pooled-slot restoration so a later user
+  cannot inherit an earlier user's opt-in. The normal plugin master gate stays
+  authoritative, and the overlay preserves the baked loopback config before
+  reversibly changing allow/load membership.
+- Routed an already-`Due` recovery result into a retryable scheduler outcome.
+  The existing tracked plugin retry loop therefore remains non-idle and keeps
+  Peter's cooperative suspension fence closed until OpenClaw rereads and
+  reconciles the due job. Missing accepted state is corrupt; missing ECS,
+  scheduler, or Blob configuration remains fail-closed.
+- Verification: Lobster library check and strict Clippy pass; cron plugin tests
+  pass 13/13; OpenClaw adapter formatting, ECS inventory, `git diff --check`,
+  and 33 EV2 deployment assertions pass. Code-mode packaging/inventory passes
+  before the wider suite stops at the absent optional sibling `agent-tools`
+  checkout. Native-Windows adapter tests retain the inherited workspace
+  blockers documented on PR 43.
+- PR 6A is now represented end to end by fork drafts 39, 41, 42, 43, and 45.
+  No user is enabled; ECS cohort rollout remains an owner decision. The next
+  architectural evidence slice is PR 6B retained Teams/API causes and shared
+  cold-start coalescing.
+
+## 2026-07-26 — Retained-wake authority/core proof
+
+- Published fork-only draft
+  [giodl/lobster#46](https://microsoft.ghe.com/giodl/lobster/pull/46), branch
+  `user/giodl/rfc-0013-retained-wake-authority`, commit `9ec7734678`, stacked
+  on fork PR 45. Its exclusive diff is 1,390 additions: 852 production lines,
+  536 focused test lines, and a two-line module export.
+- Added one permanent, payload-free authority that validates already-retained
+  Teams/API/cron/operator identities, selects accepted recovery authority
+  internally, invokes the existing final-handoff `RetainedWork` revocation
+  race, and coalesces concurrent causes into one destination generation.
+- Unknown provisioning persists pending cause/request unions and retries the
+  same generation. Exact replay preserves ready evidence; a later new cause
+  reopens that generation and requires exact readiness reconfirmation.
+- Focused evidence covers destruction racing Teams work, due cron with no
+  resident compute, concurrent Teams+cron CAS joining, response-loss replay,
+  stale-readiness reconfirmation, and rejection before lifecycle mutation.
+- `just cargo check --lib`, strict `just cargo clippy --lib`, formatting, and
+  diff checks pass. The focused retained-wake test selection passes 6/6; no
+  local Windows dependency workaround remains in the branch.
+- This is the PR 6B authority/core proof, not production owner wiring. Next,
+  add small native Teams and accepted-cron adapters into this contract and the
+  existing managed-start path, then implement PR 6C exact-readiness-gated
+  delivery and crash replay.
+
+## 2026-07-27 — Retained-wake Teams/cron owner adapters
+
+- Published fork-only draft
+  [giodl/lobster#47](https://microsoft.ghe.com/giodl/lobster/pull/47), branch
+  `user/giodl/rfc-0013-retained-wake-owner-adapters`, commit `4c03d0b1e7`,
+  stacked on fork PR 46. The exclusive diff is 870 additions across four files:
+  537 production/module-wiring lines and 328 focused test lines.
+- Added trusted logical-runtime-to-owner resolution, a native inbox
+  metadata-only retained-record lookup, exact permanent cron
+  projection/provider/deadline validation, and deterministic Teams/cron
+  requests into PR 46's single authority.
+- Completed, accepted, dead-lettered, missing, mismatched, stale-projection,
+  and wrong-provider causes fail closed. API/operator causes also fail closed
+  until their semantic owners expose equivalent authoritative stores.
+- The adapters carry no payload, prompt, service URL, acknowledgement, cron
+  expression, job name, credential, recovery point, destination generation, or
+  readiness supplied by the wake caller.
+- Final workaround-free library check, strict Clippy, formatting, and diff
+  checks pass. Six focused tests pass with 4,007 unrelated tests filtered.
+  `codex review --uncommitted` found no discrete correctness issue.
+- This slice does not activate routes/cohorts or gate delivery. Next, owners
+  choose the smallest call-site rollout from already-claimed Teams and
+  accepted-due cron paths; PR 6C then binds delivery to exact restored
+  readiness and proves shared-cold-start crash replay.
+
+## 2026-07-27 — Readiness-gated retained-wake delivery
+
+- Published fork-only draft
+  [giodl/lobster#51](https://microsoft.ghe.com/giodl/lobster/pull/51), branch
+  `user/giodl/rfc-0013-retained-wake-delivery`, commit `f6248d9656`, stacked on
+  fork PR 47. Its exclusive diff is 970 additions across two files: 612
+  production contract/store/coordinator lines and 358 focused sibling tests.
+- Added a separate `retained-wake-delivery/v1` Blob ETag-CAS journal so PR 46's
+  activation bytes remain mixed-version readable. Delivery requires exact
+  accepted recovery, destination generation, and restored-readiness identity;
+  per-cause progress remains independent and dispatch identity survives
+  response loss, readiness reconfirmation, and host restart.
+- Owner delivery remains authoritative: the Teams/cron operation must fence
+  destination and readiness atomically with its side effect. The central
+  journal stores no payload, prompt, credential, cron definition, or owner
+  acknowledgement state.
+- Final `just cargo check --lib`, strict Clippy, focused tests (7/7), formatting,
+  and diff checks pass. Final Codex review found no actionable correctness
+  defect after mixed-version, owner-starvation, authority-rollover,
+  stale-caller, and readiness-refresh repairs.
+- PRs 46, 47, and 51 now represent the planned PR 6B/6C core evidence. Do not
+  invent another evidence PR by default. The next gate is Lobster owner review
+  and selection of a production accepted-final-handoff lookup, canonical
+  opaque-logical-runtime-to-Teams/cron owner mapping, and default-off
+  route/cohort wiring.

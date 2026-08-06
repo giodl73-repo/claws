@@ -15,7 +15,7 @@ Date: 2026-07-23
 ## Proven
 
 - All three starter packages pass ClawHub `package publish --family claw
-  --dry-run --json` at the exact PR #3092 head.
+--dry-run --json` at the exact PR #3092 head.
 - ClawHub's native feed safety suite passes 5/5, with two expected platform
   skips.
 - Exact-head ClawHub feed serialization, artifact extraction, and OpenClaw

@@ -11,14 +11,14 @@ filesystem, shell, or M365 draft work.
 
 ## Review Shape
 
-| Step | Plan | Review focus |
-| --- | --- | --- |
-| 1 | [01-provider-contract-readiness.md](01-provider-contract-readiness.md) | Provider identity, entitlement, readiness, capacity, and degraded states. |
-| 2 | [02-managed-chat-adapter.md](02-managed-chat-adapter.md) | Managed-provider chat adapter, event normalization, abort/cancel, and errors. |
-| 3 | [03-routing-fallback.md](03-routing-fallback.md) | Explicit managed-provider session binding plus Desktop-provider fallback. |
-| 4 | [04-metering-attestation.md](04-metering-attestation.md) | Provider/model/source/outcome/token metadata and source-authenticated evidence. |
-| 5 | [05-desktop-capability-composition.md](05-desktop-capability-composition.md) | #3955 capability requests from managed-provider turns through Desktop policy, approval, and audit. |
-| 6 | [06-dogfood-gates.md](06-dogfood-gates.md) | Flagged dogfood proof, quota/degraded behavior, no token leakage, and no Desktop regression. |
+| Step | Plan                                                                         | Review focus                                                                                       |
+| ---- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| 1    | [01-provider-contract-readiness.md](01-provider-contract-readiness.md)       | Provider identity, entitlement, readiness, capacity, and degraded states.                          |
+| 2    | [02-managed-chat-adapter.md](02-managed-chat-adapter.md)                     | Managed-provider chat adapter, event normalization, abort/cancel, and errors.                      |
+| 3    | [03-routing-fallback.md](03-routing-fallback.md)                             | Explicit managed-provider session binding plus Desktop-provider fallback.                          |
+| 4    | [04-metering-attestation.md](04-metering-attestation.md)                     | Provider/model/source/outcome/token metadata and source-authenticated evidence.                    |
+| 5    | [05-desktop-capability-composition.md](05-desktop-capability-composition.md) | #3955 capability requests from managed-provider turns through Desktop policy, approval, and audit. |
+| 6    | [06-dogfood-gates.md](06-dogfood-gates.md)                                   | Flagged dogfood proof, quota/degraded behavior, no token leakage, and no Desktop regression.       |
 
 ## Stack Boundary
 
