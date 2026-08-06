@@ -22,6 +22,18 @@
 - Skills to use: `project-session`, `project-creator`, and `lobster-pr-ops`;
   use OpenClaw PR/testing skills when the generic OpenClaw slices start.
 
+## 2026-08-06 root cutover review repair #6116
+
+- Replaced the full-runtime `/?health=1` copy of the service/build JSON with a
+  call to the canonical `routes::health::root` handler, directly addressing the
+  requested-change finding without changing redirect behavior.
+- Published exact head `ea0b87812b`. GitHub reports the draft PR mergeable and
+  conflict-free; exact-head Runtime/re-review and human Proof of Presence remain
+  external gates.
+- `git diff --check` and Rust formatting passed. Focused local execution is
+  blocked by the authenticated private Cargo registry; let natural CI validate
+  the exact head rather than manually queueing ADO.
+
 ## Current Session
 
 - Last updated: 2026-08-04.

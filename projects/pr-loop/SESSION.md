@@ -1,5 +1,23 @@
 # PR Loop Session Context
 
+## 2026-08-06 active PR repair pass
+
+- #7268: implemented the missing `IPprStore.LoadAllDegradableAsync()` delegation,
+  merged current `main`, preserved session-token Cosmos reads alongside main's
+  typed partition keys, and published exact head `b55381a18a`. The PR is
+  mergeable; natural Runtime, exact-head re-review, and GitHubPop remain.
+- #6116: removed the duplicated root health response in favor of the canonical
+  health handler and published exact head `ea0b87812b`. The draft PR is
+  mergeable; natural Runtime, exact-head re-review, and GitHubPop remain.
+- Local authenticated .NET/Cargo execution is unavailable, so no ADO run was
+  manually queued. Formatting and diff checks passed.
+- #7039 remains exact-head approved and mergeable at `c9bcd176d1`; its only
+  required blocker is human GitHubPop, while Runtime has not attached.
+- #6839 remains mergeable at `5fe59d5e8b`. Its natural Runtime is now active:
+  image builds, static checks, Rust/JS unit lanes, and repo validation are green;
+  the remaining E2E shards are still running. GitHubPop and exact-head re-review
+  remain external gates.
+
 ## 2026-08-04 #6839 latest Runtime result
 
 - Exact head `0238fee805` is still open and draft. Required Runtime build
