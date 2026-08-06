@@ -1575,6 +1575,15 @@
   latest fork-only upstream PR restacks as parked source/proof state, but do
   not continue restacking unless a concrete CI/review failure or maintainer
   request appears.
+- 2026-08-06 patch-count reconciliation: `lobster-patch-intake-2026-08-06.md`
+  now records that the verified clean `v2026.6.33` surfaces are 28 physical
+  patch files in `C:\src\lobster-promote-633-pinfix` at `e97922975fc7` and 30
+  physical patch files in `C:\src\lobster-promote-633` at `3d09706faaf8`.
+  The newer 30-file branch adds current-main `0031` wake-only Cron and `0032`
+  Channel Participant, then shifts readiness/node-policy/test-stability to
+  `0033` through `0035`. Do not advertise or build a "31 physical patch" fork
+  until a 31st file is named, cleanly applied to `v2026.6.33`, validated, and
+  assigned a deletion condition.
 
 ## Session Checkpoints
 

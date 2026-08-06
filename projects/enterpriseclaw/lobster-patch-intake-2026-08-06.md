@@ -2,20 +2,43 @@
 
 ## Decision
 
-Use the clean `promoteclaw/openclaw-2026.6.33` branch as the intake base.
-Do not port the conflicted 32-patch PR #6839 queue wholesale.
+Use a clean fork line with an explicit patch manifest as the intake base. Do
+not port the conflicted 32-patch PR #6839 queue wholesale, and do not start a
+new image fork from an ambiguous "31 patches" label until the exact file list
+is reconciled.
 
 The working target remains a Lobster-usable OpenClaw image based on signed
 `v2026.6.33` with only traceable, deletable downstream carries. Patch count is
 not a readiness signal; each patch needs a current Lobster dependency, an
 upstream replacement path, and a deletion test.
 
+## Count Reconciliation
+
+The currently verified clean surfaces are:
+
+- `C:\src\lobster-promote-633-pinfix`: 28 physical patch files at
+  `e97922975fc7`, pushed to the `giodl` fork branch
+  `promoteclaw/openclaw-2026.6.33`.
+- `C:\src\lobster-promote-633`: 30 physical patch files at `3d09706faaf8`,
+  numbered through `0035` because `0014`, `0020`, `0021`, `0023`, `0025`, and
+  `0027` are absent. Compared with the 28-file pinfix queue, this branch adds
+  current-main `0031-cron-wake-only-payload-kind.patch` and
+  `0032-channel-participant-capability-surface.patch`, then shifts the
+  readiness/node-policy/test-stability fixups to `0033` through `0035`.
+
+The older "31 physical patch" language belongs to earlier current-main or live
+PR #6839 inventories. It is not currently a verified clean `v2026.6.33` image
+queue in the two clean worktrees. Before starting a fresh fork advertised as
+"31 patches," decide whether the target is the validated 28-file queue, the
+newer 30-file queue, or a newly derived queue with one additional proven carry.
+
 ## Current Queues
 
 | Queue | Worktree | State | Meaning |
 | --- | --- | --- | --- |
 | Reduced replay | `C:\src\lobster-pr5402-reviewfix` | 26 patch files, dirty, branch behind remote by 98 | Prior reduced queue with local validation; useful as proof history, not the clean intake base. |
-| Current promote | `C:\src\lobster-promote-633` | 28 patch files, clean worktree; fork branch `giodl:promoteclaw/openclaw-2026.6.33` at `bf72332b7172e68892bbbfe8724e8e1fc9a962ff` | Preferred `v2026.6.33` intake base. Adds current-main remote-harness carries and replay fixups. |
+| Pinfix promote | `C:\src\lobster-promote-633-pinfix` | 28 patch files, clean worktree; fork branch `giodl:promoteclaw/openclaw-2026.6.33` at `e97922975fc7` | Validated `v2026.6.33` intake base. Adds current-main remote-harness carries and replay fixups without the later current-main wake/channel-participant patches. |
+| Current promote | `C:\src\lobster-promote-633` | 30 patch files, clean worktree; local branch `promoteclaw/openclaw-2026.6.33` at `3d09706faaf8` | Candidate fresh-fork base if we intentionally accept current-main `0031` wake-only Cron and `0032` Channel Participant into the image queue. |
 | Legacy PR #6839 repair | `C:\src\lobster-pr6839-fix` | 32 patch files, unresolved OpenClaw container conflicts | Source of candidate deltas only. Do not resolve or carry wholesale. |
 
 ## Intake Classification
@@ -50,9 +73,20 @@ upstream replacement path, and a deletion test.
 
 ## Next Action
 
-Keep the clean 28-patch queue frozen and move back to the package/image gate
-for `openclaw@2026.6.33`. The remaining image blocker is external feed
-availability, not a missing 32-only patch.
+If the team wants a restart fork, start it from a clean branch and a checked-in
+manifest:
+
+1. Default conservative image path: 28-file `pinfix` queue, because it already
+   has focused validation and a fork push.
+2. Likely current-main parity path: 30-file `current promote` queue, but only
+   after accepting `0031` wake-only Cron and `0032` Channel Participant as
+   intentional carries.
+3. Do not call the target "31 patches" until a 31st physical patch is named,
+   applied cleanly against `v2026.6.33`, validated, and assigned a deletion
+   condition.
+
+The remaining image blocker for the validated 28-file path is external feed
+availability for `openclaw@2026.6.33`, not a missing legacy 32-only patch.
 
 ## Current Proof
 
