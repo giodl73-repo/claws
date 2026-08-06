@@ -66,7 +66,7 @@
   per namespace. The private
   evidence repository at
   `https://github.com/giodl73-repo/lobster-plugins-and-patches` is published at
-  `7993291` with five exact portable patches,
+  `3d8cf3a` with five exact portable patches,
   six sanitized source-rich excerpts, clean-room contracts, and exact Git tree
   identities for all 19 plugin packages. Gio Della-Libera and Omar Shahine
   approved limited disclosure of bounded Lobster source intended for OpenClaw
@@ -79,6 +79,10 @@
   binding and Context Budget token-estimation code, plus authoritative public
   source pointers for Snapshot/scale-to-zero, Rust Node RFC #54, and hosted
   Control UI issue #115423 with PRs #115408/#116013. Its
+  patch-provenance ledger maps all 31 physical patch files to the 20 merged
+  Lobster PRs that first added their current paths and records PR-author counts;
+  PR #5053 is explicitly treated as a consolidation rather than proof of
+  original authorship. The repository's
   shareable ProxyPipe decomposition
   now covers all semantic families, carrier mechanics, plugin dependencies,
   durable ownership, and frame-by-frame retirement. Its EnterpriseClaw upstream
