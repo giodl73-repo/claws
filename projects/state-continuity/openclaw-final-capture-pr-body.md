@@ -1,9 +1,5 @@
 Related RFC: https://github.com/openclaw/rfcs/pull/46
 
-Umbrella outcome: https://github.com/openclaw/openclaw/issues/114145
-
-Non-normative host follow-on evidence (Microsoft access): https://microsoft.ghe.com/giodl/lobster/pull/51
-
 Depends on: https://github.com/openclaw/openclaw/pull/112385
 
 > This is a stacked draft. GitHub cannot use the lower fork branch as an
@@ -118,3 +114,4 @@ Keep this PR draft until RFC #46's portable-handoff ownership split and
 review. A later host integration must supply real `gateway.suspend.*`, ingress
 fencing, clean stop, and provider-generation evidence; this command must not
 grow those host responsibilities.
+

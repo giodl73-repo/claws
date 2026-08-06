@@ -19,10 +19,10 @@
 
 ## Current Session
 
-- Last updated: 2026-07-28
+- Last updated: 2026-07-16
 - Last agent: Codex
-- Current focus: command catalog ownership and observation-lifetime contract
-  refreshed across the RFC and implementation review surfaces.
+- Current focus: command inventory PR1+PR2 promoted to the upstream PR, with
+  a fork-only scoped prompt projection prepared as optional PR3.
 - Active branch / PR:
   - RFC PR: `https://github.com/openclaw/rfcs/pull/32`.
   - Upstream rollup PR:
@@ -427,24 +427,6 @@
   its start placeholder at handoff. Main advanced again after the push, so
   GitHub reports #100960 as `BEHIND`; do not chase a moving tip absent a
   substantive compatibility change or maintainer request.
-
-## 2026-07-28 Ownership And Lifetime Refresh
-
-- Updated RFC 0017 on `openclaw/rfcs#32` at `de47718` to make the catalog's
-  ownership boundary explicit: contributing registries retain command
-  semantics, namespace/conflict handling, registration lifetime, and execution
-  authority.
-- Defined each catalog result as a source-scoped observation snapshot. Record
-  identity supports comparison but is not a capability token or proof that the
-  same runtime registration remains available.
-- Clarified that missing or failed source collection remains unknown, so drift
-  consumers cannot interpret catalog absence as command removal or revocation.
-- Clarified that public, internal, hidden, documentation, and prompt projections
-  are views only; they do not grant or revoke command authority.
-- Aligned the review-facing bodies for RFC #32 and implementation PRs #100960,
-  #104158, #104159, and #104160. The three follow-up PR bodies were also
-  reformatted from flattened Markdown into readable sections.
-- No implementation API or new lifecycle framework was added in this pass.
 
 ## Guardrails
 

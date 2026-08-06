@@ -1,9 +1,0 @@
-{
-  "id": "tools-code-mode",
-  "activation": { "onStartup": true },
-  "configSchema": {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {}
-  }
-}

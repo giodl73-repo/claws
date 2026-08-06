@@ -20,8 +20,10 @@ remaining logical diff is the 13-commit follow-up described here.
    Gateway client, bounded node-host foundation, proof binary, and Linux Tauri
    migration.
 2. **This PR** adds the generic embeddable runtime and conformance layer.
-3. [Windows node #1068](https://github.com/openclaw/openclaw-windows-node/pull/1068)
-   prepares the official Windows tray/node to consume these crates later while
+3. [#116863](https://github.com/openclaw/openclaw/pull/116863) adds the
+   authenticated sidecar contracts and ordinary-command bridge.
+4. [Windows node #1068](https://github.com/openclaw/openclaw-windows-node/pull/1068)
+   independently consumes those contracts behind its replaceable seam while
    retaining C# as its production default.
 
 This PR contains no Windows adapter or product-specific Scout behavior.

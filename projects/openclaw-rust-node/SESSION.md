@@ -20,9 +20,9 @@
 - Active consolidated Rust follow-up worktree:
   `C:\src\openclaw-rust-runtime-followup`.
 - Active Windows adopter worktree: `C:\src\openclaw-windows-rust-sidecar`.
-- Current Windows branch: `agent/rust-node-sidecar-seam-rebase`, with exact
-  head `c0cfa8ba` pushed to
-  `giodl73-repo/openclaw-windows-node:agent/rust-node-sidecar-seam`.
+- Current Windows verified-launch branch: `agent/rust-sidecar-verified-launch`,
+  exact head `199eaa1fcba`, stacked on process-proof fork #3 and the adapter
+  snapshot in upstream draft #1068.
 - Current reviewed `main` commit: `307945482d5543b7e3572bc6c0c288d4ff5b758c`.
 - OpenClaw source audit: `openclaw/openclaw` main at
   `219f27a5ec6b6ed058c95653ac604bc2a25a26d2` on 2026-07-28.
@@ -33,15 +33,167 @@
 
 ## Current Session
 
-- Last updated: 2026-07-30.
+- Last updated: 2026-08-01.
 - Last agent: Codex.
+- RFC [#54](https://github.com/openclaw/rfcs/pull/54) is now at `ea6891d` with
+  a sixth companion contract for live Gateway connection control through the
+  protected sidecar. It keeps immutable capability configuration secret-free
+  and specifies feature negotiation, confidential IPC, per-attempt material,
+  external signing, durable issued-token acknowledgement, three independent
+  generation scopes, cancellation/authorization/denial races, runtime closure,
+  supervisor retirement, and bounded token-mismatch recovery. Its deterministic
+  JSON/SHA-256/device-ID/Ed25519 fixture verifies; Gateway, platform, and CISO
+  role review is recorded beside the RFC; final Codex review is clean. No Rust
+  or adopter consumer is claimed yet. The next slice implements this fixture
+  and state machine in OpenClaw, followed by the independent protected-channel
+  adopter and disposable live-Gateway composition proof.
+- Donor-repository [draft PR #12](https://github.com/giodl73-repo/openclaw-rust-node/pull/12)
+  is stacked on #11 at `3d1357f`; Windows fork
+  [draft PR #4](https://github.com/giodl73-repo/openclaw-windows-node/pull/4)
+  is stacked on #3 at `199eaa1f`. The Rust child now reads a bounded versioned
+  bootstrap from inherited stdin rather than arguments/environment/files and
+  offers its self-computed executable SHA-256 during the authenticated
+  handshake. Windows verifies the exact pin, holds native handles on every
+  parent directory and the executable through process creation/bootstrap,
+  rejects reparse-point path components, and requires the offered identity to
+  match before configuration. Local exact composition passes 122 Rust tests,
+  64 focused Windows tests, and all three fixture blobs. The aggregate harness
+  creates a directory junction and requires rejection, making reparse-path
+  evidence deterministic instead of conditional. Hosted Windows run
+  [30681737723](https://github.com/giodl73-repo/openclaw-rust-node/actions/runs/30681737723)
+  passed the same aggregate; all seven PR #12 checks are green. Initial Codex review
+  found the launch path-substitution P1; the path locks and regression test
+  closed it, and the final uncommitted-fix review returned no actionable
+  finding. Runtime selection remains disabled.
+- Platform signature and package discovery/update, implementation of both
+  connection-control consumers, a real Gateway through the sidecar, crash/
+  resource/audit evidence, opt-in selection, rollout, and rollback remain
+  explicit.
+- Donor-repository [draft PR #11](https://github.com/giodl73-repo/openclaw-rust-node/pull/11)
+  is stacked on #10 at `83f11ff`. It adds a test-only Rust child built solely
+  from public `openclaw-node-host` sidecar APIs and pins Windows fork
+  [draft PR #3](https://github.com/giodl73-repo/openclaw-windows-node/pull/3)
+  at `6b03567a`. The local exact-revision runner passed 122 Rust tests, 61
+  focused Windows sidecar tests, all three byte-exact fixtures, and a real
+  stdin/stdout process exchange covering authenticated handshake,
+  configuration, admission, invocation, and result. Hosted run
+  [30679730608](https://github.com/giodl73-repo/openclaw-rust-node/actions/runs/30679730608)
+  also passed in 3m50s; all seven PR #11 checks are green and the stack is
+  clean. Production bootstrap,
+  transport, selection, supervision, audit, rollout, and rollback remain open.
+- Donor-repository [draft PR #10](https://github.com/giodl73-repo/openclaw-rust-node/pull/10)
+  is stacked on #9 and adds the first pinned cross-repository adopter proof.
+  Hosted run
+  [30679220283](https://github.com/giodl73-repo/openclaw-rust-node/actions/runs/30679220283)
+  passed on head `69528b0`: all three OpenClaw-owned sidecar fixture Git
+  blobs match between shared runtime `84f879ec` and Windows adopter
+  `3ca913a4`, all 122 Rust tests pass, and all 60 focused Windows sidecar
+  tests pass. The harness rejects changed shared crates/fixtures, a non-exact
+  Windows revision, and dirty consumed surfaces. The first hosted attempt
+  found GitVersion's full-history requirement; the final workflow uses a full
+  pinned Windows checkout and retains normal version calculation.
+- Donor-repository [draft PR #9](https://github.com/giodl73-repo/openclaw-rust-node/pull/9)
+  adds a standalone, product-neutral live-Gateway conformance package without
+  changing the byte-exact `crates/` snapshot. Hosted run
+  [30676519342](https://github.com/giodl73-repo/openclaw-rust-node/actions/runs/30676519342)
+  passed on Rust head `84f879ec` against OpenClaw `89394978`: explicit
+  command-surface approval, reconnect onto the approved pairing generation,
+  successful and structured-failure invocation, Gateway-issued device-token
+  reconnect, and fail-closed invalid-token authentication pause. All ordinary
+  CI and Linux/Windows/macOS package-acceptance jobs also pass. The fixture
+  explicitly allowlists only its two neutral commands because current
+  OpenClaw correctly removes custom commands from pairing and invocation
+  surfaces unless `gateway.nodes.commands.allow` opts them in.
+- Fresh private-repository snapshot validation on 2026-07-31 passed all 122
+  tests across `openclaw-gateway-client` and `openclaw-node-host`. The next
+  evidence step is an isolated real-Gateway foreground canary using the
+  synchronized crates, followed by a feature-gated Windows-node adopter run;
+  this is test deployment evidence, not production service readiness.
+- Private-repository PR #8 squash-merged as `e56dd94`, documenting the
+  one-runtime/two-destination layout: `crates/` plus `test/fixtures/`
+  round-trip with OpenClaw, `integrations/edge-chromium/` round-trips with the
+  Microsoft product repositories, and `tests/cross-repo/` owns only pinned
+  composition evidence. The shared crates are consumed, never copied and
+  product-patched downstream.
+- RFC #54 is now at `4ebb92b`. It defines `pub` Rust surfaces as unstable
+  workspace seams with no SemVer promise during incubation, makes no
+  cross-repository distribution commitment, and states that product-native
+  adapters are trusted product code rather than a sandbox boundary. The RFC
+  and #116050 bodies are synchronized and ClawSweeper re-reviews are queued.
+- Final five-PR body cleanup is published. Foundation #116050 now records a
+  current-head `41f4e705887` process/socket proof (OS-assigned health port,
+  health/readiness, SIGTERM, and invocation/result), PR3 #116863 and Windows
+  #1068 describe RFC ownership conditionally, and RFC #54 includes the revised
+  product-neutral topology.
+  The RFC replaces the product-internal PNG with a reviewable SVG that shows
+  product shell -> adapter -> Rust runtime -> Gateway and routes Windows
+  Companion, Scout Cloud, and other controllers only through Gateway authority.
+  ClawSweeper re-review was requested on #116050 and RFC #54.
+- Donor-repository [PR #7](https://github.com/giodl73-repo/openclaw-rust-node/pull/7)
+  squash-merged into `main` as `236c136` after all six hosted checks passed. It adds a byte-exact snapshot
+  of the two crates and six consumed fixtures from OpenClaw #116863 head
+  `8d0a1b013ea`, documents upstream-first synchronization, and adds a separate
+  Rust 1.93 CI lane. Local Rust 1.95 proof passes 122 snapshot tests, strict
+  Clippy/Rustdoc/formatting, and 61 historical-root tests with two intentional
+  live-Gateway skips. The earlier root prototype and draft provenance PR #6
+  remain intact.
+- Draft OpenClaw [#116863](https://github.com/openclaw/openclaw/pull/116863)
+  is the third logical implementation PR at `8d0a1b013ea`, stacked on #116450.
+  It preserves and consolidates the reviewed commits from now-closed fork PRs
+  #193-#195: authenticated bounded framing, negotiation, immutable
+  configuration, the ordinary-command bridge, and three exact corpora. Its
+  Rust workspace has 110 passing tests.
+- Draft Windows [#1068](https://github.com/openclaw/openclaw-windows-node/pull/1068)
+  is now at `3ca913a4`. The former fork PR #2 fast-forwarded into it and is
+  merged, so #1068 contains both the replaceable runtime/dispatcher seam and
+  the independent non-selectable C# adapter. Full build, 60 focused sidecar,
+  3,462 Shared, 2,023 Tray, and 519 Connection tests pass; C# remains the
+  production default and the earlier default-path live Gateway MXC proof is
+  unchanged.
+- RFC #54 is at `4ebb92b` and now records three logically stacked OpenClaw PRs
+  (#116050, #116450, #116863) plus one combined Windows adopter (#1068).
+  Cross-repository Git ancestry is impossible, so #1068 pins and independently
+  reproduces #116863's contracts instead of being Git-rebased onto it.
+- The next legitimate validation slice is a disposable live Gateway through
+  the sidecar boundary, but the current generic sidecar configuration has no
+  Gateway endpoint/auth, external-signing, issued-token, or revocation messages.
+  Define that OpenClaw-owned protected connection contract and exact fixtures
+  before coding the composed proof; do not reintroduce environment/file secrets.
+  Then prove pairing and issued-token reconnect, successful and failed
+  invocation, cancellation, and invalid-token fail-closed behavior. The plan is
+  recorded in `live-sidecar-gateway-proof-plan-2026-08-01.md`.
+  Production signing/package discovery, `system.*` authorization, supervision,
+  audit/resource proof, selection, rollout, and rollback remain after it.
+
+### Historical session log
+
+The entries below preserve earlier exact-head evidence and are superseded by
+the current-session summary above where their PR state differs.
+
+- Draft Windows fork [#2](https://github.com/giodl73-repo/openclaw-windows-node/pull/2)
+  is open at `3ca913a4`, stacked on upstream #1068's exact head. It independently
+  reproduces the Rust sidecar protocol, handshake, and runtime corpora; routes
+  admitted ordinary commands through `NodeCapabilityDispatcher`; and remains
+  non-selectable with C# as default. Full build, 60 focused sidecar tests, 3,462
+  Shared tests (32 existing skips), and 2,023 Tray tests pass. Sequential
+  built-in Codex, correctness, architecture/API, and security reviews are clean after fixing
+  cancellation/registration races, response ordering, admission lifetime,
+  handshake role/version binding, bounded result serialization/envelopes, and
+  retired outbound-frame leakage, serde number parity, and bounded canonicalization
+  across typed, element, node, and document payloads. The final full suite passed.
+- RFC #54 sidecars and durable PR body now record that fork #2 closes the
+  independent-consumer/vector gate for consolidating OpenClaw fork #193-#195
+  into candidate PR3. Remaining adoption gates are verified process/artifact,
+  protected bootstrap, concrete IPC, Gateway/pairing/token lifecycle,
+  `system.*` authorization, health/crash/audit/resource proof, selection,
+  rollout, and rollback.
 - Final sequential review closeout completed for the four public review
   surfaces. Foundation #116050 is at `41f4e705887` with 56 Rust tests;
   follow-up #116450 is at `894d125ee76` with 73 Rust tests; RFC #54 is at
   `923aed0e1f2`; Windows #1068 is at `c0cfa8ba668`. Core, architecture/API,
-  and security reviewers are clean after all findings were resolved. The
-  standalone Codex CLI review remained quota-blocked and is disclosed rather
-  than represented as a pass.
+  and security reviewers are clean after all findings were resolved. The three
+  OpenClaw fork PRs and Windows adopter PR also completed their requested Codex
+  reviews; Windows #2's exact-head Codex review and three-model panel are clean.
 - Windows #1068 now makes runtime connect cancellation explicit, retires every
   cancelled candidate generation before releasing the connector, disposes
   substitute runtimes outside the lifecycle lock, handles `Disposed` from any
@@ -528,9 +680,10 @@
 
 ## Open Threads
 
-- RFC 0028 now has five companion documents under `rfcs/0028/`: Gateway client
-  v1, node runtime v1, future sidecar hosting v1, conformance/adoption plan, and
-  implementation/evidence inventory. Gateway, platform, CISO, release, and
+- RFC 0028 now has six companion documents under `rfcs/0028/`: Gateway client
+  v1, node runtime v1, sidecar hosting v1, sidecar Gateway connection control
+  v1, conformance/adoption plan, and implementation/evidence inventory. Gateway,
+  platform, CISO, release, and
   maintainer role review is recorded in
   `rfc-0028-companion-spec-role-review-2026-07-30.md`. The review explicitly
   separates the current foreground proof host from a production sidecar and

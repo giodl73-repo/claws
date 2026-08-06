@@ -81,7 +81,7 @@ Defines:
 - final owner capture after authoritative quiescence;
 - immutable host acceptance bound to the aggregate manifest;
 - replay after unknown publication outcome;
-- generation-bound `sourceComputeRetirementAuthorized`;
+- generation-bound `safeToDestroy`;
 - source retention and quarantine on uncertainty.
 
 Does not define object-store APIs, placement, retention policy, or Elastic wake.
@@ -385,17 +385,9 @@ scheduler state, and open admission exactly once.
 - ordinary startup unchanged;
 - no public generic restore-hook framework.
 
-**Readiness composition:** when RFC 0018 is available and enabled, publish one
-required `RecoveryPointRestored` condition from the same durable record that
-opens admission. Preserve `gateway.restore.status` as the independently useful
-exact operation-fenced query, with both surfaces reporting the same readiness
-generation and subject identities when composed.
-
 **Evidence slice:** fresh restore, missing dependency hold, corrupt component
 quarantine, scheduler reconciliation, required owner readiness, and one-time
-admission. The recovery journal must also prove schema-version rejection,
-corruption quarantine, explicit repair ownership, active-record retention, and
-idempotent terminal cleanup.
+admission.
 
 ### PR 5: Lobster crash-safe restore replay
 
@@ -428,156 +420,19 @@ Phase B
 All journals and persistent operation paths are scoped by stable request
 identity. Contradictory replay quarantines.
 
-## Phase 2: Cron And Retained-Ingress Wake
+## Deferred Phase 2: Elastic Wake
 
-Do not fold wake orchestration into OpenClaw PRs 112385, 112865, or 112896.
-Those PRs prove the smaller recovery transaction. After their ownership split
-is accepted, use these bounded follow-on evidence slices:
+Do not include Elastic wake in the first replacement series. After PR 5 proves
+Portable crash replay, add one separate sidecar and implementation pair for:
 
-### PR 6A: Host/Scout durable cron projection
+- retained Teams/API work;
+- semantic cron wake registration;
+- coalesced `EnsureRuntimeReady`;
+- readiness-gated delivery;
+- absent-compute quarantine.
 
-**Repo:** host implementation; the public RFC remains product-neutral
-
-**Depends on:** OpenClaw PRs 103647 and 104368, final capture, restored
-admission, and permanent host acceptance
-
-**Purpose:** implement OpenClaw's documented safe external cron projection.
-Adopt the exact scheduler only from `cron_reconciled`, treat post-commit
-`cron_changed: scheduled` as coalescible reread hints, and make `replaceAll`
-return only after the host durably accepts the complete wake set. Atomically
-bind the accepted projection revision, final recovery point, and revocable
-sleep authority.
-
-**Reuse:** Peter's existing cron hooks and cancellation model, tracked root
-work under `gateway.suspend.*`, the cron owner's existing `nextWakeAtMs`, and
-restored startup reconciliation. Do not add a second OpenClaw scheduler, wake
-API, continuous per-mutation host callback, or core payload store.
-
-**Evidence slice:** disabled/no-deadline state, one future deadline, a committed
-schedule mutation racing suspension, stale projection cancellation, exact
-durable replacement, and restored reconciliation accepted before admission.
-
-**Current fork evidence:**
-[giodl/lobster#38](https://microsoft.ghe.com/giodl/lobster/pull/38)
-is a compact draft stacked on fork PR 28. It content-addresses the complete
-projection summary, binds its monotonic revision into final acceptance and
-destruction authority, and advances the permanent authority schema to v2.
-Stacked [giodl/lobster#39](https://microsoft.ghe.com/giodl/lobster/pull/39)
-adds atomic permanent `replaceAll`, stale-writer supersession, canonical digest
-construction from the live Gateway cron inventory, and recovery into the
-existing Redis scheduler. It is 828 additions across seven files, including
-286 lines of focused tests/fixtures. Stacked
-[giodl/lobster#41](https://microsoft.ghe.com/giodl/lobster/pull/41)
-makes prepare, commit, abort, and newer-attempt supersession contend in the
-same permanent CAS state, closing the transport-disconnect cancellation gap
-across fungible host pods. Stacked
-[giodl/lobster#42](https://microsoft.ghe.com/giodl/lobster/pull/42)
-adds the image-present, baked-disabled OpenClaw plugin and bounded protocol
-client. Its complete reread loop uses Peter's shipped hooks, excludes job
-definitions and credentials, and durably arbitrates lifecycle cancellation.
-Stacked [giodl/lobster#43](https://microsoft.ghe.com/giodl/lobster/pull/43)
-uses the existing loopback proxy-pipe bridge, derives owner/provider authority
-from trusted runtime context, persists through Blob CAS, and rehydrates the
-existing Redis scheduler on every accepted-receipt path. This deletes the need
-for a new public endpoint or reusable bearer design. Stacked
-[giodl/lobster#45](https://microsoft.ghe.com/giodl/lobster/pull/45)
-completes the default-off PR 6A activation boundary: private permanent Blob
-container provisioning, explicit per-user ECS projection through the shared
-Gateway start path, pooled-slot reset, and tracked retry/sleep-veto handling of
-an already-due recovered projection. Actual ECS cohort rollout remains an
-owner decision.
-
-The hook audit fixes the live topology: `cron_reconciled` and `cron_changed`
-are plugin API observations, not Gateway WS events. The adapter should therefore
-be a small baked in-container Lobster plugin implementing OpenClaw's documented
-single-flight/coalescing loop and calling one bounded authenticated host
-projection endpoint. The host endpoint must make reconciliation cancellation
-and supersession authoritative; a dropped HTTP connection alone cannot prove
-that an already-dispatched stale write did not commit. Do not emulate these
-hooks in the Rust Gateway WS client.
-
-### PR 6B: Host/Scout wake authority and coalescing
-
-**Repo:** host implementation; the public RFC remains product-neutral
-
-**Fork draft:** [giodl/lobster#46](https://microsoft.ghe.com/giodl/lobster/pull/46)
-
-**Branch:** `user/giodl/rfc-0013-retained-wake-authority`
-
-**Head:** `9ec773467851224883e27196f4f50737556208f1`
-
-**Depends on:** PR 6A, revocable sleep authority, and one
-generation-scoped ensure-runtime-ready path
-
-**Purpose:** atomically accept the recovery point, wake receipt, and sleep
-authority; durably retain Teams/API work before acknowledging it; schedule the
-semantic deadline; revoke sleep on a new cause; and coalesce Teams, API, cron,
-and operator causes into one idempotent provisioning operation.
-
-Wake callers supply only previously retained cause identities. They cannot
-choose the accepted recovery point or destination generation and cannot supply
-readiness. Central lifecycle records contain no retained payload or credential.
-
-**Keep owner-controlled:** Teams payloads and acknowledgement, host alarms,
-placement, compute lifecycle, cold-start lead, and delivery retries.
-
-**Evidence slice:** a Teams cause racing destruction, a deadline with no
-resident process, concurrent causes joining one destination generation, and
-unknown provisioning retaining every cause.
-
-Fork PR 46 is the authority/core portion of this slice. It composes the
-existing final-handoff revocation race and managed-start seam, but deliberately
-does not yet wire production Teams/cron owner adapters or delivery. Those
-adapters should translate only already-retained owner identities into the
-contract; they must not move payloads, acknowledgements, scheduler truth, or
-credentials into the central lifecycle journal.
-
-Stacked fork draft [giodl/lobster#47](https://microsoft.ghe.com/giodl/lobster/pull/47)
-adds the production-backed validation/request-construction portion: native
-Teams partition/activity/sequence metadata and the accepted permanent cron
-projection/provider/deadline are revalidated through their owner stores and a
-trusted logical-runtime directory before entering PR 46. It deliberately does
-not activate routes/cohorts or claim exact restored readiness.
-
-### PR 6C: Readiness-gated delivery and crash replay
-
-**Repo:** host implementation
-
-**Fork draft:** [giodl/lobster#51](https://microsoft.ghe.com/giodl/lobster/pull/51)
-
-**Branch:** `user/giodl/rfc-0013-retained-wake-delivery`
-
-**Head:** `f6248d9656`
-
-**Depends on:** PR 6B and OpenClaw restored-admission evidence
-
-**Purpose:** consume the exact restored-admission readiness identity before
-each owner delivers retained work, preserve independent delivery and
-acknowledgement state, and replay the same winning generation after host exit.
-
-**Evidence slice:** one retained Teams message and one cron deadline share one
-cold start; OpenClaw reconciles scheduler state before admission; the host
-crashes after restored-ready but before completion; restart reuses the same
-destination and delivers/acknowledges each cause exactly through its owner.
-
-Fork PR 51 supplies the core delivery evidence: it persists a separate
-payload-free CAS journal before crossing an owner boundary, requires the exact
-accepted recovery point, destination generation, and restored-readiness fence,
-keeps Teams/cron progress independent, and reuses deterministic dispatch
-identity across response loss and restart. It does not activate production
-Teams or cron delivery. Live wiring remains fail-closed until Lobster owners
-choose the accepted-final-handoff lookup and canonical opaque-logical-runtime
-to semantic-owner mapping; the owner operation must enforce the destination
-and readiness fence atomically with its side effect.
-
-PRs 6B and 6C may be combined if the atomic authority, retained-delivery, and
-crash-replay gates remain independently testable. This is a review topology,
-not a required implementation decomposition.
-
-Do not open another OpenClaw PR by default. If the end-to-end host proof exposes
-an invariant the shipped hooks and suspension result cannot express, author the
-smallest extension of those existing owner seams and document the exact failed
-proof first.
+This prevents scale-to-zero policy from obscuring the smaller recovery
+transaction.
 
 ## Old-To-New Mapping
 
@@ -614,16 +469,11 @@ proof first.
 
 ## Immediate Next Action
 
-Keep the RFC and implementation evidence drafts reviewable while Vincent and
-the relevant OpenClaw/Lobster owners review the ownership split. Review PR 43's
-loopback/trusted-context/storage composition together with PR 45's default-off
-Blob/ECS/pooled-reset/due-retry activation boundary. PR 6A is now represented
-end to end in fork drafts; actual ECS cohort rollout remains owner-controlled.
-Review fork PR 46's PR 6B authority/core proof together with PR 47's owner
-validation/request construction and PR 51's PR 6C readiness-gated delivery
-journal/crash replay. The planned evidence stack is now represented. The next
-step is owner review and selection of the smallest production
-accepted-final-handoff lookup, logical-runtime owner mapping, and route/cohort
-wiring from already-claimed native Teams and accepted-due cron paths into
-Peter's managed-start path. Keep payloads, acknowledgements, scheduler truth,
-credentials, and atomic delivery fencing with their semantic owners.
+Keep PRs 1, 2, 2B, and 3A-3D draft while their reviews run. PR 3D's source audit
+is recorded in `pr3d-source-audit-2026-07-22.md`. Final owner capture now exists
+in draft PR 112865, but a live Lobster caller and live generation-scoped
+provider remover remain missing. Obtain those seams before PR 3E; do not
+simulate them with advisory Redis state or unsupported Plex lifecycle
+vocabulary. Do not add a read-then-delete destruction check, new Gateway pause
+API, provider registry, credential-free portability claim, or merge-ready
+surface until Vincent confirms the owner boundary.

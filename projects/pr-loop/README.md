@@ -13,7 +13,6 @@ into mergeable, reviewed, useful PRs.
 | Area            | File         |
 | --------------- | ------------ |
 | Session handoff | `SESSION.md` |
-| Live chain fronts | `fronts.md` |
 
 ## Active Work
 

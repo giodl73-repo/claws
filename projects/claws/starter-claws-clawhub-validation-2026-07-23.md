@@ -44,28 +44,8 @@ Date: 2026-07-23
 
 - Production ClawHub was used for skill search, exact release resolution,
   integrity/security checks, and installation.
-- Production Convex was not modified because the experimental ClawHub stack is
-  not deployed. The whole-Claw registry path was instead proven against an
-  isolated local Convex deployment running the exact PR #3092 source.
+- Whole-Claw publication and discovery used deterministic local feed/artifact
+  construction from the exact PR #3092 source. It did not write to production
+  Convex because the experimental ClawHub stack is not deployed and no local
+  authenticated Convex environment is configured.
 
-## Authenticated Whole-Claw Registry Round Trip
-
-- Signed in through local dev auth as `local-official-member`, created a real
-  API token, and published a uniquely named finance starter owned by the
-  `local-official-org` publisher through the ClawHub CLI.
-- The publish returned the staged `pending-publication` contract. Mock
-  prepublication workers completed the normal staged checks and finalized the
-  release, after which `package explore` found it through registry search.
-- Published the hosted Claws feed through `catalogFeed:publish`, selected the
-  exact package candidate, fetched artifact metadata and bytes, and verified
-  that the downloaded SHA-256 matched both metadata and feed integrity.
-- The finalized release used the supported `legacy-zip` transport. Safe
-  extraction produced the expected package root, which then passed real WSL
-  OpenClaw preview, consent-bound apply, status, consent-bound remove, and
-  final empty-status checks.
-- Final proof package: `claw-roundtrip-mrxofhri`; artifact integrity:
-  `sha256:bf48cf7bd716bbeed72a19470cbdcdb309c97069fad6af9dc77dafe633cc900d`.
-- Windows-only harness accommodations covered Convex CLI/Node teardown, a
-  stale shared dependency install, and browser/path selection. All temporary
-  source changes were removed; both ClawHub worktrees are clean and local
-  services are stopped.

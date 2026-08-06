@@ -9,6 +9,8 @@ notes. Admin-plane work belongs in `projects/admin/`.
 | ------------------------------------------- | ------------------ |
 | Scout feeds and catalog work                | `feeds-scout.md`   |
 | ADO pipeline queueing and Azure login state | `ado-pipelines.md` |
+| Official Rust node-host proposal            | `openclaw-rust-node-host-proposal.md` |
+| Rust node-host role review                  | `openclaw-rust-node-host-role-review-2026-07-28.md` |
 
 Admin spaces, policy baseline admin state, and Partner Center notes moved to
 `projects/admin/`.

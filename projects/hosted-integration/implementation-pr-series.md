@@ -1,9 +1,5 @@
 # Hosted Integration Implementation PR Series
 
-> Capability/dependency source plan. For current fork dispositions, canonical
-> landing packets, and superseded PR replacements, use
-> `landing-ledger-2026-07-27.md`.
-
 ## Goal
 
 Land the bundle-centered architecture through additive, independently

@@ -19,12 +19,12 @@
 
 ## Current Session
 
-- Last updated: 2026-07-24.
+- Last updated: 2026-07-22.
 - Last agent: Codex.
-- Current focus: clear GitHubPop on exact-head-approved #5336; finish OpenClaw
-  2026.7.1 promotion #5402; then land the #5541 Active/Previous/Candidate slot
-  foundation and its sibling #5681 staging and #5646 flighting follow-ups,
-  while continuing the remaining Scout/node delivery fronts.
+- Current focus: drive ready exec-observability/safety slice #5491, draft
+  structured-workspace slice #5505, current-head node invocation #4648, and
+  offline-node remediation #5460 while continuing the corrected profile-free
+  #5336 convergence series.
 - Active branches / PRs: Lobster #4648 at `59a3973ff2`; #5460 at
   `865df0ade7`; #5422 at `8feadccf92`; shared CI repair #5495 at
   `7d76d8ff68`; #5336 at `2f2644b0bb`; #5491 at `b5e5a25869`; draft #5505 at
@@ -37,58 +37,8 @@
   separate migration to released/quarantine-cleared `productivity` only after
   delta, drift, atomicity, rollback, and deletion proof. The PR is mergeable;
   review was reset by the corrected push, `Lobster-Runtime-PullRequest` is
-  `Lobster-Runtime-PullRequest` is green, Edpiva and Galin approved the exact
-  head, and `GitOps/GitHubPop` is the only remaining enforced check.
-
-### 2026-07-24 PromoteClaw slot and Gateway lifecycle
-
-- #5402 is the independent OpenClaw 2026.7.1 promotion front. #5541 adds three
-  stable physical roles: Active, Previous, and a dark Candidate. Draft #5681
-  adds guarded PromoteClaw Candidate staging from an exact successful main
-  Official build; draft #5646 proposes explicit-user then cohort/percentage
-  flighting. Merge #5541 before either sibling follow-up.
-- Candidate staging is explicit after the version PR merges: validate island
-  301, deploy and verify it, then repeat for 302. It does not change Active;
-  promotion and rollback are separate governed role-map actions.
-- Omar's two-Gateway idea is useful for version preview, slow-roll flighting,
-  fast rollback, and wedged-Gateway recovery only when each Gateway has isolated
-  runtime/state and one route authority pins a user/session to exactly one
-  writer. Never run two versions against the same mutable OpenClaw home: cron,
-  plugins, SQLite/config migration, and channel effects can duplicate or
-  corrupt work. The slot model is preferred; a same-worker two-Gateway
-  optimization needs equivalent port, state, job, identity, capacity, and
-  compatibility isolation.
-- Live triage: #5336 is the only non-draft, mergeable authored PR with an
-  exact-head approval and every enforced check green except GitHubPop. #5422
-  also has exact-head approvals and no other red attached check but conflicts
-  with main; #5481 has exact-head approval and no other red attached check but
-  remains draft.
-
-### 2026-07-24 delivery-loop diagnosis
-
-- The authored Lobster portfolio has 17 open PRs: six drafts, five children
-  based on another open branch, and two conflicts. All 17 show GitHubPop red.
-  Runtime PR state is one success (#5336), six failures, two cancellations, two
-  missing contexts, five expected-neutral stacked checks, and one active queue
-  (#5402). Therefore only #5336 is at a just-in-time human gate; the rest need
-  CI, restacking, or draft/parent progress first.
-- Failed Runtime PR cycles are expensive: representative current runs took
-  about 57 minutes (#5460), 58 (#5541), 79 (#5491), and 191 (#5424). With
-  serialized admission, ten non-draft main-base fronts require roughly a full
-  working day for one pass before any corrective rerun.
-- Last-push approval multiplies that cost. #5336 has 15 commits/40 review
-  events, #5402 has 22/57, and #5541 has 7/20. Small fixes repeatedly create a
-  new full CI plus approval cycle even when prior reviews were positive.
-- Shared gates add false branch work: the hard-mint real-user Graph/SPO lane is
-  the recurring failure on #4648, #5424, #5460, #5491, and #5495. Treat that
-  as one shared infrastructure/proof problem rather than independently churning
-  each branch.
-- Operating correction: keep one main-base merge front active per chain; batch
-  review fixes into one locally-proved push; request last-push approval only
-  after that head is stable; perform GitHubPop just in time; and leave children
-  draft/neutral until their parent merges and they can be retargeted to main.
-  Immediate order is #5336 Pop/merge, #5402 terminal diagnosis and one repair
-  cycle, #5541 repair/merge, then retarget #5681 and #5646 one at a time.
+  queued, Build Validation is not yet attached, and `GitOps/GitHubPop` remains
+  the known failing operational check.
 
 ### 2026-07-22 node and #551 execution
 

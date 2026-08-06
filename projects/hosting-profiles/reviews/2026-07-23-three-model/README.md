@@ -8,9 +8,9 @@ Hosting Profiles implementation diffs.
 
 | Review | Model | Mandate | Result |
 | --- | --- | --- | --- |
-| Architecture | GPT-5.6-Sol | Contract coherence and OpenClaw ownership | Approve |
-| Resilience | GPT-5.5 | Adversarial runtime, reliability, and security | Ship |
-| Maintainer | GPT-5.4 | API compatibility, repository fit, and landing shape | Approve |
+| Architecture | GPT-5.6-Sol | Contract coherence and OpenClaw ownership | Request changes |
+| Resilience | GPT-5.5 | Adversarial runtime, reliability, and security | Block |
+| Maintainer | GPT-5.4 | API compatibility, repository fit, and landing shape | Request changes |
 
 The prompt and final result for each review are retained. Transient CLI logs are
 not retained because they contain verbose source traversal rather than review
@@ -33,21 +33,30 @@ pairing, and live command arrays instead of consuming the canonical effective
 node-command policy. The current test proves canonical config field names, not
 agreement with the command authorization path.
 
-## Final Disposition
+## Disposition
 
-All confirmed findings were fixed and re-reviewed. The final exact heads are:
+The foundational direction remains sound, and no reviewer found Lobster, OCC,
+or AgentHarness coupling. The current package should not be presented as
+conformant until these changes are made:
 
-- RFC 0018: `9e87932863c`
-- readiness implementation: `c1919669c3f`
-- RFC 0023: `98b0713d271`
-- Hosting Profiles implementation: `40b5b2e59d9`
+1. Enforce and redact provider results before caching or projection. Retain raw
+   invocation ownership after timeout so a cancellation-ignoring provider
+   cannot create overlapping work; bind cache and cancellation to registry
+   generation.
+2. Make `TrustedProxyReady` consume or prove the real authentication contract,
+   including loopback behavior, and test authenticated ingress plus forged and
+   direct-header rejection.
+3. Keep unprofiled readiness byte-compatible. Emit activation and profile-only
+   conditions only for a selected profile, or deliberately move a global
+   activation contract into RFC 0018 and regenerate every protocol surface.
+4. Consume the canonical effective node-command policy rather than rebuilding
+   authorization semantics inside hosting readiness.
+5. Either implement RFC 0023's host-visible result, operator inheritance,
+   immutable conformance records, and full matrix, or narrow V1 to the standard
+   profile subset this implementation actually delivers.
+6. Align stable workspace reasons and deterministic condition ordering between
+   both specs and code.
 
-The corrections cover provider bounds/redaction, duplicate registration,
-atomic config/registry publication, deterministic projections, bounded
-workspace and pairing recovery, trusted-proxy ownership, unprofiled
-compatibility, canonical command policy, activation defaults, and profile
-attribution on failure. No reviewer found Lobster, OCC, or AgentHarness
-coupling.
-
-The original prompts and findings remain in this directory. The three
-`final-*-result.md` files record the post-fix verdicts.
+These are pre-landing contract corrections. They do not invalidate readiness
+conditions or standard profiles as OpenClaw primitives; they make the proposed
+support promise match what OpenClaw can enforce and test.

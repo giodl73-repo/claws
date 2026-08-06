@@ -21,15 +21,11 @@
 
 ## Current Session
 
-- Last updated: 2026-07-28.
-- Last agent: Codex.
-- Current focus: RFC 0025 now defines the full ownership chain for operational
-  facts: the semantic owner owns fact meaning and owner-native lifetime;
-  diagnostics/hooks/renderers/exporters own projection delivery and retention;
-  and any alerting, admission, retry, repair, quota, or enforcement remains
-  owned by the acting consumer. RFC 0018 remains the canonical current-state
-  readiness owner. Signals remains a conformance and projection discipline,
-  not an event bus, evaluator, retention service, audit chain, or policy engine.
+- Last updated: 2026-07-21.
+- Last agent: Copilot.
+- Current focus: reviewed fork drafts #145-#150 remain frozen evidence
+  snapshots. Runtime LLM usage owner selection now routes through existing
+  upstream PR #107937 rather than a duplicate promotion.
 - Active branch / PR: fork draft
   [giodl73-repo/openclaw#150](https://github.com/giodl73-repo/openclaw/pull/150),
   head `user/giodl/signals-runtime-llm-usage` at `06ed6cb65ba`, stacked on fork
@@ -43,9 +39,7 @@
   `0ac31a744a5`, which is stacked on fork draft
   [#145](https://github.com/giodl73-repo/openclaw/pull/145) at
   `381c85fea31cb3d79ea08bce99e948939b49de53`. Local RFC branch
-  `user/giodl/rfc-0025-signals` remains intentionally unpushed at `87d6df8`,
-  three commits ahead of `origin/main` after rebasing over the workflow-only
-  RFC main change.
+  `user/giodl/rfc-0025-signals` remains unpushed.
 - Contributor PR:
   [openclaw/openclaw#111065](https://github.com/openclaw/openclaw/pull/111065)
   is logging-only again at `917815b6049364b51497dbb7a4c519eccef42c71`.
@@ -180,19 +174,6 @@ fork/user/giodl/base-telegram-draft-visible-failures` completed cleanly on
   and specialist review is required for security, authorization, privacy,
   destructive-action, audit, and usage/cost meaning. Enforcement remains
   owner-local with no manifest, scanner, or release matrix.
-- Ownership/lifetime review: RFC 0025 and all three normative contract surfaces
-  now require owner-native fact identity and lifetime, projection delivery and
-  retention ownership, and explicit action authority. Terminal attempts,
-  current subject revisions, policy evaluations, findings, and usage intervals
-  retain their native renewal rules. Projection replay cannot renew owner
-  state, retained telemetry does not become current or audit-grade by itself,
-  and correlation identity is not authorization. The implementation plan and
-  Telegram conformance record use the same model.
-- Validation: `git diff --check` passed before commit. Final
-  `codex review --uncommitted` found no discrete inconsistency or regression.
-  Two auxiliary review reads logged the known missing Windows sandbox helper,
-  but the review completed successfully. No runtime code or fork evidence PR
-  was changed.
 
 ## Resume Checklist
 

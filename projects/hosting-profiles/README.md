@@ -14,15 +14,14 @@ runtime evidence -> readiness conditions -> host-facing signal
                     optional hosting-profile preset
 ```
 
-## Readiness Subject Identity
+## Runtime Activation Context
 
-RFC 0018 now owns one identity package for every canonical readiness result.
-The Gateway is the producer; conditions identify the config, plugin set,
-workspace, owner resource, profile, node controller, or plugin resource they
-actually describe. Hosts may provide `OPENCLAW_INSTANCE_ID` for a fingerprinted
-host-workload parent, while OpenClaw generates process and Gateway identities
-at their own renewal boundaries and reconciles all other subjects from their
-owners.
+Hosting Profiles are also the OpenClaw entry point for a minimal runtime
+activation context. OpenClaw resolves a logical runtime id and a unique
+process/container incarnation id, then reports them with the selected profile
+and readiness result. Launchers may provide stable identities through startup
+arguments, environment, or a mounted descriptor; OpenClaw generates local
+defaults so existing installations remain zero-configuration.
 
 Managed Configuration, Hosted Integration, and Runtime State Continuity keep
 ownership of configuration sources, host-bundle selection, and restore state.
@@ -31,7 +30,7 @@ Hosting Profile composes those conditions into a support contract without
 copying their configuration, credentials, or state into a new envelope.
 
 This is the disposition for Lobster's broad environment/startup ABI: retain a
-small documented Gateway identity input, move ordinary settings to Managed
+small documented activation carrier, move ordinary settings to Managed
 Configuration, move enterprise bindings and credentials to their owners, and
 keep container-only implementation details in the host.
 
@@ -53,59 +52,18 @@ keep container-only implementation details in the host.
 | Compact upstream PR series for the RFC and first implementation slices         | `openclaw-pr-plan.md`                   |
 | Live GitHub evidence for readiness demand and extensibility boundaries         | `github-readiness-demand-2026-07-10.md` |
 
-RFC 0018 also carries the non-normative
-`rfcs/0018/readiness-platform-comparison.md` sidecar. It compares the contract
-with Kubernetes, Docker, systemd, ASP.NET Core, Spring Boot, and OpenTelemetry,
-then separates required v1 guarantees from host-owned and deferred behavior.
-
 ## Active Work
 
 | Repo                  | PR / Issue                                                                             | Branch                                             | Status   | Purpose                                                                                           |
 | --------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------- |
 | bic/lobster           | TBD                                                                                    | TBD                                                | Analysis | Inventory host pressure and patches OpenClaw should absorb as generic contracts.                  |
 | openclaw/rfcs         | [RFC 0018 / PR 33](https://github.com/openclaw/rfcs/pull/33)                           | `user/giodl/standard-hosting-profiles-ready-check` | Review   | Define readiness conditions/providers, direct operator selection, canonical projections, and CLI. |
-| openclaw/rfcs         | [RFC 0023 / PR 37](https://github.com/openclaw/rfcs/pull/37)                           | `user/giodl/rfc-0023-standard-hosting-profiles`    | Review   | Define standard, release-tested hosting profile presets over RFC 0018.                            |
-| openclaw/openclaw     | [Readiness PR 104018](https://github.com/openclaw/openclaw/pull/104018)                | `user/giodl/readiness-profiles-upstream`           | Review   | Eighteen-commit opt-in readiness framework with shared subject identity.                           |
-| giodl73-repo/openclaw | [Readiness watch PR 167](https://github.com/giodl73-repo/openclaw/pull/167)            | `user/giodl/readiness-operations`                  | Draft    | Follow-up runtime facility: bounded semantic transition watch over the canonical result.           |
-| giodl73-repo/openclaw | [Criterion catalog PR 169](https://github.com/giodl73-repo/openclaw/pull/169)          | `user/giodl/readiness-criteria-catalog`            | Draft    | Inert list/inspect facility for available, selected, and missing readiness criteria.               |
-| giodl73-repo/openclaw | [Startup wait PR 171](https://github.com/giodl73-repo/openclaw/pull/171)                | `user/giodl/readiness-startup-wait`                | Draft    | Host-agnostic bounded wait over repeated canonical Gateway readiness results.                      |
-| giodl73-repo/openclaw | [Affected subjects PR 172](https://github.com/giodl73-repo/openclaw/pull/172)           | `user/giodl/readiness-affected-subjects`           | Draft    | Human lifetime and generation context for subjects behind non-passing conditions.                 |
-| openclaw/openclaw     | [Core criteria PR 113421](https://github.com/openclaw/openclaw/pull/113421)            | `user/giodl/readiness-core-owner-adoption`         | Review   | One follow-on merge unit for startup, execution, state, storage, delivery, and scheduler facts.    |
-| openclaw/openclaw     | [Hosting Profiles PR 113422](https://github.com/openclaw/openclaw/pull/113422)         | `user/giodl/standard-hosting-profiles-owner-adoption` | Review | Restacked RFC 0023 implementation; depends on PRs 104018 and 113421.                                |
-| openclaw/openclaw     | [Profile tooling PR 114636](https://github.com/openclaw/openclaw/pull/114636)          | `user/giodl/hosting-profile-conformance-artifact` | Review | Combined catalog inspection, live validation, and package release evidence after PR 113422.         |
-| giodl73-repo/openclaw | [Profile catalog PR 173](https://github.com/giodl73-repo/openclaw/pull/173)            | `user/giodl/hosting-profile-catalog`                | Draft    | Inert list/inspect facility for shipped profile definitions and selected readiness criteria.       |
-| giodl73-repo/openclaw | [Profile validation PR 174](https://github.com/giodl73-repo/openclaw/pull/174)         | `user/giodl/hosting-profile-validate`               | Draft    | Fail-closed live conformance and readiness validation over one canonical Gateway result.           |
-| giodl73-repo/openclaw | [Release conformance PR 176](https://github.com/giodl73-repo/openclaw/pull/176)       | `user/giodl/hosting-profile-conformance-artifact`   | Draft    | Package-installed 13-state release gate and portable conformance artifact.                          |
+| openclaw/rfcs         | [RFC 0023 / PR 37](https://github.com/openclaw/rfcs/pull/37)                           | `user/giodl/rfc-0023-standard-hosting-profiles`    | Draft    | Define standard, release-tested hosting profile presets over RFC 0018.                            |
+| openclaw/openclaw     | [Readiness PR 104018](https://github.com/openclaw/openclaw/pull/104018)                | `user/giodl/readiness-profiles-upstream`           | Review   | Seven-commit readiness-only landing candidate for RFC 0018, rebased on current `main`.             |
+| openclaw/openclaw     | [Hosting Profiles PR 107765](https://github.com/openclaw/openclaw/pull/107765)         | `user/giodl/standard-hosting-profiles-upstream`    | Review   | Real stacked implementation request for RFC 0023; depends on readiness PR 104018.                 |
 | giodl73-repo/openclaw | [Readiness PRs 17, 22, 23, 27](https://github.com/giodl73-repo/openclaw/pulls)         | readiness-only stack                               | Draft    | Modernize Gateway readiness without requiring profiles.                                           |
-| giodl73-repo/openclaw | [Subject identity PR 161](https://github.com/giodl73-repo/openclaw/pull/161)           | `user/giodl/readiness-subject-identity`             | Draft    | Exact one-commit review slice for producer and condition subject identity.                         |
-| giodl73-repo/openclaw | [Activation PR 153](https://github.com/giodl73-repo/openclaw/pull/153)                | `user/giodl/readiness-activation-integrity`        | Draft    | First follow-on owner bucket: config, model-route, secret, and plugin activation evidence.         |
-| giodl73-repo/openclaw | [Capability PR 154](https://github.com/giodl73-repo/openclaw/pull/154)                | `user/giodl/readiness-agent-execution-capabilities` | Draft   | Second follow-on owner bucket: context engine, tools, MCP, sandbox, and harness evidence; skills await a bounded owner snapshot. |
-| giodl73-repo/openclaw | [State/background PR 155](https://github.com/giodl73-repo/openclaw/pull/155)          | `user/giodl/readiness-state-background-services`    | Draft   | Third follow-on owner bucket: state database, session-store durability, delivery runtime, and scheduler lifecycle evidence. |
-| giodl73-repo/openclaw | [Host bindings PR 156](https://github.com/giodl73-repo/openclaw/pull/156)              | `user/giodl/readiness-hosted-dependencies`           | Draft   | Fourth bucket: resolve bundle selectors through RFC 0018 and fail the selected aggregate closed.    |
-| giodl73-repo/openclaw | [Profile comparison PR 157](https://github.com/giodl73-repo/openclaw/pull/157)         | `user/giodl/standard-hosting-profiles-owner-adoption` | Review | Exact profile-only comparison against core criteria head `c1d7f394f86`.                              |
-| giodl73-repo/openclaw | [Profile review slices 18, 19, 42, 21](https://github.com/giodl73-repo/openclaw/pulls) | profile review slices                              | Draft    | Historical commit-level review aids; upstream PR 107765 is superseded by PR 113422.                |
-
-Exact package-installed conformance passes over profile head `18c42a7f26a`
-and release-artifact head `123bae7b876` in
-[GitHub Actions run 30289122192](https://github.com/giodl73-repo/openclaw/actions/runs/30289122192).
-The immutable Docker matrix covers 13 states across unprofiled compatibility,
-all four profiles, failure and recovery paths, node approval, repeated-poll
-identity, and host-stable/process-and-Gateway-renewing container restart
-behavior. It independently verifies and uploads one versioned artifact.
-
-The first RFC 0023 operator facility is profile catalog inspection. Fork
-[PR 173](https://github.com/giodl73-repo/openclaw/pull/173) exposes immutable
-`hosting profiles list|inspect` descriptors at exact head `f9e6b219418`.
-The complete package proof runs its focused catalog checks at that exact
-ancestor.
-
-Fork [PR 174](https://github.com/giodl73-repo/openclaw/pull/174) adds live
-profile validation at exact head `0f59b726de9`. It separates structural
-conformance from current readiness and embeds the canonical Gateway evidence.
-PR 176 exercises that exact validator ancestor in every package scenario.
-The three fork facilities are consolidated for upstream review in
-[OpenClaw PR 114636](https://github.com/openclaw/openclaw/pull/114636) at exact
-head `123bae7b876`.
+| giodl73-repo/openclaw | [Profile comparison PR 94](https://github.com/giodl73-repo/openclaw/pull/94)           | `user/giodl/standard-hosting-profiles-upstream`    | Draft    | Clean profile-only comparison against readiness PR 104018.                                        |
+| giodl73-repo/openclaw | [Profile review slices 18, 19, 42, 21](https://github.com/giodl73-repo/openclaw/pulls) | profile review slices                              | Draft    | Historical commit-level review aids for upstream PR 107765.                                       |
 
 ## Scope
 
@@ -114,7 +72,6 @@ The readiness contract is independently useful:
 - canonical required and advisory conditions over existing Gateway evidence
 - direct `gateway.readiness` selection without a profile
 - bounded, activation-scoped plugin readiness providers
-- reconciled producer, primary-subject, and related-subject identity
 - consistent `/ready`, `/readyz`, health, status, and `openclaw ready` results
 
 The separate hosting-profile proposal adds:
@@ -122,7 +79,7 @@ The separate hosting-profile proposal adds:
 - built-in profiles `local`, `container`, `reverse-proxy`, and `node-mode`
 - profile-selected defaults and required startup evidence
 - named presets over reusable readiness criteria
-- profile and node attribution through the shared readiness identity package
+- runtime activation identity
 - packaged release conformance for every built-in profile
 - standard Docker/Compose/Kubernetes examples
 
@@ -133,16 +90,6 @@ the generic contract.
 RFC 0018 is the readiness acceptance decision. RFC 0023 depends on it but is a
 separate product/support decision. The old combined project draft is not the
 normative source for either RFC.
-
-The contract-to-facility roadmap is tracked in
-[`readiness-facilities.md`](readiness-facilities.md). It separates runtime
-operations owned by RFC 0018, profile conformance owned by RFC 0023, and
-integrations into the existing Doctor, telemetry, support, and update surfaces.
-
-The 2026-07-23 three-model review is complete at exact heads `c1919669c3f`
-(readiness) and `40b5b2e59d9` (profiles). Architecture and maintainer reviews
-approve; resilience reports ship. See `reviews/2026-07-23-three-model/` for the
-original findings, dispositions, and final verdicts.
 
 ## Related Areas
 

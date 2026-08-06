@@ -57,18 +57,15 @@ ordinary-startup import isolation, and strict CLI registration.
 
 ## Evidence
 
-- Ready for review: [openclaw/openclaw#112896](https://github.com/openclaw/openclaw/pull/112896)
-- Branch/head: `user/giodl/rfc-0013-restored-admission` at `eaeb21f0a7d`
-- Incremental size: 1,407 additions, 4 deletions, 12 files
-- Safe Linux proof: Ubuntu 24.04 WSL, Node 24.15.0, built-in SQLite 3.51.3.
-  The exact current-main combined head passed both Knip audits and 102 focused
-  snapshot/Gateway/CLI/command tests. Production and core-test typechecks passed
-  before the upstream rebase; the post-rebase local production typecheck was
-  blocked only by an interrupted dependency refresh leaving
-  `libphonenumber-js` unlinked, so GitHub CI owns the clean-install result.
-- Remote proof gap: Crabbox access auth and Blacksmith organization auth are
-  absent; no remote provider/run ID exists, and none is claimed.
-- Review: Codex review found and we fixed owner-manifest verification binding
-  and canonical dependency ordering at the base. Exact-head ClawSweeper runs
-  completed successfully with `keep_open`; durable comments remained stuck on
-  their start placeholders after workflow completion.
+- Draft: [openclaw/openclaw#112896](https://github.com/openclaw/openclaw/pull/112896)
+- Branch/head: `user/giodl/rfc-0013-restored-admission` at `c96cbda2364`
+- Incremental size: 1,407 additions, 4 deletions, 11 files
+- Local proof: targeted Oxfmt/Oxlint and focused Gateway/CLI tests pass. SQLite
+  restore tests correctly reject local Node 24.14 / SQLite 3.51.2 because that
+  runtime has the known unsafe WAL-reset behavior.
+- Remote proof gap: Blacksmith Testbox is not authenticated, and direct
+  Crabbox AWS requires broker login; neither attempt provisioned a run, so
+  there is no provider/run ID to report.
+- Review: bounded `codex review` attempts produced no output; manual review
+  found and fixed result-metadata replay reconstruction so committed replay is
+  derived only from the durable request and verified manifest.

@@ -22,669 +22,26 @@
 
 ## Current Session
 
-### 2026-07-27 public evidence catalog reaches 30
+### 2026-07-28 Control UI navigation and integrity update
 
-- Added four public-evidence Awesome Claws: public company watcher (official
-  regulator/issuer sources plus Blogwatcher and a private weekday cron),
-  research scout (public scholarly indexes/correction feeds plus Blogwatcher
-  and a private weekday cron), public safety monitor (official CAP/agency feeds
-  plus Open-Meteo, Blogwatcher, and a private non-life-safety recurring cron),
-  and civic data analyst (Census/open-data/OSM/GTFS methodology plus the
-  clean-scanned Pilot transit skill with explicit remote-intermediary limits).
-- Rejected the obvious `@ractorrr/arxiv@1.0.4` and `@lkcair/sec@1.3.3`
-  candidates because Skillspector marks both CRITICAL/Do Not Install. Safer
-  alternatives introduced authenticated, paid, or third-party gateway
-  dependencies, so official public APIs remain authoritative in the manifests.
-  Selected reusable dependencies retain their prior clean scans; the Pilot
-  transit skill is aggregate/VT/LLM clean and LOW/Safe in Skillspector, with
-  daemon and remote-overlay disclosure.
-- Awesome Claws now contains 30 starters at signed public-main commit
-  `d7aceb80025ef21b17fb4d3f64801c09be855f51`. Catalog check and standalone
-  inspection pass all 30. Real OpenClaw previews against live ClawHub passed
-  all four additions with exact action counts, `ready: true`, and zero blocked
-  actions. Codex review found no actionable consistency defect; GitHub Validate
-  run `30313706188` passed at the exact pushed head.
+- Updated draft OpenClaw PR [#112808](https://github.com/openclaw/openclaw/pull/112808)
+  at `e6187a42433`: `/claws` remains an independent graduation-ready route, but
+  the feature-gated surface now appears initially as a Claws tab in the Plugins
+  hub and no longer occupies a standalone customizable sidebar slot.
+- Restacked draft PR [#112828](https://github.com/openclaw/openclaw/pull/112828)
+  at `76bd17f81ff`. Final review found and fixed two plan-integrity defects:
+  verified ClawHub preview/apply sources now share immutable artifact identity,
+  and workspace action paths are canonicalized relative to the package root
+  when hashing while retaining verified absolute paths for execution.
+- Final focused proof passed 24 ClawHub/workspace/Gateway tests, 74 Control UI
+  tests, 2 responsive Chromium tests, UI typecheck, formatting, diff checks,
+  and the production Control UI build. The measured 313.0 KiB startup JS is
+  covered by an explicit 314 KiB lifecycle-schema budget.
+- Both PRs are draft, mergeable, and have refreshed bodies explaining the
+  initial Plugins-hub placement and future top-level graduation path.
+- Local cumulative preview is running at `http://127.0.0.1:18790/settings/plugins`
+  from #112828 head `76bd17f81ff` with `OPENCLAW_EXPERIMENTAL_CLAWS=1`.
 
-### 2026-07-27 public-source travel planner
-
-- Added a 26th Awesome Claw, `travel-planner`, using clean pinned ClawHub
-  skills `@dapkus/open-meteo@1.0.0` and
-  `@onlydreams/travel-checklist@1.0.2`. Its source policy prefers official
-  government entry/health/advisory sites, OpenStreetMap/Nominatim/Overpass,
-  operator GTFS/GTFS-Realtime feeds, and official carrier/airport/operator
-  status pages. These are described as public data sources, not OpenClaw
-  channels or transactional authority.
-- Explicitly rejected `@ivangdavila/travel-planning@1.0.1` because current
-  ClawHub scans mark it suspicious/Do Not Install for persistent travel-profile
-  behavior, and rejected `@awlevin/flight-search@0.1.7` because Skillspector
-  marks its remote installer path HIGH/Do Not Install. The new Claw does not
-  book, pay, contact providers, submit forms, or retain sensitive traveler
-  identifiers.
-- Signed public-main commit
-  `4176544d8a7fbc19c341a282db61bccc09ec0d7e` is pushed. All 26 catalog and
-  standalone inspections pass. A real OpenClaw preview against live ClawHub
-  returned two package actions, two disclosed capability escalations,
-  `ready: true`, and zero blockers. Codex review found no actionable defect and
-  GitHub Validate run `30310960364` passed at the exact head.
-
-### 2026-07-27 Awesome Claws expanded to 25
-
-- Audited current high-use ClawHub skills and exact-version scan reports, then
-  added five capability-bearing starters: presentation producer
-  (`@ivangdavila/powerpoint-pptx@1.0.1`), document intake analyst
-  (`@steipete/markdown-converter@1.0.0`), media evidence reviewer
-  (`@steipete/video-frames@1.0.0` plus Whisper), release coordinator
-  (`@steipete/github@1.0.0` plus Slack), and feed intelligence monitor
-  (`@steipete/blogwatcher@1.0.0` plus an isolated weekday cron). All selected
-  dependencies report clean aggregate, VirusTotal, and LLM scans with LOW/Safe
-  Skillspector results; package guidance still constrains local binaries,
-  sensitive content, account scope, writes, posts, and scheduled execution.
-- Awesome Claws now has 25 generated starters at signed public-main commit
-  `8f0f2b0961e5a01adaabbcab03765a9af0f209a5`. Catalog check and standalone CLI
-  inspection pass all 25. Real OpenClaw previews against live ClawHub passed
-  all five new starters with exact action counts, `ready: true`, zero blocked
-  actions, consent digests, and disposable state cleanup. `codex review
-  --uncommitted` found no actionable defect. GitHub Validate run `30310166588`
-  passed at the exact pushed head.
-
-### 2026-07-27 ClawHub CLAW.md readiness and composed starter expansion
-
-- Restacked ClawHub PR #3262 onto current `main` and replaced its contributor
-  fork/pre-merge OpenClaw test pin with canonical `openclaw/openclaw` commit
-  `e79faff8aa755b201302edd286976a03f9ed79ea`, the merged #113454 CLAW.md
-  prompt contract. Signed head `5df9ef27cefad15848299949ac51e1d28c71df01`
-  is pushed and the PR is ready and mergeable. Every repository-owned exact-head
-  check passes, including the OpenClaw contract lane; the only red status is
-  Vercel external-contributor authorization.
-- Revalidated all 15 existing Awesome Claws with both the catalog checker and
-  standalone reference CLI. The four prior integrated examples are incident
-  response (cron), financial analyst (Yahoo Finance skill), customer support
-  (customer-support skill), and software maintainer (Diffs plugin, filtered
-  GitHub MCP, and an OpenClaw coding profile).
-- Audited live ClawHub skill/plugin metadata and security scan results, then
-  added five synthetic compositions: executive briefing (Gog, Weather, cron),
-  meeting intelligence (Whisper, DOCX), spreadsheet analyst (XLSX), knowledge
-  gardener (Notion), and research monitor (official Parallel plugin, cron).
-  Rejected an Obsidian candidate because its aggregate clean status disagreed
-  with a suspicious semantic scan; the Notion replacement has clean aggregate,
-  VirusTotal, and LLM scans plus LOW Skillspector risk.
-- Awesome Claws now contains 20 starters at signed public-main commit
-  `736661c428f3e7dbc4d7c8f0e4941738bd77d999`. `npm run check` and standalone
-  inspection pass all 20. Real OpenClaw dry-runs against live ClawHub resolved
-  all five new packages with `ready: true` and zero blocked actions. GitHub
-  Validate run `30308638463` passed at the exact pushed head.
-
-### 2026-07-27 public incubator repositories
-
-- Made `giodl73-repo/claws` and `giodl73-repo/awesome-claws` public at the
-  user's explicit request. Anonymous GitHub API reads confirm both are public
-  with `main` as the default branch.
-- Public heads are `de5b6f3d18d52d96274b4fdcc23a026f0b7a693c` for the standalone
-  Claws CLI/spec incubator and `7e87c09a520d310509ec66a682729914887d11e2`
-  for the integrated Awesome Claws catalog. Their latest Validate runs pass.
-- This was a repository-visibility change only. No npm package was published,
-  no package name was claimed, and neither repository was transferred to the
-  OpenClaw organization.
-
-### 2026-07-27 merged CLAW.md baseline and integrated lifecycle fix
-
-- OpenClaw #113454 merged as `e79faff8aa755b201302edd286976a03f9ed79ea`;
-  CLAW.md body materialization to managed `SOUL.md` is now on `main`.
-- Exercised four integrated Awesome Claws through real add, status, and remove
-  flows against that merged source: incident response with cron, financial
-  analyst and customer support with production ClawHub skills, and software
-  maintainer with Diffs, GitHub MCP, and a package-local tools profile.
-- The proof found three host lifecycle defects: cron add raced Gateway config
-  reload, scheduler-owned trusted policy appeared as cron drift, and exact
-  Claw agent removal could trip the generic config-size guard. All are fixed in
-  OpenClaw PR #114670 on signed branch `fix/claws-wait-for-agent-reload`.
-- Focused validation passed 163 tests plus Oxfmt and type-aware Oxlint before a
-  clean no-conflict rebase to current main. Two Codex review passes found and
-  fixed eager waiting and lost pending-state recovery; a final extra review was
-  unavailable due the Codex account usage limit. No real model turn was run.
-
-### 2026-07-27 integrated Awesome Claws examples
-
-- Enriched four starters in private `giodl73-repo/awesome-claws`: incident
-  response declares an isolated daily cron; financial analyst and customer
-  support declare exact production ClawHub skills; software maintainer declares
-  the official Diffs plugin, filtered GitHub OAuth MCP, and a package-local
-  OpenClaw coding profile with workspace-only filesystem access.
-- Added generated capability disclosure and boundaries plus schema-aligned
-  validation for exact SemVer, MCP filters, OpenClaw profiles, Croner expressions,
-  IANA timezones, and cron delivery. Unchanged base starter output remains stable.
-- Signed private-main commit `7e87c09a520d310509ec66a682729914887d11e2`
-  is pushed. `npm run check`, standalone inspection of all 15 packages, and
-  final `codex review --uncommitted` pass; Codex reported no actionable issue.
-- Disposable WSL proof against the post-agent-settings OpenClaw build passed six
-  representative dry-runs. OpenClaw trust-resolved both production skills and
-  `@openclaw/diffs@2026.7.1`; GitHub MCP remained non-mutating and correctly
-  reported OAuth as its only readiness prerequisite. No package was applied,
-  published, or made public.
-- GitHub Validate run `30279375393` passed on the pushed commit.
-
-### 2026-07-27 private repository launch-readiness audit
-
-- Rechecked private `giodl73-repo/claws` and `giodl73-repo/awesome-claws`.
-  Both local main branches are clean and aligned with origin; latest GitHub
-  Validate runs pass. Patrick-Erichsen has push access to both repositories.
-- The repositories are safe incubators: publication remains blocked, packages
-  are private, actions are SHA-pinned, licenses/contribution/security docs are
-  present, and the packed CLI proof passes. Neither repository has branch
-  protection/rulesets, topics, Dependabot alerts, or vulnerability alerts;
-  establish those when transferring to the OpenClaw organization rather than
-  treating the current personal-repo settings as launch posture.
-- Public distribution remains an owner decision. The unscoped npm package
-  `claws` is occupied by an unrelated 2014 HTTP debugging tool, so the desired
-  `npx claws` command requires a transfer/ownership conversation or a different
-  package identity. Do not publish the incubator packages opportunistically.
-- Two product-contract items should be resolved before calling the format a
-  harness-neutral public standard: package discovery still uses the
-  OpenClaw-specific `package.json.openclaw.claw` entry, and OpenClaw is the only
-  executable harness adapter. Root `CLAW.md` discovery/generic package metadata
-  and a second adapter/conformance consumer are the strongest portability
-  proofs.
-- The 15 Awesome Claws are a useful safe baseline but intentionally install no
-  packages, MCP servers, or scheduled work. Before public promotion, add a few
-  reviewed integrated examples that demonstrate those capabilities and run a
-  real resolve -> preview -> apply -> status/update -> remove/export proof
-  against a released OpenClaw plus the deployed ClawHub provider.
-
-### 2026-07-26 PR #113454 final Codex review
-
-- Ran `codex review --base origin/main` on exact PR head
-  `423cb8a15d53c708c031f0cd78c27a2f97a5408e` after refreshing current main.
-  It reported one P1: schema-v1 previously allowed a descriptive CLAW.md body
-  alongside an explicit SOUL.md sidecar, while this PR intentionally makes the
-  body executable prompt content and rejects that combination.
-- Accepted the compatibility observation as real, but it is the already-known
-  experimental contract decision rather than a newly found implementation
-  defect. Patrick/user direction supports the new body-to-SOUL contract; the
-  PR still needs that intentional break stated explicitly for maintainer
-  approval.
-- Manual review found no additional actionable issue across reader, add-plan,
-  workspace apply/provenance, update, and export. The body is bounded, included
-  in aggregate limits, consent-hashed, re-read from CLAW.md at mutation time,
-  and exported with sidecar fallback for whitespace, non-UTF-8, or oversized
-  SOUL content.
-- `git diff --check origin/main...HEAD` passed and `git merge-tree --write-tree
-  origin/main HEAD` produced a clean merge tree. Focused local Vitest did not
-  execute because Windows Node 24.14 is below the repository minimum and pnpm
-  correctly refused to purge the existing dependency tree noninteractively;
-  exact-head hosted `openclaw/ci-gate` remains green.
-
-### 2026-07-26 CLAW.md prompt-body consumer baseline
-
-- Live OpenClaw PR #113454 `feat(claws): materialize CLAW.md prompts` remains
-  open, ready, and mergeable at head `423cb8a15d53c708c031f0cd78c27a2f97a5408e`.
-  Its prior CI suite is green, but the branch is behind current `main`, has no
-  human approval, and ClawSweeper still requests a maintainer decision on the
-  experimental schema-v1 behavior plus persistent add/update/export proof.
-- Adopted the proposed contract in private `giodl73-repo/claws`: a nonempty
-  `CLAW.md` body is the portable prompt materialized by OpenClaw as managed
-  `SOUL.md`, and it cannot coexist with an exact, ancestor, or descendant
-  workspace target for `SOUL.md`. Signed main commit
-  `de5b6f3d18d52d96274b4fdcc23a026f0b7a693c`; `pnpm check` passed 79 tests
-  with one intentional skip, packed-bin proof passed, and final Codex review
-  found no actionable issue.
-- Adopted the same contract across all 15 private
-  `giodl73-repo/awesome-claws` examples and its catalog validator. Validation
-  now parses YAML structurally, requires a nonempty body, and rejects portable
-  path aliases or conflicts with `SOUL.md`. Signed main commits
-  `3352c3cae0aa577f8e4346c33164b50e55314866` and
-  `bbb65726957fce3c560032283b18a4a1f02fb325`; GitHub Validate run
-  `30223795215` passed.
-- A direct persistent proof against the PR branch is still outstanding. The
-  Windows checkout lacks built `dist/entry.js`; WSL correctly refused to reuse
-  its Windows `node_modules`, and the existing Linux OpenClaw checkout is not a
-  clean proof surface. Do not count the private parser/catalog checks as the
-  ClawSweeper-requested host lifecycle proof.
-- Recommended next step: explicitly document the intentional experimental
-  compatibility choice, refresh #113454 onto current `main`, run real
-  add/update/export proof, then request ClawSweeper and human re-review.
-
-### 2026-07-26 guided standalone CLI terminal workflow
-
-- Implemented Patrick's requested TUI polish in the private standalone CLI,
-  using `@clack/prompts` and `picocolors` with interaction patterns inspired by
-  `vercel-labs/skills`: branded intro, phase spinners, package/plan summaries,
-  confirmation, cancellation, and completion output.
-- The short TTY command now performs resolve -> host preview -> explicit
-  confirmation -> apply and forwards the exact preview `planIntegrity` to the
-  harness. Interactive `create` prompts for omitted required inputs. The UI is
-  presentation-only; source providers, the portable parser, harness policy,
-  consent validation, and mutation ownership are unchanged.
-- JSON, non-TTY execution, and explicit `--dry-run` or
-  `--yes --plan-integrity` retain their existing non-interactive contracts. A
-  declined or canceled confirmation exits successfully without invoking apply.
-- Private `giodl73-repo/claws` main is clean at signed commit `5bac7b9799c2`.
-  Local `pnpm check` passed 79 tests with one intentional Windows symlink skip;
-  `pnpm proof:pack` passed isolated packed-bin proof. `codex review
-  --uncommitted` returned no actionable finding. GitHub Validate run
-  `30221359755` passed a fresh frozen-lockfile install and full check suite.
-- No npm package was registered or published, no repository was made public,
-  and no resolver, provider, adapter, or public package-name decision was
-  added by this slice.
-
-### 2026-07-26 standalone source-provider and construction model
-
-- Redesigned the private standalone CLI around three independent extension
-  points: component importers construct a package, source providers resolve a
-  complete immutable Claw, and harness adapters preview/apply through host
-  policy. Documented the contract in `ARCHITECTURE.md`.
-- Added complete-Claw providers for local directories, exact ClawHub versions,
-  and GitHub repositories pinned to exact 40-character commits. GitHub archive
-  redirects are restricted to codeload, auth is not forwarded, and archive plus
-  package integrity are recorded.
-- Added experimental `claws-dev create`: it composes a non-empty `SOUL.md`,
-  optional `AGENTS.md`, repeated vendored local skills, and exact ClawHub
-  skill/plugin dependencies into a validated package. The README demonstrates
-  selecting a public skills.sh skill and constructing a Claw from it.
-- Construction enforces file/count/aggregate bounds during I/O, rejects unsafe
-  skill entries, reserves destinations atomically without overwrite, and does
-  not mutate a harness. Vendored workspace skills are included in summaries.
-- Removed the stale standalone-adapter rejection of CLAW.md body prompts;
-  current OpenClaw owns SOUL mapping and conflict validation.
-- Four Codex review passes found and fixed Windows drive-relative routing,
-  whitespace-only personas, post-read resource checks, dangling destination
-  handling, and a POSIX no-clobber race. Final review found no actionable issue.
-- Private `giodl73-repo/claws` main is clean at signed commit `457dbfd9bf91`.
-  Final `pnpm check` passed 72 tests with one Windows symlink test skipped;
-  packed-binary proof passed. Real create and inspect passed with a vendored
-  OpenClaw docs skill. Current-host preview is blocked locally because the
-  available OpenClaw build requires Node 24.15+ and this host has 24.14.
-- GitHub Validate run `30214845654` was queued at handoff. No npm publication,
-  public repository, direct skills.sh importer, or Hermes adapter was created.
-
-### 2026-07-26 private GitHub review repositories created
-
-- Created private `giodl73-repo/claws` at
-  `https://github.com/giodl73-repo/claws` and pushed signed, GitHub-verified
-  `main` head `0a8c86ccc8a7`. Before creation, removed `PRIVATE-REVIEW.md`,
-  replaced private-incubator documentation with user/contributor/security
-  documentation, and added pinned-action CI. `pnpm check` passed all 58 tests,
-  packed offline proof passed, final Codex review found no actionable issue,
-  and the first GitHub `Validate` run `30212507530` succeeded.
-- Created private `giodl73-repo/awesome-claws` at
-  `https://github.com/giodl73-repo/awesome-claws` and pushed signed,
-  GitHub-verified `main` head `0fbf2578194d`. Its first GitHub `Validate` run
-  `30212514264` succeeded.
-- Both repositories remain private and all npm packages remain `private: true`;
-  no npm publication, public launch, or OpenClaw organization repository was
-  created. Patrick needs explicit collaborator access to view the links.
-
-### 2026-07-26 Awesome Claws repository review handoff
-
-- Removed the shipping-tree review briefs (`REVIEW.md` and `ROLE-REVIEW.md`)
-  from `C:\src\awesome-claws-private-prototype`. The role-review conclusions
-  remain recorded in this private coordination session rather than in the
-  proposed public catalog.
-- Reworked the repository to match current OpenClaw ecosystem conventions: a
-  task-oriented root README, contribution guide, OpenClaw Foundation MIT
-  license, private security reporting policy, focused issue/PR templates, and
-  pinned-action validation workflow. The OpenClaw maintainer handbook confirms
-  that creation of a new organization repository still requires admin
-  approval; no remote or publication action was taken.
-- Each generated starter now has a package README. Portable identity content
-  moved from a `workspace/SOUL.md` sidecar into the `CLAW.md` body, which current
-  OpenClaw maps to managed `SOUL.md`; `workspace/AGENTS.md` remains the operating
-  workflow. Package names use the non-publishable `@awesome-claws/<id>` shape.
-- Default `npm run check` is self-contained for CI, while `npm run inspect`
-  retains the optional standalone reference-CLI proof. Validation requires the
-  original 15 baseline starters but permits future catalog additions.
-- Local proof passes `npm run check`, standalone inspection of all 15 packages,
-  YAML parsing of all GitHub configuration, and `git diff --check`. Final
-  `codex review --uncommitted` completed with no correctness findings. A fresh
-  current-OpenClaw build/proof was blocked because the configured Microsoft npm
-  proxy does not carry pinned `pnpm@11.15.1`; the earlier five-package real
-  planner proof remains historical evidence, not a fresh result for this edit.
-- The maintainer-review candidate is clean on local `main` at signed commit
-  `0fbf2578194d`; it still has no Git remote.
-
-### 2026-07-26 starter catalog role review complete
-
-- Reviewed all 15 private starter Claws through the `.craft/roles/claws`
-  founder, new-hire, power-user, skill-author, CISO, compliance,
-  repository-steward, and maintainer-reviewer lenses. The rubric, findings,
-  and remediation are retained in this private coordination history; the
-  standalone review brief was intentionally removed from the catalog.
-- Every starter now defines its target setting, focused intake, realistic
-  example, domain-specific authority/privacy boundaries, concrete deliverables,
-  and observable completion criteria. The generated instructions remain plain,
-  compact Markdown with no fabricated dependencies or hidden actions.
-- Independent review found and fixed sensitive-data persistence ambiguity,
-  incident action/communication approval, compliance evidence provenance,
-  ecosystem-specific examples, missing reproducibility artifacts, recruiting
-  accommodation privacy, and three semantic completion contradictions. Final
-  role re-review has no product blocker; final Codex review is clean.
-- At that checkpoint, `C:\src\awesome-claws-private-prototype` was clean at
-  signed commit `2159e243ec8d`. Validation enforced all 15 baseline identities
-  and their quality minima. All 15 passed standalone inspection; five representative
-  starters return ready, four-action, non-mutating real OpenClaw plans.
-- The repository still has no remote and no public namespace or publication
-  action was taken.
-
-### 2026-07-26 private CLI readiness and broad catalog complete
-
-- The standalone private CLI is clean on `main` at signed commit
-  `764bf30a46f0`. It now has ungated help/version, Windows installed-command
-  discovery, structured host diagnostics, bounded preview/apply timeouts, and
-  a concise private review brief. Review found and fixed literal-percent path
-  corruption and quote-based command injection in the Windows `.cmd` bridge.
-- `pnpm proof:private` passes 58 tests, format, lint, typecheck, bundled build,
-  and offline tarball install/bin execution. A packed WSL2 binary also reached
-  a real Linux-native OpenClaw dry-run with isolated state. A fresh full
-  dependency reinstall was not offline because the local pnpm store lacks
-  `hookable@6.1.1`; do not describe that cache-dependent lane as current proof.
-- A separate local collection now lives at
-  `C:\src\awesome-claws-private-prototype`, established on `main` at signed root
-  commit `6e206f321658`. It contains 15 generated, role-specific Claw packages,
-  not only the original three. All 15 pass exact-tree, private/no-remote,
-  secret-pattern, and standalone reference inspection checks.
-- Real OpenClaw dry-runs pass for incident response, financial analysis,
-  customer support, executive assistance, and compliance review. Each returns
-  a ready four-action plan with no mutation; disposable state is removed.
-- Both repositories have no remote and perform no public registration or
-  publication. Remaining decisions for Patrick/Foundation review are final
-  repository/package/bin names, public ownership and governance, license and
-  contribution policy, macOS proof, and later Hermes adapter scope.
-
-### 2026-07-26 standalone private distribution proof complete
-
-- The private standalone repository is now at signed commit
-  `ccddf6e16280667a9f7f2b5b871b637068bc9ce3`. `pnpm proof:pack` builds the
-  bundled artifact, constrains its tarball contents, installs it offline in a
-  fresh prefix, proves the experimental gate, and executes the installed npm
-  bin against a representative Claw.
-- The proof found and fixed a real Unix launch bug: npm invokes the bin through
-  a symlink, so main-module detection now compares real paths. Windows packed
-  install/inspect passes, and WSL2 Node 24.15 packed-bin preview passes against
-  current OpenClaw with a native `planIntegrity` result.
-- Optional OpenClaw proof uses disposable home, state, and config paths, accepts
-  absolute or caller-relative `OPENCLAW_CLI_ENTRY`, and cannot read or migrate
-  normal operator state. The docs now state Node/OpenClaw compatibility,
-  telemetry, and update boundaries.
-- Final proof passes 47 tests, format, lint including scripts, typecheck, frozen
-  offline lock resolution, Windows offline pack/install, WSL real OpenClaw
-  preview, and clean uncommitted Codex review. No package was published, no
-  remote was added, and no final npm or repository name was claimed.
-- The next technical evidence gap is a macOS packed-bin proof. Actual npm
-  trusted publishing, the public repository, and `awesome-claws` remain gated
-  on Foundation naming/public-incubation approval.
-
-### 2026-07-26 standalone consented apply delegation complete
-
-- The private standalone repository is now at signed commit
-  `e254eb4ce7787027996ed460dd21b32c896380d7`. It accepts `--yes` only with an
-  exact reviewed `--plan-integrity` value and delegates mutation to canonical
-  `openclaw claws add`; OpenClaw still owns consent enforcement, mutation,
-  provenance, status, and removal.
-- Preview and apply reuse an atomically published, byte-verified,
-  content-addressed package path because OpenClaw's development-plan integrity
-  binds the absolute manifest path. The private cache expires after 24 hours,
-  is capped at 16 entries or 512 MiB, serializes cross-process reservation, and
-  protects active operations from eviction.
-- Real WSL2 Node 24.15 proof against Linux-native OpenClaw passed preview,
-  stale-integrity rejection with zero mutation, exact consented apply, status,
-  exact remove, and empty final provenance. The final repository matrix passes
-  46 tests, typecheck, zero-warning Oxlint, Oxfmt, bundled build, frozen offline
-  lock resolution, isolated tarball installation, and clean uncommitted Codex
-  review.
-- The repository remains private, clean, on `main`, and has no remote or
-  publication configuration. The next bounded slice is distribution/launch
-  proof planning; broader lifecycle commands remain host-owned and should only
-  be added to the standalone dispatcher when a cross-harness contract is clear.
-
-### 2026-07-25 standalone exact ClawHub resolution complete
-
-- The private standalone repository is now at signed commit
-  `b8bea05b50892b78d4a6a91cee89721c836f9edd`. It resolves only exact
-  `clawhub:<package>@<semver>` coordinates through the experimental official
-  feed and still has no remote or publication configuration.
-- Resolution binds the official feed candidate to exact downloaded bytes,
-  same-origin artifact metadata and redirects, ClawHub's 64 MiB compressed / 50
-  MiB expanded / 10,000-entry limits, safe ZIP or npm-pack extraction, and the
-  extracted package name/version before adapter dispatch. The registry URL is
-  explicit until the ClawHub feed is deployed.
-- Validation passed 37 tests, typecheck, zero-warning Oxlint, Oxfmt, bundled
-  build, frozen offline lock resolution, isolated private-tarball install, and
-  final uncommitted Codex review with no actionable correctness findings.
-- A real loopback HTTP registry proof used the proposed ClawHub feed and
-  artifact APIs, then delegated the immutable snapshot to real OpenClaw under
-  WSL2 Node 24.15. OpenClaw returned a ready
-  `openclaw.clawAddPlan.v1` with four non-mutating actions and one distinct
-  capability escalation. The next bounded slice is consented apply delegation.
-
-### 2026-07-25 standalone repository migration complete
-
-- The private standalone implementation now lives in
-  `C:\src\standalone-claw-cli-prototype` on `main` at signed commit
-  `a911cb5bc92b21b09833aaa5eba65f607a7a41a1`. It has no remote, publishes
-  nothing, and claims neither the final repository nor npm identity.
-- `packages/reference` owns an independent harness-neutral parser, types,
-  fixtures, and portability policy. It imports no OpenClaw or ClawHub code.
-  `packages/cli` owns source inspection, integrity, content-free outcomes,
-  bounded adapter execution, and dispatch.
-- The OpenClaw adapter crosses only the public machine-readable process
-  boundary: `openclaw claws add --dry-run --json`. OpenClaw revalidates at its
-  trust boundary and continues to own policy, consent, mutation, provenance,
-  update, status, doctor, and removal.
-- Validation passed 24 tests, typecheck, zero-warning Oxlint, Oxfmt, bundled
-  build, frozen offline lock resolution, private tarball installation, and a
-  real WSL2 standalone-to-OpenClaw four-action dry-run. Final uncommitted Codex
-  review reported no actionable correctness issues.
-- OpenClaw PR #113836 was closed as superseded by this separate-repository
-  direction; the handoff is recorded in
-  [comment 5081335065](https://github.com/openclaw/openclaw/pull/113836#issuecomment-5081335065).
-  Its proof remains useful, but no OpenClaw-private parser package should
-  become the portable standard.
-
-### 2026-07-25 standalone CLI monorepo incubation
-
-- Opened draft OpenClaw [#113836](https://github.com/openclaw/openclaw/pull/113836)
-  from signed head `5a1dd4da6c6e`. It adds private workspace packages for
-  the portable Claw schema and standalone CLI, with the temporary
-  `claws-dev` binary and no npm publication configuration or final name claim.
-- The first slice accepts local package directories, supports content-free
-  inspect, and delegates only OpenClaw dry-run preview through an immutable
-  verified snapshot. OpenClaw still owns policy, consent, mutation,
-  provenance, update, status, doctor, and removal.
-- Final proof built both artifacts from the signed checkout and ran the
-  standalone CLI under WSL2 Node 24.15 against the real OpenClaw planner. It
-  returned a ready four-action plan with `mutationAllowed: false`.
-- Focused proof is 79 passed with 2 intentional skips; targeted typecheck,
-  Oxlint, Oxfmt 0.60, private tarball install, unified production bundle, and
-  final commit-scoped Codex review are clean. Review fixed portable separator,
-  unmapped prompt, and case-variant `CLAW.md` compatibility gaps.
-- The PR remains draft and experimental. Remote ClawHub resolution, apply,
-  npm/repository creation, final naming, macOS, and Hermes are follow-ups.
-
-### 2026-07-24 approved CLAW.md prompt-to-SOUL.md implementation
-
-- RFC addendum [#48](https://github.com/openclaw/rfcs/pull/48) and both sidecar
-  specs now define a non-empty `CLAW.md` body as the portable agent prompt;
-  OpenClaw materializes its exact bytes as managed `SOUL.md`. Frontmatter-only
-  CLAW.md remains valid, explicit SOUL plus a non-empty body is rejected, and
-  headings/task lists have no package-time executable meaning.
-- OpenClaw draft [#113454](https://github.com/openclaw/openclaw/pull/113454)
-  reuses the existing workspace preview, consent, provenance, update, status,
-  removal, and export lifecycle. Signed head `d15c9357f9f`; focused proof is
-  102/102 plus the 33/33 Claws CLI file, source typecheck, Oxlint, and Oxfmt.
-- ClawHub draft [#3262](https://github.com/openclaw/clawhub/pull/3262) is the
-  fifth slice after merged #3089-#3092. It is restacked onto current `main` at
-  signed head `cf83a62c`; publication projects only the SOUL capability and
-  never a second prompt copy. Restacked focused proof is 363/363 plus the exact
-  Claw CLI publication test; CI is running.
-- Both implementation PRs remain under their existing experimental Claws
-  gates. OpenClaw has no ClawHub dependency; the ClawHub slice consumes the
-  OpenClaw contract through its hosted proof.
-
-### 2026-07-24 standalone `npx claws` PR plan
-
-- Corrected the initial overreach: signed RFC commit `4f162a7a3855`, which had
-  prematurely made the `CLAW.md` body normative `SOUL.md` content, was reverted
-  by signed commit `6459c70` and pushed. RFC #48's prior profile-only PR body is
-  restored. Body semantics remain an explicit deferred design question.
-- OpenClaw #112773 merged as `e9b3252ae8e5`; the standalone CLI plan targets
-  that current package/profile model and may adapt later as the RFC evolves.
-- Reworked `projects/claws/portable-standard-pr-plan.md` into a focused
-  `openclaw/claws` track: CLI core/inspect, OpenClaw preview adapter, consented
-  apply delegation, npm distribution proof, `openclaw/awesome-claws`, then a
-  separately owned Hermes adapter.
-- The CLI owns source resolution, integrity, package validation, and adapter
-  dispatch. OpenClaw continues to own policy, preview, consent, mutation,
-  provenance, update, status, doctor, and removal. The guaranteed package path
-  is `@openclaw/claws`; voluntary transfer of unscoped `claws` is parallel
-  Foundation work.
-
-### 2026-07-24 CLAW.md standards assessment
-
-- Current `CLAW.md` is a strong strict OpenClaw incubation envelope, especially
-  after moving OpenClaw policy to `profiles/openclaw.yml`, but it is not yet a
-  harness-neutral standard. Portable-core leaks remain in OpenClaw bootstrap
-  filenames, ClawHub-only package coordinates, cron behavior, and lifecycle
-  ownership semantics.
-- A standards track should separate: a small portable `CLAW.md` core; package
-  resources and reproducibility/lock data; namespaced harness adapters; and
-  host-owned add/update/remove/provenance behavior. The Markdown body should be
-  considered as normative portable agent instructions rather than
-  documentation-only so a minimal Claw is readable and useful as one file.
-- Standardization also needs an independent schema/reference validator,
-  fixtures, capability negotiation/conformance levels, versioning/governance,
-  and a decision about the existing Apache-2.0 `agentclawsio/agentclaws`
-  project, which already assigns incompatible asynchronous-task semantics to
-  the canonical `CLAW.md` filename.
-- Recommendation: do not block experimental OpenClaw #112773; use it as the
-  adapter/incubation implementation, but do not freeze or advertise the current
-  full OpenClaw/ClawHub contract as a cross-harness v1 standard.
-
-### 2026-07-23 starter validation Claws archive
-
-- Recovered the original incident-response, finance-analyst, and
-  customer-support packages from `/root/src/claws-validation/starter-pilots`.
-- All three packages pass `claws inspect` against OpenClaw #112773 head
-  `32d9929923e` in isolated state, both before and after ZIP extraction.
-- Created `projects/claws/artifacts/starter-validation-claws.zip`; SHA-256 is
-  `a96a946660781b91973df9c3d9f68f5b8d075fb5def33cc1b5c38905e2a2236e`.
-
-### 2026-07-23 portable profile review repair and ClawHub restack closeout
-
-- Fixed all three accepted independent-review findings in OpenClaw
-  [#112773](https://github.com/openclaw/openclaw/pull/112773): lifecycle fixtures
-  now use and prove package-local profiles, unsupported
-  `heartbeat.skipWhenBusy` is removed, and `metadata.openclaw.config` rejects
-  backslashes in favor of forward-slash package-relative syntax.
-- Rebased all six signed commits cleanly over current main and force-pushed
-  signed head `d255a128a23`. Proof passes 82/82 focused tests, the exact
-  previously failing 220/220 test-project routing suite, 8/8 lifecycle E2E,
-  full `check:test-types`, targeted Oxlint, and diff checks. The prior red CI
-  jobs were unrelated iOS release deadcode and test-plan snapshot failures;
-  current main now includes their fix and fresh exact-head CI is running.
-- Rejected two final exporter review suggestions after source validation:
-  schema-invalid tool and session-memory combinations cannot reach profile
-  generation because export requires an installed Claw whose agent config
-  still matches provenance. Invalid profiles cannot be installed, and later
-  changes fail as `agent_drifted` before export.
-- Aligned RFC [#48](https://github.com/openclaw/rfcs/pull/48) and both sidecar
-  specs at signed head `fa31caafedd4` with the same heartbeat and pointer
-  contract.
-- Restacked ClawHub [#3089](https://github.com/openclaw/clawhub/pull/3089)-[#3092](https://github.com/openclaw/clawhub/pull/3092)
-  at signed heads `61bc0f49759c`, `c1c0002298bd`, `177428287cb5`, and
-  `0c495a6c968d`. All repository checks across all four PRs pass; Vercel alone
-  requires OpenClaw Foundation fork authorization. The final 7/7 bridge suite passes against OpenClaw
-  `d255a128a23`, including canonical scoped-package artifact routing and real
-  `claws add --dry-run` profile consumption.
-- Updated every PR body with exact proof/head data, posted fix comments, and
-  requested fresh ClawSweeper review. Patrick has not yet reviewed or commented
-  on any of the four ClawHub PRs. Do not merge from this session.
-
-### 2026-07-23 PR #112773 three-model review
-
-- Independent GPT-5.6 Sol, GPT-5.5, and GPT-5.4 reviews of exact signed head
-  `fdbfcd029b1` found three accepted blockers: two grouped-JSON lifecycle
-  fixtures still embed the removed inline OpenClaw policy shape;
-  `heartbeat.skipWhenBusy` is accepted by the Claw profile but rejected by the
-  canonical agent config and omitted by export; and backslash profile pointers
-  validate but resolve differently across Windows and POSIX.
-- Reproduced the fixture regression locally: `src/claws/lifecycle.e2e.test.ts`
-  passes 6/8 and fails inspect/add on the two stale fixtures. All three agents
-  otherwise rejected YAML, path-containment, hardlink, host-confinement, and
-  memory/tool-policy security concerns.
-- Rejected one proposed global allow/deny classification finding: RFC #48
-  intentionally compares declared built-in profile capabilities while host
-  policy remains an upper bound. Conservatively consenting to a requested
-  profile expansion is correct even when current host policy narrows it.
-- No files in the OpenClaw PR were edited and no GitHub comments were posted.
-  Next: migrate fixtures to package-local profiles, remove the dead heartbeat
-  field, reject or canonicalize backslash pointers, add regressions, rerun the
-  lifecycle E2E/full focused suite, and repeat Codex review before pushing.
-
-### 2026-07-23 portable core and package-local harness profile closeout
-
-- `CLAW.md` and grouped JSON now keep only portable agent identity plus a
-  string-to-string metadata map. `metadata.openclaw.config` points to a strict
-  OpenClaw profile inside the Claw package; export uses the conventional
-  `profiles/openclaw.yml` path, but the metadata pointer is normative.
-- The profile is read only from the package during inspect, preview, apply,
-  update, and export. It is never copied to OpenClaw's ordinary configuration
-  path. Exact profile path and bytes participate in development-source
-  integrity, and other harnesses may ignore the OpenClaw key or define their
-  own namespaced pointer.
-- OpenClaw [#112773](https://github.com/openclaw/openclaw/pull/112773) is
-  pushed at signed head `fdbfcd029b1`. The final test-only commit aligns two
-  stale CI fixtures with the portable/profile split. Proof passes 73 focused
-  tests, full test typecheck, targeted Oxlint, `git diff --check`, and an
-  uncommitted Codex review with no actionable finding. Fresh CI and
-  ClawSweeper review are running; the worktree is clean.
-- RFC addendum [#48](https://github.com/openclaw/rfcs/pull/48) and both sidecar
-  specs are pushed at signed head `8ac0203b2f7`; final Codex review found no
-  actionable correctness issue.
-- ClawHub [#3089](https://github.com/openclaw/clawhub/pull/3089)-[#3092](https://github.com/openclaw/clawhub/pull/3092)
-  are rebased, ready, and conflict-free at signed heads `6b9a1d008380`,
-  `234acb86648b`, `73565240f67f`, and `5eb3295447df`. PR1 validates pointer
-  syntax; PR2 validates the referenced package-local profile; PR4 proves the
-  exact artifact through a real OpenClaw dry-run. Repository checks pass after
-  rerunning one transient hosted-search failure; Vercel still requires fork
-  authorization. Do not merge any PR from this session.
-
-### 2026-07-23 PR #112773 Omar review repair closeout
-
-- Addressed all four of Omar's portable-agent-policy findings at signed
-  OpenClaw head `631964673ee`: canonical `memory.search`, additive
-  `alsoAllow`, effective inherited tool/filesystem comparison, and
-  restrictive-only `tools.fs.workspaceOnly: true`.
-- Closed the two remaining role-review gaps: schema validation now rejects
-  `workspaceOnly: false`, export never emits it, and update classification uses
-  OpenClaw's canonical contextual `resolveRememberAcrossConversations`
-  resolver rather than a Claw-local default.
-- Proof passes 75/75 focused tests, production core/UI/extension typechecks,
-  targeted Oxlint with zero findings, full docs formatting/lint/MDX checks,
-  `git diff --check`, and an unsandboxed Codex review with no actionable
-  findings. The OpenClaw worktree is clean and pushed.
-- RFC addendum #48 and both normative sidecars carry the same host-boundary
-  rules at signed head `d06703f`; that worktree is clean and pushed.
-- Replied to Omar on #112773 and requested a fresh ClawSweeper review. Both
-  #112773 and RFC #48 are ready for review. OpenClaw CI started on exact head
-  `631964673ee`; do not merge until review and required checks complete.
-
-### 2026-07-23 PR #112773 `.craft/roles` validation
-
-- Reviewed exact signed head `33605d4b0df` through the gateway/runtime,
-  CISO/security, policy-steward, power-user, new-hire, and Lorant maintainer
-  lenses. The existing 73 focused schema/export/update tests pass, but two
-  omitted boundary cases reproduce as failures.
-- `tools.fs.workspaceOnly: false` is accepted by the Claw schema and overrides
-  global `tools.fs.workspaceOnly: true` at runtime. This leaves Omar's original
-  host-upper-bound finding unresolved; the portable field should be literal
-  `true` or omitted.
-- Update classification hand-rolls `rememberAcrossConversations` with a false
-  default instead of using OpenClaw's canonical context-sensitive resolver.
-  On a default single-user config, removing an explicit per-agent `false`
-  enables cross-conversation recall at runtime but produces no capability
-  change and no distinct consent request.
-- Temporary regression assertions proved both failures and were removed. The
-  WSL PR worktree is clean. PR #112773 remains draft and should not be promoted
-  until both regressions, their tests, and the matching RFC wording are fixed.
 ### 2026-07-24 Skill Memory product rename and proof closeout
 
 - Recast RFC 0022 and the full fork-only evidence series as **Skill Memory**.
@@ -696,25 +53,17 @@
   `RFC 0022: Skill Memory`; the RFC source and v1 sidecar are now
   `0022-skill-memory.md` and `skill-memory-v1-spec.md` at pushed head
   `203101b`.
-- Restacked the six OpenClaw proof PRs onto fork `main` `59640bad2` and adapted
-  the core slice to current config modularization. Public titles and bodies tell
-  one story: remember completed work, associate managed runs, recall results,
+- Restacked the six OpenClaw proof PRs without compatibility aliases because
+  the fork-only API has not shipped. Public titles and bodies now tell one
+  story: remember completed work, associate managed runs, recall results,
   retain exact-run usage, make caller-owned token decisions, and centralize
-  managed dispatch.
-- Current OpenClaw heads are #97 `5584af5e7`, #98 `f78049388`, #100
-  `a86371fb7`, #109 `fc6161f02`, #113 `4f5da2fbc`, and #114 `b461715f1`.
-  All six draft PRs are live and mergeable. The compatibility branch used as
-  #113's stacked base also points to #109's exact head.
-- Linux proof passes 380 core tests, 182 managed-run tests, 48 result tests,
-  346 exact-usage tests, 12 budget tests, 137 dispatch tests, 22 focused
-  post-review regressions, and the complete `check:test-types` gate. The tested
-  WSL tree and final Windows branch tree both resolve to
-  `3b8b304c97c7fc245375b66c1f67a5101088895a`.
-- Code review found and fixed terminal-result forwarding, managed identity
-  correlation, result pagination, optional CLI tool-call IDs, and a strict
-  indexing error. Two subsequent Codex review attempts stalled without a
-  verdict; no new finding was emitted. GitHub code checks are green; only the
-  fork-only `label` and `auto-response` automation jobs fail.
+  managed dispatch. Focused Linux proof passes 174 tests on the cumulative
+  stack plus the generated config baseline and `git diff --check`.
+- OpenClaw #97 is at `3985b35d`; downstream heads are #98 `36d5120f`, #100
+  `ed4390b1`, #109 `b844b072`, #113 `ba73d2ef`, and #114 `5f6683c5`. PR #97
+  conflicts with the fork's much newer `main` in three generated/config files;
+  #98 through #114 are mergeable. The POC was not expanded into unrelated
+  modernization work.
 - Recast the disabled-by-default Lobster proof as plugin `skill-memory` at
   commit `7c79a99af`. `authorize_return`, `skill_memory_recall`, and
   `skill_memory_count` share configurable `skill-memory.sqlite`; all 7 focused
@@ -740,14 +89,11 @@
   dry-runs pass, the native feed safety suite passes 5/5 with two expected
   skips, and exact-head feed/artifact output passes real OpenClaw dry-run for
   all three starters.
-- Proved the complete authenticated whole-Claw registry path against isolated
-  local Convex on the exact #3092 head: official-organization token publish,
-  staged checks/finalization, registry search, hosted feed publication, exact
-  artifact integrity, safe extraction, and real WSL OpenClaw
-  preview/apply/status/remove with empty final provenance. Production Convex
-  was not modified. Suspicious incident-response skill archives were rejected
-  without override, and retained workspace shells contain only canonical empty
-  ClawHub lockfiles. Full evidence is in
+- Whole-Claw registry validation was deterministic/local rather than a
+  production Convex write; production ClawHub was used for skill dependencies.
+  Suspicious incident-response skill archives were rejected without override.
+  Skill removal leaves only canonical empty ClawHub lockfiles in retained
+  workspace shells, matching the conservative preview. Full evidence is in
   `starter-claws-clawhub-validation-2026-07-23.md`.
 
 ### 2026-07-23 merged-main lifecycle validation and cron removal repair
@@ -5027,3 +4373,79 @@ package install policy`). The branch is `user/giodl/claws-pr5-installers`,
   merged by `giodl73-repo`. `main` advanced by two unrelated commits while
   waiting for checks, but GitHub accepted the head-pinned merge with the
   required gate green.
+
+### 2026-08-01 PR #113403 explicit tool-less agent runs landed
+
+- PR #113403 `fix(agents): allow explicit tool-less runs` landed through the
+  maintainer wrapper path as squash commit
+  `752a910e8c9e316260fcd6ffbea5ade4b5381201`, merged by `giodl73-repo` at
+  2026-08-01T04:56:21Z. Completion comment:
+  https://github.com/openclaw/openclaw/pull/113403#issuecomment-5149884008.
+- Prepared PR head was `cfe54b459d70f4eb432bcebac5a2c9e06f08bfd6`. The
+  landed diff stayed limited to three agent files:
+  `src/agents/embedded-agent-runner/run/attempt-tool-catalog.ts`,
+  `src/agents/tool-allowlist-guard.ts`, and
+  `src/agents/tool-allowlist-guard.test.ts`.
+- Exact-head hosted gates were green on `cfe54b459d70...`: CI run
+  `30683123434`, Workflow Sanity run `30683123423`, `openclaw/ci-gate`
+  success, and ClawSweeper run `30683453330` complete. Local scoped proof had
+  passed diff-check, changed-file Oxfmt/Oxlint, 9 guard tests, 26 construction
+  plan tests, and Codex review reported no actionable regressions.
+- A local prepare/sync attempt rebased cleanly but could not complete `pnpm
+  check` because latest `origin/main` had the same unrelated env-var-count
+  ratchet warning (`OPENCLAW_* count 515 is below budget 517; update
+  config/env-var-count-budget.txt`). The merge used the current advisory-drift
+  wrapper from the PR worktree, pinned to the already-green head, and treated
+  the behind-main `scripts/e2e-sandbox-bind-conflict.mjs` drift as a warning.
+  Post-merge cleanup initially reported a stale operation lock after the
+  worktree was removed, but the newer checkout confirmed no PR #113403 lock
+  remained.
+
+### 2026-08-06 PR #115237 portable profiles/native bootstrap refreshed
+
+- PR #115237 `feat(claws): adopt portable profiles and native bootstrap` was
+  rebased onto current `origin/main`
+  `cd009e72f0bc336a6c454c28611fd7fc50394652` and force-with-lease pushed to
+  head `29c73937416db2bf72747fab4da64b89ef009c3f`.
+- Local exact-head proof passed `git diff --check`, changed-file `oxfmt`,
+  changed-file `oxlint --deny-warnings` on 23 non-generated TypeScript files,
+  51 focused Claws/workspace-state Vitest tests, and `pnpm db:kysely:check`.
+- Source CLI real-behavior proof passed add dry-run, consented add, status,
+  remove dry-run, and consented remove with isolated state/config dirs.
+  Concurrent bootstrap seed proof passed with simultaneous results
+  `already-seeded` and `seeded`, and target digest matched the consented source.
+- `pnpm tsgo:core` currently fails on existing main-owned boundary-file type
+  errors outside the PR's changed files (`rejectSymlinks` callers vs
+  `OpenRootFileParams` / `OpenRootFileSyncParams`). Do not fix that in this
+  Claws PR unless maintainers explicitly ask.
+- PR body and proof comment were refreshed:
+  https://github.com/openclaw/openclaw/pull/115237#issuecomment-5205055791.
+  ClawSweeper acknowledged the re-review request. The PR remains draft, so
+  normal CI/preflight are skipped until it is explicitly marked ready.
+- Main advanced once more to `913b53ad808772be8c3a8497f7320d93e928b4db`;
+  #115237 rebased cleanly again and was force-with-lease pushed to
+  `7cac4a1efd548ba75028ea4ff10514ef5463dae3`.
+- Exact-head proof on `7cac4a1...` passed the same scoped checks: diff-check,
+  changed-file Oxfmt, changed-file Oxlint, 51 focused Vitest tests,
+  `pnpm db:kysely:check`, source CLI add/status/remove proof, and concurrent
+  bootstrap seed proof. `pnpm tsgo:core` still fails only on the same
+  main-owned `rejectSymlinks` type mismatch outside PR files.
+- PR body and proof comment were refreshed again:
+  https://github.com/openclaw/openclaw/pull/115237#issuecomment-5205235782.
+  ClawSweeper acknowledged the new re-review request at current head.
+- After marking #115237 ready, hosted CI exposed two PR-owned fast-check
+  failures: new max-lines suppressions in `src/claws/lifecycle-state.ts` and
+  `src/claws/provenance.ts`, plus an unused exported
+  `OPENCLAW_CLAW_PROFILE_PATH`. Fixed by making the profile path
+  module-private and moving bootstrap removal/provenance row helpers into
+  small Claws helper modules.
+- Main advanced to `f5add8197fa990890d3f96142cba1523e9c6c0df`; #115237 was
+  amended/rebased cleanly and force-with-lease pushed to
+  `24094a438fe35980e0f818edca271b13c24611fb`.
+- Exact-head proof on `24094a...` passed diff-check, changed-file Oxfmt,
+  changed-file Oxlint, `pnpm check:max-lines-ratchet --base origin/main`,
+  `pnpm deadcode:dependencies`, 51 focused Vitest tests,
+  `pnpm db:kysely:check`, source CLI add/status/remove proof, and concurrent
+  bootstrap seed proof. PR proof comment:
+  https://github.com/openclaw/openclaw/pull/115237#issuecomment-5205693363.
+  New CI and ClawSweeper review are running on this head.

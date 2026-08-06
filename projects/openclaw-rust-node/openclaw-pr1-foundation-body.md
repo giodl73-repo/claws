@@ -19,10 +19,15 @@ would incubate the shared contract in the monorepo, not stabilize a public Rust
 API or create a platform-support commitment. Those remain explicit RFC release
 gates.
 
+During incubation, `pub` exposes an unstable workspace seam, not a supported
+SemVer contract. Rust API and configuration shapes may change with their
+reviewed in-tree consumers; canonical Gateway behavior and shared fixtures
+remain the compatibility authority.
+
 ## Position in the series
 
 The ownership proposal is [RFC #54](https://github.com/openclaw/rfcs/pull/54).
-The implementation is split into three reviewable jobs:
+The implementation is split into four reviewable jobs:
 
 1. **This PR** creates the reusable Gateway client, bounded node-host
    foundation, and headless binary, and makes the Linux Tauri app its first
@@ -30,9 +35,12 @@ The implementation is split into three reviewable jobs:
 2. [#116450](https://github.com/openclaw/openclaw/pull/116450) depends on this
    PR and adds the embeddable lifecycle, duplex invocation, admission,
    connection manifests, and cross-language conformance layer.
-3. [Windows node #1068](https://github.com/openclaw/openclaw-windows-node/pull/1068)
-   prepares the official Windows tray/node to consume the runtime later while
-   keeping C# as its production default.
+3. [#116863](https://github.com/openclaw/openclaw/pull/116863) depends on
+   #116450 and adds the authenticated sidecar contracts and ordinary-command
+   bridge without selecting product IPC or bootstrap.
+4. [Windows node #1068](https://github.com/openclaw/openclaw-windows-node/pull/1068)
+   independently consumes those contracts behind the replaceable Windows seam
+   while keeping C# as its production default.
 
 Because this head branch is in the contributor fork, GitHub cannot use it as
 the base of an upstream PR. #116450 therefore temporarily targets `main` and
@@ -95,7 +103,7 @@ review surface and is not required to review or use this foundation.
   mapped-IPv4 trust, TLS classification, terminal reconnect metadata, and
   final-event delivery issues. The fixes have focused unit or real-socket
   regressions.
-- Current head `7600501dd50` passes 47 Rust workspace tests, strict whole-workspace
+- Current head `41f4e705887` passes 56 Rust workspace tests, strict whole-workspace
   Clippy, rustdoc with warnings denied, formatting, and diff validation on
   Windows 11 / Rust 1.95.
 - Final clean-verdict retries of Codex review timed out in the local review
@@ -110,14 +118,14 @@ serves health/readiness, shuts down cleanly, and completes a node
 invocation/result over a real loopback WebSocket Gateway harness.
 
 Real environment tested:
-Ubuntu 24.04 under WSL2, Rust 1.93.0, proof head `13242763f3d`, the compiled
+Ubuntu 24.04 under WSL2, Rust 1.95.0, current head `41f4e705887`, the compiled
 `openclaw-node` binary, real loopback TCP/HTTP/WebSocket sockets, and the
 repository's Gateway protocol integration harness. No external endpoint or
 production credential was used.
 
 Exact steps or command run after this patch:
 
-1. Built `openclaw-node` from proof head `13242763f3d` and launched it with a
+1. Built `openclaw-node` from current head `41f4e705887` and launched it with a
    non-secret config that omitted `healthListen`; test-only identity/auth
    values were supplied through the documented environment indirections.
 2. Read the structured `host.starting` record, requested `/healthz` and
@@ -130,9 +138,9 @@ Exact steps or command run after this patch:
 Evidence after fix:
 
 ```text
-HEAD 13242763f3d5cfb4fb7069ae4f9156679d4dae47
+HEAD 41f4e705887704f5cd88278c6ffdfed406c88992
 STARTUP
-{"event":"host.starting","fields":{"healthListen":"127.0.0.1:38057","statusCommand":"rust-node.status"},"level":"info"}
+{"event":"host.starting","fields":{"healthListen":"127.0.0.1:43293","statusCommand":"rust-node.status"},"level":"info"}
 HEALTH
 {"status":"ok"}
 HTTP 200
@@ -148,13 +156,12 @@ test result: ok. 1 passed; 0 failed
 ```
 
 Observed result after fix:
-The kernel selected unused loopback port `38057`, rather than `18790`; the
+The kernel selected unused loopback port `43293`, rather than `18790`; the
 binary reported that exact address, returned HTTP 200 for liveness, correctly
 returned HTTP 503 before Gateway readiness, and stopped on SIGTERM. The socket
 harness then completed the challenge-bound node connect, activation,
-invocation, and correlated result path. At that proof head, the complete gates
-passed 43 Rust workspace tests plus doc tests and all 98 Linux Tauri tests.
-The current reviewed head passes 47 Rust workspace tests on Windows.
+invocation, and correlated result path. At the same current head, the complete
+gates pass 56 Rust workspace tests plus doc tests and all 98 Linux Tauri tests.
 
 What was not tested:
 A packaged desktop UI build, a production Gateway deployment from the current

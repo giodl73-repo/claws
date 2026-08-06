@@ -1,19 +1,5 @@
 # Admin Session Context
 
-## 2026-07-27 Ownership Handoff
-
-- Prepared `projects/staffing/china-handoffs/admin-governance.md` as the
-  transfer prompt for tenant/global settings, MAC/MOS3 Scout controls,
-  Partner Center, permissions, approvals, audit/override state, marketplace
-  governance, and M365 auth decisions.
-- Live Lobster admin state: #5422 is open and non-draft at `70b96a084d`; only
-  GitOps checks are attached, GitHubPop is failing, Runtime PR validation is
-  missing, and there is no current review. #5495 is closed.
-- The receiving owner should audit #5422 against current main and either take
-  it through the required gates or supersede it with smaller current-main
-  slices. Policy PR #3607 is also closed/conflicting and should be replaced,
-  not reopened blindly.
-
 ## Agent Start
 
 1. Read this file.

@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+<body style="margin:0; font-family:Segoe UI,Arial,sans-serif; color:#24292f; line-height:1.45;">
+  <div style="max-width:760px; padding:20px 22px; border:1px solid #d0d7de; border-radius:10px; background:#ffffff;">
+    <h2 style="margin:0 0 10px; font-size:20px; color:#0969da;">Scout system-app tray: OpenClaw Rust runtime proposal</h2>
+    <p style="margin:0 0 12px;">Here is what I am filing following Peter’s Tauri refactor suggestion:</p>
+    <ul style="margin:0 0 14px; padding-left:22px;">
+      <li><a href="https://github.com/openclaw/openclaw/pull/116050" style="color:#0969da;">openclaw-gateway-client</a> extracts the reusable Rust Gateway connection layer.</li>
+      <li><a href="https://github.com/openclaw/openclaw/pull/116450" style="color:#0969da;">openclaw-node-host</a> adds the shared Rust node runtime.</li>
+      <li><a href="https://github.com/openclaw/openclaw/pull/116863" style="color:#0969da;">Authenticated sidecar bridge</a> defines the product-neutral host/runtime contract.</li>
+      <li><a href="https://github.com/openclaw/openclaw-windows-node/pull/1068" style="color:#0969da;">Windows-node integration</a> proves the Windows seam while retaining C# as the production default.</li>
+    </ul>
+    <p style="margin:0 0 12px;">The first adopter would be the Copilot app system tray in Edge/Chromium, making it an OpenClaw node manageable through the Gateway by Scout Cloud, Cowork, and other authorized controllers.</p>
+    <div style="padding:11px 13px; border-left:4px solid #2da44e; background:#f0fff4;">
+      <strong>Incremental adoption:</strong> we can take drops of these crates as each layer merges, integrate them behind the tray boundary, and provide feedback early—without waiting for the entire production IPC and rollout stack.
+    </div>
+    <p style="margin:14px 0 0;"><a href="https://github.com/openclaw/rfcs/pull/54" style="color:#0969da; font-weight:600;">RFC 0028</a> ties together ownership, the implementation series, the Windows proof, and the remaining production gates.</p>
+  </div>
+</body>
+</html>

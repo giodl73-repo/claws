@@ -4,21 +4,6 @@ Working designs for the ClawHub product-side account feed stack. These drafts
 stay in `claws-hapi` until they are ready to promote into the ClawHub repo as
 formal design docs or implementation PRs.
 
-## Current Implementation Series
-
-| Order | PR | Current role |
-| ----- | -- | ------------ |
-| 1 | [ClawHub #2948](https://github.com/openclaw/clawhub/pull/2948) | Publisher identity and bounded publisher artifact-feed snapshots. |
-| 2 | [ClawHub #2950](https://github.com/openclaw/clawhub/pull/2950) | Private authenticated publisher follow graph and reversible delivery preference. |
-| 3 | [ClawHub #2958](https://github.com/openclaw/clawhub/pull/2958) | Coalesced, presentation-neutral publisher activity with separate Following and Inbox projections. |
-| 4 | [ClawHub #3293](https://github.com/openclaw/clawhub/pull/3293) | Draft private Inbox UI, seen-through state, expansion, mute/unmute, and unfollow. |
-
-The future chronological Following page is intentionally not another backend
-slice. It can render #2958's `following` projection after the inbox-first UX is
-validated. The publisher-state draft [#2949](https://github.com/openclaw/clawhub/pull/2949)
-is orthogonal to this dependency chain. The item-watch prototype #3171 remains
-parked for OpenClaw-local installed/watched update semantics.
-
 ## Proposed PR Stack
 
 | Order | Design                                                                 | Implementation intent                                                                                 |
@@ -33,7 +18,6 @@ parked for OpenClaw-local installed/watched update semantics.
 | 8     | [Public feed and profile pages](public-feed-profile-pages.md)          | Human-readable account/publisher feed pages backed by account-feed facts and explicit state labels.   |
 | 9     | [Registry submission workflow](registry-submission-workflow.md)        | Idempotent queue, retry, withdrawal, and resubmission flow for downstream registry review and scans.  |
 | 10    | [Reflected registry and scan state](reflected-registry-scan-state.md)  | Persist and display downstream review, scan, inclusion, local approval, and status history facts.     |
-| 11    | [Following inbox and personal feed projections](following-inbox-feed-projections.md) | Ship a coalesced private inbox first while preserving a chronological personal Following view over the same activity substrate. |
 
 ## Cross-Cutting Boundaries
 

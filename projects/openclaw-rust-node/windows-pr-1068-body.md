@@ -1,85 +1,140 @@
 ## Summary
 
-- introduce `INodeRuntimeClient` and an injectable factory at the Windows capability-host boundary
-- keep the existing C# `WindowsNodeClient` as the default, with no production behavior change
-- make `NodeService` and A2UI consumers depend on the runtime contract
-- extract Windows-owned command routing and execution into the transport-independent `NodeCapabilityDispatcher`
-- give the current C# runtime one shared path for command indexing, bounded execution, duplicate tracking, cancellation, telemetry, and completion events, and require future adapters to prove that same route before selection
-- require substitute runtimes to honor connection cancellation and retire cancelled candidates without blocking later reconnects
-- record the ownership boundary, migration sequence, and behavioral architecture guards
+Adds one replaceable Windows node-runtime boundary, one shared Windows capability
+dispatcher, and a non-selectable C# conformance consumer of OpenClaw's proposed
+authenticated Rust sidecar contract. It is independent contract proof, not a
+second production runtime.
 
-This is the consolidated Windows adopter slice for the proposed OpenClaw Rust runtime in [openclaw/openclaw#116050](https://github.com/openclaw/openclaw/pull/116050), its [stacked follow-up #116450](https://github.com/openclaw/openclaw/pull/116450), and [RFC #54](https://github.com/openclaw/rfcs/pull/54). It shows how the existing Windows tray can adopt that runtime without rewriting WinUI, the operator role, MCP, approvals, or Windows-native capability handlers.
+This consolidated Windows adopter PR now:
+
+- introduces `INodeRuntimeClient` and an injectable factory while keeping
+  `WindowsNodeClient` selected by default;
+- moves `NodeService` and A2UI consumers behind that runtime contract;
+- extracts command indexing, bounded execution, duplicate tracking,
+  cancellation, telemetry, and completion into the transport-independent
+  `NodeCapabilityDispatcher`;
+- requires substitute runtimes to honor connection cancellation and retire
+  cancelled candidates without blocking later reconnects;
+- independently implements the authenticated framing, handshake, immutable
+  configuration, admission, invocation, cancellation, result, and status
+  contracts proposed by OpenClaw PR3; and
+- routes admitted ordinary native invocations through the same
+  `NodeCapabilityDispatcher`, without adding a second Windows policy or
+  execution path.
+
+The former stacked fork proof
+[#2](https://github.com/giodl73-repo/openclaw-windows-node/pull/2) has been
+fast-forwarded into this branch. The C# runtime remains the production default.
 
 ## Position in the series
 
-1. [OpenClaw #116050](https://github.com/openclaw/openclaw/pull/116050) creates the reusable Gateway client, bounded node-host foundation, and headless binary, and makes the Linux Tauri app its first consumer.
-2. [OpenClaw #116450](https://github.com/openclaw/openclaw/pull/116450) adds the embeddable lifecycle, duplex invocation, admission, connection manifests, and cross-language conformance layer.
-3. **This PR** prepares the official Windows tray/node to adopt that runtime through a replaceable client boundary and one shared Windows capability dispatcher.
+1. [OpenClaw #116050](https://github.com/openclaw/openclaw/pull/116050) — shared
+   Gateway client, bounded node-host foundation, headless binary, and Linux
+   Tauri convergence.
+2. [OpenClaw #116450](https://github.com/openclaw/openclaw/pull/116450) — signing,
+   lifecycle/reconnect, duplex invocation, admission, Gateway authority,
+   connection manifests, and shared conformance.
+3. [OpenClaw #116863](https://github.com/openclaw/openclaw/pull/116863) —
+   authenticated/versioned sidecar framing, handshake, immutable configuration,
+   and the bounded ordinary-command runtime bridge.
+4. **This PR** — the Windows runtime seam, shared capability dispatcher, and
+   independent C# adopter proof.
 
-This PR is independently safe to land because it keeps the existing C# runtime selected. The later authenticated, versioned Rust adapter depends on the OpenClaw runtime series; this refactor itself does not.
+OpenClaw and `openclaw-windows-node` are separate repositories, so this PR
+cannot be Git-rebased onto #116863. The dependency is contractual: this branch
+pins and reproduces #116863's three fixture corpora at OpenClaw head
+`8d0a1b013ea83b1726e284d71791002260eac3c6`. Production Rust selection remains
+blocked until that contract is accepted and the remaining adoption gates close.
 
 ## Ownership boundary
 
-`WindowsNodeClient` still owns Gateway wire parsing and response framing. `NodeCapabilityDispatcher` owns Windows capability execution. A future Rust `INodeRuntimeClient` adapter must deliver decoded invocations into the same dispatcher instead of duplicating Windows routing or policy, and remains ineligible for selection until adapter-level conformance proves that route.
+RFC #54 proposes that OpenClaw own the reusable protocol, Gateway authority
+semantics, Rust runtime, and conformance corpora. Under that boundary, Windows
+retains WinUI, operator behavior, MCP, approvals, native capability handlers,
+process/artifact verification, protected bootstrap, concrete IPC, audit,
+packaging, rollout, and rollback.
 
-Production runtime selection remains unchanged. This PR adds no Rust binary, local IPC, new command, permission, or Gateway policy.
+`WindowsNodeClient` still owns production Gateway wire parsing and response
+framing. `NodeCapabilityDispatcher` owns Windows capability execution. The
+sidecar adapter can only deliver authenticated, admitted ordinary invocations
+into that dispatcher; it is not an `INodeRuntimeClient`, launches no process,
+chooses no transport, and cannot be selected.
 
-The branch is rebased onto upstream `9acafa60`. The rebase preserves current `main` behavior for signed challenge timestamps, reconnect authorization, and disposal notification through the generic runtime interface.
+The generic Rust runtime still rejects the reserved `system.*` namespace. The
+existing Windows `system.run` family therefore stays on C# until OpenClaw owns
+an explicit authorization mechanism.
 
-## Migration path
+## Remaining adoption gates
 
-1. Define authenticated, versioned local IPC against the consolidated OpenClaw embeddable-runtime contract ([Rust follow-up draft #116450](https://github.com/openclaw/openclaw/pull/116450)).
-2. Add an opt-in C# adapter implementing `INodeRuntimeClient` over that Rust sidecar protocol and feed decoded invocations into `NodeCapabilityDispatcher`.
-3. Run the C# and Rust paths through shared registration and invocation conformance fixtures, including blocked-connect cancellation and adapter-to-dispatcher routing.
-4. Switch behind an explicit rollout gate, then remove duplicated C# Gateway transport only after parity and rollback evidence.
+Before Rust can become selectable, Windows still needs verified artifact/process
+launch, protected credential handoff, concrete local IPC, live Gateway pairing
+and issued-token lifecycle, duplex sidecar input/progress/heartbeat transport,
+process/crash supervision, health and resource proof, product audit export,
+packaging, rollout, and rollback.
 
 ## Validation
 
-- `./build.ps1` (Debug, win-x64): all projects built successfully
-- `dotnet test ./tests/OpenClaw.Shared.Tests/OpenClaw.Shared.Tests.csproj --no-restore`: 3,402 passed, 32 existing environment-gated skips
-- `dotnet test ./tests/OpenClaw.Tray.Tests/OpenClaw.Tray.Tests.csproj --no-restore`: 2,023 passed
-- `dotnet test ./tests/OpenClaw.Connection.Tests/OpenClaw.Connection.Tests.csproj --no-restore`: 519 passed
-- `./scripts/validate-mxc-e2e.ps1`: full repository, tray, and E2E builds succeeded with 0 warnings and 0 errors; 2/2 live Gateway MXC tests passed
-- `git diff --check upstream/main...HEAD`: passed
-- sequential core, architecture/API, and security reviews: all actionable findings resolved; final passes clean
+- `./build.ps1` — all Debug `win-x64` projects built successfully
+- `dotnet test tests/OpenClaw.Shared.Tests/OpenClaw.Shared.Tests.csproj --no-restore --filter "FullyQualifiedName~RustSidecar"` — 60 passed
+- `OPENCLAW_REPO_ROOT=<checkout> dotnet test tests/OpenClaw.Shared.Tests/OpenClaw.Shared.Tests.csproj --no-restore` — 3,462 passed, 32 existing environment-gated skips
+- `dotnet test tests/OpenClaw.Tray.Tests/OpenClaw.Tray.Tests.csproj --no-restore` — 2,023 passed
+- `dotnet test tests/OpenClaw.Connection.Tests/OpenClaw.Connection.Tests.csproj --no-restore` — 519 passed
+- `./scripts/validate-mxc-e2e.ps1` on the runtime-seam head — 2/2 live Gateway MXC tests passed
+- `git diff --check` — passed
+- built-in Codex review plus independent correctness, architecture/API, and
+  security reviews — all findings resolved; exact combined-head passes clean
+
+The combined Windows head is
+`3ca913a43a62957b8aca0448667facff3290fbc6`. The adapter review fixed
+cancellation/registration races, response ordering, admission lifetime,
+handshake role/version binding, result/envelope bounds, serde-compatible typed
+and untyped number handling, and bounded canonicalization across `JsonElement`,
+`JsonNode`, and `JsonDocument`.
 
 ## Real behavior proof
 
 Behavior or issue addressed:
-The new runtime boundary and shared dispatcher must preserve real Gateway-to-Windows-node execution, including successful contained `system.run` and rejection of writes outside the MXC sandbox, while the C# runtime remains the default.
+Windows needs one migration-safe execution boundary that preserves current
+Gateway-to-native behavior while proving that the OpenClaw sidecar contract can
+be consumed independently without bypassing Windows policy or handlers.
 
 Real environment tested:
-Windows 11 build 26310, commit `c0cfa8ba66802e601de23875b07caf941209e554`, .NET SDK 10.0.302, WSL 2 with an isolated Ubuntu 24.04 instance, OpenClaw CLI 2026.6.11, a live loopback Gateway, the built Windows tray/node host, and the real MXC/AppContainer executor.
+Windows 11, .NET SDK 10.0.302, combined head
+`3ca913a43a62957b8aca0448667facff3290fbc6`, OpenClaw sidecar fixtures from
+`8d0a1b013ea83b1726e284d71791002260eac3c6`, and the existing live Gateway/MXC
+proof collected on runtime-seam head
+`c0cfa8ba66802e601de23875b07caf941209e554`. The sidecar proof is an in-process
+source harness; it does not launch an external Rust binary.
 
 Exact steps or command run after this patch:
 
-1. Run `./scripts/validate-mxc-e2e.ps1` from the consolidated PR checkout.
-2. Let the harness build the repository, tray, and E2E host; create and configure a fresh isolated WSL distro; start and pair the live Gateway and Windows node; and invoke both MXC scenarios.
-3. Let the harness uninstall the test deployment and unregister the isolated distro.
+1. Build every Windows project at the combined head.
+2. Reproduce all three Rust sidecar corpora byte-for-byte in C#.
+3. Complete authentication, immutable configuration, admission, invocation,
+   cancellation, result, and status flows.
+4. Route admitted ordinary commands only through `NodeCapabilityDispatcher`.
+5. Exercise authentication, ordering, identity, admission, serialization,
+   cancellation, and resource-bound failures.
+6. Run the focused and complete Shared/Tray suites.
+7. On the unchanged production C# selection, run the live Gateway MXC harness
+   for successful contained `system.run` and denied tray-data writes.
 
 Evidence after fix:
-The retained console/TRX transcript at `TestResults/MxcE2E/OpenClaw.E2ETests.Mxc.trx` reports `Test Run Successful`, `Total tests: 2`, `Passed: 2`. The success invocation returned `OPENCLAW_GATEWAY_SYSTEM_RUN_MXC_OK`, exit code 0, `contained=True`, and `containment=mxc`. The denied-write invocation returned exit code 1 with `Access is denied.`, confirmed `fileExists=False`, and reported `containment=mxc`. Teardown completed successfully and unregistered the generated distro.
-
-Redacted current-head transcript:
-
-```text
-head: c0cfa8ba66802e601de23875b07caf941209e554
-RealGateway_SystemRun_BlocksWritesToTrayDataDirectoryInMxcSandbox  Passed  00:00:06.6140118
-  node.invoke: ok=true, command=system.run
-  stdout=OPENCLAW_GATEWAY_SYSTEM_RUN_MXC_SOURCE_READY
-  stderr="Access is denied.", exitCode=1, success=false
-  contained=True, containment=mxc, fileExists=False
-RealGateway_SystemRun_ExecutesThroughWindowsNodeMxcSandbox          Passed  00:00:06.6871952
-  node.invoke: ok=true, command=system.run
-  stdout=OPENCLAW_GATEWAY_SYSTEM_RUN_MXC_OK
-  stderr="", exitCode=0, success=true
-  contained=True, containment=mxc
-Test Run Successful. Total tests: 2. Passed: 2. Failed: 0.
-Teardown: uninstall completed; generated WSL distro unregistered.
-```
+The combined head passes 60 focused sidecar tests, 3,462 Shared tests, and 2,023
+Tray tests. The retained live MXC transcript reports 2/2 passed: contained
+`system.run` returned `OPENCLAW_GATEWAY_SYSTEM_RUN_MXC_OK`, and a write outside
+the sandbox failed with `Access is denied` and `fileExists=False`.
 
 Observed result after fix:
-Both `RealGateway_SystemRun_ExecutesThroughWindowsNodeMxcSandbox` and `RealGateway_SystemRun_BlocksWritesToTrayDataDirectoryInMxcSandbox` passed through the live Gateway, replaceable runtime boundary, and shared Windows dispatcher. Existing production selection still chose the C# `WindowsNodeClient`.
+The incumbent C# runtime still executes real Gateway commands through the shared
+dispatcher. Independently, the non-selectable adapter accepts the exact
+OpenClaw sidecar contracts, routes ordinary admitted commands into that same
+dispatcher, and fails closed on authentication, ordering, identity, admission,
+cancellation, serialization, and output/work-bound violations.
 
 What was not tested:
-The future Rust IPC adapter and runtime-selection rollback are not part of this PR and were not tested. Production runtime selection remains the existing C# client.
+No Rust process was launched; no concrete IPC or protected bootstrap was used;
+no live Gateway session selected the Rust runtime; and no `system.*` sidecar
+command, crash recovery, production audit, resource measurement, packaged
+artifact, rollout, or rollback was exercised. Production selection remains the
+existing C# `WindowsNodeClient`.
