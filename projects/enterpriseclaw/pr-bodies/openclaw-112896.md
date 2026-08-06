@@ -6,7 +6,7 @@ Non-normative host follow-on evidence (Microsoft access): https://microsoft.ghe.
 
 Stacked on: https://github.com/openclaw/openclaw/pull/112865
 
-Exact current head: `27ca7ca96736651cbdb57d1bcbb63203aa2a2f76`
+Exact current head: `8f64c26f5c35699a2cf8ad4375f55c77a3083b61`
 
 Previous full proof head: `ebe486dae3cad495c73259c5ee04cc042292fe8b`
 
@@ -70,6 +70,12 @@ The current head also repairs two review findings from the previous ClawSweeper 
 - `gateway.restore.status` now appends after the existing advertised method tail instead of inserting between `gateway.suspend.prepare` and `gateway.suspend.status`; the generated Android method catalog is synchronized.
 - restored agent databases are re-registered against the destination runtime after accepted bytes are restored, replacing restored source-path registry rows for the same agent before the committed restore receipt is written.
 
+The current head repairs the follow-up ClawSweeper findings from the rebased branch:
+
+- restored-admission operator probes can pass the startup-pending WebSocket gate only when the current restored-admission status is held; ordinary operator, node, browser, device, and worker connections remain blocked.
+- restored startup descriptors are now bound back to the committed `intent` and `result` records in the same journal before startup admission can observe them; descriptor/result divergence, invalid committed intent/result records, and invalid committed receipt hashes quarantine.
+- the Admin HTTP RPC documentation and suspension-admission integration proof now include the `gateway.restore.status` exception, limited to held restored admission and still blocked during restart drain.
+
 ## Real behavior proof
 
 Behavior or issue addressed:
@@ -88,6 +94,15 @@ and conflict-marker search passed; local package-backed Vitest could not be
 rerun in the fresh Windows clone because dependency materialization failed on
 private feed auth for `@openclaw/fs-safe@0.5.2`. GitHub CI is the current
 package-materialized validation for this head.
+
+2026-08-06 follow-up review repair:
+The branch added one repair commit and was pushed to exact head
+`8f64c26f5c35699a2cf8ad4375f55c77a3083b61`. Local validation in the fresh
+Windows clone passed `git diff --check` and a conflict-marker search over all
+touched files. Focused Vitest could not run in this clone because `vitest` was
+not linked after dependency materialization failed on private feed auth for
+`@openclaw/fs-safe@0.5.2`; GitHub CI is the current package-materialized
+validation for this exact head.
 
 Exact steps or command run after this patch:
 
@@ -132,6 +147,7 @@ current-restack test-src tsgo: passed
 current-restack deadcode exports: passed with 0 entries
 current-restack protocol registry/generation/since/native diff check: passed
 current-restack touched oxfmt, oxlint, and diff check: passed
+follow-up review repair diff check and conflict-marker search: passed
 snapshot restored/final/recovery-point tests: 29 passed
 gateway restored/suspension/restore method tests: 50 passed
 CLI gateway/backup tests: 80 passed

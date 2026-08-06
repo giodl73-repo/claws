@@ -1437,6 +1437,24 @@
   proof and was queued/running at the last live check. The PR body was updated
   and exact-head ClawSweeper re-review was requested at
   `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5207750436`.
+- 2026-08-06 follow-up: #112896 received the follow-up restored-admission
+  repair commit in `C:\src\openclaw-pr112896-restack-current` and was pushed
+  only to the fork branch
+  `giodl73-repo/openclaw:user/giodl/rfc-0013-restored-admission` at
+  `8f64c26f5c35699a2cf8ad4375f55c77a3083b61`, with an exact force-with-lease
+  from `27ca7ca96736651cbdb57d1bcbb63203aa2a2f76`. The repair allows the
+  restored-hold operator probe through startup-pending only for held restored
+  admission, binds startup descriptors to same-journal committed intent/result
+  records before startup admission observes them, and documents/proves the
+  Admin HTTP RPC `gateway.restore.status` suspension exception. Local
+  `git diff --check` and conflict-marker search over touched files passed;
+  focused Vitest still could not run in the fresh Windows clone because
+  `vitest` was not linked after private feed auth failed for
+  `@openclaw/fs-safe@0.5.2`. The PR body was updated and exact-head
+  ClawSweeper re-review was requested at
+  `https://github.com/openclaw/openclaw/pull/112896#issuecomment-5207826740`.
+  `gh pr checks` currently reports the Socket checks passing and no visible
+  failed check; keep watching CI/review before any further restack.
 
 ## Session Checkpoints
 
