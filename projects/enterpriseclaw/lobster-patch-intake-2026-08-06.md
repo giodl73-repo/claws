@@ -47,8 +47,8 @@ newer 30-file queue, or a newly derived queue with one additional proven carry.
 | --- | --- | --- | --- |
 | `0000-enterpriseclaw-upstream-evidence-slices.patch` | 26 and 28 | Keep | Required metadata/evidence base for readiness and hosting replay on `v2026.6.33`. |
 | `0001` through `0013`, `0015` through `0019`, `0022`, `0024`, `0026`, `0028` | 26, 28, and 32 | Keep as current downstream adoption layer | These are the retained Teams, Cron, keyless WebIQ, personality, node, memory, approval, hosted UI, and session-binding carries. |
-| `0029-agent-harness-host-adapter.patch` | 28 and 32 | Keep pending validation | Current-main remote-harness carry. Already included in the clean promote branch; validate with the 28-patch queue. |
-| `0030-msteams-native-audience-route.patch` | 28 and 32 | Keep pending validation | Current-main Teams routing carry. Already included in the clean promote branch; validate with the 28-patch queue. |
+| `0029-agent-harness-host-adapter.patch` | 28, 30, and legacy queues | Keep | Current-main remote-harness carry. Included in the validated 28-file pinfix queue and preserved in the 30-file current-promote candidate. |
+| `0030-msteams-native-audience-route.patch` | 28, 30, and legacy queues | Keep | Current-main Teams routing carry. Included in the validated 28-file pinfix queue and preserved in the 30-file current-promote candidate. |
 | `0031-hosted-replay-integration.patch` | 28 only | Keep | `v2026.6.33` replay bridge for readiness/hosted UI compile and behavior drift. Delete after equivalent released upstream behavior and Lobster adapter proof. |
 | `0032-node-command-policy-structured-commands.patch` | 28 only | Keep | Compatibility bridge for structured node command policy used by hosting readiness evidence. Delete after released upstream profile support or profile rollback to legacy names. |
 | `0033-scoped-enterprise-test-stability.patch` | 28 only | Keep | Test/tooling stability for scoped evidence and Cron timer lanes. Delete when equivalent test support exists upstream. |
@@ -90,7 +90,7 @@ availability for `openclaw@2026.6.33`, not a missing legacy 32-only patch.
 
 ## Current Proof
 
-- `wsl -d Ubuntu-24.04 -- bash -lc 'cd /mnt/c/src/lobster-promote-633 && just openclaw-patches-check --offline'` passed.
+- `wsl -d Ubuntu-24.04 -- bash -lc 'cd /mnt/c/src/lobster-promote-633-pinfix && just openclaw-patches-check --offline'` passed.
 - The gate reported all 28 patches documented in `README.md`, applied by
   Dockerfile order, covered by shared scoped Vitest runner registration, and
   pinned consistently to `openclaw 2026.6.33`, tag `v2026.6.33`, sha

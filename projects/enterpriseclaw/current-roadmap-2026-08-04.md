@@ -146,22 +146,29 @@ fresh-clone signed release commit `v2026.6.33`
 
 2026-08-06 patch-count update:
 
-- `C:\src\lobster-promote-633` is the clean current intake base with 28 patch
-  files on `promoteclaw/openclaw-2026.6.33`.
+- `C:\src\lobster-promote-633-pinfix` is the validated 28-physical-patch
+  branch at `e97922975f`, pushed to the `giodl` fork branch
+  `promoteclaw/openclaw-2026.6.33`.
+- `C:\src\lobster-promote-633` is a clean 30-physical-patch candidate at
+  `3d09706faaf8`. It keeps the 28-file base and intentionally adds
+  current-main `0031-cron-wake-only-payload-kind.patch` plus
+  `0032-channel-participant-capability-surface.patch`; readiness/node-policy
+  and scoped test-stability then shift to `0033` through `0035`.
 - `C:\src\lobster-pr6839-fix` is a conflicted legacy PR #6839 repair tree with
-  32 patch files. It is a candidate-delta source only; do not port it wholesale.
-- The two current-main remote-harness carries already accepted into the clean
-  28 queue are `0029-agent-harness-host-adapter.patch` and
-  `0030-msteams-native-audience-route.patch`.
-- The 32-only `0031-cron-wake-only-payload-kind.patch` is the only small
-  investigate-now candidate. The older sensitivity, retry/session-init,
-  DoltLite/SQLite, test-order, per-send sensitivity, and 2026.6.11 correction
-  patches stay out unless current Lobster dependency proof exists.
+  33 physical patch files excluding `0000`. It is a candidate-delta source
+  only; do not port it wholesale.
+- The older "31 patch" label is not currently a verified clean
+  `v2026.6.33` physical patch queue. Before starting a fork with that label,
+  name the 31st file, prove the Lobster dependency, apply it cleanly, validate
+  it, and record its deletion condition.
+- The older sensitivity, retry/session-init, DoltLite/SQLite, test-order,
+  per-send sensitivity, and 2026.6.11 correction patches stay out unless
+  current Lobster dependency proof exists.
 
 Validation:
 
 - `just openclaw-patches-check --offline` passed.
-- The clean `C:\src\lobster-promote-633` branch passed the 28-patch offline
+- The clean `C:\src\lobster-promote-633-pinfix` branch passed the 28-patch offline
   gate: all patch files are documented, applied by Dockerfile order, covered by
   the scoped JS runner, and pinned to `openclaw 2026.6.33` / `v2026.6.33` /
   `7af0cfc9c548`.
@@ -510,26 +517,32 @@ Upstream PR #104160 current-main restack on 2026-08-05:
 
 ## Next Execution Order
 
-1. Let normal quarantine promotion publish `openclaw@2026.6.33` to the Lobster
+1. Choose the image-fork patch manifest explicitly before more branch work:
+   keep the conservative 28-file `pinfix` queue for the fastest validated
+   Lobster image path, or promote the clean 30-file current-main parity queue
+   only after accepting wake-only Cron and Channel Participant as intentional
+   carries. Do not create or advertise a 31-file fork until the extra file is
+   named and proven.
+2. Let normal quarantine promotion publish `openclaw@2026.6.33` to the Lobster
    npm feed after the 7-day gate, or get an approved Day0 work item before
    manually queueing `Lobster-Promote-OpenClaw-LTS-Packages` with
    `specificVersion=2026.6.33 day0Override=true`. Do not queue Day0 without
    that work item. The package exists in upstream quarantine but is not yet in
    the Lobster runtime feed, so latest image materialization reached the feed
    and failed with npm `ETARGET` for `openclaw@2026.6.33`.
-2. Re-run `just openclaw-js-unit-tests` only if the patch queue changes, then
+3. Re-run `just openclaw-js-unit-tests` only if the patch queue changes, then
    rerun `scripts/ensure-openclaw-image.sh` from
    `C:\src\lobster-promote-633-pinfix` at fork commit `e97922975f` and record the
    exact image digest.
-3. Run Lobster adapter validation against the exact image: readiness RPC,
+4. Run Lobster adapter validation against the exact image: readiness RPC,
    hosting profile selection, route/rollback, and managed-policy boundaries.
-4. Preserve the stale timeout patcher removal already made in
+5. Preserve the stale timeout patcher removal already made in
    `C:\src\lobster-pr5402-reviewfix`; upstream `openclaw@2026.6.33` owns the
    bundle-MCP request-timeout behavior, and local Lobster validators plus
    `just openclaw-patches-check --offline` have passed with the patcher gone.
-5. Publish the fork/image migration PR with tree SHA, image digest, adapter
+6. Publish the fork/image migration PR with tree SHA, image digest, adapter
    proof, rollback proof, and patch deletion ledger.
-6. Watch #100960 at exact head
+7. Watch #100960 at exact head
    `2155498943dd4687d446b59f3df0124bba59ee51` and #112896 at exact head
    `0c2ec9392063227c93c1d3ab516d195b2de72c8e`: both are rebased on current
    `upstream/main` `dcf7fadf2c03d594f455e140194044a492f1fc6e`, GitHub checks
@@ -537,8 +550,8 @@ Upstream PR #104160 current-main restack on 2026-08-05:
    updated for the restored-hold startup-pending exception, same-journal
    startup descriptor binding, Admin HTTP RPC restore-status suspension
    exception, and clean rebase-only refresh.
-7. Keep #104158, #104159, and #104160 draft until maintainers explicitly
+8. Keep #104158, #104159, and #104160 draft until maintainers explicitly
    accept source-harness proof or ask us to mark them ready; they currently
    have zero visible failures and zero pending checks.
-8. Resume 35-RFC implementation package work only after the base image is
+9. Resume 35-RFC implementation package work only after the base image is
    usable and the relevant owner/deletion gate is explicit.
