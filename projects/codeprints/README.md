@@ -46,12 +46,13 @@ passes unchanged owner tests, beats a matched direct-native change on review
 cost, and ejects cleanly. Owner-scenario discovery comes before choosing .NET,
 Rust, or another target.
 
-The selected first scenario is FLETCH's shared `CacheIndexEntry` contract.
-Phase A now proves target-neutral JSON compatibility value: an additive
-`object_path` alias is allowed, while a canonical rename is blocked for old
-readers. The next decision is whether to build only the bounded Phase B
-Rust/Serde and selector projection and compare it with the retained
-direct-native edit.
+The first scenario, FLETCH's shared `CacheIndexEntry` contract, is complete.
+Target-neutral JSON compatibility proved useful: an additive `object_path`
+alias is allowed, while a canonical rename is blocked for old readers. A
+bounded Rust/Serde and selector provider then passed the owner tests but failed
+the matched-native cost gate because direct native code was already the same
+three-line production change. The provider was deleted and FLETCH was not
+adopted.
 
 ## Related Areas
 

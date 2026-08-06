@@ -20,8 +20,8 @@
 
 - Last updated: 2026-08-06
 - Last agent: Copilot CLI
-- Current focus: Phase A of the FLETCH cache-index owner pilot is complete.
-  Bound Phase B to exact Rust/Serde and selector output before implementation.
+- Current focus: The FLETCH owner loop is complete. Retain target-neutral
+  compatibility; reject Rust generation and FLETCH adoption.
 - Active branch / PR: `user/giodl/factor-draft-projection` in
   `C:\src\codeprints-factor-draft`; no PR or commit.
 - Known dirty state: The draft worktree contains the intended uncommitted
@@ -109,12 +109,24 @@
   dedicated `dependency-systems/codeprints-usage.md`, and includes Codeprints
   in the new-repo intake checklist. Future repos can request owner-led pilots
   without treating it as required or runtime infrastructure.
+- A bounded Rust/Serde plus `slice_core` owner provider emitted the exact
+  43-line FLETCH module, blocked the canonical rename before bytes, and passed
+  all 69 unchanged owner tests with no Codeprints dependency.
+- The steady-state Codeprint alias edit produced exactly the same three
+  production lines as direct native code. The provider, binding, and generated
+  fixture cost 595 lines and required FLETCH-specific selector machinery.
+- Phase B therefore failed the matched-native/minimalism gate. Its provider and
+  adoption were deleted; FLETCH is restored to the retained 20-insertion,
+  1-replacement direct-native evidence state.
+- Final review found one real `omitNull` compatibility gap. Both neutral and
+  .NET classifiers now emit the fact and block writers that omit a member
+  required by old readers. Full workspace validation and the rerun Codex review
+  are clean.
 
 ## Resume Checklist
 
-- If continuing, design only the bounded Phase B Rust/Serde and selector
-  projection, then compare its exact output and review cost with the retained
-  direct-native worktree. Do not absorb manifest logic or owner tests.
+- If continuing, evaluate packaging the retained target-neutral compatibility
+  report for owner use. Do not add a Rust target from the FLETCH result.
 - Tracker discovery is documented; do not broaden its availability language
   beyond owner-led local-tool pilots until the uncommitted work is published.
 
@@ -147,8 +159,8 @@
   writes while accepting/querying `object_path`.
 - Phase A is retained under
   `fixtures/owner-pilots/fletch-cache-index/{before,alias,rename}`. Its
-  compatibility evidence clears the value gate for a bounded Phase B
-  experiment but does not yet prove generated Rust preferable to native code.
+  compatibility evidence proved useful; Phase B proved generated Rust was not
+  preferable to native code for this surface.
 - No FLETCH commit or PR exists. The experiment is dirty only in
   `C:\src\FLETCH-codeprints-native`.
 
