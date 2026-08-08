@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { lstat, mkdir, realpath, writeFile } from "node:fs/promises";
-import { basename, dirname, join, resolve } from "node:path";
+import { chmod, lstat, mkdir, realpath, writeFile } from "node:fs/promises";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { conflictsWithClawPath, portableClawPathKey } from "@claws/reference-private";
 import { CliError } from "./errors.js";
 import type { LocalClawPackage } from "./types.js";
@@ -182,6 +182,25 @@ async function resolveNewTarget(target: string): Promise<{ target: string }> {
   return { target: canonicalTarget };
 }
 
+async function ensureOwnerOnlyDirectory(root: string, target: string): Promise<void> {
+  let current = root;
+  for (const part of relative(root, target).split(sep).filter(Boolean)) {
+    current = join(current, part);
+    await mkdir(current, { mode: 0o700 }).catch((error: NodeJS.ErrnoException) => {
+      if (error.code !== "EEXIST") throw error;
+    });
+    const info = await lstat(current);
+    if (!info.isDirectory() || info.isSymbolicLink()) {
+      return fail(
+        "codex_apply_failed",
+        "A Codex workspace directory component is not a real directory.",
+        current,
+      );
+    }
+    await chmod(current, 0o700);
+  }
+}
+
 async function buildCodexWorkspacePlan(
   claw: LocalClawPackage,
   target: string,
@@ -311,7 +330,7 @@ export async function applyCodexWorkspace(
     await mkdir(plan.target, { recursive: false, mode: 0o700 });
     for (const file of files) {
       const destination = resolve(plan.target, ...file.path.split("/"));
-      await mkdir(dirname(destination), { recursive: true, mode: 0o700 });
+      await ensureOwnerOnlyDirectory(plan.target, dirname(destination));
       await writeFile(destination, file.bytes, { flag: "wx", mode: 0o600 });
     }
   } catch (error) {

@@ -1,4 +1,4 @@
-import { access, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdtemp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -155,6 +155,36 @@ describe("Codex workspace adapter", () => {
       readFile(join(target, "schemas", "review.schema.json"), "utf8"),
     ).resolves.toContain('"findings"');
   });
+
+  it.skipIf(process.platform === "win32")(
+    "keeps intermediate workspace directories owner-only",
+    async () => {
+      const claw = await inspectLocalPackage(fixture);
+      const target = await targetPath();
+      const nested = {
+        ...claw,
+        manifest: {
+          ...claw.manifest,
+          workspace: {
+            ...claw.manifest.workspace,
+            files: [
+              ...claw.manifest.workspace.files,
+              {
+                source: "assets/review.schema.json",
+                path: "deep/nested/review.schema.json",
+              },
+            ],
+          },
+        },
+      };
+      const plan = await previewCodexWorkspace(nested, target);
+
+      await applyCodexWorkspace(nested, target, plan.planIntegrity);
+
+      expect((await stat(join(target, "deep"))).mode & 0o777).toBe(0o700);
+      expect((await stat(join(target, "deep", "nested"))).mode & 0o777).toBe(0o700);
+    },
+  );
 
   it("never overlays an existing target directory", async () => {
     const claw = await inspectLocalPackage(fixture);
