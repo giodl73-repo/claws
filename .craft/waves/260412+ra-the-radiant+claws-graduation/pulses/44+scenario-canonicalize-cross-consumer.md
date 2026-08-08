@@ -12,10 +12,8 @@ test_tiers:
   L2_e2e: 0
   L3_accept: 0
 test_scope:
-  run:
-    []
-  typecheck:
-    []
+  run: []
+  typecheck: []
 checkpoint: 9
 ---
 
@@ -41,6 +39,7 @@ Design-probe scenario. `@openclaw/workspace/canonicalize` is consumed by `@openc
 If this pulse surfaces a gap in the proposal spec (main spec, one of the 4 package specs, or the plan) — **the amendment lands inside this pulse's commit**. No deferral, no follow-up pulse. Amendment SHA = pulse SHA.
 
 Commit-message convention for in-pulse amendments:
+
 ```
 <pulse-type>(<pulse-slug>): <summary>
 

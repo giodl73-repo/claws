@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "voice-call plugin (communication)",
   "contributes": {
-    "tools": [
-      "voice-call/initiate-call",
-      "voice-call/list-recent"
-    ],
-    "skills": [
-      "voice-call/initiate-call",
-      "voice-call/list-recent"
-    ]
+    "tools": ["voice-call/initiate-call", "voice-call/list-recent"],
+    "skills": ["voice-call/initiate-call", "voice-call/list-recent"]
   }
 }

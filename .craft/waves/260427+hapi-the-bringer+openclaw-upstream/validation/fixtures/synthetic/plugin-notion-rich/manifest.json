@@ -4,18 +4,9 @@
   "version": "0.1.0",
   "description": "notion plugin (productivity)",
   "contributes": {
-    "tools": [
-      "notion/read-page",
-      "notion/write-page",
-      "notion/search"
-    ],
-    "skills": [
-      "notion/read-page",
-      "notion/write-page"
-    ],
-    "workflows": [
-      "notion-flow.lobster"
-    ],
+    "tools": ["notion/read-page", "notion/write-page", "notion/search"],
+    "skills": ["notion/read-page", "notion/write-page"],
+    "workflows": ["notion-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

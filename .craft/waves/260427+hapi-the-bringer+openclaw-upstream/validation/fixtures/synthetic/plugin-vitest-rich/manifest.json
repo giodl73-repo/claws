@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "vitest plugin (testing)",
   "contributes": {
-    "tools": [
-      "vitest/run",
-      "vitest/list-tests"
-    ],
-    "skills": [
-      "vitest/run",
-      "vitest/list-tests"
-    ],
-    "workflows": [
-      "vitest-flow.lobster"
-    ],
+    "tools": ["vitest/run", "vitest/list-tests"],
+    "skills": ["vitest/run", "vitest/list-tests"],
+    "workflows": ["vitest-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

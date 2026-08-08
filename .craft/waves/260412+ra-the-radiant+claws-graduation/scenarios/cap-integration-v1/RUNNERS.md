@@ -2,14 +2,14 @@
 
 ## Existing Runners (reuse from claws-sdk/tests/accept/runners/)
 
-| Runner | Scenarios | What it does |
-|--------|-----------|-------------|
-| `gateway-sim` | S03, S04, S05 | Compile → emit → fire tool calls → verify enforcement outcomes. Reuse for PATCH validation: edit → recompile → verify governance holds. |
-| `compile-sim` | S06, S07 | Full/incremental compilation pipeline. Reuse for cache invalidation timing and rollback verification. |
-| `emit-sim` | S01, S02 | Emit artifacts from GovernanceIR. Reuse for verifying chunk assembly sources (host-approval-policies.json, exec-approvals.json). |
-| `host-policy-sim` | S04, S05 | Host approval policy resolution with specific→wildcard→global order. Reuse for fleet lock and "Allow all" enforcement. |
-| `fleet-sim` | S04 | Fleet policy distribution and override resolution. Reuse for fleet lock precedence testing. |
-| `security-sim` | S15 | Security rule enforcement (injection, secrets). Reuse for onboard content validation. |
+| Runner            | Scenarios     | What it does                                                                                                                            |
+| ----------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `gateway-sim`     | S03, S04, S05 | Compile → emit → fire tool calls → verify enforcement outcomes. Reuse for PATCH validation: edit → recompile → verify governance holds. |
+| `compile-sim`     | S06, S07      | Full/incremental compilation pipeline. Reuse for cache invalidation timing and rollback verification.                                   |
+| `emit-sim`        | S01, S02      | Emit artifacts from GovernanceIR. Reuse for verifying chunk assembly sources (host-approval-policies.json, exec-approvals.json).        |
+| `host-policy-sim` | S04, S05      | Host approval policy resolution with specific→wildcard→global order. Reuse for fleet lock and "Allow all" enforcement.                  |
+| `fleet-sim`       | S04           | Fleet policy distribution and override resolution. Reuse for fleet lock precedence testing.                                             |
+| `security-sim`    | S15           | Security rule enforcement (injection, secrets). Reuse for onboard content validation.                                                   |
 
 ## New Runners Required
 
@@ -20,8 +20,8 @@
 
 ```typescript
 interface ServeSimConfig {
-  workspaceRoot: string;          // fixture workspace with OC files
-  port?: number;                  // default: 0 (random port)
+  workspaceRoot: string; // fixture workspace with OC files
+  port?: number; // default: 0 (random port)
 }
 
 interface ServeSimResult {
@@ -31,7 +31,7 @@ interface ServeSimResult {
 
 // Usage:
 const sim = await ServeSim.start(config);
-const chunk = await sim.get('/api/chunks/connections/outlook');
+const chunk = await sim.get("/api/chunks/connections/outlook");
 // chunk.response.status === 200
 // chunk.response.body.data.tools[0].risk.level === 5
 await sim.stop();
@@ -47,13 +47,13 @@ await sim.stop();
 ```typescript
 interface ChunkSimConfig {
   workspaceRoot: string;
-  compiledIR?: GovernanceIR;      // optional: inject pre-compiled IR
-  fleetPolicy?: FleetPolicy;     // optional: inject fleet overrides
+  compiledIR?: GovernanceIR; // optional: inject pre-compiled IR
+  fleetPolicy?: FleetPolicy; // optional: inject fleet overrides
 }
 
 // Usage:
 const sim = new ChunkSim(config);
-const chunk = await sim.assembleChunk('connections', 'outlook');
+const chunk = await sim.assembleChunk("connections", "outlook");
 // chunk.data.tools[0].lock.source === 'r5'
 // chunk.governance.risk.level === 5
 ```
@@ -67,23 +67,23 @@ const chunk = await sim.assembleChunk('connections', 'outlook');
 
 ```typescript
 interface PatchSimConfig {
-  workspaceRoot: string;           // mutable fixture workspace
+  workspaceRoot: string; // mutable fixture workspace
   fleetPolicy?: FleetPolicy;
 }
 
 interface PatchSimResult {
-  status: 'ok' | 'rejected';
+  status: "ok" | "rejected";
   error?: string;
-  fileChanged: boolean;            // was the OC file actually modified?
-  fileContent?: string;            // post-edit file content (for lossless verification)
-  governance?: GovernanceResult;   // recompilation result (if status === 'ok')
-  auditEvent?: AuditEvent;        // audit event emitted (if any)
+  fileChanged: boolean; // was the OC file actually modified?
+  fileContent?: string; // post-edit file content (for lossless verification)
+  governance?: GovernanceResult; // recompilation result (if status === 'ok')
+  auditEvent?: AuditEvent; // audit event emitted (if any)
 }
 
 // Usage:
 const sim = new PatchSim(config);
-const result = await sim.patch('connections', 'outlook', {
-  tools: [{ tool: 'send-email', enabled: false }]
+const result = await sim.patch("connections", "outlook", {
+  tools: [{ tool: "send-email", enabled: false }],
 });
 // result.status === 'rejected'
 // result.error === 'R5_NON_NEGOTIABLE'
@@ -100,8 +100,8 @@ const result = await sim.patch('connections', 'outlook', {
 ```typescript
 interface LoopSimConfig {
   workspaceRoot: string;
-  soulContent?: string;           // inject SOUL.md content
-  memoryContent?: string;         // inject MEMORY.md content
+  soulContent?: string; // inject SOUL.md content
+  memoryContent?: string; // inject MEMORY.md content
 }
 
 // Usage:
@@ -110,7 +110,7 @@ const soul = await sim.getSoulSections();
 // soul[0].name === 'Instructions'
 // soul[1].governance.denyRules === 2
 
-const result = await sim.patchSoulSection('Boundaries', 'New boundary text');
+const result = await sim.patchSoulSection("Boundaries", "New boundary text");
 // result.governance.warnings includes 'DENY_RULE_REMOVED' if deny rule was removed
 // result.fileContent preserves frontmatter and other sections
 ```
@@ -124,15 +124,15 @@ const result = await sim.patchSoulSection('Boundaries', 'New boundary text');
 
 ```typescript
 interface SseSimConfig {
-  serverUrl: string;              // from serve-sim
-  timeout?: number;               // max wait for events (default: 5000ms)
+  serverUrl: string; // from serve-sim
+  timeout?: number; // max wait for events (default: 5000ms)
 }
 
 // Usage:
 const sim = new SseSim(config);
-await sim.connect('/api/events');
+await sim.connect("/api/events");
 // ... trigger a PATCH ...
-const events = await sim.collectUntil(e => e.type === 'compilation_complete');
+const events = await sim.collectUntil((e) => e.type === "compilation_complete");
 // events[0].type === 'file_changed'
 // events[1].type === 'compilation_started'
 // events[2].type === 'compilation_complete'
@@ -144,23 +144,23 @@ await sim.disconnect();
 
 ## Scenario → Runner Matrix
 
-| Scenario | Primary Runner | Supporting Runners |
-|----------|---------------|-------------------|
-| S01-chunk-read-connections | serve-sim | chunk-sim, emit-sim |
-| S02-chunk-read-general | serve-sim | chunk-sim |
-| S03-r5-patch-rejection | patch-sim | gateway-sim |
-| S04-fleet-lock-enforcement | patch-sim | fleet-sim, host-policy-sim |
-| S05-allow-all-r5-exclusion | patch-sim | host-policy-sim |
-| S06-incremental-recompile | serve-sim | compile-sim |
-| S07-patch-atomic-rollback | patch-sim | compile-sim |
-| S08-sse-events-on-edit | sse-sim | serve-sim, patch-sim |
-| S09-loop-soul-sync | loop-sim | patch-sim |
-| S10-loop-deny-rule-removal | loop-sim | patch-sim, gateway-sim |
-| S11-schedule-as-calendar | serve-sim | — |
-| S12-trust-escalation | patch-sim | — |
-| S13-workqueue-read | serve-sim | — |
-| S14-audit-query | serve-sim | — |
-| S15-onboard-content-validation | patch-sim | security-sim |
+| Scenario                       | Primary Runner | Supporting Runners         |
+| ------------------------------ | -------------- | -------------------------- |
+| S01-chunk-read-connections     | serve-sim      | chunk-sim, emit-sim        |
+| S02-chunk-read-general         | serve-sim      | chunk-sim                  |
+| S03-r5-patch-rejection         | patch-sim      | gateway-sim                |
+| S04-fleet-lock-enforcement     | patch-sim      | fleet-sim, host-policy-sim |
+| S05-allow-all-r5-exclusion     | patch-sim      | host-policy-sim            |
+| S06-incremental-recompile      | serve-sim      | compile-sim                |
+| S07-patch-atomic-rollback      | patch-sim      | compile-sim                |
+| S08-sse-events-on-edit         | sse-sim        | serve-sim, patch-sim       |
+| S09-loop-soul-sync             | loop-sim       | patch-sim                  |
+| S10-loop-deny-rule-removal     | loop-sim       | patch-sim, gateway-sim     |
+| S11-schedule-as-calendar       | serve-sim      | —                          |
+| S12-trust-escalation           | patch-sim      | —                          |
+| S13-workqueue-read             | serve-sim      | —                          |
+| S14-audit-query                | serve-sim      | —                          |
+| S15-onboard-content-validation | patch-sim      | security-sim               |
 
 ## Finding Count Target
 

@@ -23,9 +23,11 @@ checkpoint_gate: false
 # Pulse 24: Dead-Code Merge
 
 ## Objective
+
 Implement three optimization passes for GovernanceIR: dead-code elimination, redundant check merging, and DataFrame materialization.
 
 **Dead-Code Elimination**: Removes governance rules that are provably inapplicable to the current compilation target. Two elimination criteria:
+
 - **Absent tool rules** — rules governing tools not present in the skill's manifest are removed. If a skill doesn't use `send-email`, governance rules for email sending are dead code.
 - **Explicitly disabled rules** — rules marked as disabled in the governance configuration (via `enabled: false` or `disabled_rules[]` in `.claws-manifest.json`) are removed.
 
@@ -34,6 +36,7 @@ Implement three optimization passes for GovernanceIR: dead-code elimination, red
 **DataFrame Materialization**: Converts DataFrame references in GovernanceIR to const objects for compile-time materialization. This eliminates runtime DataFrame resolution overhead in generated governance code, replacing dynamic lookups with static constants.
 
 ## Deliverables
+
 - [ ] `claws-sdk/src/optimize/dead-code.ts` — remove inapplicable rules: tools not in manifest, explicitly disabled rules
 - [ ] `claws-sdk/src/optimize/merge-checks.ts` — combine redundant checks: same tool + compatible rule predicates; preserve incompatible rules separately
 - [ ] `claws-sdk/src/optimize/materialize.ts` — DataFrame to const objects for compile-time materialization
@@ -43,6 +46,7 @@ Implement three optimization passes for GovernanceIR: dead-code elimination, red
 - [ ] `claws-sdk/tests/optimize/optimize-pipeline.integration.test.ts` — L1: dead-code + merge on fixture GovernanceIR (1)
 
 ## Acceptance Criteria
+
 - [ ] Rules for absent tools are removed from GovernanceIR
 - [ ] Explicitly disabled rules are removed from GovernanceIR
 - [ ] Compatible rules for the same tool are merged into a single check
@@ -55,14 +59,18 @@ Implement three optimization passes for GovernanceIR: dead-code elimination, red
 - [ ] `npx tsc --noEmit` exits 0
 
 ## Governing Roles
+
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — overall claws architecture and SDK boundaries
 - `.craft/roles/claws/platform-eng.md` — implementation patterns, cross-platform concerns
 
 ## Dependencies
+
 - Pulse 21 (pinch-profiles) — profiles define which rules are in-scope for elimination decisions
 
 ## Test Gates
+
 - [ ] L0 unit (5 tests): absent tool rule removed (1), disabled rule removed (1), compatible rules merged (1), incompatible rules preserved separately (1), materialize.ts produces correct const objects from DataFrame (1)
 - [ ] L1 integration (1 test): dead-code + merge on fixture GovernanceIR
 - [ ] `npm run build` exits 0

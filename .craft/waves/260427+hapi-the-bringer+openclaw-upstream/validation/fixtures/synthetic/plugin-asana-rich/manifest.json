@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "asana plugin (productivity)",
   "contributes": {
-    "tools": [
-      "asana/create-task",
-      "asana/list-projects"
-    ],
-    "skills": [
-      "asana/create-task",
-      "asana/list-projects"
-    ],
-    "workflows": [
-      "asana-flow.lobster"
-    ],
+    "tools": ["asana/create-task", "asana/list-projects"],
+    "skills": ["asana/create-task", "asana/list-projects"],
+    "workflows": ["asana-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

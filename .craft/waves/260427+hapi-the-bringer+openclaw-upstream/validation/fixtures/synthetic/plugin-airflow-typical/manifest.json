@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "airflow plugin (data)",
   "contributes": {
-    "tools": [
-      "airflow/trigger-dag",
-      "airflow/list-dags"
-    ],
-    "skills": [
-      "airflow/trigger-dag",
-      "airflow/list-dags"
-    ]
+    "tools": ["airflow/trigger-dag", "airflow/list-dags"],
+    "skills": ["airflow/trigger-dag", "airflow/list-dags"]
   }
 }

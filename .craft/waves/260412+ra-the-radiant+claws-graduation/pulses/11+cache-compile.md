@@ -9,7 +9,17 @@ governing_roles: [craft:architect, craft:perf-stress, claws:platform-eng]
 # follow-up: add a `cache/` scenario directory covering hit (S01), LRU
 # eviction (S02), TTL expiry (S03), corrupt manifest (S04), and options key
 # (S05 — depends on CM-4 landing).
-scenario_codes: [execution/S01, execution/S03, cross-package/S03, cache/S01, cache/S02, cache/S03, cache/S04, cache/S05]
+scenario_codes:
+  [
+    execution/S01,
+    execution/S03,
+    cross-package/S03,
+    cache/S01,
+    cache/S02,
+    cache/S03,
+    cache/S04,
+    cache/S05,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 6
@@ -66,6 +76,7 @@ The free-tier cache is file-based (one cache directory per workspace) with conte
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- compilation pipeline design, host orchestration, cache strategy
 - `.craft/roles/craft/perf-stress.md` -- cache performance, LRU eviction, content-hash determinism
 - `.craft/roles/claws/platform-eng.md` -- SDK host patterns, pipeline integration

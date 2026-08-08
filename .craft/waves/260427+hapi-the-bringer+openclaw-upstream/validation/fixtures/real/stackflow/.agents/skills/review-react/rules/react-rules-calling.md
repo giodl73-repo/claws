@@ -18,7 +18,7 @@ React must control when components render and hooks execute. Calling them direct
 ```tsx
 function Parent() {
   // This bypasses React's rendering, no proper lifecycle or state isolation
-  return <div>{Profile({ name: 'Alice' })}</div>
+  return <div>{Profile({ name: "Alice" })}</div>;
 }
 ```
 
@@ -26,11 +26,16 @@ function Parent() {
 
 ```tsx
 function Parent() {
-  return <div><Profile name="Alice" /></div>
+  return (
+    <div>
+      <Profile name="Alice" />
+    </div>
+  );
 }
 ```
 
 Calling a component as a function makes React treat it as part of the parent's render. This means:
+
 - No separate fiber node for reconciliation
 - State and effects are tied to the parent
 - Keys and refs don't work as expected
@@ -41,23 +46,23 @@ Calling a component as a function makes React treat it as part of the parent's r
 
 ```tsx
 function ChatRoom({ useStatus }) {
-  const status = useStatus() // Hook passed as value
-  return <p>{status}</p>
+  const status = useStatus(); // Hook passed as value
+  return <p>{status}</p>;
 }
 
-<ChatRoom useStatus={useOnlineStatus} />
+<ChatRoom useStatus={useOnlineStatus} />;
 ```
 
 **Correct (call hook directly, pass result as prop):**
 
 ```tsx
 function ChatRoom({ status }) {
-  return <p>{status}</p>
+  return <p>{status}</p>;
 }
 
 function ChatRoomWrapper() {
-  const status = useOnlineStatus()
-  return <ChatRoom status={status} />
+  const status = useOnlineStatus();
+  return <ChatRoom status={status} />;
 }
 ```
 

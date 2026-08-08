@@ -61,7 +61,7 @@ When this command is used, Claude should:
    When changes span multiple packages, add a "Cross-Package Impact" section noting affected packages and downstream effects per the dependency graph (`tokens --> CSS --> Vue --> docs / MCP / language-server`).
 
 9. **Suggest doc-janitor cleanup:**
-   Before generating the PR body, check for stale work artifacts (PLAN-*.md, SESSION_*.md, *.backup, etc.) in the working tree. If any are found, suggest running `/doc-janitor` to clean them up before opening the PR. Do not block — just inform the user and continue.
+   Before generating the PR body, check for stale work artifacts (PLAN-_.md, SESSION__.md, *.backup, etc.) in the working tree. If any are found, suggest running `/doc-janitor` to clean them up before opening the PR. Do not block — just inform the user and continue.
 
 10. **Flag documentation artifacts:**
     Check all 6 documentation artifacts are updated (see CLAUDE.md Documentation Pipeline). Add a "Documentation Artifacts" section listing which are relevant to the changes. Mark artifacts already updated with a checkmark and those needing attention with a flag.
@@ -93,15 +93,19 @@ When this command is used, Claude should:
 # feat(tooltip): DLT-123 add new tooltip component
 
 ## Obligatory GIF (super important!)
+
 ![Obligatory GIF](path/to/gif)
 
 ## :hammer_and_wrench: Type Of Change
+
 - [x] Feature
 
 ## :book: Jira Ticket
+
 [DLT-123](https://dialpad.atlassian.net/browse/DLT-123)
 
 ## :book: Description
+
 Add a new tooltip component to Dialtone with configurable placement,
 arrow positioning, and accessible keyboard interactions.
 
@@ -109,23 +113,23 @@ arrow positioning, and accessible keyboard interactions.
 
 Changes span the following packages:
 
-| Package | Changes | Downstream Impact |
-|---|---|---|
-| dialtone-css | New tooltip styles | Vue tooltip component depends on these styles |
+| Package      | Changes               | Downstream Impact                              |
+| ------------ | --------------------- | ---------------------------------------------- |
+| dialtone-css | New tooltip styles    | Vue tooltip component depends on these styles  |
 | dialtone-vue | New tooltip component | Documentation site and MCP server need updates |
 
 Dependency flow: tokens --> **CSS** --> **Vue** --> docs/MCP/language-server
 
 ## :page_facing_up: Documentation Artifacts
 
-| Artifact | Status | Notes |
-|---|---|---|
-| Vue source | Updated | New component added |
-| Tests | Updated | Unit tests included |
-| Storybook stories | Updated | Stories for all variants |
-| Component docs JSON | Updated | Props and events documented |
-| VuePress docs | Needs attention | Component page not yet created |
-| MCP server data | Needs attention | New component not yet registered |
+| Artifact            | Status          | Notes                            |
+| ------------------- | --------------- | -------------------------------- |
+| Vue source          | Updated         | New component added              |
+| Tests               | Updated         | Unit tests included              |
+| Storybook stories   | Updated         | Stories for all variants         |
+| Component docs JSON | Updated         | Props and events documented      |
+| VuePress docs       | Needs attention | Component page not yet created   |
+| MCP server data     | Needs attention | New component not yet registered |
 
 ## :bulb: Context
 

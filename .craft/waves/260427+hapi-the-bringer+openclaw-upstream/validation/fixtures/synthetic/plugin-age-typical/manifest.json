@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "age plugin (security)",
   "contributes": {
-    "tools": [
-      "age/encrypt",
-      "age/decrypt"
-    ],
-    "skills": [
-      "age/encrypt",
-      "age/decrypt"
-    ]
+    "tools": ["age/encrypt", "age/decrypt"],
+    "skills": ["age/encrypt", "age/decrypt"]
   }
 }

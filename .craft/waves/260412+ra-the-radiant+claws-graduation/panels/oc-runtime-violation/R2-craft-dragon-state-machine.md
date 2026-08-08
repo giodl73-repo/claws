@@ -18,7 +18,7 @@ The transition table only defines two lateral escalation paths: WARN→R5 and R5
 - FLEET → R5 (R5 violation while fleet-degraded)
 - STRUCTURAL → FLEET (fleet conflict while structurally degraded)
 
-The "worst wins" invariant *implies* these should resolve to the higher-severity state, but the severity ordering among DEGRADED variants is only partially defined. R5 > WARN is explicit. Where does FLEET rank relative to R5 and STRUCTURAL? Where does STRUCTURAL rank relative to FLEET? These are different failure modes with different enforcement semantics — they are not on a single severity axis.
+The "worst wins" invariant _implies_ these should resolve to the higher-severity state, but the severity ordering among DEGRADED variants is only partially defined. R5 > WARN is explicit. Where does FLEET rank relative to R5 and STRUCTURAL? Where does STRUCTURAL rank relative to FLEET? These are different failure modes with different enforcement semantics — they are not on a single severity axis.
 
 **Risk**: Two orthogonal degradation types (FLEET + STRUCTURAL) have no defined composite state. "Worst wins" assumes a total ordering, but FLEET and STRUCTURAL are incomparable — one blocks a dependency chain, the other applies most-restrictive fleet interpretation. Both behaviors are needed simultaneously.
 
@@ -33,7 +33,7 @@ Picking one loses the other's enforcement. The state machine needs either: (a) a
 
 ### F3: ERROR ← DEGRADED_* transition is under-specified for concurrent violations (MEDIUM)
 
-The transition table says `DEGRADED_* → ERROR` triggers on "concurrent violation causes parse failure." But what if the system is in DEGRADED_R5 (one tool missing elicitation) and a *separate* file becomes corrupt? The existing R5 violation is still real. The table says ERROR→CLEAN requires "zero violations," but ERROR→DEGRADED_* requires "violations remain." This correctly handles the case where the parse error is fixed but the R5 violation persists. However, the reverse recovery path (R5 violation fixed but parse error persists) stays in ERROR — which is correct but not explicitly stated.
+The transition table says `DEGRADED_* → ERROR` triggers on "concurrent violation causes parse failure." But what if the system is in DEGRADED_R5 (one tool missing elicitation) and a _separate_ file becomes corrupt? The existing R5 violation is still real. The table says ERROR→CLEAN requires "zero violations," but ERROR→DEGRADED_* requires "violations remain." This correctly handles the case where the parse error is fixed but the R5 violation persists. However, the reverse recovery path (R5 violation fixed but parse error persists) stays in ERROR — which is correct but not explicitly stated.
 
 No bug here, but the asymmetry deserves a note: violations are lost into ERROR and only re-emerge on partial fix. The system should track the full violation set, not just the top-level state.
 
@@ -41,7 +41,7 @@ No bug here, but the asymmetry deserves a note: violations are lost into ERROR a
 
 The invariant says: "On startup, recompile determines actual state (may differ from persisted if files changed while server was down)." This is the right design — always recompile on startup, don't trust persisted state.
 
-However: if the server starts for the first time (no `violation-state.json`, no last-good IR in the forest cache), and the workspace files have violations, there is no last-good IR to fall back to. The spec should define cold-start behavior: presumably compile, and if it fails, serve *nothing* (hard block) until the admin fixes the workspace. This is implied by the "never accept a violation into GovernanceIR" invariant but should be explicit.
+However: if the server starts for the first time (no `violation-state.json`, no last-good IR in the forest cache), and the workspace files have violations, there is no last-good IR to fall back to. The spec should define cold-start behavior: presumably compile, and if it fails, serve _nothing_ (hard block) until the admin fixes the workspace. This is implied by the "never accept a violation into GovernanceIR" invariant but should be explicit.
 
 ### F5: "Blocked for affected chain tools, normal for others" is enforceable but expensive (MEDIUM)
 
@@ -57,11 +57,11 @@ This is a per-PATCH dependency-chain walk. The GovernanceIR must expose tool→f
 
 The invariant says: "The compilation forest retains the most recent clean GovernanceIR. It is never evicted while in any degraded/error state." The compilation forest is a bounded cache (per CL-04's forest design). If the cache has N slots and the system stays in DEGRADED state through N recompilation attempts (each producing a new violation variant), the last-good IR must survive all N evictions.
 
-This requires the last-good IR to be *pinned*, not just retained by recency. A standard LRU/bounded eviction policy will evict it once enough newer (but violating) compilations push it out. The spec should say "pinned" not "retained" — the implementation must exempt it from normal eviction, not just hope it stays recent enough.
+This requires the last-good IR to be _pinned_, not just retained by recency. A standard LRU/bounded eviction policy will evict it once enough newer (but violating) compilations push it out. The spec should say "pinned" not "retained" — the implementation must exempt it from normal eviction, not just hope it stays recent enough.
 
 ### F7: No transition from CLEAN back to itself on clean recompile (TRIVIAL)
 
-The diagram shows recompile-produces-violations as the only trigger out of CLEAN. A file-change that triggers recompile but produces zero violations should be a CLEAN→CLEAN self-transition. This is implied (no state change = stay in CLEAN) but the SSE invariant says "SSE on every transition." Should a CLEAN→CLEAN non-transition emit an SSE event? Probably not, but the invariant as written is ambiguous. Recommend: "SSE on every *state change*" not "every transition."
+The diagram shows recompile-produces-violations as the only trigger out of CLEAN. A file-change that triggers recompile but produces zero violations should be a CLEAN→CLEAN self-transition. This is implied (no state change = stay in CLEAN) but the SSE invariant says "SSE on every transition." Should a CLEAN→CLEAN non-transition emit an SSE event? Probably not, but the invariant as written is ambiguous. Recommend: "SSE on every _state change_" not "every transition."
 
 ---
 

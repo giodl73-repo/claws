@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "jira plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "jira/create-ticket"
-    ]
+    "tools": ["jira/create-ticket"]
   }
 }

@@ -57,6 +57,7 @@ Routes are thin adapters in claws-serve. All chunk assembly logic is in claws-sd
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- thin HTTP adapter pattern, SDK-owns-logic rule
 - `.craft/roles/claws/gateway-eng.md` -- chunk route conventions, response shape alignment with CL-10 spec
 

@@ -51,6 +51,7 @@ Build three governance query endpoints. GET /diagnostics returns the full list o
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/architect.md` — system-level design authority for claws packages
 - `.craft/roles/claws/platform-eng.md` — implementation patterns and route design
 

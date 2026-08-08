@@ -55,6 +55,7 @@ Four templates ship out of the box: minimal (bare governance with trust tier onl
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/compliance.md` — regulatory frameworks, policy structure, compliance mapping
 - `.craft/roles/claws/skill-author.md` — template authoring patterns, policy YAML schema
 

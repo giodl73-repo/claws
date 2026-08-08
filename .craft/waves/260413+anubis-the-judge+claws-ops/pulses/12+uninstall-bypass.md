@@ -56,6 +56,7 @@ Bypass mode allows developers to temporarily disable enforcement without removin
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/ciso.md` — security posture, audit chain integrity, bypass governance
 - `.craft/roles/craft/architect.md` — SDK-owns-logic rule, backup strategies
 

@@ -25,21 +25,21 @@ Intent: try strict JSON first (fast path), fall back to JSON5 if that fails (slo
 **Decision: Option B** (locked in 2026-04-28 evening).
 
 Read JSON5 superset (full input tolerance), emit JSONC (comments + trailing commas preserved; single-quoted strings normalized to double-quoted; unquoted keys normalized to quoted). Net effect:
+
 - JSON-only users (90%+): byte-identical output (JSONC-of-strict-JSON ≡ strict-JSON).
 - JSONC users (the people PR-1 exists for): comments + trailing commas survive.
 - JSON5-only users (rare): one-time normalization on first write, then stable JSONC.
 
 Plus optional `OC_CFG_PREFER_JSONC` info-level lint code to surface the normalization (not silent).
 
-
-
-| Option | Read | Write | Comment-preservation | Effort |
-|---|---|---|---|---|
-| **B (rec)** | JSON5 superset | JSONC (comments + trailing commas; single-quoted → double, unquoted → quoted on first write) | Yes for JSON/JSONC users (90%+) | ~2 hrs |
-| A | JSON5 superset | Strict JSON | No (matches upstream behavior — drops PR-1's headline value) | Same |
-| C | JSON5 superset | Round-trip exact dialect | Yes for everyone | ~6 hrs |
+| Option      | Read           | Write                                                                                        | Comment-preservation                                         | Effort |
+| ----------- | -------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ------ |
+| **B (rec)** | JSON5 superset | JSONC (comments + trailing commas; single-quoted → double, unquoted → quoted on first write) | Yes for JSON/JSONC users (90%+)                              | ~2 hrs |
+| A           | JSON5 superset | Strict JSON                                                                                  | No (matches upstream behavior — drops PR-1's headline value) | Same   |
+| C           | JSON5 superset | Round-trip exact dialect                                                                     | Yes for everyone                                             | ~6 hrs |
 
 **Concrete parser-loosening for B** (the work tomorrow if Option B):
+
 1. `parseString`: accept `0x27` (`'`) as quote delimiter
 2. `parseObject`: accept identifier-shaped unquoted keys
 3. `parseNumber`: accept `+` sign, `0xFF` hex, `.5` leading-decimal, `5.` trailing-decimal
@@ -57,6 +57,7 @@ Total: ~80 LOC source + ~100 LOC tests.
 **Source**: `trust-and-redaction.md:217-273` — SecretRef = `{source, provider, id}`; resolved values **never transit back** into `openclaw.json`.
 
 The substrate principle is "no resolved secret values in config", not "reject one literal". `OcEmitSentinelError` is correct as one instance, but PR-1's framing could pre-empt "why only this string?" by:
+
 - Listing the patterns we'd defend if we generalized (`sk-…`, `ghp_…`, `xox[baprs]-…`, `gsk_…`, `AIza…`, PEM blocks, Bearer tokens — same patterns `redactSensitiveText` uses)
 - Explicitly noting that PR-1 is the floor (literal sentinel); broader pattern-matching is a follow-up if upstream wants it.
 
@@ -104,7 +105,7 @@ Our classifier currently has `'lobster.yaml': 'config'` with comment `// claws-i
 - `runDoctorHealthContributions(ctx)` IS the right doctor entry point.
 - Manifest-first / owner-boundary rules: PR-1 doesn't add `register*()` APIs, doesn't extend the SDK baseline, doesn't touch protocol codegen. Clean.
 - Sentinel rejection IS the correct substrate-level defense, just narrowly framed.
-- Doctor lint is *passive discovery*; doctor `--fix` is *active repair*. Our integration is on the passive side, exactly where the design doc puts it.
+- Doctor lint is _passive discovery_; doctor `--fix` is _active repair_. Our integration is on the passive side, exactly where the design doc puts it.
 
 ## Late-night addendum (2026-04-28 — upstream load-pattern map)
 
@@ -127,6 +128,7 @@ After mapping `loadWorkspaceBootstrapFiles` (`agents/workspace.ts:602-667`), `lo
 **Reality**: bootstrap loading is **case-sensitive everywhere**. `VALID_BOOTSTRAP_NAMES` is a literal Set; no `.toLowerCase()` in the loader. The earlier survey's claim that "memory.md is legacy-tolerated" was wrong — files with lowercase basenames are silently dropped by upstream.
 
 **Fix tomorrow**: either:
+
 - **Drop `LEGACY_BASENAME_MAP` entirely** — the classifier shouldn't pretend lowercase is loaded when upstream silently drops it.
 - OR keep it but reframe `OC_WS_LEGACY_BASENAME` as "this file is invisible to upstream — rename to UPPERCASE.md to make it load." That's actually a STRONGER warning than "deprecated", since the file effectively doesn't exist from upstream's POV.
 

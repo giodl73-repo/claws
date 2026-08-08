@@ -21,17 +21,17 @@ estimates are advisory.
 
 **Status**: confirmed; partial duplication, with an awkward asymmetry.
 
-| Helper                | oc-paths-substrate cli | pinch cli | lkg cli | policy cli |
-|-----------------------|------------------------|-----------|---------|------------|
-| `scrubSentinel`       | line 65 (4 LoC)        | line 91 (4 LoC) | line 82 (4 LoC) | line 92 (4 LoC) |
-| `SCRUB_PLACEHOLDER`   | line 64                | line 90  | line 81 | line 91 |
-| `OutputContext` iface | line 72 (4 LoC)        | line 66 (5 LoC) | line 67 (5 LoC) | line 78 (5 LoC) |
-| `makeOutput`/`detectMode` | line 77 (4 LoC)    | line 72 (7 LoC) | line 73 (7 LoC) | line 84 (7 LoC) |
-| `emit`                | line 83 (12 LoC)       | line 96 (7 LoC) | line 111 (9 LoC) | line 129 (9 LoC) |
-| `emitError`           | line 96 (10 LoC)       | (absent)  | line 121 (8 LoC) | line 139 (8 LoC) |
-| `isClosedPipeError`   | absent                 | absent    | line 95 (5 LoC, exported) | line 105 (5 LoC, exported) |
-| `safeWrite`           | absent                 | absent    | line 101 (9 LoC) | line 119 (9 LoC) |
-| `installPipeGuard`    | absent                 | absent    | line 444 (18 LoC) | line 763 (18 LoC) |
+| Helper                    | oc-paths-substrate cli | pinch cli       | lkg cli                   | policy cli                 |
+| ------------------------- | ---------------------- | --------------- | ------------------------- | -------------------------- |
+| `scrubSentinel`           | line 65 (4 LoC)        | line 91 (4 LoC) | line 82 (4 LoC)           | line 92 (4 LoC)            |
+| `SCRUB_PLACEHOLDER`       | line 64                | line 90         | line 81                   | line 91                    |
+| `OutputContext` iface     | line 72 (4 LoC)        | line 66 (5 LoC) | line 67 (5 LoC)           | line 78 (5 LoC)            |
+| `makeOutput`/`detectMode` | line 77 (4 LoC)        | line 72 (7 LoC) | line 73 (7 LoC)           | line 84 (7 LoC)            |
+| `emit`                    | line 83 (12 LoC)       | line 96 (7 LoC) | line 111 (9 LoC)          | line 129 (9 LoC)           |
+| `emitError`               | line 96 (10 LoC)       | (absent)        | line 121 (8 LoC)          | line 139 (8 LoC)           |
+| `isClosedPipeError`       | absent                 | absent          | line 95 (5 LoC, exported) | line 105 (5 LoC, exported) |
+| `safeWrite`               | absent                 | absent          | line 101 (9 LoC)          | line 119 (9 LoC)           |
+| `installPipeGuard`        | absent                 | absent          | line 444 (18 LoC)         | line 763 (18 LoC)          |
 
 Hardest dup is `installPipeGuard` (18 LoC, byte-identical between lkg
 and policy modulo doc strings). `safeWrite` (9 LoC) and
@@ -91,8 +91,8 @@ import.
 old files). No external surface change.
 
 **Trade-off**: pro: kills 36 LoC of literal copy, removes the doc-comment
-disclaimer "*duplicates the lint pack's helper but lives here so the
-fixer pack doesn't import across extensions*" — that disclaimer was
+disclaimer "_duplicates the lint pack's helper but lives here so the
+fixer pack doesn't import across extensions_" — that disclaimer was
 there to justify the copy, not to defend it. con: the two extension
 packs now share a sibling import, weakening the "extensions are
 independent" framing slightly. Acceptable: `_shared/` makes the
@@ -102,13 +102,13 @@ boundary explicit.
 
 **Status**: confirmed; 3 production duplications + 2 in tests.
 
-| Site                                                                                            | LoC |
-|-------------------------------------------------------------------------------------------------|-----|
-| `pinch/src/cli/index.ts:106`                                                                    | 10  |
-| `policy-substrate/src/cli/index.ts:150`                                                         | 10  |
+| Site                                                                                                   | LoC |
+| ------------------------------------------------------------------------------------------------------ | --- |
+| `pinch/src/cli/index.ts:106`                                                                           | 10  |
+| `policy-substrate/src/cli/index.ts:150`                                                                | 10  |
 | `policy-substrate/src/extensions/policy-doctor-fixers-starter/fixers/policy-regenerate-on-drift.ts:55` | 10  |
-| `pinch/tests/integration/manifest-driven.test.ts:36`                                            | 10  |
-| `oc-paths-doctor/tests/integration/manifest-driven.test.ts:39`                                  | 10  |
+| `pinch/tests/integration/manifest-driven.test.ts:36`                                                   | 10  |
+| `oc-paths-doctor/tests/integration/manifest-driven.test.ts:39`                                         | 10  |
 
 oc-paths-substrate has the analogous `loadAst` (file 151) and
 `emitForKind` (file 160), which are file/AST variants of the same
@@ -138,7 +138,7 @@ right home; this is a trivial omission.
 All 5 declare:
 
 ```ts
-const SCRUB_PLACEHOLDER = '[REDACTED]';
+const SCRUB_PLACEHOLDER = "[REDACTED]";
 ```
 
 Sites: `oc-paths-substrate/src/cli/index.ts:64`, `pinch/src/cli/index.ts:90`,
@@ -167,12 +167,12 @@ placeholder (e.g., to `[REDACTED-OPENCLAW]`) edits one file. con: none.
 
 Comparison of the four packages that have plug-in surfaces:
 
-| Package                  | `src/test-harness/` | `./test-harness` export |
-|--------------------------|---------------------|--------------------------|
-| pinch                    | yes (114 LoC)       | yes                     |
-| oc-paths-doctor          | yes                 | yes                     |
-| lkg-recovery-substrate   | yes                 | yes                     |
-| **policy-substrate**     | **no**              | **no**                   |
+| Package                | `src/test-harness/` | `./test-harness` export |
+| ---------------------- | ------------------- | ----------------------- |
+| pinch                  | yes (114 LoC)       | yes                     |
+| oc-paths-doctor        | yes                 | yes                     |
+| lkg-recovery-substrate | yes                 | yes                     |
+| **policy-substrate**   | **no**              | **no**                  |
 
 policy-substrate ships extension packs (`policy-from-md-starter`,
 `policy-lint-rules-starter`, `policy-doctor-fixers-starter`) but no
@@ -216,7 +216,7 @@ trajectory; coupling their SDK versions to a shared constant means
 all four. `requires.sdkVersion` on plugin specs is per-substrate
 deliberately — that's the whole point of the version field.
 
-The substrates *are* coupled in this snapshot, but only because they
+The substrates _are_ coupled in this snapshot, but only because they
 were stood up together. Forcing a shared constant freezes that
 coincidence into the contract.
 
@@ -242,13 +242,13 @@ policy-substrate               → @openclaw/policy
 
 But every DEPRECATED.md still tells consumers to migrate to `@bic/*`:
 
-| File                                                       | Says "migrate to"                  | Actual name                |
-|------------------------------------------------------------|------------------------------------|-----------------------------|
-| `openclaw-guardrails/DEPRECATED.md:3`                      | `@bic/claws-guardrails`             | (rename pending)            |
-| `openclaw-lkg/DEPRECATED.md:3,41-42`                       | `@bic/lkg-recovery-substrate`       | `@openclaw/lkg`             |
-| `openclaw-lkg-git/DEPRECATED.md:3,33-34`                   | `@bic/lkg-recovery-git`             | (likely `@openclaw/lkg-git`)|
-| `openclaw-policy/DEPRECATED.md:3,46-47,57-60`              | `@bic/policy-substrate`             | `@openclaw/policy`          |
-| `openclaw-workspace/src/ast/DEPRECATED.md:3,42-43`         | `@bic/oc-paths-substrate`           | `@openclaw/oc-path`         |
+| File                                               | Says "migrate to"             | Actual name                  |
+| -------------------------------------------------- | ----------------------------- | ---------------------------- |
+| `openclaw-guardrails/DEPRECATED.md:3`              | `@bic/claws-guardrails`       | (rename pending)             |
+| `openclaw-lkg/DEPRECATED.md:3,41-42`               | `@bic/lkg-recovery-substrate` | `@openclaw/lkg`              |
+| `openclaw-lkg-git/DEPRECATED.md:3,33-34`           | `@bic/lkg-recovery-git`       | (likely `@openclaw/lkg-git`) |
+| `openclaw-policy/DEPRECATED.md:3,46-47,57-60`      | `@bic/policy-substrate`       | `@openclaw/policy`           |
+| `openclaw-workspace/src/ast/DEPRECATED.md:3,42-43` | `@bic/oc-paths-substrate`     | `@openclaw/oc-path`          |
 
 **Proposed fix**: rewrite the migration code blocks in all 5 to use
 `@openclaw/*` names. While there, also re-check the export subpaths
@@ -280,10 +280,18 @@ All three are shaped:
 
 ```ts
 const REGISTRY = new Map<string, T>();
-export function register(spec: T): void { REGISTRY.set(spec.id, spec); }
-export function get(id: string): T | null { return REGISTRY.get(id) ?? null; }
-export function list(): readonly T[] { return [...REGISTRY.values()]; }
-export function _clearRegistry(): void { REGISTRY.clear(); }
+export function register(spec: T): void {
+  REGISTRY.set(spec.id, spec);
+}
+export function get(id: string): T | null {
+  return REGISTRY.get(id) ?? null;
+}
+export function list(): readonly T[] {
+  return [...REGISTRY.values()];
+}
+export function _clearRegistry(): void {
+  REGISTRY.clear();
+}
 ```
 
 The three pieces of variation: (a) the exported names (`registerLintRule`
@@ -322,7 +330,7 @@ lkg-recovery-substrate/src/cli/index.ts:171  const lkgSection = wsConfig?.['lkg'
 ```
 
 Each substrate's `plugin-sdk/.../workspace-config.ts` documents this
-*usage pattern* in a code-block doc-comment but doesn't ship a typed
+_usage pattern_ in a code-block doc-comment but doesn't ship a typed
 helper. The cast-via-`as` is identical at 5 sites.
 
 **Proposed addition**: each `workspace-config.ts` exports a typed reader:
@@ -332,7 +340,7 @@ helper. The cast-via-`as` is identical at 5 sites.
 export function readPolicyConfigSection(
   cfg: WorkspaceConfig | null,
 ): WorkspacePolicyConfig | undefined {
-  return cfg?.['policy'] as WorkspacePolicyConfig | undefined;
+  return cfg?.["policy"] as WorkspacePolicyConfig | undefined;
 }
 ```
 
@@ -354,17 +362,17 @@ Recommend doing this only if (1) is being done — they share the
 
 ## Summary table
 
-| #  | Finding                                  | LoC saved | Effort | Recommend? |
-|----|------------------------------------------|-----------|--------|-------------|
-| 1  | CLI helpers extraction                   | ~150      | S      | yes         |
-| 2  | `_tools-md-scan.ts` dedup                | ~36       | XS     | yes         |
-| 3  | `parseForKind` / `emitForKind` to substrate | ~50    | XS     | yes         |
-| 4  | `[REDACTED]` placeholder constant        | folds into 1 | XS  | yes (with 1)|
-| 5  | policy-substrate `./test-harness`        | net **add** ~80 LoC | S | yes         |
-| 6  | shared SDK_VERSION                       | -         | -      | **no**      |
-| 7  | DEPRECATED.md `@bic/*` → `@openclaw/*`   | doc fix   | XS     | yes         |
-| 8  | generic `makeRegistry<T>()`              | ~150      | M      | **no, defer to v2** |
-| 9  | typed workspace-section readers          | minor     | XS     | yes (with 1)|
+| #   | Finding                                     | LoC saved           | Effort | Recommend?          |
+| --- | ------------------------------------------- | ------------------- | ------ | ------------------- |
+| 1   | CLI helpers extraction                      | ~150                | S      | yes                 |
+| 2   | `_tools-md-scan.ts` dedup                   | ~36                 | XS     | yes                 |
+| 3   | `parseForKind` / `emitForKind` to substrate | ~50                 | XS     | yes                 |
+| 4   | `[REDACTED]` placeholder constant           | folds into 1        | XS     | yes (with 1)        |
+| 5   | policy-substrate `./test-harness`           | net **add** ~80 LoC | S      | yes                 |
+| 6   | shared SDK_VERSION                          | -                   | -      | **no**              |
+| 7   | DEPRECATED.md `@bic/*` → `@openclaw/*`      | doc fix             | XS     | yes                 |
+| 8   | generic `makeRegistry<T>()`                 | ~150                | M      | **no, defer to v2** |
+| 9   | typed workspace-section readers             | minor               | XS     | yes (with 1)        |
 
 **Total LoC delta if all "yes" actions land**: ~−240 production LoC,
 +~80 test-harness LoC ⇒ ~−160 net. Bigger qualitative wins than

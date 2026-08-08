@@ -21,7 +21,7 @@ expect:
   unclassified_tools:
     present_in_workspace: true
     absent_from_last_good_ir: true
-    block.source: 'r5'
+    block.source: "r5"
     lock_source: "unclassified"
     defaulted_risk:
       level: 5

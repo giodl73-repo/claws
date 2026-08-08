@@ -148,7 +148,7 @@ Skimming the realigned-story and policy-pre-rfc:
 - Policy generators are "downstream / per-consumer" — claws ships
   one, OPA/CEL/yaml users ship their own, **and a hobbyist runs
   openclaw without any policy generator at all**. PolicyIR is
-  upstream as a *type*, not a *runtime*. So if I never install a
+  upstream as a _type_, not a _runtime_. So if I never install a
   policy generator, PolicyIR never runs in my setup. Good.
 - Snap / signed snapshots / KeyVault / per-tenant signing keys —
   none of this lands on my laptop. The realigned-story is very
@@ -167,14 +167,14 @@ I went looking. A few things I'd flag for cleanup before the PRs
 hit upstream:
 
 - **`Sensitivity` enum** with `'public' | 'internal' |
-  'confidential' | 'restricted'`. That's a Microsoft data-
+'confidential' | 'restricted'`. That's a Microsoft data-
   classification taxonomy. A hobbyist (or any non-MS user) is going
   to look at that and go "huh? what does 'restricted' mean for my
   home assistant?" The pre-RFC notes this — claws-specific R0–R5
   labels get re-mapped to a generic `Sensitivity` — but the
-  *generic* one is still MS-shaped. Either soften to something
+  _generic_ one is still MS-shaped. Either soften to something
   more obviously generic (`'low' | 'medium' | 'high' |
-  'critical'`, matching `RiskLevel` right above it) or document
+'critical'`, matching `RiskLevel` right above it) or document
   what each tier means in non-corporate terms. Today's spelling
   reads enterprise-only.
 - **`Agent365-attested identity`** mentioned in the lkg-git pre-
@@ -182,11 +182,11 @@ hit upstream:
   pre-RFC does say "tests pass deterministic strings," so the
   contract itself isn't MS-bound, but the prose makes it sound
   like the only path. Add a hobbyist-shaped example: `name:
-  'my-laptop-agent'`, `email: 'me@example.com'`, no Agent365 in
+'my-laptop-agent'`, `email: 'me@example.com'`, no Agent365 in
   sight.
 - **OneDrive / SharePoint / Aether** mentions in the multi-agent
-  shared-workspace section. Fine that this is *a* use case, but
-  the section reads like it's the *primary* use case. Most
+  shared-workspace section. Fine that this is _a_ use case, but
+  the section reads like it's the _primary_ use case. Most
   hobbyists running multi-agent are using Tailscale + a NAS or a
   shared git remote, not OneDrive. Lead with the generic case;
   put the OneDrive concern in a callout.
@@ -260,7 +260,7 @@ ambition a credibility hit.
    actually changes for them. Right now the answer is "nothing,
    probably" but I had to read 1500 lines to be sure of that.
 
-## Things I do *not* care about as a hobbyist
+## Things I do _not_ care about as a hobbyist
 
 For the record, so the panel doesn't waste time addressing them
 at me:
@@ -278,7 +278,7 @@ at me:
 - The `openclaw-policy` → `claws-policy-generator` rename
   conversation. Not on the hobbyist install path.
 
-These all matter; they just don't matter *to my persona*. The
+These all matter; they just don't matter _to my persona_. The
 proposal is appropriately invisible to me on those axes — that's
 the right outcome.
 

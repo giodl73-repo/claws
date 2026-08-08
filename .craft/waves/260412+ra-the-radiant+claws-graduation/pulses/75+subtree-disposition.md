@@ -12,8 +12,7 @@ test_tiers:
   L2_e2e: 0
   L3_accept: 0
 test_scope:
-  run:
-    []
+  run: []
   typecheck:
     - "cd claws-sdk && npx tsc --noEmit"
 checkpoint: 11

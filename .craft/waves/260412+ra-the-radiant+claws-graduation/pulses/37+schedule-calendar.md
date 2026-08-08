@@ -56,6 +56,7 @@ The parser handles HEARTBEAT.md schedule blocks (daily, weekly, monthly, custom 
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, SDK-owns-logic rule
 - `.craft/roles/claws/platform-eng.md` — workspace file parsing, calendar data patterns
 

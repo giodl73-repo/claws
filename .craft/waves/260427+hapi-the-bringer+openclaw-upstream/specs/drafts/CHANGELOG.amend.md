@@ -39,12 +39,12 @@ At deploy time, the following entry is **appended at end-of-section** to `docs/u
   registry overrides at `postAudit()` boundary. Defends against adversarial plugins
   spoofing each other's audit entries. Amendment §6.
 - **Temporal query semantics.** New CLI verb `openclaw snap resolvePolicy --at
-  <iso8601-timestamp>` walks the audit chain to answer "what policy was in force at
+<iso8601-timestamp>` walks the audit chain to answer "what policy was in force at
   time T?" — required for SOC 2 / HIPAA e-discovery answerability. Amendment §7.
 - **PR sequencing pacing.** v0.1's dependency order retained; v0.2 adds 2-PR-open
   concurrency rule per upstream's culture. Amendment §8.
 - **Scope-flip mechanics moved into scope.** Original v0.1 left `@bic/openclaw-* →
-  @openclaw/*` rename across our monorepo as a follow-up plan. v0.2 makes it the
+@openclaw/*` rename across our monorepo as a follow-up plan. v0.2 makes it the
   closing deliverable of the contribution wave's final checkpoint, ordered AFTER all
   upstream package PRs merge but BEFORE any `@openclaw/*` npm publish to avoid the
   transient versioning gap. Amendment §9.

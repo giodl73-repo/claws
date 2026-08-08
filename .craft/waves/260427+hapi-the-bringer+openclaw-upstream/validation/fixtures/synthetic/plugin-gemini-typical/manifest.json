@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "gemini plugin (ai_ml)",
   "contributes": {
-    "tools": [
-      "gemini/chat-complete"
-    ],
-    "skills": [
-      "gemini/chat-complete"
-    ]
+    "tools": ["gemini/chat-complete"],
+    "skills": ["gemini/chat-complete"]
   }
 }

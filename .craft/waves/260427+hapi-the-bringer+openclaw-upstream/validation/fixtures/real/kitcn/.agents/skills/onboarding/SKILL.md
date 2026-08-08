@@ -17,7 +17,7 @@ This skill always regenerates the document from scratch. It does not read or dif
 2. **Show, don't just tell** -- Use ASCII diagrams for architecture and flow, markdown tables for structured information, and backtick formatting for all file paths, commands, and code references.
 3. **Six sections, each earning its place** -- Every section answers a question a new contributor will ask in their first hour. No speculative sections. Section 2 may be skipped for pure infrastructure with no consuming audience, producing five sections.
 4. **State what you can observe, not what you must infer** -- Do not fabricate design rationale or assess fragility. If the code doesn't reveal why a decision was made, don't guess.
-5. **Never include secrets** -- The onboarding document is committed to the repository. Never include API keys, tokens, passwords, connection strings with credentials, or any other secret values. Reference environment variable *names* (`STRIPE_SECRET_KEY`), never their *values*. If a `.env` file contains actual secrets, extract only the variable names.
+5. **Never include secrets** -- The onboarding document is committed to the repository. Never include API keys, tokens, passwords, connection strings with credentials, or any other secret values. Reference environment variable _names_ (`STRIPE_SECRET_KEY`), never their _values_. If a `.env` file contains actual secrets, extract only the variable names.
 6. **Link, don't duplicate** -- When existing documentation covers a topic well, link to it inline rather than re-explaining.
 
 ## Execution Flow
@@ -31,6 +31,7 @@ node scripts/inventory.mjs --root .
 ```
 
 Parse the JSON output. This provides:
+
 - Project name, languages, frameworks, package manager, test framework
 - Directory structure (top-level + one level into source directories)
 - Entry points per detected ecosystem
@@ -72,18 +73,21 @@ Synthesize the inventory data and key file contents into the sections defined be
 **Writing style -- the document should read like a knowledgeable teammate explaining the project over coffee, not like generated documentation.**
 
 Voice and tone:
+
 - Write in second person ("you") -- speak directly to the new contributor
 - Use active voice and present tense: "The router dispatches requests to handlers" not "Requests are dispatched by the router to handlers"
 - Be direct. Lead sentences with what matters, not with setup: "Run `bun dev` to start the server" not "In order to start the development server, you will need to run the following command"
 - Match the formality of the codebase. A scrappy prototype gets casual prose. An enterprise system gets more precise language. Read the README and existing docs for tone cues.
 
 Clarity:
+
 - Every sentence should teach the reader something or tell them what to do. Cut any sentence that doesn't.
 - Prefer concrete over abstract: "`src/services/billing.ts` charges the customer's card" not "The billing module handles payment-related business logic"
 - When introducing a term, define it immediately in context. Don't make the reader scroll to a glossary.
 - Use the simplest word that's accurate. "Use" not "utilize." "Start" not "initialize." "Send" not "transmit."
 
 What to avoid:
+
 - Filler and throat-clearing: "It's important to note that", "As mentioned above", "In this section we will"
 - Vague summarization: "This module handles various aspects of..." -- say specifically what it does
 - Hedge words when stating facts: "This essentially serves as", "This is basically" -- if you know what it does, say it plainly
@@ -91,6 +95,7 @@ What to avoid:
 - Meta-commentary about the document itself: "This document aims to..." -- just do the thing
 
 **Formatting requirements -- apply consistently throughout:**
+
 - Use backticks for all file names (`package.json`), paths (`src/routes/`), commands (`bun test`), function/class names, environment variables, and technical terms
 - Use markdown headers (`##`) for each section
 - Use ASCII diagrams and markdown tables where specified below
@@ -119,12 +124,12 @@ Keep to 1-3 paragraphs.
 
 Answer: What does it look like to be on the consuming side of this project?
 
-Before a contributor can reason about architecture, they need to understand what the project *does* from the outside. This section bridges "what is this" (Section 1) and "how is it built" (Section 3). The audience for this section -- like the rest of the document -- is a new developer on the team. The goal is to show them what the product looks like from the consumer's perspective so the architecture and code flows in later sections make intuitive sense.
+Before a contributor can reason about architecture, they need to understand what the project _does_ from the outside. This section bridges "what is this" (Section 1) and "how is it built" (Section 3). The audience for this section -- like the rest of the document -- is a new developer on the team. The goal is to show them what the product looks like from the consumer's perspective so the architecture and code flows in later sections make intuitive sense.
 
 Title this section in the output based on who consumes the project:
 
 - **End-user product** (web app, mobile app, consumer tool) -- Title: **"User Experience"**. Describe what the user sees and the primary workflows (e.g., "sign up, create a project, invite collaborators, see real-time updates"). Draw from routes, entry points, and README.
-- **Developer tool** (SDK, library, dev CLI, framework) -- Title: **"Developer Experience"**. Describe how a developer consumes the tool: installation, a minimal usage example showing the primary API surface, and the 2-3 most common commands or patterns. This is distinct from Section 6 (Developer Guide), which covers contributing to *this codebase* -- this section covers *using* what the codebase produces.
+- **Developer tool** (SDK, library, dev CLI, framework) -- Title: **"Developer Experience"**. Describe how a developer consumes the tool: installation, a minimal usage example showing the primary API surface, and the 2-3 most common commands or patterns. This is distinct from Section 6 (Developer Guide), which covers contributing to _this codebase_ -- this section covers _using_ what the codebase produces.
 - **Both** (platform with a consumer-facing product AND a developer API/SDK) -- Title: **"User and Developer Experience"**. Cover both perspectives, starting with the end-user experience and then the developer-facing surface.
 
 Keep to 1-3 paragraphs or a short flow per audience. If comprehensive user or developer docs exist, link to them and summarize the key workflows in a sentence each. Do not duplicate existing documentation.
@@ -146,7 +151,8 @@ This section covers both the **internal structure** and the **system boundary** 
 2. **User interaction flow** -- The logical journey a user takes through the product. Not about infrastructure, but about what happens from the user's perspective -- the sequence of actions and what the system does in response.
 
 **When to use one vs. both:**
-- For straightforward systems (single web app, CLI tool, simple API), the architecture diagram already tells the user's story -- one diagram is enough. The request path through the components *is* the user flow.
+
+- For straightforward systems (single web app, CLI tool, simple API), the architecture diagram already tells the user's story -- one diagram is enough. The request path through the components _is_ the user flow.
 - For multi-surface products (native app + web + API, or systems with multiple distinct user types), include both. The architecture diagram shows the developer how the pieces are wired; the user interaction flow shows the logical product experience across those pieces. These are different lenses on the same system.
 
 Use vertical stacking to keep diagrams under 80 columns.
@@ -232,6 +238,7 @@ When there are distinct modules or components with clear responsibilities, prese
 Describe how the modules connect -- what calls what, where data flows between them.
 
 **External dependencies and integrations** -- Surface everything the system talks to outside its own codebase. This is often the biggest blocker for new contributors trying to run the project. Look for signals in:
+
 - `docker-compose.yml` (databases, caches, message queues)
 - Environment variable references in config files or `.env.example`
 - Import statements for client libraries (database drivers, API SDKs, cloud storage)
@@ -261,6 +268,7 @@ This section covers two things:
 **Architectural abstractions** -- The structural patterns in the codebase that shape how code is organized and how a contributor should think about making changes. These are especially important in codebases where the original author may not have consciously chosen these patterns -- they may have been introduced by an AI or adopted from a template without documentation.
 
 Examples of architectural abstractions worth surfacing:
+
 - "Business logic lives in the service layer (`src/services/`), not in route handlers"
 - "Authentication runs through middleware in `src/middleware/auth.ts` before every protected route"
 - "Database access uses the repository pattern -- each model has a corresponding repository class"
@@ -319,6 +327,7 @@ Answer: How do I set up the project, run it, and make common changes?
 Cover these areas:
 
 1. **Setup** -- Prerequisites, install steps, environment config. Draw from README and the inventory's scripts. Format commands in code blocks:
+
    ```
    bun install
    cp .env.example .env
@@ -388,11 +397,13 @@ Write the file to the repo root as `ONBOARDING.md`.
 After writing, inform the user that `ONBOARDING.md` has been generated. Offer next steps using the platform's blocking question tool when available (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat.
 
 Options:
+
 1. Open the file for review
 2. Share to Proof
 3. Done
 
 Based on selection:
+
 - **Open for review** -> Open `ONBOARDING.md` using the current platform's file-open or editor mechanism
 - **Share to Proof** -> Upload the document:
   ```bash

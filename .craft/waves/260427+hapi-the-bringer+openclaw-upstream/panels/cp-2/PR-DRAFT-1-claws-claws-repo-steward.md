@@ -12,11 +12,11 @@
 
 Verified against `C:\src\openclaw-core\src\config\io.ts` (current HEAD on the integration fork branch).
 
-| PR-1 cite | Verified content | Verdict |
-|---|---|---|
-| `src/config/io.ts:1381` (PR-1 L3, L101) | `const persistedRootRaw = JSON.stringify(persistedRootParsed, null, 2)` | EXACT MATCH |
-| `src/config/io.ts:2082` (PR-1 L3, L108) | `const json = JSON.stringify(stampedOutputConfig, null, 2).trimEnd().concat("\n");` | EXACT MATCH |
-| `replaceConfigFileSync` defined at `:1305`; called from `:1385` | matches PR-1's "two write paths through `replaceConfigFile`" framing | OK |
+| PR-1 cite                                                       | Verified content                                                                    | Verdict     |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------- |
+| `src/config/io.ts:1381` (PR-1 L3, L101)                         | `const persistedRootRaw = JSON.stringify(persistedRootParsed, null, 2)`             | EXACT MATCH |
+| `src/config/io.ts:2082` (PR-1 L3, L108)                         | `const json = JSON.stringify(stampedOutputConfig, null, 2).trimEnd().concat("\n");` | EXACT MATCH |
+| `replaceConfigFileSync` defined at `:1305`; called from `:1385` | matches PR-1's "two write paths through `replaceConfigFile`" framing                | OK          |
 
 Note: `JSON.stringify` also appears at `:436` and `:449` (health-state writes inside `writeFile`/`writeFileSync`). PR-1 correctly excludes them — they are not config-mutation paths and the body says "the only two write paths through `replaceConfigFile`" which is accurate. **No citation rot.**
 
@@ -39,12 +39,12 @@ PR-1 is body-only — no YAML frontmatter. Verified all six PR-drafts (`PR-1.md`
 
 ## "Earns its keep four ways" table (L169–177) vs deliverables
 
-| Way | Subpath in table | Deliverable in §"What ships" | Match? |
-|---|---|---|---|
-| 1. Lossless `replaceConfigFile` | `/ast/jsonc` | "`replaceConfigFile` lossless conversion" L99–114 | OK |
-| 2. 13-code lint surface | `/lint` | "13 new lint codes" §"Lint surface" L198–213 | OK |
-| 3. URI vocabulary in diagnostics | `/path` | "Diagnostic location format extension" + "`oc://config/...` URI scheme + doctor migration emit" L116–167 | OK |
-| 4. Cross-OS canonicalize | `/canonicalize` | F-52, F-53 in test plan L230–231 | OK — but no body §; deliverable is the CI matrix only |
+| Way                              | Subpath in table | Deliverable in §"What ships"                                                                             | Match?                                                |
+| -------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| 1. Lossless `replaceConfigFile`  | `/ast/jsonc`     | "`replaceConfigFile` lossless conversion" L99–114                                                        | OK                                                    |
+| 2. 13-code lint surface          | `/lint`          | "13 new lint codes" §"Lint surface" L198–213                                                             | OK                                                    |
+| 3. URI vocabulary in diagnostics | `/path`          | "Diagnostic location format extension" + "`oc://config/...` URI scheme + doctor migration emit" L116–167 | OK                                                    |
+| 4. Cross-OS canonicalize         | `/canonicalize`  | F-52, F-53 in test plan L230–231                                                                         | OK — but no body §; deliverable is the CI matrix only |
 
 The four-ways table is honest. **However the cp-2 R1-already-cross-confirmed HC-WARN from cp-1 release-eng W1** ("PR-1 'earns its keep' table missing `/lint` and `/ast/jsonc`") is fully addressed in this draft — both rows present. Confirms the post-restructure cleanup applied.
 
@@ -68,18 +68,18 @@ For the **public** PR description: the framing is acceptable. Bot reviewers don'
 
 ### HC-WARN
 
-| # | Where | Issue | Action |
-|---|---|---|---|
-| W1 | L87 | "four of them are exercised in the same PR" — actually FIVE earn keep on landing (`/ast`, `/ast/jsonc`, `/lint`, `/path`, `/canonicalize`); only `/staging` + `/path-canonical` defer | Reword to "five of seven" or restructure intro — current count contradicts the four-ways table at L169 (which lists four because it folds `/ast` into the URI-vocabulary row). Pick one accounting and apply consistently. |
-| W2 | L12 | #22272 row maps to "doctor `--fix` reports changes but doesn't modify file" — EVIDENCE.md L17 maps the same issue to `OC_CFG_UNKNOWN_FIELD` (different bug class) | Either consolidate the two #22272 rows (L10 + L12) into one with both mechanisms cited, or strike the L12 row and let L10's `OC_CFG_UNKNOWN_FIELD` carry the citation |
+| #   | Where | Issue                                                                                                                                                                                 | Action                                                                                                                                                                                                                     |
+| --- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| W1  | L87   | "four of them are exercised in the same PR" — actually FIVE earn keep on landing (`/ast`, `/ast/jsonc`, `/lint`, `/path`, `/canonicalize`); only `/staging` + `/path-canonical` defer | Reword to "five of seven" or restructure intro — current count contradicts the four-ways table at L169 (which lists four because it folds `/ast` into the URI-vocabulary row). Pick one accounting and apply consistently. |
+| W2  | L12   | #22272 row maps to "doctor `--fix` reports changes but doesn't modify file" — EVIDENCE.md L17 maps the same issue to `OC_CFG_UNKNOWN_FIELD` (different bug class)                     | Either consolidate the two #22272 rows (L10 + L12) into one with both mechanisms cited, or strike the L12 row and let L10's `OC_CFG_UNKNOWN_FIELD` carry the citation                                                      |
 
 ### HC-NOTE
 
-| # | Where | Issue | Action |
-|---|---|---|---|
-| N1 | UG-upstream.amend.md §8 line 265 | "Wave A (cp-2): PR-1 ... + PR-2 oc://config URI scheme extension — open simultaneously" — stale pre-2026-04-28 wording | Pre-deploy fix in record stage; not a PR-1 blocker. PROGRESS.md and §9 already carry the corrected framing. |
-| N2 | L278 | Wave-history footer is acceptable but verbose | Tighten to: "The runtime-config URI scheme + doctor migration emit ride alongside the lint surface in this PR; splitting would have created a forward-reference dependency on the URI vocabulary." Drop the date and "originally planned" framing. |
-| N3 | L260 | Test totals: PR-1 says **70 tests** (42 lint + 20 prior + 8 absorbed). Pulse 04 line 113 says **67 tests** (41 L0 + 14 L1 claws + 7 L1 upstream + 3 L2 + 2 L3) and notes "PR-1 description's '70 new tests' includes these plus 3 prior-scope L2 tests." The arithmetic is consistent (67 + 3 L2 prior-scope = 70) but the PR-1 body breakdown (42 + 20 + 8 = 70) and the pulse breakdown reach 70 by different routes | Add a one-line reconciliation comment, or normalize one count |
+| #   | Where                            | Issue                                                                                                                                                                                                                                                                                                                                                                                                                  | Action                                                                                                                                                                                                                                             |
+| --- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| N1  | UG-upstream.amend.md §8 line 265 | "Wave A (cp-2): PR-1 ... + PR-2 oc://config URI scheme extension — open simultaneously" — stale pre-2026-04-28 wording                                                                                                                                                                                                                                                                                                 | Pre-deploy fix in record stage; not a PR-1 blocker. PROGRESS.md and §9 already carry the corrected framing.                                                                                                                                        |
+| N2  | L278                             | Wave-history footer is acceptable but verbose                                                                                                                                                                                                                                                                                                                                                                          | Tighten to: "The runtime-config URI scheme + doctor migration emit ride alongside the lint surface in this PR; splitting would have created a forward-reference dependency on the URI vocabulary." Drop the date and "originally planned" framing. |
+| N3  | L260                             | Test totals: PR-1 says **70 tests** (42 lint + 20 prior + 8 absorbed). Pulse 04 line 113 says **67 tests** (41 L0 + 14 L1 claws + 7 L1 upstream + 3 L2 + 2 L3) and notes "PR-1 description's '70 new tests' includes these plus 3 prior-scope L2 tests." The arithmetic is consistent (67 + 3 L2 prior-scope = 70) but the PR-1 body breakdown (42 + 20 + 8 = 70) and the pulse breakdown reach 70 by different routes | Add a one-line reconciliation comment, or normalize one count                                                                                                                                                                                      |
 
 ## Pre-push gate decision
 

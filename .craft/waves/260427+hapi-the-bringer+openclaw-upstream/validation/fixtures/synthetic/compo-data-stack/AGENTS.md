@@ -6,6 +6,7 @@ trust: composition
 # compo-data-stack
 
 Composition workspace bringing together 2 plugin(s):
+
 - `plugins/postgres/`
 - `plugins/redis/`
 

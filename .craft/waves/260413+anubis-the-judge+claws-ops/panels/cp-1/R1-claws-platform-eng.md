@@ -81,11 +81,11 @@
 
 ## Summary
 
-| Severity | Count | IDs |
-|----------|-------|-----|
-| Must-fix (M) | 3 | F-01, F-02, F-03 |
-| Warning (W) | 3 | F-04, F-05, F-06 |
-| Note (N) | 2 | F-07, F-08 |
+| Severity     | Count | IDs              |
+| ------------ | ----- | ---------------- |
+| Must-fix (M) | 3     | F-01, F-02, F-03 |
+| Warning (W)  | 3     | F-04, F-05, F-06 |
+| Note (N)     | 2     | F-07, F-08       |
 
 **Strongest positives from the platform-eng lens:**
 

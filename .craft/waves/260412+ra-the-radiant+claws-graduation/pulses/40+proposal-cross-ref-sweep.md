@@ -12,10 +12,8 @@ test_tiers:
   L2_e2e: 0
   L3_accept: 0
 test_scope:
-  run:
-    []
-  typecheck:
-    []
+  run: []
+  typecheck: []
 checkpoint: 8
 ---
 

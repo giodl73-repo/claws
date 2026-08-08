@@ -6,6 +6,7 @@ trust: composition
 # compo-monitoring-stack
 
 Composition workspace bringing together 3 plugin(s):
+
 - `plugins/snyk/`
 - `plugins/trivy/`
 - `plugins/gitleaks/`

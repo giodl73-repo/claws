@@ -55,6 +55,7 @@ This completes the inner development loop: edit an OC file → watch detects cha
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/gateway-eng.md` — analyze pipeline, violation diffing, artifact management
 - `.craft/roles/claws/platform-eng.md` — cache invalidation, recompile performance, cross-platform fs behavior
 

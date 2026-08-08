@@ -129,19 +129,9 @@ import { createQueryClient } from "./query-client";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-export function AppConvexProvider({
-  children,
-  token,
-}: {
-  children: ReactNode;
-  token?: string;
-}) {
+export function AppConvexProvider({ children, token }: { children: ReactNode; token?: string }) {
   return (
-    <ConvexAuthProvider
-      authClient={authClient}
-      client={convex}
-      initialToken={token}
-    >
+    <ConvexAuthProvider authClient={authClient} client={convex} initialToken={token}>
       <QueryProvider>{children}</QueryProvider>
     </ConvexAuthProvider>
   );

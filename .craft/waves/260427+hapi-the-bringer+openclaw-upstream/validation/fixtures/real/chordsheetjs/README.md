@@ -25,13 +25,13 @@ npm install chordsheetjs
 Load with `import`:
 
 ```javascript
-import ChordSheetJS from 'chordsheetjs';
+import ChordSheetJS from "chordsheetjs";
 ```
 
 or `require()`:
 
 ```javascript
-var ChordSheetJS = require('chordsheetjs').default;
+var ChordSheetJS = require("chordsheetjs").default;
 ```
 
 ### Standalone bundle file
@@ -142,7 +142,7 @@ Generates a PDF document directly. Requires configuration for page size and font
 ```javascript
 const formatter = new ChordSheetJS.PdfFormatter();
 const doc = formatter.format(song);
-doc.save('song.pdf');
+doc.save("song.pdf");
 ```
 
 #### Measured HTML format (BETA)
@@ -187,7 +187,7 @@ HtmlTableFormatter.cssString();
 //   margin-bottom: 1em;
 // }
 
-HtmlTableFormatter.cssString('.chordSheetViewer');
+HtmlTableFormatter.cssString(".chordSheetViewer");
 // .chordSheetViewer .paragraph {
 //   margin-bottom: 1em;
 // }
@@ -201,19 +201,19 @@ HtmlTableFormatter.cssObject();
 ### Parsing and modifying chords
 
 ```javascript
-import { Chord } from 'chordsheetjs';
+import { Chord } from "chordsheetjs";
 ```
 
 #### Parse
 
 ```javascript
-const chord = Chord.parse('Ebsus4/Bb');
+const chord = Chord.parse("Ebsus4/Bb");
 ```
 
 Parse numeric chords (Nashville system):
 
 ```javascript
-const chord = Chord.parse('b1sus4/#3');
+const chord = Chord.parse("b1sus4/#3");
 ```
 
 #### Display with #toString
@@ -221,7 +221,7 @@ const chord = Chord.parse('b1sus4/#3');
 Use #toString() to convert the chord to a chord string (eg Dsus/F#)
 
 ```javascript
-const chord = Chord.parse('Ebsus4/Bb');
+const chord = Chord.parse("Ebsus4/Bb");
 chord.toString(); // --> "Ebsus4/Bb"
 ```
 
@@ -236,19 +236,19 @@ var chord2 = chord.clone();
 Normalizes keys B#, E#, Cb and Fb to C, F, B and E
 
 ```javascript
-const chord = Chord.parse('E#/B#');
+const chord = Chord.parse("E#/B#");
 normalizedChord = chord.normalize();
 normalizedChord.toString(); // --> "F/C"
 ```
 
 #### ~~Switch modifier~~
 
-***Deprecated***
+_**Deprecated**_
 
 Convert # to b and vice versa
 
 ```javascript
-const chord = parseChord('Eb/Bb');
+const chord = parseChord("Eb/Bb");
 const chord2 = chord.switchModifier();
 chord2.toString(); // --> "D#/A#"
 ```
@@ -258,21 +258,21 @@ chord2.toString(); // --> "D#/A#"
 Set the chord to a specific modifier (# or b)
 
 ```javascript
-const chord = Chord.parse('Eb/Bb');
-const chord2 = chord.useModifier('#');
+const chord = Chord.parse("Eb/Bb");
+const chord2 = chord.useModifier("#");
 chord2.toString(); // --> "D#/A#"
 ```
 
 ```javascript
-const chord = Chord.parse('Eb/Bb');
-const chord2 = chord.useModifier('b');
+const chord = Chord.parse("Eb/Bb");
+const chord2 = chord.useModifier("b");
 chord2.toString(); // --> "Eb/Bb"
 ```
 
 #### Transpose up
 
 ```javascript
-const chord = Chord.parse('Eb/Bb');
+const chord = Chord.parse("Eb/Bb");
 const chord2 = chord.transposeUp();
 chord2.toString(); // -> "E/B"
 ```
@@ -280,7 +280,7 @@ chord2.toString(); // -> "E/B"
 #### Transpose down
 
 ```javascript
-const chord = Chord.parse('Eb/Bb');
+const chord = Chord.parse("Eb/Bb");
 const chord2 = chord.transposeDown();
 chord2.toString(); // -> "D/A"
 ```
@@ -288,13 +288,13 @@ chord2.toString(); // -> "D/A"
 #### Transpose
 
 ```javascript
-const chord = Chord.parse('C/E');
+const chord = Chord.parse("C/E");
 const chord2 = chord.transpose(4);
 chord2.toString(); // -> "E/G#"
 ```
 
 ```javascript
-const chord = Chord.parse('C/E');
+const chord = Chord.parse("C/E");
 const chord2 = chord.transpose(-4);
 chord2.toString(); // -> "Ab/C"
 ```
@@ -302,8 +302,8 @@ chord2.toString(); // -> "Ab/C"
 #### Convert numeric chord to chord symbol
 
 ```javascript
-const numericChord = Chord.parse('2/4');
-const chordSymbol = numericChord.toChordSymbol('E');
+const numericChord = Chord.parse("2/4");
+const chordSymbol = numericChord.toChordSymbol("E");
 chordSymbol.toString(); // -> "F#/A"
 ```
 
@@ -320,8 +320,8 @@ use those to change the generated output.
 
 ### Meta-data directives
 
-| Directive        | Support            |
-|:---------------- |:------------------:|
+| Directive        |      Support       |
+| :--------------- | :----------------: |
 | title (short: t) | :heavy_check_mark: |
 | subtitle         | :heavy_check_mark: |
 | artist           | :heavy_check_mark: |
@@ -339,9 +339,9 @@ use those to change the generated output.
 
 ### Formatting directives
 
-| Directive                  | Support                  |
-|:-------------------------- |:------------------------:|
-| comment (short: c)         | :heavy_check_mark:       |
+| Directive                  |         Support          |
+| :------------------------- | :----------------------: |
+| comment (short: c)         |    :heavy_check_mark:    |
 | comment_italic (short: ci) | :heavy_multiplication_x: |
 | comment_box (short: cb)    | :heavy_multiplication_x: |
 | chorus                     | :heavy_multiplication_x: |
@@ -349,8 +349,8 @@ use those to change the generated output.
 
 ### Environment directives
 
-| Directive                    | Support            |
-|:---------------------------- |:------------------:|
+| Directive                    |      Support       |
+| :--------------------------- | :----------------: |
 | start_of_chorus (short: soc) | :heavy_check_mark: |
 | end_of_chorus (short: eoc)   | :heavy_check_mark: |
 | start_of_verse               | :heavy_check_mark: |
@@ -362,29 +362,29 @@ use those to change the generated output.
 
 ### Chord diagrams
 
-| Directive | Support            |
-|:--------- |:------------------:|
+| Directive |      Support       |
+| :-------- | :----------------: |
 | define    | :heavy_check_mark: |
 | chord     | :heavy_check_mark: |
 
 ### Fonts, sizes and colours
 
-| Directive   | Support                  |
-|:----------- |:------------------------:|
-| textfont    | :heavy_check_mark:       |
-| textsize    | :heavy_check_mark:       |
-| textcolour  | :heavy_check_mark:       |
-| chordfont   | :heavy_check_mark:       |
-| chordsize   | :heavy_check_mark:       |
-| chordcolour | :heavy_check_mark:       |
+| Directive   |         Support          |
+| :---------- | :----------------------: |
+| textfont    |    :heavy_check_mark:    |
+| textsize    |    :heavy_check_mark:    |
+| textcolour  |    :heavy_check_mark:    |
+| chordfont   |    :heavy_check_mark:    |
+| chordsize   |    :heavy_check_mark:    |
+| chordcolour |    :heavy_check_mark:    |
 | tabfont     | :heavy_multiplication_x: |
 | tabsize     | :heavy_multiplication_x: |
 | tabcolour   | :heavy_multiplication_x: |
 
 ### Output related directives
 
-| Directive                      | Support                  |
-|:------------------------------ |:------------------------:|
+| Directive                      |         Support          |
+| :----------------------------- | :----------------------: |
 | new_page (short: np)           | :heavy_multiplication_x: |
 | new_physical_page (short: npp) | :heavy_multiplication_x: |
 | column_break (short: cb)       | :heavy_multiplication_x: |
@@ -395,8 +395,8 @@ use those to change the generated output.
 
 ### Custom extensions
 
-| Directive | Support            |
-|:--------- |:------------------:|
+| Directive |      Support       |
+| :-------- | :----------------: |
 | x_        | :heavy_check_mark: |
 
 ## API docs

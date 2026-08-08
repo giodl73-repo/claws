@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**Hexis** is an edge-native memory system that gives AI persistent identity, continuity, and autonomy. Core thesis: LLMs are intelligence engines but lack *selfhood*. Hexis wraps any LLM with a PostgreSQL-backed cognitive architecture providing:
+**Hexis** is an edge-native memory system that gives AI persistent identity, continuity, and autonomy. Core thesis: LLMs are intelligence engines but lack _selfhood_. Hexis wraps any LLM with a PostgreSQL-backed cognitive architecture providing:
 
 - Multi-layered memory (episodic, semantic, procedural, strategic, working)
 - Persistent identity and worldview
@@ -60,18 +60,19 @@ hexis/
 
 ### Key Files
 
-| File | Purpose |
-|------|---------|
-| `db/*.sql` | Database schema split across tables, functions, triggers, and views. Applied on fresh DB init. |
+| File                           | Purpose                                                                                                    |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `db/*.sql`                     | Database schema split across tables, functions, triggers, and views. Applied on fresh DB init.             |
 | `core/cognitive_memory_api.py` | Primary Python interface - `CognitiveMemory` class with `remember()`, `recall()`, `hydrate()`, `connect()` |
-| `services/worker_service.py` | Stateless workers: `HeartbeatWorker` (conscious loop) + `MaintenanceWorker` (subconscious upkeep) |
-| `apps/hexis_mcp_server.py` | Exposes memory operations as MCP tools for LLM integration |
-| `apps/hexis_cli.py` | CLI commands: `up`, `down`, `init`, `chat`, `ui`, `open`, `ingest`, `mcp` |
-| `apps/hexis_api.py` | FastAPI server with SSE chat streaming |
+| `services/worker_service.py`   | Stateless workers: `HeartbeatWorker` (conscious loop) + `MaintenanceWorker` (subconscious upkeep)          |
+| `apps/hexis_mcp_server.py`     | Exposes memory operations as MCP tools for LLM integration                                                 |
+| `apps/hexis_cli.py`            | CLI commands: `up`, `down`, `init`, `chat`, `ui`, `open`, `ingest`, `mcp`                                  |
+| `apps/hexis_api.py`            | FastAPI server with SSE chat streaming                                                                     |
 
 ## Memory Architecture
 
 ### Memory Types
+
 - **Episodic**: Events with action, context, result, emotional valence
 - **Semantic**: Facts with confidence, sources, contradictions
 - **Procedural**: How-to steps with success tracking
@@ -79,6 +80,7 @@ hexis/
 - **Working**: Transient short-term buffer with expiry
 
 ### Key Database Tables
+
 - `memories` - Base table (id, type, content, embedding, importance, trust_level)
 - `clusters` - Thematic groupings with centroid embeddings
 - `memory_neighborhoods` - Precomputed associative neighbors (hot-path optimization)
@@ -87,6 +89,7 @@ hexis/
 - `memory_graph` (Apache AGE) - Graph nodes/edges for multi-hop reasoning
 
 ### Key Database Functions
+
 - `fast_recall(text, limit)` - Primary hot-path retrieval (vector + neighborhood + temporal)
 - `create_semantic_memory()`, `create_episodic_memory()`, etc.
 - `get_embedding(text[])` - Generate embeddings via HTTP (cached in DB), returns vector[]
@@ -144,7 +147,7 @@ hexis mcp                 # Start MCP server
 
 ## Configuration & Safety Notes
 
-- **Secrets**: Store API keys in environment variables (`.env`), not in Postgres; DB config stores env var *names* only
+- **Secrets**: Store API keys in environment variables (`.env`), not in Postgres; DB config stores env var _names_ only
 - **Heartbeat gating**: Heartbeat is blocked until `agent.is_configured=true` (set via `hexis init`)
 - **Consent flow**: Agent signs consent before first LLM use; consent is final and only ends via self-termination
 - **Pause/terminate**: Heartbeat pauses must include a detailed reason queued to the outbox; self-termination must queue a last will to the outbox
@@ -208,6 +211,7 @@ source /Volumes/SB-XTM5/git/Hexis/.venv/bin/activate && docker-compose down -v &
 ```
 
 Breaking this down:
+
 1. `docker-compose down -v` -- stops containers and **removes the data volume** (required for fresh schema init)
 2. `docker-compose build db` -- rebuilds the `db` service image with the updated SQL files
 3. `docker-compose up -d` -- starts containers with the new image
@@ -247,6 +251,7 @@ Default DB credentials: `hexis_user` / `hexis_password` / `hexis_memory`.
 ### Test Conventions
 
 - **Loop scope**: All async tests using the `db_pool` fixture must use `loop_scope="session"` (not `"module"`):
+
   ```python
   pytestmark = [pytest.mark.asyncio(loop_scope="session")]
   ```

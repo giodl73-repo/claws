@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Python output**: Python syntax validation with target version, LangGraph node function signature compliance, Python 3.9+ compatible type annotations
 - **Framework targeting**: langgraph version targeting and declaration, non-exception governance enforcement pattern, graceful import error with install guidance
 - **Zero-import enforcement**: complete template substitution verification, sanitize IR descriptions in Python strings, product name in Python docstrings

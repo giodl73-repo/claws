@@ -41,6 +41,7 @@ verdict: conditional-pass
 **Why it matters**: Protect is the security posture feature -- the reason enterprises adopt claws. A user who just ran `claws init` has no discoverability path to `claws protect` without reading `--help`. For the community, budget tracking is the most immediately useful protect feature (it answers "how much is my agent costing me?"), and it's hidden.
 
 **Fix**: Add `protect` to the commands arrays and add a line to the "Next steps" sections:
+
 ```
   claws protect    Budget, secrets, and identity management
 ```
@@ -167,11 +168,11 @@ verdict: conditional-pass
 
 ## Summary
 
-| Severity | Count | Must-fix |
-|----------|-------|----------|
-| Major | 3 | Yes |
-| Warning | 7 | Recommended |
-| Note | 4 | Optional |
+| Severity | Count | Must-fix    |
+| -------- | ----- | ----------- |
+| Major    | 3     | Yes         |
+| Warning  | 7     | Recommended |
+| Note     | 4     | Optional    |
 
 **What works well**: The SDK/CLI separation is clean -- `protect.ts` is a pure adapter with no business logic. The secrets vault crypto is solid (AES-256-GCM, Argon2id with scrypt fallback, per-entry IVs, passphrase entropy validation). The type surface in `types.ts` is well-designed with clear boundaries. Budget tracking from the audit chain is a smart design -- no new telemetry required. The doctor checks for vault KDF and key co-location are the kind of proactive security guidance that makes claws feel like it's on the user's side.
 

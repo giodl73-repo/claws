@@ -1,7 +1,8 @@
 # Agent
 
 ## Tools
+
 - foo
 - bar
-## Boundaries
 
+## Boundaries

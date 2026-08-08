@@ -125,12 +125,10 @@ The IR carries the full analysis:
   },
   "capabilities": {
     "tools": [
-      {"name": "file-read", "riskClass": "R2", "requires": ["audit"]},
-      {"name": "send-email", "riskClass": "R5", "requires": ["elicitation", "obo"]}
+      { "name": "file-read", "riskClass": "R2", "requires": ["audit"] },
+      { "name": "send-email", "riskClass": "R5", "requires": ["elicitation", "obo"] }
     ],
-    "skills": [
-      {"name": "summarize", "riskLevel": "R3", "oboTypes": ["email"]}
-    ],
+    "skills": [{ "name": "summarize", "riskLevel": "R3", "oboTypes": ["email"] }],
     "agents": [],
     "workflows": []
   },
@@ -150,14 +148,14 @@ The IR carries the full analysis:
       "requiredApprovals": ["send-email"],
       "auditOnlyRules": ["G-CONTEXT-01"]
     },
-    "effectiveR5Count": {"derived": 1, "overridden": 0, "total": 1}
+    "effectiveR5Count": { "derived": 1, "overridden": 0, "total": 1 }
   },
   "conflicts": {
     "totalConflicts": 1,
     "oboConflicts": [
       {
         "category": "circular-delegation",
-        "location": {"file": "AGENTS.md", "line": 42},
+        "location": { "file": "AGENTS.md", "line": 42 },
         "involved": ["agent-1", "agent-2"]
       }
     ]
@@ -170,13 +168,15 @@ The IR carries the full analysis:
 The type system encodes the non-negotiable: R5 tools always fail closed.
 
 ```typescript
-type FailMode<R extends RuleLevel> =
-  R extends 5 ? 'closed' :              // R5: always closed. Period.
-  R extends 4 ? 'closed' | 'open' :     // R4: configurable
-  R extends 3 ? 'closed' | 'open' :     // R3: configurable
-  'closed' | 'open';                     // R1-R2: configurable
+type FailMode<R extends RuleLevel> = R extends 5
+  ? "closed" // R5: always closed. Period.
+  : R extends 4
+    ? "closed" | "open" // R4: configurable
+    : R extends 3
+      ? "closed" | "open" // R3: configurable
+      : "closed" | "open"; // R1-R2: configurable
 
-const bad: FailMode<5> = 'open';  // TypeScript error! Does not compile.
+const bad: FailMode<5> = "open"; // TypeScript error! Does not compile.
 ```
 
 Runtime guard catches deserialized tampering — `validateFailModes(ir)` throws `OC-POLICY-E001` if R5 fail-open appears in JSON loaded from disk.
@@ -203,25 +203,29 @@ Skill authors need governance metadata on their handlers. Requiring the full com
 ### After Ptah
 
 ```typescript
-  import { skill, classify, obo, audit, validate, budget, timeout }
-    from '@bic/claws-skill-kit';
-  import { z } from 'zod';
+import { skill, classify, obo, audit, validate, budget, timeout } from "@bic/claws-skill-kit";
+import { z } from "zod";
 
-  export const handler = skill('email-sender')
-    .decorate(classify('R5'))              // Risk level: highest
-    .decorate(obo('email'))                // On-behalf-of boundary
-    .decorate(audit())                     // Include in audit trail
-    .decorate(validate(z.object({          // Input schema
-      to: z.string().email(),
-      body: z.string().max(10000)
-    })))
-    .decorate(budget(5000))                // Token budget limit
-    .decorate(timeout(300))                // 5 minute timeout
-    .handler(async (input) => {
-      const email = await composeEmail(input);
-      await sendEmail(email);
-      return { sent: true };
-    });
+export const handler = skill("email-sender")
+  .decorate(classify("R5")) // Risk level: highest
+  .decorate(obo("email")) // On-behalf-of boundary
+  .decorate(audit()) // Include in audit trail
+  .decorate(
+    validate(
+      z.object({
+        // Input schema
+        to: z.string().email(),
+        body: z.string().max(10000),
+      }),
+    ),
+  )
+  .decorate(budget(5000)) // Token budget limit
+  .decorate(timeout(300)) // 5 minute timeout
+  .handler(async (input) => {
+    const email = await composeEmail(input);
+    await sendEmail(email);
+    return { sent: true };
+  });
 ```
 
 `npm install @bic/claws-skill-kit` — 35KB, zero compiler dependencies, zero runtime overhead. The decorators are compile-time metadata slots. `claws check` reads them. The Gateway enforces them. The skill author never touches the compiler.
@@ -229,14 +233,14 @@ Skill authors need governance metadata on their handlers. Requiring the full com
 ### MockGateway for Unit Testing
 
 ```typescript
-  import { MockGateway } from '@bic/claws-skill-kit';
+import { MockGateway } from "@bic/claws-skill-kit";
 
-  const gateway = new MockGateway()
-    .on('before_tool_call', () => ({ allowed: true, reclassified: false }))
-    .on('after_tool_call', () => ({ redact: [] }));
+const gateway = new MockGateway()
+  .on("before_tool_call", () => ({ allowed: true, reclassified: false }))
+  .on("after_tool_call", () => ({ redact: [] }));
 
-  const result = await handler.execute(input, { gateway });
-  expect(result.sent).toBe(true);
+const result = await handler.execute(input, { gateway });
+expect(result.sent).toBe(true);
 ```
 
 ---
@@ -261,34 +265,34 @@ A skill author adds `classify('R3')` but never verifies that the handler actuall
 ### After Ptah
 
 ```typescript
-  import { GovernanceValidator, SecurityScanner } from '@bic/claws-test';
+import { GovernanceValidator, SecurityScanner } from "@bic/claws-test";
 
-  it('passes all 12 governance checks', async () => {
-    const validator = new GovernanceValidator();
-    const result = await validator.validate(handler);
+it("passes all 12 governance checks", async () => {
+  const validator = new GovernanceValidator();
+  const result = await validator.validate(handler);
 
-    expect(result.checks['risk-level'].passed).toBe(true);
-    expect(result.checks['obo-boundary'].passed).toBe(true);
-    expect(result.checks['fail-mode'].passed).toBe(true);
-    expect(result.checks['elicitation'].passed).toBe(true);
-    expect(result.checks['supply-chain'].passed).toBe(true);
-    // ... all 12 checks
-    expect(result.violations).toHaveLength(0);
-  });
+  expect(result.checks["risk-level"].passed).toBe(true);
+  expect(result.checks["obo-boundary"].passed).toBe(true);
+  expect(result.checks["fail-mode"].passed).toBe(true);
+  expect(result.checks["elicitation"].passed).toBe(true);
+  expect(result.checks["supply-chain"].passed).toBe(true);
+  // ... all 12 checks
+  expect(result.violations).toHaveLength(0);
+});
 
-  it('has no injection vulnerabilities', async () => {
-    const scanner = new SecurityScanner();
-    const findings = await scanner.scan('./src/handler.ts');
-    expect(findings).toHaveLength(0);
-  });
+it("has no injection vulnerabilities", async () => {
+  const scanner = new SecurityScanner();
+  const findings = await scanner.scan("./src/handler.ts");
+  expect(findings).toHaveLength(0);
+});
 
-  // Or use the vitest matchers:
-  it('governance vitest matchers', () => {
-    expect(handler).toPassGovernance();
-    expect(handler).toHaveRiskLevel('R3');
-    expect(handler).toRequireElicitation();
-    expect(handler).toPassSecurityScan();
-  });
+// Or use the vitest matchers:
+it("governance vitest matchers", () => {
+  expect(handler).toPassGovernance();
+  expect(handler).toHaveRiskLevel("R3");
+  expect(handler).toRequireElicitation();
+  expect(handler).toPassSecurityScan();
+});
 ```
 
 The 12 governance checks:
@@ -425,20 +429,20 @@ The acceptance harness materializes scenarios into executable tests:
 Each scenario carries its own fixture workspace and expected output:
 
 ```yaml
-  name: compile-full-pipeline-8-files
-  series: compile-pipeline
-  problem: |
-    An OpenClaw workspace with 8 governance intents across 9 files.
-    The compiler must parse all files, extract intents, evaluate 29
-    rules, and produce a GovernanceIR with zero violations.
-  expect:
-    violations: 0
-    conflicts: 0
-    artifactCount: 4
-    riskProfile:
-      R1: 2
-      R3: 5
-      R5: 1
+name: compile-full-pipeline-8-files
+series: compile-pipeline
+problem: |
+  An OpenClaw workspace with 8 governance intents across 9 files.
+  The compiler must parse all files, extract intents, evaluate 29
+  rules, and produce a GovernanceIR with zero violations.
+expect:
+  violations: 0
+  conflicts: 0
+  artifactCount: 4
+  riskProfile:
+    R1: 2
+    R3: 5
+    R5: 1
 ```
 
 5 runner types cover the compiler surface: compile-sim (full pipeline), pinch-sim (rules), emit-sim (artifacts), security-sim (attack patterns), fleet-sim (stub for Anubis). 95 scenarios materialized with fixtures for Ptah, wired into CI via vitest.
@@ -454,7 +458,7 @@ Each scenario carries its own fixture workspace and expected output:
     15+ legacy directories               concepts/ (flat, no areas)
     astro/ (410 files, pre-decomposition) superpowers/ (orphaned)
     admin/ (230 files, pre-split)         surface-contracts/ (legacy)
-  
+
   DC health checks: 7 FAIL of 13
   Known gaps: 989
 ```
@@ -518,6 +522,6 @@ Ptah delivers the foundation. Anubis and Thoth deliver the surface and the ecosy
 
 ---
 
-*9 files in. Governance out. Your agent asks before it acts.*
+_9 files in. Governance out. Your agent asks before it acts._
 
 Generated with [Claude Code](https://claude.com/claude-code)

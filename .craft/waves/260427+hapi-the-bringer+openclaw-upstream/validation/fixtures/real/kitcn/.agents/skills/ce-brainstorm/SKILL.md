@@ -1,6 +1,6 @@
 ---
 name: ce:brainstorm
-description: 'Explore requirements and approaches through collaborative dialogue before writing a right-sized requirements document and planning implementation. Use for feature ideas, problem framing, when the user says ''let''s brainstorm'', or when they want to think through options before deciding what to build. Also use when a user describes a vague or ambitious feature request, asks ''what should we build'', ''help me think through X'', presents a problem with multiple valid solutions, or seems unsure about scope or direction — even if they don''t explicitly ask to brainstorm.'
+description: "Explore requirements and approaches through collaborative dialogue before writing a right-sized requirements document and planning implementation. Use for feature ideas, problem framing, when the user says 'let's brainstorm', or when they want to think through options before deciding what to build. Also use when a user describes a vague or ambitious feature request, asks 'what should we build', 'help me think through X', presents a problem with multiple valid solutions, or seems unsure about scope or direction — even if they don't explicitly ask to brainstorm."
 argument-hint: "[feature idea or problem to explore]"
 ---
 
@@ -49,6 +49,7 @@ Do not proceed until you have a feature description from the user.
 #### 0.1 Resume Existing Work When Appropriate
 
 If the user references an existing brainstorm topic or document, or there is an obvious recent matching `*-requirements.md` file in `docs/brainstorms/`:
+
 - Read the document
 - Confirm with the user before resuming: "Found an existing requirements doc for [topic]. Should I continue from this, or start fresh?"
 - If resuming, summarize the current state briefly, continue from its existing decisions and outstanding questions, and update the existing document instead of creating a duplicate
@@ -56,6 +57,7 @@ If the user references an existing brainstorm topic or document, or there is an 
 #### 0.2 Assess Whether Brainstorming Is Needed
 
 **Clear requirements indicators:**
+
 - Specific acceptance criteria provided
 - Referenced existing patterns to follow
 - Described exact expected behavior
@@ -67,6 +69,7 @@ Keep the interaction brief. Confirm understanding and present concise next-step 
 #### 0.3 Assess Scope
 
 Use the feature description plus a light repo scan to classify the work:
+
 - **Lightweight** - small, well-bounded, low ambiguity
 - **Standard** - normal feature or bounded refactor with some decisions to make
 - **Deep** - cross-cutting, strategic, or highly ambiguous
@@ -83,9 +86,9 @@ Scan the repo before substantive brainstorming. Match depth to scope:
 
 **Standard and Deep** — Two passes:
 
-*Constraint Check* — Check project instruction files (`AGENTS.md`, and `CLAUDE.md` only if retained as compatibility context) for workflow, product, or scope constraints that affect the brainstorm. If these add nothing, move on.
+_Constraint Check_ — Check project instruction files (`AGENTS.md`, and `CLAUDE.md` only if retained as compatibility context) for workflow, product, or scope constraints that affect the brainstorm. If these add nothing, move on.
 
-*Topic Scan* — Search for relevant terms. Read the most relevant existing artifact if one exists (brainstorm, plan, spec, skill, feature doc). Skim adjacent examples covering similar behavior.
+_Topic Scan_ — Search for relevant terms. Read the most relevant existing artifact if one exists (brainstorm, plan, spec, skill, feature doc). Skim adjacent examples covering similar behavior.
 
 If nothing obvious appears after a short scan, say so and continue. Do not drift into technical planning — avoid inspecting tests, migrations, deployment, or low-level architecture unless the brainstorm is itself about a technical decision.
 
@@ -94,11 +97,13 @@ If nothing obvious appears after a short scan, say so and continue. Do not drift
 Before generating approaches, challenge the request to catch misframing. Match depth to scope:
 
 **Lightweight:**
+
 - Is this solving the real user problem?
 - Are we duplicating something that already covers this?
 - Is there a clearly better framing with near-zero extra cost?
 
 **Standard:**
+
 - Is this the right problem, or a proxy for a more important one?
 - What user or business outcome actually matters here?
 - What happens if we do nothing?
@@ -108,6 +113,7 @@ Before generating approaches, challenge the request to catch misframing. Match d
 - Use the result to sharpen the conversation, not to bulldoze the user's intent
 
 **Deep** — Standard questions plus:
+
 - What durable capability should this create in 6-12 months?
 - Does this move the product toward that, or is it only a local patch?
 
@@ -116,6 +122,7 @@ Before generating approaches, challenge the request to catch misframing. Match d
 Use the platform's blocking question tool when available (see Interaction Rules). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
 
 **Guidelines:**
+
 - Ask questions **one at a time**
 - Prefer multiple choice when natural options exist
 - Prefer **single-select** when choosing one direction, one priority, or one next step
@@ -134,9 +141,11 @@ Use the platform's blocking question tool when available (see Interaction Rules)
 If multiple plausible directions remain, propose **2-3 concrete approaches** based on research and conversation. Otherwise state the recommended direction directly.
 
 When useful, include one deliberately higher-upside alternative:
+
 - Identify what adjacent addition or reframing would most increase usefulness, compounding value, or durability without disproportionate carrying cost. Present it as a challenger option alongside the baseline, not as the default. Omit it when the work is already obviously over-scoped or the baseline request is clearly the right move.
 
 For each approach, provide:
+
 - Brief description (2-3 sentences)
 - Pros and cons
 - Key risks or unknowns
@@ -147,6 +156,7 @@ Lead with your recommendation and explain why. Prefer simpler solutions when add
 If one approach is clearly best and alternatives are not meaningful, skip the menu and state the recommendation directly.
 
 If relevant, call out whether the choice is:
+
 - Reuse an existing pattern
 - Extend an existing capability
 - Build something net new
@@ -160,12 +170,14 @@ This document should behave like a lightweight PRD without PRD ceremony. Include
 The requirements document is for product definition and scope control. Do **not** include implementation details such as libraries, schemas, endpoints, file layouts, or code structure unless the brainstorm is inherently technical and those details are themselves the subject of the decision.
 
 **Required content for non-trivial work:**
+
 - Problem frame
 - Concrete requirements or intended behavior with stable IDs
 - Scope boundaries
 - Success criteria
 
 **Include when materially useful:**
+
 - Key decisions and rationale
 - Dependencies or assumptions
 - Outstanding questions
@@ -183,39 +195,49 @@ topic: <kebab-case-topic>
 # <Topic Title>
 
 ## Problem Frame
+
 [Who is affected, what is changing, and why it matters]
 
 ## Requirements
 
 **[Group Header]**
+
 - R1. [Concrete requirement in this group]
 - R2. [Concrete requirement in this group]
 
 **[Group Header]**
+
 - R3. [Concrete requirement in this group]
 
 ## Success Criteria
+
 - [How we will know this solved the right problem]
 
 ## Scope Boundaries
+
 - [Deliberate non-goal or exclusion]
 
 ## Key Decisions
+
 - [Decision]: [Rationale]
 
 ## Dependencies / Assumptions
+
 - [Only include if material]
 
 ## Outstanding Questions
 
 ### Resolve Before Planning
+
 - [Affects R1][User decision] [Question that must be answered before planning can proceed]
 
 ### Deferred to Planning
+
 - [Affects R2][Technical] [Question that should be answered during planning or codebase exploration]
 - [Affects R2][Needs research] [Question that likely requires research during planning]
 
 ## Next Steps
+
 [If `Resolve Before Planning` is empty: `→ /ce:plan` for structured implementation planning]
 [If `Resolve Before Planning` is not empty: `→ Resume /ce:brainstorm` to resolve blocking questions before planning]
 ```
@@ -224,20 +246,22 @@ topic: <kebab-case-topic>
 
 **When to include:**
 
-| Requirements describe... | Visual aid | Placement |
-|---|---|---|
-| A multi-step user workflow or process | Mermaid flow diagram or ASCII flow with annotations | After Problem Frame, or under its own `## User Flow` heading for substantial flows (>10 nodes) |
-| 3+ behavioral modes, variants, or states | Markdown comparison table | Within the Requirements section |
-| 3+ interacting participants (user roles, system components, external services) | Mermaid or ASCII relationship diagram | After Problem Frame, or under its own `## Architecture` heading |
-| Multiple competing approaches being compared | Comparison table | Within Phase 2 approach exploration |
+| Requirements describe...                                                       | Visual aid                                          | Placement                                                                                      |
+| ------------------------------------------------------------------------------ | --------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| A multi-step user workflow or process                                          | Mermaid flow diagram or ASCII flow with annotations | After Problem Frame, or under its own `## User Flow` heading for substantial flows (>10 nodes) |
+| 3+ behavioral modes, variants, or states                                       | Markdown comparison table                           | Within the Requirements section                                                                |
+| 3+ interacting participants (user roles, system components, external services) | Mermaid or ASCII relationship diagram               | After Problem Frame, or under its own `## Architecture` heading                                |
+| Multiple competing approaches being compared                                   | Comparison table                                    | Within Phase 2 approach exploration                                                            |
 
 **When to skip:**
+
 - Prose already communicates the concept clearly
 - The diagram would just restate the requirements in visual form without adding comprehension value
 - The visual describes implementation architecture, data schemas, state machines, or code structure (that belongs in `ce:plan`)
 - The brainstorm is simple and linear with no multi-step flows, mode comparisons, or multi-participant interactions
 
 **Format selection:**
+
 - **Mermaid** (default) for simple flows — 5-15 nodes, no in-box annotations, standard flowchart shapes. Use `TB` (top-to-bottom) direction so diagrams stay narrow in both rendered and source form. Source should be readable as fallback in diff views and terminals.
 - **ASCII/box-drawing diagrams** for annotated flows that need rich in-box content — CLI commands at each step, decision logic branches, file path layouts, multi-column spatial arrangements. More expressive than mermaid when the diagram's value comes from annotations within steps. Follow 80-column max for code blocks, use vertical stacking.
 - **Markdown tables** for mode/variant comparisons and approach comparisons.
@@ -259,6 +283,7 @@ When requirements span multiple distinct concerns, group them under bold topic h
 When the work is simple, combine sections rather than padding them. A short requirements document is better than a bloated one.
 
 Before finalizing, check:
+
 - What would `ce:plan` still have to invent if this brainstorm ended now?
 - Do any requirements depend on something claimed to be out of scope?
 - Are any unresolved items actually product decisions rather than planning questions?
@@ -271,6 +296,7 @@ If planning would need to invent product behavior, scope boundaries, or success 
 Ensure `docs/brainstorms/` directory exists before writing.
 
 If a document contains outstanding questions:
+
 - Use `Resolve Before Planning` only for questions that truly block planning
 - If `Resolve Before Planning` is non-empty, keep working those questions during the brainstorm by default
 - If the user explicitly wants to proceed anyway, convert each remaining item into an explicit decision, assumption, or `Deferred to Planning` question before proceeding
@@ -294,6 +320,7 @@ When document-review returns "Review complete", proceed to Phase 4.
 Present next steps using the platform's blocking question tool when available (see Interaction Rules). Otherwise present numbered options in chat and end the turn.
 
 If `Resolve Before Planning` contains any items:
+
 - Ask the blocking questions now, one at a time, by default
 - If the user explicitly wants to proceed anyway, first convert each remaining item into an explicit decision, assumption, or `Deferred to Planning` question
 - If the user chooses to pause instead, present the handoff as paused or blocked rather than complete
@@ -304,6 +331,7 @@ If `Resolve Before Planning` contains any items:
 **Question when blocking questions remain and user wants to pause:** "Brainstorm paused. Planning is blocked until the remaining questions are resolved. What would you like to do next?"
 
 Present only the options that apply:
+
 - **Proceed to planning (Recommended)** - Run `/ce:plan` for structured implementation planning
 - **Proceed directly to work** - Only offer this when scope is lightweight, success criteria are clear, scope boundaries are clear, and no meaningful technical or research questions remain
 - **Run additional document review** - Offer this only when a requirements document exists. Runs another pass for further refinement

@@ -10,14 +10,14 @@
 
 ## Totals
 
-| Role | Major | Warning | Notes | Total |
-|------|-------|---------|-------|-------|
-| architect | 4 | 6 | 3 | 13 |
-| dragon | 4 | 6 | 3 | 13 |
-| navigator | 4 | 5 | 5 | 14 |
-| type-system | 4 | 7 | 4 | 15 |
-| **Raw total** | **16** | **24** | **15** | **55** |
-| **After dedup** | **8** | **13** | **9** | **30** |
+| Role            | Major  | Warning | Notes  | Total  |
+| --------------- | ------ | ------- | ------ | ------ |
+| architect       | 4      | 6       | 3      | 13     |
+| dragon          | 4      | 6       | 3      | 13     |
+| navigator       | 4      | 5       | 5      | 14     |
+| type-system     | 4      | 7       | 4      | 15     |
+| **Raw total**   | **16** | **24**  | **15** | **55** |
+| **After dedup** | **8**  | **13**  | **9**  | **30** |
 
 ---
 
@@ -52,6 +52,7 @@ The flat interface with 5 optional fields allows invalid states: `{ decision: 'a
 **File**: openclaw-governance-spec.md
 
 Three paths to R5 bypass, all enforced by prose only:
+
 1. **Empty registry** defaults to `{ decision: 'allow' }` — all tools pass including R5
 2. **Provider omitting `requiresExternalApproval`** for R5 gets `false` default — no host gate
 3. **Host overriding `alwaysDenyRiskLevels: []`** — R5 auto-approves on timeout
@@ -104,44 +105,44 @@ The "CONTRIBUTE (19)" header lists only 10 items visually. The number can't be v
 
 ### Major
 
-| ID | Role | Finding | File |
-|----|------|---------|------|
-| U-M1 | architect | ShellExecProvider uses `readFileSync` with no import — not copy-paste runnable | openclaw-governance-spec.md |
-| U-M2 | architect | JSON Schema promised for approval-events but not delivered in spec | openclaw-governance-spec.md §8 |
-| U-M3 | type-system | `AuditableResult` should be `ExecutedResult | BlockedResult` discriminated union | openclaw-governance-spec.md |
+| ID   | Role        | Finding                                                                        | File                                                   |
+| ---- | ----------- | ------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| U-M1 | architect   | ShellExecProvider uses `readFileSync` with no import — not copy-paste runnable | openclaw-governance-spec.md                            |
+| U-M2 | architect   | JSON Schema promised for approval-events but not delivered in spec             | openclaw-governance-spec.md §8                         |
+| U-M3 | type-system | `AuditableResult` should be `ExecutedResult                                    | BlockedResult` discriminated union                     | openclaw-governance-spec.md |
 | U-M4 | type-system | `risk.level` and `risk.label` have no type-level coupling — mismatches compile | openclaw-governance-spec.md + approval-event-schema.md |
 
 ### Warning
 
-| ID | Role | Finding | File |
-|----|------|---------|------|
-| U-W1 | architect | audit-chain and siem-emitter both own format serialization (SARIF/CEF/etc) — overlap | openclaw-governance-spec.md §3 |
-| U-W2 | architect | 100ms SLA on preAuthorize() is advisory with no enforcement mechanism | openclaw-governance-spec.md §1 |
-| U-W3 | architect | Python adapter → TypeScript audit-chain cross-language dependency unexplained | claws-aether-integration.md |
-| U-W4 | architect | identity-bridge claims "zero dependencies" but OIDC needs JWKS keys | openclaw-governance-spec.md §5 |
-| U-W5 | dragon | `extensions` field is an untyped escape hatch — exfiltration vector | openclaw-governance-spec.md §2 |
-| U-W6 | dragon | Deck claims Ed25519 but spec only defines HMAC-SHA256 | why-claws.md vs openclaw-governance-spec.md |
-| U-W7 | navigator | No "Start Here" adoption funnel in the canonical spec | openclaw-governance-spec.md |
-| U-W8 | navigator | Open questions framed as "current proposal" (rubber-stamp tone) | openclaw-governance-spec.md §11 |
-| U-W9 | navigator | 240 lines of TypeScript before first conceptual diagram | openclaw-governance-spec.md §1 |
-| U-W10 | navigator | Package sections lack error-handling examples (happy path only) | openclaw-governance-spec.md §3-8 |
-| U-W11 | type-system | `ToolCall.context` index signature silently absorbs typos | openclaw-governance-spec.md |
-| U-W12 | type-system | `schemaVersion: 1` literal with no version negotiation strategy | openclaw-governance-spec.md |
-| U-W13 | type-system | `ExportFormat` differs between audit-chain (`json`) and siem-emitter (`ndjson`) | openclaw-governance-spec.md |
+| ID    | Role        | Finding                                                                              | File                                        |
+| ----- | ----------- | ------------------------------------------------------------------------------------ | ------------------------------------------- |
+| U-W1  | architect   | audit-chain and siem-emitter both own format serialization (SARIF/CEF/etc) — overlap | openclaw-governance-spec.md §3              |
+| U-W2  | architect   | 100ms SLA on preAuthorize() is advisory with no enforcement mechanism                | openclaw-governance-spec.md §1              |
+| U-W3  | architect   | Python adapter → TypeScript audit-chain cross-language dependency unexplained        | claws-aether-integration.md                 |
+| U-W4  | architect   | identity-bridge claims "zero dependencies" but OIDC needs JWKS keys                  | openclaw-governance-spec.md §5              |
+| U-W5  | dragon      | `extensions` field is an untyped escape hatch — exfiltration vector                  | openclaw-governance-spec.md §2              |
+| U-W6  | dragon      | Deck claims Ed25519 but spec only defines HMAC-SHA256                                | why-claws.md vs openclaw-governance-spec.md |
+| U-W7  | navigator   | No "Start Here" adoption funnel in the canonical spec                                | openclaw-governance-spec.md                 |
+| U-W8  | navigator   | Open questions framed as "current proposal" (rubber-stamp tone)                      | openclaw-governance-spec.md §11             |
+| U-W9  | navigator   | 240 lines of TypeScript before first conceptual diagram                              | openclaw-governance-spec.md §1              |
+| U-W10 | navigator   | Package sections lack error-handling examples (happy path only)                      | openclaw-governance-spec.md §3-8            |
+| U-W11 | type-system | `ToolCall.context` index signature silently absorbs typos                            | openclaw-governance-spec.md                 |
+| U-W12 | type-system | `schemaVersion: 1` literal with no version negotiation strategy                      | openclaw-governance-spec.md                 |
+| U-W13 | type-system | `ExportFormat` differs between audit-chain (`json`) and siem-emitter (`ndjson`)      | openclaw-governance-spec.md                 |
 
 ### Notes
 
-| ID | Role | Finding |
-|----|------|---------|
-| U-N1 | architect | `modify` outcome implies providers understand tool argument schemas — coupling undocumented |
-| U-N2 | architect | `compilerVersion` in host-approval-policies.json is Craftworks-internal |
-| U-N3 | dragon | ShellExecProvider `allow` + `requiresExternalApproval` — safety depends on host honoring optional field |
-| U-N4 | dragon | `ToolCall.arguments` "MUST NOT modify" is prose only — no freeze/clone enforcement |
-| U-N5 | navigator | 100ms SLA number unjustified — community will ask "why not 50ms?" |
-| U-N6 | navigator | Approval Events slide is well-structured (positive) — model for other slides |
-| U-N7 | type-system | `ProviderCapabilities.name` duplicates `GuardrailProvider.name` — identity contradiction possible |
-| U-N8 | type-system | `register()` returns void with no error on duplicate names |
-| U-N9 | type-system | `Identity.roles` and `Identity.groups` both `string[]` — no type distinction |
+| ID   | Role        | Finding                                                                                                 |
+| ---- | ----------- | ------------------------------------------------------------------------------------------------------- |
+| U-N1 | architect   | `modify` outcome implies providers understand tool argument schemas — coupling undocumented             |
+| U-N2 | architect   | `compilerVersion` in host-approval-policies.json is Craftworks-internal                                 |
+| U-N3 | dragon      | ShellExecProvider `allow` + `requiresExternalApproval` — safety depends on host honoring optional field |
+| U-N4 | dragon      | `ToolCall.arguments` "MUST NOT modify" is prose only — no freeze/clone enforcement                      |
+| U-N5 | navigator   | 100ms SLA number unjustified — community will ask "why not 50ms?"                                       |
+| U-N6 | navigator   | Approval Events slide is well-structured (positive) — model for other slides                            |
+| U-N7 | type-system | `ProviderCapabilities.name` duplicates `GuardrailProvider.name` — identity contradiction possible       |
+| U-N8 | type-system | `register()` returns void with no error on duplicate names                                              |
+| U-N9 | type-system | `Identity.roles` and `Identity.groups` both `string[]` — no type distinction                            |
 
 ---
 
@@ -175,18 +176,18 @@ The "CONTRIBUTE (19)" header lists only 10 items visually. The number can't be v
 
 ## Lens Summary Across Roles
 
-| Lens | architect (D) | dragon (A) | navigator (E) | type-system (C) |
-|------|:---:|:---:|:---:|:---:|
-| Structural clarity | PASS | — | — | — |
-| Contribute/keep boundary | PASS | — | — | — |
-| R5 invariant enforced | — | FAIL | — | — |
-| Fail-mode exhaustive | — | FAIL | — | — |
-| Timeout safety | — | FAIL | — | — |
-| First-5-minutes path | — | — | FAIL | — |
-| Progressive disclosure | — | — | WARN | — |
-| User mental model | — | — | FAIL | — |
-| Discriminated unions | — | — | — | FAIL |
-| Invalid states prevented | — | — | — | FAIL |
+| Lens                     | architect (D) | dragon (A) | navigator (E) | type-system (C) |
+| ------------------------ | :-----------: | :--------: | :-----------: | :-------------: |
+| Structural clarity       |     PASS      |     —      |       —       |        —        |
+| Contribute/keep boundary |     PASS      |     —      |       —       |        —        |
+| R5 invariant enforced    |       —       |    FAIL    |       —       |        —        |
+| Fail-mode exhaustive     |       —       |    FAIL    |       —       |        —        |
+| Timeout safety           |       —       |    FAIL    |       —       |        —        |
+| First-5-minutes path     |       —       |     —      |     FAIL      |        —        |
+| Progressive disclosure   |       —       |     —      |     WARN      |        —        |
+| User mental model        |       —       |     —      |     FAIL      |        —        |
+| Discriminated unions     |       —       |     —      |       —       |      FAIL       |
+| Invalid states prevented |       —       |     —      |       —       |      FAIL       |
 
 **Overall**: The architecture is sound (architect passes). The security invariants leak (dragon fails across the board). The developer journey needs a starting point (navigator fails on adoption). The type contracts need discriminated unions before v1.0 publish (type-system fails on exhaustiveness).
 

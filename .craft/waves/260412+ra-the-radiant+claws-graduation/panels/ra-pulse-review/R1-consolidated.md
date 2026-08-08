@@ -10,14 +10,14 @@
 
 ## Totals
 
-| Role | HC-BLOCK | HIGH | MEDIUM | LOW | Total |
-|------|----------|------|--------|-----|-------|
-| architect | 0 | 5 | 10 | 8 | 23 |
-| conformance | 7 | 7 | 6 | 0 | 20 |
-| dragon | 2 | 3 | 4 | 2 | 11 |
-| navigator | 3 | 7 | 5 | 3 | 18 |
-| **Raw** | **12** | **22** | **25** | **13** | **72** |
-| **Dedup** | **8** | **12** | **14** | **8** | **42** |
+| Role        | HC-BLOCK | HIGH   | MEDIUM | LOW    | Total  |
+| ----------- | -------- | ------ | ------ | ------ | ------ |
+| architect   | 0        | 5      | 10     | 8      | 23     |
+| conformance | 7        | 7      | 6      | 0      | 20     |
+| dragon      | 2        | 3      | 4      | 2      | 11     |
+| navigator   | 3        | 7      | 5      | 3      | 18     |
+| **Raw**     | **12**   | **22** | **25** | **13** | **72** |
+| **Dedup**   | **8**    | **12** | **14** | **8**  | **42** |
 
 ---
 
@@ -75,20 +75,20 @@ CP-5 says "partners can build" but no pulse produces an OpenAPI schema or typed 
 
 ## HIGH Priority (fix before wave start)
 
-| ID | Role | Finding |
-|----|------|---------|
-| H-1 | navigator | Error UX fragmented: PatchError codes (P30), HTTP mapping (P31), human messages (P49) — should be co-designed in P30 |
-| H-2 | navigator | VS Code LSP (P56) in CP-10 but only depends on CP-6 P30 — move diagnostics earlier |
-| H-3 | architect | Workspace parser file sets differ between P1 (compiler readers) and P22 (serve parser) |
-| H-4 | dragon | Onboard (P43) scans input transcript but not generated SOUL.md/MEMORY.md output |
-| H-5 | dragon | No explicit deny-rule-removal validator in P30 for HTTP API (TUI hides toggle, API doesn't) |
-| H-6 | dragon | Trust JWT signing key provenance unspecified in P39 |
-| H-7 | conformance | P-279 (trust JWT) not cited by ID in pulse 39 |
-| H-8 | conformance | CL-10 has no mechanical spec→pulse traceability |
-| H-9 | architect | Pulse 11 (compile host) wires 10 modules but declares only 2 depends_on |
-| H-10 | navigator | Demo fixture workspace defined in P55 (last TUI pulse) — should be earlier |
-| H-11 | dragon | VS Code code actions (P58) could bypass serve validation |
-| H-12 | architect | 4 dependency descriptions reference wrong pulse slugs |
+| ID   | Role        | Finding                                                                                                              |
+| ---- | ----------- | -------------------------------------------------------------------------------------------------------------------- |
+| H-1  | navigator   | Error UX fragmented: PatchError codes (P30), HTTP mapping (P31), human messages (P49) — should be co-designed in P30 |
+| H-2  | navigator   | VS Code LSP (P56) in CP-10 but only depends on CP-6 P30 — move diagnostics earlier                                   |
+| H-3  | architect   | Workspace parser file sets differ between P1 (compiler readers) and P22 (serve parser)                               |
+| H-4  | dragon      | Onboard (P43) scans input transcript but not generated SOUL.md/MEMORY.md output                                      |
+| H-5  | dragon      | No explicit deny-rule-removal validator in P30 for HTTP API (TUI hides toggle, API doesn't)                          |
+| H-6  | dragon      | Trust JWT signing key provenance unspecified in P39                                                                  |
+| H-7  | conformance | P-279 (trust JWT) not cited by ID in pulse 39                                                                        |
+| H-8  | conformance | CL-10 has no mechanical spec→pulse traceability                                                                      |
+| H-9  | architect   | Pulse 11 (compile host) wires 10 modules but declares only 2 depends_on                                              |
+| H-10 | navigator   | Demo fixture workspace defined in P55 (last TUI pulse) — should be earlier                                           |
+| H-11 | dragon      | VS Code code actions (P58) could bypass serve validation                                                             |
+| H-12 | architect   | 4 dependency descriptions reference wrong pulse slugs                                                                |
 
 ---
 

@@ -16,6 +16,7 @@ You can check the minimum Android version supported by looking at the `minSdkVer
 Declare the main components in your layout:
 
 Visual editor
+
 ```XML
 <org.wordpress.aztec.AztecText
     android:id="@+id/visual"
@@ -25,7 +26,9 @@ Visual editor
     android:imeOptions="flagNoExtractUi"
     aztec:historyEnable="false" />
 ```
+
 Source editor
+
 ```XML
 <org.wordpress.aztec.source.SourceViewEditText
     android:id="@+id/source"
@@ -39,6 +42,7 @@ Source editor
 ```
 
 Toolbar
+
 ```XML
 <org.wordpress.aztec.toolbar.AztecToolbar
     android:id="@+id/formatting_toolbar"
@@ -48,6 +52,7 @@ Toolbar
 ```
 
 Inflate the views:
+
 ```kotlin
 val visualEditor = findViewById<AztecText>(R.id.visual)
 val sourceEditor = findViewById<SourceViewEditText>(R.id.source)
@@ -55,6 +60,7 @@ val toolbar = findViewById<AztecToolbar>(R.id.formatting_toolbar)
 ```
 
 Configure Aztec with a provided image & video loaders:
+
 ```kotlin
 Aztec.with(visualEditor, sourceEditor, toolbar, context)
     .setImageGetter(GlideImageLoader(context))
@@ -104,6 +110,7 @@ repositories {
     maven { url "https://a8c-libs.s3.amazonaws.com/android" }
 }
 ```
+
 ```gradle
 dependencies {
     api "org.wordpress:aztec:v1.6.2"
@@ -123,25 +130,27 @@ dependencies {
 
 ## Modifications
 
-You can use the API to modify Aztec behaviour. 
+You can use the API to modify Aztec behaviour.
 
 ### Toolbar items
 
-If you want to limit the functionality the Aztec library provides, you can change it calling the `setToolbarItems` method on `AztecToolbar`. 
+If you want to limit the functionality the Aztec library provides, you can change it calling the `setToolbarItems` method on `AztecToolbar`.
 The following example will enable only `bold`, `plugins` and `list` items in the given order.
 
 ```kotlin
 aztecToolbar.setToolbarItems(ToolbarItems.BasicLayout(ToolbarAction.BOLD, ToolbarItems.PLUGINS, ToolbarAction.LIST))
 ```
 
-You can set new items which are not enabled by default. `ToolbarAction.CODE` and `ToolbarAction.PRE`. 
-- `CODE` represents inline HTML code 
+You can set new items which are not enabled by default. `ToolbarAction.CODE` and `ToolbarAction.PRE`.
+
+- `CODE` represents inline HTML code
 - `PRE` represents a preformat block (including code block)
 
 ### Task list
 
-There is an optional list type you can enable in the editor. In addition to ordered and unordered lists you can use `task list`. 
+There is an optional list type you can enable in the editor. In addition to ordered and unordered lists you can use `task list`.
 A task list is an unordered list which shows and saves checkboxes instead of the bullets. Enable it by calling the following method.
+
 ```kotlin
 aztecToolbar.enableTaskList()
 ```
@@ -150,16 +159,17 @@ aztecToolbar.enableTaskList()
 
 By default Aztec allows nested blocks. In certain cases this doesn't have to be the preferred behaviour. There is an option to disable nested blocks.
 When switched, this editor will always add media and horizontal rule after the currently selected block, not in the middle of it.
+
 ```kotlin
 aztecText.addMediaAfterBlocks()
 ```
 
 ### Placeholder API
 
-Aztec now supports placeholders to draw views which are not natively supported by the EditText and Spannable API. 
-The functionality creates a span in the visual editor and draws an Android view over it. 
+Aztec now supports placeholders to draw views which are not natively supported by the EditText and Spannable API.
+The functionality creates a span in the visual editor and draws an Android view over it.
 The view is moved around when the user changes anything in the editor and allows you to draw things like video that can be played inline in the editor.
-In order to use the API you have to create an instance of `PlaceholderManager` and initialize it in your `onCreate` call like this: 
+In order to use the API you have to create an instance of `PlaceholderManager` and initialize it in your `onCreate` call like this:
 
 ```kotlin
 private lateinit var placeholderManager: PlaceholderManager
@@ -173,10 +183,10 @@ override fun onDestroy() {
 }
 ```
 
-You can create a custom `PlaceholderAdapter` to prepare and draw your view. 
-You can check the sample `ImageWithCaptionAdapter` which draws a simple Android view with an image and a caption. 
+You can create a custom `PlaceholderAdapter` to prepare and draw your view.
+You can check the sample `ImageWithCaptionAdapter` which draws a simple Android view with an image and a caption.
 However, you can implement things like `YouTube` view or `Video` view with playback controls.
-Don't forget to register your `PlaceholderAdapter` like this: 
+Don't forget to register your `PlaceholderAdapter` like this:
 
 ```kotlin
 placeholderManager.registerAdapter(ImageWithCaptionAdapter())
@@ -189,16 +199,15 @@ placeholderManager.insertItem(adapterType, attributes)
 placeholderManager.removeItem(predicate)
 ```
 
-
 ## Code formatting
 
 We use [ktlint](https://github.com/shyiko/ktlint) for Kotlin linting. You can run ktlint using `./gradlew ktlint`, and you can also run `./gradlew ktlintFormat` for auto-formatting. There is no IDEA plugin (like Checkstyle's) at this time.
 
 ## Reference
 
-* [Spans, a Powerful Concept](http://flavienlaurent.com/blog/2014/01/31/spans/ "Spans, a Powerful Concept.").
-* [Spanned, Android Reference Documentation](http://developer.android.com/reference/android/text/Spanned.html "Spanned | Android Developers").
-* Aztec was inspired by [Knife](https://github.com/mthli/Knife).
+- [Spans, a Powerful Concept](http://flavienlaurent.com/blog/2014/01/31/spans/ "Spans, a Powerful Concept.").
+- [Spanned, Android Reference Documentation](http://developer.android.com/reference/android/text/Spanned.html "Spanned | Android Developers").
+- Aztec was inspired by [Knife](https://github.com/mthli/Knife).
 
 ## License
 

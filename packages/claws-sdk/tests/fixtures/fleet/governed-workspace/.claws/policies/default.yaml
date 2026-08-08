@@ -1,5 +1,0 @@
-name: default
-version: 1
-rules:
-  - deny: shell_exec
-  - require: approval_for_deploy

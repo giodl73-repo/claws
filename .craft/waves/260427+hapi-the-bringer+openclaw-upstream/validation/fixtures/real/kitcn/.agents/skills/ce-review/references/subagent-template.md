@@ -68,12 +68,12 @@ Diff:
 
 ## Variable Reference
 
-| Variable | Source | Description |
-|----------|--------|-------------|
-| `{persona_file}` | Agent markdown file content | The full persona definition (identity, failure modes, calibration, suppress conditions) |
-| `{diff_scope_rules}` | `references/diff-scope.md` content | Primary/secondary/pre-existing tier rules |
-| `{schema}` | `references/findings-schema.json` content | The JSON schema reviewers must conform to |
-| `{intent_summary}` | Stage 2 output | 2-3 line description of what the change is trying to accomplish |
-| `{pr_metadata}` | Stage 1 output | PR title, body, and URL when reviewing a PR. Empty string when reviewing a branch or standalone checkout |
-| `{file_list}` | Stage 1 output | List of changed files from the scope step |
-| `{diff}` | Stage 1 output | The actual diff content to review |
+| Variable             | Source                                    | Description                                                                                              |
+| -------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `{persona_file}`     | Agent markdown file content               | The full persona definition (identity, failure modes, calibration, suppress conditions)                  |
+| `{diff_scope_rules}` | `references/diff-scope.md` content        | Primary/secondary/pre-existing tier rules                                                                |
+| `{schema}`           | `references/findings-schema.json` content | The JSON schema reviewers must conform to                                                                |
+| `{intent_summary}`   | Stage 2 output                            | 2-3 line description of what the change is trying to accomplish                                          |
+| `{pr_metadata}`      | Stage 1 output                            | PR title, body, and URL when reviewing a PR. Empty string when reviewing a branch or standalone checkout |
+| `{file_list}`        | Stage 1 output                            | List of changed files from the scope step                                                                |
+| `{diff}`             | Stage 1 output                            | The actual diff content to review                                                                        |

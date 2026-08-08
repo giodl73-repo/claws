@@ -10,14 +10,14 @@
 
 ## Lens Checklist Application
 
-| Lens Question | Verdict | Details |
-|---|---|---|
-| Can `claws comply soc2` generate a complete SOC2 evidence package? | N/A | Not in CP-2 scope (CP-3+), but SOC2 template lays groundwork |
-| Is the audit chain HMAC-signed and tamper-evident? | **PARTIAL** | Signer exists in compliance/artifact-signer.ts but bypass.ts writes UNSIGNED JSON lines |
-| Can `claws audit verify` prove chain integrity? | **PARTIAL** | verifyAuditEntry exists but bypass events skip it entirely |
-| Does compliance report include what/when/policy-version/result? | **PARTIAL** | bypass.ts records type+timestamp+env but omits actor, policyVersion, ruleId |
-| Can artifact be handed to Big 4 auditor? | **NO** | Bypass audit entries lack required fields; amendment records lack signing |
-| Does EU AI Act risk classification match Article 6 categories? | **YES** | Template correctly maps unacceptable/high-risk/limited-risk/minimal-risk per Article 6 |
+| Lens Question                                                      | Verdict     | Details                                                                                 |
+| ------------------------------------------------------------------ | ----------- | --------------------------------------------------------------------------------------- |
+| Can `claws comply soc2` generate a complete SOC2 evidence package? | N/A         | Not in CP-2 scope (CP-3+), but SOC2 template lays groundwork                            |
+| Is the audit chain HMAC-signed and tamper-evident?                 | **PARTIAL** | Signer exists in compliance/artifact-signer.ts but bypass.ts writes UNSIGNED JSON lines |
+| Can `claws audit verify` prove chain integrity?                    | **PARTIAL** | verifyAuditEntry exists but bypass events skip it entirely                              |
+| Does compliance report include what/when/policy-version/result?    | **PARTIAL** | bypass.ts records type+timestamp+env but omits actor, policyVersion, ruleId             |
+| Can artifact be handed to Big 4 auditor?                           | **NO**      | Bypass audit entries lack required fields; amendment records lack signing               |
+| Does EU AI Act risk classification match Article 6 categories?     | **YES**     | Template correctly maps unacceptable/high-risk/limited-risk/minimal-risk per Article 6  |
 
 ---
 
@@ -34,13 +34,14 @@
 
 **File**: `claws-sdk/src/init/bypass.ts:97-101`
 **What**: The bypass event object contains only `{type, timestamp, env}`. It is missing:
+
 - `actor` — WHO activated the bypass (process user, CI pipeline, etc.)
 - `policyVersion` — which policy version was active when bypass was engaged
 - `ruleId` — no rule identifier for audit trail correlation
 - `outcome` — no explicit allow/deny outcome
 - `target` — no workspace identification
-**Impact**: HIPAA audit_mandatory policy (template) requires `require_signed: true` for policy_change events. A bypass IS a policy change. The system's own HIPAA template mandates fields that the bypass implementation doesn't produce. This is an internal consistency failure — the templates promise more than the implementation delivers.
-**Fix**: Extend bypass event to include all `AuditChainEntry` fields, or at minimum actor, policyVersion, target, outcome, and ruleId.
+  **Impact**: HIPAA audit_mandatory policy (template) requires `require_signed: true` for policy_change events. A bypass IS a policy change. The system's own HIPAA template mandates fields that the bypass implementation doesn't produce. This is an internal consistency failure — the templates promise more than the implementation delivers.
+  **Fix**: Extend bypass event to include all `AuditChainEntry` fields, or at minimum actor, policyVersion, target, outcome, and ruleId.
 
 ### M-03: Uninstall does not record an audit event before archiving [M]
 
@@ -120,11 +121,11 @@
 
 ## Summary
 
-| Severity | Count | Key themes |
-|---|---|---|
-| **Major** | 4 | Unsigned audit events (bypass, uninstall, amendment); missing audit fields |
-| **Warning** | 5 | Template/doctor schema mismatch; denied bypass not logged; EU AI Act Art. 9 gap |
-| **Note** | 4 | Non-canonical event shapes; config override ordering; positive content-hash finding |
+| Severity    | Count | Key themes                                                                          |
+| ----------- | ----- | ----------------------------------------------------------------------------------- |
+| **Major**   | 4     | Unsigned audit events (bypass, uninstall, amendment); missing audit fields          |
+| **Warning** | 5     | Template/doctor schema mismatch; denied bypass not logged; EU AI Act Art. 9 gap     |
+| **Note**    | 4     | Non-canonical event shapes; config override ordering; positive content-hash finding |
 
 ### Compliance Verdict
 

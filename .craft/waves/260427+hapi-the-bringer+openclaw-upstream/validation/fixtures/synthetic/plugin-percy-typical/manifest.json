@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "percy plugin (testing)",
   "contributes": {
-    "tools": [
-      "percy/snapshot"
-    ],
-    "skills": [
-      "percy/snapshot"
-    ]
+    "tools": ["percy/snapshot"],
+    "skills": ["percy/snapshot"]
   }
 }

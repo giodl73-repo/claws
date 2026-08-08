@@ -6,6 +6,7 @@ trust: composition
 # compo-finance-stack
 
 Composition workspace bringing together 2 plugin(s):
+
 - `plugins/stripe/`
 - `plugins/ordercli/`
 

@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Cycle prevention**: madge must scan .ts source (not .js output), CI must detect new inter-package edges (not just cycles), ban or declare dynamic cross-package imports
 - **Diamond dedup**: platform manifest must be single source of truth for version pins across layers, all packages must use consistent dep type (peer vs regular) for shared packages, EmitRegistry must detect and fail on duplicate instances
 - **Pipeline equivalence**: document every normalization pass forma applies that WorkspaceReader must replicate, hash equivalence test against compiler-sdk crypto module, define expected-change zones vs invariant zones in emit output

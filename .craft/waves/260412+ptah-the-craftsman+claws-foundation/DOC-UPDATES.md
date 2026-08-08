@@ -11,19 +11,19 @@ Plans: 11 (claws-sdk-bootstrap, claws-governance-ir, claws-detect, claws-parse, 
 
 ### Plans in Scope
 
-| Plan | Status | Atoms |
-|------|--------|-------|
-| claws-sdk-bootstrap | Implemented | atom:claws-sdk |
-| claws-governance-ir | Implemented | atom:governance-ir, atom:capability-manifest, atom:mechanical-intent, atom:fail-mode |
-| claws-detect | Implemented | atom:claws-compiler, atom:platform-detection, atom:marker-files, atom:multi-platform |
-| claws-parse | Implemented | atom:claws-compiler, atom:mechanical-intent, atom:capability-manifest, atom:lossless-roundtrip |
-| claws-rules | Implemented | atom:tool-classification, atom:obo-boundary, atom:a2a-governance, atom:elicitation-gate, atom:injection-defense |
-| claws-emit | Implemented | atom:governance-plugin, atom:governance-skill, atom:three-engine-model, atom:workflow-inversion |
-| claws-cli-foundation | Implemented | atom:pinch, atom:claws-init, atom:progressive-disclosure, atom:claws-json, atom:error-contract |
-| claws-skill-kit | Implemented | atom:skill-kit, atom:tier-adoption |
-| claws-test-framework | Implemented | atom:claws-test, atom:cicd-pipeline |
-| claws-public-naming | Implemented | C01, C30, C40, C50 |
-| claws-acceptance-harness | Active | atom:claws-test, atom:scenario-runner, atom:governance-ir |
+| Plan                     | Status      | Atoms                                                                                                           |
+| ------------------------ | ----------- | --------------------------------------------------------------------------------------------------------------- |
+| claws-sdk-bootstrap      | Implemented | atom:claws-sdk                                                                                                  |
+| claws-governance-ir      | Implemented | atom:governance-ir, atom:capability-manifest, atom:mechanical-intent, atom:fail-mode                            |
+| claws-detect             | Implemented | atom:claws-compiler, atom:platform-detection, atom:marker-files, atom:multi-platform                            |
+| claws-parse              | Implemented | atom:claws-compiler, atom:mechanical-intent, atom:capability-manifest, atom:lossless-roundtrip                  |
+| claws-rules              | Implemented | atom:tool-classification, atom:obo-boundary, atom:a2a-governance, atom:elicitation-gate, atom:injection-defense |
+| claws-emit               | Implemented | atom:governance-plugin, atom:governance-skill, atom:three-engine-model, atom:workflow-inversion                 |
+| claws-cli-foundation     | Implemented | atom:pinch, atom:claws-init, atom:progressive-disclosure, atom:claws-json, atom:error-contract                  |
+| claws-skill-kit          | Implemented | atom:skill-kit, atom:tier-adoption                                                                              |
+| claws-test-framework     | Implemented | atom:claws-test, atom:cicd-pipeline                                                                             |
+| claws-public-naming      | Implemented | C01, C30, C40, C50                                                                                              |
+| claws-acceptance-harness | Active      | atom:claws-test, atom:scenario-runner, atom:governance-ir                                                       |
 
 ### Areas Touched
 
@@ -46,17 +46,17 @@ The `design/claws/ATOMS.md` registry contains 62 atoms across 10 layers. All ato
 
 ### Atoms Touched by Implementation
 
-| Atom | ID | Authority Updated? | Mirrors Consistent? | Notes |
-|------|----|--------------------|---------------------|-------|
-| atom:governance-ir | C02 | N/A (spec is authority) | Yes | GovernanceIR implemented in claws-sdk/src/ir/ |
-| atom:capability-manifest | C03 | N/A | Yes | Implemented in claws-sdk/src/ir/ |
-| atom:mechanical-intent | C04 | N/A | Yes | Implemented in claws-sdk/src/ir/ |
-| atom:tool-classification | C10 | N/A | Yes | Rules in claws-sdk/src/governance/rules/ |
-| atom:governance-plugin | C20 | N/A | Yes | Emitter in claws-sdk/src/emit/ |
-| atom:governance-skill | C21 | N/A | Yes | Emitter in claws-sdk/src/emit/ |
-| atom:claws-sdk | C50 | N/A | Yes | Package bootstrapped |
-| atom:skill-kit | C41 | N/A | Yes | Standalone package concept |
-| atom:claws-test | C90 | N/A | Yes | Test framework implemented |
+| Atom                     | ID  | Authority Updated?      | Mirrors Consistent? | Notes                                         |
+| ------------------------ | --- | ----------------------- | ------------------- | --------------------------------------------- |
+| atom:governance-ir       | C02 | N/A (spec is authority) | Yes                 | GovernanceIR implemented in claws-sdk/src/ir/ |
+| atom:capability-manifest | C03 | N/A                     | Yes                 | Implemented in claws-sdk/src/ir/              |
+| atom:mechanical-intent   | C04 | N/A                     | Yes                 | Implemented in claws-sdk/src/ir/              |
+| atom:tool-classification | C10 | N/A                     | Yes                 | Rules in claws-sdk/src/governance/rules/      |
+| atom:governance-plugin   | C20 | N/A                     | Yes                 | Emitter in claws-sdk/src/emit/                |
+| atom:governance-skill    | C21 | N/A                     | Yes                 | Emitter in claws-sdk/src/emit/                |
+| atom:claws-sdk           | C50 | N/A                     | Yes                 | Package bootstrapped                          |
+| atom:skill-kit           | C41 | N/A                     | Yes                 | Standalone package concept                    |
+| atom:claws-test          | C90 | N/A                     | Yes                 | Test framework implemented                    |
 
 ### No New Atoms Required
 
@@ -66,13 +66,13 @@ All concepts implemented in Ptah were already registered in ATOMS.md during the 
 
 ## Phase 3: Count Reconciliation
 
-| Metric | Before Ptah | After Ptah | Authority | All Mirrors Updated? |
-|--------|-------------|------------|-----------|---------------------|
-| claws Specs | 7 (CL-01..CL-07) | 12 (CL-01..CL-12) | design/claws/SPECS.md | **NO** — design/claws/CLAUDE.md says "7 specs" |
-| claws Concept Guides | 89 | 89 | docs/claws/concepts/README.md | Yes |
-| claws Atoms | 62 | 62 | design/claws/ATOMS.md | Yes |
-| claws Plans (total) | 35 | 35 | .craft/PLANS.md | Yes |
-| Packages in monorepo | 9 | 11 | CODEBASE.md | **NO** — CODEBASE.md says "Nine-Package" |
+| Metric               | Before Ptah      | After Ptah        | Authority                     | All Mirrors Updated?                           |
+| -------------------- | ---------------- | ----------------- | ----------------------------- | ---------------------------------------------- |
+| claws Specs          | 7 (CL-01..CL-07) | 12 (CL-01..CL-12) | design/claws/SPECS.md         | **NO** — design/claws/CLAUDE.md says "7 specs" |
+| claws Concept Guides | 89               | 89                | docs/claws/concepts/README.md | Yes                                            |
+| claws Atoms          | 62               | 62                | design/claws/ATOMS.md         | Yes                                            |
+| claws Plans (total)  | 35               | 35                | .craft/PLANS.md               | Yes                                            |
+| Packages in monorepo | 9                | 11                | CODEBASE.md                   | **NO** — CODEBASE.md says "Nine-Package"       |
 
 ### Drifts Found
 
@@ -85,13 +85,13 @@ All concepts implemented in Ptah were already registered in ATOMS.md during the 
 
 ## Phase 4: Design Doc Sync
 
-| Design Doc | Checked? | Updated? | Notes |
-|------------|----------|----------|-------|
-| design/claws/SPECS.md | Yes | No | Already at v1.1 with 12 specs — correct |
-| design/claws/ATOMS.md | Yes | No | 62 atoms, all layers present — correct |
-| design/claws/CLAUDE.md | Yes | **Needs update** | Stale status table, spec count, phase map |
-| design/claws/COMMAND-MAP.md | Yes | No | 40 commands — not affected by Ptah |
-| design/claws/PITFALLS.md | Yes | No | 50 pitfalls — not affected by Ptah |
+| Design Doc                  | Checked? | Updated?         | Notes                                     |
+| --------------------------- | -------- | ---------------- | ----------------------------------------- |
+| design/claws/SPECS.md       | Yes      | No               | Already at v1.1 with 12 specs — correct   |
+| design/claws/ATOMS.md       | Yes      | No               | 62 atoms, all layers present — correct    |
+| design/claws/CLAUDE.md      | Yes      | **Needs update** | Stale status table, spec count, phase map |
+| design/claws/COMMAND-MAP.md | Yes      | No               | 40 commands — not affected by Ptah        |
+| design/claws/PITFALLS.md    | Yes      | No               | 50 pitfalls — not affected by Ptah        |
 
 ---
 
@@ -115,10 +115,10 @@ No missing concept guides identified for Ptah scope. All implemented atoms (Gove
 
 ### CORPUS.md
 
-| Check | Status | Notes |
-|-------|--------|-------|
-| claws design area listed | Yes | Line 263: `claws | design/claws/ (CL specs) | docs/claws/ (concepts, how-to)` |
-| Surface count accurate | N/A | No count claim in CORPUS for claws specifically |
+| Check                    | Status | Notes                                           |
+| ------------------------ | ------ | ----------------------------------------------- |
+| claws design area listed | Yes    | Line 263: `claws                                | design/claws/ (CL specs) | docs/claws/ (concepts, how-to)` |
+| Surface count accurate   | N/A    | No count claim in CORPUS for claws specifically |
 
 ### Concept README
 
@@ -190,11 +190,11 @@ No Implementation Validation Checklists found in design/claws/specs/. This is ex
 
 ## New Stale Items
 
-| Item | Issue | Severity | Fix |
-|------|-------|----------|-----|
-| design/claws/CLAUDE.md | Spec count says 7, actual 12 | Medium | Fix in this sync |
-| design/claws/CLAUDE.md | Implementation status stale | Medium | Fix in this sync |
-| CODEBASE.md | Missing claws-sdk + claws-cli | High | Fix in this sync |
-| WAVES.md | Missing Ptah wave | Medium | Fix in this sync |
-| PHASES.md | Missing Phase 50 | Medium | Fix in this sync |
-| PLANS.md | claws-acceptance-harness Active, no plan file | Low | Flag for review |
+| Item                   | Issue                                         | Severity | Fix              |
+| ---------------------- | --------------------------------------------- | -------- | ---------------- |
+| design/claws/CLAUDE.md | Spec count says 7, actual 12                  | Medium   | Fix in this sync |
+| design/claws/CLAUDE.md | Implementation status stale                   | Medium   | Fix in this sync |
+| CODEBASE.md            | Missing claws-sdk + claws-cli                 | High     | Fix in this sync |
+| WAVES.md               | Missing Ptah wave                             | Medium   | Fix in this sync |
+| PHASES.md              | Missing Phase 50                              | Medium   | Fix in this sync |
+| PLANS.md               | claws-acceptance-harness Active, no plan file | Low      | Flag for review  |

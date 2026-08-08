@@ -41,6 +41,7 @@ This is the CP-3 gate pulse. All package extraction (10 core + 7 emitters = 17 p
 ## Deliverables
 
 For each of the 7 emitter plugins:
+
 - [ ] `packages/@craftworks/emit-{platform}/package.json` -- Correct name, version 1.0.0, dependency on `@craftworks/codegen`, exports map, engines node >=18. Small install footprint (~300-500 lines per emitter).
 - [ ] `packages/@craftworks/emit-{platform}/src/index.ts` -- Platform emitter implementation moved from compiler-sdk/src/emit/platforms/{platform}/.
 - [ ] `packages/@craftworks/emit-{platform}/tsconfig.json` -- Strict TypeScript, project reference to @craftworks/codegen.
@@ -48,11 +49,13 @@ For each of the 7 emitter plugins:
 - [ ] Source + tests moved from compiler-sdk emit/platforms/ to packages.
 
 Integration:
+
 - [ ] `compiler-sdk/package.json` (EDIT) -- Add all 7 emitter packages as dependencies for backward compat.
 - [ ] `compiler-sdk/src/emit/index.ts` (EDIT) -- Re-export from emitter packages instead of local implementations.
 - [ ] `packages/@craftworks/codegen/src/registry.ts` (EDIT) -- Platform registry accepts dynamically registered emitters from plugins.
 
 Tests:
+
 - [ ] `packages/@craftworks/emit-oc/tests/oc-emitter.unit.test.ts` -- L0: OC emitter produces valid Gateway plugin output (1 test)
 - [ ] `packages/@craftworks/emit-cc/tests/cc-emitter.unit.test.ts` -- L0: Claude Code emitter produces valid CLAUDE.md + settings.json (1 test)
 - [ ] `packages/@craftworks/emit-cursor/tests/cursor-emitter.unit.test.ts` -- L0: Cursor emitter produces valid .cursorrules (1 test)
@@ -79,6 +82,7 @@ Tests:
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- monorepo structure, plugin extraction patterns, backward compatibility
 - `.craft/roles/claws/platform-eng.md` -- emitter plugin architecture, platform registry, cherry-pick install model
 

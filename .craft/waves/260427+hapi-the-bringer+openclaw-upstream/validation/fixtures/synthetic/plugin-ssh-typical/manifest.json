@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "ssh plugin (system)",
   "contributes": {
-    "tools": [
-      "ssh/exec-remote",
-      "ssh/copy-file"
-    ],
-    "skills": [
-      "ssh/exec-remote",
-      "ssh/copy-file"
-    ]
+    "tools": ["ssh/exec-remote", "ssh/copy-file"],
+    "skills": ["ssh/exec-remote", "ssh/copy-file"]
   }
 }

@@ -69,6 +69,7 @@ Startup health check: when claws-serve starts, it performs a full compilation to
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — CP gate criteria, rollback patterns, health check design
 - `.craft/roles/claws/platform-eng.md` — server lifecycle, degraded mode implementation
 - `.craft/roles/claws/ciso.md` — rollback audit requirements, degraded mode security posture

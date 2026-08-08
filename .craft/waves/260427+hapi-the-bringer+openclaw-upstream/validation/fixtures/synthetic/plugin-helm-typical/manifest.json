@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "helm plugin (infra)",
   "contributes": {
-    "tools": [
-      "helm/list",
-      "helm/install"
-    ],
-    "skills": [
-      "helm/list",
-      "helm/install"
-    ]
+    "tools": ["helm/list", "helm/install"],
+    "skills": ["helm/list", "helm/install"]
   }
 }

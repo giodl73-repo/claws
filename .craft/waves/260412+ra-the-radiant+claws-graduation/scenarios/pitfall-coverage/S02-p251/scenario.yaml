@@ -15,7 +15,10 @@ expect:
   prevention: "`claws check --package` audits all import paths (static and dynamic) against the package's declared dependencies. `import()` expressions are scanned alongside static imports."
 
 simulate:
-  failures: ["Internal import paths referencing compiler-sdk modules survive extraction and cause MODULE_NOT_FOUND at runtime"]
+  failures:
+    [
+      "Internal import paths referencing compiler-sdk modules survive extraction and cause MODULE_NOT_FOUND at runtime",
+    ]
   halt: null
   budget: null
 

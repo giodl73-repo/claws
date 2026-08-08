@@ -118,6 +118,7 @@ npm run build
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/gateway-eng.md` — OC integration, plugin conventions, hook API
 - `.craft/roles/craft/codegen.md` — code generation patterns, template rendering, output validation
 - `.craft/roles/craft/dragon.md` — security review, catch clause hardening, fail-closed enforcement
@@ -125,15 +126,18 @@ Load these role files before starting:
 ## Review Amendments (R1)
 
 ### C11: Frozen OC Type Snapshot
+
 - [ ] Add frozen OC Gateway type definitions (.d.ts) in test fixtures
 - [ ] Structural assignability test: `GovernanceHost extends OCGatewayPluginApi`
 - [ ] If OC Gateway updates plugin interface, this test breaks immediately
 
 ### Dragon: Injection Guard in Generated Code
+
 - [ ] Add acceptance test: generated plugin output MUST contain system-prompt boundary markers
 - [ ] Guardrail Sandwich: governance preamble before AND after user content in assembled context
 - [ ] Verify generated catch clause has explicit null toolName guard
 
 ### Gateway-Eng: Latency Budget Test
+
 - [ ] Add L1 perf test: 1000 before_tool_call evaluations, p99 < 50ms
 - [ ] No dynamic allocation in hot path — ReadonlyMap only

@@ -6,6 +6,7 @@ trust: composition
 # compo-pdf-stack
 
 Composition workspace bringing together 2 plugin(s):
+
 - `plugins/nano-pdf/`
 - `plugins/whisper/`
 

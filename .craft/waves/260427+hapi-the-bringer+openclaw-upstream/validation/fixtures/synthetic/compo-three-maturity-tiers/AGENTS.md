@@ -6,6 +6,7 @@ trust: composition
 # compo-three-maturity-tiers
 
 Composition workspace bringing together 3 plugin(s):
+
 - `plugins/minimal/`
 - `plugins/typical/`
 - `plugins/rich/`

@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Ed25519 compliance**: must use standard Ed25519 (RFC 8032), not ctx/ph variants; RFC 8032 Section 7.1 test vector validation required
 - **Key format**: raw 32-byte seed (private) + 32-byte public, base64 standard RFC 4648 with padding, import accepts seed-only and derives public key
 - **API strictness**: sign() and verify() accept Buffer only (not strings), no message normalization in sign/verify (caller responsibility), empty message signing must work per RFC 8032

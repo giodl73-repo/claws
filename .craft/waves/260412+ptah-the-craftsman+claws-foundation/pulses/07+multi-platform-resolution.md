@@ -4,7 +4,8 @@ slug: multi-platform-resolution
 plan: claws-detect
 depends_on: [6]
 governing_roles: [claws:platform-eng, craft:navigator]
-scenario_codes: [detect/multi-platform-resolve, detect/multi-platform-ambiguous, detect/case-sensitive-linux]
+scenario_codes:
+  [detect/multi-platform-resolve, detect/multi-platform-ambiguous, detect/case-sensitive-linux]
 stage: implementation
 test_tiers:
   L0_unit: 5
@@ -74,10 +75,10 @@ emission format.
 
 ## Governing Roles
 
-| Role | File | Focus |
-|------|------|-------|
+| Role               | File                                 | Focus                                                                                 |
+| ------------------ | ------------------------------------ | ------------------------------------------------------------------------------------- |
 | claws:platform-eng | `.craft/roles/claws/platform-eng.md` | Enforcement precedence correctness, ambiguity rejection UX, config override semantics |
-| craft:navigator | `.craft/roles/craft/navigator.md` | Resolution → parse pipeline threading, PlatformTarget propagation downstream |
+| craft:navigator    | `.craft/roles/craft/navigator.md`    | Resolution → parse pipeline threading, PlatformTarget propagation downstream          |
 
 ## Dependencies
 

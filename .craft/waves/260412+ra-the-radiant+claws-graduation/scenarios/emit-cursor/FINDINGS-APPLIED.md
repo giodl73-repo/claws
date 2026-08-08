@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **MDC output**: mandatory MDC frontmatter field mapping from IR, default activation strategy when IR lacks file scope, MDC file naming conventions
 - **File management**: managed vs user file separation in .cursor/rules/, rule consolidation threshold for large governance sets, generation report for rule-to-file mapping
 - **Zero-import enforcement**: type references must become natural language, code examples must use platform-native imports, user-friendly descriptions in MDC frontmatter

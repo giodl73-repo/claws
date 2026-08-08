@@ -6,6 +6,7 @@ trust: composition
 # compo-infra-pipeline
 
 Composition workspace bringing together 3 plugin(s):
+
 - `plugins/terraform/`
 - `plugins/kubernetes/`
 - `plugins/helm/`

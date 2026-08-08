@@ -20,6 +20,7 @@ Read `.claude/rules/code-review.md` to load the full review checklist (9 categor
 ### 2. Get the diff
 
 Run `git diff --name-only` (unstaged) and `git diff --cached --name-only` (staged) to get the list of changed files. If neither has changes, detect the base branch dynamically:
+
 - Try: `git rev-parse --abbrev-ref HEAD@{upstream} 2>/dev/null`
 - Fallback: `git remote show origin | sed -n 's/.*HEAD branch: //p'`
 - Then: `git diff --name-only <base>...HEAD`

@@ -19,12 +19,12 @@ note: 5
 
 ## Panel
 
-| Role | Focus Area | Verdict |
-|------|-----------|---------|
-| claws:ciso | Key management security, ceremony integrity, signing chain | conditional-pass |
+| Role               | Focus Area                                                 | Verdict          |
+| ------------------ | ---------------------------------------------------------- | ---------------- |
+| claws:ciso         | Key management security, ceremony integrity, signing chain | conditional-pass |
 | claws:skill-author | Scaffold experience, annotation accuracy, publish workflow | conditional-pass |
-| craft:architect | Shamir dependency, package boundaries, atomicity design | conditional-pass |
-| claws:founder | Community adoption, publish trust model, badge credibility | conditional-pass |
+| craft:architect    | Shamir dependency, package boundaries, atomicity design    | conditional-pass |
+| claws:founder      | Community adoption, publish trust model, badge credibility | conditional-pass |
 
 All four reviewers issued conditional-pass. Five Major findings require pulse edits before implementation.
 
@@ -40,12 +40,12 @@ All four reviewers issued conditional-pass. Five Major findings require pulse ed
 
 Every pulse invents its own directory structure that contradicts the authoritative plan paths:
 
-| Domain | Plan (authoritative) | Pulse (divergent) |
-|--------|---------------------|-------------------|
-| Keys | `claws-sdk/src/protect/` | `claws-sdk/src/keys/` |
-| Scaffold | `claws-sdk/src/maker/` | `claws-sdk/src/scaffold/` |
-| Annotate | `claws-sdk/src/maker/` | `claws-sdk/src/annotate/` |
-| Publish | `claws-sdk/src/maker/` | `claws-sdk/src/publish/` |
+| Domain   | Plan (authoritative)     | Pulse (divergent)         |
+| -------- | ------------------------ | ------------------------- |
+| Keys     | `claws-sdk/src/protect/` | `claws-sdk/src/keys/`     |
+| Scaffold | `claws-sdk/src/maker/`   | `claws-sdk/src/scaffold/` |
+| Annotate | `claws-sdk/src/maker/`   | `claws-sdk/src/annotate/` |
+| Publish  | `claws-sdk/src/maker/`   | `claws-sdk/src/publish/`  |
 
 If agents implement from pulses, they will create 4 orphan directories that don't match the plan's module structure. The `maker/` grouping in the scaffold/annotate/publish plans is intentional -- these are all maker-experience commands that share types and utilities. The `protect/` grouping for keys is aligned with `claws-protect` (vault) adjacency.
 
@@ -59,12 +59,12 @@ If agents implement from pulses, they will create 4 orphan directories that don'
 
 CP-4 exit criteria require `L2: 8+` and `L3: 3+` tests. Actual pulse allocations:
 
-| Tier | CP-4 Target | Sum of Pulses | Deficit |
-|------|-------------|---------------|---------|
-| L0 | 52+ | 52 | 0 (exact) |
-| L1 | 17+ | 17 | 0 (exact) |
-| L2 | 8+ | 4 | **-4** |
-| L3 | 3+ | 1 | **-2** |
+| Tier | CP-4 Target | Sum of Pulses | Deficit   |
+| ---- | ----------- | ------------- | --------- |
+| L0   | 52+         | 52            | 0 (exact) |
+| L1   | 17+         | 17            | 0 (exact) |
+| L2   | 8+          | 4             | **-4**    |
+| L3   | 3+          | 1             | **-2**    |
 
 L2 e2e tests are only in pulses 29, 33, 34, and 35 (1 each). L3 acceptance tests are only in pulse 35 (1 test). Four L2 tests and two L3 tests are missing from any pulse. This means either the CP exit criteria are wrong or pulses need more tests.
 

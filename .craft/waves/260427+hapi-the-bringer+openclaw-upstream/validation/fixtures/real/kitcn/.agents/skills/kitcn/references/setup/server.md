@@ -7,14 +7,7 @@ For production bootstrap, start in the CLI Registry: use `npx kitcn@latest init 
 **Create:** `convex/functions/schema.ts`
 
 ```ts
-import {
-  boolean,
-  convexTable,
-  defineSchema,
-  index,
-  text,
-  timestamp,
-} from "kitcn/orm";
+import { boolean, convexTable, defineSchema, index, text, timestamp } from "kitcn/orm";
 
 export const user = convexTable(
   "user",
@@ -30,7 +23,7 @@ export const user = convexTable(
     banReason: text(),
     banExpires: timestamp(),
   },
-  (t) => [index("email").on(t.email)]
+  (t) => [index("email").on(t.email)],
 );
 
 export const session = convexTable(
@@ -47,7 +40,7 @@ export const session = convexTable(
     userAgent: text(),
     impersonatedBy: text(),
   },
-  (t) => [index("token").on(t.token), index("userId").on(t.userId)]
+  (t) => [index("token").on(t.token), index("userId").on(t.userId)],
 );
 
 export const account = convexTable(
@@ -68,7 +61,7 @@ export const account = convexTable(
     createdAt: timestamp().notNull().defaultNow(),
     updatedAt: timestamp().notNull(),
   },
-  (t) => [index("accountId").on(t.accountId), index("userId").on(t.userId)]
+  (t) => [index("accountId").on(t.accountId), index("userId").on(t.userId)],
 );
 
 export const verification = convexTable(
@@ -80,7 +73,7 @@ export const verification = convexTable(
     createdAt: timestamp().notNull().defaultNow(),
     updatedAt: timestamp().notNull(),
   },
-  (t) => [index("identifier").on(t.identifier)]
+  (t) => [index("identifier").on(t.identifier)],
 );
 
 export const jwks = convexTable("jwks", {
@@ -99,7 +92,7 @@ export const project = convexTable(
     createdAt: timestamp().notNull().defaultNow(),
     updatedAt: timestamp().notNull(),
   },
-  (t) => [index("ownerId_updatedAt").on(t.ownerId, t.updatedAt)]
+  (t) => [index("ownerId_updatedAt").on(t.ownerId, t.updatedAt)],
 );
 
 export const tables = { user, session, account, verification, jwks, project };
@@ -289,7 +282,7 @@ export const secret = convexTable.withRLS(
       for: "select",
       using: (ctx) => eq(t.ownerId, ctx.viewerId),
     }),
-  ]
+  ],
 );
 ```
 
@@ -323,17 +316,15 @@ Declare `aggregateIndex` and/or `rankIndex` in table definitions. Backfill runs 
 const postLikes = convexTable(
   "postLikes",
   { postId: text().notNull(), userId: text().notNull() },
-  (t) => [aggregateIndex("by_post").on(t.postId)]
+  (t) => [aggregateIndex("by_post").on(t.postId)],
 );
 
 const scores = convexTable(
   "scores",
   { gameId: text().notNull(), score: integer().notNull() },
   (t) => [
-    rankIndex("leaderboard")
-      .partitionBy(t.gameId)
-      .orderBy({ column: t.score, direction: "desc" }),
-  ]
+    rankIndex("leaderboard").partitionBy(t.gameId).orderBy({ column: t.score, direction: "desc" }),
+  ],
 );
 ```
 
@@ -413,16 +404,10 @@ export const ratelimit = RatelimitPlugin.configure({
   buckets: ratelimitBuckets,
   getBucket: ({ meta }: { meta: RatelimitMeta }) => meta.ratelimit ?? "default",
   getUser: ({ ctx }: { ctx: RatelimitCtx }) => ctx.user ?? null,
-  getIdentifier: ({ user }: { user: RatelimitUser | null }) =>
-    user?.id ?? "anonymous",
+  getIdentifier: ({ user }: { user: RatelimitUser | null }) => user?.id ?? "anonymous",
   getTier: getUserTier,
-  getSignals: ({
-    ctx,
-    user,
-  }: {
-    ctx: RatelimitCtx;
-    user: RatelimitUser | null;
-  }) => getSessionNetworkSignals(ctx, user?.session ?? null),
+  getSignals: ({ ctx, user }: { ctx: RatelimitCtx; user: RatelimitUser | null }) =>
+    getSessionNetworkSignals(ctx, user?.session ?? null),
   prefix: ({ bucket, tier }) => `ratelimit:${bucket}:${tier}`,
   failureMode: "closed",
   enableProtection: true,

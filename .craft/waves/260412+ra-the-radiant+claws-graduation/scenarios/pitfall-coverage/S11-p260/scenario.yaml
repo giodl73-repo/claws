@@ -15,7 +15,8 @@ expect:
   prevention: "`claws broadcast` uses `--save-exact` to prevent cascade upgrades of shared dependencies. Per-workspace lock acquired before modification. Parallel flag with configurable concurrency."
 
 simulate:
-  failures: ["Targeted emitter upgrade cascades shared dependency upgrades to all emitters in workspace"]
+  failures:
+    ["Targeted emitter upgrade cascades shared dependency upgrades to all emitters in workspace"]
   halt: null
   budget: null
 

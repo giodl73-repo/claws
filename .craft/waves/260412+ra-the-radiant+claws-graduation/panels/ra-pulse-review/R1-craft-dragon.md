@@ -50,7 +50,7 @@ This is the same UX lie as D-01: the read path tells users they can edit, the wr
 **Pulses**: 43, 30
 **Invariant**: Secret scanning must happen before any file write.
 
-Pulse 43 specifies three validation layers (secret scanner, size limit, injection defense) but the flow is: "accepts transcript -> validates -> extracts structured data -> generates SOUL.md + MEMORY.md seeds -> writes to workspace -> triggers initial compile." The validation is on the *input transcript*, not on the *generated output*. If the extraction/generation step introduces content that looks like a secret (e.g., extracting a base64 connection string from a legitimate transcript passage that passed the input scanner), the generated file would be written without re-scanning.
+Pulse 43 specifies three validation layers (secret scanner, size limit, injection defense) but the flow is: "accepts transcript -> validates -> extracts structured data -> generates SOUL.md + MEMORY.md seeds -> writes to workspace -> triggers initial compile." The validation is on the _input transcript_, not on the _generated output_. If the extraction/generation step introduces content that looks like a secret (e.g., extracting a base64 connection string from a legitimate transcript passage that passed the input scanner), the generated file would be written without re-scanning.
 
 **Requirement**: Add a second validation pass on the generated SOUL.md and MEMORY.md content before writing to disk. The onboard-validator should expose a `validateGeneratedContent()` function that runs secret scanning and injection defense on the output. Add to pulse 43 acceptance criteria: "generated files are scanned for secrets before write, not just the input transcript."
 
@@ -187,25 +187,25 @@ Pulse 34 specifies atomic rollback on compilation failure (P-274): "restore OC f
 
 Tracing R5 fail-closed enforcement across all 59 pulses:
 
-| Layer | Pulse | R5 Mechanism | Status |
-|-------|-------|-------------|--------|
-| Compile-time | 06 | `enforceR5()` rejects ambiguous/conflicting governance | SOLID -- acceptance test for non-bypassability |
-| Compile-time | 10 | Validator check #4: R5 fail-closed compliance | SOLID -- mirrors enforceR5 logic |
-| Compile-time | 12 | E2E: broken governance triggers R5 denial | SOLID -- tested end-to-end |
-| Emit-time | 07, 08 | OC + CC emitters call `compileGuard` before emit | SOLID -- guard is the gate |
-| Chunk assembly | 23 | `lock.source: 'r5'` derived from GovernanceIR | WEAK -- see D-01 |
-| Chunk API | 25 | P-270: unclassified defaults to R5 | PARTIAL -- see D-08 |
-| Write-time | 30 | `r5-validator.ts` in validation pipeline | SOLID -- blocks R5 tool toggle |
-| PATCH routes | 31 | Routes through validation pipeline | SOLID -- delegates to 30 |
-| Allow-all | 33 | R5 tools silently excluded from bulk enable | SOLID -- P-282 explicit |
-| Loop soul sync | 35 | Locked sections reject PATCH | PARTIAL -- see D-04 |
-| Trust escalation | 39 | JWT 5-check verification | PARTIAL -- see D-05 (key provenance) |
-| Onboard | 43 | Content validation before write | PARTIAL -- see D-03 |
-| E2E gate | 44 | S21-S24 policy violation tests | WEAK -- see D-07 (compound) |
-| TUI connections | 47, 48 | R5 tools rendered without toggle | SOLID -- defense-in-depth |
-| TUI PATCH | 49 | R5 rejection renders human message | SOLID -- error mapping |
-| TUI soul editor | 51 | R5 deny rules render as immutable | SOLID -- rendering only |
-| LSP code actions | 58 | Code actions validate via serve | UNCLEAR -- see D-09 |
+| Layer            | Pulse  | R5 Mechanism                                           | Status                                         |
+| ---------------- | ------ | ------------------------------------------------------ | ---------------------------------------------- |
+| Compile-time     | 06     | `enforceR5()` rejects ambiguous/conflicting governance | SOLID -- acceptance test for non-bypassability |
+| Compile-time     | 10     | Validator check #4: R5 fail-closed compliance          | SOLID -- mirrors enforceR5 logic               |
+| Compile-time     | 12     | E2E: broken governance triggers R5 denial              | SOLID -- tested end-to-end                     |
+| Emit-time        | 07, 08 | OC + CC emitters call `compileGuard` before emit       | SOLID -- guard is the gate                     |
+| Chunk assembly   | 23     | `lock.source: 'r5'` derived from GovernanceIR          | WEAK -- see D-01                               |
+| Chunk API        | 25     | P-270: unclassified defaults to R5                     | PARTIAL -- see D-08                            |
+| Write-time       | 30     | `r5-validator.ts` in validation pipeline               | SOLID -- blocks R5 tool toggle                 |
+| PATCH routes     | 31     | Routes through validation pipeline                     | SOLID -- delegates to 30                       |
+| Allow-all        | 33     | R5 tools silently excluded from bulk enable            | SOLID -- P-282 explicit                        |
+| Loop soul sync   | 35     | Locked sections reject PATCH                           | PARTIAL -- see D-04                            |
+| Trust escalation | 39     | JWT 5-check verification                               | PARTIAL -- see D-05 (key provenance)           |
+| Onboard          | 43     | Content validation before write                        | PARTIAL -- see D-03                            |
+| E2E gate         | 44     | S21-S24 policy violation tests                         | WEAK -- see D-07 (compound)                    |
+| TUI connections  | 47, 48 | R5 tools rendered without toggle                       | SOLID -- defense-in-depth                      |
+| TUI PATCH        | 49     | R5 rejection renders human message                     | SOLID -- error mapping                         |
+| TUI soul editor  | 51     | R5 deny rules render as immutable                      | SOLID -- rendering only                        |
+| LSP code actions | 58     | Code actions validate via serve                        | UNCLEAR -- see D-09                            |
 
 **Overall R5 chain verdict**: The compile-time and write-time enforcement layers are well-designed. The gaps are at the boundaries: chunk assembly (D-01), startup (D-02), and cross-surface consistency (D-09). None of these are fatal to the design, but each represents a wall with a crack. Fix them before implementation.
 
@@ -213,19 +213,19 @@ Tracing R5 fail-closed enforcement across all 59 pulses:
 
 ## Summary of Findings
 
-| ID | Severity | Pulse(s) | Finding |
-|----|----------|----------|---------|
-| D-01 | HC-BLOCK | 06, 23, 25, 30 | R5 classification divergence between chunk assembler and validation layer |
-| D-02 | HC-BLOCK | 30, 34, 42 | Fleet fail-closed (P-272) not enforced at server startup |
-| D-03 | HIGH | 43, 30 | Onboard secret scanning on input only, not generated output |
-| D-04 | HIGH | 30, 35, 43 | No explicit validator for deny rule immutability in pipeline |
-| D-05 | HIGH | 39 | JWT signing key provenance unspecified -- 5-check verification meaningless without it |
-| D-06 | MEDIUM | 45, 49, 54, 56 | TUI connects to unverified localhost server |
-| D-07 | MEDIUM | 30, 44 | Validation pipeline short-circuit contradicts compound violation test S24 |
-| D-08 | MEDIUM | 06, 10, 12, 25 | P-270 default-to-R5 not tested in compile pipeline |
-| D-09 | MEDIUM | 58, 30 | VS Code code action edits may bypass serve validation pipeline |
-| D-10 | LOW | 49, 56, 59 | HTML injection risk in VS Code webview -- no sanitization specified |
-| D-11 | LOW | 34 | Rollback-succeeds-but-audit-fails scenario unhandled |
+| ID   | Severity | Pulse(s)       | Finding                                                                               |
+| ---- | -------- | -------------- | ------------------------------------------------------------------------------------- |
+| D-01 | HC-BLOCK | 06, 23, 25, 30 | R5 classification divergence between chunk assembler and validation layer             |
+| D-02 | HC-BLOCK | 30, 34, 42     | Fleet fail-closed (P-272) not enforced at server startup                              |
+| D-03 | HIGH     | 43, 30         | Onboard secret scanning on input only, not generated output                           |
+| D-04 | HIGH     | 30, 35, 43     | No explicit validator for deny rule immutability in pipeline                          |
+| D-05 | HIGH     | 39             | JWT signing key provenance unspecified -- 5-check verification meaningless without it |
+| D-06 | MEDIUM   | 45, 49, 54, 56 | TUI connects to unverified localhost server                                           |
+| D-07 | MEDIUM   | 30, 44         | Validation pipeline short-circuit contradicts compound violation test S24             |
+| D-08 | MEDIUM   | 06, 10, 12, 25 | P-270 default-to-R5 not tested in compile pipeline                                    |
+| D-09 | MEDIUM   | 58, 30         | VS Code code action edits may bypass serve validation pipeline                        |
+| D-10 | LOW      | 49, 56, 59     | HTML injection risk in VS Code webview -- no sanitization specified                   |
+| D-11 | LOW      | 34             | Rollback-succeeds-but-audit-fails scenario unhandled                                  |
 
 **HC-BLOCK count**: 2
 **HIGH count**: 3
@@ -238,4 +238,4 @@ Tracing R5 fail-closed enforcement across all 59 pulses:
 
 **REVISE** -- The 2 HC-BLOCK findings (D-01, D-02) must be addressed in pulse amendments before implementation begins. The 3 HIGH findings (D-03, D-04, D-05) should be addressed in the pulse specifications. The MEDIUM and LOW findings can be tracked as implementation-time requirements but should be documented in the pulse files now.
 
-The overall architecture is sound. The separation between compile-time enforcement (pulse 06), write-time validation (pulse 30), and UI rendering (pulses 45-55) is the correct layered defense pattern. The invariant chain holds at each individual layer. The findings above are about gaps *between* layers -- the seams where one layer's assumptions don't match another's guarantees. Fix the seams and this wave lands clean.
+The overall architecture is sound. The separation between compile-time enforcement (pulse 06), write-time validation (pulse 30), and UI rendering (pulses 45-55) is the correct layered defense pattern. The invariant chain holds at each individual layer. The findings above are about gaps _between_ layers -- the seams where one layer's assumptions don't match another's guarantees. Fix the seams and this wave lands clean.

@@ -4,7 +4,8 @@ slug: cross-file-conflicts
 plan: claws-parse
 depends_on: [11]
 governing_roles: [craft:dragon, claws:ciso, craft:architect]
-scenario_codes: [parse/conflict-deny-vs-tool, parse/conflict-trust-escalation, parse/conflict-circular-delegation]
+scenario_codes:
+  [parse/conflict-deny-vs-tool, parse/conflict-trust-escalation, parse/conflict-circular-delegation]
 stage: implementation
 test_tiers:
   L0_unit: 8
@@ -111,11 +112,11 @@ This is the checkpoint gate pulse -- all CP-2 exit criteria must be met.
 
 ## Governing Roles
 
-| Role | File | Focus |
-|------|------|-------|
-| craft:dragon | `.craft/roles/craft/dragon.md` | SDK architecture, conflict detector isolation, ConflictReport type design |
-| claws:ciso | `.craft/roles/claws/ciso.md` | Conflict severity assignment, R5 fail-closed semantics, OBO detection, SCHEDULE-NO-APPROVAL three-way |
-| craft:architect | `.craft/roles/craft/architect.md` | Graph algorithms (DFS cycle detection, transitive data flow), semantic matching design |
+| Role            | File                              | Focus                                                                                                 |
+| --------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| craft:dragon    | `.craft/roles/craft/dragon.md`    | SDK architecture, conflict detector isolation, ConflictReport type design                             |
+| claws:ciso      | `.craft/roles/claws/ciso.md`      | Conflict severity assignment, R5 fail-closed semantics, OBO detection, SCHEDULE-NO-APPROVAL three-way |
+| craft:architect | `.craft/roles/craft/architect.md` | Graph algorithms (DFS cycle detection, transitive data flow), semantic matching design                |
 
 ## Dependencies
 
@@ -150,4 +151,5 @@ npm run build
 ## Review Amendments (R1)
 
 ### C10: Getting-Started Doc (CP-2 Gate)
+
 - [ ] Write `docs/claws/getting-started/platform-detection.md` — 1-2 pages: 7 platforms, enforcement models, zero-config

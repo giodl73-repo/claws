@@ -4,14 +4,7 @@
   "version": "0.1.0",
   "description": "github plugin (developer)",
   "contributes": {
-    "tools": [
-      "github/create-issue",
-      "github/list-prs",
-      "github/merge-pr"
-    ],
-    "skills": [
-      "github/create-issue",
-      "github/list-prs"
-    ]
+    "tools": ["github/create-issue", "github/list-prs", "github/merge-pr"],
+    "skills": ["github/create-issue", "github/list-prs"]
   }
 }

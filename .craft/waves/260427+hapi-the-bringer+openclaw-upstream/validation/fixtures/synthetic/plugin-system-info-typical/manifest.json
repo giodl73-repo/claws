@@ -4,14 +4,7 @@
   "version": "0.1.0",
   "description": "system-info plugin (system)",
   "contributes": {
-    "tools": [
-      "system-info/get-cpu",
-      "system-info/get-memory",
-      "system-info/get-uptime"
-    ],
-    "skills": [
-      "system-info/get-cpu",
-      "system-info/get-memory"
-    ]
+    "tools": ["system-info/get-cpu", "system-info/get-memory", "system-info/get-uptime"],
+    "skills": ["system-info/get-cpu", "system-info/get-memory"]
   }
 }

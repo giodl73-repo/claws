@@ -4,7 +4,12 @@ slug: mock-gateway-frontmatter
 plan: claws-skill-kit
 depends_on: [23]
 governing_roles: [claws:skill-author, claws:gateway-eng]
-scenario_codes: [skill-kit/mock-gateway-event, skill-kit/annotation-schema-valid, skill-kit/annotation-schema-invalid]
+scenario_codes:
+  [
+    skill-kit/mock-gateway-event,
+    skill-kit/annotation-schema-valid,
+    skill-kit/annotation-schema-invalid,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 6
@@ -78,6 +83,7 @@ Implement MockGateway which simulates OC Gateway `before_tool_call` events witho
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/skill-author.md` -- MockGateway usability, testing workflow, adoption friction
 - `.craft/roles/claws/gateway-eng.md` -- event model fidelity, hook response types, approval flow
 
@@ -97,9 +103,11 @@ npm run build
 ## Review Amendments (R1)
 
 ### C02: Moved to CP-2
+
 - [ ] Update frontmatter: `checkpoint: 2`
 
 ### C11: OC Type Snapshot for MockGateway
+
 - [ ] Add frozen OC type snapshot (.d.ts) in test fixtures
 - [ ] Structural test: `MockGatewayEvent satisfies OCBeforeToolCallEvent`
 - [ ] If OC Gateway types change, this test breaks — forcing update

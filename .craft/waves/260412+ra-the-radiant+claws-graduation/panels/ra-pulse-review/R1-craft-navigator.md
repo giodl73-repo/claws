@@ -42,6 +42,7 @@ A maker's first interaction with the claws API surface needs a tangible artifact
 **Pulses affected**: 30 (validation layer), 31 (PATCH routes), 34 (patch errors E2E), 49 (TUI patch)
 
 The error experience is built incrementally:
+
 - Pulse 30 defines the PatchError union (8 error codes)
 - Pulse 31 maps PatchError to HTTP status codes
 - Pulse 34 tests all 8 errors end-to-end through HTTP
@@ -78,6 +79,7 @@ The gap: pulse 43 tests that the API works, but not that the generated files pro
 **Pulses affected**: 45 through 55
 
 The TUI screen order is:
+
 - 45: Scaffold (3 experiences, no screens)
 - 46: General + Preferences (read + edit)
 - 47: Connections L1 (read only — no PATCH until pulse 49)
@@ -220,18 +222,18 @@ Pulses 35-39 build real Loop/Calendar/Trust APIs. Pulses 51-52 build TUI screens
 
 ## Checkpoint Demo-ability Assessment
 
-| Checkpoint | Pulses | What you can demo | Demo quality |
-|-----------|--------|-------------------|-------------|
-| CP-1 | 1-6 | Compile 9-file workspace, R5 fail-closed rejection | Internal only |
-| CP-2 | 7-12 | Compile to OC + Claude Code targets, full pipeline | Internal only |
-| CP-3 | 13-18 | `npm pack @claws/compiler` standalone, 17 packages | Internal + partner preview |
-| CP-4 | 19-20 | Publish pipeline dry-run, migration guide | Partner-ready |
-| CP-5 | 21-28 | `curl /api/chunks/connections`, SSE stream, live file watching | Partner handoff (read) |
-| CP-6 | 29-34 | PATCH tool toggle, R5 rejection JSON, atomic rollback | Partner handoff (read+write), but JSON-only |
-| CP-7 | 35-39 | Loop soul sync, calendar events, trust escalation | Partner handoff (collaboration) |
-| CP-8 | 40-44 | Skills store, audit trail, fleet view, onboarding | Full API surface |
-| CP-9 | 45-55 | `claws tui --demo`, guided walkthrough, live editing | Executive demo, customer demo |
-| CP-10 | 56-59 | VS Code extension with diagnostics, decorations, code actions, webview | Developer experience showcase |
+| Checkpoint | Pulses | What you can demo                                                      | Demo quality                                |
+| ---------- | ------ | ---------------------------------------------------------------------- | ------------------------------------------- |
+| CP-1       | 1-6    | Compile 9-file workspace, R5 fail-closed rejection                     | Internal only                               |
+| CP-2       | 7-12   | Compile to OC + Claude Code targets, full pipeline                     | Internal only                               |
+| CP-3       | 13-18  | `npm pack @claws/compiler` standalone, 17 packages                     | Internal + partner preview                  |
+| CP-4       | 19-20  | Publish pipeline dry-run, migration guide                              | Partner-ready                               |
+| CP-5       | 21-28  | `curl /api/chunks/connections`, SSE stream, live file watching         | Partner handoff (read)                      |
+| CP-6       | 29-34  | PATCH tool toggle, R5 rejection JSON, atomic rollback                  | Partner handoff (read+write), but JSON-only |
+| CP-7       | 35-39  | Loop soul sync, calendar events, trust escalation                      | Partner handoff (collaboration)             |
+| CP-8       | 40-44  | Skills store, audit trail, fleet view, onboarding                      | Full API surface                            |
+| CP-9       | 45-55  | `claws tui --demo`, guided walkthrough, live editing                   | Executive demo, customer demo               |
+| CP-10      | 56-59  | VS Code extension with diagnostics, decorations, code actions, webview | Developer experience showcase               |
 
 **Key insight**: The wave has two natural demo points: CP-5 (read APIs, compelling curl demos) and CP-9 (TUI, compelling visual demos). Everything between CP-5 and CP-9 is API plumbing that is technically impressive but visually flat. This is fine if stakeholder expectations are set correctly.
 
@@ -240,6 +242,7 @@ Pulses 35-39 build real Loop/Calendar/Trust APIs. Pulses 51-52 build TUI screens
 ## TUI Flow Coherence Assessment
 
 The TUI builds in a sensible order within each experience:
+
 - **Settings**: General/Preferences (46) -> Connections overview (47) -> Connections drill-in (48) -> Wire all PATCHes (49) -> Remaining screens (50)
 - **Lobster**: Soul editor (51) -> Trust/Schedule/Queue (52)
 - **Manage**: Companion screens (53)

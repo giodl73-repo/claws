@@ -52,7 +52,7 @@ test("rejects unauthenticated call", async () => {
       baseCtx.runMutation(api.project.renameProject, {
         id: "proj_1",
         name: "Renamed",
-      })
+      }),
     ).rejects.toThrow(/UNAUTHORIZED/);
   });
 });
@@ -75,7 +75,7 @@ test("rejects non-owner update", async () => {
       baseCtx.runMutation(api.project.renameProject, {
         id,
         name: "Hacked",
-      })
+      }),
     ).rejects.toThrow(/FORBIDDEN/);
   });
 });
@@ -91,7 +91,7 @@ test("returns not found for missing row", async () => {
       baseCtx.runMutation(api.project.renameProject, {
         id: "missing",
         name: "x",
-      })
+      }),
     ).rejects.toThrow(/NOT_FOUND/);
   });
 });
@@ -112,10 +112,7 @@ test("updating message updates thread timestamp via trigger", async () => {
       authorId: "user_1",
     });
 
-    await ctx.orm
-      .update(message)
-      .set({ body: "hello again" })
-      .where(eq(message.id, messageId));
+    await ctx.orm.update(message).set({ body: "hello again" }).where(eq(message.id, messageId));
 
     const threadRow = await ctx.orm.query.thread.findFirstOrThrow({
       where: { id: threadId },
@@ -156,6 +153,7 @@ test("scheduled cleanup runs", async () => {
 ## Lightweight Type Checks (Optional)
 
 Only keep app-facing type checks:
+
 - procedure input/output DTOs
 - key ORM return shapes used by UI
 
@@ -195,12 +193,14 @@ These files are validated by `tsc`/`bun typecheck`; they are not runtime tests.
 ## Keep / Drop Guidance
 
 Keep:
+
 - feature tests tied to user-visible behavior
 - auth/rules tests
 - trigger and scheduler tests
 - API contract checks at app boundary
 
 Drop:
+
 - internal ORM parity progress tracking
 - assertion counting workflows
 - package-internal generic/type torture suites

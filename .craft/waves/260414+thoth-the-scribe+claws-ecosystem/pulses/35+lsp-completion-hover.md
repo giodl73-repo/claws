@@ -49,6 +49,7 @@ Build the RELAX expression completion provider and risk classification hover pro
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/architect.md` — system-level design authority for claws packages
 - `.craft/roles/claws/platform-eng.md` — implementation patterns and provider contracts
 

@@ -15,7 +15,10 @@ expect:
   prevention: "`claws check --dedup` verifies zero duplication via `npm ls --all` at manifest-declared versions. Platform manifest is the single source of truth for version pins. Publish gate rejects manifest versions that produce duplicates."
 
 simulate:
-  failures: ["Diamond dependency between @bic/claws-sdk and @bic/claws-sdk installs duplicate @craftworks/crypto instances"]
+  failures:
+    [
+      "Diamond dependency between @bic/claws-sdk and @bic/claws-sdk installs duplicate @craftworks/crypto instances",
+    ]
   halt: null
   budget: null
 

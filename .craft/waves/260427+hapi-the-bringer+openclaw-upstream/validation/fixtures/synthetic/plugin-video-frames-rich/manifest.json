@@ -4,15 +4,9 @@
   "version": "0.1.0",
   "description": "video-frames plugin (media)",
   "contributes": {
-    "tools": [
-      "video-frames/extract"
-    ],
-    "skills": [
-      "video-frames/extract"
-    ],
-    "workflows": [
-      "video-frames-flow.lobster"
-    ],
+    "tools": ["video-frames/extract"],
+    "skills": ["video-frames/extract"],
+    "workflows": ["video-frames-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

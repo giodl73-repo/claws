@@ -188,16 +188,19 @@ Opportunity: <one-sentence selected slice>
 Class: <feature | compatibility | agentic | cleanup>
 
 Evidence:
+
 - Ship changelog: <short citation or summary>
 - Convex changelog: <short citation or summary>
 - Upstream diff: <refs and files>
 - Kitcn evidence: <local files and docs/solutions notes>
 
 Implementation:
+
 - <specific files or seams to inspect first>
 - <expected code/doc/test shape>
 
 Acceptance:
+
 - <tests/checks>
 - <package build if packages/kitcn changes>
 - <fixtures commands if scaffold output changes>
@@ -217,9 +220,9 @@ Before delegation, keep the audit terse:
 Current: <version>
 Target: <version>
 
-| Class | Opportunity | Evidence | Decision |
-| --- | --- | --- | --- |
-| cleanup | ... | ... | selected |
+| Class   | Opportunity | Evidence | Decision |
+| ------- | ----------- | -------- | -------- |
+| cleanup | ...         | ...      | selected |
 
 Delegating to task: <selected slice>
 ```

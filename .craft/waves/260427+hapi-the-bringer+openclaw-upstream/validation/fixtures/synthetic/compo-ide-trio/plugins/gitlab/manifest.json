@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "gitlab plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "gitlab/create-mr"
-    ]
+    "tools": ["gitlab/create-mr"]
   }
 }

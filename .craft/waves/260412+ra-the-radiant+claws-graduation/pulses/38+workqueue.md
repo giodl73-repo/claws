@@ -54,6 +54,7 @@ The workqueue store handles persistence, conflict resolution (HEARTBEAT.md is au
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, SDK-owns-logic rule
 - `.craft/roles/claws/platform-eng.md` — state persistence patterns, atomic file operations
 

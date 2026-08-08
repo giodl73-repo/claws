@@ -9,13 +9,8 @@
       "hashicorp-vault/write-secret",
       "hashicorp-vault/list-paths"
     ],
-    "skills": [
-      "hashicorp-vault/read-secret",
-      "hashicorp-vault/write-secret"
-    ],
-    "workflows": [
-      "hashicorp-vault-flow.lobster"
-    ],
+    "skills": ["hashicorp-vault/read-secret", "hashicorp-vault/write-secret"],
+    "workflows": ["hashicorp-vault-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

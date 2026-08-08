@@ -31,20 +31,20 @@ All plugin/loader modules depend on `:aztec`. Published independently to Automat
 
 ### Code Navigation (package: `org.wordpress.aztec`)
 
-| To find...                      | Look in...                                           |
-|---------------------------------|------------------------------------------------------|
-| Main editor component           | `aztec/.../AztecText.kt` (extends EditText, ~3K LOC) |
-| Editor facade / initialization  | `aztec/.../Aztec.kt`                                 |
-| HTML parsing                    | `aztec/.../AztecParser.kt`, `AztecTagHandler.kt`     |
-| Custom spans (visual rendering) | `aztec/.../spans/` (62 files — one per HTML element)  |
-| Text formatting logic           | `aztec/.../formatting/` (Block, Inline, Line, List)   |
-| Block element handlers          | `aztec/.../handlers/` (Heading, List, Quote, etc.)    |
-| Plugin interfaces               | `aztec/.../plugins/` (IAztecPlugin, IToolbarButton)   |
-| HTML source editor              | `aztec/.../source/SourceViewEditText.kt`              |
-| Text change watchers            | `aztec/.../watchers/` (30+ files, API-version buckets)|
-| Toolbar                         | `aztec/.../toolbar/AztecToolbar.kt`                   |
-| Undo/redo                       | `aztec/.../History.kt`                                |
-| Compose placeholders            | `media-placeholders/.../ComposePlaceholder*.kt`       |
+| To find...                      | Look in...                                             |
+| ------------------------------- | ------------------------------------------------------ |
+| Main editor component           | `aztec/.../AztecText.kt` (extends EditText, ~3K LOC)   |
+| Editor facade / initialization  | `aztec/.../Aztec.kt`                                   |
+| HTML parsing                    | `aztec/.../AztecParser.kt`, `AztecTagHandler.kt`       |
+| Custom spans (visual rendering) | `aztec/.../spans/` (62 files — one per HTML element)   |
+| Text formatting logic           | `aztec/.../formatting/` (Block, Inline, Line, List)    |
+| Block element handlers          | `aztec/.../handlers/` (Heading, List, Quote, etc.)     |
+| Plugin interfaces               | `aztec/.../plugins/` (IAztecPlugin, IToolbarButton)    |
+| HTML source editor              | `aztec/.../source/SourceViewEditText.kt`               |
+| Text change watchers            | `aztec/.../watchers/` (30+ files, API-version buckets) |
+| Toolbar                         | `aztec/.../toolbar/AztecToolbar.kt`                    |
+| Undo/redo                       | `aztec/.../History.kt`                                 |
+| Compose placeholders            | `media-placeholders/.../ComposePlaceholder*.kt`        |
 
 ### Key Architectural Patterns
 
@@ -68,6 +68,7 @@ All plugin/loader modules depend on `:aztec`. Published independently to Automat
 - Thread safety in `AztecAttributes` — operations should be synchronized
 
 ## Git Operations (CRITICAL)
+
 - **NEVER commit without explicit permission**
 - **NEVER push without explicit permission**
 - **NEVER create a PR without explicit permission**
@@ -121,6 +122,7 @@ PAGER=cat gh pr diff <NUMBER>
 ## PR Template
 
 PRs follow this format (from `.github/PULL_REQUEST_TEMPLATE.md`):
+
 ```
 ### Fix
 <description of what was fixed/added>
@@ -135,6 +137,6 @@ PRs follow this format (from `.github/PULL_REQUEST_TEMPLATE.md`):
 
 ## Skills
 
-| Skill       | Trigger phrases                                                                                      |
-|-------------|------------------------------------------------------------------------------------------------------|
-| `implement` | "implement", "fix this", "work on this", "build this", "add feature", any implementation request     |
+| Skill       | Trigger phrases                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------------------ |
+| `implement` | "implement", "fix this", "work on this", "build this", "add feature", any implementation request |

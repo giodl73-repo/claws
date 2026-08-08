@@ -56,6 +56,7 @@ The SOC2 evidence builder is the first of three compliance frameworks in the com
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/founder.md` — product vision for compliance framework, SOC2 scope decisions
 - `.craft/roles/claws/ciso.md` — SOC2 Type II control requirements, evidence standards, observation period rules
 

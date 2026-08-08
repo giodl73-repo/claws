@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "sympy plugin (science)",
   "contributes": {
-    "tools": [
-      "sympy/solve",
-      "sympy/simplify"
-    ],
-    "skills": [
-      "sympy/solve",
-      "sympy/simplify"
-    ],
-    "workflows": [
-      "sympy-flow.lobster"
-    ],
+    "tools": ["sympy/solve", "sympy/simplify"],
+    "skills": ["sympy/solve", "sympy/simplify"],
+    "workflows": ["sympy-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

@@ -163,7 +163,7 @@ Components expose their state through `data-state` attributes. Use Tailwind's ar
     "data-[state=open]:animate-in data-[state=open]:fade-in",
     "data-[state=closed]:animate-out data-[state=closed]:fade-out",
     // Multiple attributes
-    "data-[state=open][data-side=top]:slide-in-from-top-2"
+    "data-[state=open][data-side=top]:slide-in-from-top-2",
   )}
 />
 ```
@@ -255,7 +255,7 @@ Components use `data-slot` attributes for stable identifiers that can be targete
     "has-[>[data-slot=form-section]]:space-y-6",
     "has-[>[data-slot=inline-fields]]:space-y-2",
     // Style based on slot states
-    "has-[[data-slot=submit-button][data-loading=true]]:opacity-50"
+    "has-[[data-slot=submit-button][data-loading=true]]:opacity-50",
   )}
 >
   {children}
@@ -273,7 +273,7 @@ Components use `data-slot` attributes for stable identifiers that can be targete
     "**:data-[slot=card-header]:mb-4",
     "**:data-[slot=card-title]:text-lg **:data-[slot=card-title]:font-semibold",
     "**:data-[slot=card-description]:text-muted-foreground **:data-[slot=card-description]:text-sm",
-    "**:data-[slot=card-footer]:mt-4 **:data-[slot=card-footer]:border-t **:data-[slot=card-footer]:pt-4"
+    "**:data-[slot=card-footer]:mt-4 **:data-[slot=card-footer]:border-t **:data-[slot=card-footer]:pt-4",
   )}
 >
   {children}

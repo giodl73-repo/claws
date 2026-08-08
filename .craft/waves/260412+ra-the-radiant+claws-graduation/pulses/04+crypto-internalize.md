@@ -61,6 +61,7 @@ This is the security foundation for the free tier. Ed25519 signing is in the fre
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/security.md` -- cryptographic standards, key management, audit signing requirements
 - `.craft/roles/claws/platform-eng.md` -- SDK module patterns, Node.js crypto usage conventions
 

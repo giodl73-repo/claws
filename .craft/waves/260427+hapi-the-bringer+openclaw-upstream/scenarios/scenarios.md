@@ -2,12 +2,11 @@
 
 > **Reading note (added 2026-04-30 after the chain consolidation):** PR-N references in Phases 1-3 below use the pre-pivot 6-PR numbering and are sometimes inconsistent across sections (PR-numbering changed multiple times during planning). The canonical chain is now **3 upstream PRs**: PR-1 (`@openclaw/workspace` + frontmatter raw-preserve), PR-2 (LKG carrier), PR-3 (PolicyIR + `ctx.lkgFingerprint` + hook merger conjunctive AND). Phase 4 (`SC-22..SC-39`) was authored post-pivot and is aligned with the 3-PR chain. Mapping in `carve-consumer-catalog.md` § "CHAIN CONSOLIDATION (2026-04-30)".
 
-
 **Wave**: `260427+hapi-the-bringer+openclaw-upstream`
 **Stage**: scenarios
 **Date**: 2026-04-27
 
-For this contribution-phase wave, "scenarios" walk what *can go wrong with each upstream PR* (bot-reviewer pushback, reviewer rejection, merge-conflict, semantic drift) more than runtime-behavior fixtures. Detailed findings are aggregated in `FINDINGS.md` next to this file.
+For this contribution-phase wave, "scenarios" walk what _can go wrong with each upstream PR_ (bot-reviewer pushback, reviewer rejection, merge-conflict, semantic drift) more than runtime-behavior fixtures. Detailed findings are aggregated in `FINDINGS.md` next to this file.
 
 Catalog — 39 scenarios across 4 phases (Phase 4 added 2026-04-30 post-LKG-pivot; SC-26..SC-39 added with waves 5..18 — campaign closes):
 
@@ -272,6 +271,7 @@ This is the BACKWARD-COMPAT proof. The conversion must not change behavior for t
 ### SC-29 · `upstream/oc-config-uri-parser-roundtrip`
 
 **Walk**: `parseOcUri('oc://config/channels/matrix/accessToken')` returns structured object; `formatOcUri()` round-trips it. Edge cases:
+
 - Array index: `oc://config/channels/matrix/account-allowlist/0`
 - Deeply nested: `oc://config/plugins/installed/my-plugin/options/timeout-ms`
 - Malformed: `oc://config//double-slash`, `oc://config/x/y/`, etc. — rejected with structured codes
@@ -302,6 +302,7 @@ This is the BACKWARD-COMPAT proof. The conversion must not change behavior for t
 ### SC-32 · `upstream/resolve-config-uri-correctness`
 
 **Walk**: `resolveConfigUri(uri, configRoot)` walks an OpenClawConfig fixture. Cases:
+
 - Valid path → `{value, parentNode, leafKey, found: true}`
 - Missing path → `{found: false}`, no exception
 - Ambiguous path (if any wildcard form supported) → `OC_CONFIG_PATH_AMBIGUOUS`
@@ -314,7 +315,7 @@ This is the BACKWARD-COMPAT proof. The conversion must not change behavior for t
 
 ### SC-33 · `upstream/concurrent-config-write-safety`
 
-**Walk**: Two processes call `replaceConfigFile` simultaneously. Today: file locking via existing `replaceConfigFileSync` semantics (atomic rename pattern). After AST conversion: file locking semantics unchanged; only the *content generation* changes from stringify to emit. AST + emit happens in-memory; the rename is the durability primitive.
+**Walk**: Two processes call `replaceConfigFile` simultaneously. Today: file locking via existing `replaceConfigFileSync` semantics (atomic rename pattern). After AST conversion: file locking semantics unchanged; only the _content generation_ changes from stringify to emit. AST + emit happens in-memory; the rename is the durability primitive.
 
 **Risk to validate**: does the AST parser handle the case where another process is writing the file mid-read? Today this is handled by the atomic-rename. Confirm no regression.
 
@@ -455,7 +456,7 @@ These scenarios validate the 13-code JSONC config lint surface. Built claws-side
 
 ### SC-47 · `upstream/lint-issue-62281-redacted-corruption`
 
-**Walk**: Config has `accessToken: "__OPENCLAW_REDACTED__"` — corruption introduced by a stringify-over-redacted-view path. Lint fires `OC_CFG_REDACTED_PLACEHOLDER` at severity `error`. The lossless write path *prevents recurrence*; lint catches any residual instances.
+**Walk**: Config has `accessToken: "__OPENCLAW_REDACTED__"` — corruption introduced by a stringify-over-redacted-view path. Lint fires `OC_CFG_REDACTED_PLACEHOLDER` at severity `error`. The lossless write path _prevents recurrence_; lint catches any residual instances.
 
 **Test tier**: L1 integration
 **Runner**: forward (issue replay)
@@ -526,13 +527,13 @@ These scenarios validate the 13-code JSONC config lint surface. Built claws-side
 
 Per-tier materialization (planned, fixtures created during pulses stage acceptance test pulses, not now):
 
-| Tier | Count | Series |
-|---|---|---|
-| L0 unit | 24 | bot-preempt (4), generator-side (6), workspace path/ast/canonicalize (6), guardrails subpaths (8) |
-| L1 integration | 18 | OC-7 merger (5), audit chain (4), approval handle (3), HTTP surface (3), policy + workspace (3) |
-| L2 e2e | 8 | hostile-write-then-read (1), emitted-plugin-registration adapter (1), audit-stream adapter (1), snap historical query (1), per-PR smoke (4) |
-| L3 acceptance | 8 | per-PR landed verification (6), SOC 2 rubric coverage (1), HIPAA rubric coverage (1) |
-| **Total** | **58** | aligns with plan Coverage Contract targets (24 / 18 / 8 / 6 with +2 acceptance for rubrics) |
+| Tier           | Count  | Series                                                                                                                                      |
+| -------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| L0 unit        | 24     | bot-preempt (4), generator-side (6), workspace path/ast/canonicalize (6), guardrails subpaths (8)                                           |
+| L1 integration | 18     | OC-7 merger (5), audit chain (4), approval handle (3), HTTP surface (3), policy + workspace (3)                                             |
+| L2 e2e         | 8      | hostile-write-then-read (1), emitted-plugin-registration adapter (1), audit-stream adapter (1), snap historical query (1), per-PR smoke (4) |
+| L3 acceptance  | 8      | per-PR landed verification (6), SOC 2 rubric coverage (1), HIPAA rubric coverage (1)                                                        |
+| **Total**      | **58** | aligns with plan Coverage Contract targets (24 / 18 / 8 / 6 with +2 acceptance for rubrics)                                                 |
 
 Plan Coverage Contract target was 24 / 12 / 8 / 6. Scenarios stage exercised the catalog and found 6 additional L1 integration tests warranted (12 → 18) and 2 additional L3 acceptance tests for compliance rubric coverage (6 → 8). These deltas are reflected in the FINDINGS.md apply-back.
 
@@ -686,5 +687,6 @@ After the snap → LKG strategic pivot, four waves of adversarial scenarios were
 ### Phase 4 routing
 
 Findings route to:
+
 - **PR for `@openclaw/plugin-sdk/lkg` contract** (the v2-lkg-contract upstream PR) — F-118 fix is in the downstream `@bic/openclaw-lkg-git` reference impl; the upstream PR's reference implementation should land with the same fix from day one. F-119 is documented as the existing config-LKG model's known limit (not a regression introduced by this PR).
 - **Adversarial test artifacts** — the 76 scenarios are downstream test artifacts; the upstream PR doesn't ship them. They serve as evidence in PR conversations that the contract has been stress-tested beyond the conformance matrix.

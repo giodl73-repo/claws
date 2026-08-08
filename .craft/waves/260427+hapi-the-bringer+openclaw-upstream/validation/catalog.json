@@ -10,12 +10,7 @@
       "domain": "web/AI-app",
       "lang": "TS",
       "stars": 20243,
-      "shape": [
-        "AGENTS.md",
-        "CLAUDE.md(symlink)",
-        ".agents/",
-        ".claude/"
-      ],
+      "shape": ["AGENTS.md", "CLAUDE.md(symlink)", ".agents/", ".claude/"],
       "notes": "CLAUDE.md is a symlink â€” real path-resolver edge case"
     },
     {
@@ -26,13 +21,7 @@
       "domain": "web/registry",
       "lang": "TS",
       "stars": 410,
-      "shape": [
-        "AGENTS.md",
-        "CLAUDE.md(stub)",
-        ".agents/",
-        ".claude/",
-        ".claude-plugin/"
-      ],
+      "shape": ["AGENTS.md", "CLAUDE.md(stub)", ".agents/", ".claude/", ".claude-plugin/"],
       "notes": "19.5KB AGENTS.md + .claude-plugin/ packaging"
     },
     {
@@ -43,13 +32,7 @@
       "domain": "ML/RL",
       "lang": "Python",
       "stars": 576,
-      "shape": [
-        "AGENTS.md",
-        "CLAUDE.md(stub)",
-        ".agents/",
-        ".claude/",
-        ".claude-plugin/"
-      ],
+      "shape": ["AGENTS.md", "CLAUDE.md(stub)", ".agents/", ".claude/", ".claude-plugin/"],
       "notes": "Full substrate, RL training environment"
     },
     {
@@ -60,10 +43,7 @@
       "domain": "ML/agents",
       "lang": "Python",
       "stars": 103,
-      "shape": [
-        "AGENTS.md",
-        "CLAUDE.md"
-      ],
+      "shape": ["AGENTS.md", "CLAUDE.md"],
       "notes": "Both files large; Microsoft-public OSS"
     },
     {
@@ -74,10 +54,7 @@
       "domain": "web/lib",
       "lang": "TS",
       "stars": 42576,
-      "shape": [
-        "AGENTS.md",
-        "CLAUDE.md(stub)"
-      ],
+      "shape": ["AGENTS.md", "CLAUDE.md(stub)"],
       "notes": "Massive-star OSS lib; stub-CLAUDE pattern"
     },
     {
@@ -88,12 +65,7 @@
       "domain": "mobile/lib",
       "lang": "TS",
       "stars": 1011,
-      "shape": [
-        "AGENTS.md",
-        "CLAUDE.md",
-        ".agents/",
-        ".claude/"
-      ],
+      "shape": ["AGENTS.md", "CLAUDE.md", ".agents/", ".claude/"],
       "notes": "Korean OSS mobile navigation"
     },
     {
@@ -104,12 +76,7 @@
       "domain": "mobile/editor",
       "lang": "Kotlin",
       "stars": 731,
-      "shape": [
-        "AGENTS.md",
-        "CLAUDE.md(stub)",
-        ".agents/",
-        ".claude/"
-      ],
+      "shape": ["AGENTS.md", "CLAUDE.md(stub)", ".agents/", ".claude/"],
       "notes": "Android domain; stub-CLAUDE"
     },
     {
@@ -120,11 +87,7 @@
       "domain": "design-system",
       "lang": "JS",
       "stars": 14,
-      "shape": [
-        "agents.md",
-        "CLAUDE.md",
-        ".claude/"
-      ],
+      "shape": ["agents.md", "CLAUDE.md", ".claude/"],
       "notes": "lowercase agents.md; .claude/skills/icon.md real skill"
     },
     {
@@ -135,10 +98,7 @@
       "domain": "backend/NestJS",
       "lang": "TS",
       "stars": 29,
-      "shape": [
-        "CLAUDE.md",
-        ".claude/"
-      ],
+      "shape": ["CLAUDE.md", ".claude/"],
       "notes": ".claude/skills/gql.md GraphQL skill"
     },
     {
@@ -149,9 +109,7 @@
       "domain": "music",
       "lang": "TS",
       "stars": 419,
-      "shape": [
-        "agents.md"
-      ],
+      "shape": ["agents.md"],
       "notes": "Music-software domain; lowercase agents.md only"
     },
     {
@@ -162,11 +120,7 @@
       "domain": "ACP-adapter",
       "lang": "Zig",
       "stars": 41,
-      "shape": [
-        "AGENTS.md",
-        "CLAUDE.md(stub)",
-        ".claude/"
-      ],
+      "shape": ["AGENTS.md", "CLAUDE.md(stub)", ".claude/"],
       "notes": "Zig language; tests parser against unusual host"
     },
     {
@@ -177,10 +131,7 @@
       "domain": "game",
       "lang": "Elixir",
       "stars": 833,
-      "shape": [
-        "AGENTS.md",
-        "CLAUDE.md"
-      ],
+      "shape": ["AGENTS.md", "CLAUDE.md"],
       "notes": "Multiplayer game; Elixir host"
     },
     {
@@ -191,9 +142,7 @@
       "domain": "infra/bot",
       "lang": "TS",
       "stars": 16,
-      "shape": [
-        "claude.md"
-      ],
+      "shape": ["claude.md"],
       "notes": "lowercase claude.md only"
     }
   ],
@@ -206,13 +155,7 @@
       "domain": "framework",
       "lang": "TS",
       "stars": 368331,
-      "shape": [
-        "AGENTS.md(22KB)",
-        "CLAUDE.md",
-        "VISION.md",
-        ".agents/",
-        "skills/"
-      ],
+      "shape": ["AGENTS.md(22KB)", "CLAUDE.md", "VISION.md", ".agents/", "skills/"],
       "notes": "Anchor: the openclaw framework itself"
     },
     {
@@ -223,10 +166,7 @@
       "domain": "workflow-runtime",
       "lang": "TS",
       "stars": 1191,
-      "shape": [
-        "AGENTS.md",
-        "VISION.md"
-      ],
+      "shape": ["AGENTS.md", "VISION.md"],
       "notes": "Anchor: openclaw/lobster itself; the *.lobster runtime"
     },
     {
@@ -237,12 +177,7 @@
       "domain": "skill-directory",
       "lang": "TS",
       "stars": 8419,
-      "shape": [
-        "AGENTS.md",
-        "CLAUDE.md",
-        "DESIGN.md",
-        ".agents/{agents,commands,skills}/"
-      ],
+      "shape": ["AGENTS.md", "CLAUDE.md", "DESIGN.md", ".agents/{agents,commands,skills}/"],
       "notes": "Anchor: skill directory"
     },
     {
@@ -253,12 +188,7 @@
       "domain": "headless-cli",
       "lang": "TS",
       "stars": 2568,
-      "shape": [
-        "AGENTS.md",
-        "agents/{14 named harness files}.md",
-        "skills/",
-        ".pi/"
-      ],
+      "shape": ["AGENTS.md", "agents/{14 named harness files}.md", "skills/", ".pi/"],
       "notes": "Anchor: 14-harness polyglot fixture"
     },
     {
@@ -269,12 +199,7 @@
       "domain": "docs/examples",
       "lang": "Python",
       "stars": 42162,
-      "shape": [
-        "CLAUDE.md",
-        "skills/CLAUDE.md",
-        "agents/",
-        "claude_agent_sdk/"
-      ],
+      "shape": ["CLAUDE.md", "skills/CLAUDE.md", "agents/", "claude_agent_sdk/"],
       "notes": "Anchor: official Anthropic, multi-agent monorepo"
     }
   ]

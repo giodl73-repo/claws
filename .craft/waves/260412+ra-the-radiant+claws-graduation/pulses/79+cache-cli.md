@@ -43,28 +43,28 @@ back to the source finding.
 
 Audit source: `.craft/waves/260412+ra-the-radiant+claws-graduation/panels/claws-compile-dx-findings-audit/R1-audit.md`.
 
-| Finding | Severity | Disposition | AC reference |
-|---------|----------|-------------|--------------|
-| cache-cli/S01-F01 | major | spec (CL-01 shared contract) → implementation follows shared resolver | AC-1 |
-| cache-cli/S01-F02 | major | spec (CL-01 JSON shape contracts) → versioned JSON schema snapshot tests | AC-2 |
-| cache-cli/S01-F03 | major | spec (resolved, CL-01 requires ndjson) → implementation assertion | AC-3 |
-| cache-cli/S01-F04 | warning | spec (resolved, duration `s\|m\|h\|d`) → test-level (this pulse) exercises all 4 units | AC-4 |
-| cache-cli/S01-F05 | warning | spec (CL-01 `--yes`/prompt) → AC + prompt-skip on empty | AC-5, AC-13 |
-| cache-cli/S01-F06 | warning | spec (stable sort key) → AC + unit test | AC-6 |
-| cache-cli/S01-F07 | warning | spec (`--reset-counters` opt-in) → AC + unit test | AC-7 |
-| cache-cli/S01-F08 | note | spec (resolved, `version` field) → AC | AC-2 |
-| cache-cli/S01-F09 | note | spec (resolved, no-op exit 0) → AC | AC-11 |
-| cache-cli/S01-F10 | note | spec (ISO 8601 UTC) → AC + unit test | AC-8 |
-| cache-cli/S02-F01 | major | spec (missing dir == empty for reads) → AC + unit test | AC-9 |
-| cache-cli/S02-F02 | major | spec (concurrent-clear tolerant) → AC + integration test | AC-10 |
-| cache-cli/S02-F03 | major | spec (no-op exits 0) → AC | AC-11 |
-| cache-cli/S02-F04 | warning | spec (0 bytes on empty list) → AC + unit test | AC-12 |
-| cache-cli/S02-F05 | warning | spec (full schema with zero values) → AC + unit test | AC-2 |
-| cache-cli/S02-F06 | warning | spec (reads don't create dir) → AC + unit test | AC-14 |
-| cache-cli/S02-F07 | warning | **pulse AC** (prune short-circuit on empty) | **AC-15** |
-| cache-cli/S02-F08 | note | **test** (strict idempotence across repeated runs) | **AC-16 / L3-S02 test** |
-| cache-cli/S02-F09 | note | **pulse AC** (`clear` prompt skipped on empty) | **AC-13** |
-| cache-cli/S02-F10 | note | spec (umask-respecting perms on lazy dir create) → AC + unit test | AC-17 |
+| Finding           | Severity | Disposition                                                                            | AC reference            |
+| ----------------- | -------- | -------------------------------------------------------------------------------------- | ----------------------- |
+| cache-cli/S01-F01 | major    | spec (CL-01 shared contract) → implementation follows shared resolver                  | AC-1                    |
+| cache-cli/S01-F02 | major    | spec (CL-01 JSON shape contracts) → versioned JSON schema snapshot tests               | AC-2                    |
+| cache-cli/S01-F03 | major    | spec (resolved, CL-01 requires ndjson) → implementation assertion                      | AC-3                    |
+| cache-cli/S01-F04 | warning  | spec (resolved, duration `s\|m\|h\|d`) → test-level (this pulse) exercises all 4 units | AC-4                    |
+| cache-cli/S01-F05 | warning  | spec (CL-01 `--yes`/prompt) → AC + prompt-skip on empty                                | AC-5, AC-13             |
+| cache-cli/S01-F06 | warning  | spec (stable sort key) → AC + unit test                                                | AC-6                    |
+| cache-cli/S01-F07 | warning  | spec (`--reset-counters` opt-in) → AC + unit test                                      | AC-7                    |
+| cache-cli/S01-F08 | note     | spec (resolved, `version` field) → AC                                                  | AC-2                    |
+| cache-cli/S01-F09 | note     | spec (resolved, no-op exit 0) → AC                                                     | AC-11                   |
+| cache-cli/S01-F10 | note     | spec (ISO 8601 UTC) → AC + unit test                                                   | AC-8                    |
+| cache-cli/S02-F01 | major    | spec (missing dir == empty for reads) → AC + unit test                                 | AC-9                    |
+| cache-cli/S02-F02 | major    | spec (concurrent-clear tolerant) → AC + integration test                               | AC-10                   |
+| cache-cli/S02-F03 | major    | spec (no-op exits 0) → AC                                                              | AC-11                   |
+| cache-cli/S02-F04 | warning  | spec (0 bytes on empty list) → AC + unit test                                          | AC-12                   |
+| cache-cli/S02-F05 | warning  | spec (full schema with zero values) → AC + unit test                                   | AC-2                    |
+| cache-cli/S02-F06 | warning  | spec (reads don't create dir) → AC + unit test                                         | AC-14                   |
+| cache-cli/S02-F07 | warning  | **pulse AC** (prune short-circuit on empty)                                            | **AC-15**               |
+| cache-cli/S02-F08 | note     | **test** (strict idempotence across repeated runs)                                     | **AC-16 / L3-S02 test** |
+| cache-cli/S02-F09 | note     | **pulse AC** (`clear` prompt skipped on empty)                                         | **AC-13**               |
+| cache-cli/S02-F10 | note     | spec (umask-respecting perms on lazy dir create) → AC + unit test                      | AC-17                   |
 
 The two rows marked bold (S02-F07, S02-F08, S02-F09) are the audit's explicit
 `findings left for pulse authoring` for pulse 79. Every other row is included so
@@ -76,88 +76,51 @@ re-reading each scenario file.
 
 ### SDK — cache API extension (`claws-sdk/src/compiler/cache/`)
 
-- [x] `claws-sdk/src/compiler/cache/cache.ts` — add two methods to `CompilationCache`:
-      - `pruneOlderThan(maxAgeMs: number): Promise<PruneResult>` where
-        `PruneResult = { removedCount: number; removedBytes: number }`. On an
-        empty / missing cache dir, MUST return `{ removedCount: 0, removedBytes: 0 }`
-        **without** a full directory traversal (addresses S02-F07).
-      - `list(): Promise<readonly CacheEntryInfo[]>` returning per-entry metadata,
-        sorted by `lastAccess` DESC (stable tiebreak on `key` lexicographic)
-        per CL-01 v1.2 (S01-F06). On an empty / missing cache dir returns `[]`
-        (S02-F01, S02-F04).
+- [x] `claws-sdk/src/compiler/cache/cache.ts` — add two methods to `CompilationCache`: - `pruneOlderThan(maxAgeMs: number): Promise<PruneResult>` where
+      `PruneResult = { removedCount: number; removedBytes: number }`. On an
+      empty / missing cache dir, MUST return `{ removedCount: 0, removedBytes: 0 }`
+      **without** a full directory traversal (addresses S02-F07). - `list(): Promise<readonly CacheEntryInfo[]>` returning per-entry metadata,
+      sorted by `lastAccess` DESC (stable tiebreak on `key` lexicographic)
+      per CL-01 v1.2 (S01-F06). On an empty / missing cache dir returns `[]`
+      (S02-F01, S02-F04).
 - [x] `claws-sdk/src/compiler/cache/types.ts` — add `CacheEntryInfo`:
-      ```ts
-      readonly key: string;
-      readonly stage: StageName;
-      readonly inputHash: string;
-      readonly sizeBytes: number;
-      readonly createdAt: string;        // ISO 8601 UTC (S01-F10)
-      readonly lastAccessedAt: string;   // ISO 8601 UTC (S01-F10)
-      ```
+      `ts
+    readonly key: string;
+    readonly stage: StageName;
+    readonly inputHash: string;
+    readonly sizeBytes: number;
+    readonly createdAt: string;        // ISO 8601 UTC (S01-F10)
+    readonly lastAccessedAt: string;   // ISO 8601 UTC (S01-F10)
+    `
       Plus `PruneResult` as above.
 - [x] `claws-sdk/src/compiler/cache/resolve.ts` — export `resolveCacheDir(workspaceRoot: string): string` as the **single shared resolver** consumed by both the CLI and the compile path (S01-F01). If the `CompilationCache` ctor currently resolves inline, refactor to go through this function.
-- [x] `claws-sdk/src/compiler/cache/clear.ts` (or inline in `cache.ts`) — `clear()` MUST:
-      - tolerate ENOENT mid-traversal (S02-F02) — concurrent callers must not produce errors
-      - preserve `hitCount` / `missCount` counters by default; accept a `resetCounters: boolean` option that, when true, zeros the counters (S01-F07)
-      - create the cache dir lazily IF absent with umask-respecting permissions (S02-F10)
+- [x] `claws-sdk/src/compiler/cache/clear.ts` (or inline in `cache.ts`) — `clear()` MUST: - tolerate ENOENT mid-traversal (S02-F02) — concurrent callers must not produce errors - preserve `hitCount` / `missCount` counters by default; accept a `resetCounters: boolean` option that, when true, zeros the counters (S01-F07) - create the cache dir lazily IF absent with umask-respecting permissions (S02-F10)
 
 ### CLI — command surface (`claws-cli/src/commands/cache/`)
 
 Each command is a thin adapter over the SDK. No business logic in the CLI.
 
-- [x] `claws-cli/src/commands/cache/stats.ts` — `claws cache stats`:
-      - reads `CompilationCache.stats()` and prints a **single JSON object** with
-        exactly the 5 fields: `sizeBytes`, `entryCount`, `hitCount`, `missCount`,
-        `version` (S01-F02, S01-F08)
-      - on empty cache (incl. missing dir), emits the **full schema with zero values**,
-        NOT `{}` (S02-F05)
-      - MUST NOT create the cache directory (S02-F06)
-- [x] `claws-cli/src/commands/cache/prune.ts` — `claws cache prune --older-than <duration>`:
-      - duration parser accepts `/^\d+(s|m|h|d)$/` (addresses S01-F04 assertion)
-      - reports `pruned <N> entries (<M> bytes)` to stdout, exit 0 on zero matches (S01-F09, S02-F03)
-      - short-circuits without expensive traversal when the cache dir is empty or missing (S02-F07)
-- [x] `claws-cli/src/commands/cache/clear.ts` — `claws cache clear [--yes] [--reset-counters]`:
-      - interactive invocation requires `--yes` OR prompts for confirmation (S01-F05)
-      - confirmation prompt short-circuits when cache is empty — nothing to lose (S02-F09)
-      - `--reset-counters` is opt-in; default preserves `hitCount` / `missCount` (S01-F07)
-      - concurrent-clear tolerant: ENOENT during traversal is not an error (S02-F02)
-      - exit 0 whether cache was populated or already empty (S02-F03)
-- [x] `claws-cli/src/commands/cache/list.ts` — `claws cache list [--json]`:
-      - default: human-readable table (`key`, `stage`, `sizeBytes`, `created`, `lastAccess`)
-      - `--json`: **ndjson** (one JSON object per line), NOT a JSON array (S01-F03)
-      - empty cache emits 0 bytes on stdout (S02-F04), exit 0
-      - timestamps are **ISO 8601 UTC** (`2026-04-16T14:23:00Z`), never epoch seconds or local-TZ (S01-F10)
-      - stable sort by `lastAccess` DESC, tiebreak on `key` lexicographic (S01-F06); sort order documented in `--help`
-      - MUST NOT create the cache directory (S02-F06)
+- [x] `claws-cli/src/commands/cache/stats.ts` — `claws cache stats`: - reads `CompilationCache.stats()` and prints a **single JSON object** with
+      exactly the 5 fields: `sizeBytes`, `entryCount`, `hitCount`, `missCount`,
+      `version` (S01-F02, S01-F08) - on empty cache (incl. missing dir), emits the **full schema with zero values**,
+      NOT `{}` (S02-F05) - MUST NOT create the cache directory (S02-F06)
+- [x] `claws-cli/src/commands/cache/prune.ts` — `claws cache prune --older-than <duration>`: - duration parser accepts `/^\d+(s|m|h|d)$/` (addresses S01-F04 assertion) - reports `pruned <N> entries (<M> bytes)` to stdout, exit 0 on zero matches (S01-F09, S02-F03) - short-circuits without expensive traversal when the cache dir is empty or missing (S02-F07)
+- [x] `claws-cli/src/commands/cache/clear.ts` — `claws cache clear [--yes] [--reset-counters]`: - interactive invocation requires `--yes` OR prompts for confirmation (S01-F05) - confirmation prompt short-circuits when cache is empty — nothing to lose (S02-F09) - `--reset-counters` is opt-in; default preserves `hitCount` / `missCount` (S01-F07) - concurrent-clear tolerant: ENOENT during traversal is not an error (S02-F02) - exit 0 whether cache was populated or already empty (S02-F03)
+- [x] `claws-cli/src/commands/cache/list.ts` — `claws cache list [--json]`: - default: human-readable table (`key`, `stage`, `sizeBytes`, `created`, `lastAccess`) - `--json`: **ndjson** (one JSON object per line), NOT a JSON array (S01-F03) - empty cache emits 0 bytes on stdout (S02-F04), exit 0 - timestamps are **ISO 8601 UTC** (`2026-04-16T14:23:00Z`), never epoch seconds or local-TZ (S01-F10) - stable sort by `lastAccess` DESC, tiebreak on `key` lexicographic (S01-F06); sort order documented in `--help` - MUST NOT create the cache directory (S02-F06)
 - [x] `claws-cli/src/commands/cache/index.ts` — subcommand router wiring stats/prune/clear/list; invalid flags exit 2 (CL-01 convention)
 - [x] Wire the `cache` group into the top-level `claws` CLI command tree
 
 ### Tests
 
-- [x] `claws-sdk/tests/compiler/cache/list.unit.test.ts` — L0 (2 tests):
-      1. empty dir returns `[]` (S02-F01, S02-F04)
-      2. populated cache returns entries sorted `lastAccess` DESC, ISO 8601 timestamps (S01-F06, S01-F10)
-- [x] `claws-sdk/tests/compiler/cache/prune-older-than.unit.test.ts` — L0 (3 tests):
-      1. all entries new → 0 removed, exit-equivalent-0 return (S01 step 4, S01-F09)
-      2. some entries older than threshold → correct count removed
-      3. empty/missing cache → short-circuits without traversal (S02-F07); a spy on fs.readdir confirms it is called **at most once** (early exit)
-- [x] `claws-sdk/tests/compiler/cache/clear.unit.test.ts` — L0 (2 tests):
-      1. `resetCounters: false` (default) preserves hitCount/missCount (S01-F07)
-      2. ENOENT mid-traversal does not throw (S02-F02); simulate by racing two clears on an fs-mocked dir
+- [x] `claws-sdk/tests/compiler/cache/list.unit.test.ts` — L0 (2 tests): 1. empty dir returns `[]` (S02-F01, S02-F04) 2. populated cache returns entries sorted `lastAccess` DESC, ISO 8601 timestamps (S01-F06, S01-F10)
+- [x] `claws-sdk/tests/compiler/cache/prune-older-than.unit.test.ts` — L0 (3 tests): 1. all entries new → 0 removed, exit-equivalent-0 return (S01 step 4, S01-F09) 2. some entries older than threshold → correct count removed 3. empty/missing cache → short-circuits without traversal (S02-F07); a spy on fs.readdir confirms it is called **at most once** (early exit)
+- [x] `claws-sdk/tests/compiler/cache/clear.unit.test.ts` — L0 (2 tests): 1. `resetCounters: false` (default) preserves hitCount/missCount (S01-F07) 2. ENOENT mid-traversal does not throw (S02-F02); simulate by racing two clears on an fs-mocked dir
 - [x] `claws-sdk/tests/compiler/cache/resolve.unit.test.ts` — L0 (1 test):
       single resolver is exported and the compile path imports the **same** function as the CLI (assert by identity / module reference) (S01-F01)
-- [x] `claws-cli/tests/commands/cache/stats.unit.test.ts` — L0 (2 tests):
-      1. populated cache → JSON with all 5 fields, `version` non-empty (S01-F02, S01-F08)
-      2. empty cache / missing dir → full schema with zero values, NOT `{}` (S02-F05); dir is NOT created (S02-F06) — assert post-run that the dir still does not exist
-- [x] `claws-cli/tests/commands/cache/list.unit.test.ts` — L0 (2 tests):
-      1. empty cache → 0 bytes stdout, exit 0 (S02-F04); dir not created (S02-F06)
-      2. `--json` emits ndjson (lines are individually JSON-parseable; whole stdout is NOT valid JSON) (S01-F03)
-- [x] `claws-cli/tests/commands/cache/prune.unit.test.ts` — L0 (2 tests):
-      1. duration parser accepts `30s`, `15m`, `24h`, `7d`; rejects `1w`, `abc`, empty (S01-F04)
-      2. fresh populated cache with `--older-than 1d` removes 0, exit 0, summary line printed (S01 step 4, S01-F09)
-- [x] `claws-cli/tests/commands/cache/clear.unit.test.ts` — L0 (2 tests):
-      1. `--yes` skips prompt; default preserves counters (S01-F05, S01-F07)
-      2. empty cache invocation without `--yes` does NOT prompt, exits 0 (S02-F09, S02-F03)
+- [x] `claws-cli/tests/commands/cache/stats.unit.test.ts` — L0 (2 tests): 1. populated cache → JSON with all 5 fields, `version` non-empty (S01-F02, S01-F08) 2. empty cache / missing dir → full schema with zero values, NOT `{}` (S02-F05); dir is NOT created (S02-F06) — assert post-run that the dir still does not exist
+- [x] `claws-cli/tests/commands/cache/list.unit.test.ts` — L0 (2 tests): 1. empty cache → 0 bytes stdout, exit 0 (S02-F04); dir not created (S02-F06) 2. `--json` emits ndjson (lines are individually JSON-parseable; whole stdout is NOT valid JSON) (S01-F03)
+- [x] `claws-cli/tests/commands/cache/prune.unit.test.ts` — L0 (2 tests): 1. duration parser accepts `30s`, `15m`, `24h`, `7d`; rejects `1w`, `abc`, empty (S01-F04) 2. fresh populated cache with `--older-than 1d` removes 0, exit 0, summary line printed (S01 step 4, S01-F09)
+- [x] `claws-cli/tests/commands/cache/clear.unit.test.ts` — L0 (2 tests): 1. `--yes` skips prompt; default preserves counters (S01-F05, S01-F07) 2. empty cache invocation without `--yes` does NOT prompt, exits 0 (S02-F09, S02-F03)
 - [x] `claws-cli/tests/commands/cache/round-trip.integration.test.ts` — L1 (1 test):
       full S01 sequence: compile 3 fixtures → `stats` (entryCount=3) → `list --json` (3 ndjson lines, sorted) → `prune --older-than 1d` (0 removed) → `clear --yes` → `stats` (entryCount=0). CLI and compile path share the resolved cache dir (S01-F01 end-to-end).
 - [x] `claws-cli/tests/commands/cache/concurrent-clear.integration.test.ts` — L1 (1 test):

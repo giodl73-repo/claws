@@ -10,13 +10,13 @@
 
 ## Totals
 
-| Role | Critical | Major | Warning | Notes | Total |
-|------|----------|-------|---------|-------|-------|
-| architect | 0 | 4 | 4 | 3 | 11 |
-| navigator | 0 | 6 | 6 | 0 | 12 |
-| dragon | 2 | 5 | 6 | 0 | 13 |
-| **Raw** | **2** | **15** | **16** | **3** | **36** |
-| **Dedup** | **2** | **8** | **10** | **3** | **23** |
+| Role      | Critical | Major  | Warning | Notes | Total  |
+| --------- | -------- | ------ | ------- | ----- | ------ |
+| architect | 0        | 4      | 4       | 3     | 11     |
+| navigator | 0        | 6      | 6       | 0     | 12     |
+| dragon    | 2        | 5      | 6       | 0     | 13     |
+| **Raw**   | **2**    | **15** | **16**  | **3** | **36** |
+| **Dedup** | **2**    | **8**  | **10**  | **3** | **23** |
 
 ---
 
@@ -47,6 +47,7 @@ are "Heavy" and should be split. Realistic: 10-12 pulses.
 **Severity**: Critical (dragon) / Major (navigator)
 
 Two issues:
+
 - Dragon: fixture workspace is writable — user can bypass governance by editing it
 - Navigator: fixture loads but there's no guided walkthrough, just a data dump
 

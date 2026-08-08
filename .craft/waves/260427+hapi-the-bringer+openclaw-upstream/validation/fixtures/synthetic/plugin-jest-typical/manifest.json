@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "jest plugin (testing)",
   "contributes": {
-    "tools": [
-      "jest/run",
-      "jest/list-tests"
-    ],
-    "skills": [
-      "jest/run",
-      "jest/list-tests"
-    ]
+    "tools": ["jest/run", "jest/list-tests"],
+    "skills": ["jest/run", "jest/list-tests"]
   }
 }

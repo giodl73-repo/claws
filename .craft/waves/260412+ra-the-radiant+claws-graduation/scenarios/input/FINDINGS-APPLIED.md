@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **File resolution**: cross-platform path normalization requirement, workspace boundary enforcement for file resolution, symlink resolution and provenance recording
 - **Package resolution**: must handle monorepo hoisting, pkg: URI parsing for scoped packages, logical vs physical path distinction for pnpm
 - **URL resolution**: locked mode for URL resolution determinism, TLS verification must be mandatory (not optional), cache key must include full URL with query string

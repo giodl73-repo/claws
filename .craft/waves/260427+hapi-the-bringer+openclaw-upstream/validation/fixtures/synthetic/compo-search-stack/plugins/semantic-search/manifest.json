@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "semantic-search plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "semantic-search/query"
-    ]
+    "tools": ["semantic-search/query"]
   }
 }

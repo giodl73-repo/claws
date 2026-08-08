@@ -91,10 +91,10 @@ platform.
 
 ## Governing Roles
 
-| Role | File | Focus |
-|------|------|-------|
+| Role               | File                                 | Focus                                                                        |
+| ------------------ | ------------------------------------ | ---------------------------------------------------------------------------- |
 | claws:platform-eng | `.craft/roles/claws/platform-eng.md` | Nested path accuracy, forward-compat patterns, marker registry extensibility |
-| craft:architect | `.craft/roles/craft/architect.md` | Loss matrix design, enforcement capability vector, Spec 108 integration |
+| craft:architect    | `.craft/roles/craft/architect.md`    | Loss matrix design, enforcement capability vector, Spec 108 integration      |
 
 ## Dependencies
 
@@ -120,6 +120,7 @@ npm run build
 ## Review Amendments (R1)
 
 ### C03: Loss Matrix Consolidation
+
 - [ ] Loss matrix data lives in `claws-sdk/src/types/loss-matrix.ts` (single source of truth)
 - [ ] `detect/capability-scores.ts` imports loss-matrix types for platform scoring
 - [ ] `emit/route-selector.ts` imports same loss-matrix types for path scoring

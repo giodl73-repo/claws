@@ -268,8 +268,8 @@ new installer. Example:
       "channels": ["official", "community"],
       "verificationTiers": ["source-linked", "reviewed"],
       "scanStates": ["clean"],
-      "families": ["skill", "code-plugin", "bundle-plugin"]
-    }
+      "families": ["skill", "code-plugin", "bundle-plugin"],
+    },
   },
   "entries": [
     {
@@ -283,10 +283,10 @@ new installer. Example:
         "tier": "reviewed",
         "risk": "low",
         "data": "internal",
-        "requiresScanClean": true
-      }
-    }
-  ]
+        "requiresScanClean": true,
+      },
+    },
+  ],
 }
 ```
 
@@ -364,10 +364,10 @@ Out of scope for MVP:
 
 Enterprise Feeds should have two modes:
 
-| Mode | Install behavior | Use case |
-|---|---|---|
-| `advisory` | Existing install succeeds but emits feed findings/warnings. | Local exploration, early rollout, hobbyist compatibility. |
-| `enforcing` | Existing install fails when the selected entry is ineligible. | Managed workspaces, CI, hosted products. |
+| Mode        | Install behavior                                              | Use case                                                  |
+| ----------- | ------------------------------------------------------------- | --------------------------------------------------------- |
+| `advisory`  | Existing install succeeds but emits feed findings/warnings.   | Local exploration, early rollout, hobbyist compatibility. |
+| `enforcing` | Existing install fails when the selected entry is ineligible. | Managed workspaces, CI, hosted products.                  |
 
 The filter result should be structured:
 
@@ -384,9 +384,9 @@ The filter result should be structured:
       "severity": "error",
       "message": "Skill requires graph.mail.send, but this workspace baseline only allows graph.mail.read.",
       "target": "clawhub://skills/outlook-triage",
-      "requirement": "oc://enterprise-feeds/m365-approved/entries/skill%3Aoutlook-triage/requiredScopes"
-    }
-  ]
+      "requirement": "oc://enterprise-feeds/m365-approved/entries/skill%3Aoutlook-triage/requiredScopes",
+    },
+  ],
 }
 ```
 
@@ -476,13 +476,13 @@ Entries are the curated list:
       "requiredCapabilities": ["host.identity", "host.graph"],
       "policyTags": ["mail", "external-write-review"],
       "install": {
-        "mode": "allowed"
+        "mode": "allowed",
       },
       "signature": {
-        "required": true
-      }
-    }
-  ]
+        "required": true,
+      },
+    },
+  ],
 }
 ```
 
@@ -500,8 +500,8 @@ Requirements are the workspace rules for interpreting entry metadata:
     {
       "id": "m365-approved",
       "type": "file",
-      "path": "enterprise-feeds.jsonc"
-    }
+      "path": "enterprise-feeds.jsonc",
+    },
   ],
   "rules": {
     "defaultDecision": "warn",
@@ -515,9 +515,9 @@ Requirements are the workspace rules for interpreting entry metadata:
     "minTierByRisk": {
       "low": "declared",
       "medium": "typed",
-      "high": "verified"
-    }
-  }
+      "high": "verified",
+    },
+  },
 }
 ```
 
@@ -566,10 +566,10 @@ the conformance authority. Enterprise Feeds supplies facts such as:
         "approved": true,
         "version": "1.2.3",
         "risk": "medium",
-        "sensitivity": "confidential"
-      }
-    ]
-  }
+        "sensitivity": "confidential",
+      },
+    ],
+  },
 }
 ```
 

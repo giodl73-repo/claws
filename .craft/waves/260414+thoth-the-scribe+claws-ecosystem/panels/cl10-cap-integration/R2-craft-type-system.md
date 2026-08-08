@@ -11,6 +11,7 @@
 ## R1 Summary
 
 R1 found 11 findings (4 Major, 5 Warning, 2 Note). The core issues were:
+
 - `Chunk<T>` unconstrained generic allowing `Chunk<any>`
 - `tab` field did not discriminate `data` shape
 - `editable` keys stringly typed with no connection to `data`
@@ -63,7 +64,7 @@ R1 found 11 findings (4 Major, 5 Warning, 2 Note). The core issues were:
 **R2**: The spec now imports `RiskClassification` from CL-11 explicitly:
 
 ```typescript
-import type { RiskClassification } from '@openclaw/approval-events'; // from CL-11
+import type { RiskClassification } from "@openclaw/approval-events"; // from CL-11
 ```
 
 And uses it in the governance context:
@@ -103,8 +104,8 @@ The coupled discriminated union from CL-11 is now the single source of truth.
 
 ```typescript
 type PatchResult =
-  | { status: 'ok'; updatedChunk: Chunk; governance: GovernanceResult }
-  | { status: 'rejected'; error: PatchError; field?: string; message: string };
+  | { status: "ok"; updatedChunk: Chunk; governance: GovernanceResult }
+  | { status: "rejected"; error: PatchError; field?: string; message: string };
 ```
 
 `PatchResult` is discriminated on `status`. Each variant has its own shape. `PatchError` is a closed string union of 8 values. The PATCH endpoint is now the chunk PATCH (sole write surface), not the per-operation model from R1.
@@ -143,7 +144,7 @@ The general chunk example (line 762) still shows `"managedBy": { "type": "string
 **R2**: The spec now defines:
 
 ```typescript
-type TrustTier = 'T0' | 'T1' | 'T2' | 'T3' | 'T4';
+type TrustTier = "T0" | "T1" | "T2" | "T3" | "T4";
 ```
 
 And uses it in the governance context: `trustTier?: TrustTier`. The trust API response (line 198) still shows `"currentTier": "T2"` in JSON, but this is the serialized form of the typed value.
@@ -167,7 +168,7 @@ And uses it in the governance context: `trustTier?: TrustTier`. The trust API re
 **R2**: The spec now defines:
 
 ```typescript
-type DataLabel = 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';
+type DataLabel = "PUBLIC" | "INTERNAL" | "CONFIDENTIAL" | "RESTRICTED";
 ```
 
 This is a proper 4-value closed union. JSON examples still show raw strings (e.g., line 498), but this is the serialized form.
@@ -178,19 +179,19 @@ This is a proper 4-value closed union. JSON examples still show raw strings (e.g
 
 ## R1 Resolution Summary
 
-| R1 ID | Severity | Finding | R2 Status |
-|-------|----------|---------|-----------|
-| TS-01 | HIGH | `Chunk<T>` unconstrained | PARTIALLY RESOLVED |
-| TS-02 | HIGH | `tab` doesn't discriminate `data` | PARTIALLY RESOLVED |
-| TS-03 | HIGH | `editable` keys stringly typed | PARTIALLY RESOLVED |
-| TS-04 | HIGH | Governance reinvents CL-11 types | RESOLVED |
-| TS-05 | MEDIUM | Per-tool `risk` uncoupled | PARTIALLY RESOLVED |
-| TS-06 | MEDIUM | PATCH operation untyped | RESOLVED |
-| TS-07 | MEDIUM | `editable.type` enum incomplete | UNRESOLVED |
-| TS-08 | MEDIUM | `fleetOverrides` stringly typed | UNRESOLVED |
-| TS-09 | MEDIUM | `trustTier` raw string | RESOLVED |
-| TS-10 | MEDIUM | SSE events untyped | UNRESOLVED |
-| TS-11 | LOW | `dataLabel` raw string | RESOLVED |
+| R1 ID | Severity | Finding                           | R2 Status          |
+| ----- | -------- | --------------------------------- | ------------------ |
+| TS-01 | HIGH     | `Chunk<T>` unconstrained          | PARTIALLY RESOLVED |
+| TS-02 | HIGH     | `tab` doesn't discriminate `data` | PARTIALLY RESOLVED |
+| TS-03 | HIGH     | `editable` keys stringly typed    | PARTIALLY RESOLVED |
+| TS-04 | HIGH     | Governance reinvents CL-11 types  | RESOLVED           |
+| TS-05 | MEDIUM   | Per-tool `risk` uncoupled         | PARTIALLY RESOLVED |
+| TS-06 | MEDIUM   | PATCH operation untyped           | RESOLVED           |
+| TS-07 | MEDIUM   | `editable.type` enum incomplete   | UNRESOLVED         |
+| TS-08 | MEDIUM   | `fleetOverrides` stringly typed   | UNRESOLVED         |
+| TS-09 | MEDIUM   | `trustTier` raw string            | RESOLVED           |
+| TS-10 | MEDIUM   | SSE events untyped                | UNRESOLVED         |
+| TS-11 | LOW      | `dataLabel` raw string            | RESOLVED           |
 
 **Resolved**: 5/11 (TS-04, TS-06, TS-09, TS-11, plus effective resolution of TS-06 via architecture change)
 **Partially resolved**: 4/11 (TS-01, TS-02, TS-03, TS-05)
@@ -233,6 +234,7 @@ Without this, the generic `K` is cosmetic on the data dimension. A `Chunk<'gener
 The spec states the design decision: "Editability for array items (tools, knowledge sources) is embedded per-item in data -- each tool carries its own `lock` field. No JSONPath-like query syntax." (lines 739-742).
 
 But the connections chunk example at line 816-818 still uses:
+
 ```json
 "editable": {
   "tools[*].enabled": { "type": "boolean" },
@@ -243,6 +245,7 @@ But the connections chunk example at line 816-818 still uses:
 This is the exact JSONPath-like syntax the design decision prohibits. The tool objects in `data.tools` (lines 786-814) do NOT carry per-item `lock` fields. The `FieldEditability` type defines a `lock` structure, but the JSON example tools have no `lock` property.
 
 **Fix**: Update the connections chunk example to embed lock info per tool item:
+
 ```json
 "tools": [
   {
@@ -254,6 +257,7 @@ This is the exact JSONPath-like syntax the design decision prohibits. The tool o
   ...
 ]
 ```
+
 And remove the `tools[*].enabled` / `tools[send-email].enabled` entries from `editable`. The `editable` record should contain only flat-field entries.
 
 ---
@@ -263,6 +267,7 @@ And remove the `tools[*].enabled` / `tools[send-email].enabled` entries from `ed
 **Location**: Line 858
 
 Same issue as NEW-02. The memory chunk example uses:
+
 ```json
 "editable": {
   "knowledgeSources[*].enabled": { "type": "boolean" }
@@ -315,9 +320,11 @@ The second variant is inherently "locked" -- no boolean needed.
 The `managedBy` entry uses `"locked": false` as a flat boolean, not the structured `lock: { locked, source, reason }` defined in `FieldEditability`. The `name` and `description` entries have no `lock` at all. These examples don't conform to the TypeScript type defined at lines 602-612.
 
 **Fix**: Update examples to use the `lock` structure:
+
 ```json
 "name": { "type": "string", "required": true, "lock": { "locked": false, "source": "none" } }
 ```
+
 Or make `lock` optional (which it is -- `lock?:`) and explain that absent lock means editable.
 
 ---
@@ -333,7 +340,7 @@ phaseOutputs: {
   analyze: string;
   optimize: string;
   emit: Record<string, string>;
-};
+}
 ```
 
 All hash values are `string`. A branded type like `type ContentHash = string & { __brand: 'ContentHash' }` would prevent accidental assignment of non-hash strings (file paths, names, etc.) to hash fields. This is a minor improvement for a cache implementation but prevents a category of bugs where cache keys and cache values get mixed.
@@ -373,29 +380,29 @@ This also enables adding `severity` or `location` fields in one place.
 
 ## R2 New Findings Summary
 
-| ID | Severity | Finding |
-|----|----------|---------|
-| NEW-01 | MEDIUM | `ChunkData` undefined -- generic `K` does not discriminate `data` |
-| NEW-02 | MEDIUM | Connections example contradicts per-item editability design |
-| NEW-03 | WARNING | Memory example uses array-path syntax in `editable` |
-| NEW-04 | WARNING | `lock.locked` redundant with `lock.source` -- allows invalid states |
-| NEW-05 | WARNING | General example uses old `FieldEditability` shape without `lock` struct |
-| NEW-06 | NOTE | Phase cache uses raw `string` for hashes, not branded type |
-| NEW-07 | NOTE | `GovernanceResult` warnings/errors share unnamed inline shape |
+| ID     | Severity | Finding                                                                 |
+| ------ | -------- | ----------------------------------------------------------------------- |
+| NEW-01 | MEDIUM   | `ChunkData` undefined -- generic `K` does not discriminate `data`       |
+| NEW-02 | MEDIUM   | Connections example contradicts per-item editability design             |
+| NEW-03 | WARNING  | Memory example uses array-path syntax in `editable`                     |
+| NEW-04 | WARNING  | `lock.locked` redundant with `lock.source` -- allows invalid states     |
+| NEW-05 | WARNING  | General example uses old `FieldEditability` shape without `lock` struct |
+| NEW-06 | NOTE     | Phase cache uses raw `string` for hashes, not branded type              |
+| NEW-07 | NOTE     | `GovernanceResult` warnings/errors share unnamed inline shape           |
 
 ---
 
 ## R1 to R2 Lens Comparison
 
-| Dimension | R1 | R2 | Delta |
-|-----------|----|----|-------|
-| **Chunk generic safety** | `Chunk<T = unknown>` -- wide open | `Chunk<K extends ChunkTab>` -- tab-bounded | Improved: tab constrained. Gap: `data` not tab-discriminated |
-| **CL-11 coupling** | Reinvented types | `RiskClassification` imported, `TrustTier` + `DataLabel` defined | Strong improvement. Cross-spec consistency achieved |
-| **Write-path typing** | Raw string operations | `PatchResult` discriminated union, `PatchError` closed union | Fully resolved. Write path is now properly typed |
-| **Lock model** | `locked: true/false` -- boolean | `lock: { locked, source, reason }` -- structured | Improved but redundant `locked` + `source` creates invalid state space |
-| **Editable keys** | `Record<string, ...>` with JSONPath | Design decision to embed per-item, flat keys only | Architecture better, but examples contradict the decision |
-| **SSE events** | Untyped | Still untyped | No progress |
-| **Cache typing** | N/A (not in R1 scope) | `PhaseCache` with per-phase outputs | New addition, adequately typed |
+| Dimension                | R1                                  | R2                                                               | Delta                                                                  |
+| ------------------------ | ----------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **Chunk generic safety** | `Chunk<T = unknown>` -- wide open   | `Chunk<K extends ChunkTab>` -- tab-bounded                       | Improved: tab constrained. Gap: `data` not tab-discriminated           |
+| **CL-11 coupling**       | Reinvented types                    | `RiskClassification` imported, `TrustTier` + `DataLabel` defined | Strong improvement. Cross-spec consistency achieved                    |
+| **Write-path typing**    | Raw string operations               | `PatchResult` discriminated union, `PatchError` closed union     | Fully resolved. Write path is now properly typed                       |
+| **Lock model**           | `locked: true/false` -- boolean     | `lock: { locked, source, reason }` -- structured                 | Improved but redundant `locked` + `source` creates invalid state space |
+| **Editable keys**        | `Record<string, ...>` with JSONPath | Design decision to embed per-item, flat keys only                | Architecture better, but examples contradict the decision              |
+| **SSE events**           | Untyped                             | Still untyped                                                    | No progress                                                            |
+| **Cache typing**         | N/A (not in R1 scope)               | `PhaseCache` with per-phase outputs                              | New addition, adequately typed                                         |
 
 ---
 

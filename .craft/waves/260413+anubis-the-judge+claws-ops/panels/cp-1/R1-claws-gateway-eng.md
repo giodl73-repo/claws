@@ -28,7 +28,7 @@ nits: 4
 
 `evaluatePolicy()` and `checkElicitation()` accept an `AbortSignal` parameter but never wire it into the mock implementation. More critically, `GatewaySim.fireToolCall()` (`claws-test/src/gateway-sim.ts:199-305`) never passes an AbortSignal at all when calling hooks. This means the 50ms latency budget from the role spec is architecturally unenforceable -- a governance host that hangs will block the Gateway event loop indefinitely.
 
-The `TimingCollector` measures elapsed time *after* the call returns, but it cannot *enforce* the budget. A real Gateway integration would need `AbortController` with a deadline to cut off slow hosts.
+The `TimingCollector` measures elapsed time _after_ the call returns, but it cannot _enforce_ the budget. A real Gateway integration would need `AbortController` with a deadline to cut off slow hosts.
 
 **Recommendation**: Wire an `AbortController` with configurable timeout (default 50ms) into `GatewaySim.fireToolCall()` before the `beforeToolCall` hook invocation. The mock can remain simple, but the sim must model the timeout behavior that production will need.
 
@@ -84,18 +84,18 @@ In a production Gateway, unrecognized events would either throw or log a warning
 
 ```typescript
 export function diffSeverity(diff: SimDiff): DiffSeverity {
-  if (diff.regressions.length === 0) return 'clean';
-  const hasR5 = diff.regressions.some(r => r.riskLevel >= 5);
-  if (hasR5) return 'critical';
-  const hasR3R4 = diff.regressions.some(r => r.riskLevel >= 3);
-  if (hasR3R4) return 'warning';
-  return 'clean';  // <-- R1-R2 regressions get 'clean'
+  if (diff.regressions.length === 0) return "clean";
+  const hasR5 = diff.regressions.some((r) => r.riskLevel >= 5);
+  if (hasR5) return "critical";
+  const hasR3R4 = diff.regressions.some((r) => r.riskLevel >= 3);
+  if (hasR3R4) return "warning";
+  return "clean"; // <-- R1-R2 regressions get 'clean'
 }
 ```
 
 If enforcement weakens on R1-R2 tools (e.g., a tool that was BLOCKED drops to ALLOWED), `diffSeverity()` returns `'clean'` because neither the R5 nor R3-R4 threshold is hit. The `hasRegressions()` function would still return `true`, but any consumer that checks only `diffSeverity()` would miss the regression entirely.
 
-Per role spec: "Fail-open for R1-R2" means errors *allow through* -- it does not mean regressions on R1-R2 are unimportant. An R1 tool going from BLOCKED to ALLOWED could indicate a policy misconfiguration.
+Per role spec: "Fail-open for R1-R2" means errors _allow through_ -- it does not mean regressions on R1-R2 are unimportant. An R1 tool going from BLOCKED to ALLOWED could indicate a policy misconfiguration.
 
 **Recommendation**: Return `'warning'` (not `'clean'`) when any regressions exist, regardless of risk tier.
 
@@ -139,7 +139,7 @@ Any Gateway code that catches config errors and tries to call `.toDiagnostic()` 
 ```typescript
 function extractRuleId(reason: string): string {
   const match = reason.match(/G-[\w-]+/);
-  return match ? match[0] : 'default';
+  return match ? match[0] : "default";
 }
 ```
 
@@ -180,10 +180,10 @@ Every CSV row has `line=1` regardless of the actual violation location. The expe
 
 ## Summary
 
-| Grade | Count | IDs |
-|-------|-------|-----|
-| MUST-FIX | 2 | M-01, M-02 |
-| WARNING | 5 | W-01, W-02, W-03, W-04, W-05 |
-| NIT | 4 | N-01, N-02, N-03, N-04 |
+| Grade    | Count | IDs                          |
+| -------- | ----- | ---------------------------- |
+| MUST-FIX | 2     | M-01, M-02                   |
+| WARNING  | 5     | W-01, W-02, W-03, W-04, W-05 |
+| NIT      | 4     | N-01, N-02, N-03, N-04       |
 
 **Verdict**: PASS with warnings. The core gateway model is sound -- risk-tiered fail modes, audit chain integrity, and plugin loading without eval/Function are all correctly implemented. The two must-fixes are about enforcement completeness: M-01 (no timeout on host calls) means the 50ms latency budget is aspirational rather than enforced, and M-02 (afterToolCall skipped on blocked tools) creates an audit gap that contradicts the stated contract. Both are fixable without architectural changes. The warnings are hardening items for production readiness; the nits are polish.

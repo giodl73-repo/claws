@@ -4,7 +4,32 @@ slug: protect-test-coverage
 plan: claws-protect
 depends_on: [1, 2, 3, 4, 5, 6, 7, 8, 9]
 governing_roles: [claws:ciso, claws:founder, craft:architect]
-scenario_codes: [obo-elicitation/S01, obo-elicitation/S02, obo-elicitation/S05, obo-elicitation/S06, obo-elicitation/S07, obo-elicitation/S08, a2a-governance/S04, a2a-governance/S05, a2a-governance/S06, pitfall-thoth-1/P-197, pitfall-thoth-1/P-198, pitfall-thoth-1/P-199, pitfall-thoth-1/P-203, pitfall-thoth-1/P-204, pitfall-thoth-1/P-205, pitfall-thoth-1/P-206, pitfall-thoth-1/P-207, pitfall-thoth-1/P-208, pitfall-thoth-1/P-209, pitfall-thoth-1/P-210, pitfall-thoth-1/P-211, pitfall-thoth-1/P-212, pitfall-thoth-1/P-213]
+scenario_codes:
+  [
+    obo-elicitation/S01,
+    obo-elicitation/S02,
+    obo-elicitation/S05,
+    obo-elicitation/S06,
+    obo-elicitation/S07,
+    obo-elicitation/S08,
+    a2a-governance/S04,
+    a2a-governance/S05,
+    a2a-governance/S06,
+    pitfall-thoth-1/P-197,
+    pitfall-thoth-1/P-198,
+    pitfall-thoth-1/P-199,
+    pitfall-thoth-1/P-203,
+    pitfall-thoth-1/P-204,
+    pitfall-thoth-1/P-205,
+    pitfall-thoth-1/P-206,
+    pitfall-thoth-1/P-207,
+    pitfall-thoth-1/P-208,
+    pitfall-thoth-1/P-209,
+    pitfall-thoth-1/P-210,
+    pitfall-thoth-1/P-211,
+    pitfall-thoth-1/P-212,
+    pitfall-thoth-1/P-213,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 7
@@ -29,10 +54,12 @@ CP-1 gate pulse. This pulse closes all remaining test gaps from THOTH-FINDINGS, 
 **Integration Coverage Hardening:** This gate pulse includes 6 integration tests addressing coverage gaps identified in the THOTH-INTEGRATION-COVERAGE analysis. Target: 90%+ stmts from integration tests alone across snapshot (74%), doctor (68%), amend (67%), detect (62%), config (38%), and adapter (41%) areas.
 
 **Test gaps to close:**
+
 - T-01 (path traversal in key operations): `../`, `/`, `\` in keyId must throw — no path traversal through key management APIs.
 - T-04 (raise-only boundary edges): LLM at R1 vs regex at R5, both undefined, gap-fill with no baseline — all boundary conditions must be covered.
 
 **Warnings to address:**
+
 - D-W1 (rate limit backoff): sequential LLM extraction calls need exponential backoff to avoid provider rate limits.
 - D-W2 (fuzzy match bypass): fuzzy matching for high-risk (R4-R5) tools is dangerous — a near-miss match could silently approve a different tool. Disable fuzzy match for R4-R5.
 - F2 (relocated tier): line-number mismatches between OC source and extraction results need a "relocated" confidence tier (0.6x) instead of silent acceptance.
@@ -44,6 +71,7 @@ CP-1 gate pulse. This pulse closes all remaining test gaps from THOTH-FINDINGS, 
 - C-W1 (policyVersion): broadcast uses hardcoded 'unknown' for policyVersion — should resolve from claws.json.
 
 **Pitfall scenarios:**
+
 - P-197, P-198, P-199: Thoth wave pitfall scenarios covering protect module edge cases.
 
 ## Deliverables
@@ -98,6 +126,7 @@ CP-1 gate pulse. This pulse closes all remaining test gaps from THOTH-FINDINGS, 
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/ciso.md` — security hardening verification, threat model coverage
 - `.craft/roles/claws/founder.md` — product security posture, acceptable risk thresholds
 - `.craft/roles/craft/architect.md` — test coverage standards, barrel export conventions, CP gate criteria

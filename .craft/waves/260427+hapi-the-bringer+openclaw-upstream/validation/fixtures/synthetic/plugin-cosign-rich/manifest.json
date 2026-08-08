@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "cosign plugin (security)",
   "contributes": {
-    "tools": [
-      "cosign/sign-image",
-      "cosign/verify"
-    ],
-    "skills": [
-      "cosign/sign-image",
-      "cosign/verify"
-    ],
-    "workflows": [
-      "cosign-flow.lobster"
-    ],
+    "tools": ["cosign/sign-image", "cosign/verify"],
+    "skills": ["cosign/sign-image", "cosign/verify"],
+    "workflows": ["cosign-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

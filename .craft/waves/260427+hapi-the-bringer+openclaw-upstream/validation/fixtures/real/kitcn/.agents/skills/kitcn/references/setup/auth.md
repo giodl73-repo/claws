@@ -36,9 +36,7 @@ import { getEnv } from "../lib/get-env";
 
 export default {
   providers: [
-    getEnv().JWKS
-      ? getAuthConfigProvider({ jwks: getEnv().JWKS })
-      : getAuthConfigProvider(),
+    getEnv().JWKS ? getAuthConfigProvider({ jwks: getEnv().JWKS }) : getAuthConfigProvider(),
   ],
 } satisfies AuthConfig;
 ```
@@ -115,7 +113,7 @@ export const getSessionUser = publicQuery
         plan: z.string().optional(),
       }),
       z.null(),
-    ])
+    ]),
   )
   .query(async ({ ctx }) => {
     const auth = getAuth(ctx);
@@ -232,7 +230,7 @@ app.use(
     allowHeaders: ["Content-Type", "Authorization", "Better-Auth-Cookie"],
     exposeHeaders: ["Set-Better-Auth-Cookie"],
     credentials: true,
-  })
+  }),
 );
 
 app.use(authMiddleware(getAuth));
@@ -374,22 +372,20 @@ export const privateQuery = c.query.internal();
 export const privateMutation = c.mutation.internal();
 export const privateAction = c.action.internal();
 
-export const optionalAuthQuery = c.query
-  .meta({ auth: "optional" })
-  .use(async ({ ctx, next }) => {
-    const auth = getAuth(ctx);
-    const session = await auth.api.getSession({
-      headers: await getHeaders(ctx),
-    });
-
-    return next({
-      ctx: {
-        ...ctx,
-        user: session?.user ?? null,
-        userId: session?.user?.id ?? null,
-      },
-    });
+export const optionalAuthQuery = c.query.meta({ auth: "optional" }).use(async ({ ctx, next }) => {
+  const auth = getAuth(ctx);
+  const session = await auth.api.getSession({
+    headers: await getHeaders(ctx),
   });
+
+  return next({
+    ctx: {
+      ...ctx,
+      user: session?.user ?? null,
+      userId: session?.user?.id ?? null,
+    },
+  });
+});
 
 export const authQuery = c.query
   .meta({ auth: "required" })
@@ -432,16 +428,14 @@ export const authMutation = c.mutation
   })
   .use(roleMiddleware);
 
-export const authAction = c.action
-  .meta({ auth: "required" })
-  .use(async ({ ctx, next }) => {
-    const auth = getAuth(ctx);
-    const session = await auth.api.getSession({
-      headers: await getHeaders(ctx),
-    });
-    const user = requireAuth(session?.user ?? null);
-    return next({ ctx: { ...ctx, user, userId: user.id } });
+export const authAction = c.action.meta({ auth: "required" }).use(async ({ ctx, next }) => {
+  const auth = getAuth(ctx);
+  const session = await auth.api.getSession({
+    headers: await getHeaders(ctx),
   });
+  const user = requireAuth(session?.user ?? null);
+  return next({ ctx: { ...ctx, user, userId: user.id } });
+});
 
 export const publicRoute = c.httpAction;
 export const authRoute = c.httpAction.use(async ({ ctx, next }) => {

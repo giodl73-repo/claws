@@ -55,6 +55,7 @@ Article 13 transparency evaluation checks whether the system provides adequate d
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/founder.md` — product vision for EU AI Act compliance, classification scope
 - `.craft/roles/claws/ciso.md` — EU AI Act requirements, Annex III categories, Article 13/14 evaluation criteria
 

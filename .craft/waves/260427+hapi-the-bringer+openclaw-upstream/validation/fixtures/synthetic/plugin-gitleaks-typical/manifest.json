@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "gitleaks plugin (security)",
   "contributes": {
-    "tools": [
-      "gitleaks/scan",
-      "gitleaks/detect"
-    ],
-    "skills": [
-      "gitleaks/scan",
-      "gitleaks/detect"
-    ]
+    "tools": ["gitleaks/scan", "gitleaks/detect"],
+    "skills": ["gitleaks/scan", "gitleaks/detect"]
   }
 }

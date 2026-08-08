@@ -6,6 +6,7 @@ trust: composition
 # compo-comm-cascade
 
 Composition workspace bringing together 3 plugin(s):
+
 - `plugins/email/`
 - `plugins/sms/`
 - `plugins/voice-call/`

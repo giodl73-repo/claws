@@ -11,13 +11,29 @@ description: >
 
 expect:
   downgrade:
-    npm_uninstall: ["@craftworks/forma", "@craftworks/crypto", "@craftworks/workspace",
-      "@craftworks/governance", "@craftworks/codegen", "@craftworks/relax",
-      "@craftworks/context", "@craftworks/execution", "@craftworks/eval",
-      "@craftworks/input", "@craftworks/emit-oc", "@craftworks/emit-cc",
-      "@craftworks/emit-cursor", "@craftworks/emit-copilot", "@craftworks/emit-bedrock",
-      "@craftworks/emit-langgraph", "@craftworks/emit-crewai", "@bic/claws-sdk",
-      "@bic/claws-skill-kit", "@bic/claws-test"]
+    npm_uninstall:
+      [
+        "@craftworks/forma",
+        "@craftworks/crypto",
+        "@craftworks/workspace",
+        "@craftworks/governance",
+        "@craftworks/codegen",
+        "@craftworks/relax",
+        "@craftworks/context",
+        "@craftworks/execution",
+        "@craftworks/eval",
+        "@craftworks/input",
+        "@craftworks/emit-oc",
+        "@craftworks/emit-cc",
+        "@craftworks/emit-cursor",
+        "@craftworks/emit-copilot",
+        "@craftworks/emit-bedrock",
+        "@craftworks/emit-langgraph",
+        "@craftworks/emit-crewai",
+        "@bic/claws-sdk",
+        "@bic/claws-skill-kit",
+        "@bic/claws-test",
+      ]
     npm_install: "@craftworks/compiler-sdk@pre-extraction-version"
     behavior: "identical"
   compilation:

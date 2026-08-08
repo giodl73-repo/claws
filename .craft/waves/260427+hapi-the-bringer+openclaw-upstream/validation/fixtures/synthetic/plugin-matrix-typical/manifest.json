@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "matrix plugin (communication)",
   "contributes": {
-    "tools": [
-      "matrix/send-message",
-      "matrix/list-rooms"
-    ],
-    "skills": [
-      "matrix/send-message",
-      "matrix/list-rooms"
-    ]
+    "tools": ["matrix/send-message", "matrix/list-rooms"],
+    "skills": ["matrix/send-message", "matrix/list-rooms"]
   }
 }

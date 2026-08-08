@@ -1,6 +1,6 @@
 ---
 name: concave-parity
-description: 'Skill: concave-parity'
+description: "Skill: concave-parity"
 metadata:
   skiller:
     source: .agents/rules/concave-parity.mdc

@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "playwright plugin (testing)",
   "contributes": {
-    "tools": [
-      "playwright/screenshot",
-      "playwright/run-test"
-    ],
-    "skills": [
-      "playwright/screenshot",
-      "playwright/run-test"
-    ],
-    "workflows": [
-      "playwright-flow.lobster"
-    ],
+    "tools": ["playwright/screenshot", "playwright/run-test"],
+    "skills": ["playwright/screenshot", "playwright/run-test"],
+    "workflows": ["playwright-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

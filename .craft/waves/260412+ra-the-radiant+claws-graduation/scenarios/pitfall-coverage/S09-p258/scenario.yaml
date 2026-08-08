@@ -15,7 +15,10 @@ expect:
   prevention: "`claws check --audit-chain` verifies cross-implementation chain continuity. Canonical format frozen before extraction: sorted keys, LF line endings, buffer-based hash concatenation, ISO 8601 UTC timestamps with ms precision."
 
 simulate:
-  failures: ["Audit chain JSONL format changes during extraction break cross-implementation chain continuity"]
+  failures:
+    [
+      "Audit chain JSONL format changes during extraction break cross-implementation chain continuity",
+    ]
   halt: null
   budget: null
 

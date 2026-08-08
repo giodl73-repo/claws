@@ -18,10 +18,10 @@ Hooks rely on a stable call order. Calling them conditionally or in loops breaks
 ```tsx
 function Form({ showName }) {
   if (showName) {
-    const [name, setName] = useState('') // Conditional hook call
+    const [name, setName] = useState(""); // Conditional hook call
   }
-  const [email, setEmail] = useState('')
-  return <input value={email} onChange={e => setEmail(e.target.value)} />
+  const [email, setEmail] = useState("");
+  return <input value={email} onChange={(e) => setEmail(e.target.value)} />;
 }
 ```
 
@@ -29,14 +29,14 @@ function Form({ showName }) {
 
 ```tsx
 function Form({ showName }) {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   return (
     <>
-      {showName && <input value={name} onChange={e => setName(e.target.value)} />}
-      <input value={email} onChange={e => setEmail(e.target.value)} />
+      {showName && <input value={name} onChange={(e) => setName(e.target.value)} />}
+      <input value={email} onChange={(e) => setEmail(e.target.value)} />
     </>
-  )
+  );
 }
 ```
 
@@ -44,11 +44,11 @@ function Form({ showName }) {
 
 ```tsx
 function Filters({ filters }) {
-  const values = []
+  const values = [];
   for (const f of filters) {
-    values.push(useState(f.default)) // Hook in loop
+    values.push(useState(f.default)); // Hook in loop
   }
-  return <>{/* ... */}</>
+  return <>{/* ... */}</>;
 }
 ```
 
@@ -57,9 +57,9 @@ function Filters({ filters }) {
 ```tsx
 function Filters({ filters }) {
   const [values, setValues] = useState(() =>
-    Object.fromEntries(filters.map(f => [f.id, f.default]))
-  )
-  return <>{/* ... */}</>
+    Object.fromEntries(filters.map((f) => [f.id, f.default])),
+  );
+  return <>{/* ... */}</>;
 }
 ```
 
@@ -69,8 +69,8 @@ function Filters({ filters }) {
 
 ```tsx
 function getUser() {
-  const [user, setUser] = useState(null) // Not a React component
-  return user
+  const [user, setUser] = useState(null); // Not a React component
+  return user;
 }
 ```
 
@@ -78,13 +78,13 @@ function getUser() {
 
 ```tsx
 function useUser() {
-  const [user, setUser] = useState(null)
-  return user
+  const [user, setUser] = useState(null);
+  return user;
 }
 
 function Profile() {
-  const user = useUser()
-  return <p>{user?.name}</p>
+  const user = useUser();
+  return <p>{user?.name}</p>;
 }
 ```
 

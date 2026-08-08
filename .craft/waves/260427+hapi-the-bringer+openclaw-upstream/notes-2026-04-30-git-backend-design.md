@@ -15,17 +15,20 @@ local POSIX filesystem this works. On a FUSE mount that proxies to
 OneDrive's Graph API, advisory file locks may not propagate.
 
 If `flock` is not preserved:
+
 - Two `git commit`s racing across the mount can corrupt the index
 - Even single-process git is at risk if rclone's pack-file sync
   intervenes mid-commit
 
 If `flock` IS preserved:
+
 - The git backend is straightforward: same as local-disk git, but on
   a FUSE mount
 - We still want to serialize observe() calls within a single process
   (cheap mutex), but cross-process safety comes from git itself
 
 Mitigations if flock isn't preserved:
+
 1. Coordinator process (one writer per repo) — adds an architectural
    layer
 2. Use a sidecar state file outside the mount — defeats the purpose
@@ -54,12 +57,12 @@ via `child_process.execFile` for auditability.
 
 ### Mapping LKG → git
 
-| `LKGStore` operation | Git backend implementation |
-|----------------------|----------------------------|
-| `register(tracker)` | Validate `repoRoot` is a git repo; verify tracker path is under repoRoot; verify path is not gitignored. Store in-memory. |
-| `observe(path)`     | Read file → parse → validate → branch on outcome. |
-| `readLastKnownGood(path)` | `git show HEAD:<relpath>` → bytes |
-| `getEntry(path)`    | Derive `lastPromotedGood.hash` from `git ls-tree HEAD <relpath>` (the blob sha). Other fingerprint fields nullable. |
+| `LKGStore` operation      | Git backend implementation                                                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `register(tracker)`       | Validate `repoRoot` is a git repo; verify tracker path is under repoRoot; verify path is not gitignored. Store in-memory. |
+| `observe(path)`           | Read file → parse → validate → branch on outcome.                                                                         |
+| `readLastKnownGood(path)` | `git show HEAD:<relpath>` → bytes                                                                                         |
+| `getEntry(path)`          | Derive `lastPromotedGood.hash` from `git ls-tree HEAD <relpath>` (the blob sha). Other fingerprint fields nullable.       |
 
 ### Observe state machine (git-backend specifics)
 
@@ -101,8 +104,8 @@ Authorship per commit is configurable on store construction:
 gitLKGStore({
   repoRoot,
   authorship: {
-    name: 'openclaw-agent',
-    email: 'agent@<tenant>.onmicrosoft.com',
+    name: "openclaw-agent",
+    email: "agent@<tenant>.onmicrosoft.com",
   },
 });
 ```
@@ -170,7 +173,7 @@ operators that want a non-git-log surface.
 ### What this means for the upstream pre-RFC
 
 The pre-RFC (`v2-lkg-contract.md`) doesn't need to change. The
-contract is impl-agnostic. This work *strengthens* the pre-RFC by
+contract is impl-agnostic. This work _strengthens_ the pre-RFC by
 proving the contract supports two genuinely different backends (FS
 companion files + git history). Adds a paragraph:
 

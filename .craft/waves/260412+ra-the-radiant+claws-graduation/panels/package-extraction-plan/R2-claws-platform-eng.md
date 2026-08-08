@@ -59,12 +59,12 @@ The Out of Scope section still says public npm is deferred. From a fleet perspec
 
 **Positive.** 17 packages with clear domain boundaries map well to fleet tracking:
 
-| Fleet concern | 10+7 impact |
-|---------------|-------------|
-| `claws drift` | 17 version slots per workspace — tractable |
-| `claws broadcast` | Can push one package at a time (e.g., security patch to `@craftworks/crypto`) |
-| `claws doctor --post-upgrade` | Needs compatibility manifest (see C03) |
-| CI/CD (`claws pinch --ci`) | Each emitter plugin is independently testable — faster CI |
+| Fleet concern                 | 10+7 impact                                                                   |
+| ----------------------------- | ----------------------------------------------------------------------------- |
+| `claws drift`                 | 17 version slots per workspace — tractable                                    |
+| `claws broadcast`             | Can push one package at a time (e.g., security patch to `@craftworks/crypto`) |
+| `claws doctor --post-upgrade` | Needs compatibility manifest (see C03)                                        |
+| CI/CD (`claws pinch --ci`)    | Each emitter plugin is independently testable — faster CI                     |
 
 ### Emitter plugins as separate packages
 
@@ -83,6 +83,7 @@ The plan says 15 weeks. With 17 packages (not 25), the extraction work is reduce
 ### N04 — No fleet test scenarios (MUST-ADDRESS)
 
 R1's W04 flagged missing fleet test scenarios. The revised plan's Scenario Coverage (lines 231-234) still covers only extraction/backward-compat/circular-dep/claws-composition. Missing:
+
 - `fleet/drift-detection-17-packages` — `claws drift` correctly detects version divergence across 17 packages
 - `fleet/targeted-broadcast` — `claws broadcast` can push a single emitter plugin update to affected workspaces only
 - `fleet/upgrade-rollback` — if `claws doctor --post-upgrade` fails on 3/47 workspaces, the other 44 are unaffected
@@ -94,6 +95,7 @@ R1's W04 flagged missing fleet test scenarios. The revised plan's Scenario Cover
 ### N06 — Phase 1 leaf packages are wrong (MUST-ADDRESS)
 
 Phase 1 (line 183) lists:
+
 - `@craftworks/crypto` — correct, exists in 10+7
 - `@craftworks/normalize` — does NOT exist in 10+7 (merged into workspace)
 - `@craftworks/budget-tracker` — does NOT exist in 10+7 (merged into governance)
@@ -103,17 +105,17 @@ Only 1 of 4 Phase 1 packages actually exists in the 10+7 model. The extraction p
 
 ## Summary
 
-| Finding | Status | Severity |
-|---------|--------|----------|
-| C01 — Consolidate to domain-based packages | PARTIAL | Must-address |
-| C02 — Canonical import path | UNRESOLVED | Must-address |
-| C03 — Compatibility manifest | UNRESOLVED | Must-address (BLOCKER) |
-| C04 — Gateway startup benchmark | UNRESOLVED | Warning |
-| C05 — Governance as one package | RESOLVED | -- |
-| C06 — Public npm / registry strategy | PARTIAL | Warning |
-| N04 — No fleet test scenarios | NEW | Must-address |
-| N05 — No rollback strategy | NEW | Warning |
-| N06 — Phase 1 packages are wrong | NEW | Must-address |
+| Finding                                    | Status     | Severity               |
+| ------------------------------------------ | ---------- | ---------------------- |
+| C01 — Consolidate to domain-based packages | PARTIAL    | Must-address           |
+| C02 — Canonical import path                | UNRESOLVED | Must-address           |
+| C03 — Compatibility manifest               | UNRESOLVED | Must-address (BLOCKER) |
+| C04 — Gateway startup benchmark            | UNRESOLVED | Warning                |
+| C05 — Governance as one package            | RESOLVED   | --                     |
+| C06 — Public npm / registry strategy       | PARTIAL    | Warning                |
+| N04 — No fleet test scenarios              | NEW        | Must-address           |
+| N05 — No rollback strategy                 | NEW        | Warning                |
+| N06 — Phase 1 packages are wrong           | NEW        | Must-address           |
 
 **Total: 4 Must-address (1 blocker), 3 Warning, 0 Note**
 

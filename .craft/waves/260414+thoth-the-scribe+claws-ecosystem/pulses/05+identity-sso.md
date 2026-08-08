@@ -57,6 +57,7 @@ The identity config is persisted in claws.json under the `identity` key and cons
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, claws.json schema extension patterns
 - `.craft/roles/claws/platform-eng.md` — identity provider integration, trust tier model, pinch rule engine consumption
 

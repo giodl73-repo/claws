@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "openai plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "openai/chat"
-    ]
+    "tools": ["openai/chat"]
   }
 }

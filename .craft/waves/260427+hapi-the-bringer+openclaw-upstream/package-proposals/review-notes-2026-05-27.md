@@ -41,4 +41,3 @@ No major change yet. Keep it observational:
 The interesting future connection is that Enterprise Feeds can declare expected
 context ranges for feed entries, and Context Budget can report when an
 installed entry exceeds those expectations.
-

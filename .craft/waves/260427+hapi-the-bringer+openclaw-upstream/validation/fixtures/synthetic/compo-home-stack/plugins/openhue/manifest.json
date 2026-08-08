@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "openhue plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "openhue/set-light"
-    ]
+    "tools": ["openhue/set-light"]
   }
 }

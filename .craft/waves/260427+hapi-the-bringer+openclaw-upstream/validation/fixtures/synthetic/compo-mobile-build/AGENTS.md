@@ -6,6 +6,7 @@ trust: composition
 # compo-mobile-build
 
 Composition workspace bringing together 3 plugin(s):
+
 - `plugins/xcode-build/`
 - `plugins/gradle-android/`
 - `plugins/fastlane/`

@@ -26,7 +26,7 @@ checkpoint_gate: false
 
 ## Objective
 
-Build the amendment pipeline that allows governed modifications to workspace governance state. Amendments are structured changes (add-skill, remove-tool, update-policy, etc.) that go through a validate → preview → apply → re-compile pipeline. This ensures that every workspace modification is checked against GovernanceIR constraints before being applied, and that the compiled artifacts stay in sync. **Lossless OC fidelity: apply.ts writes ONLY to `.claws/` files and `claws.json`, NEVER modifies OC workspace files (SOUL.md, TOOLS.md, AGENTS.md, IDENTITY.md, USER.md, MEMORY.md, HEARTBEAT.md, skills/*/SKILL.md, lobster.yaml).**
+Build the amendment pipeline that allows governed modifications to workspace governance state. Amendments are structured changes (add-skill, remove-tool, update-policy, etc.) that go through a validate → preview → apply → re-compile pipeline. This ensures that every workspace modification is checked against GovernanceIR constraints before being applied, and that the compiled artifacts stay in sync. **Lossless OC fidelity: apply.ts writes ONLY to `.claws/` files and `claws.json`, NEVER modifies OC workspace files (SOUL.md, TOOLS.md, AGENTS.md, IDENTITY.md, USER.md, MEMORY.md, HEARTBEAT.md, skills/\*/SKILL.md, lobster.yaml).**
 
 The validate step checks the proposed amendment against current GovernanceIR constraints (e.g., can't add an R5 tool if trust tier is T2). The preview step generates a before/after diff showing the governance impact. The apply step writes amendment state to `.claws/` sidecar files and `claws.json` only, then triggers recompilation. The re-compile step verifies the workspace is still valid after the amendment.
 
@@ -57,6 +57,7 @@ The validate step checks the proposed amendment against current GovernanceIR con
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — SDK-owns-logic rule, pipeline architecture
 - `.craft/roles/claws/skill-author.md` — amendment types, skill/tool modification patterns
 

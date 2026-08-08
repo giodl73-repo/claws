@@ -1,8 +1,0 @@
-version: 1.0.0
-targets:
-  - claude-code
-  - cursor
-options:
-  strict: true
-  verbose: false
-  policyDir: .claws/policies

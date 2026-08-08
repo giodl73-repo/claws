@@ -4,15 +4,9 @@
   "version": "0.1.0",
   "description": "google-search plugin (search)",
   "contributes": {
-    "tools": [
-      "google-search/web-search"
-    ],
-    "skills": [
-      "google-search/web-search"
-    ],
-    "workflows": [
-      "google-search-flow.lobster"
-    ],
+    "tools": ["google-search/web-search"],
+    "skills": ["google-search/web-search"],
+    "workflows": ["google-search-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

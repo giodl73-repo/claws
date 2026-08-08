@@ -74,69 +74,72 @@ If no relevant entries are found, proceed to Phase 1 without passing memory cont
 Launch these subagents IN PARALLEL. Each returns text data to the orchestrator.
 
 #### 1. **Context Analyzer**
-   - Extracts conversation history
-   - Reads `references/schema.yaml` for enum validation and **track classification**
-   - Determines the track (bug or knowledge) from the problem_type
-   - Identifies problem type, component, and track-appropriate fields:
-     - **Bug track**: symptoms, root_cause, resolution_type
-     - **Knowledge track**: applies_when (symptoms/root_cause/resolution_type optional)
-   - Incorporates auto memory excerpts (if provided by the orchestrator) as supplementary evidence
-   - Reads `references/yaml-schema.md` for category mapping into `docs/solutions/`
-   - Suggests a filename using the pattern `[sanitized-problem-slug]-[date].md`
-   - Returns: YAML frontmatter skeleton (must include `category:` field mapped from problem_type), category directory path, suggested filename, and which track applies
-   - Does not invent enum values, categories, or frontmatter fields from memory; reads the schema and mapping files above
-   - Does not force bug-track fields onto knowledge-track learnings or vice versa
+
+- Extracts conversation history
+- Reads `references/schema.yaml` for enum validation and **track classification**
+- Determines the track (bug or knowledge) from the problem_type
+- Identifies problem type, component, and track-appropriate fields:
+  - **Bug track**: symptoms, root_cause, resolution_type
+  - **Knowledge track**: applies_when (symptoms/root_cause/resolution_type optional)
+- Incorporates auto memory excerpts (if provided by the orchestrator) as supplementary evidence
+- Reads `references/yaml-schema.md` for category mapping into `docs/solutions/`
+- Suggests a filename using the pattern `[sanitized-problem-slug]-[date].md`
+- Returns: YAML frontmatter skeleton (must include `category:` field mapped from problem_type), category directory path, suggested filename, and which track applies
+- Does not invent enum values, categories, or frontmatter fields from memory; reads the schema and mapping files above
+- Does not force bug-track fields onto knowledge-track learnings or vice versa
 
 #### 2. **Solution Extractor**
-   - Reads `references/schema.yaml` for track classification (bug vs knowledge)
-   - Adapts output structure based on the problem_type track
-   - Incorporates auto memory excerpts (if provided by the orchestrator) as supplementary evidence -- conversation history and the verified fix take priority; if memory notes contradict the conversation, note the contradiction as cautionary context
 
-   **Bug track output sections:**
+- Reads `references/schema.yaml` for track classification (bug vs knowledge)
+- Adapts output structure based on the problem_type track
+- Incorporates auto memory excerpts (if provided by the orchestrator) as supplementary evidence -- conversation history and the verified fix take priority; if memory notes contradict the conversation, note the contradiction as cautionary context
 
-   - **Problem**: 1-2 sentence description of the issue
-   - **Symptoms**: Observable symptoms (error messages, behavior)
-   - **What Didn't Work**: Failed investigation attempts and why they failed
-   - **Solution**: The actual fix with code examples (before/after when applicable)
-   - **Why This Works**: Root cause explanation and why the solution addresses it
-   - **Prevention**: Strategies to avoid recurrence, best practices, and test cases. Include concrete code examples where applicable (e.g., gem configurations, test assertions, linting rules)
+**Bug track output sections:**
 
-   **Knowledge track output sections:**
+- **Problem**: 1-2 sentence description of the issue
+- **Symptoms**: Observable symptoms (error messages, behavior)
+- **What Didn't Work**: Failed investigation attempts and why they failed
+- **Solution**: The actual fix with code examples (before/after when applicable)
+- **Why This Works**: Root cause explanation and why the solution addresses it
+- **Prevention**: Strategies to avoid recurrence, best practices, and test cases. Include concrete code examples where applicable (e.g., gem configurations, test assertions, linting rules)
 
-   - **Context**: What situation, gap, or friction prompted this guidance
-   - **Guidance**: The practice, pattern, or recommendation with code examples when useful
-   - **Why This Matters**: Rationale and impact of following or not following this guidance
-   - **When to Apply**: Conditions or situations where this applies
-   - **Examples**: Concrete before/after or usage examples showing the practice in action
+**Knowledge track output sections:**
+
+- **Context**: What situation, gap, or friction prompted this guidance
+- **Guidance**: The practice, pattern, or recommendation with code examples when useful
+- **Why This Matters**: Rationale and impact of following or not following this guidance
+- **When to Apply**: Conditions or situations where this applies
+- **Examples**: Concrete before/after or usage examples showing the practice in action
 
 #### 3. **Related Docs Finder**
-   - Searches `docs/solutions/` for related documentation
-   - Identifies cross-references and links
-   - Finds related GitHub issues
-   - Flags any related learning or pattern docs that may now be stale, contradicted, or overly broad
-   - **Assesses overlap** with the new doc being created across five dimensions: problem statement, root cause, solution approach, referenced files, and prevention rules. Score as:
-     - **High**: 4-5 dimensions match — essentially the same problem solved again
-     - **Moderate**: 2-3 dimensions match — same area but different angle or solution
-     - **Low**: 0-1 dimensions match — related but distinct
-   - Returns: Links, relationships, refresh candidates, and overlap assessment (score + which dimensions matched)
 
-   **Search strategy (grep-first filtering for efficiency):**
+- Searches `docs/solutions/` for related documentation
+- Identifies cross-references and links
+- Finds related GitHub issues
+- Flags any related learning or pattern docs that may now be stale, contradicted, or overly broad
+- **Assesses overlap** with the new doc being created across five dimensions: problem statement, root cause, solution approach, referenced files, and prevention rules. Score as:
+  - **High**: 4-5 dimensions match — essentially the same problem solved again
+  - **Moderate**: 2-3 dimensions match — same area but different angle or solution
+  - **Low**: 0-1 dimensions match — related but distinct
+- Returns: Links, relationships, refresh candidates, and overlap assessment (score + which dimensions matched)
 
-   1. Extract keywords from the problem context: module names, technical terms, error messages, component types
-   2. If the problem category is clear, narrow search to the matching `docs/solutions/<category>/` directory
-   3. Use the native content-search tool (e.g., Grep in Claude Code) to pre-filter candidate files BEFORE reading any content. Run multiple searches in parallel, case-insensitive, targeting frontmatter fields. These are template patterns -- substitute actual keywords:
-      - `title:.*<keyword>`
-      - `tags:.*(<keyword1>|<keyword2>)`
-      - `module:.*<module name>`
-      - `component:.*<component>`
-   4. If search returns >25 candidates, re-run with more specific patterns. If <3, broaden to full content search
-   5. Read only frontmatter (first 30 lines) of candidate files to score relevance
-   6. Fully read only strong/moderate matches
-   7. Return distilled links and relationships, not raw file contents
+**Search strategy (grep-first filtering for efficiency):**
 
-   **GitHub issue search:**
+1.  Extract keywords from the problem context: module names, technical terms, error messages, component types
+2.  If the problem category is clear, narrow search to the matching `docs/solutions/<category>/` directory
+3.  Use the native content-search tool (e.g., Grep in Claude Code) to pre-filter candidate files BEFORE reading any content. Run multiple searches in parallel, case-insensitive, targeting frontmatter fields. These are template patterns -- substitute actual keywords:
+    - `title:.*<keyword>`
+    - `tags:.*(<keyword1>|<keyword2>)`
+    - `module:.*<module name>`
+    - `component:.*<component>`
+4.  If search returns >25 candidates, re-run with more specific patterns. If <3, broaden to full content search
+5.  Read only frontmatter (first 30 lines) of candidate files to score relevance
+6.  Fully read only strong/moderate matches
+7.  Return distilled links and relationships, not raw file contents
 
-   Prefer the `gh` CLI for searching related issues: `gh issue list --search "<keywords>" --state all --limit 5`. If `gh` is not installed, fall back to the GitHub MCP tools (e.g., `unblocked` data_retrieval) if available. If neither is available, skip GitHub issue search and note it was skipped in the output.
+**GitHub issue search:**
+
+Prefer the `gh` CLI for searching related issues: `gh issue list --search "<keywords>" --state all --limit 5`. If `gh` is not installed, fall back to the GitHub MCP tools (e.g., `unblocked` data_retrieval) if available. If neither is available, skip GitHub issue search and note it was skipped in the output.
 
 </parallel_tasks>
 
@@ -151,11 +154,11 @@ The orchestrating agent (main conversation) performs these steps:
 1. Collect all text results from Phase 1 subagents
 2. **Check the overlap assessment** from the Related Docs Finder before deciding what to write:
 
-   | Overlap | Action |
-   |---------|--------|
-   | **High** — existing doc covers the same problem, root cause, and solution | **Update the existing doc** with fresher context (new code examples, updated references, additional prevention tips) rather than creating a duplicate. The existing doc's path and structure stay the same. |
-   | **Moderate** — same problem area but different angle, root cause, or solution | **Create the new doc** normally. Flag the overlap for Phase 2.5 to recommend consolidation review. |
-   | **Low or none** | **Create the new doc** normally. |
+   | Overlap                                                                       | Action                                                                                                                                                                                                      |
+   | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | **High** — existing doc covers the same problem, root cause, and solution     | **Update the existing doc** with fresher context (new code examples, updated references, additional prevention tips) rather than creating a duplicate. The existing doc's path and structure stay the same. |
+   | **Moderate** — same problem area but different angle, root cause, or solution | **Create the new doc** normally. Flag the overlap for Phase 2.5 to recommend consolidation review.                                                                                                          |
+   | **Low or none**                                                               | **Create the new doc** normally.                                                                                                                                                                            |
 
    The reason to update rather than create: two docs describing the same problem and solution will inevitably drift apart. The newer context is fresher and more trustworthy, so fold it into the existing doc rather than creating a second one that immediately needs consolidation.
 
@@ -255,6 +258,7 @@ The orchestrator (main conversation) performs ALL of the following in one sequen
 4. **Skip specialized agent reviews** (Phase 3) to conserve context
 
 **Compact-safe output:**
+
 ```
 ✓ Documentation complete (compact-safe mode)
 
@@ -315,12 +319,12 @@ In compact-safe mode, the overlap check is skipped (no Related Docs Finder subag
 
 ## Common Mistakes to Avoid
 
-| ❌ Wrong | ✅ Correct |
-|----------|-----------|
-| Subagents write files like `context-analysis.md`, `solution-draft.md` | Subagents return text data; orchestrator writes one final file |
-| Research and assembly run in parallel | Research completes → then assembly runs |
-| Multiple files created during workflow | One file written or updated: `docs/solutions/[category]/[filename].md` |
-| Creating a new doc when an existing doc covers the same problem | Check overlap assessment; update the existing doc when overlap is high |
+| ❌ Wrong                                                              | ✅ Correct                                                             |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Subagents write files like `context-analysis.md`, `solution-draft.md` | Subagents return text data; orchestrator writes one final file         |
+| Research and assembly run in parallel                                 | Research completes → then assembly runs                                |
+| Multiple files created during workflow                                | One file written or updated: `docs/solutions/[category]/[filename].md` |
+| Creating a new doc when an existing doc covers the same problem       | Check overlap assessment; update the existing doc when overlap is high |
 
 ## Success Output
 
@@ -401,22 +405,26 @@ Writes the final learning directly into `docs/solutions/`.
 Based on problem type, these agents can enhance documentation:
 
 ### Code Quality & Review
+
 - **kieran-rails-reviewer**: Reviews code examples for Rails best practices
 - **code-simplicity-reviewer**: Ensures solution code is minimal and clear
 - **pattern-recognition-specialist**: Identifies anti-patterns or repeating issues
 
 ### Specific Domain Experts
+
 - **performance-oracle**: Analyzes performance_issue category solutions
 - **security-sentinel**: Reviews security_issue solutions for vulnerabilities
 - **cora-test-reviewer**: Creates test cases for prevention strategies
 - **data-integrity-guardian**: Reviews database_issue migrations and queries
 
 ### Enhancement & Documentation
+
 - **best-practices-researcher**: Enriches solution with industry best practices
 - **every-style-editor**: Reviews documentation style and clarity
 - **framework-docs-researcher**: Links to Rails/gem documentation references
 
 ### When to Invoke
+
 - **Auto-triggered** (optional): Agents can run post-documentation for enhancement
 - **Manual trigger**: User can invoke agents after /ce:compound completes for deeper review
 

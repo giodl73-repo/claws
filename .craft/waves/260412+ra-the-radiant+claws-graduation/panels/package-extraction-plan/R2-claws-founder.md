@@ -63,18 +63,18 @@ R1 consensus (3/5 roles) was: core packages target public npm from Phase 1. The 
 
 The 10 core packages have good, intuitive names:
 
-| Package | Name clarity | Contributor-friendly? |
-|---------|-------------|----------------------|
-| `@craftworks/forma` | Good — domain name | Yes |
-| `@craftworks/workspace` | Excellent — obvious | Yes |
-| `@craftworks/crypto` | Excellent — obvious | Yes |
-| `@craftworks/governance` | Good — enterprise-y but clear | Yes |
-| `@craftworks/codegen` | Good — familiar term | Yes |
-| `@craftworks/relax` | Domain-specific but documented | Acceptable |
-| `@craftworks/context` | Good — common concept | Yes |
-| `@craftworks/execution` | Good — clear | Yes |
-| `@craftworks/eval` | Excellent — obvious | Yes |
-| `@craftworks/input` | Good — simple | Yes |
+| Package                  | Name clarity                   | Contributor-friendly? |
+| ------------------------ | ------------------------------ | --------------------- |
+| `@craftworks/forma`      | Good — domain name             | Yes                   |
+| `@craftworks/workspace`  | Excellent — obvious            | Yes                   |
+| `@craftworks/crypto`     | Excellent — obvious            | Yes                   |
+| `@craftworks/governance` | Good — enterprise-y but clear  | Yes                   |
+| `@craftworks/codegen`    | Good — familiar term           | Yes                   |
+| `@craftworks/relax`      | Domain-specific but documented | Acceptable            |
+| `@craftworks/context`    | Good — common concept          | Yes                   |
+| `@craftworks/execution`  | Good — clear                   | Yes                   |
+| `@craftworks/eval`       | Excellent — obvious            | Yes                   |
+| `@craftworks/input`      | Good — simple                  | Yes                   |
 
 No left-pad-sized packages. No names that require reading an architecture doc to understand. This is a contributor-friendly catalog.
 
@@ -117,12 +117,14 @@ The plan does not mention licensing. OpenClaw's MIT license and the community's 
 ### N10 — Backward compat section references old names (NOTE)
 
 The Backward Compatibility section (lines 147-155) shows:
+
 ```
 import { readOCWorkspace } from '@craftworks/oc-readers';
 import { FormaIR } from '@craftworks/oc-ir';
 ```
 
 These should be:
+
 ```
 import { readOCWorkspace } from '@craftworks/forma';
 import { FormaIR } from '@craftworks/forma';
@@ -132,18 +134,18 @@ Small but matters for documentation correctness.
 
 ## Summary
 
-| Finding | Status | Severity |
-|---------|--------|----------|
-| C01 — Consolidate to domain-based packages | PARTIAL | Must-address |
-| C02 — Canonical import path | UNRESOLVED | Must-address |
-| C03 — Compatibility manifest | UNRESOLVED | Must-address |
-| C04 — Gateway startup benchmark | UNRESOLVED | Warning |
-| C05 — Governance as one package | RESOLVED | -- |
-| C06 — Public npm from Phase 1 | UNRESOLVED | Must-address |
-| N07 — Out of Scope blocks community | NEW | Must-address |
-| N08 — No emitter contribution guide | NEW | Warning |
-| N09 — MIT license not specified | NEW | Warning |
-| N10 — Old names in backward compat | NEW | Note |
+| Finding                                    | Status     | Severity     |
+| ------------------------------------------ | ---------- | ------------ |
+| C01 — Consolidate to domain-based packages | PARTIAL    | Must-address |
+| C02 — Canonical import path                | UNRESOLVED | Must-address |
+| C03 — Compatibility manifest               | UNRESOLVED | Must-address |
+| C04 — Gateway startup benchmark            | UNRESOLVED | Warning      |
+| C05 — Governance as one package            | RESOLVED   | --           |
+| C06 — Public npm from Phase 1              | UNRESOLVED | Must-address |
+| N07 — Out of Scope blocks community        | NEW        | Must-address |
+| N08 — No emitter contribution guide        | NEW        | Warning      |
+| N09 — MIT license not specified            | NEW        | Warning      |
+| N10 — Old names in backward compat         | NEW        | Note         |
 
 **Total: 4 Must-address, 3 Warning, 1 Note**
 

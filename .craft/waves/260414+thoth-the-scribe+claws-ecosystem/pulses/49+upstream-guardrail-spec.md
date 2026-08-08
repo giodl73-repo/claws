@@ -4,7 +4,20 @@ slug: upstream-guardrail-spec
 plan: claws-upstream-contrib
 depends_on: [43, 44, 45, 46, 47, 48]
 governing_roles: [claws:founder, craft:architect, claws:ciso]
-scenario_codes: [pitfall-thoth-2/P-230, pitfall-thoth-2/P-231, pitfall-thoth-2/P-232, pitfall-thoth-2/P-242, pitfall-thoth-2/P-243, pitfall-thoth-2/P-244, pitfall-thoth-2/P-245, pitfall-thoth-2/P-246, pitfall-thoth-2/P-247, pitfall-thoth-2/P-248, pitfall-thoth-2/P-249]
+scenario_codes:
+  [
+    pitfall-thoth-2/P-230,
+    pitfall-thoth-2/P-231,
+    pitfall-thoth-2/P-232,
+    pitfall-thoth-2/P-242,
+    pitfall-thoth-2/P-243,
+    pitfall-thoth-2/P-244,
+    pitfall-thoth-2/P-245,
+    pitfall-thoth-2/P-246,
+    pitfall-thoth-2/P-247,
+    pitfall-thoth-2/P-248,
+    pitfall-thoth-2/P-249,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 6
@@ -23,6 +36,7 @@ checkpoint_gate: true
 # Pulse 49: GuardrailProvider Specification (CP-5 Gate)
 
 ## Objective
+
 **Execution context**: This pulse executes within the `craftworks/openclaw-governance` standalone monorepo (https://github.com/gim-home/openclaw-governance), NOT the claws repo. The test_scope paths (packages/...) are relative to that repo root. During wave execution, the openclaw-governance repo must be cloned and set up before these pulses can run.
 
 CP-5 gate pulse. GuardrailProvider specification plus ShellExecProvider reference implementation.
@@ -36,6 +50,7 @@ This pulse also validates that all 5 `@openclaw/*` packages compile standalone w
 Also validates pitfall-thoth-2 P-242 through P-249 (ecosystem pitfalls: platform detection edge cases, lossless roundtrip, skill lifecycle failures).
 
 ## Deliverables
+
 - [ ] `spec/guardrail-provider.ts` — GuardrailProvider interface, AuthorizationDecision type, ProviderRegistry with chain-of-responsibility. Log WARNING when empty ProviderRegistry receives a preAuthorize call, alerting operators to missing configuration
 - [ ] `spec/shell-exec-provider.ts` — reference ShellExecProvider wrapping exec-approvals.json
 - [ ] `spec/README.md` — spec PR body with rationale, sequence diagrams, migration path
@@ -47,6 +62,7 @@ Also validates pitfall-thoth-2 P-242 through P-249 (ecosystem pitfalls: platform
 - [ ] L3 acceptance: GuardrailProvider compiles with OC Gateway type definitions (documented)
 
 ## Acceptance Criteria
+
 - [ ] GuardrailProvider interface defines preAuthorize, postAudit, and getCapabilities methods
 - [ ] AuthorizationDecision supports allow, deny, review, and modify outcomes
 - [ ] ProviderRegistry chains providers with deny > review > modify > allow priority
@@ -57,17 +73,21 @@ Also validates pitfall-thoth-2 P-242 through P-249 (ecosystem pitfalls: platform
 - [ ] All 5 @openclaw/* packages compile standalone with zero @craftworks/* imports (verified by grep)
 
 ## Governing Roles
+
 Load these role files before starting:
+
 - `.craft/roles/claws/founder.md` — OpenClaw upstream contribution standards
 - `.craft/roles/craft/architect.md` — system-wide architecture constraints
 - `.craft/roles/claws/ciso.md` — security and compliance review
 
 ## Dependencies
+
 - Pulse 46 (upstream-audit-chain) — audit-chain package must compile standalone
 - Pulse 47 (upstream-budget-identity) — budget-meter and identity-bridge must compile standalone
 - Pulse 48 (upstream-siem-scanner) — siem-emitter and secret-scanner must compile standalone
 
 ## Test Gates
+
 - [ ] L0 unit (6 tests): preAuthorize returns correct decision, postAudit records entry, getCapabilities returns metadata, deny > review > modify > allow priority, 3 providers chained correctly, empty registry allows all
 - [ ] L1 integration (3 tests): ShellExecProvider wraps exec-approvals.json + 10 scenarios, zero @craftworks/* imports across all 5 packages
 - [ ] L2 e2e (1 test): GuardrailProvider with mock OC Gateway

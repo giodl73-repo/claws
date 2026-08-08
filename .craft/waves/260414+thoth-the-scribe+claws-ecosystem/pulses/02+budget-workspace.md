@@ -50,6 +50,7 @@ This reuses the agent-sdk suite/budget.ts patterns for token accounting but adap
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, cross-package import patterns
 - `.craft/roles/claws/platform-eng.md` — audit chain format, claws.json schema, token accounting
 

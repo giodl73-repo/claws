@@ -4,18 +4,9 @@
   "version": "0.1.0",
   "description": "postgres plugin (data)",
   "contributes": {
-    "tools": [
-      "postgres/query",
-      "postgres/exec",
-      "postgres/migrate"
-    ],
-    "skills": [
-      "postgres/query",
-      "postgres/exec"
-    ],
-    "workflows": [
-      "postgres-flow.lobster"
-    ],
+    "tools": ["postgres/query", "postgres/exec", "postgres/migrate"],
+    "skills": ["postgres/query", "postgres/exec"],
+    "workflows": ["postgres-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

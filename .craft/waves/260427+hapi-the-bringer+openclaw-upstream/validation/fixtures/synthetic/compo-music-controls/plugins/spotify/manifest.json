@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "spotify plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "spotify/play-track"
-    ]
+    "tools": ["spotify/play-track"]
   }
 }

@@ -12,11 +12,11 @@ The canonical upstream proposal drafts are at:
 
 ## What lives where
 
-| Package | Drafts (in lobster-docs) | Code (here in claws) |
-|---|---|---|
-| **oc-paths** | `oc-paths/upstream-pr1-workspace.md`, `pr2-oclint.md`, `pr3-ocdoctor.md` | `packages/oc-paths-{substrate,lint,doctor}/` |
-| **lkg-recovery** | `lkg-recovery/upstream-pr1-lkg.md`, `pr2-lkg-git.md` | `packages/lkg-recovery-{substrate,git}/` |
-| **policy-anchoring** | `policy-anchoring/upstream-pr1-policyir.md`, `pr2-hook-merger.md` | `packages/openclaw-policy/` |
+| Package              | Drafts (in lobster-docs)                                                 | Code (here in claws)                         |
+| -------------------- | ------------------------------------------------------------------------ | -------------------------------------------- |
+| **oc-paths**         | `oc-paths/upstream-pr1-workspace.md`, `pr2-oclint.md`, `pr3-ocdoctor.md` | `packages/oc-paths-{substrate,lint,doctor}/` |
+| **lkg-recovery**     | `lkg-recovery/upstream-pr1-lkg.md`, `pr2-lkg-git.md`                     | `packages/lkg-recovery-{substrate,git}/`     |
+| **policy-anchoring** | `policy-anchoring/upstream-pr1-policyir.md`, `pr2-hook-merger.md`        | `packages/openclaw-policy/`                  |
 
 ## Why this directory still exists
 

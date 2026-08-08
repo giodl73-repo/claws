@@ -47,6 +47,7 @@ $$ LANGUAGE plpgsql;
 ## Key Syntax Rules
 
 ### 1. Cypher Function Call Format
+
 ```sql
 SELECT * FROM cypher('graph_name', $$
     -- Cypher query here
@@ -54,6 +55,7 @@ $$) as (column_name agtype);
 ```
 
 ### 2. Node Creation
+
 ```sql
 -- Create node with label and properties
 CREATE (n:Label {prop1: 'value', prop2: 123})
@@ -63,6 +65,7 @@ CREATE (a:Person {name: 'A'}), (b:Person {name: 'B'})
 ```
 
 ### 3. Edge Creation (requires MATCH first)
+
 ```sql
 -- Match nodes first, then create edge
 MATCH (a:Person {name: 'A'})
@@ -72,6 +75,7 @@ RETURN a, b
 ```
 
 ### 4. MERGE Pattern (idempotent create)
+
 ```sql
 -- MERGE ensures the pattern exists (creates if not found)
 MERGE (n:Person {name: 'John'})
@@ -85,6 +89,7 @@ RETURN a
 ```
 
 ### 5. Query with RETURN
+
 ```sql
 MATCH (n:Person)-[r:KNOWS]->(m:Person)
 WHERE n.name = 'John'
@@ -92,6 +97,7 @@ RETURN n.name, m.name, r
 ```
 
 ### 6. DELETE Operations
+
 ```sql
 -- Delete node (must have no edges)
 MATCH (n:Person {name: 'John'})
@@ -108,6 +114,7 @@ DELETE r
 ```
 
 ### 7. SET Properties
+
 ```sql
 MATCH (n:Person {name: 'John'})
 SET n.age = 30, n.city = 'NYC'
@@ -115,6 +122,7 @@ RETURN n
 ```
 
 ### 8. REMOVE Properties
+
 ```sql
 MATCH (n:Person {name: 'John'})
 REMOVE n.temporary_field
@@ -125,19 +133,19 @@ RETURN n
 
 The Hexis project uses a graph called `memory_graph` with these node types:
 
-| Node Label | Primary Key | Description |
-|------------|-------------|-------------|
-| `MemoryNode` | `memory_id` (UUID) | Links to memories table |
-| `ConceptNode` | `name` (text) | Abstract concepts |
-| `SelfNode` | singleton | Agent's self-reference |
-| `GoalNode` | `goal_id` (UUID) | Links to goals table |
-| `ClusterNode` | `cluster_id` (UUID) | Links to memory_clusters |
-| `EpisodeNode` | `episode_id` (UUID) | Links to episodes table |
-| `LifeChapterNode` | `chapter_id` | Narrative chapters |
-| `TurningPointNode` | - | Significant events |
-| `NarrativeThreadNode` | - | Ongoing story threads |
-| `RelationshipNode` | - | Interpersonal relationships |
-| `ValueConflictNode` | - | Internal value tensions |
+| Node Label            | Primary Key         | Description                 |
+| --------------------- | ------------------- | --------------------------- |
+| `MemoryNode`          | `memory_id` (UUID)  | Links to memories table     |
+| `ConceptNode`         | `name` (text)       | Abstract concepts           |
+| `SelfNode`            | singleton           | Agent's self-reference      |
+| `GoalNode`            | `goal_id` (UUID)    | Links to goals table        |
+| `ClusterNode`         | `cluster_id` (UUID) | Links to memory_clusters    |
+| `EpisodeNode`         | `episode_id` (UUID) | Links to episodes table     |
+| `LifeChapterNode`     | `chapter_id`        | Narrative chapters          |
+| `TurningPointNode`    | -                   | Significant events          |
+| `NarrativeThreadNode` | -                   | Ongoing story threads       |
+| `RelationshipNode`    | -                   | Interpersonal relationships |
+| `ValueConflictNode`   | -                   | Internal value tensions     |
 
 ## Edge Types (from graph_edge_type enum)
 
@@ -164,6 +172,7 @@ The Hexis project uses a graph called `memory_graph` with these node types:
 ## Common Hexis Patterns
 
 ### Sync entity to graph (idempotent)
+
 ```sql
 CREATE OR REPLACE FUNCTION sync_memory_node(p_memory_id UUID)
 RETURNS BOOLEAN AS $$
@@ -180,6 +189,7 @@ $$ LANGUAGE plpgsql;
 ```
 
 ### Link two nodes
+
 ```sql
 CREATE OR REPLACE FUNCTION link_memories(p_from UUID, p_to UUID, p_type TEXT)
 RETURNS BOOLEAN AS $$
@@ -198,6 +208,7 @@ $$ LANGUAGE plpgsql;
 ```
 
 ### Query graph relationships
+
 ```sql
 CREATE OR REPLACE FUNCTION find_related(p_id UUID)
 RETURNS TABLE (related_id UUID, rel_type TEXT) AS $$
@@ -222,6 +233,7 @@ $$ LANGUAGE plpgsql;
 ## Testing AGE Queries
 
 Test AGE queries directly in psql:
+
 ```sql
 -- Load AGE extension
 LOAD 'age';

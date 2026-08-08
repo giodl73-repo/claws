@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "description": "confluence plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "confluence/read-page",
-      "confluence/write-page"
-    ]
+    "tools": ["confluence/read-page", "confluence/write-page"]
   }
 }

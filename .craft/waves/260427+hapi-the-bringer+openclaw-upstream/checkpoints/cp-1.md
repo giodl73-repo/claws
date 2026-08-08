@@ -2,7 +2,15 @@
 checkpoint: 1
 pulse_range: [01, 03]
 depends_on_cp: null
-review_panel: [claws:gateway-eng, claws:compliance, claws:claws-release-eng, claws:claws-repo-steward, architect, testing]
+review_panel:
+  [
+    claws:gateway-eng,
+    claws:compliance,
+    claws:claws-release-eng,
+    claws:claws-repo-steward,
+    architect,
+    testing,
+  ]
 ---
 
 # Checkpoint 1 · Prep Artifacts

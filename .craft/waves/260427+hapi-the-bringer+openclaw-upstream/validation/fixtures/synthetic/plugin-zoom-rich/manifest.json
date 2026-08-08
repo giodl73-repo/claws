@@ -4,15 +4,9 @@
   "version": "0.1.0",
   "description": "zoom plugin (work)",
   "contributes": {
-    "tools": [
-      "zoom/create-meeting"
-    ],
-    "skills": [
-      "zoom/create-meeting"
-    ],
-    "workflows": [
-      "zoom-flow.lobster"
-    ],
+    "tools": ["zoom/create-meeting"],
+    "skills": ["zoom/create-meeting"],
+    "workflows": ["zoom-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

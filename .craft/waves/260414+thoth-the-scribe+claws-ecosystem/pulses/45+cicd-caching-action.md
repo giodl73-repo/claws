@@ -23,11 +23,13 @@ checkpoint_gate: false
 # Pulse 45: Caching via actions/cache
 
 ## Objective
+
 `.claws/` directory caching via actions/cache. The cache key is computed as the SHA-256 of `claws.json` plus the 9 governance files. A cache hit skips recompilation (<1s vs ~8s cold). Non-governance files (e.g., README.md) do not affect the cache key, preventing unnecessary cache invalidation.
 
 This pulse also delivers a fleet scan workflow with matrix strategy, enabling organizations to run claws across multiple repositories in parallel with shared caching. The self-test workflow validates the action itself in CI.
 
 ## Deliverables
+
 NOTE: bats (Bash Automated Testing System) must be available globally. Install via `npm install -g bats` or OS package manager.
 
 - [ ] `claws-action/scripts/cache-key.sh` — cache key computation from governance file hashes
@@ -40,6 +42,7 @@ NOTE: bats (Bash Automated Testing System) must be available globally. Install v
 - [ ] L3 acceptance (2 tests documented as manual): live GitHub Actions workflow run on test repo (1), real SARIF upload verification (1)
 
 ## Acceptance Criteria
+
 - [ ] Cache key is SHA-256 of claws.json + 9 governance files
 - [ ] Cache hit skips recompilation and completes in <1s
 - [ ] Changes to README.md do not invalidate the cache
@@ -48,15 +51,19 @@ NOTE: bats (Bash Automated Testing System) must be available globally. Install v
 - [ ] actions/cache integration restores and saves .claws/ directories correctly
 
 ## Governing Roles
+
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — system-wide architecture constraints
 - `.craft/roles/claws/platform-eng.md` — CI/CD platform engineering standards
 
 ## Dependencies
+
 - Pulse 43 (cicd-sarif-pipeline) — base action structure
 - Pulse 44 (cicd-severity-gating) — severity inputs used in fleet workflows
 
 ## Test Gates
+
 - [ ] L0 unit (2 tests): cache key includes governance files, README change doesn't affect key
 - [ ] L1 integration (1 test): cache hit vs miss behavior
 - [ ] L2 e2e (1 test): full action with cache on fixture workspace

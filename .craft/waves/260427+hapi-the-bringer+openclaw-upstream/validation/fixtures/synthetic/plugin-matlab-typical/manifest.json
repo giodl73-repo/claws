@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "matlab plugin (science)",
   "contributes": {
-    "tools": [
-      "matlab/run-script"
-    ],
-    "skills": [
-      "matlab/run-script"
-    ]
+    "tools": ["matlab/run-script"],
+    "skills": ["matlab/run-script"]
   }
 }

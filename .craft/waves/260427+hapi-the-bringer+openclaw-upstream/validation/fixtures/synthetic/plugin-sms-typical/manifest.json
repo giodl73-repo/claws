@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "sms plugin (communication)",
   "contributes": {
-    "tools": [
-      "sms/send-sms"
-    ],
-    "skills": [
-      "sms/send-sms"
-    ]
+    "tools": ["sms/send-sms"],
+    "skills": ["sms/send-sms"]
   }
 }

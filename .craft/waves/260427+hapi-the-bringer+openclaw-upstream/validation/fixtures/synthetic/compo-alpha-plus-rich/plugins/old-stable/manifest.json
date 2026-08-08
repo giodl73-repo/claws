@@ -3,11 +3,7 @@
   "version": "0.1.0",
   "description": "old-stable plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "old-stable/do"
-    ],
-    "skills": [
-      "old-stable/do"
-    ]
+    "tools": ["old-stable/do"],
+    "skills": ["old-stable/do"]
   }
 }

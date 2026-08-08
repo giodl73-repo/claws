@@ -108,6 +108,7 @@ The user's journey after a failed onboard is: (1) see an error, (2) understand w
 ### N-08 [major] — Layer 1 and Layer 2 write paths create two mental models for the same operation
 
 CL-10 defines two write surfaces:
+
 - Layer 1: `PATCH /api/oc/{file}#{section}/{item}` -- direct OC file editing
 - Layer 2: `PATCH /api/chunks/{tab}/{section}` -- chunk-based editing
 

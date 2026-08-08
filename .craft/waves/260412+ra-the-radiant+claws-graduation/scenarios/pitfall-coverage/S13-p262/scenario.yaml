@@ -15,7 +15,8 @@ expect:
   prevention: "`claws drift` reports split-version state with per-workspace manifest version pinning. GovernanceIR includes a schema version field. Fleet aggregation handles both versions or fails explicitly."
 
 simulate:
-  failures: ["Mixed-version fleet produces GovernanceIR v1 and v2 schemas that cannot be aggregated"]
+  failures:
+    ["Mixed-version fleet produces GovernanceIR v1 and v2 schemas that cannot be aggregated"]
   halt: null
   budget: null
 

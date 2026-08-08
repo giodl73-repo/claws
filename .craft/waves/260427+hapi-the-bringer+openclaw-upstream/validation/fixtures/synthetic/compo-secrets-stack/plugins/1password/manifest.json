@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "1password plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "1password/get-secret"
-    ]
+    "tools": ["1password/get-secret"]
   }
 }

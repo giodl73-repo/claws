@@ -10,8 +10,8 @@ Covers all kitcn React client, TanStack Query integration, and Next.js RSC patte
 
 ```ts
 // src/lib/convex/crpc.tsx
-import { api } from '@convex/api';
-import { createCRPCContext } from 'kitcn/react';
+import { api } from "@convex/api";
+import { createCRPCContext } from "kitcn/react";
 
 export const { CRPCProvider, useCRPC, useCRPCClient } = createCRPCContext({
   api,
@@ -20,11 +20,11 @@ export const { CRPCProvider, useCRPC, useCRPCClient } = createCRPCContext({
 });
 ```
 
-| Export | Description |
-|--------|-------------|
-| `CRPCProvider` | Context provider — wraps children with cRPC proxy |
-| `useCRPC` | Hook → cRPC proxy for `queryOptions`/`mutationOptions`/`infiniteQueryOptions` |
-| `useCRPCClient` | Hook → typed vanilla client for imperative `client.path.query()`/`mutate()` |
+| Export          | Description                                                                   |
+| --------------- | ----------------------------------------------------------------------------- |
+| `CRPCProvider`  | Context provider — wraps children with cRPC proxy                             |
+| `useCRPC`       | Hook → cRPC proxy for `queryOptions`/`mutationOptions`/`infiniteQueryOptions` |
+| `useCRPCClient` | Hook → typed vanilla client for imperative `client.path.query()`/`mutate()`   |
 
 ### QueryClient
 
@@ -32,16 +32,16 @@ cRPC auto-sets `staleTime: Infinity`, `refetch*: false` per query (Convex pushes
 
 ```ts
 // src/lib/convex/query-client.ts
-import { defaultShouldDehydrateQuery, QueryCache, QueryClient } from '@tanstack/react-query';
-import { isCRPCClientError, isCRPCError } from 'kitcn/crpc';
-import SuperJSON from 'superjson';
+import { defaultShouldDehydrateQuery, QueryCache, QueryClient } from "@tanstack/react-query";
+import { isCRPCClientError, isCRPCError } from "kitcn/crpc";
+import SuperJSON from "superjson";
 
 // Shared hydration config for SSR (client + server)
 export const hydrationConfig = {
   dehydrate: {
     serializeData: SuperJSON.serialize,
     shouldDehydrateQuery: (query) =>
-      defaultShouldDehydrateQuery(query) || query.state.status === 'pending',
+      defaultShouldDehydrateQuery(query) || query.state.status === "pending",
     shouldRedactErrors: () => false,
   },
   hydrate: { deserializeData: SuperJSON.deserialize },
@@ -79,13 +79,19 @@ export function createQueryClient() {
 ### Provider Hierarchy
 
 **Without auth:**
+
 ```tsx
 // src/lib/convex/convex-provider.tsx
-'use client';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { ConvexProvider, ConvexReactClient, getQueryClientSingleton, getConvexQueryClientSingleton } from 'kitcn/react';
-import { CRPCProvider } from '@/lib/convex/crpc';
-import { createQueryClient } from '@/lib/convex/query-client';
+"use client";
+import { QueryClientProvider } from "@tanstack/react-query";
+import {
+  ConvexProvider,
+  ConvexReactClient,
+  getQueryClientSingleton,
+  getConvexQueryClientSingleton,
+} from "kitcn/react";
+import { CRPCProvider } from "@/lib/convex/crpc";
+import { createQueryClient } from "@/lib/convex/query-client";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -111,9 +117,15 @@ function QueryProvider({ children }) {
 ```
 
 **With auth** — swap `ConvexProvider` for `ConvexAuthProvider`:
+
 ```tsx
-import { ConvexAuthProvider } from 'kitcn/auth/client';
-import { ConvexReactClient, getConvexQueryClientSingleton, getQueryClientSingleton, useAuthStore } from 'kitcn/react';
+import { ConvexAuthProvider } from "kitcn/auth/client";
+import {
+  ConvexReactClient,
+  getConvexQueryClientSingleton,
+  getQueryClientSingleton,
+  useAuthStore,
+} from "kitcn/react";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -124,8 +136,8 @@ export function AppConvexProvider({ children, token }: { children: ReactNode; to
       authClient={authClient}
       client={convex}
       initialToken={token}
-      onMutationUnauthorized={() => router.push('/login')}
-      onQueryUnauthorized={() => router.push('/login')}
+      onMutationUnauthorized={() => router.push("/login")}
+      onQueryUnauthorized={() => router.push("/login")}
     >
       <QueryProvider>{children}</QueryProvider>
     </ConvexAuthProvider>
@@ -148,12 +160,13 @@ function QueryProvider({ children }) {
 
 ### Singleton Helpers
 
-| Helper | Behavior |
-|--------|----------|
-| `getQueryClientSingleton(factory)` | Same instance on client, fresh per SSR request |
-| `getConvexQueryClientSingleton(opts)` | Creates/connects ConvexQueryClient bridge |
+| Helper                                | Behavior                                       |
+| ------------------------------------- | ---------------------------------------------- |
+| `getQueryClientSingleton(factory)`    | Same instance on client, fresh per SSR request |
+| `getConvexQueryClientSingleton(opts)` | Creates/connects ConvexQueryClient bridge      |
 
 `getConvexQueryClientSingleton` options:
+
 - `convex` — ConvexReactClient
 - `queryClient` — TanStack QueryClient
 - `authStore` — from `useAuthStore()` (auth apps only)
@@ -181,19 +194,22 @@ Lifecycle: Mount → subscribe → unmount → wait `unsubscribeDelay` → unsub
 const crpc = useCRPC();
 const { data } = useQuery(crpc.user.list.queryOptions({}));
 const { data } = useQuery(crpc.user.get.queryOptions({ id }));
-const { data } = useQuery(crpc.user.get.queryOptions({ id }, { enabled: !!id, placeholderData: null }));
+const { data } = useQuery(
+  crpc.user.get.queryOptions({ id }, { enabled: !!id, placeholderData: null }),
+);
 ```
 
 Signature: `crpc.path.queryOptions(args, options?)`
 
 cRPC-specific options beyond standard TanStack Query:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
+| Option       | Type      | Default | Description                                           |
+| ------------ | --------- | ------- | ----------------------------------------------------- |
 | `skipUnauth` | `boolean` | `false` | Skip query when not authenticated (returns undefined) |
-| `subscribe` | `boolean` | `true` | Enable real-time WebSocket subscription |
+| `subscribe`  | `boolean` | `true`  | Enable real-time WebSocket subscription               |
 
 **With `select`** — spread options, add select separately:
+
 ```ts
 const { data } = useSuspenseQuery({
   ...crpc.http.health.queryOptions(),
@@ -204,6 +220,7 @@ const { data } = useSuspenseQuery({
 ### Real-time Subscriptions
 
 Default ON. Every `queryOptions` subscribes to Convex WebSocket. Disable with `subscribe: false`:
+
 ```ts
 useQuery(crpc.analytics.getReport.queryOptions({ period }, { subscribe: false }));
 // refresh manually:
@@ -213,17 +230,18 @@ queryClient.invalidateQueries(crpc.analytics.getReport.queryFilter());
 ### Auth-Aware Queries
 
 **`skipUnauth`** — client-side: returns undefined when not authenticated:
+
 ```ts
 useQuery(crpc.user.getCurrentUser.queryOptions({}, { skipUnauth: true }));
 ```
 
 **`meta({ auth })` on procedures** — controls query behavior during auth loading:
 
-| Procedure type | Auth loading | Logged out |
-|----------------|-------------|------------|
-| `publicQuery` | Runs immediately | Runs |
-| `optionalAuthQuery` (auth: 'optional') | **Waits** | Runs |
-| `authQuery` (auth: 'required') | **Waits** | **Skips** |
+| Procedure type                         | Auth loading     | Logged out |
+| -------------------------------------- | ---------------- | ---------- |
+| `publicQuery`                          | Runs immediately | Runs       |
+| `optionalAuthQuery` (auth: 'optional') | **Waits**        | Runs       |
+| `authQuery` (auth: 'required')         | **Waits**        | **Skips**  |
 
 The procedure builders (`authQuery`, `publicQuery`, etc.) already include correct `.meta()` settings.
 
@@ -234,7 +252,7 @@ The procedure builders (`authQuery`, `publicQuery`, etc.) already include correc
 useQuery(crpc.user.getSettings.queryOptions({ userId: user?.id }, { enabled: !!user }));
 
 // skipToken
-import { skipToken } from '@tanstack/react-query';
+import { skipToken } from "@tanstack/react-query";
 useQuery(crpc.user.get.queryOptions(userId ? { id: userId } : skipToken));
 ```
 
@@ -244,7 +262,10 @@ useQuery(crpc.user.get.queryOptions(userId ? { id: userId } : skipToken));
 const queryKey = crpc.user.list.queryKey({}); // ['convexQuery', 'user:list', {}]
 const data = queryClient.getQueryData(queryKey);
 
-const filter = crpc.user.list.queryFilter({}, { predicate: (q) => q.state.dataUpdatedAt > Date.now() - 60000 });
+const filter = crpc.user.list.queryFilter(
+  {},
+  { predicate: (q) => q.state.dataUpdatedAt > Date.now() - 60000 },
+);
 queryClient.invalidateQueries(filter);
 ```
 
@@ -252,17 +273,17 @@ queryClient.invalidateQueries(filter);
 
 Three methods:
 
-| Method | Context | Caching | Use Case |
-|--------|---------|---------|----------|
-| `client.*.query()` | Anywhere | None | Direct calls, no cache |
-| `crpc.*.queryOptions()` | Render only | Cache | Components (uses hooks) |
-| `crpc.*.staticQueryOptions()` | Anywhere | Cache | Prefetch, event handlers |
+| Method                        | Context     | Caching | Use Case                 |
+| ----------------------------- | ----------- | ------- | ------------------------ |
+| `client.*.query()`            | Anywhere    | None    | Direct calls, no cache   |
+| `crpc.*.queryOptions()`       | Render only | Cache   | Components (uses hooks)  |
+| `crpc.*.staticQueryOptions()` | Anywhere    | Cache   | Prefetch, event handlers |
 
 ```ts
 // useCRPCClient — direct calls
 const client = useCRPCClient();
 const user = await client.user.get.query({ id });
-await client.user.update.mutate({ id, name: 'test' });
+await client.user.update.mutate({ id, name: "test" });
 
 // staticQueryOptions — prefetch in event handlers (no hooks, no reactive auth)
 const handleMouseEnter = () => {
@@ -273,6 +294,7 @@ const handleMouseEnter = () => {
 ### Actions as Queries
 
 Actions (external API calls) auto-detected, no subscription:
+
 ```ts
 const { data } = useQuery(crpc.ai.analyze.queryOptions({ documentId }));
 ```
@@ -286,10 +308,12 @@ const { data } = useQuery(crpc.ai.analyze.queryOptions({ documentId }));
 ```ts
 const crpc = useCRPC();
 const mutation = useMutation(crpc.user.create.mutationOptions());
-const mutation = useMutation(crpc.user.update.mutationOptions({
-  onSuccess: (data) => toast.success('Updated'),
-  onError: (error) => toast.error(error.data?.message ?? 'Failed'),
-}));
+const mutation = useMutation(
+  crpc.user.update.mutationOptions({
+    onSuccess: (data) => toast.success("Updated"),
+    onError: (error) => toast.error(error.data?.message ?? "Failed"),
+  }),
+);
 ```
 
 Signature: `crpc.path.mutationOptions(options?)` — standard TanStack mutation options except `mutationFn`.
@@ -303,31 +327,45 @@ const key = crpc.user.create.mutationKey(); // ['convexMutation', 'user:create']
 ### Common Patterns
 
 **Toast promise:**
+
 ```ts
 toast.promise(mutation.mutateAsync({ title }), {
-  loading: 'Creating...', success: 'Created!',
-  error: (e) => e.data?.message ?? 'Failed',
+  loading: "Creating...",
+  success: "Created!",
+  error: (e) => e.data?.message ?? "Failed",
 });
 ```
 
 **Form with cleanup:**
+
 ```ts
-const mutation = useMutation(crpc.user.update.mutationOptions({
-  onSuccess: () => { form.reset(); closeModal(); toast.success('Updated'); },
-}));
+const mutation = useMutation(
+  crpc.user.update.mutationOptions({
+    onSuccess: () => {
+      form.reset();
+      closeModal();
+      toast.success("Updated");
+    },
+  }),
+);
 ```
 
 **Inline callbacks:**
+
 ```ts
-mutation.mutate({ id }, {
-  onSuccess: () => router.push('/sessions'),
-  onError: () => toast.error('Delete failed'),
-});
+mutation.mutate(
+  { id },
+  {
+    onSuccess: () => router.push("/sessions"),
+    onError: () => toast.error("Delete failed"),
+  },
+);
 ```
 
 ### Actions as Mutations
 
 Actions work with `mutationOptions` for external API calls (no real-time):
+
 ```ts
 const scrape = useMutation(crpc.scraper.scrapeLink.mutationOptions());
 ```
@@ -339,11 +377,11 @@ const scrape = useMutation(crpc.scraper.scrapeLink.mutationOptions());
 Import `useInfiniteQuery` from `kitcn/react` (wraps TanStack with Convex subscription logic):
 
 ```ts
-import { useInfiniteQuery } from 'kitcn/react';
+import { useInfiniteQuery } from "kitcn/react";
 
 const crpc = useCRPC();
 const { data, fetchNextPage, hasNextPage, isLoading, status } = useInfiniteQuery(
-  crpc.session.list.infiniteQueryOptions({ userId })
+  crpc.session.list.infiniteQueryOptions({ userId }),
 );
 // data is flattened T[] — all loaded items
 // status: 'LoadingFirstPage' | 'LoadingMore' | 'CanLoadMore' | 'Exhausted'
@@ -355,10 +393,10 @@ const { data, fetchNextPage, hasNextPage, isLoading, status } = useInfiniteQuery
 crpc.path.infiniteQueryOptions(args, options?)
 ```
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `limit` | `number` | Items per page (optional if `.paginated(limit)` on server, must be ≤ server limit) |
-| `skipUnauth` | `boolean` | Skip when unauthenticated |
+| Option       | Type      | Description                                                                        |
+| ------------ | --------- | ---------------------------------------------------------------------------------- |
+| `limit`      | `number`  | Items per page (optional if `.paginated(limit)` on server, must be ≤ server limit) |
+| `skipUnauth` | `boolean` | Skip when unauthenticated                                                          |
 
 Access server limit: `crpc.session.list.meta.limit`
 
@@ -373,7 +411,7 @@ export const list = publicQuery
     // input.cursor and input.limit auto-added
     return ctx.orm.query.session.findMany({
       where: input.userId ? { userId: input.userId } : undefined,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       cursor: input.cursor,
       limit: input.limit,
     });
@@ -382,6 +420,7 @@ export const list = publicQuery
 ```
 
 `.paginated({ limit, item })`:
+
 - Adds `cursor` (string|null) and `limit` (number) to input
 - Auto-sets output schema: `{ continueCursor: string, isDone: boolean, page: T[] }`
 - Must be called before `.query()`
@@ -400,11 +439,16 @@ await queryClient.prefetchQuery(crpc.session.list.infiniteQueryOptions({ userId 
 
 ```ts
 const { data, isPlaceholderData } = useInfiniteQuery(
-  crpc.session.list.infiniteQueryOptions({}, {
-    placeholderData: Array.from({ length: crpc.session.list.meta.limit }).map((_, i) => ({
-      id: i.toString() as Id<'session'>, token: 'Loading...', expiresAt: 0,
-    })),
-  })
+  crpc.session.list.infiniteQueryOptions(
+    {},
+    {
+      placeholderData: Array.from({ length: crpc.session.list.meta.limit }).map((_, i) => ({
+        id: i.toString() as Id<"session">,
+        token: "Loading...",
+        expiresAt: 0,
+      })),
+    },
+  ),
 );
 ```
 
@@ -424,9 +468,9 @@ the built-in fields and any custom payload via `error.data`:
 ```ts
 // Server:
 throw new CRPCError({
-  code: 'CONFLICT',
-  message: 'Domain already exists',
-  data: { existingSiteId: 'site_123' },
+  code: "CONFLICT",
+  message: "Domain already exists",
+  data: { existingSiteId: "site_123" },
 });
 
 // Client:
@@ -434,10 +478,12 @@ error.data?.message; // 'Domain already exists'
 error.data?.existingSiteId; // 'site_123'
 
 const { error, isError } = useQuery(crpc.posts.get.queryOptions({ id }));
-if (isError) toast.error(error.data?.message ?? 'Something went wrong');
+if (isError) toast.error(error.data?.message ?? "Something went wrong");
 
 // Mutation callback:
-crpc.posts.create.mutationOptions({ onError: (error) => toast.error(error.data?.message ?? 'Failed') });
+crpc.posts.create.mutationOptions({
+  onError: (error) => toast.error(error.data?.message ?? "Failed"),
+});
 
 // Try/catch:
 const error = err as Error & {
@@ -453,22 +499,22 @@ const error = err as Error & {
 `CRPCClientError` — thrown client-side when queries are skipped (auth):
 
 ```ts
-import { CRPCClientError, isCRPCClientError, isCRPCErrorCode } from 'kitcn/crpc';
+import { CRPCClientError, isCRPCClientError, isCRPCErrorCode } from "kitcn/crpc";
 
 if (isCRPCClientError(error)) {
-  error.code;         // 'UNAUTHORIZED'
+  error.code; // 'UNAUTHORIZED'
   error.functionName; // 'user:getSettings'
 }
-if (isCRPCErrorCode(error, 'UNAUTHORIZED')) router.push('/login');
+if (isCRPCErrorCode(error, "UNAUTHORIZED")) router.push("/login");
 ```
 
-| Code | Description |
-|------|-------------|
-| `UNAUTHORIZED` | Missing authentication |
-| `FORBIDDEN` | Not authorized |
-| `NOT_FOUND` | Resource not found |
-| `BAD_REQUEST` | Invalid input |
-| `TOO_MANY_REQUESTS` | Rate limited |
+| Code                | Description            |
+| ------------------- | ---------------------- |
+| `UNAUTHORIZED`      | Missing authentication |
+| `FORBIDDEN`         | Not authorized         |
+| `NOT_FOUND`         | Resource not found     |
+| `BAD_REQUEST`       | Invalid input          |
+| `TOO_MANY_REQUESTS` | Rate limited           |
 
 ### Global Error Handling
 
@@ -487,14 +533,15 @@ new QueryClient({
 ## Type Inference
 
 ```ts
-import type { Api, ApiInputs, ApiOutputs } from '@convex/api';
+import type { Api, ApiInputs, ApiOutputs } from "@convex/api";
 ```
 
 Bracket notation:
+
 ```ts
-type User = ApiOutputs['user']['get'];
-type GetUserArgs = ApiInputs['user']['get'];
-type OrgMember = ApiOutputs['organization']['members']['list'][number]; // array item
+type User = ApiOutputs["user"]["get"];
+type GetUserArgs = ApiInputs["user"]["get"];
+type OrgMember = ApiOutputs["organization"]["members"]["list"][number]; // array item
 ```
 
 ---
@@ -505,8 +552,8 @@ type OrgMember = ApiOutputs['organization']['members']['list'][number]; // array
 
 ```ts
 // src/lib/convex/server.ts
-import { api } from '@convex/api';
-import { convexBetterAuth } from 'kitcn/auth/nextjs';
+import { api } from "@convex/api";
+import { convexBetterAuth } from "kitcn/auth/nextjs";
 
 export const { createContext, createCaller, handler } = convexBetterAuth({
   api,
@@ -514,11 +561,11 @@ export const { createContext, createCaller, handler } = convexBetterAuth({
 });
 ```
 
-| Export | Description |
-|--------|-------------|
-| `createContext` | RSC context with auth |
-| `createCaller` | Server-side caller factory |
-| `handler` | Next.js API route handler (`export const { GET, POST } = handler;`) |
+| Export          | Description                                                         |
+| --------------- | ------------------------------------------------------------------- |
+| `createContext` | RSC context with auth                                               |
+| `createCaller`  | Server-side caller factory                                          |
+| `handler`       | Next.js API route handler (`export const { GET, POST } = handler;`) |
 
 Options: `api`, `convexSiteUrl`, `auth.jwtCache` (default true), `auth.isUnauthorized`.
 
@@ -534,7 +581,7 @@ return <ConvexProvider token={token}>{children}</ConvexProvider>;
 
 ```ts
 // src/app/api/auth/[...all]/route.ts
-import { handler } from '@/lib/convex/server';
+import { handler } from "@/lib/convex/server";
 export const { GET, POST } = handler;
 ```
 
@@ -546,13 +593,13 @@ export const { GET, POST } = handler;
 
 ```tsx
 // src/lib/convex/rsc.tsx
-import 'server-only';
-import { createServerCRPCProxy, getServerQueryClientOptions } from 'kitcn/rsc';
-import { cache } from 'react';
-import { headers } from 'next/headers';
-import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
-import { hydrationConfig } from './query-client';
-import { createCaller, createContext } from './server';
+import "server-only";
+import { createServerCRPCProxy, getServerQueryClientOptions } from "kitcn/rsc";
+import { cache } from "react";
+import { headers } from "next/headers";
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
+import { hydrationConfig } from "./query-client";
+import { createCaller, createContext } from "./server";
 
 const createRSCContext = cache(async () => createContext({ headers: await headers() }));
 
@@ -563,15 +610,16 @@ export const caller = createCaller(createRSCContext);
 export const crpc = createServerCRPCProxy({ api });
 
 // Server QueryClient with HTTP-based fetching
-const createServerQueryClient = () => new QueryClient({
-  defaultOptions: {
-    ...hydrationConfig,
-    ...getServerQueryClientOptions({
-      getToken: caller.getToken,
-      convexSiteUrl: process.env.NEXT_PUBLIC_CONVEX_SITE_URL!,
-    }),
-  },
-});
+const createServerQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      ...hydrationConfig,
+      ...getServerQueryClientOptions({
+        getToken: caller.getToken,
+        convexSiteUrl: process.env.NEXT_PUBLIC_CONVEX_SITE_URL!,
+      }),
+    },
+  });
 export const getQueryClient = cache(createServerQueryClient);
 
 // Fire-and-forget prefetch
@@ -581,11 +629,7 @@ export function prefetch<T extends { queryKey: readonly unknown[] }>(opts: T): v
 
 // Hydration wrapper
 export function HydrateClient({ children }: { children: React.ReactNode }) {
-  return (
-    <HydrationBoundary state={dehydrate(getQueryClient())}>
-      {children}
-    </HydrationBoundary>
-  );
+  return <HydrationBoundary state={dehydrate(getQueryClient())}>{children}</HydrationBoundary>;
 }
 
 // Awaited fetch + hydration (equivalent to Convex preloadQuery)
@@ -596,31 +640,43 @@ export function preloadQuery<T>(options: FetchQueryOptions<T>): Promise<T> {
 
 ### Three RSC Patterns
 
-| Pattern | Blocking | Returns data | Client hydration | Use case |
-|---------|----------|-------------|------------------|----------|
-| `prefetch` | No | No (void) | Yes | Client-only data, non-blocking |
-| `caller` | Yes | Yes | **No** | Server-only logic (redirects, auth checks, sensitive data) |
-| `preloadQuery` | Yes | Yes | Yes | Server + client data (metadata, 404 checks) |
+| Pattern        | Blocking | Returns data | Client hydration | Use case                                                   |
+| -------------- | -------- | ------------ | ---------------- | ---------------------------------------------------------- |
+| `prefetch`     | No       | No (void)    | Yes              | Client-only data, non-blocking                             |
+| `caller`       | Yes      | Yes          | **No**           | Server-only logic (redirects, auth checks, sensitive data) |
+| `preloadQuery` | Yes      | Yes          | Yes              | Server + client data (metadata, 404 checks)                |
 
 **prefetch** (preferred — non-blocking, client owns data):
+
 ```tsx
 export default async function PostsPage() {
   prefetch(crpc.posts.list.queryOptions({}));
-  return <HydrateClient><PostList /></HydrateClient>;
+  return (
+    <HydrateClient>
+      <PostList />
+    </HydrateClient>
+  );
 }
 ```
 
 **caller** (server-only, not hydrated):
+
 ```tsx
 const user = await caller.user.getSessionUser({});
-if (!user?.isAdmin) redirect('/');
+if (!user?.isAdmin) redirect("/");
 ```
 
 **preloadQuery** (awaited + hydrated — use sparingly):
+
 ```tsx
 const post = await preloadQuery(crpc.posts.get.queryOptions({ id }));
 if (!post) notFound();
-return <HydrateClient><h1>{post.title}</h1><PostContent /></HydrateClient>;
+return (
+  <HydrateClient>
+    <h1>{post.title}</h1>
+    <PostContent />
+  </HydrateClient>
+);
 ```
 
 ### Auth-Aware Prefetching
@@ -635,7 +691,11 @@ prefetch(crpc.user.getCurrentUser.queryOptions({}, { skipUnauth: true }));
 prefetch(crpc.user.getCurrentUser.queryOptions({}, { skipUnauth: true }));
 prefetch(crpc.posts.list.queryOptions({}));
 prefetch(crpc.stats.dashboard.queryOptions({}));
-return <HydrateClient><Dashboard /></HydrateClient>;
+return (
+  <HydrateClient>
+    <Dashboard />
+  </HydrateClient>
+);
 ```
 
 ### Metadata Generation
@@ -644,7 +704,7 @@ return <HydrateClient><Dashboard /></HydrateClient>;
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const post = await preloadQuery(crpc.posts.get.queryOptions({ id }));
-  return { title: post?.title ?? 'Not Found', description: post?.excerpt };
+  return { title: post?.title ?? "Not Found", description: post?.excerpt };
 }
 ```
 
@@ -662,11 +722,11 @@ Don't render `preloadQuery` data in BOTH Server and Client components — the se
 
 ### Infinite Query Return Value
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `data` | `T[]` | Flattened array of all items |
-| `pages` | `T[][]` | Raw page arrays |
-| `fetchNextPage` | `(limit?) => void` | Load next page |
-| `hasNextPage` | `boolean` | More pages exist |
-| `status` | `PaginationStatus` | `'LoadingFirstPage' \| 'LoadingMore' \| 'CanLoadMore' \| 'Exhausted'` |
-| `isPlaceholderData` | `boolean` | Showing placeholder |
+| Property            | Type               | Description                                                           |
+| ------------------- | ------------------ | --------------------------------------------------------------------- |
+| `data`              | `T[]`              | Flattened array of all items                                          |
+| `pages`             | `T[][]`            | Raw page arrays                                                       |
+| `fetchNextPage`     | `(limit?) => void` | Load next page                                                        |
+| `hasNextPage`       | `boolean`          | More pages exist                                                      |
+| `status`            | `PaginationStatus` | `'LoadingFirstPage' \| 'LoadingMore' \| 'CanLoadMore' \| 'Exhausted'` |
+| `isPlaceholderData` | `boolean`          | Showing placeholder                                                   |

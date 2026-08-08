@@ -6,6 +6,7 @@ trust: composition
 # compo-skill-name-collision
 
 Composition workspace bringing together 2 plugin(s):
+
 - `plugins/plug-x/`
 - `plugins/plug-y/`
 

@@ -4,15 +4,9 @@
   "version": "0.1.0",
   "description": "1password plugin (work)",
   "contributes": {
-    "tools": [
-      "1password/get-secret"
-    ],
-    "skills": [
-      "1password/get-secret"
-    ],
-    "workflows": [
-      "1password-flow.lobster"
-    ],
+    "tools": ["1password/get-secret"],
+    "skills": ["1password/get-secret"],
+    "workflows": ["1password-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

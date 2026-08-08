@@ -10,20 +10,20 @@ See [Better Auth Admin Plugin](https://www.better-auth.com/docs/plugins/admin) f
 
 ```ts
 // convex/functions/auth.ts
-import { admin } from 'better-auth/plugins';
-import { defineAuth } from './generated/auth';
+import { admin } from "better-auth/plugins";
+import { defineAuth } from "./generated/auth";
 
 export default defineAuth((ctx) => ({
-    plugins: [
-      admin({
-        defaultRole: 'user',
-        // adminUserIds: ['user_id_1'], // Always admin regardless of role
-        // impersonationSessionDuration: 60 * 60, // 1 hour default
-        // defaultBanReason: 'No reason',
-        // bannedUserMessage: 'You have been banned',
-      }),
-    ],
-  }));
+  plugins: [
+    admin({
+      defaultRole: "user",
+      // adminUserIds: ['user_id_1'], // Always admin regardless of role
+      // impersonationSessionDuration: 60 * 60, // 1 hour default
+      // defaultBanReason: 'No reason',
+      // bannedUserMessage: 'You have been banned',
+    }),
+  ],
+}));
 ```
 
 ### Admin Assignment via Environment
@@ -35,7 +35,7 @@ ADMIN=admin@domain.test,ops@domain.test
 
 ```ts
 // convex/functions/auth.ts
-import { defineAuth } from './generated/auth';
+import { defineAuth } from "./generated/auth";
 
 export default defineAuth((ctx) => ({
   triggers: {
@@ -45,9 +45,7 @@ export default defineAuth((ctx) => ({
           const env = getEnv();
           const adminEmails = env.ADMIN;
           const role =
-            data.role !== 'admin' && adminEmails?.includes(data.email)
-              ? 'admin'
-              : data.role;
+            data.role !== "admin" && adminEmails?.includes(data.email) ? "admin" : data.role;
           return { data: { ...data, role } };
         },
       },
@@ -60,7 +58,7 @@ export default defineAuth((ctx) => ({
 
 ```ts
 // src/lib/convex/auth-client.ts
-import { adminClient } from 'better-auth/client/plugins';
+import { adminClient } from "better-auth/client/plugins";
 
 export const authClient = createAuthClient({
   plugins: [
@@ -74,17 +72,17 @@ export const authClient = createAuthClient({
 
 ```ts
 // convex/functions/schema.ts
-import { boolean, convexTable, defineSchema, integer, text } from 'kitcn/orm';
+import { boolean, convexTable, defineSchema, integer, text } from "kitcn/orm";
 
-export const user = convexTable('user', {
+export const user = convexTable("user", {
   // ... existing fields
-  role: text(),           // 'admin' | 'user'
+  role: text(), // 'admin' | 'user'
   banned: boolean(),
   banReason: text(),
   banExpires: integer(),
 });
 
-export const session = convexTable('session', {
+export const session = convexTable("session", {
   // ... existing fields
   impersonatedBy: text(), // Admin user ID during impersonation
 });
@@ -99,29 +97,27 @@ export default defineSchema(tables, { strict: false });
 
 ```ts
 // convex/lib/crpc.ts
-const c = initCRPC
-  .meta<{ auth?: 'optional' | 'required'; role?: 'admin' }>()
-  .create();
+const c = initCRPC.meta<{ auth?: "optional" | "required"; role?: "admin" }>().create();
 
 const roleMiddleware = c.middleware<object>(({ ctx, meta, next }) => {
   const user = (ctx as { user?: { role?: string | null } }).user;
-  if (meta.role === 'admin' && user?.role !== 'admin') {
+  if (meta.role === "admin" && user?.role !== "admin") {
     throw new CRPCError({
-      code: 'FORBIDDEN',
-      message: 'Admin access required',
+      code: "FORBIDDEN",
+      message: "Admin access required",
     });
   }
   return next({ ctx });
 });
 
 export const authQuery = c.query
-  .meta({ auth: 'required' })
+  .meta({ auth: "required" })
   .use(devMiddleware)
   .use(authMiddleware)
   .use(roleMiddleware);
 
 export const authMutation = c.mutation
-  .meta({ auth: 'required' })
+  .meta({ auth: "required" })
   .use(devMiddleware)
   .use(authMiddleware)
   .use(roleMiddleware)
@@ -132,17 +128,14 @@ export const authMutation = c.mutation
 
 ```ts
 // convex/lib/auth/role-guard.ts
-import { CRPCError } from 'kitcn/server';
+import { CRPCError } from "kitcn/server";
 
-export function roleGuard(
-  role: 'admin',
-  user: { role?: string | null } | null
-) {
+export function roleGuard(role: "admin", user: { role?: string | null } | null) {
   if (!user) {
-    throw new CRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+    throw new CRPCError({ code: "FORBIDDEN", message: "Access denied" });
   }
-  if (role === 'admin' && user.role !== 'admin') {
-    throw new CRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+  if (role === "admin" && user.role !== "admin") {
+    throw new CRPCError({ code: "FORBIDDEN", message: "Admin access required" });
   }
 }
 ```
@@ -151,23 +144,23 @@ export function roleGuard(
 
 ```ts
 // convex/shared/permissions.ts
-import { createAccessControl } from 'better-auth/plugins/access';
-import { defaultStatements, adminAc } from 'better-auth/plugins/admin/access';
+import { createAccessControl } from "better-auth/plugins/access";
+import { defaultStatements, adminAc } from "better-auth/plugins/admin/access";
 
 const statement = {
   ...defaultStatements,
-  project: ['create', 'read', 'update', 'delete'],
+  project: ["create", "read", "update", "delete"],
 } as const;
 
 export const ac = createAccessControl(statement);
 
 export const admin = ac.newRole({
   ...adminAc.statements,
-  project: ['create', 'read', 'update', 'delete'],
+  project: ["create", "read", "update", "delete"],
 });
 
 export const user = ac.newRole({
-  project: ['create', 'read'],
+  project: ["create", "read"],
 });
 ```
 
@@ -175,10 +168,10 @@ Pass to plugins:
 
 ```ts
 // Server
-admin({ ac, roles: { admin, user } })
+admin({ ac, roles: { admin, user } });
 
 // Client (src/lib/convex/auth-client.ts)
-adminClient({ ac, roles: { admin, user } })
+adminClient({ ac, roles: { admin, user } });
 ```
 
 ## Admin Functions
@@ -187,12 +180,12 @@ adminClient({ ac, roles: { admin, user } })
 
 ```ts
 export const checkUserAdminStatus = authQuery
-  .meta({ role: 'admin' })
+  .meta({ role: "admin" })
   .input(z.object({ userId: z.string() }))
   .output(z.object({ isAdmin: z.boolean(), role: z.string().nullish() }))
   .query(async ({ ctx, input }) => {
     const user = await ctx.orm.query.user.findFirstOrThrow({ where: { id: input.userId } });
-    return { isAdmin: user.role === 'admin', role: user.role };
+    return { isAdmin: user.role === "admin", role: user.role };
   });
 ```
 
@@ -200,18 +193,18 @@ export const checkUserAdminStatus = authQuery
 
 ```ts
 export const updateUserRole = authMutation
-  .meta({ role: 'admin' })
-  .input(z.object({ role: z.enum(['user', 'admin']), userId: z.string() }))
+  .meta({ role: "admin" })
+  .input(z.object({ role: z.enum(["user", "admin"]), userId: z.string() }))
   .output(z.boolean())
   .mutation(async ({ ctx, input }) => {
-    if (input.role === 'admin' && !ctx.user.isAdmin) {
-      throw new CRPCError({ code: 'FORBIDDEN', message: 'Only admin can promote users to admin' });
+    if (input.role === "admin" && !ctx.user.isAdmin) {
+      throw new CRPCError({ code: "FORBIDDEN", message: "Only admin can promote users to admin" });
     }
 
     const targetUser = await ctx.orm.query.user.findFirstOrThrow({ where: { id: input.userId } });
 
-    if (targetUser.role === 'admin' && !ctx.user.isAdmin) {
-      throw new CRPCError({ code: 'FORBIDDEN', message: 'Cannot modify admin users' });
+    if (targetUser.role === "admin" && !ctx.user.isAdmin) {
+      throw new CRPCError({ code: "FORBIDDEN", message: "Cannot modify admin users" });
     }
 
     await ctx.orm
@@ -226,8 +219,8 @@ export const updateUserRole = authMutation
 
 ```ts
 export const grantAdminByEmail = authMutation
-  .meta({ role: 'admin' })
-  .input(z.object({ email: z.string().email(), role: z.enum(['admin']) }))
+  .meta({ role: "admin" })
+  .input(z.object({ email: z.string().email(), role: z.enum(["admin"]) }))
   .output(z.object({ success: z.boolean(), userId: z.string().optional() }))
   .mutation(async ({ ctx, input }) => {
     const user = await ctx.orm.query.user.findFirst({ where: { email: input.email } });
@@ -257,10 +250,12 @@ const UserListItemSchema = z.object({
 });
 
 export const getAllUsers = authQuery
-  .input(z.object({
-    role: z.enum(['all', 'user', 'admin']).optional(),
-    search: z.string().optional(),
-  }))
+  .input(
+    z.object({
+      role: z.enum(["all", "user", "admin"]).optional(),
+      search: z.string().optional(),
+    }),
+  )
   .paginated({ limit: 20, item: UserListItemSchema.nullable() })
   .query(async ({ ctx, input }) => {
     const result = await ctx.orm.query.user.findMany({
@@ -274,18 +269,21 @@ export const getAllUsers = authQuery
           ...user,
           banExpiresAt: user?.banExpires,
           banReason: user?.banReason,
-          email: user?.email || '',
+          email: user?.email || "",
           isBanned: user?.banned,
-          role: user?.role || 'user',
+          role: user?.role || "user",
         };
 
         if (input.search) {
           const searchLower = input.search.toLowerCase();
-          if (!(userData.name?.toLowerCase().includes(searchLower) || userData.email.toLowerCase().includes(searchLower))) {
+          if (!(
+            userData.name?.toLowerCase().includes(searchLower) ||
+            userData.email.toLowerCase().includes(searchLower)
+          )) {
             return null;
           }
         }
-        if (input.role && input.role !== 'all' && userData.role !== input.role) return null;
+        if (input.role && input.role !== "all" && userData.role !== input.role) return null;
 
         return userData;
       })
@@ -299,26 +297,40 @@ export const getAllUsers = authQuery
 
 ```ts
 export const getDashboardStats = authQuery
-  .meta({ role: 'admin' })
-  .output(z.object({
-    recentUsers: z.array(z.object({ id: z.string(), createdAt: z.date(), image: z.string().nullish(), name: z.string().optional() })),
-    totalAdmins: z.number(),
-    totalUsers: z.number(),
-    userGrowth: z.array(z.object({ count: z.number(), date: z.string() })),
-  }))
+  .meta({ role: "admin" })
+  .output(
+    z.object({
+      recentUsers: z.array(
+        z.object({
+          id: z.string(),
+          createdAt: z.date(),
+          image: z.string().nullish(),
+          name: z.string().optional(),
+        }),
+      ),
+      totalAdmins: z.number(),
+      totalUsers: z.number(),
+      userGrowth: z.array(z.object({ count: z.number(), date: z.string() })),
+    }),
+  )
   .query(async ({ ctx }) => {
     const toRows = <TRow>(result: TRow[] | { page: TRow[] }): TRow[] =>
       Array.isArray(result) ? result : result.page;
 
-    const recentUsers = toRows(await ctx.orm.query.user.findMany({
-      limit: 5, orderBy: { createdAt: 'desc' },
-      columns: { id: true, createdAt: true, image: true, name: true },
-    }));
+    const recentUsers = toRows(
+      await ctx.orm.query.user.findMany({
+        limit: 5,
+        orderBy: { createdAt: "desc" },
+        columns: { id: true, createdAt: true, image: true, name: true },
+      }),
+    );
 
-    const usersLast7Days = toRows(await ctx.orm.query.user.findMany({
-      where: { createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
-      limit: 1000,
-    }));
+    const usersLast7Days = toRows(
+      await ctx.orm.query.user.findMany({
+        where: { createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
+        limit: 1000,
+      }),
+    );
 
     const userGrowth: { count: number; date: string }[] = [];
     const now = Date.now();
@@ -332,12 +344,12 @@ export const getDashboardStats = authQuery
           const t = u.createdAt.getTime();
           return t >= startOfDay && t <= endOfDay;
         }).length,
-        date: new Date(startOfDay).toISOString().split('T')[0],
+        date: new Date(startOfDay).toISOString().split("T")[0],
       });
     }
 
     const sampleUsers = toRows(await ctx.orm.query.user.findMany({ limit: 100 }));
-    const adminCount = sampleUsers.filter((u) => u.role === 'admin').length;
+    const adminCount = sampleUsers.filter((u) => u.role === "admin").length;
     const totalUsers = await ctx.orm.query.user.count();
     const totalAdmins = Math.round((adminCount / sampleUsers.length) * totalUsers);
 
@@ -351,33 +363,33 @@ export const getDashboardStats = authQuery
 
 ```ts
 const { data: session } = authClient.useSession();
-const isAdmin = session?.user?.role === 'admin';
+const isAdmin = session?.user?.role === "admin";
 ```
 
 ### Ban/Unban Users
 
 ```ts
 await authClient.admin.banUser({
-  userId: 'user_123',
-  banReason: 'Violation of terms',
+  userId: "user_123",
+  banReason: "Violation of terms",
   banExpiresIn: 60 * 60 * 24 * 7, // 7 days
 });
 
-await authClient.admin.unbanUser({ userId: 'user_123' });
+await authClient.admin.unbanUser({ userId: "user_123" });
 ```
 
 ### Session Management
 
 ```ts
-const { data: sessions } = await authClient.admin.listUserSessions({ userId: 'user_123' });
-await authClient.admin.revokeUserSession({ sessionToken: 'session_token' });
-await authClient.admin.revokeUserSessions({ userId: 'user_123' }); // All sessions
+const { data: sessions } = await authClient.admin.listUserSessions({ userId: "user_123" });
+await authClient.admin.revokeUserSession({ sessionToken: "session_token" });
+await authClient.admin.revokeUserSessions({ userId: "user_123" }); // All sessions
 ```
 
 ### Impersonation
 
 ```ts
-await authClient.admin.impersonateUser({ userId: 'user_123' });
+await authClient.admin.impersonateUser({ userId: "user_123" });
 await authClient.admin.stopImpersonating();
 ```
 
@@ -386,23 +398,30 @@ await authClient.admin.stopImpersonating();
 ```ts
 // Create user
 await authClient.admin.createUser({
-  email: 'user@domain.test', password: 'password', name: 'John Doe', role: 'user',
+  email: "user@domain.test",
+  password: "password",
+  name: "John Doe",
+  role: "user",
 });
 
 // List users (with filtering/sorting/pagination)
 const { users, total } = await authClient.admin.listUsers({
-  searchValue: 'john', searchField: 'name', limit: 20, offset: 0,
-  sortBy: 'createdAt', sortDirection: 'desc',
+  searchValue: "john",
+  searchField: "name",
+  limit: 20,
+  offset: 0,
+  sortBy: "createdAt",
+  sortDirection: "desc",
 });
 
 // Set role
-await authClient.admin.setRole({ userId, role: 'admin' });
+await authClient.admin.setRole({ userId, role: "admin" });
 
 // Set password
 await authClient.admin.setUserPassword({ userId, newPassword });
 
 // Update user
-await authClient.admin.updateUser({ userId, data: { name: 'New Name' } });
+await authClient.admin.updateUser({ userId, data: { name: "New Name" } });
 
 // Delete user
 await authClient.admin.removeUser({ userId });
@@ -413,34 +432,34 @@ await authClient.admin.removeUser({ userId });
 ```ts
 // Server call
 const { success } = await authClient.admin.hasPermission({
-  permissions: { project: ['create', 'update'] },
+  permissions: { project: ["create", "update"] },
 });
 
 // Client-side, no server call
 const canDelete = authClient.admin.checkRolePermission({
-  role: 'admin',
-  permissions: { project: ['delete'] },
+  role: "admin",
+  permissions: { project: ["delete"] },
 });
 ```
 
 ## API Reference
 
-| Operation | Method | Admin Required |
-|-----------|--------|----------------|
-| Create user | `authClient.admin.createUser` | Yes |
-| List users | `authClient.admin.listUsers` | Yes |
-| Set role | `authClient.admin.setRole` | Yes |
-| Set password | `authClient.admin.setUserPassword` | Yes |
-| Update user | `authClient.admin.updateUser` | Yes |
-| Ban user | `authClient.admin.banUser` | Yes |
-| Unban user | `authClient.admin.unbanUser` | Yes |
-| List sessions | `authClient.admin.listUserSessions` | Yes |
-| Revoke session | `authClient.admin.revokeUserSession` | Yes |
-| Revoke all sessions | `authClient.admin.revokeUserSessions` | Yes |
-| Impersonate | `authClient.admin.impersonateUser` | Yes |
-| Stop impersonating | `authClient.admin.stopImpersonating` | Yes |
-| Remove user | `authClient.admin.removeUser` | Yes |
-| Check permission | `authClient.admin.hasPermission` | No |
-| Check role permission | `authClient.admin.checkRolePermission` | No |
+| Operation             | Method                                 | Admin Required |
+| --------------------- | -------------------------------------- | -------------- |
+| Create user           | `authClient.admin.createUser`          | Yes            |
+| List users            | `authClient.admin.listUsers`           | Yes            |
+| Set role              | `authClient.admin.setRole`             | Yes            |
+| Set password          | `authClient.admin.setUserPassword`     | Yes            |
+| Update user           | `authClient.admin.updateUser`          | Yes            |
+| Ban user              | `authClient.admin.banUser`             | Yes            |
+| Unban user            | `authClient.admin.unbanUser`           | Yes            |
+| List sessions         | `authClient.admin.listUserSessions`    | Yes            |
+| Revoke session        | `authClient.admin.revokeUserSession`   | Yes            |
+| Revoke all sessions   | `authClient.admin.revokeUserSessions`  | Yes            |
+| Impersonate           | `authClient.admin.impersonateUser`     | Yes            |
+| Stop impersonating    | `authClient.admin.stopImpersonating`   | Yes            |
+| Remove user           | `authClient.admin.removeUser`          | Yes            |
+| Check permission      | `authClient.admin.hasPermission`       | No             |
+| Check role permission | `authClient.admin.checkRolePermission` | No             |
 
 Use Convex functions for custom admin operations. Use Better Auth client API for standard operations like user management, banning, and session management.

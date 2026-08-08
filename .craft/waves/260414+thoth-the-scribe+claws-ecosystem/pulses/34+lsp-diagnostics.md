@@ -47,6 +47,7 @@ Build the LSP server entry point and diagnostic provider. Map 10 governance diag
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/architect.md` — system-level design authority for claws packages
 - `.craft/roles/claws/platform-eng.md` — implementation patterns and diagnostic mapping
 

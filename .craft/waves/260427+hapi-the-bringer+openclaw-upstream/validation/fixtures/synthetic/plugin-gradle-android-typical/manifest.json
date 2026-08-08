@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "gradle-android plugin (mobile)",
   "contributes": {
-    "tools": [
-      "gradle-android/build",
-      "gradle-android/install-apk"
-    ],
-    "skills": [
-      "gradle-android/build",
-      "gradle-android/install-apk"
-    ]
+    "tools": ["gradle-android/build", "gradle-android/install-apk"],
+    "skills": ["gradle-android/build", "gradle-android/install-apk"]
   }
 }

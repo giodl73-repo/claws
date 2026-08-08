@@ -52,6 +52,7 @@ Promotion is the trust boundary between local experimentation and fleet-wide dis
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/ciso.md` — promotion trust boundary, provenance requirements, fleet registry governance
 - `.craft/roles/craft/architect.md` — SDK architecture, registry storage patterns
 

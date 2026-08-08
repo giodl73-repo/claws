@@ -64,6 +64,7 @@ The server binds to 127.0.0.1 by default. When `--host 0.0.0.0` is used, a WARNI
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/architect.md` — system-level design authority for claws packages
 - `.craft/roles/claws/platform-eng.md` — implementation patterns and package scaffolding
 

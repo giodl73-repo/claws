@@ -2,7 +2,8 @@
 checkpoint: 3
 pulse_range: [06, 07]
 depends_on_cp: 2
-review_panel: [claws:ciso, claws:compliance, claws:gateway-eng, claws:claws-release-eng, architect, testing]
+review_panel:
+  [claws:ciso, claws:compliance, claws:gateway-eng, claws:claws-release-eng, architect, testing]
 ---
 
 # Checkpoint 3 · Wave B — Small Surgical + Governance
@@ -25,12 +26,14 @@ Pair a small surgical PR with the heavy governance package PR. Reviewers can fas
 ## Gate
 
 cp-3 closes when BOTH PRs MERGE at openclaw/openclaw AND post-merge verification reports:
+
 - H2 GREEN against trunk: hash-chain integrity + approval-handle replay-resistance + zero-`@microsoft/*` gate
 - H5-partial GREEN (OC-4 portion): round-trip on templated SOUL.md / TOOLS.md emits byte-identical bytes via `result.raw`
 - Audit-stream adapter audit verdict re-checked against post-merge trunk (no drift since cp-2 merged)
 - Audit entries in test fixtures show `oc://...` URIs (workspace + config) as actor / source / location fields where appropriate
 
 **Critical**:
+
 - adapter-audits.md § 3 must be complete BEFORE pulse 07 opens (F-38 hard dependency).
 - Both PRs must cite the bot-preempt checklist + Wave A merge SHAs in their descriptions.
 - Audit-attribution invariant (sourcePluginId mandatory) lands in PR-3 — first PR to ship that.

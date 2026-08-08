@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "aws-secrets-manager plugin (security)",
   "contributes": {
-    "tools": [
-      "aws-secrets-manager/get-secret",
-      "aws-secrets-manager/put-secret"
-    ],
-    "skills": [
-      "aws-secrets-manager/get-secret",
-      "aws-secrets-manager/put-secret"
-    ],
-    "workflows": [
-      "aws-secrets-manager-flow.lobster"
-    ],
+    "tools": ["aws-secrets-manager/get-secret", "aws-secrets-manager/put-secret"],
+    "skills": ["aws-secrets-manager/get-secret", "aws-secrets-manager/put-secret"],
+    "workflows": ["aws-secrets-manager-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

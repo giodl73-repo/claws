@@ -7,12 +7,14 @@ Built-in online data migrations for kitcn. Prerequisites: `setup/server.md`.
 Convex is not SQL — skip migrations for backward-compatible changes.
 
 **Skip migrations:**
+
 - Adding optional fields
 - Adding new tables or indexes
 - Code-level defaults on read (`doc.field ?? 'default'`)
 - Keeping deprecated fields while new code rolls out
 
 **Use migrations:**
+
 - Optional → required (field must exist on every row)
 - Type or enum narrowing
 - Field rename or removal that would violate schema
@@ -25,24 +27,25 @@ Convex is not SQL — skip migrations for backward-compatible changes.
 ### `defineMigration`
 
 ```ts
-import { defineMigration } from 'kitcn/orm';
+import { defineMigration } from "kitcn/orm";
 
 export const migration = defineMigration({
-  id: '20260227_080239_backfill_todo_priority', // timestamped unique id
-  description: 'backfill todo priority',         // optional
+  id: "20260227_080239_backfill_todo_priority", // timestamped unique id
+  description: "backfill todo priority", // optional
   up: {
-    table: 'todos',
+    table: "todos",
     migrateOne: async (_ctx, doc) => {
       if (doc.priority === undefined || doc.priority === null) {
-        return { priority: 'medium' }; // partial patch
+        return { priority: "medium" }; // partial patch
       }
       // return nothing to skip
     },
   },
-  down: { // optional — omit if not safely reversible
-    table: 'todos',
+  down: {
+    // optional — omit if not safely reversible
+    table: "todos",
     migrateOne: async (_ctx, doc) => {
-      if (doc.priority === 'medium') {
+      if (doc.priority === "medium") {
         return { priority: undefined };
       }
     },
@@ -52,44 +55,44 @@ export const migration = defineMigration({
 
 ### MigrationStep Fields
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `table` | `string` | — | Table to iterate |
-| `migrateOne` | `(ctx, doc) => patch \| void` | — | Per-document transform |
-| `batchSize` | `number` | `128` (runtime) / `256` (CLI) | Docs per batch |
-| `writeMode` | `'safe_bypass' \| 'normal'` | `'safe_bypass'` | Bypass or run ORM rules/triggers |
+| Field        | Type                          | Default                       | Description                      |
+| ------------ | ----------------------------- | ----------------------------- | -------------------------------- |
+| `table`      | `string`                      | —                             | Table to iterate                 |
+| `migrateOne` | `(ctx, doc) => patch \| void` | —                             | Per-document transform           |
+| `batchSize`  | `number`                      | `128` (runtime) / `256` (CLI) | Docs per batch                   |
+| `writeMode`  | `'safe_bypass' \| 'normal'`   | `'safe_bypass'`               | Bypass or run ORM rules/triggers |
 
 ### `migrateOne` Context
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `db` | `DatabaseWriter` | Raw Convex database writer |
-| `orm` | `OrmWriter` | ORM writer for complex ops |
-| `migrationId` | `string` | Current migration id |
-| `runId` | `string` | Current run id |
-| `direction` | `'up' \| 'down'` | Current direction |
-| `dryRun` | `boolean` | Whether dry run |
-| `writeMode` | `'safe_bypass' \| 'normal'` | Current write mode |
+| Field         | Type                        | Description                |
+| ------------- | --------------------------- | -------------------------- |
+| `db`          | `DatabaseWriter`            | Raw Convex database writer |
+| `orm`         | `OrmWriter`                 | ORM writer for complex ops |
+| `migrationId` | `string`                    | Current migration id       |
+| `runId`       | `string`                    | Current run id             |
+| `direction`   | `'up' \| 'down'`            | Current direction          |
+| `dryRun`      | `boolean`                   | Whether dry run            |
+| `writeMode`   | `'safe_bypass' \| 'normal'` | Current write mode         |
 
 ### `defineMigrationSet`
 
 Auto-generated manifest. Collects migrations, computes checksums, sorts by id:
 
 ```ts
-import { defineMigrationSet } from 'kitcn/orm';
+import { defineMigrationSet } from "kitcn/orm";
 export const migrations = defineMigrationSet([migration1, migration2]);
 ```
 
 ## CLI Commands
 
-| Command | Description |
-|---------|-------------|
-| `migrate create <name>` | Scaffold timestamped migration + update manifest |
-| `migrate up [--prod]` | Apply all pending migrations in order |
-| `migrate down --steps N [--prod]` | Roll back N migrations |
-| `migrate down --to <id> [--prod]` | Roll back to specific migration |
-| `migrate status [--prod]` | Show applied/pending/drift state |
-| `migrate cancel [--prod]` | Cancel active run |
+| Command                           | Description                                      |
+| --------------------------------- | ------------------------------------------------ |
+| `migrate create <name>`           | Scaffold timestamped migration + update manifest |
+| `migrate up [--prod]`             | Apply all pending migrations in order            |
+| `migrate down --steps N [--prod]` | Roll back N migrations                           |
+| `migrate down --to <id> [--prod]` | Roll back to specific migration                  |
+| `migrate status [--prod]`         | Show applied/pending/drift state                 |
+| `migrate cancel [--prod]`         | Cancel active run                                |
 
 ## Deploy Integration
 
@@ -123,10 +126,10 @@ Config in `kitcn.json`:
 
 Applied migrations are immutable. Two drift checks:
 
-| Drift | Cause | Effect |
-|-------|-------|--------|
-| Checksum mismatch | Applied migration file edited | Blocks next run |
-| Missing from manifest | Applied migration deleted | Blocks next run |
+| Drift                 | Cause                         | Effect          |
+| --------------------- | ----------------------------- | --------------- |
+| Checksum mismatch     | Applied migration file edited | Blocks next run |
+| Missing from manifest | Applied migration deleted     | Blocks next run |
 
 `allowDrift` is emergency-only. Create new migrations for follow-up behavior.
 

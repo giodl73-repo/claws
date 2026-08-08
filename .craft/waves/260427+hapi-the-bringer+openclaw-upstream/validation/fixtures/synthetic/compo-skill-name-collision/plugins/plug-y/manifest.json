@@ -3,11 +3,7 @@
   "version": "0.1.0",
   "description": "plug-y plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "plug-y/summarize"
-    ],
-    "skills": [
-      "plug-y/summarize"
-    ]
+    "tools": ["plug-y/summarize"],
+    "skills": ["plug-y/summarize"]
   }
 }

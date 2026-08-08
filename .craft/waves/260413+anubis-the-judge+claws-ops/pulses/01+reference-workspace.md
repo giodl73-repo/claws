@@ -109,6 +109,7 @@ The `before-claws/` variant enables a side-by-side demo story:
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, fixture conventions
 - `.craft/roles/claws/gateway-eng.md` — OC file formats, risk tier semantics, tool governance model
 - `.craft/roles/claws/new-hire.md` — first-run experience, progressive disclosure

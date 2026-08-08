@@ -6,6 +6,7 @@ trust: composition
 # compo-camera-trio
 
 Composition workspace bringing together 3 plugin(s):
+
 - `plugins/screenshot/`
 - `plugins/camsnap/`
 - `plugins/video-frames/`

@@ -42,7 +42,7 @@ CP-11 gate. Mirror cp-11.md Exit Criteria verbatim. All 4 target packages exist;
 - [ ] CI guard script `scripts/ci/no-craftworks-runtime-imports.sh` active + fails on regression (wired in .github/workflows/ci.yml)
 - [ ] `claws-lsp` renamed to `@bic/openclaw-lsp` — 6-point cascade complete per P76 verification (steward M6)
 - [ ] **23-subtree `claws-sdk/DISPOSITION.md` complete** — every non-consolidated subtree named with disposition (lift-as-claws-internal / merge-into-package / drop); no subtree un-categorized (steward M6 closure)
-- [ ] Internal claws-serve regression suite passes: all ~25 kept-internal routes (chunks-*, loop-*, sessions, trust, allow-all, ir, tensions, governance, batch, workqueue, schedule, patch-chunks, oc-generic, workspace-schema, admin-reset, error-sanitize) functional (steward coverage)
+- [ ] Internal claws-serve regression suite passes: all ~25 kept-internal routes (chunks-_, loop-_, sessions, trust, allow-all, ir, tensions, governance, batch, workqueue, schedule, patch-chunks, oc-generic, workspace-schema, admin-reset, error-sanitize) functional (steward coverage)
 - [ ] Per-file 95/90/95/95 coverage met across all 4 packages (no DEFERRED.md entries — no-deferrals directive)
 - [ ] Panel dry-run returns zero outstanding Majors
 - [ ] Ready for `/craft-push ra cp-11`
@@ -78,12 +78,13 @@ P51 (policy-1) + P52 (policy-2) + P53 (snap) + P54 (sdk sweep) + P55 (serve swee
 **Fix**: both gates narrowed to runtime-import regex. Substring refs in guard/scanner source, test fixtures, doc attestations, emitted-output assertions, and historical doc references are EXEMPT.
 
 **Categorized inventory (15 total substring refs confirmed exempt)**:
-- **@craftworks/* (10)**:
+
+- *_@craftworks/_ (10)**:
   - `policy/CONSOLIDATION-LOG.md` L56, L59 — doc attestation (zero runtime imports)
   - `workspace/src/path/index.ts:5` — doc attestation ("zero runtime dependencies on @craftworks/*")
   - `policy/src/emit/emit-plugin.ts:43` — scanner error-message string
   - `policy/tests/emit-plugin-coverage.unit.test.ts` lines 9, 11, 18, 23, 59, 61 — scanner regression fixtures
-- **@openclaw/* (5)**:
+- *_@openclaw/_ (5)**:
   - `policy/CONSOLIDATION-LOG.md` L37, L46 — historical doc references + runtime scope name
   - `policy/src/ops/verify-audit.ts:10` — comment citation
   - `policy/tests/emit.unit.test.ts:14` — emitted-output assertion (`toContain("from '@openclaw/policy/runtime'")`)

@@ -2,7 +2,8 @@
 checkpoint: 2
 pulse_range: [04, 04]
 depends_on_cp: 1
-review_panel: [claws:gateway-eng, claws:claws-release-eng, claws:claws-repo-steward, architect, testing]
+review_panel:
+  [claws:gateway-eng, claws:claws-release-eng, claws:claws-repo-steward, architect, testing]
 ---
 
 # Checkpoint 2 · Wave A — Workspace Foothold
@@ -29,6 +30,7 @@ One PR opens at upstream. The dispatch sequence (steps 0a, 0b, 1-6) is captured 
 ## Gate
 
 cp-2 closes when PR-1 MERGES at openclaw/openclaw AND post-merge verification (pulse 03 runbook) reports H1 GREEN against trunk:
+
 - Cross-OS canonicalize CI matrix green
 - JSONC round-trip with comments preserves byte-for-byte
 - Plain-JSON behavior unchanged (backward compat proof)
@@ -39,6 +41,7 @@ cp-2 closes when PR-1 MERGES at openclaw/openclaw AND post-merge verification (p
 - Plain JSON path benchmarked at parity-or-faster vs `JSON.stringify`; JSONC path ≤2× stringify; 50ms hard ceiling on 1MB
 
 **Critical**:
+
 - PR-1 is the high-blast-radius PR. Reviewers will scrutinize. Strong test coverage of the existing JSON-without-comments case is mandatory.
 - PR description must reference `docs/upstream/guides/bot-preempt-checklist.md` §3 in its body, lead with the 27-issue stats table, and embed perf bench results.
 - The pitch: "comments + key ordering + indentation + secrets all preserved across `openclaw update` cycles, AND a 13-code lint surface flags 27+ existing config-failure patterns, AND `oc://config/...` URI vocabulary lights up everywhere in one shot." Workspace earns its keep four ways in this single PR.

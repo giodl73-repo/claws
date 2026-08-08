@@ -54,6 +54,7 @@ Additionally, implement a session-scoped tool resolver that returns tool permiss
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, SDK-owns-logic rule, type design conventions
 - `.craft/roles/claws/gateway-eng.md` — workspace model, session architecture, tool resolution patterns
 

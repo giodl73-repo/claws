@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "description": "nano-pdf plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "nano-pdf/extract-text",
-      "nano-pdf/split-pages"
-    ]
+    "tools": ["nano-pdf/extract-text", "nano-pdf/split-pages"]
   }
 }

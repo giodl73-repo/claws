@@ -53,6 +53,7 @@ The color system maps risk tiers (R1-R5) and severity levels (CRITICAL/HIGH/MEDI
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — error contract patterns, diagnostic output conventions
 - `.craft/roles/claws/skill-author.md` — skill-facing error messages, docsUrl conventions
 

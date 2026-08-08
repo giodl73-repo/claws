@@ -6,29 +6,29 @@
 
 ## Verdict roll-up
 
-| Reviewer | Verdict | HC-BLOCK | HC-WARN | HC-NOTE |
-|---|---|---|---|---|
-| claws-gateway-eng | APPROVE-WITH-WARNINGS | 0 | 4 | 4 |
-| claws-compliance | APPROVE-WITH-WARNINGS | 0 | 5 | 5 |
-| claws-release-eng | APPROVE-WITH-WARNINGS | 2 | 4 | 4 |
-| claws-repo-steward | **REQUEST-CHANGES** | 3 | 7 | 5 |
-| architect | APPROVE-WITH-WARNINGS | 0 | 4 | 5 |
-| testing | APPROVE-WITH-WARNINGS | 2 | 6 | 7 |
-| **Total (6/6)** | **REQUEST-CHANGES (gated by repo-steward)** | **7** | **30** | **30** |
+| Reviewer           | Verdict                                     | HC-BLOCK | HC-WARN | HC-NOTE |
+| ------------------ | ------------------------------------------- | -------- | ------- | ------- |
+| claws-gateway-eng  | APPROVE-WITH-WARNINGS                       | 0        | 4       | 4       |
+| claws-compliance   | APPROVE-WITH-WARNINGS                       | 0        | 5       | 5       |
+| claws-release-eng  | APPROVE-WITH-WARNINGS                       | 2        | 4       | 4       |
+| claws-repo-steward | **REQUEST-CHANGES**                         | 3        | 7       | 5       |
+| architect          | APPROVE-WITH-WARNINGS                       | 0        | 4       | 5       |
+| testing            | APPROVE-WITH-WARNINGS                       | 2        | 6       | 7       |
+| **Total (6/6)**    | **REQUEST-CHANGES (gated by repo-steward)** | **7**    | **30**  | **30**  |
 
 5 of 6 reviewers approve with warnings; **repo-steward gates the wave on three mechanical fixes** (PR-numbering, FINDINGS tally, v0.3 frontmatter). Without those, cp-2 opens with stale citations threading into upstream PR descriptions.
 
 ## Consolidated HC-BLOCK (7 total, 6 unique after dedup)
 
-| # | Title | Source | Domain | Apply where | Effort |
-|---|---|---|---|---|---|
-| B1 | **PR-numbering inconsistency across docs** — pr-drafts say PR-2=oc://, PR-6=OC-4, PR-7=snap; UG-upstream §8/§9, PROGRESS.md cp-2/cp-4, bot-preempt-checklist `applies_to`, post-merge `applies_to` use different mappings (some inverted) | repo-steward B1 | repo discipline | UG-upstream.amend.md §8/§9, PROGRESS.md, bot-preempt-checklist.md frontmatter, post-merge-verification.md frontmatter | ~30 min audit + edits across 5 files |
-| B2 | **FINDINGS.md tally wrong by 50** — headline 67 (6/28/33), actual rows 117 (6/39/72); PROGRESS.md echoes the wrong number | repo-steward B2 | repo discipline | scenarios/FINDINGS.md headline, PROGRESS.md | ~15 min recount |
-| B3 | **UG-upstream.amend.md v0.3 frontmatter half-extends v0.2** — version: 0.3 but title still "v0.2 (DRAFT)", Reader's guide doesn't mention §12/§13 | repo-steward B3 | repo discipline | UG-upstream.amend.md title + Reader's guide subsection | ~15 min |
-| B4 | **regen-lint-evidence.ts is a stub but cited as CI gate** — Plan H5 + workspace-lint plan promise pre-PR-push refresh; today exits 0 silently | release-eng B1 | release engineering | Either implement file-write+diff path, OR downgrade plan contract from "CI gate" to "advisory script" | 2 hr implement, 5 min downgrade |
-| B5 | **PR-1 falsely self-attests "regex-scanned: zero hits"** — actually has 11 hits ("extension", "SKILL"); §3.2 carve-outs not wired into §3 checkbox semantics | release-eng B2 | release engineering | bot-preempt-checklist.md §3 line 2 + new `scan-pr-body.sh`; PR-DRAFT 1 re-attests in qualified form | ~30 min |
-| B6 | **`null` matches anything in type-mismatch is untested AND likely wrong for required string paths** — `{ "homeserver": null }` produces ZERO findings (no TYPE_MISMATCH, no MISSING_REQUIRED) | testing B1 (also architect W2) | tests + semantics | `src/lint/rules/type-mismatch.ts` semantics decision + new test in `tests/lint/rules-coverage.test.ts` | ~30 min |
-| B7 | **did-you-mean distance-3 cap has no boundary test** — only distance-1 tested today; cap is the entire UX gate; refactor could break invisibly | testing B2 | tests | Add 2 tests in `rules-coverage.test.ts`: distance-3 accepted, distance-4 rejected | ~15 min |
+| #   | Title                                                                                                                                                                                                                                     | Source                         | Domain              | Apply where                                                                                                           | Effort                               |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| B1  | **PR-numbering inconsistency across docs** — pr-drafts say PR-2=oc://, PR-6=OC-4, PR-7=snap; UG-upstream §8/§9, PROGRESS.md cp-2/cp-4, bot-preempt-checklist `applies_to`, post-merge `applies_to` use different mappings (some inverted) | repo-steward B1                | repo discipline     | UG-upstream.amend.md §8/§9, PROGRESS.md, bot-preempt-checklist.md frontmatter, post-merge-verification.md frontmatter | ~30 min audit + edits across 5 files |
+| B2  | **FINDINGS.md tally wrong by 50** — headline 67 (6/28/33), actual rows 117 (6/39/72); PROGRESS.md echoes the wrong number                                                                                                                 | repo-steward B2                | repo discipline     | scenarios/FINDINGS.md headline, PROGRESS.md                                                                           | ~15 min recount                      |
+| B3  | **UG-upstream.amend.md v0.3 frontmatter half-extends v0.2** — version: 0.3 but title still "v0.2 (DRAFT)", Reader's guide doesn't mention §12/§13                                                                                         | repo-steward B3                | repo discipline     | UG-upstream.amend.md title + Reader's guide subsection                                                                | ~15 min                              |
+| B4  | **regen-lint-evidence.ts is a stub but cited as CI gate** — Plan H5 + workspace-lint plan promise pre-PR-push refresh; today exits 0 silently                                                                                             | release-eng B1                 | release engineering | Either implement file-write+diff path, OR downgrade plan contract from "CI gate" to "advisory script"                 | 2 hr implement, 5 min downgrade      |
+| B5  | **PR-1 falsely self-attests "regex-scanned: zero hits"** — actually has 11 hits ("extension", "SKILL"); §3.2 carve-outs not wired into §3 checkbox semantics                                                                              | release-eng B2                 | release engineering | bot-preempt-checklist.md §3 line 2 + new `scan-pr-body.sh`; PR-DRAFT 1 re-attests in qualified form                   | ~30 min                              |
+| B6  | **`null` matches anything in type-mismatch is untested AND likely wrong for required string paths** — `{ "homeserver": null }` produces ZERO findings (no TYPE_MISMATCH, no MISSING_REQUIRED)                                             | testing B1 (also architect W2) | tests + semantics   | `src/lint/rules/type-mismatch.ts` semantics decision + new test in `tests/lint/rules-coverage.test.ts`                | ~30 min                              |
+| B7  | **did-you-mean distance-3 cap has no boundary test** — only distance-1 tested today; cap is the entire UX gate; refactor could break invisibly                                                                                            | testing B2                     | tests               | Add 2 tests in `rules-coverage.test.ts`: distance-3 accepted, distance-4 rejected                                     | ~15 min                              |
 
 ## Cross-reviewer consensus signals
 
@@ -41,31 +41,31 @@ These findings were independently flagged by multiple reviewers — high-confide
 
 ## Consolidated HC-WARN highlights (30 total)
 
-| Category | Count | Notable items |
-|---|---|---|
-| Performance / runtime | 4 | gateway-eng W1-W4: pushDiag O(N²), unbounded recursion depth, 13× walker passes with path clone, post-merge §3 has no perf microbench |
-| Compliance / SIEM | 5 | compliance C-W1-C-W5: `--verify` should default-on; mutation-lag `mutationDetectionLagMs` field; OC-5 metadata-key contract; postAudit override should be HC-WARN; mutation forensics omits prior-turn `actor.principalId` |
-| Architecture / seams | 4 | architect W1-W4: `pluginIdSources(doc)` seam leak; type-mismatch null carve-out; ocUri message-weave irreversible; §13 fixer contract under-specified for cross-fixer interactions |
-| Tests / fixtures | 6 | testing W1-W6: minimal-toy fixtures; test-schema drift risk; weak ocUri invariant; H1 validator delegates to upstream CI; no concurrent-read; no rule-ordering/dedup |
-| Repo discipline | 7 | repo-steward W1-W7: hook count, ATOMS prose, ATOMS frontmatter version pin, index.ts JSDoc, §13 reciprocal cite, §10a numbering, lint/ Error-export parity |
-| Release engineering | 4 | release-eng W1-W4: subpath skew, codemod gate path implies pre-existence, cp-5 PR ordering, adapter-audits §5 not CI-detectable |
+| Category              | Count | Notable items                                                                                                                                                                                                              |
+| --------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Performance / runtime | 4     | gateway-eng W1-W4: pushDiag O(N²), unbounded recursion depth, 13× walker passes with path clone, post-merge §3 has no perf microbench                                                                                      |
+| Compliance / SIEM     | 5     | compliance C-W1-C-W5: `--verify` should default-on; mutation-lag `mutationDetectionLagMs` field; OC-5 metadata-key contract; postAudit override should be HC-WARN; mutation forensics omits prior-turn `actor.principalId` |
+| Architecture / seams  | 4     | architect W1-W4: `pluginIdSources(doc)` seam leak; type-mismatch null carve-out; ocUri message-weave irreversible; §13 fixer contract under-specified for cross-fixer interactions                                         |
+| Tests / fixtures      | 6     | testing W1-W6: minimal-toy fixtures; test-schema drift risk; weak ocUri invariant; H1 validator delegates to upstream CI; no concurrent-read; no rule-ordering/dedup                                                       |
+| Repo discipline       | 7     | repo-steward W1-W7: hook count, ATOMS prose, ATOMS frontmatter version pin, index.ts JSDoc, §13 reciprocal cite, §10a numbering, lint/ Error-export parity                                                                 |
+| Release engineering   | 4     | release-eng W1-W4: subpath skew, codemod gate path implies pre-existence, cp-5 PR ordering, adapter-audits §5 not CI-detectable                                                                                            |
 
 ## Apply-back routing
 
-| Apply target | Findings |
-|---|---|
-| **PR-numbering audit + cross-doc patch** | B1 (5 files) |
-| **FINDINGS.md recount** | B2 |
-| **UG-upstream.amend.md v0.3 frontmatter + Reader's guide** | B3 + W5/W6 (repo-steward) |
-| **bot-preempt-checklist.md §3 + scan-pr-body.sh** | B5 |
-| **regen-lint-evidence.ts implementation OR plan downgrade** | B4 |
-| **type-mismatch.ts semantics + tests** | B6 (also architect W2) |
-| **unknown-field.ts boundary tests** | B7 |
-| **PR-DRAFT 1 subpath table extension + index.ts JSDoc** | release-eng W1 + repo-steward W4 |
-| **adapter-audits §3 mapping refinements (compliance C-W2/C-W3/C-W4)** | compliance HC-WARNs (post-cp-1, before PR-3 push) |
-| **Performance instrumentation** | gateway-eng HC-WARNs (post-cp-1, capture as L1 perf bench in PR-1 prep) |
-| **Architectural refinements** | architect W1/W3/W4 (deferred to cp-2 entry; W2 covered by B6) |
-| **Test additions for unicode/empty/large/concurrent/dedup** | testing HC-NOTEs N1-N7 (post-cp-1; treat as polish) |
+| Apply target                                                          | Findings                                                                |
+| --------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **PR-numbering audit + cross-doc patch**                              | B1 (5 files)                                                            |
+| **FINDINGS.md recount**                                               | B2                                                                      |
+| **UG-upstream.amend.md v0.3 frontmatter + Reader's guide**            | B3 + W5/W6 (repo-steward)                                               |
+| **bot-preempt-checklist.md §3 + scan-pr-body.sh**                     | B5                                                                      |
+| **regen-lint-evidence.ts implementation OR plan downgrade**           | B4                                                                      |
+| **type-mismatch.ts semantics + tests**                                | B6 (also architect W2)                                                  |
+| **unknown-field.ts boundary tests**                                   | B7                                                                      |
+| **PR-DRAFT 1 subpath table extension + index.ts JSDoc**               | release-eng W1 + repo-steward W4                                        |
+| **adapter-audits §3 mapping refinements (compliance C-W2/C-W3/C-W4)** | compliance HC-WARNs (post-cp-1, before PR-3 push)                       |
+| **Performance instrumentation**                                       | gateway-eng HC-WARNs (post-cp-1, capture as L1 perf bench in PR-1 prep) |
+| **Architectural refinements**                                         | architect W1/W3/W4 (deferred to cp-2 entry; W2 covered by B6)           |
+| **Test additions for unicode/empty/large/concurrent/dedup**           | testing HC-NOTEs N1-N7 (post-cp-1; treat as polish)                     |
 
 ## Strengths consolidated
 

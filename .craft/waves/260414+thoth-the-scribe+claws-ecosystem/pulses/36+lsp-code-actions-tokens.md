@@ -49,6 +49,7 @@ Build auto-fix code actions for governance violations (6 fix types) and a semant
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/architect.md` — system-level design authority for claws packages
 - `.craft/roles/claws/platform-eng.md` — implementation patterns and LSP provider contracts
 

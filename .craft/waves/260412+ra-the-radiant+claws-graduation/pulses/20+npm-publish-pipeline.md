@@ -59,6 +59,7 @@ This is the CP-4 gate pulse. Both packages must be publishable with all quality 
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- CI/CD pipeline design, publish workflow conventions, quality gates
 - `.craft/roles/claws/platform-eng.md` -- npm publishing, integrity hashing, freemium boundary enforcement
 

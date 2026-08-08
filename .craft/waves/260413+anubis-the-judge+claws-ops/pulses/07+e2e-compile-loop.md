@@ -40,12 +40,7 @@ This is the critical integration proof that the entire claws pipeline works end-
   5. Verify audit chain has 3 entries with correct event types (allow, block/elicit, block)
   6. Verify enforcement matches expected-enforcement.json from fixtures
 
-  **Fail-mode enforcement (R1 review GE-03):**
-  7. Configure MockGovernanceHost to throw on the next `evaluatePolicy` call
-  8. Fire file-read (R2) tool call → ALLOWED (fail-open: R1-R2 tools fail-open when GovernanceHost throws)
-  9. Configure MockGovernanceHost to throw on the next `evaluatePolicy` call
-  10. Fire db-query (R4) tool call → BLOCKED (fail-closed: R4 tools fail-closed when GovernanceHost throws)
-  11. Verify audit chain records both fail-mode events with correct reason codes
+  **Fail-mode enforcement (R1 review GE-03):** 7. Configure MockGovernanceHost to throw on the next `evaluatePolicy` call 8. Fire file-read (R2) tool call → ALLOWED (fail-open: R1-R2 tools fail-open when GovernanceHost throws) 9. Configure MockGovernanceHost to throw on the next `evaluatePolicy` call 10. Fire db-query (R4) tool call → BLOCKED (fail-closed: R4 tools fail-closed when GovernanceHost throws) 11. Verify audit chain records both fail-mode events with correct reason codes
 
 ## Acceptance Criteria
 
@@ -65,6 +60,7 @@ This is the critical integration proof that the entire claws pipeline works end-
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/gateway-eng.md` — gateway enforcement semantics, audit chain format, tool call lifecycle
 - `.craft/roles/craft/architect.md` — e2e test patterns, fixture usage conventions
 

@@ -55,6 +55,7 @@ In all three pipelines (`compile.ts:148`, `check.ts:113`, `build.ts:178`), when 
 ### NAV-05 [W] — `init` success message crams too much into one line and buries the next step
 
 `init.ts:115-118` outputs: `Detected: ${platform}. Created claws.json + .claws/. Run \`claws check\` to check governance.` This is 3 distinct pieces of information in one line:
+
 1. What was detected
 2. What was created
 3. What to do next
@@ -121,12 +122,12 @@ All commands produce human-readable output on success. CI pipelines typically wa
 
 ## Summary
 
-| Grade | Count | IDs |
-|-------|-------|-----|
-| M     | 4     | NAV-01, NAV-02, NAV-03, NAV-04 |
+| Grade | Count | IDs                                    |
+| ----- | ----- | -------------------------------------- |
+| M     | 4     | NAV-01, NAV-02, NAV-03, NAV-04         |
 | W     | 5     | NAV-05, NAV-06, NAV-07, NAV-08, NAV-09 |
-| N     | 2     | NAV-10, NAV-11 |
-| Total | 11    | |
+| N     | 2     | NAV-10, NAV-11                         |
+| Total | 11    |                                        |
 
 ### Key user journey risks
 

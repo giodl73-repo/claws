@@ -56,6 +56,7 @@ Per R1 review C5: semver is enforced mechanically, not by convention. Every rele
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- API stability, semver enforcement, supply chain safety
 - `.craft/roles/claws/platform-eng.md` -- package publishing, integrity verification, changelog conventions
 

@@ -25,6 +25,7 @@ checkpoint_gate: false
 # Pulse 27: Maker Scaffold
 
 ## Objective
+
 Implement the skill scaffolding engine with a template registry. The scaffold command generates a complete, compilable skill project from a template selection. Five templates are provided:
 
 1. **communication** (R3-R5, OBO email/message) — skills that send emails, messages, or notifications on behalf of users. Includes OBO governance frontmatter by default.
@@ -34,6 +35,7 @@ Implement the skill scaffolding engine with a template registry. The scaffold co
 5. **custom base** (R1, minimal) — minimal template for custom skill types. Lowest risk, minimal governance surface.
 
 Each scaffold produces:
+
 - `SKILL.md` with governance frontmatter (risk level, OBO status, data labels, trust tier)
 - `handler.ts` with governance decorators
 - `package.json` with claws dependencies
@@ -42,6 +44,7 @@ Each scaffold produces:
 - `.gitignore` including `.claws/` directory
 
 **Scenario-driven requirements** (from skill-lifecycle scenarios):
+
 - Trust tier derivation from workspace context (S01-F01)
 - Scaffold default governance tier is TYPED (S01-F03)
 - Version alignment with workspace claws version (S01-F04)
@@ -55,6 +58,7 @@ Each scaffold produces:
 **Integration Coverage Hardening** (THOTH-INTEGRATION-COVERAGE): scaffold area at 79% is below the 90% target. This pulse adds 2 additional L1 integration tests covering full scaffold-to-compile-to-pinch round-trips for R1 and R5 tier skills to close the gap to 90%+.
 
 ## Deliverables
+
 - [ ] `claws-sdk/src/maker/scaffold.ts` — template selection + file generation engine, < 2s performance target
 - [ ] `claws-sdk/src/maker/templates/communication.ts` — email/message skill template (R3-R5, OBO)
 - [ ] `claws-sdk/src/maker/templates/data-processing.ts` — data transformation template (R2-R3, no OBO)
@@ -70,6 +74,7 @@ Each scaffold produces:
 - [ ] `claws-cli/tests/maker/scaffold.accept.test.ts` — L3: CLI acceptance — `claws maker scaffold` with each template flag produces complete project directory with pinch-clean output
 
 ## Acceptance Criteria
+
 - [ ] All 5 templates produce valid, compilable skill projects
 - [ ] SKILL.md includes correct governance frontmatter for each template
 - [ ] handler.ts includes governance decorators appropriate to template risk level
@@ -86,14 +91,18 @@ Each scaffold produces:
 - [ ] `npx tsc --noEmit` exits 0
 
 ## Governing Roles
+
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — overall claws architecture and SDK boundaries
 - `.craft/roles/claws/platform-eng.md` — implementation patterns, cross-platform concerns
 
 ## Dependencies
+
 None — this is the foundational maker command that other maker pulses build on.
 
 ## Test Gates
+
 - [ ] L0 unit (5 tests): template selection, SKILL.md frontmatter generated, handler.ts has decorators, .gitignore includes .claws/, OBO auto-suggestion from name
 - [ ] L1 integration (4 tests): full scaffold + tsc --noEmit on generated output, scaffold completes in < 2s, full scaffold → compile → pinch round-trip for R1 tier skill, full scaffold → compile → pinch round-trip for R5 tier skill
 - [ ] L2 e2e (1 test): scaffold communication template, verify all files present, pinch-clean

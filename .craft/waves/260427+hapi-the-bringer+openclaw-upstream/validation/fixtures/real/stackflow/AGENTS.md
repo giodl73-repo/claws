@@ -5,6 +5,7 @@
 Stackflow is a JavaScript library that implements Stack Navigation UX commonly used in mobile applications (iOS/Android). It provides a framework-agnostic core with React integration for building hybrid apps and webviews with native-like navigation experiences.
 
 **Key Features:**
+
 - Stack-based navigation with state preservation
 - Native-like transition effects and iOS-style swipe back
 - Plugin system for extensibility
@@ -111,6 +112,7 @@ yarn release:canary
 ## Plugin System
 
 Plugins can hook into various lifecycle events:
+
 - `onInit`
 - `onBeforePush/onPushed`
 - `onBeforePop/onPopped`
@@ -131,6 +133,7 @@ Plugins can hook into various lifecycle events:
 ## Common Tasks
 
 ### Adding a New Activity
+
 ```typescript
 export const { Stack, useFlow } = stackflow({
   transitionDuration: 350,
@@ -147,16 +150,17 @@ export const { Stack, useFlow } = stackflow({
 ```
 
 ### Navigation
+
 ```tsx
 const MyActivity: ActivityComponentType = () => {
   const { push } = useFlow();
- 
+
   const onClick = () => {
     push("Article", {
       title: "Hello",
     });
   };
- 
+
   return (
     <AppScreen appBar={{ title: "My Activity" }}>
       <div>
@@ -169,6 +173,7 @@ const MyActivity: ActivityComponentType = () => {
 ```
 
 ### Creating a Plugin
+
 ```tsx
 stackflow({
   // ...

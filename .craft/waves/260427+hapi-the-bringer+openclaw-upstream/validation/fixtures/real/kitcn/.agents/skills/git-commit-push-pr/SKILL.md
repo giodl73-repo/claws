@@ -5,7 +5,7 @@ description: Commit, push, and open a PR with an adaptive, value-first descripti
 
 # Git Commit, Push, and PR
 
-Go from working tree changes to an open pull request in a single workflow, or update an existing PR description. The key differentiator of this skill is PR descriptions that communicate *value and intent* proportional to the complexity of the change.
+Go from working tree changes to an open pull request in a single workflow, or update an existing PR description. The key differentiator of this skill is PR descriptions that communicate _value and intent_ proportional to the complexity of the change.
 
 ## Mode detection
 
@@ -143,7 +143,7 @@ If the `git status` result from this step shows a clean working tree (no staged,
 
 ### Step 2: Determine conventions
 
-Follow this priority order for commit messages *and* PR titles:
+Follow this priority order for commit messages _and_ PR titles:
 
 1. **Repo conventions already in context** -- If project instructions (AGENTS.md, CLAUDE.md, or similar) are loaded and specify conventions, follow those. Do not re-read these files; they are loaded at session start.
 2. **Recent commit history** -- If no explicit convention exists, match the pattern visible in the last 10 commits.
@@ -259,31 +259,31 @@ Assess the PR along two axes before writing, based on the full branch diff:
 
 Use this to select the right description depth:
 
-| Change profile | Description approach |
-|---|---|
-| Small + simple (typo, config, dep bump) | 1-2 sentences, no headers. Total body under ~300 characters. |
-| Small + non-trivial (targeted bugfix, behavioral change) | Short "Problem / Fix" narrative, ~3-5 sentences. Enough for a reviewer to understand *why* without reading the diff. No headers needed unless there are two distinct concerns. |
-| Medium feature or refactor | Summary paragraph, then a section explaining what changed and why. Call out design decisions. |
-| Large or architecturally significant | Full narrative: problem context, approach chosen (and why), key decisions, migration notes or rollback considerations if relevant. |
-| Performance improvement | Include before/after measurements if available. A markdown table is effective here. |
+| Change profile                                           | Description approach                                                                                                                                                           |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Small + simple (typo, config, dep bump)                  | 1-2 sentences, no headers. Total body under ~300 characters.                                                                                                                   |
+| Small + non-trivial (targeted bugfix, behavioral change) | Short "Problem / Fix" narrative, ~3-5 sentences. Enough for a reviewer to understand _why_ without reading the diff. No headers needed unless there are two distinct concerns. |
+| Medium feature or refactor                               | Summary paragraph, then a section explaining what changed and why. Call out design decisions.                                                                                  |
+| Large or architecturally significant                     | Full narrative: problem context, approach chosen (and why), key decisions, migration notes or rollback considerations if relevant.                                             |
+| Performance improvement                                  | Include before/after measurements if available. A markdown table is effective here.                                                                                            |
 
 **Brevity matters for small changes.** A 3-line bugfix with a 20-line PR description signals the author didn't calibrate. Match the weight of the description to the weight of the change. When in doubt, shorter is better -- reviewers can read the diff.
 
 #### Writing principles
 
-- **Lead with value**: The first sentence should tell the reviewer *why this PR exists*, not *what files changed*. "Fixes timeout errors during batch exports" beats "Updated export_handler.py and config.yaml".
+- **Lead with value**: The first sentence should tell the reviewer _why this PR exists_, not _what files changed_. "Fixes timeout errors during batch exports" beats "Updated export_handler.py and config.yaml".
 - **No orphaned opening paragraphs**: If the description uses `##` section headings anywhere, the opening summary must also be under a heading (e.g., `## Summary`). An untitled paragraph followed by titled sections looks like a missing heading. For short descriptions with no sections, a bare paragraph is fine.
 - **Describe the net result, not the journey**: The PR description is about the end state -- what changed and why. Do not include work-product details like bugs found and fixed during development, intermediate failures, debugging steps, iteration history, or refactoring done along the way. Those are part of getting the work done, not part of the result. If a bug fix happened during development, the fix is already in the diff -- mentioning it in the description implies it's a separate concern the reviewer should evaluate, when really it's just part of the final implementation. Exception: include process details only when they are critical for a reviewer to understand a design choice (e.g., "tried approach X first but it caused Y, so went with Z instead").
 - **When commits conflict, trust the final diff**: The commit list is supporting context, not the source of truth for the final PR description. If commit messages describe intermediate steps that were later revised or reverted (for example, "switch to gh pr list" followed by a later change back to `gh pr view`), describe the end state shown by the full branch diff. Do not narrate contradictory commit history as if all of it shipped.
-- **Explain the non-obvious**: If the diff is self-explanatory, don't narrate it. Spend description space on things the diff *doesn't* show: why this approach, what was considered and rejected, what the reviewer should pay attention to.
+- **Explain the non-obvious**: If the diff is self-explanatory, don't narrate it. Spend description space on things the diff _doesn't_ show: why this approach, what was considered and rejected, what the reviewer should pay attention to.
 - **Use structure when it earns its keep**: Headers, bullet lists, and tables are tools -- use them when they aid comprehension, not as mandatory template sections. An empty "## Breaking Changes" section adds noise.
 - **Markdown tables for data**: When there are before/after comparisons, performance numbers, or option trade-offs, a table communicates density well. Example:
 
   ```markdown
-  | Metric | Before | After |
-  |--------|--------|-------|
-  | p95 latency | 340ms | 120ms |
-  | Memory (peak) | 2.1GB | 1.4GB |
+  | Metric        | Before | After |
+  | ------------- | ------ | ----- |
+  | p95 latency   | 340ms  | 120ms |
+  | Memory (peak) | 2.1GB  | 1.4GB |
   ```
 
 - **No empty sections**: If a section (like "Breaking Changes" or "Migration Guide") doesn't apply, omit it entirely. Do not include it with "N/A" or "None".
@@ -297,15 +297,16 @@ The bar for including visual aids in PR descriptions is higher than in brainstor
 
 **When to include:**
 
-| PR changes... | Visual aid | Placement |
-|---|---|---|
-| Architecture touching 3+ interacting components or services | Mermaid component or interaction diagram | Within the approach or changes section |
-| A multi-step workflow, pipeline, or data flow with non-obvious sequencing | Mermaid flow diagram | After the summary or within the changes section |
-| 3+ behavioral modes, states, or variants being introduced or changed | Markdown comparison table | Within the relevant section |
-| Before/after performance data, behavioral differences, or option trade-offs | Markdown table (see the "Markdown tables for data" writing principle above) | Inline with the data being discussed |
-| Data model changes with 3+ related entities or relationship changes | Mermaid ERD or relationship diagram | Within the changes section |
+| PR changes...                                                               | Visual aid                                                                  | Placement                                       |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------- |
+| Architecture touching 3+ interacting components or services                 | Mermaid component or interaction diagram                                    | Within the approach or changes section          |
+| A multi-step workflow, pipeline, or data flow with non-obvious sequencing   | Mermaid flow diagram                                                        | After the summary or within the changes section |
+| 3+ behavioral modes, states, or variants being introduced or changed        | Markdown comparison table                                                   | Within the relevant section                     |
+| Before/after performance data, behavioral differences, or option trade-offs | Markdown table (see the "Markdown tables for data" writing principle above) | Inline with the data being discussed            |
+| Data model changes with 3+ related entities or relationship changes         | Mermaid ERD or relationship diagram                                         | Within the changes section                      |
 
 **When to skip:**
+
 - The change is trivial -- if the sizing table routes to "1-2 sentences", skip visual aids
 - Prose already communicates the change clearly
 - The diagram would just restate the diff in visual form without adding comprehension value
@@ -313,6 +314,7 @@ The bar for including visual aids in PR descriptions is higher than in brainstor
 - The PR description is already short enough that a diagram would be heavier than the prose around it
 
 **Format selection:**
+
 - **Mermaid** (default) for flow diagrams, interaction diagrams, and dependency graphs -- 5-10 nodes typical for a PR description, up to 15 only for genuinely complex changes. Use `TB` (top-to-bottom) direction so diagrams stay narrow in both rendered and source form. Source should be readable as fallback in diff views, email notifications, and Slack previews.
 - **ASCII/box-drawing diagrams** for annotated flows that need rich in-box content -- decision logic branches, file path layouts, step-by-step transformations with annotations. More expressive than mermaid when the diagram's value comes from annotations within steps. Follow 80-column max for code blocks, use vertical stacking.
 - **Markdown tables** for mode/variant comparisons, before/after data, and decision matrices.
@@ -328,6 +330,7 @@ After generating a visual aid, verify it accurately represents the change descri
 
 ```markdown
 ## Changes
+
 #1. Updated the parser
 #2. Fixed the validation
 ```
@@ -336,6 +339,7 @@ Write:
 
 ```markdown
 ## Changes
+
 1. Updated the parser
 2. Fixed the validation
 ```
@@ -355,14 +359,14 @@ Append a badge footer to the PR description, separated by a `---` rule. Do not a
 
 Fill in at PR creation time:
 
-| Placeholder | Value | Example |
-|-------------|-------|---------|
-| `[MODEL]` | Model name | Claude Opus 4.6, GPT-5.4 |
-| `[CONTEXT]` | Context window (if known) | 200K, 1M |
-| `[THINKING]` | Thinking level (if known) | extended thinking |
-| `[HARNESS]` | Tool running you | Claude Code, Codex, Gemini CLI |
-| `[HARNESS_URL]` | Link to that tool | `https://claude.com/claude-code` |
-| `[VERSION]` | `plugin.json` -> `version` | 2.40.0 |
+| Placeholder     | Value                      | Example                          |
+| --------------- | -------------------------- | -------------------------------- |
+| `[MODEL]`       | Model name                 | Claude Opus 4.6, GPT-5.4         |
+| `[CONTEXT]`     | Context window (if known)  | 200K, 1M                         |
+| `[THINKING]`    | Thinking level (if known)  | extended thinking                |
+| `[HARNESS]`     | Tool running you           | Claude Code, Codex, Gemini CLI   |
+| `[HARNESS_URL]` | Link to that tool          | `https://claude.com/claude-code` |
+| `[VERSION]`     | `plugin.json` -> `version` | 2.40.0                           |
 
 ### Step 7: Create or update the PR
 

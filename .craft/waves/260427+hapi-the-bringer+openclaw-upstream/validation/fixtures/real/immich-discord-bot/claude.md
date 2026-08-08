@@ -23,9 +23,11 @@ Immich Discord bot built with NestJS, discordx, and PostgreSQL (Kysely ORM).
 ### Dependency Injection
 
 Repositories are provided via NestJS DI tokens in `src/repositories/index.ts`:
+
 ```ts
 { provide: IDatabaseRepository, useClass: DatabaseRepository }
 ```
+
 Services inject them with `@Inject(IDatabaseRepository)`.
 
 ### Registration
@@ -49,6 +51,7 @@ Located in `src/migrations/` with naming pattern `{timestamp}-{description}.ts`.
 ### Adding a New Slash Command
 
 Commands live in `src/discord/commands.ts`. Use discordx decorators:
+
 - `@Slash({ name, description })` on method
 - `@SlashOption({...})` for parameters
 - `@SlashChoice(...)` for enum choices

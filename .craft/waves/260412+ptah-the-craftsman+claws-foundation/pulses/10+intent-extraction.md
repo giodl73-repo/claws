@@ -95,11 +95,11 @@ extraction (CP-S04-F07): skip content inside fenced code blocks.
 
 ## Governing Roles
 
-| Role | File | Focus |
-|------|------|-------|
-| craft:dragon | `.craft/roles/craft/dragon.md` | SDK architecture, intent type design, extractor isolation |
-| claws:gateway-eng | `.craft/roles/claws/gateway-eng.md` | 9-file coverage, extraction completeness, per-file intent types |
-| claws:ciso | `.craft/roles/claws/ciso.md` | SOUL.md constraint extraction accuracy, R5 classification, OBO detection correctness |
+| Role              | File                                | Focus                                                                                |
+| ----------------- | ----------------------------------- | ------------------------------------------------------------------------------------ |
+| craft:dragon      | `.craft/roles/craft/dragon.md`      | SDK architecture, intent type design, extractor isolation                            |
+| claws:gateway-eng | `.craft/roles/claws/gateway-eng.md` | 9-file coverage, extraction completeness, per-file intent types                      |
+| claws:ciso        | `.craft/roles/claws/ciso.md`        | SOUL.md constraint extraction accuracy, R5 classification, OBO detection correctness |
 
 ## Dependencies
 

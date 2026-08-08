@@ -58,6 +58,7 @@ Implement JSON serialization and deserialization for GovernanceIR with sorted-ke
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/dragon.md` — serialization correctness, hash determinism, round-trip fidelity invariants
 - `.craft/roles/claws/gateway-eng.md` — audit chain integrity, compliance evidence format, HMAC requirements
 
@@ -68,6 +69,7 @@ Pulse 03 must be complete — GovernanceIR types must exist before serialization
 ## Review Amendments (R1)
 
 ### C04: HMAC Key Provisioning
+
 - [ ] Auto-generate `.claws/keys/hmac.key` on first compile if not exists (32-byte random, crypto.randomBytes)
 - [ ] Add `.claws/keys/` to auto-generated .gitignore rule
 - [ ] Set file permission 0600 on key file (Unix) or ACL-restricted (Windows)
@@ -75,6 +77,7 @@ Pulse 03 must be complete — GovernanceIR types must exist before serialization
 - [ ] First-run MUST never fail due to missing key — silent auto-provisioning
 
 ### Dragon: Audit Chain Schema
+
 - [ ] AuditChainEntry includes `keyId` field (allows key rotation without breaking chain)
 - [ ] AuditChainEntry includes `algorithm` field (e.g., "hmac-sha256") for algorithm agility
 - [ ] Append-only chain: `.claws/audit/chain.jsonl` with sequential integrity

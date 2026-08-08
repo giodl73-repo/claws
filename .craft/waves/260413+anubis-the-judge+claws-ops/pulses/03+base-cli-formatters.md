@@ -57,6 +57,7 @@ Each formatter implements a common interface and is selected via the `--format` 
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — CLI output patterns, formatter registry conventions
 - `.craft/roles/claws/platform-eng.md` — SARIF integration requirements, fleet reporting format
 

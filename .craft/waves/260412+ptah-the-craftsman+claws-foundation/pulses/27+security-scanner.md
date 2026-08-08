@@ -4,7 +4,14 @@ slug: security-scanner
 plan: claws-test-framework
 depends_on: [26]
 governing_roles: [claws:ciso, craft:dragon]
-scenario_codes: [test/security-scanner-clean, test/security-scanner-eval, test/security-scanner-secrets, test/security-scanner-input, test/security-scanner-output]
+scenario_codes:
+  [
+    test/security-scanner-clean,
+    test/security-scanner-eval,
+    test/security-scanner-secrets,
+    test/security-scanner-input,
+    test/security-scanner-output,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 16
@@ -35,7 +42,7 @@ Implement SecurityScanner with 16 AST-based rules across 4 categories. The scann
   - Rule 3: `no-template-literal-injection` -- detect template literals with unsanitized user input in dangerous contexts (high)
   - Rule 4: `no-dynamic-import` -- detect `import()` with variable arguments (high)
 - [ ] `claws-test/src/security/rules/secrets.ts` -- NEW: 4 secret detection rules
-  - Rule 5: `no-api-keys` -- detect hardcoded API key patterns (sk-*, AKIA*, etc.) (high)
+  - Rule 5: `no-api-keys` -- detect hardcoded API key patterns (sk-_, AKIA_, etc.) (high)
   - Rule 6: `no-tokens` -- detect hardcoded bearer/auth tokens (high)
   - Rule 7: `no-credentials` -- detect password/secret string literals assigned to variables (medium)
   - Rule 8: `no-env-leaks` -- detect process.env values logged or returned without redaction (medium)
@@ -59,24 +66,28 @@ Implement SecurityScanner with 16 AST-based rules across 4 categories. The scann
 ### L0 Unit (16)
 
 **Injection Defense (4):**
+
 - `no-eval`: handler with `eval(userInput)` produces critical finding with file:line and remediation -> `claws-test/tests/security/scanner.unit.test.ts`
 - `no-function-constructor`: handler with `new Function(input)` produces critical finding -> `claws-test/tests/security/scanner.unit.test.ts`
 - `no-template-literal-injection`: handler with `` `SELECT * FROM ${userInput}` `` in exec context produces high finding -> `claws-test/tests/security/scanner.unit.test.ts`
 - `no-dynamic-import`: handler with `import(userPath)` produces high finding -> `claws-test/tests/security/scanner.unit.test.ts`
 
 **Secret Detection (4):**
+
 - `no-api-keys`: handler with `const key = "sk-proj-abc123..."` produces high finding -> `claws-test/tests/security/scanner.unit.test.ts`
 - `no-tokens`: handler with `headers: { Authorization: "Bearer abc123" }` produces high finding -> `claws-test/tests/security/scanner.unit.test.ts`
 - `no-credentials`: handler with `const password = "hunter2"` produces medium finding -> `claws-test/tests/security/scanner.unit.test.ts`
 - `no-env-leaks`: handler with `console.log(process.env.SECRET_KEY)` produces medium finding -> `claws-test/tests/security/scanner.unit.test.ts`
 
 **Input Sanitization (4):**
+
 - `no-unvalidated-input`: handler passes raw user input to tool call without validation -> `claws-test/tests/security/scanner.unit.test.ts`
 - `no-missing-trust-labels`: handler sends message to agent without trust annotation -> `claws-test/tests/security/scanner.unit.test.ts`
 - `no-url-injection`: handler constructs URL with `http://${userDomain}/api` -> `claws-test/tests/security/scanner.unit.test.ts`
 - `no-unbounded-input`: handler accepts string input without length check or schema -> `claws-test/tests/security/scanner.unit.test.ts`
 
 **Output Validation (4):**
+
 - `no-unredacted-pii`: handler returns email/phone in output without redaction -> `claws-test/tests/security/scanner.unit.test.ts`
 - `no-unvalidated-urls`: handler returns URL to user without protocol/domain validation -> `claws-test/tests/security/scanner.unit.test.ts`
 - `no-format-injection`: handler interpolates user input into JSON/XML output -> `claws-test/tests/security/scanner.unit.test.ts`
@@ -100,6 +111,7 @@ Implement SecurityScanner with 16 AST-based rules across 4 categories. The scann
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/ciso.md` -- security rule calibration, false positive tolerance, threat model alignment
 - `.craft/roles/craft/dragon.md` -- AST parsing approach, TypeScript compiler API usage, code quality
 

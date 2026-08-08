@@ -12,7 +12,7 @@ verdict: CONDITIONAL PASS — 4 Majors require pulse edits before implementation
 ## Severity Summary
 
 | Severity | Count |
-|----------|-------|
+| -------- | ----- |
 | Major    | 4     |
 | Warning  | 7     |
 | Note     | 5     |
@@ -123,12 +123,12 @@ Pulse 18 step 7 says "Load into gateway-sim -> shell-exec BLOCKED." Gateway-sim 
 
 CP-2 exit criteria require "L0: 38+ unit tests, L1: 16+ integration, L2: 7+ e2e." Summing pulse frontmatter test_tiers:
 
-| Tier | Sum from pulses | CP-2 target | Delta |
-|------|----------------|-------------|-------|
-| L0   | 42             | 38+         | +4 OK |
-| L1   | 18             | 16+         | +2 OK |
-| L2   | 3              | 7+          | **-4** |
-| L3   | 1              | —           | — |
+| Tier | Sum from pulses | CP-2 target | Delta  |
+| ---- | --------------- | ----------- | ------ |
+| L0   | 42              | 38+         | +4 OK  |
+| L1   | 18              | 16+         | +2 OK  |
+| L2   | 3               | 7+          | **-4** |
+| L3   | 1               | —           | —      |
 
 L2 e2e tests total only 3 (P12: 1, P14: 1, P18: 1) vs the checkpoint target of 7+. Either more pulses need L2 tests or the checkpoint target needs revision.
 
@@ -184,62 +184,62 @@ Pulse 18 (`checkpoint_gate: true`) is the only gate pulse. If the e2e test is fl
 
 ### claws:gateway-eng (runtime enforcement, watch latency, plugin integration)
 
-| ID | Sev | Finding | Pulse |
-|----|-----|---------|-------|
-| GE-1 | M | Amend pipeline "modifies workspace files" — violates CL-08 lossless OC | 17 |
-| GE-2 | M | Watch 1s latency unverified on Windows | 13, 14 |
-| GE-3 | W | Watch OC file list is hardcoded; skills/*/SKILL.md is a glob, not a file | 13 |
-| GE-4 | W | E2E test uses gateway-sim without declaring dependency | 18 |
-| GE-5 | N | Checkpoint gate e2e is single point of failure for flaky watcher timing | 18 |
+| ID   | Sev | Finding                                                                  | Pulse  |
+| ---- | --- | ------------------------------------------------------------------------ | ------ |
+| GE-1 | M   | Amend pipeline "modifies workspace files" — violates CL-08 lossless OC   | 17     |
+| GE-2 | M   | Watch 1s latency unverified on Windows                                   | 13, 14 |
+| GE-3 | W   | Watch OC file list is hardcoded; skills/*/SKILL.md is a glob, not a file | 13     |
+| GE-4 | W   | E2E test uses gateway-sim without declaring dependency                   | 18     |
+| GE-5 | N   | Checkpoint gate e2e is single point of failure for flaky watcher timing  | 18     |
 
 ### claws:platform-eng (cross-platform Windows, CI readiness, packaging)
 
-| ID | Sev | Finding | Pulse |
-|----|-----|---------|-------|
-| PE-1 | M | fs.watch Windows: duplicate events, rename-as-change, editor temp files | 13, 14 |
-| PE-2 | W | Doctor migration backup collision handling unspecified | 16 |
-| PE-3 | W | Uninstall .gitignore revert uses wrong entry count (2 vs 4) | 12 |
-| PE-4 | W | L2 e2e test sum (3) < CP-2 target (7+) | all |
-| PE-5 | N | ~/.claws-backups tilde expansion unreliable on Windows | 12 |
+| ID   | Sev | Finding                                                                 | Pulse  |
+| ---- | --- | ----------------------------------------------------------------------- | ------ |
+| PE-1 | M   | fs.watch Windows: duplicate events, rename-as-change, editor temp files | 13, 14 |
+| PE-2 | W   | Doctor migration backup collision handling unspecified                  | 16     |
+| PE-3 | W   | Uninstall .gitignore revert uses wrong entry count (2 vs 4)             | 12     |
+| PE-4 | W   | L2 e2e test sum (3) < CP-2 target (7+)                                  | all    |
+| PE-5 | N   | ~/.claws-backups tilde expansion unreliable on Windows                  | 12     |
 
 ### craft:architect (SDK-owns-logic, dependency ordering, package boundaries)
 
-| ID | Sev | Finding | Pulse |
-|----|-----|---------|-------|
-| AR-1 | M | Init CLI has business logic; SDK migration not explicit | 10 |
-| AR-2 | M | Batch 1 parallelism contradicts P11 depends_on P10 | 10, 11 |
-| AR-3 | M | Sidecar directory list in P10 diverges from CLAWS_SIDECAR_LAYOUT | 10 |
-| AR-4 | N | Doctor --fix and amend share apply-with-rollback; no shared infra | 16, 17 |
+| ID   | Sev | Finding                                                           | Pulse  |
+| ---- | --- | ----------------------------------------------------------------- | ------ |
+| AR-1 | M   | Init CLI has business logic; SDK migration not explicit           | 10     |
+| AR-2 | M   | Batch 1 parallelism contradicts P11 depends_on P10                | 10, 11 |
+| AR-3 | M   | Sidecar directory list in P10 diverges from CLAWS_SIDECAR_LAYOUT  | 10     |
+| AR-4 | N   | Doctor --fix and amend share apply-with-rollback; no shared infra | 16, 17 |
 
 ### claws:skill-author (developer experience, onboarding, error clarity)
 
-| ID | Sev | Finding | Pulse |
-|----|-----|---------|-------|
-| SA-1 | W | Template YAML validated for syntax only, not against policy schema | 11 |
-| SA-2 | W | Exit code contract incomplete (no code 1 specified) | 10 |
-| SA-3 | N | P15 says 5 checks, delivers 4 | 15 |
-| SA-4 | N | eu-ai-act hyphens in template name — parser edge case | 11 |
+| ID   | Sev | Finding                                                            | Pulse |
+| ---- | --- | ------------------------------------------------------------------ | ----- |
+| SA-1 | W   | Template YAML validated for syntax only, not against policy schema | 11    |
+| SA-2 | W   | Exit code contract incomplete (no code 1 specified)                | 10    |
+| SA-3 | N   | P15 says 5 checks, delivers 4                                      | 15    |
+| SA-4 | N   | eu-ai-act hyphens in template name — parser edge case              | 11    |
 
 ### Dedup Map
 
-| Consolidated | Source IDs |
-|-------------|------------|
-| M-01 | GE-1 |
-| M-02 | GE-2 + PE-1 |
-| M-03 | AR-1 + AR-3 |
-| M-04 | AR-2 |
-| W-01 | PE-2 |
-| W-02 | SA-1 |
-| W-03 | PE-3 |
-| W-04 | GE-3 |
-| W-05 | GE-4 |
-| W-06 | PE-4 |
-| W-07 | SA-2 |
-| N-01 | SA-3 |
-| N-02 | PE-5 |
-| N-03 | SA-4 |
-| N-04 | AR-4 |
-| N-05 | GE-5 |
+| Consolidated | Source IDs  |
+| ------------ | ----------- |
+| M-01         | GE-1        |
+| M-02         | GE-2 + PE-1 |
+| M-03         | AR-1 + AR-3 |
+| M-04         | AR-2        |
+| W-01         | PE-2        |
+| W-02         | SA-1        |
+| W-03         | PE-3        |
+| W-04         | GE-3        |
+| W-05         | GE-4        |
+| W-06         | PE-4        |
+| W-07         | SA-2        |
+| N-01         | SA-3        |
+| N-02         | PE-5        |
+| N-03         | SA-4        |
+| N-04         | AR-4        |
+| N-05         | GE-5        |
 
 ---
 

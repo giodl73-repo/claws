@@ -41,6 +41,7 @@ Consolidate operational helpers and compliance rubrics into `claws-sdk/packages/
 If this pulse surfaces a gap in the proposal spec (main spec, one of the 4 package specs, or the plan) — **the amendment lands inside this pulse's commit**. No deferral, no follow-up pulse. Amendment SHA = pulse SHA.
 
 Commit-message convention for in-pulse amendments:
+
 ```
 <pulse-type>(<pulse-slug>): <summary>
 

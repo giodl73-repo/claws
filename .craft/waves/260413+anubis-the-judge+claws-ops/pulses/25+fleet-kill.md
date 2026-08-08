@@ -57,6 +57,7 @@ Every kill activation is recorded in the audit chain with the path used, reason,
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/ciso.md` — kill switch governance, audit requirements, emergency procedures
 - `.craft/roles/claws/gateway-eng.md` — gateway sidecar protocol, sentinel file format, PID management
 

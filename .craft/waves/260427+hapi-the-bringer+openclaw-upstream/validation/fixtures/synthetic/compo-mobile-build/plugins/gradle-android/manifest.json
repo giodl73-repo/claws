@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "gradle-android plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "gradle-android/build"
-    ]
+    "tools": ["gradle-android/build"]
   }
 }

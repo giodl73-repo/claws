@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **CrewAI integration**: CrewAI callback function signature compliance, crewai version targeting with explicit range, Python version compatibility validation
 - **Enforcement modes**: soft vs hard governance enforcement mode, agent-level tool restriction support, Pydantic-based validation for output constraints
 - **Zero-import enforcement**: sanitize governance rule descriptions in callbacks, sanitize Pydantic field descriptions, product name attribution in Python docstrings

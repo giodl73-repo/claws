@@ -49,6 +49,7 @@ Build the CompilationHost with cached GovernanceIR for sub-200ms responses. Impl
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/architect.md` — system-level design authority for claws packages
 - `.craft/roles/claws/platform-eng.md` — implementation patterns and package scaffolding
 

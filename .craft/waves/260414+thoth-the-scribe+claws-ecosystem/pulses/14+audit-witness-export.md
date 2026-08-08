@@ -55,6 +55,7 @@ The export module provides three output formats: CEF (Common Event Format) for S
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — export format design, streaming patterns, agent-sdk wrapping
 - `.craft/roles/claws/ciso.md` — witness receipt integrity, Merkle proof requirements, PII redaction
 

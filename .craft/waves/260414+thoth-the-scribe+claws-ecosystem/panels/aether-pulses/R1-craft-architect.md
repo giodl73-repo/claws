@@ -120,13 +120,13 @@ Pulse 51 describes `blob-verify.ts` checking "manifest signature (HMAC or Ed2551
 
 ## Summary
 
-| ID | Severity | Finding | Location |
-|----|----------|---------|----------|
-| M1 | M | `mcpServer` field targets wrong file, parse-phase population missing | P50 / capability-manifest.ts |
-| M2 | M | R1 risk level unreachable in current type system | P50 / capability-manifest.ts:12 |
-| M3 | M | Blob verification key management unspecified | P51 / blob-verify.ts |
-| M4 | M | `AuthorizationDecision` type does not exist yet, edit annotation misleading | P52 / guardrail-types.ts |
-| W1 | W | Emit pipeline artifact list grows without registry pattern | P50 / openclaw-adapter.ts |
-| W2 | W | Duplicate risk→approval mapping across two emitters | P50 / emit-host-approval-policies.ts |
-| W3 | W | No tests for the updated GovernanceValidator in claws-test | P52 / claws-test validator |
-| N1 | N | Ed25519 mentioned but not implemented; scope to HMAC-only | P51 / blob-verify.ts |
+| ID  | Severity | Finding                                                                     | Location                             |
+| --- | -------- | --------------------------------------------------------------------------- | ------------------------------------ |
+| M1  | M        | `mcpServer` field targets wrong file, parse-phase population missing        | P50 / capability-manifest.ts         |
+| M2  | M        | R1 risk level unreachable in current type system                            | P50 / capability-manifest.ts:12      |
+| M3  | M        | Blob verification key management unspecified                                | P51 / blob-verify.ts                 |
+| M4  | M        | `AuthorizationDecision` type does not exist yet, edit annotation misleading | P52 / guardrail-types.ts             |
+| W1  | W        | Emit pipeline artifact list grows without registry pattern                  | P50 / openclaw-adapter.ts            |
+| W2  | W        | Duplicate risk→approval mapping across two emitters                         | P50 / emit-host-approval-policies.ts |
+| W3  | W        | No tests for the updated GovernanceValidator in claws-test                  | P52 / claws-test validator           |
+| N1  | N        | Ed25519 mentioned but not implemented; scope to HMAC-only                   | P51 / blob-verify.ts                 |

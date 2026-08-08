@@ -9,17 +9,17 @@ Alkemio Server is a NestJS GraphQL server for the Alkemio collaboration platform
 - **Scale**: ~3k TypeScript files
 - **Key Roots**: `src/`, `test/`, `docs/`, `.specify/`, `scripts/`, `specs/<NNN-slug>/`
 
-| Layer           | Technology                              |
-| --------------- | --------------------------------------- |
-| Runtime         | Node.js 22 LTS (Volta pins 22.21.1)    |
-| Package Manager | pnpm 10.17.1 via Corepack              |
+| Layer           | Technology                               |
+| --------------- | ---------------------------------------- |
+| Runtime         | Node.js 22 LTS (Volta pins 22.21.1)      |
+| Package Manager | pnpm 10.17.1 via Corepack                |
 | Framework       | NestJS 10, TypeORM 0.3*, Apollo Server 4 |
-| Language        | TypeScript 5.3                          |
-| Database        | PostgreSQL 17.5                         |
-| Messaging       | RabbitMQ queues                         |
-| Auth            | Ory Kratos/Oathkeeper                   |
-| Monitoring      | Elastic APM                             |
-| Logging         | Winston                                 |
+| Language        | TypeScript 5.3                           |
+| Database        | PostgreSQL 17.5                          |
+| Messaging       | RabbitMQ queues                          |
+| Auth            | Ory Kratos/Oathkeeper                    |
+| Monitoring      | Elastic APM                              |
+| Logging         | Winston                                  |
 
 *TypeORM uses a custom fork (`pkg.pr.new/antst/typeorm`) — not the standard npm package. Be aware when debugging TypeORM behavior.
 
@@ -124,9 +124,9 @@ Never include dynamic data (IDs, emails) in exception messages. Use structured `
 
 ```typescript
 throw new EntityNotFoundException(
-  'User not found',
+  "User not found",
   LogContext.AUTH,
-  { userId: id } // ExceptionDetails - third parameter
+  { userId: id }, // ExceptionDetails - third parameter
 );
 ```
 
@@ -194,14 +194,14 @@ Migration validation harness: `.scripts/migrations/run_validate_migration.sh` (s
 
 ## CI/CD
 
-| Workflow                       | Trigger              | Purpose                                      |
-| ------------------------------ | -------------------- | -------------------------------------------- |
-| `ci-tests.yml`                 | Push/PR to develop   | Runs CI test suite                           |
-| `schema-contract.yml`          | PRs                  | Validates schema changes, posts diff comment |
-| `schema-baseline.yml`          | Merge to `develop`   | Regenerates baseline, opens PR if changed    |
-| `review-router.yml`            | PRs                  | PR review metrics                            |
-| `build-release-docker-hub.yml` | Release              | Builds and publishes Docker images           |
-| `build-deploy-k8s-*.yml`       | Deployment           | Targets dev/sandbox/test clusters (Hetzner)  |
+| Workflow                       | Trigger            | Purpose                                      |
+| ------------------------------ | ------------------ | -------------------------------------------- |
+| `ci-tests.yml`                 | Push/PR to develop | Runs CI test suite                           |
+| `schema-contract.yml`          | PRs                | Validates schema changes, posts diff comment |
+| `schema-baseline.yml`          | Merge to `develop` | Regenerates baseline, opens PR if changed    |
+| `review-router.yml`            | PRs                | PR review metrics                            |
+| `build-release-docker-hub.yml` | Release            | Builds and publishes Docker images           |
+| `build-deploy-k8s-*.yml`       | Deployment         | Targets dev/sandbox/test clusters (Hetzner)  |
 
 ## Git Conventions
 
@@ -218,12 +218,14 @@ The project uses **Biome** for linting and formatting (replaced ESLint + Prettie
 - VS Code extension: `biomejs.biome`
 
 Key rules:
+
 - `noConsole`: error (use Winston logger instead)
 - `noDebugger`: error
 - `noExplicitAny`: off (legacy codebase compatibility)
 - Underscore prefix (`_param`) ignores unused parameters
 
 ## Active Technologies
+
 - TypeScript 5.3, Node.js 22 LTS (Volta pins 22.21.1) + NestJS 10, TypeORM 0.3, Apollo Server 4, GraphQL 16 (034-unit-tests)
 - N/A (no data model changes — test-only feature) (034-unit-tests)
 - PostgreSQL 17.5
@@ -239,5 +241,6 @@ Key rules:
 - PostgreSQL 17.5 (file table — renamed from document — read-only for server) (085-file-service-migration)
 
 ## Recent Changes
+
 - 028-migrate-biome-linting: Migrated from ESLint + Prettier to Biome for linting and formatting
 - 027-vitest-migration: Migrated from Jest to Vitest for testing

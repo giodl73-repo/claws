@@ -24,55 +24,55 @@ integration, and the CP-2 gate security fixes pulse.
 
 ### Batch 1 — Foundation (single)
 
-| Pulse | Slug | Depends On |
-|-------|------|-----------|
-| 11 | audit-chain-foundation | — |
+| Pulse | Slug                   | Depends On |
+| ----- | ---------------------- | ---------- |
+| 11    | audit-chain-foundation | —          |
 
 ### Batch 2 — Depends on Pulse 11 (parallel)
 
-| Pulse | Slug | Depends On |
-|-------|------|-----------|
-| 12 | audit-verify-integrity | 11 |
-| 13 | audit-wal-recovery | 11 |
+| Pulse | Slug                   | Depends On |
+| ----- | ---------------------- | ---------- |
+| 12    | audit-verify-integrity | 11         |
+| 13    | audit-wal-recovery     | 11         |
 
 ### Batch 3 — Depends on 11+12 (parallel)
 
-| Pulse | Slug | Depends On |
-|-------|------|-----------|
-| 14 | audit-witness-export | 11, 12 |
-| 15 | compliance-soc2 | 11, 12 |
+| Pulse | Slug                 | Depends On |
+| ----- | -------------------- | ---------- |
+| 14    | audit-witness-export | 11, 12     |
+| 15    | compliance-soc2      | 11, 12     |
 
 ### Batch 4 — Depends on Pulse 15 (parallel)
 
-| Pulse | Slug | Depends On |
-|-------|------|-----------|
-| 16 | compliance-hipaa | 15 |
-| 17 | compliance-eu-ai-act | 15 |
-| 18 | artifact-signer | 15 |
+| Pulse | Slug                 | Depends On |
+| ----- | -------------------- | ---------- |
+| 16    | compliance-hipaa     | 15         |
+| 17    | compliance-eu-ai-act | 15         |
+| 18    | artifact-signer      | 15         |
 
 ### Batch 5 — Integration (sequential)
 
-| Pulse | Slug | Depends On |
-|-------|------|-----------|
-| 19 | comply-scenario-findings | 14, 15, 16, 17, 18 |
+| Pulse | Slug                     | Depends On         |
+| ----- | ------------------------ | ------------------ |
+| 19    | comply-scenario-findings | 14, 15, 16, 17, 18 |
 
 ### Batch 6 — Gate (sequential, depends on all)
 
-| Pulse | Slug | Depends On |
-|-------|------|-----------|
-| 20 | audit-security-fixes | 11–19 |
+| Pulse | Slug                 | Depends On |
+| ----- | -------------------- | ---------- |
+| 20    | audit-security-fixes | 11–19      |
 
 **Checkpoint gate**: Pulse 20 (`checkpoint_gate: true`)
 
 ## Review Panel
 
-| Role | Cluster | Focus |
-|------|---------|-------|
-| craft:architect | design | Audit chain data model, compliance API surface |
-| claws:ciso | security | Hash chain integrity, signing crypto, evidence fidelity |
-| claws:founder | product | Compliance framework coverage, audit UX |
-| claws:platform-eng | platform | WAL recovery, witness export formats, SIEM integration |
-| craft:testing | quality | L0–L3 coverage, compliance scenario validation |
+| Role               | Cluster  | Focus                                                   |
+| ------------------ | -------- | ------------------------------------------------------- |
+| craft:architect    | design   | Audit chain data model, compliance API surface          |
+| claws:ciso         | security | Hash chain integrity, signing crypto, evidence fidelity |
+| claws:founder      | product  | Compliance framework coverage, audit UX                 |
+| claws:platform-eng | platform | WAL recovery, witness export formats, SIEM integration  |
+| craft:testing      | quality  | L0–L3 coverage, compliance scenario validation          |
 
 ## Coverage Requirements
 

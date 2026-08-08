@@ -2,7 +2,16 @@
 checkpoint: 5
 pulse_range: [10, 12]
 depends_on_cp: 4
-review_panel: [claws:gateway-eng, claws:compliance, claws:ciso, claws:claws-release-eng, claws:claws-repo-steward, architect, testing]
+review_panel:
+  [
+    claws:gateway-eng,
+    claws:compliance,
+    claws:ciso,
+    claws:claws-release-eng,
+    claws:claws-repo-steward,
+    architect,
+    testing,
+  ]
 final: true
 ---
 
@@ -29,6 +38,7 @@ PR-6 (snap) opens alone since Wave C is heavy and PR-6 carries broad surface (11
 ## Gate
 
 cp-5 closes — and the wave closes — when:
+
 1. PR-6 MERGES at openclaw/openclaw
 2. Post-merge verification reports H4 GREEN against trunk: cross-OS snapshotId stability matrix + promote-audited test + HTTP smoke
 3. Scope-flip pulse lands cleanly (`grep -r '@bic/openclaw' packages/` returns zero)
@@ -36,6 +46,7 @@ cp-5 closes — and the wave closes — when:
 5. All 7 PR merge SHAs + scope-flip commit SHA recorded in `docs/upstream/CHANGELOG.md`
 
 **Critical**:
+
 - This is the FINAL checkpoint; closeout (record + delivery stages) follows
 - HTTP `/v1/resolve` endpoint MUST accept both `oc://workspace-file/...` and `oc://config/...` URIs (the unification PR-2 introduced)
 - Acceptance-fixture pulse exercises POST-MERGE TRUNK reality; must run AFTER all upstream PRs merge AND after scope-flip

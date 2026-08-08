@@ -73,7 +73,6 @@ $ mix images.pull elixir
 
 - [https://t.me/hexletcommunity](https://t.me/hexletcommunity/5) channel: codebattle
 
-
 ### Troubleshooting
 
 #### macOS

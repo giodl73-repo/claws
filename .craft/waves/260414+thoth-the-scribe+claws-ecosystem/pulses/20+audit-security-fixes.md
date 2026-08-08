@@ -4,7 +4,27 @@ slug: audit-security-fixes
 plan: claws-comply-audit
 depends_on: [11, 12, 13, 14, 15, 16, 17, 18, 19]
 governing_roles: [claws:ciso, claws:founder, craft:architect]
-scenario_codes: [pitfall-thoth-1/P-200, pitfall-thoth-1/P-201, pitfall-thoth-1/P-202, pitfall-thoth-2/P-226, pitfall-thoth-2/P-227, pitfall-thoth-2/P-228, pitfall-thoth-1/P-214, pitfall-thoth-1/P-215, pitfall-thoth-1/P-216, pitfall-thoth-1/P-217, pitfall-thoth-1/P-218, pitfall-thoth-1/P-219, pitfall-thoth-1/P-220, pitfall-thoth-1/P-221, pitfall-thoth-1/P-222, pitfall-thoth-1/P-223, pitfall-thoth-1/P-224, pitfall-thoth-1/P-225]
+scenario_codes:
+  [
+    pitfall-thoth-1/P-200,
+    pitfall-thoth-1/P-201,
+    pitfall-thoth-1/P-202,
+    pitfall-thoth-2/P-226,
+    pitfall-thoth-2/P-227,
+    pitfall-thoth-2/P-228,
+    pitfall-thoth-1/P-214,
+    pitfall-thoth-1/P-215,
+    pitfall-thoth-1/P-216,
+    pitfall-thoth-1/P-217,
+    pitfall-thoth-1/P-218,
+    pitfall-thoth-1/P-219,
+    pitfall-thoth-1/P-220,
+    pitfall-thoth-1/P-221,
+    pitfall-thoth-1/P-222,
+    pitfall-thoth-1/P-223,
+    pitfall-thoth-1/P-224,
+    pitfall-thoth-1/P-225,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 3
@@ -62,6 +82,7 @@ The full compliance + audit test suite runs across all three frameworks on fixtu
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/ciso.md` — security fix validation, tamper detection regression, PBKDF2 configuration verification
 - `.craft/roles/claws/founder.md` — compliance framework validation, checkpoint gate criteria
 - `.craft/roles/craft/architect.md` — cross-module integration validation, end-to-end pipeline verification

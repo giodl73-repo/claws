@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "brave-search plugin (search)",
   "contributes": {
-    "tools": [
-      "brave-search/web-search"
-    ],
-    "skills": [
-      "brave-search/web-search"
-    ]
+    "tools": ["brave-search/web-search"],
+    "skills": ["brave-search/web-search"]
   }
 }

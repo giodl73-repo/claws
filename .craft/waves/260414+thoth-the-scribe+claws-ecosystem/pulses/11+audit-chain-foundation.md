@@ -54,6 +54,7 @@ The implementation wraps agent-sdk's suite/audit/hash-chain.ts to reuse the exis
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, SDK wrapping patterns, barrel export conventions
 - `.craft/roles/claws/ciso.md` — audit chain integrity, hash chaining requirements, tamper-evidence design
 

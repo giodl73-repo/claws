@@ -20,18 +20,18 @@ scenario.yaml + reuse patterns from existing `claws-sdk/tests/fixtures/`.
 
 **Phase 1 (Ptah) series only** — 10 series, 74 scenarios (verified on-disk count):
 
-| Series | Scenarios | Runner | Spec |
-|--------|-----------|--------|------|
-| compile-pipeline | 8 | compile-sim | CL-04 |
-| governance-rules | 12 | pinch-sim | CL-02 |
-| fail-mode | 6 | pinch-sim, security-sim | CL-02 |
-| emit-artifacts | 8 | emit-sim | CL-04 |
-| cross-file-conflicts | 7 | compile-sim | CL-04 |
-| platform-detection | 7 | compile-sim | CL-01 |
-| lossless-roundtrip | 5 | compile-sim | CL-04 |
-| loss-aware-emission | 5 | compile-sim | CL-04 |
-| input-resolver | 6 | compile-sim | CL-01/04/07 |
-| pitfall-coverage-1 | 10 | compile-sim, pinch-sim, emit-sim | CL-02/04 |
+| Series               | Scenarios | Runner                           | Spec        |
+| -------------------- | --------- | -------------------------------- | ----------- |
+| compile-pipeline     | 8         | compile-sim                      | CL-04       |
+| governance-rules     | 12        | pinch-sim                        | CL-02       |
+| fail-mode            | 6         | pinch-sim, security-sim          | CL-02       |
+| emit-artifacts       | 8         | emit-sim                         | CL-04       |
+| cross-file-conflicts | 7         | compile-sim                      | CL-04       |
+| platform-detection   | 7         | compile-sim                      | CL-01       |
+| lossless-roundtrip   | 5         | compile-sim                      | CL-04       |
+| loss-aware-emission  | 5         | compile-sim                      | CL-04       |
+| input-resolver       | 6         | compile-sim                      | CL-01/04/07 |
+| pitfall-coverage-1   | 10        | compile-sim, pinch-sim, emit-sim | CL-02/04    |
 
 **Multi-runner dispatch**: When a series lists multiple runners (e.g., fail-mode: pinch-sim + security-sim), each runner gets its own `describe()` block. Expect keys are dispatched by runner: pinch-sim reads `rules_applied`/`violations`/`pass`/`severity`; security-sim reads `attack_class`/`defense_layer`/`blocked`/`audit_event`. Keys not relevant to a runner are ignored.
 
@@ -41,6 +41,7 @@ are out of scope — their runners are stubs.
 ## Deliverables
 
 ### D1: Compile-Pipeline Fixtures (8 workspaces)
+
 - `S01-minimal-workspace/00+workspace/` — SOUL.md (1 deny), TOOLS.md (1 R1 tool), claws.json
 - `S02-full-workspace/00+workspace/` — All 9 OC files + skills/ directory
 - `S03-missing-optional-files/00+workspace/` — Only SOUL.md + TOOLS.md (7 absent files)
@@ -51,22 +52,26 @@ are out of scope — their runners are stubs.
 - `S08-workflow-intent/00+workspace/` — lobster.yaml with governance-sensitive steps
 
 ### D2: Governance-Rules Fixtures (12 workspaces)
+
 - One workspace per governance rule family (G-CLASS, G-PERM, G-DATA, G-A2A, G-INPUT, G-CONTEXT, G-OUTPUT, G-BOUND, G-ELICIT, G-SUPPLY, plus 2 multi-rule)
 - Each workspace triggers exactly the rule under test
 - TOOLS.md calibrated to produce expected risk levels
 - SOUL.md contains deny/allow patterns that exercise the rule
 
 ### D3: Platform-Detection Fixtures (7 workspaces)
+
 - One workspace per platform (OpenClaw, Cursor, Claude Code, GitHub Copilot, Bedrock, LangGraph, CrewAI)
 - Each contains the platform's marker file(s) at the correct path
 - Reuse patterns from `claws-sdk/tests/fixtures/platform-*/`
 
 ### D4: Cross-File-Conflicts Fixtures (7 workspaces)
+
 - One workspace per conflict category (deny-vs-tool, trust-escalation, obo-without-elicit, data-label-mismatch, circular-delegation, skill-tool-ghost, schedule-no-approval)
 - Reuse patterns from `claws-sdk/tests/fixtures/conflict-workspace/`
 - Each workspace is isolated to a single conflict category
 
 ### D5: Remaining Series Fixtures
+
 - fail-mode (6): R5 closed, R1-R2 configurable, crash scenarios
 - emit-artifacts (8): gateway plugin, SKILL.md, exec-approvals, workflow, multi-platform
 - lossless-roundtrip (5): parse → emit → parse round-trip fidelity
@@ -75,6 +80,7 @@ are out of scope — their runners are stubs.
 - pitfall-coverage-1 (10): P-051 through P-070 edge cases
 
 ### D6: Expect Block Population + Re-Baseline Strategy
+
 - For each materialized workspace, populate the `expect:` block in scenario.yaml
 - **Spec-first**: expects derive from spec requirements, NOT from recording compiler output (avoids circular "compiler is correct because it matches itself")
 - Where spec is ambiguous, run compiler and **review** output before committing as expected
@@ -84,6 +90,7 @@ are out of scope — their runners are stubs.
 ## Workspace Template
 
 Each `00+workspace/` follows this minimal structure:
+
 ```
 00+workspace/
 ├── SOUL.md           # Governance intent declarations

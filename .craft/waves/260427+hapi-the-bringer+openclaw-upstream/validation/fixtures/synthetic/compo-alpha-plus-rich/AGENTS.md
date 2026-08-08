@@ -6,6 +6,7 @@ trust: composition
 # compo-alpha-plus-rich
 
 Composition workspace bringing together 2 plugin(s):
+
 - `plugins/old-stable/`
 - `plugins/new-alpha/`
 

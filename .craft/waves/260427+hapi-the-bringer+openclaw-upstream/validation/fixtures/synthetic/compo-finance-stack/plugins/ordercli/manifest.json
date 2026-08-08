@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "ordercli plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "ordercli/place-order"
-    ]
+    "tools": ["ordercli/place-order"]
   }
 }

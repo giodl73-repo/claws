@@ -13,6 +13,7 @@ Evaluating whether the 25-package extraction preserves Gateway runtime contracts
 ## Findings
 
 ### F01 — Module resolution overhead from 25 packages at Gateway startup [M]
+
 **Severity**: Must-address
 **Category**: Runtime performance
 
@@ -21,6 +22,7 @@ The OC Gateway is a Node.js process. When it loads governance skills, it resolve
 **Recommendation**: Benchmark Gateway startup before and after extraction. The compiler-sdk re-export bundle should pre-resolve all package entries so consumers who import from the SDK pay zero additional resolution cost. Only consumers who import directly from extracted packages should pay the resolution cost. If startup exceeds current baseline by >200ms, bundle the re-exports into a single entry point with no dynamic resolution.
 
 ### F02 — emit-oc as a standalone package must preserve Gateway plugin contract [M]
+
 **Severity**: Must-address
 **Category**: Runtime contract
 
@@ -29,6 +31,7 @@ The Gateway loads governance skills that are generated TypeScript. These skills 
 **Recommendation**: Define a runtime contract interface (TypeScript interface) between emit-framework/emit-oc and compilation-host. The contract should be in a shared types package (or in emit-framework itself). Both packages depend on the contract, not on each other's internals. Version the contract separately and gate breaking changes.
 
 ### F03 — compilation-host thinning must not lose the incremental cache [M]
+
 **Severity**: Must-address
 **Category**: Runtime performance
 
@@ -37,6 +40,7 @@ The plan shows compilation-host at ~2000 lines providing "workspace analysis, pe
 **Recommendation**: Cache keys must include package version hashes of all dependencies that contribute to the cached artifact. If oc-ir bumps, the cache automatically invalidates for affected entries rather than silently serving stale results or failing to match.
 
 ### F04 — governance-primitives and governance-runtime split creates a runtime seam [W]
+
 **Severity**: Warning
 **Category**: Hidden coupling
 
@@ -45,6 +49,7 @@ The plan splits governance into @craftworks/governance-primitives (from compiler
 **Recommendation**: governance-primitives and governance-runtime should either be one package (@craftworks/governance) or have a shared schema package that both depend on. The risk-level enum and gate-type definitions must live in exactly one place.
 
 ### F05 — "No breaking changes" claim needs Gateway-specific validation [M]
+
 **Severity**: Must-address
 **Category**: Backward compatibility
 
@@ -53,6 +58,7 @@ The plan says "No breaking changes. The extraction is additive." But the Gateway
 **Recommendation**: Add a Gateway-specific backward compatibility test: install the current compiler-sdk, capture the runtime types of all Gateway-used exports (using typeof checks and structural assertions), then verify the post-extraction SDK produces identical runtime shapes. TypeScript assignability is not sufficient — runtime identity matters for the Gateway.
 
 ### F06 — Transitive dependency depth affects before_tool_call latency [W]
+
 **Severity**: Warning
 **Category**: Latency budget
 
@@ -61,6 +67,7 @@ The dependency graph shows: crypto -> audit-chain -> governance-primitives -> co
 **Recommendation**: Lazy initialization is not enough — the first call still pays. Pre-warm the governance chain at Gateway startup (outside the hot path). Document that governance packages must have zero-cost require (no side effects on import) and explicit init() calls that the Gateway controls.
 
 ### F07 — The plan doesn't address Gateway hot-reload scenarios [W]
+
 **Severity**: Warning
 **Category**: Operational
 
@@ -69,6 +76,7 @@ The Gateway can reload governance skills without full restart (hot-reload). Afte
 **Recommendation**: Generated governance skills should embed a version manifest (which @craftworks/ package versions they were compiled against). The Gateway checks this manifest on hot-reload and warns or rejects if there's a mismatch.
 
 ### F08 — crypto at 200 lines is too small for Gateway to depend on directly [N]
+
 **Severity**: Note
 **Category**: Granularity
 
@@ -80,8 +88,8 @@ The Gateway can reload governance skills without full restart (hot-reload). Afte
 
 The Gateway's primary risk from extraction is death by a thousand cuts: startup resolution overhead, cache invalidation from version mismatches, governance split across two packages that must agree on risk semantics, and transitive init costs on the hot path. The plan's "no breaking changes" claim is TypeScript-level true but may not be runtime-level true for Gateway-specific patterns (instanceof, Symbol.for, prototype identity). The key mitigations are: benchmark startup, define runtime contracts between split packages, version-tag the cache, merge governance into one package, and pre-warm the dependency chain at startup rather than on first hook invocation.
 
-| Severity | Count |
-|----------|-------|
-| Must-address | 4 |
-| Warning | 3 |
-| Note | 1 |
+| Severity     | Count |
+| ------------ | ----- |
+| Must-address | 4     |
+| Warning      | 3     |
+| Note         | 1     |

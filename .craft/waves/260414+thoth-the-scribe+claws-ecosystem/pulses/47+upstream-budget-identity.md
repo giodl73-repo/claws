@@ -24,6 +24,7 @@ checkpoint_gate: false
 # Pulse 47: @openclaw/budget-meter and @openclaw/identity-bridge
 
 ## Objective
+
 **Execution context**: This pulse executes within the `craftworks/openclaw-governance` standalone monorepo (https://github.com/gim-home/openclaw-governance), NOT the claws repo. The test_scope paths (packages/...) are relative to that repo root. During wave execution, the openclaw-governance repo must be cloned and set up before these pulses can run.
 
 Two standalone packages: @openclaw/budget-meter (~8KB) and @openclaw/identity-bridge (~3KB).
@@ -35,6 +36,7 @@ Identity-bridge provides OIDC/SAML token validation with role-based access contr
 Both packages have zero `@craftworks/*` imports and are publishable standalone under the `@openclaw` scope with MIT licenses.
 
 ## Deliverables
+
 - [ ] `packages/budget-meter/package.json` — MIT license, zero peer deps
 - [ ] `packages/budget-meter/src/meter.ts` — token/cost tracking with threshold alerts
 - [ ] `packages/budget-meter/src/throttle.ts` — enforcement: block at 100%, warn at 80/95%
@@ -53,6 +55,7 @@ Both packages have zero `@craftworks/*` imports and are publishable standalone u
 - [ ] L3 acceptance: OC workspace integration (documented)
 
 ## Acceptance Criteria
+
 - [ ] Both packages have zero `@craftworks/*` and zero `@claws/*` imports
 - [ ] Budget-meter fires threshold alerts at 80%, 95%, and 100% usage
 - [ ] Throttle blocks requests at 100% budget utilization
@@ -61,14 +64,18 @@ Both packages have zero `@craftworks/*` imports and are publishable standalone u
 - [ ] Both packages compile standalone with `npx tsc --noEmit`
 
 ## Governing Roles
+
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — system-wide architecture constraints
 - `.craft/roles/claws/founder.md` — OpenClaw upstream contribution standards
 
 ## Dependencies
+
 - Pulse 46 (upstream-audit-chain) — audit-chain patterns inform the event model
 
 ## Test Gates
+
 - [ ] L0 unit (8 tests): threshold alerts at 80/95/100%, cost tracking, throttle blocks at 100%, throttle warns at 95%, OIDC token validation, role check passes/fails
 - [ ] L1 integration (3 tests): budget + throttle pipeline, identity + RBAC composition, OIDC + RBAC round-trip
 - [ ] L2 e2e (2 tests): standalone install + usage for each package

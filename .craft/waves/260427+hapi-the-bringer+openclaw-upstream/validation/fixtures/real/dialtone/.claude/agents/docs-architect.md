@@ -36,11 +36,18 @@ apps/dialtone-documentation/docs/
 The sidebar uses path-keyed objects. Example structure:
 
 ```json
-{ "/components/": [{ "text": "Components", "children": [
-  { "text": "Overview", "link": "/components/" },
-  { "text": "Avatar", "link": "/components/avatar.html" },
-  { "text": "Future Component", "link": "/components/future.html", "planned": true }
-]}] }
+{
+  "/components/": [
+    {
+      "text": "Components",
+      "children": [
+        { "text": "Overview", "link": "/components/" },
+        { "text": "Avatar", "link": "/components/avatar.html" },
+        { "text": "Future Component", "link": "/components/future.html", "planned": true }
+      ]
+    }
+  ]
+}
 ```
 
 Rules:
@@ -59,7 +66,7 @@ Every documentation page requires frontmatter:
 ---
 title: Component Name
 description: Brief description of the component's purpose
-status: ready    # ready | planned | deprecated
+status: ready # ready | planned | deprecated
 thumb: true
 storybook: <storybook_url>
 figma_url: <figma_url>

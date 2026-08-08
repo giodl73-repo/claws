@@ -59,6 +59,7 @@ Define the GovernanceIR interface as the stable pivot between analysis and emiss
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/dragon.md` — type safety enforcement, structural correctness, invariant verification
 - `.craft/roles/claws/gateway-eng.md` — Gateway API constraints, governance model alignment, FailMode semantics
 - `.craft/roles/craft/architect.md` — IR design patterns, FormaIR pivot pattern from compiler-sdk (Spec 109)
@@ -70,14 +71,17 @@ Pulse 01 must be complete — claws-sdk package must exist with build tooling be
 ## Review Amendments (R1)
 
 ### C08: Canonical AuditEvent Type
+
 - [ ] Define `AuditEvent` interface: timestamp, eventType, actor, target, action, outcome, ruleId, severity, policyVersion, hmacSignature, keyId, algorithm
 - [ ] All audit-producing code across all pulses MUST emit this type
 - [ ] Export from claws-sdk/src/ir/audit-event.ts
 
 ### Architect: P03 depends_on must include P02
+
 - [ ] Update frontmatter: `depends_on: [1, 2]` (lint must be active before IR code)
 
 ### Dragon: FailMode Deserialization Guard
+
 - [ ] Add runtime validation: when deserializing GovernanceIR from JSON, validate that no R5 rule has fail-open mode
 - [ ] `validateFailModes(ir: GovernanceIR): void` throws OC-POLICY-E001 if violation found
 - [ ] This guards against hand-edited .claws/compiled/governance-ir.json tampering

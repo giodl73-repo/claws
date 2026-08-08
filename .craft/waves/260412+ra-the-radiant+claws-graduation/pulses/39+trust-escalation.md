@@ -62,6 +62,7 @@ The trust-manager in claws-sdk owns all trust tier logic: tier definitions, esca
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, SDK-owns-logic rule, security patterns
 - `.craft/roles/claws/platform-eng.md` — JWT verification, trust tier management, nonce tracking
 

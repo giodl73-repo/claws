@@ -1,5 +1,32 @@
 # PromoteClaw Session Context
 
+## 2026-08-06 OpenClaw 2026.6.33 restack #7055
+
+- Merged current Lobster `main`, resolved the promotion conflicts, re-derived
+  all 30 patches, updated stale executable version/cron contracts and hard-gate
+  evidence, and removed stale references to dropped patches.
+- Published exact head `3d09706faa`; GitHub reports the draft PR mergeable.
+  Proof passed for 30-patch applicability, 322 Python tests, the Rust MCP
+  contract, and 73 focused Vitest tests.
+- Natural Runtime is queued. Exact-head re-review and human GitHubPop remain;
+  production feed/image/warm-up acceptance is still external because the local
+  feed recheck hit expired credentials (`E401`).
+
+## 2026-08-06 OpenClaw 2026.6.11 Runtime cron repair #6839
+
+- Natural Runtime `175491685` exposed a shipped-bundle syntax defect:
+  `patch-openclaw-cron-plan.mjs` inserted helpers between `async` and
+  `function listConfiguredAnnounceChannelIds`, leaving the rewritten function
+  synchronous while its body still used `await`. Daily diagnostics,
+  behavioral self-eval, and git-workspace cron E2Es then failed with
+  `SyntaxError: Unexpected reserved word`.
+- The patcher now preserves either the async or sync function signature,
+  recognizes 6.11's `reservedJobId` create-job shape, and runs `node --check`
+  against every bundle it rewrites. Published exact head `1119c5bee8`.
+- Reproduced against a pristine `v2026.6.11` tree with all 33 patches, rebuilt
+  the Docker dist, ran the patcher against the real generated bundles, and
+  confirmed both syntax validation and `openclaw --version` pass.
+
 ## 2026-08-06 OpenClaw 2026.6.11 repair #6839
 
 - Merged current Lobster `main` twice while it advanced and published exact PR

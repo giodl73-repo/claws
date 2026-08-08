@@ -55,6 +55,7 @@ Addresses fleet integration coverage gap (74% → 90%+ target from THOTH-INTEGRA
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, fleet scan integration patterns
 - `.craft/roles/claws/platform-eng.md` — fleet workspace discovery, parallel data collection
 

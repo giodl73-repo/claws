@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "description": "filesystem plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "filesystem/read",
-      "filesystem/write"
-    ]
+    "tools": ["filesystem/read", "filesystem/write"]
   }
 }

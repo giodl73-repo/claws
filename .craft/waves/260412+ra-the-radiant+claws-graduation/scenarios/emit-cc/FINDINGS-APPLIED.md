@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Output format**: CLAUDE.md format must use flat imperative instructions, section-delimited merge for existing CLAUDE.md, deep merge for existing .claude/settings.json
 - **Platform compliance**: minimum Claude Code version target for settings.json, relative path requirement in emitted CLAUDE.md, settings must reflect governance restrictions
 - **Content transformation**: expand rule IDs to natural language in CLAUDE.md, map governance to standard CC settings keys, use product name (not package name) in headers

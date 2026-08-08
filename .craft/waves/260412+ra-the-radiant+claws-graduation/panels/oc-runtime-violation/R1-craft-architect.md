@@ -176,19 +176,19 @@ claws-serve already has `compilation-host.ts` which wires claws-sdk's compilatio
 
 ## Disposition
 
-| # | Severity | Topic | Status |
-|---|----------|-------|--------|
-| F01 | critical | Auto-snapshot storage duplicates forest | open |
-| F02 | major | 20-entry bound creates time-travel gaps | open |
-| F03 | critical | OneDrive detection at wrong abstraction | open |
-| F04 | critical | Last-good-IR ownership ambiguous | open |
-| F05 | major | PATCH blocking contradicts across sections | open |
-| F06 | major | Violation-gate middleware must not cache | open |
-| F07 | major | Snapshot trigger fires after debounce | open |
-| F08 | minor | DEGRADED_FLEET missing from enum | open |
-| F09 | major | Snapshot data label unspecified | open |
-| F10 | major | Write serialization has no deliverable | open |
-| F11 | minor | Two parallel chunk issue arrays | open |
-| F12 | minor | compilation-host accumulation risk | open |
+| #   | Severity | Topic                                      | Status |
+| --- | -------- | ------------------------------------------ | ------ |
+| F01 | critical | Auto-snapshot storage duplicates forest    | open   |
+| F02 | major    | 20-entry bound creates time-travel gaps    | open   |
+| F03 | critical | OneDrive detection at wrong abstraction    | open   |
+| F04 | critical | Last-good-IR ownership ambiguous           | open   |
+| F05 | major    | PATCH blocking contradicts across sections | open   |
+| F06 | major    | Violation-gate middleware must not cache   | open   |
+| F07 | major    | Snapshot trigger fires after debounce      | open   |
+| F08 | minor    | DEGRADED_FLEET missing from enum           | open   |
+| F09 | major    | Snapshot data label unspecified            | open   |
+| F10 | major    | Write serialization has no deliverable     | open   |
+| F11 | minor    | Two parallel chunk issue arrays            | open   |
+| F12 | minor    | compilation-host accumulation risk         | open   |
 
 **Totals**: 12 findings (3 critical, 6 major, 3 minor)

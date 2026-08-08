@@ -16,11 +16,11 @@ React assumes components are pure functions: same inputs, same output. Side effe
 **Incorrect (mutating external variable during render):**
 
 ```tsx
-let count = 0
+let count = 0;
 
 function Counter() {
-  count++ // Side effect during render
-  return <p>{count}</p>
+  count++; // Side effect during render
+  return <p>{count}</p>;
 }
 ```
 
@@ -28,8 +28,8 @@ function Counter() {
 
 ```tsx
 function Counter() {
-  const [count, setCount] = useState(0)
-  return <p>{count}</p>
+  const [count, setCount] = useState(0);
+  return <p>{count}</p>;
 }
 ```
 
@@ -39,8 +39,14 @@ function Counter() {
 
 ```tsx
 function ProductList({ items }) {
-  analytics.track('viewed', items.length) // Runs on every render
-  return <ul>{items.map(i => <li key={i.id}>{i.name}</li>)}</ul>
+  analytics.track("viewed", items.length); // Runs on every render
+  return (
+    <ul>
+      {items.map((i) => (
+        <li key={i.id}>{i.name}</li>
+      ))}
+    </ul>
+  );
 }
 ```
 
@@ -49,9 +55,15 @@ function ProductList({ items }) {
 ```tsx
 function ProductList({ items }) {
   useEffect(() => {
-    analytics.track('viewed', items.length)
-  }, [items.length])
-  return <ul>{items.map(i => <li key={i.id}>{i.name}</li>)}</ul>
+    analytics.track("viewed", items.length);
+  }, [items.length]);
+  return (
+    <ul>
+      {items.map((i) => (
+        <li key={i.id}>{i.name}</li>
+      ))}
+    </ul>
+  );
 }
 ```
 
@@ -61,8 +73,14 @@ function ProductList({ items }) {
 
 ```tsx
 function List({ items }) {
-  items.push({ id: 'last' }) // Mutating prop
-  return <ul>{items.map(i => <li key={i.id}>{i.name}</li>)}</ul>
+  items.push({ id: "last" }); // Mutating prop
+  return (
+    <ul>
+      {items.map((i) => (
+        <li key={i.id}>{i.name}</li>
+      ))}
+    </ul>
+  );
 }
 ```
 
@@ -70,8 +88,14 @@ function List({ items }) {
 
 ```tsx
 function List({ items }) {
-  const allItems = [...items, { id: 'last', name: 'Last' }]
-  return <ul>{allItems.map(i => <li key={i.id}>{i.name}</li>)}</ul>
+  const allItems = [...items, { id: "last", name: "Last" }];
+  return (
+    <ul>
+      {allItems.map((i) => (
+        <li key={i.id}>{i.name}</li>
+      ))}
+    </ul>
+  );
 }
 ```
 
@@ -81,9 +105,9 @@ function List({ items }) {
 
 ```tsx
 function useItems() {
-  const items = useContext(ItemsContext)
-  items.sort() // Mutating context value
-  return items
+  const items = useContext(ItemsContext);
+  items.sort(); // Mutating context value
+  return items;
 }
 ```
 
@@ -91,8 +115,8 @@ function useItems() {
 
 ```tsx
 function useItems() {
-  const items = useContext(ItemsContext)
-  return [...items].sort()
+  const items = useContext(ItemsContext);
+  return [...items].sort();
 }
 ```
 
@@ -102,10 +126,10 @@ function useItems() {
 
 ```tsx
 function Page({ title }) {
-  const config = { title }
-  const element = <Header config={config} />
-  config.title = 'changed' // Mutating after JSX use
-  return element
+  const config = { title };
+  const element = <Header config={config} />;
+  config.title = "changed"; // Mutating after JSX use
+  return element;
 }
 ```
 
@@ -113,8 +137,8 @@ function Page({ title }) {
 
 ```tsx
 function Page({ title }) {
-  const config = { title }
-  return <Header config={config} />
+  const config = { title };
+  return <Header config={config} />;
 }
 ```
 
@@ -130,13 +154,13 @@ This is **not** mitigated by the write being "idempotent" — the problem isn't 
 
 ```tsx
 function useEventBusHandler(bus: EventBus, event: string, handler: () => void) {
-  const handlerRef = useRef(handler)
-  handlerRef.current = handler // ← render phase write
+  const handlerRef = useRef(handler);
+  handlerRef.current = handler; // ← render phase write
 
   useEffect(() => {
     // External subscriber reads handlerRef on every event
-    return bus.on(event, () => handlerRef.current())
-  }, [bus, event])
+    return bus.on(event, () => handlerRef.current());
+  }, [bus, event]);
 }
 
 // Meanwhile, outside React:
@@ -148,14 +172,14 @@ function useEventBusHandler(bus: EventBus, event: string, handler: () => void) {
 
 ```tsx
 function useEventBusHandler(bus: EventBus, event: string, handler: () => void) {
-  const handlerRef = useRef(handler)
+  const handlerRef = useRef(handler);
   useEffect(() => {
-    handlerRef.current = handler // ← commit phase only
-  })
+    handlerRef.current = handler; // ← commit phase only
+  });
 
   useEffect(() => {
-    return bus.on(event, () => handlerRef.current())
-  }, [bus, event])
+    return bus.on(event, () => handlerRef.current());
+  }, [bus, event]);
 }
 ```
 

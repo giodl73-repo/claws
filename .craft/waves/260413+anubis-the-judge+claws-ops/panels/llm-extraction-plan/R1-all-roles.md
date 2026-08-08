@@ -179,17 +179,17 @@ Optional peer dependencies create branches in the dependency graph that are hard
 
 ## Summary
 
-| Role | Findings | Severities |
-|------|----------|------------|
-| Founder | 3 | M, W, N |
-| CISO | 3 | M, M, W |
-| Compliance | 2 | M, W |
-| Gateway Eng | 3 | N, M, W |
-| Skill Author | 2 | M, W |
-| New Hire | 2 | M, W |
-| Power User | 2 | M, W |
-| Platform Eng | 3 | M, M, W |
-| Craft Architect | 3 | M, W, W |
+| Role            | Findings | Severities |
+| --------------- | -------- | ---------- |
+| Founder         | 3        | M, W, N    |
+| CISO            | 3        | M, M, W    |
+| Compliance      | 2        | M, W       |
+| Gateway Eng     | 3        | N, M, W    |
+| Skill Author    | 2        | M, W       |
+| New Hire        | 2        | M, W       |
+| Power User      | 2        | M, W       |
+| Platform Eng    | 3        | M, M, W    |
+| Craft Architect | 3        | M, W, W    |
 
 **Total**: 23 findings (9M, 11W, 3N)
 

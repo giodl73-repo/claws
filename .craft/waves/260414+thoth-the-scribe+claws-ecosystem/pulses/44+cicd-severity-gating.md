@@ -23,11 +23,13 @@ checkpoint_gate: false
 # Pulse 44: Severity Gating for Gradual Rollout
 
 ## Objective
+
 `warn-only` and `fail-on` severity gating for gradual rollout. When `warn-only: true`, the action reports all violations as warnings but exits 0, allowing teams to observe violations without blocking merges. The `fail-on` input selects which severities block merges: `critical`, `high`, `medium`, or `all`.
 
 The recommended 8-week adoption ramp is: Week 1 (warn-only), Week 2 (fail-on: critical), Week 4 (fail-on: high), Week 8 (fail-on: all). This gives teams time to remediate existing violations before enforcement tightens.
 
 ## Deliverables
+
 NOTE: bats (Bash Automated Testing System) must be available globally. Install via `npm install -g bats` or OS package manager.
 
 - [ ] `claws-action/scripts/run.sh` (EDIT) — add warn-only mode (exit 0 with warnings), fail-on severity filtering
@@ -40,6 +42,7 @@ NOTE: bats (Bash Automated Testing System) must be available globally. Install v
 - [ ] `claws-cli/tests/cicd/cicd-severity-gating.accept.test.ts` — L3: CLI acceptance — runs action with `warn-only: true` and `fail-on: critical/high/all`, verifies exit codes and warning output per gating level
 
 ## Acceptance Criteria
+
 - [ ] `warn-only: true` causes the action to exit 0 even when violations are present
 - [ ] `fail-on: critical` blocks merges only when critical-severity violations exist
 - [ ] `fail-on: high` blocks on critical or high violations, passes on medium-only
@@ -48,14 +51,18 @@ NOTE: bats (Bash Automated Testing System) must be available globally. Install v
 - [ ] Gradual adoption example demonstrates the 8-week ramp
 
 ## Governing Roles
+
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — system-wide architecture constraints
 - `.craft/roles/claws/platform-eng.md` — CI/CD platform engineering standards
 
 ## Dependencies
+
 - Pulse 43 (cicd-sarif-pipeline) — requires the base action and SARIF generation
 
 ## Test Gates
+
 - [ ] L0 unit (3 tests): warn-only exits 0 with violations, fail-on: critical blocks on critical only, fail-on: high passes medium-only
 - [ ] L1 integration (2 tests): warn-only -> fail-on: critical -> fail-on: all progression, Stage 2 CD gate with --sign
 - [ ] L2 e2e (1 test): full action run with warn-only on fixture workspace

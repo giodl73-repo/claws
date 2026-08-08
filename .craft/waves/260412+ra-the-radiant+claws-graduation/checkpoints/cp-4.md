@@ -3,7 +3,8 @@ checkpoint: 4
 name: "Publish + DX — Docs, Migration, npm, Incremental, Watch, Event Bus"
 pulse_range: [19, 20, 80, 81, 83]
 depends_on_cp: 3
-review_panel: [craft:architect, claws:platform-eng, craft:conformance, craft:codegen, craft:perf-stress]
+review_panel:
+  [craft:architect, claws:platform-eng, craft:conformance, craft:codegen, craft:perf-stress]
 tag: ra-cp-4
 ---
 
@@ -31,31 +32,31 @@ pipeline is validated AND the DX pulses land green.
 
 ### Batch 1 — Publish prep
 
-| Agent | Pulse | Slug | Depends on | Notes |
-|-------|-------|------|------------|-------|
-| alpha | 19 | docs-migration-guide | 16, 18 | Migration docs, CHANGELOG |
+| Agent | Pulse | Slug                 | Depends on | Notes                     |
+| ----- | ----- | -------------------- | ---------- | ------------------------- |
+| alpha | 19    | docs-migration-guide | 16, 18     | Migration docs, CHANGELOG |
 
 ### Batch 2 — DX foundation (parallel with Batch 1; depends only on pulse 12)
 
-| Agent | Pulse | Slug | Depends on | Notes |
-|-------|-------|------|------------|-------|
-| bravo | 80 | incremental-stages | 11, 12 | Per-stage caches + stageTimings; claws-compile-dx H2; CL-04 v1.2 §IS |
-| charlie | 83 | compiler-event-bus | 12 | CompilerEventBus + subpath export; claws-compile-dx H5; CL-14 v1.4 §9; Horus seam |
+| Agent   | Pulse | Slug               | Depends on | Notes                                                                             |
+| ------- | ----- | ------------------ | ---------- | --------------------------------------------------------------------------------- |
+| bravo   | 80    | incremental-stages | 11, 12     | Per-stage caches + stageTimings; claws-compile-dx H2; CL-04 v1.2 §IS              |
+| charlie | 83    | compiler-event-bus | 12         | CompilerEventBus + subpath export; claws-compile-dx H5; CL-14 v1.4 §9; Horus seam |
 
 80 and 83 are independent and parallel-safe. Both thread through the host
 pipeline but touch different surfaces (cache/stage logic vs event emission).
 
 ### Batch 3 — Watch mode (depends on incremental)
 
-| Agent | Pulse | Slug | Depends on | Notes |
-|-------|-------|------|------------|-------|
-| delta | 81 | watch-mode | 80 | `claws watch` with chokidar + debounce + SIGINT cleanup; claws-compile-dx H1; consumes per-stage caches from 80; threads `options.events` through to 83 |
+| Agent | Pulse | Slug       | Depends on | Notes                                                                                                                                                   |
+| ----- | ----- | ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| delta | 81    | watch-mode | 80         | `claws watch` with chokidar + debounce + SIGINT cleanup; claws-compile-dx H1; consumes per-stage caches from 80; threads `options.events` through to 83 |
 
 ### Batch 4 — Gate (depends on all prior + Batch 2/3)
 
-| Agent | Pulse | Slug | Depends on | Notes |
-|-------|-------|------|------------|-------|
-| echo | 20 | npm-publish-pipeline | 19, 80, 81, 83 | Publish workflows to GHE Packages + CI gates, `checkpoint_gate: true` — tarballs MUST include `./compiler/events` subpath (§9.5) |
+| Agent | Pulse | Slug                 | Depends on     | Notes                                                                                                                            |
+| ----- | ----- | -------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| echo  | 20    | npm-publish-pipeline | 19, 80, 81, 83 | Publish workflows to GHE Packages + CI gates, `checkpoint_gate: true` — tarballs MUST include `./compiler/events` subpath (§9.5) |
 
 ## Review Panel
 

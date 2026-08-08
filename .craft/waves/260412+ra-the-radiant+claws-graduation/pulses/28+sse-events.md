@@ -62,6 +62,7 @@ This is the CP-5 gate pulse. After this pulse, all GET endpoints return typed JS
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- event-driven architecture, SDK-owns-logic rule
 - `.craft/roles/claws/gateway-eng.md` -- SSE design, file watcher integration, sequence number protocol
 
@@ -72,6 +73,7 @@ Load these role files before starting:
 ## CP-5 Gate
 
 This is the checkpoint gate pulse. After pulse 28, all Phase 1 (Read APIs) deliverables are complete:
+
 - Health endpoint (pulse 21)
 - Workspace parser (pulse 22)
 - Chunk assembler (pulse 23)

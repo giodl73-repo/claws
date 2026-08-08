@@ -48,13 +48,13 @@ metadata:
 export default async function Page(props: PageProps<'/products/[category]/[id]'>) {
   const { category, id } = await props.params;
   const searchParams = await props.searchParams;
-  
-  return (
-    <div>
-      <h1>Product: {id}</h1>
-      <p>Category: {category}</p>
-    </div>
-  );
+
+return (
+<div>
+<h1>Product: {id}</h1>
+<p>Category: {category}</p>
+</div>
+);
 }
 </example>
 

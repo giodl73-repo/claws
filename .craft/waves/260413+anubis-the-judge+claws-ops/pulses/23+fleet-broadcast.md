@@ -55,6 +55,7 @@ Broadcast is the distribution mechanism for fleet governance: when a CISO approv
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/platform-eng.md` — fleet architecture, atomic write patterns
 - `.craft/roles/claws/compliance.md` — trust tier monotonicity, audit trail requirements
 

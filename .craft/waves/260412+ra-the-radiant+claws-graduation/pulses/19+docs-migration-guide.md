@@ -57,6 +57,7 @@ Also update CHANGELOG.md for both packages to document the 1.0.0 launch.
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- documentation structure, migration guide patterns, architecture documentation
 - `.craft/roles/claws/platform-eng.md` -- consumer migration paths, API mapping, changelog conventions
 

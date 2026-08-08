@@ -2,7 +2,8 @@
 checkpoint: 4
 pulse_range: [08, 09]
 depends_on_cp: 3
-review_panel: [claws:gateway-eng, claws:ciso, claws:compliance, claws:claws-release-eng, architect, testing]
+review_panel:
+  [claws:gateway-eng, claws:ciso, claws:compliance, claws:claws-release-eng, architect, testing]
 ---
 
 # Checkpoint 4 · Wave C — Merger + Generator
@@ -25,11 +26,13 @@ Same pattern as cp-3: small surgical (OC-7) + big package (policy) opened in par
 ## Gate
 
 cp-4 closes when BOTH PRs MERGE at openclaw/openclaw AND post-merge verification reports:
+
 - H5 fully GREEN: merger conjunctive test + plugin-B-throw crash-safety test on trunk
 - H3 GREEN: deterministic-generation test + R5 fail-closed + RESTRICTED stickiness on trunk
 - Codemod gate (W1) reports our internal `@bic/openclaw-policy` + `@bic/openclaw-snap` compile clean against trunk's widened `requireApproval` field
 
 **Critical**:
+
 - adapter-audits.md § 2 (emitted-plugin registration) must be complete BEFORE pulse 09 opens
 - Codemod gate is mandatory: PR-6 (snap) builds against trunk's widened field; if internal consumers don't compile, halt before opening cp-5
 - Swift protocol model regen for OC-7's hook-result envelope shape change

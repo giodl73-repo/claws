@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "tts plugin (media)",
   "contributes": {
-    "tools": [
-      "tts/synthesize",
-      "tts/list-voices"
-    ],
-    "skills": [
-      "tts/synthesize",
-      "tts/list-voices"
-    ]
+    "tools": ["tts/synthesize", "tts/list-voices"],
+    "skills": ["tts/synthesize", "tts/list-voices"]
   }
 }

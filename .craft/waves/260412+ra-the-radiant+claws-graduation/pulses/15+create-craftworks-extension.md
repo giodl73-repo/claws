@@ -56,6 +56,7 @@ The extension re-exports all free-tier symbols (curated, not `export *`) so ente
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- monorepo structure, extension pattern, curated re-export conventions
 - `.craft/roles/claws/platform-eng.md` -- freemium boundary, enterprise module wiring, integrity hash pinning
 

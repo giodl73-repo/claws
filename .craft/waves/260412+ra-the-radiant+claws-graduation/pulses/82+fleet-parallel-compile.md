@@ -130,28 +130,28 @@ are already durable in CL-01 v1.2 and implementation MUST satisfy them too.
 
 ## Scenario Findings Applied
 
-| Finding | Severity | Disposition | AC ref | Notes |
-|---------|---------:|-------------|--------|-------|
-| fleet/S01-F01 | major | spec (resolved) + AC | AC-01 | `allSettled` semantics; `Promise.all` forbidden |
-| fleet/S01-F02 | major | spec + AC | AC-02, AC-03 | Structured `CompileDiagnostic` union |
-| fleet/S01-F03 | major | spec + AC | AC-05, AC-06 | Per-workspace cache isolation + atomic writes |
-| fleet/S01-F04 | warning | spec (resolved) + AC | AC-07 | Exit 0/1/2 already in CL-01 |
-| fleet/S01-F05 | warning | spec + AC | AC-17 | ndjson `--json` output shape |
-| fleet/S01-F06 | warning | spec + AC | AC-04 | `stage` field in diagnostic |
-| fleet/S01-F07 | warning | spec + AC | AC-08 | SIGINT graceful shutdown |
-| fleet/S01-F08 | note | **test** | test harness | Multi-mode failure fixtures |
-| fleet/S01-F09 | note | spec + AC | AC-15 | Lexicographic traversal |
-| fleet/S01-F10 | note | spec + AC | AC-14 | Aggregate metrics in summary |
-| fleet/S02-F01 | major | spec (resolved) + AC | AC-09 | Real bounded semaphore |
-| fleet/S02-F02 | major | spec + AC | AC-13, AC-14 | Peak + parallelismRatio exposed |
-| fleet/S02-F03 | major | **test** (e2e) | L2 scaling test | Wall-clock scaling band |
-| fleet/S02-F04 | warning | spec + AC | AC-11 | `--max-concurrency 1` serial |
-| fleet/S02-F05 | warning | spec + AC | AC-10 | Default = `os.cpus().length` |
-| fleet/S02-F06 | warning | spec + AC | AC-12 | Argument validation |
-| fleet/S02-F07 | warning | **pulse** (concept guide) | docs | Resource envelope doc |
-| fleet/S02-F08 | note | **test** (harness) | L1/L3 | Peak-not-mean assertion |
-| fleet/S02-F09 | note | **test** (harness) | harness | Sampling frequency ≥10× task rate |
-| fleet/S02-F10 | note | **test** (harness) | harness | Filter supervisor from probe |
+| Finding       | Severity | Disposition               | AC ref          | Notes                                           |
+| ------------- | -------: | ------------------------- | --------------- | ----------------------------------------------- |
+| fleet/S01-F01 |    major | spec (resolved) + AC      | AC-01           | `allSettled` semantics; `Promise.all` forbidden |
+| fleet/S01-F02 |    major | spec + AC                 | AC-02, AC-03    | Structured `CompileDiagnostic` union            |
+| fleet/S01-F03 |    major | spec + AC                 | AC-05, AC-06    | Per-workspace cache isolation + atomic writes   |
+| fleet/S01-F04 |  warning | spec (resolved) + AC      | AC-07           | Exit 0/1/2 already in CL-01                     |
+| fleet/S01-F05 |  warning | spec + AC                 | AC-17           | ndjson `--json` output shape                    |
+| fleet/S01-F06 |  warning | spec + AC                 | AC-04           | `stage` field in diagnostic                     |
+| fleet/S01-F07 |  warning | spec + AC                 | AC-08           | SIGINT graceful shutdown                        |
+| fleet/S01-F08 |     note | **test**                  | test harness    | Multi-mode failure fixtures                     |
+| fleet/S01-F09 |     note | spec + AC                 | AC-15           | Lexicographic traversal                         |
+| fleet/S01-F10 |     note | spec + AC                 | AC-14           | Aggregate metrics in summary                    |
+| fleet/S02-F01 |    major | spec (resolved) + AC      | AC-09           | Real bounded semaphore                          |
+| fleet/S02-F02 |    major | spec + AC                 | AC-13, AC-14    | Peak + parallelismRatio exposed                 |
+| fleet/S02-F03 |    major | **test** (e2e)            | L2 scaling test | Wall-clock scaling band                         |
+| fleet/S02-F04 |  warning | spec + AC                 | AC-11           | `--max-concurrency 1` serial                    |
+| fleet/S02-F05 |  warning | spec + AC                 | AC-10           | Default = `os.cpus().length`                    |
+| fleet/S02-F06 |  warning | spec + AC                 | AC-12           | Argument validation                             |
+| fleet/S02-F07 |  warning | **pulse** (concept guide) | docs            | Resource envelope doc                           |
+| fleet/S02-F08 |     note | **test** (harness)        | L1/L3           | Peak-not-mean assertion                         |
+| fleet/S02-F09 |     note | **test** (harness)        | harness         | Sampling frequency ≥10× task rate               |
+| fleet/S02-F10 |     note | **test** (harness)        | harness         | Filter supervisor from probe                    |
 
 ## Coverage target
 

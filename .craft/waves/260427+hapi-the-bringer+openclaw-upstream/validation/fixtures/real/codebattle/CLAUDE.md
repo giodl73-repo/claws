@@ -17,6 +17,7 @@ Open-source competitive programming platform where users solve coding tasks head
 ## Project Structure
 
 Elixir umbrella project with three apps under `apps/`:
+
 - `codebattle` — Main Phoenix web app (backend + frontend assets)
 - `runner` — HTTP service that executes user code in isolated containers; language images in `apps/runner/images/`
 - `phoenix_gon` — Shared library for passing server data to frontend
@@ -28,6 +29,7 @@ See `AGENTS.md` for detailed module organization and core domain contexts.
 ## Common Commands
 
 ### Development
+
 ```bash
 make compose                    # Start app + db via Docker Compose
 make server                     # Local: iex -S mix phx.server
@@ -36,6 +38,7 @@ cd apps/codebattle && pnpm run dev  # Vite dev server with HMR (port 8080)
 ```
 
 ### Testing
+
 ```bash
 make test                       # ExUnit + coverage (excludes image_executor)
 make test-code-checkers         # Image executor tests (CODEBATTLE_EXECUTOR=local)
@@ -50,6 +53,7 @@ cd apps/codebattle && pnpm test UserStats.test.jsx
 ```
 
 ### Linting & Formatting
+
 ```bash
 make format                     # mix format
 make lint                       # mix format --check-formatted
@@ -60,6 +64,7 @@ make lint-js-fix                # Auto-fix JS lint issues
 ```
 
 ### Setup
+
 ```bash
 make setup                      # Full first-time setup (Docker)
 make setup-env-local            # Local setup without Docker (requires asdf)

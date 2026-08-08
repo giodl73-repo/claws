@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "whatsapp plugin (communication)",
   "contributes": {
-    "tools": [
-      "whatsapp/send-message",
-      "whatsapp/list-chats"
-    ],
-    "skills": [
-      "whatsapp/send-message",
-      "whatsapp/list-chats"
-    ],
-    "workflows": [
-      "whatsapp-flow.lobster"
-    ],
+    "tools": ["whatsapp/send-message", "whatsapp/list-chats"],
+    "skills": ["whatsapp/send-message", "whatsapp/list-chats"],
+    "workflows": ["whatsapp-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

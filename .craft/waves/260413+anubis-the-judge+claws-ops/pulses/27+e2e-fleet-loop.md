@@ -58,6 +58,7 @@ The e2e test creates temporary workspace directories from fixtures, runs the ful
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/gateway-eng.md` — gateway integration, e2e test patterns, audit chain verification
 - `.craft/roles/claws/ciso.md` — fleet governance lifecycle, compliance verification, kill switch audit
 

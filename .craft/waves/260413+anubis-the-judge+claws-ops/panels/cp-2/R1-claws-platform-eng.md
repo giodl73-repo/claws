@@ -87,8 +87,9 @@ The doctor orchestrator runs all checks with a sequential `for` loop. The 4 chec
 **Impact**: Monthly fleet upgrade validation takes longer than necessary. The 10-minute fleet upgrade window is tighter than it needs to be.
 
 **Fix**: Use `Promise.all()` to run independent checks in parallel:
+
 ```ts
-const results = await Promise.all(checks.map(check => check(workspaceRoot)));
+const results = await Promise.all(checks.map((check) => check(workspaceRoot)));
 ```
 
 ---
@@ -179,14 +180,14 @@ The `TemplateNotFoundError` pattern is properly defined in the SDK and caught in
 
 ## Lens Checklist
 
-| Question | Assessment |
-|----------|-----------|
-| Does `claws broadcast` reliably push this to 47 workspaces? | Partial -- M-03 (doctor false positives) and W-04 (template overrides not applied) would cause fleet-wide issues after broadcast. |
+| Question                                                               | Assessment                                                                                                                                |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Does `claws broadcast` reliably push this to 47 workspaces?            | Partial -- M-03 (doctor false positives) and W-04 (template overrides not applied) would cause fleet-wide issues after broadcast.         |
 | Does `claws drift` detect when a workspace diverges from fleet policy? | Not directly tested in CP-2, but the config schema check and artifact compat check provide a foundation. M-01 (gitignore drift) is a gap. |
-| Does `claws doctor --post-upgrade --fleet` handle monthly upgrades? | W-02 (sequential checks) makes it slower than needed. W-06 (bypass lockout) is a policy hazard during fleet upgrades. |
-| Can I see fleet-wide compliance in one command? | Partial -- bypass audit (W-03) lacks identity attribution needed for compliance reports. |
-| What happens when 3 of 47 workspaces fail the upgrade? | Migration runner has proper backup+restore (good). Doctor checks aggregate per-workspace. Individual workspace failures are isolated. |
-| Does the CI/CD pipeline work with GitHub Enterprise? | Not tested in CP-2 scope. |
+| Does `claws doctor --post-upgrade --fleet` handle monthly upgrades?    | W-02 (sequential checks) makes it slower than needed. W-06 (bypass lockout) is a policy hazard during fleet upgrades.                     |
+| Can I see fleet-wide compliance in one command?                        | Partial -- bypass audit (W-03) lacks identity attribution needed for compliance reports.                                                  |
+| What happens when 3 of 47 workspaces fail the upgrade?                 | Migration runner has proper backup+restore (good). Doctor checks aggregate per-workspace. Individual workspace failures are isolated.     |
+| Does the CI/CD pipeline work with GitHub Enterprise?                   | Not tested in CP-2 scope.                                                                                                                 |
 
 ---
 

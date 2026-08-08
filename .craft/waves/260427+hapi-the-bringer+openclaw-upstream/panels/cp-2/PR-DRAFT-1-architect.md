@@ -17,16 +17,18 @@ The package boundary is sound, the dependency direction is clean (`@openclaw/wor
 
 ### S1 — `DiagnosticLocation.kind: 'uri'` is the right granularity (no change requested)
 
-The single `'uri'` discriminator in `PR-1.md:121-124` is correctly layered: `DiagnosticLocation` discriminates *transport* (legacy file/line tuple vs canonical URI string), and `ParsedOcUri` (`PR-1.md:137-139`) discriminates *URI semantics*. Splitting `DiagnosticLocation` into `'workspace-uri' | 'config-uri'` would leak URI-scheme internals into the diagnostic vocabulary and force every renderer to re-discriminate after parsing. The current shape lets renderers treat URIs as opaque strings until they need structure — at which point `parseOcUri()` provides the second-tier discriminator. This is properly layered, not redundant. **Keep as is.**
+The single `'uri'` discriminator in `PR-1.md:121-124` is correctly layered: `DiagnosticLocation` discriminates _transport_ (legacy file/line tuple vs canonical URI string), and `ParsedOcUri` (`PR-1.md:137-139`) discriminates _URI semantics_. Splitting `DiagnosticLocation` into `'workspace-uri' | 'config-uri'` would leak URI-scheme internals into the diagnostic vocabulary and force every renderer to re-discriminate after parsing. The current shape lets renderers treat URIs as opaque strings until they need structure — at which point `parseOcUri()` provides the second-tier discriminator. This is properly layered, not redundant. **Keep as is.**
 
 ### S2 — `resolveConfigUri()` return shape is inconsistent with the rest of the package (WARNING)
 
 `PR-1.md:144-150` mixes three failure conventions in one signature:
+
 - success: `{found: true, value, parentNode, leafKey}`
 - soft-miss: `{found: false}`
 - hard error: `OcUriError` (thrown? returned?)
 
 The package elsewhere uses thrown `OcConfigUriError` (`oc-config-uri.ts:30-39, 57`) for malformed input and structured diagnostics for parser issues (`ast-types.ts:107-124`). The proposed `resolveConfigUri` blends "boolean-tagged result" with "error-as-value-or-throw" ambiguously. Pick one:
+
 - If errors throw, signature should be `{found:true,...} | {found:false}`.
 - If errors are values, use a uniform `Result<T,E>` (or three-arm union with `{kind:'ok'|'miss'|'error'}`).
 
@@ -37,6 +39,7 @@ The current draft's `| OcUriError` arm is the worst of both worlds — callers m
 `index.ts:30-31` and `package.json:39-48` export two subpaths that PR-1.md:87 admits "ride along" without earning their keep until PR-5/PR-6. Architecturally this is defensible (publishing the package once is cheaper than re-publishing twice for filler subpaths), BUT: shipping public exports without exercised consumers means their API shape is locked by SemVer before any caller has stress-tested it. If PR-5 needs to evolve `/staging`'s surface, it costs a major version on a package that just hit 0.1.0.
 
 **Recommend one of**:
+
 1. Mark `/staging` and `/path-canonical` `"private": true` or via a `// @internal` JSDoc tag, with a note that PR-5/PR-6 will promote them.
 2. Drop the subpath exports from `package.json:39-48` for this PR; add them back when PR-5/PR-6 lands.
 3. Keep as-is but call out in CHANGELOG that `0.x` minors may break these two subpaths.
@@ -46,6 +49,7 @@ Option 2 is cleanest for a forward-compat lens.
 ### S4 — Naming asymmetry: `ParsedOcUri` vs `ParsedOcConfigUri` (MINOR)
 
 `PR-1.md:137` documents a unified `ParsedOcUri` discriminated union, but the actual implementation in `oc-config-uri.ts:26-28` defines a separate `ParsedOcConfigUri` — config-only, no `kind` discriminator. The PR description and the code are out of sync. Either:
+
 - The PR ships TWO parsers (`parseOcUri` for workspace, `parseOcConfigUri` for config) with no unified type — fine, but PR-1.md:137-141 misrepresents this.
 - The PR ships ONE parser with the union, and `oc-config-uri.ts` is a delegated helper — then `ParsedOcConfigUri` should be `Extract<ParsedOcUri, {kind:'config'}>`.
 
@@ -74,7 +78,7 @@ The "originally planned as PR-2 ... folded on 2026-04-28" disclosure is helpful,
 - PR-2 (now absorbed): N/A.
 - PR-3+ governance plugins: depend on `DiagnosticLocation` discriminator — current shape supports adding new `kind` variants without breaking existing `'file'`/`'uri'` consumers. **Holds.**
 - PR-5 `/staging`, PR-6 `/path-canonical`: API not yet validated by consumers. See S3.
-- Any future URI scheme (e.g. `oc://snapshot/...`): `ParsedOcUri` union extends cleanly. **Holds** *if* S4 is reconciled toward the unified union.
+- Any future URI scheme (e.g. `oc://snapshot/...`): `ParsedOcUri` union extends cleanly. **Holds** _if_ S4 is reconciled toward the unified union.
 
 ## Pre-push gate
 

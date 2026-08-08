@@ -6,6 +6,7 @@ trust: composition
 # compo-knowledge-base
 
 Composition workspace bringing together 3 plugin(s):
+
 - `plugins/notion/`
 - `plugins/confluence/`
 - `plugins/obsidian/`

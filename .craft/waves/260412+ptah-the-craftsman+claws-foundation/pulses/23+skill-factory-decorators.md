@@ -4,7 +4,16 @@ slug: skill-factory-decorators
 plan: claws-skill-kit
 depends_on: [3]
 governing_roles: [claws:skill-author, claws:gateway-eng]
-scenario_codes: [skill-kit/skill-factory-basic, skill-kit/decorator-obo, skill-kit/decorator-classify, skill-kit/decorator-audit, skill-kit/decorator-validate, skill-kit/decorator-budget, skill-kit/decorator-timeout]
+scenario_codes:
+  [
+    skill-kit/skill-factory-basic,
+    skill-kit/decorator-obo,
+    skill-kit/decorator-classify,
+    skill-kit/decorator-audit,
+    skill-kit/decorator-validate,
+    skill-kit/decorator-budget,
+    skill-kit/decorator-timeout,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 8
@@ -85,6 +94,7 @@ Create the @bic/claws-skill-kit package scaffolding and implement the core API: 
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/skill-author.md` -- decorator ergonomics, factory API, adoption friction
 - `.craft/roles/claws/gateway-eng.md` -- decorator metadata shape, OC Gateway compatibility, event model
 
@@ -104,5 +114,6 @@ npm run build
 ## Review Amendments (R1)
 
 ### C02: Moved to CP-2
+
 - [ ] Update frontmatter: `checkpoint: 2` (was 4, moved per founder review)
 - [ ] Actual dependency is P03 only — runs in parallel with detection/parse

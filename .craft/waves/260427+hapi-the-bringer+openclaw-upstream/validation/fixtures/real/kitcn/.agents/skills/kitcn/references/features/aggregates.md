@@ -20,14 +20,9 @@ const orders = convexTable(
   "orders",
   { orgId: text(), amount: integer(), score: integer() },
   (t) => [
-    aggregateIndex("by_org")
-      .on(t.orgId)
-      .sum(t.amount)
-      .avg(t.amount)
-      .min(t.score)
-      .max(t.score),
+    aggregateIndex("by_org").on(t.orgId).sum(t.amount).avg(t.amount).min(t.score).max(t.score),
     aggregateIndex("all_metrics").all().sum(t.amount).count(t.orgId),
-  ]
+  ],
 );
 ```
 
@@ -133,7 +128,7 @@ const tags = await ctx.orm.query.tags.findMany({
   where: { createdBy: ctx.userId },
 });
 const usageCounts = await Promise.all(
-  tags.map((tag) => ctx.orm.query.todoTags.count({ where: { tagId: tag.id } }))
+  tags.map((tag) => ctx.orm.query.todoTags.count({ where: { tagId: tag.id } })),
 );
 return tags.map((tag, idx) => ({
   ...tag,
@@ -167,9 +162,7 @@ const users = await ctx.orm.query.user.findMany({
     },
   },
 });
-const usersWithTodos = users.filter(
-  (user) => (user._count?.todos ?? 0) > 0
-).length;
+const usersWithTodos = users.filter((user) => (user._count?.todos ?? 0) > 0).length;
 ```
 
 Through-filtered `_count` works for `through()` relations:
@@ -252,10 +245,8 @@ const scores = convexTable(
       .orderBy({ column: t.createdAt, direction: "asc" })
       .sum(t.score),
 
-    rankIndex("global_leaderboard")
-      .all()
-      .orderBy({ column: t.score, direction: "desc" }),
-  ]
+    rankIndex("global_leaderboard").all().orderBy({ column: t.score, direction: "desc" }),
+  ],
 );
 ```
 
@@ -292,14 +283,10 @@ const totalPlayers = await lb.count();
 
 ```ts
 // ✅ Partition per tenant to isolate write hot spots
-rankIndex("tenant_scores")
-  .partitionBy(t.tenantId)
-  .orderBy({ column: t.score, direction: "desc" });
+rankIndex("tenant_scores").partitionBy(t.tenantId).orderBy({ column: t.score, direction: "desc" });
 
 // ❌ Global rank can create cross-tenant contention
-rankIndex("global_scores")
-  .all()
-  .orderBy({ column: t.score, direction: "desc" });
+rankIndex("global_scores").all().orderBy({ column: t.score, direction: "desc" });
 ```
 
 ## Repair

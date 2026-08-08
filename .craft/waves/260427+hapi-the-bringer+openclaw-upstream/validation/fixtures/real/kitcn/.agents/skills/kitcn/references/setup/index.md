@@ -28,11 +28,11 @@ Ask these questions before editing files.
 
 #### Required choices
 
-| Feature         | Options                                             | Default            |
-| --------------- | --------------------------------------------------- | ------------------ |
+| Feature         | Options                                     | Default            |
+| --------------- | ------------------------------------------- | ------------------ |
 | Bootstrap       | CLI (`kitcn init` / `add`), Docs by section | CLI                |
-| React Framework | Next.js App Router, TanStack Start, Other           | Next.js App Router |
-| Database        | ORM (`ctx.orm`)                                     | ORM                |
+| React Framework | Next.js App Router, TanStack Start, Other   | Next.js App Router |
+| Database        | ORM (`ctx.orm`)                             | ORM                |
 
 #### Optional features
 
@@ -738,30 +738,30 @@ See the [Troubleshooting Reference](#troubleshooting-reference) at the bottom of
 
 Source coverage mapping used to build this runbook:
 
-| Source                                            | Mapped In Setup      |
-| ------------------------------------------------- | -------------------- |
-| `www/content/docs/cli/registry.mdx`               | Sections 3, 11       |
+| Source                                            | Mapped In Setup       |
+| ------------------------------------------------- | --------------------- |
+| `www/content/docs/cli/registry.mdx`               | Sections 3, 11        |
 | `www/content/docs/quickstart.mdx`                 | Sections 3, 4, 11, 12 |
-| `www/content/docs/server/setup.mdx`               | Section 5.3          |
-| `www/content/docs/auth/server.mdx`                | Sections 6.1 - 6.10  |
-| `www/content/docs/auth/client.mdx`                | Section 7.1          |
-| `www/content/docs/auth/server.mdx#triggers`       | Section 6.3, 9.2     |
-| `www/content/docs/react/index.mdx`                | Sections 7.2 - 7.4   |
-| `www/content/docs/nextjs/index.mdx`               | Section 8.A          |
-| `www/content/docs/tanstack-start.mdx`             | Section 8.B          |
-| `www/content/docs/server/http.mdx`                | Sections 6.6, 9.6    |
-| `www/content/docs/server/server-side-calls.mdx`   | Section 8.A.1, 8.B.3 |
-| `www/content/docs/plugins/ratelimit.mdx`          | Section 9.4          |
-| `www/content/docs/orm/queries/aggregates.mdx`     | Section 9.3          |
-| `www/content/docs/server/scheduling.mdx`          | Section 9.5          |
-| `www/content/docs/orm/queries/index.mdx`          | Sections 5, 12       |
-| `www/content/docs/orm/mutations/index.mdx`        | Sections 5, 12       |
-| `www/content/docs/orm/triggers.mdx`               | Sections 9.2, 9.3    |
-| `www/content/docs/orm/rls.mdx`                    | Section 9.1          |
-| `www/content/docs/auth/plugins/admin.mdx`         | Section 10.1         |
-| `www/content/docs/auth/plugins/organizations.mdx` | Section 10.2         |
-| `www/content/docs/auth/plugins/polar.mdx`         | Section 10.3         |
-| `www/content/docs/cli/backend.mdx`                | Section 11           |
+| `www/content/docs/server/setup.mdx`               | Section 5.3           |
+| `www/content/docs/auth/server.mdx`                | Sections 6.1 - 6.10   |
+| `www/content/docs/auth/client.mdx`                | Section 7.1           |
+| `www/content/docs/auth/server.mdx#triggers`       | Section 6.3, 9.2      |
+| `www/content/docs/react/index.mdx`                | Sections 7.2 - 7.4    |
+| `www/content/docs/nextjs/index.mdx`               | Section 8.A           |
+| `www/content/docs/tanstack-start.mdx`             | Section 8.B           |
+| `www/content/docs/server/http.mdx`                | Sections 6.6, 9.6     |
+| `www/content/docs/server/server-side-calls.mdx`   | Section 8.A.1, 8.B.3  |
+| `www/content/docs/plugins/ratelimit.mdx`          | Section 9.4           |
+| `www/content/docs/orm/queries/aggregates.mdx`     | Section 9.3           |
+| `www/content/docs/server/scheduling.mdx`          | Section 9.5           |
+| `www/content/docs/orm/queries/index.mdx`          | Sections 5, 12        |
+| `www/content/docs/orm/mutations/index.mdx`        | Sections 5, 12        |
+| `www/content/docs/orm/triggers.mdx`               | Sections 9.2, 9.3     |
+| `www/content/docs/orm/rls.mdx`                    | Section 9.1           |
+| `www/content/docs/auth/plugins/admin.mdx`         | Section 10.1          |
+| `www/content/docs/auth/plugins/organizations.mdx` | Section 10.2          |
+| `www/content/docs/auth/plugins/polar.mdx`         | Section 10.3          |
+| `www/content/docs/cli/backend.mdx`                | Section 11            |
 
 ### Template Coverage (Recreation Target)
 
@@ -783,30 +783,30 @@ This runbook + references map to the canonical template shape as follows:
 
 ## Troubleshooting Reference
 
-| Symptom                                                                               | Likely Cause                                                                                    | Fix                                                                                                                                                                                         |
-| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@convex/api` not found                                                               | `kitcn dev` not run                                                                     | Run `bunx kitcn dev` and regenerate API metadata                                                                                                                                    |
-| `Cannot prompt for input in non-interactive terminals` during bootstrap               | Convex deployment targeting is ambiguous                                                        | Use `bunx kitcn verify` for local proof, or pass `--env-file` / deployment-target args so Convex can resolve the deployment without prompting                                      |
-| Can't find new local backend files under `~/.convex`                                  | Convex now stores new local deployment state per project                                        | Check `.convex/local/default/` in the current project root; treat `~/.convex/**` as legacy storage                                                                                          |
-| `kitcn env push` fails to set auth vars                                       | Target deployment is not active or not initialized                                              | For local proof, run `bunx kitcn verify`. For remote targets, resolve deployment targeting, then rerun `bunx kitcn env push`                                             |
-| `Failed to analyze auth.js` with `Unexpected token` / `map is not a function` on JWKS | Static `JWKS` value is malformed JSON                                                           | Unset/fix `JWKS`; use `getAuthConfigProvider()` fallback or repush with `bunx kitcn env push`                                                                                       |
-| `Local backend isn't running` during manual `kitcn codegen`                   | Convex local deployment not active                                                              | Prefer `bunx kitcn dev` (it already codegens); use manual `codegen` only as fallback with active backend                                                                            |
-| HTTP calls fail but queries work                                                      | `.site` URL missing or wrong                                                                    | Set `NEXT_PUBLIC_CONVEX_SITE_URL` correctly                                                                                                                                                 |
-| Auth works locally but fails in prod                                                  | JWKS not pushed                                                                                 | Run `bunx kitcn env push --prod`                                                                                                                                                    |
-| Sign-in fails on `/auth` (loop, no session, or immediate sign-out)                    | Auth route/env/provider wiring mismatch                                                         | Recheck Sections 6.5-6.7 (`authMiddleware`, route registration, env push), verify provider credentials/URLs, then rerun Section 11.3                                                        |
-| `UNAUTHORIZED` on protected procedures                                                | auth middleware not attaching `userId`                                                          | Ensure `getAuth(ctx)` + `getHeaders(ctx)` session lookup is in middleware                                                                                                                   |
-| `ctx.orm` missing in handlers                                                         | Generated `initCRPC` not used                                                                   | Use `initCRPC` from `../functions/generated/server` — ORM context is pre-wired                                                                                                              |
-| `Property 'insert'/'update' does not exist on type 'OrmReader'`                       | Using query context for mutations                                                               | Ensure mutation handlers use `publicMutation` / `protectedMutation` builders                                                                                                                |
-| `useCRPC must be used within CRPCProvider`                                            | Provider chain not mounted around route tree                                                    | Wrap app with `AppConvexProvider` and verify `CRPCProvider` is inside QueryClientProvider (Section 7.4 / 8.A.4)                                                                          |
-| Route auth cookies not set                                                            | Missing CORS auth headers                                                                       | Add `Better-Auth-Cookie` allow/expose headers + credentials                                                                                                                                 |
-| TanStack Start auth helper import errors                                              | Using `kitcn/auth/nextjs` in Start app                                                  | Use the TanStack Start helper from `kitcn/auth/start`                                                                                                                                        |
-| `Returned promise will never resolve` from internal function                          | Trigger path is recursively querying/updating related rows or stale component wiring still runs | Isolate failing write with logs, disable/move trigger-side sync into explicit mutation helper, rerun `bunx kitcn verify`, then retry the runtime proof                            |
-| Better Auth secret mismatch/warnings in setup flows                                   | `BETTER_AUTH_SECRET` manually set inconsistently or low entropy                                 | Let `bunx kitcn dev` manage local bootstrap, or regenerate/push via `bunx kitcn env push` for active non-local targets                                                   |
-| `Invalid orderBy value. Use a column or asc()/desc()`                                 | Wrong `orderBy` shape (`[{ field, direction }]`)                                                | Use object form only, e.g. `orderBy: { updatedAt: "desc" }`                                                                                                                                 |
-| `Invalid argument id for db.get` while testing `NOT_FOUND`                            | Fabricated Convex document ID                                                                   | Use real inserted IDs or non-ID lookup keys (slug/name/email) for not-found tests                                                                                                           |
-| Trigger side effects too slow                                                         | Heavy sync work inside trigger                                                                  | Move heavy work to scheduled actions via `ctx.scheduler`                                                                                                                                    |
-| Rate limiter throws missing-table/setup guidance                                      | local ratelimit scaffold missing or not registered                                              | Run `bunx kitcn add ratelimit`, then ensure `convex/functions/schema.ts` imports `../lib/plugins/ratelimit/schema`                                                                  |
-| fallback `kitcn codegen` fails after disabling aggregates                     | Aggregate helper/import references still exist                                                  | Remove `app.use(aggregate...)`, `defineTriggers` aggregate handlers, and aggregate helper modules in the same change; prefer rerunning `kitcn verify`                              |
-| Aggregate counts drift                                                                | trigger not registered in `defineTriggers`                                                      | Register `aggregate.trigger` in `defineTriggers` `change:` handler                                                                                                                          |
-| Invite emails never send                                                              | Resend schema scaffold missing or not registered                                                | Run `bunx kitcn add resend`, ensure `convex/functions/schema.ts` imports `../lib/plugins/resend/schema`, and wire `internal.plugins.email.sendTemplatedEmail`                       |
-| Dev reset/seed commands do nothing                                                    | `init.ts`/`seed.ts`/`reset.ts` missing or not wired                                             | Add dev bootstrap functions and scripts from Section 11.1                                                                                                                                   |
+| Symptom                                                                               | Likely Cause                                                                                    | Fix                                                                                                                                                           |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@convex/api` not found                                                               | `kitcn dev` not run                                                                             | Run `bunx kitcn dev` and regenerate API metadata                                                                                                              |
+| `Cannot prompt for input in non-interactive terminals` during bootstrap               | Convex deployment targeting is ambiguous                                                        | Use `bunx kitcn verify` for local proof, or pass `--env-file` / deployment-target args so Convex can resolve the deployment without prompting                 |
+| Can't find new local backend files under `~/.convex`                                  | Convex now stores new local deployment state per project                                        | Check `.convex/local/default/` in the current project root; treat `~/.convex/**` as legacy storage                                                            |
+| `kitcn env push` fails to set auth vars                                               | Target deployment is not active or not initialized                                              | For local proof, run `bunx kitcn verify`. For remote targets, resolve deployment targeting, then rerun `bunx kitcn env push`                                  |
+| `Failed to analyze auth.js` with `Unexpected token` / `map is not a function` on JWKS | Static `JWKS` value is malformed JSON                                                           | Unset/fix `JWKS`; use `getAuthConfigProvider()` fallback or repush with `bunx kitcn env push`                                                                 |
+| `Local backend isn't running` during manual `kitcn codegen`                           | Convex local deployment not active                                                              | Prefer `bunx kitcn dev` (it already codegens); use manual `codegen` only as fallback with active backend                                                      |
+| HTTP calls fail but queries work                                                      | `.site` URL missing or wrong                                                                    | Set `NEXT_PUBLIC_CONVEX_SITE_URL` correctly                                                                                                                   |
+| Auth works locally but fails in prod                                                  | JWKS not pushed                                                                                 | Run `bunx kitcn env push --prod`                                                                                                                              |
+| Sign-in fails on `/auth` (loop, no session, or immediate sign-out)                    | Auth route/env/provider wiring mismatch                                                         | Recheck Sections 6.5-6.7 (`authMiddleware`, route registration, env push), verify provider credentials/URLs, then rerun Section 11.3                          |
+| `UNAUTHORIZED` on protected procedures                                                | auth middleware not attaching `userId`                                                          | Ensure `getAuth(ctx)` + `getHeaders(ctx)` session lookup is in middleware                                                                                     |
+| `ctx.orm` missing in handlers                                                         | Generated `initCRPC` not used                                                                   | Use `initCRPC` from `../functions/generated/server` — ORM context is pre-wired                                                                                |
+| `Property 'insert'/'update' does not exist on type 'OrmReader'`                       | Using query context for mutations                                                               | Ensure mutation handlers use `publicMutation` / `protectedMutation` builders                                                                                  |
+| `useCRPC must be used within CRPCProvider`                                            | Provider chain not mounted around route tree                                                    | Wrap app with `AppConvexProvider` and verify `CRPCProvider` is inside QueryClientProvider (Section 7.4 / 8.A.4)                                               |
+| Route auth cookies not set                                                            | Missing CORS auth headers                                                                       | Add `Better-Auth-Cookie` allow/expose headers + credentials                                                                                                   |
+| TanStack Start auth helper import errors                                              | Using `kitcn/auth/nextjs` in Start app                                                          | Use the TanStack Start helper from `kitcn/auth/start`                                                                                                         |
+| `Returned promise will never resolve` from internal function                          | Trigger path is recursively querying/updating related rows or stale component wiring still runs | Isolate failing write with logs, disable/move trigger-side sync into explicit mutation helper, rerun `bunx kitcn verify`, then retry the runtime proof        |
+| Better Auth secret mismatch/warnings in setup flows                                   | `BETTER_AUTH_SECRET` manually set inconsistently or low entropy                                 | Let `bunx kitcn dev` manage local bootstrap, or regenerate/push via `bunx kitcn env push` for active non-local targets                                        |
+| `Invalid orderBy value. Use a column or asc()/desc()`                                 | Wrong `orderBy` shape (`[{ field, direction }]`)                                                | Use object form only, e.g. `orderBy: { updatedAt: "desc" }`                                                                                                   |
+| `Invalid argument id for db.get` while testing `NOT_FOUND`                            | Fabricated Convex document ID                                                                   | Use real inserted IDs or non-ID lookup keys (slug/name/email) for not-found tests                                                                             |
+| Trigger side effects too slow                                                         | Heavy sync work inside trigger                                                                  | Move heavy work to scheduled actions via `ctx.scheduler`                                                                                                      |
+| Rate limiter throws missing-table/setup guidance                                      | local ratelimit scaffold missing or not registered                                              | Run `bunx kitcn add ratelimit`, then ensure `convex/functions/schema.ts` imports `../lib/plugins/ratelimit/schema`                                            |
+| fallback `kitcn codegen` fails after disabling aggregates                             | Aggregate helper/import references still exist                                                  | Remove `app.use(aggregate...)`, `defineTriggers` aggregate handlers, and aggregate helper modules in the same change; prefer rerunning `kitcn verify`         |
+| Aggregate counts drift                                                                | trigger not registered in `defineTriggers`                                                      | Register `aggregate.trigger` in `defineTriggers` `change:` handler                                                                                            |
+| Invite emails never send                                                              | Resend schema scaffold missing or not registered                                                | Run `bunx kitcn add resend`, ensure `convex/functions/schema.ts` imports `../lib/plugins/resend/schema`, and wire `internal.plugins.email.sendTemplatedEmail` |
+| Dev reset/seed commands do nothing                                                    | `init.ts`/`seed.ts`/`reset.ts` missing or not wired                                             | Add dev bootstrap functions and scripts from Section 11.1                                                                                                     |

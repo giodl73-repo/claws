@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "clickhouse plugin (data)",
   "contributes": {
-    "tools": [
-      "clickhouse/query",
-      "clickhouse/insert"
-    ],
-    "skills": [
-      "clickhouse/query",
-      "clickhouse/insert"
-    ],
-    "workflows": [
-      "clickhouse-flow.lobster"
-    ],
+    "tools": ["clickhouse/query", "clickhouse/insert"],
+    "skills": ["clickhouse/query", "clickhouse/insert"],
+    "workflows": ["clickhouse-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

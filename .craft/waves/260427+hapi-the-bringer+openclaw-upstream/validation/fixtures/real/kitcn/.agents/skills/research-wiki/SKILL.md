@@ -1,6 +1,6 @@
 ---
 description: Operate the docs/research compiled layer in either full or maintain mode. Use for research-lane creation, research upkeep, authority-sensitive corpus work, source summaries, concepts, systems, decisions, and open-question pages.
-argument-hint: '[full|maintain] <goal or area>'
+argument-hint: "[full|maintain] <goal or area>"
 disable-model-invocation: true
 name: research-wiki
 metadata:

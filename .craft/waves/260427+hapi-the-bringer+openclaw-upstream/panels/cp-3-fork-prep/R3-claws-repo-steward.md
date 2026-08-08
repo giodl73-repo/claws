@@ -59,12 +59,12 @@ What ships, ships.
   organization (e.g., `Acme Corp / platform team`) or scrub to
   `<organization>` / `<team>` placeholders.
 - **WARN**: `README.md:3,7` — `downstream prototype of the upstream`
-  + the absolute URL
-  `https://microsoft.ghe.com/bic/lobster/blob/main/project-lobster-vault/Tech/OpenClaw/specs/proposals/upstream/oc-paths.md`.
-  README likely doesn't ship upstream (per the file's "claws
-  prototype" framing it's a transplant cover sheet), but the GHE URL
-  hard-codes the Microsoft GHE host into the public record. Either
-  move the README to `.craft/` notes or scrub the URL.
+  - the absolute URL
+    `https://microsoft.ghe.com/bic/lobster/blob/main/project-lobster-vault/Tech/OpenClaw/specs/proposals/upstream/oc-paths.md`.
+    README likely doesn't ship upstream (per the file's "claws
+    prototype" framing it's a transplant cover sheet), but the GHE URL
+    hard-codes the Microsoft GHE host into the public record. Either
+    move the README to `.craft/` notes or scrub the URL.
 - **WARN**: `PITFALLS.md:7-11` — references the
   `claws-side governance taxonomy in /docs/PITFALLS.md`. PITFALLS.md
   is in `files: ["dist", "bin"]` indirectly (it's at package root,
@@ -78,13 +78,13 @@ What ships, ships.
   `openclaw-core/test/plugin-sdk/oc-path/*.test.ts` map, the comment
   ships too.
 - **WARN**: `src/index.ts:2` and the `src/plugin-sdk/oc-path/find.ts`
-  + `yaml/ast.ts` + `workspace/roles.ts` headers all describe
-  themselves as "downstream prototype of the upstream..." — that's
-  a useful prototype-stage banner here, but if `cp src/*
-  openclaw-core/src/*` is the transplant rule, every header ships
-  with `downstream prototype` baked in. Either strip on transplant
-  (mechanical) OR make this an explicit transplant-step in the
-  upstream PR plan.
+  - `yaml/ast.ts` + `workspace/roles.ts` headers all describe
+    themselves as "downstream prototype of the upstream..." — that's
+    a useful prototype-stage banner here, but if `cp src/*
+openclaw-core/src/*` is the transplant rule, every header ships
+    with `downstream prototype` baked in. Either strip on transplant
+    (mechanical) OR make this an explicit transplant-step in the
+    upstream PR plan.
 - **NIT**: yaml AST docstring at `yaml/ast.ts:14` mentions
   `.craft/waves/*.yaml` — incidental, but it's the only `.craft/`
   reference in the substrate sources. Generalize to "host workflow
@@ -103,14 +103,14 @@ What ships, ships.
   `id: 'lobster-yaml-starter-v0/...'`. This pack lives in the lint
   package's `extensions/` dir which is exported per the
   `./rules-starter` subpath. Either:
-    1. Delete the pack from the upstream PR scope; ship only
-       `oclint-rules-{starter,jsonc-starter,jsonl-starter}` and let
-       lobster ship the yaml-starter as a downstream package.
-    2. Rename to `oclint-rules-yaml-starter-v0`, change all rule
-       ids to `yaml-starter-v0/step/*`, change `appliesTo` to
-       `*.yaml` or a host-configured glob, and rewrite each
-       "Source: openclaw/lobster issue" docstring to a generic
-       failure-mode description.
+  1. Delete the pack from the upstream PR scope; ship only
+     `oclint-rules-{starter,jsonc-starter,jsonl-starter}` and let
+     lobster ship the yaml-starter as a downstream package.
+  2. Rename to `oclint-rules-yaml-starter-v0`, change all rule
+     ids to `yaml-starter-v0/step/*`, change `appliesTo` to
+     `*.yaml` or a host-configured glob, and rewrite each
+     "Source: openclaw/lobster issue" docstring to a generic
+     failure-mode description.
 - **BLOCK**: `src/shared/starter-values.ts:65-71` —
   `STARTER_IN_PROCESS_TOOLS` list contains `'lobster'` and
   `'clawd.invoke'`. `clawd` is the claws daemon command name; both
@@ -134,7 +134,7 @@ What ships, ships.
   "lobster-specific or workspace-specific conventions" by way of
   example. Generalize.
 - **WARN**: `src/index.ts:2` — `downstream prototype of the
-  upstream` header (same family as oc-paths-substrate; same fix).
+upstream` header (same family as oc-paths-substrate; same fix).
 - **NIT**: `tests/extensions/oclint-rules-starter/rules.test.ts:163`
   — `'## Organization\nMicrosoft\n'` test fixture content. In-line
   fixture, low blast radius, but the word "Microsoft" leaks.
@@ -150,7 +150,7 @@ What ships, ships.
   fixer pack pairs 1:1 with the lint pack; any decision on one
   must apply identically to the other.
 - **WARN**: `src/index.ts:2` — `downstream prototype of the
-  upstream` header. Same family.
+upstream` header. Same family.
 - Otherwise this substrate is the cleanest of the five — the
   contamination is concentrated in the yaml-starter pack.
 
@@ -168,11 +168,11 @@ What ships, ships.
   in a `toContain` check. Test ships with the package per the
   starter convention. Update once `roles.ts` is generalized.
 - **WARN**: `tests/extensions/lkg-fs/bounding-box.test.ts:208,230,246,367,379`
-  + `tests/trackers/trackers.test.ts:203,204,217,251,264` +
-  `tests/integration/manifest-multi-consumer.test.ts:63` — fixtures
-  use `wf.lobster` / `build.lobster` / `test.lobster` filenames as
-  yaml-kind exemplars. Switch to `.yaml` / `.yml` once the
-  canonical role generalizes.
+  - `tests/trackers/trackers.test.ts:203,204,217,251,264` +
+    `tests/integration/manifest-multi-consumer.test.ts:63` — fixtures
+    use `wf.lobster` / `build.lobster` / `test.lobster` filenames as
+    yaml-kind exemplars. Switch to `.yaml` / `.yml` once the
+    canonical role generalizes.
 - **WARN**: `PITFALLS.md:9` references "claws-side
   `docs/PITFALLS.md`"; lines 73-74 mention `wf.lobster` as a kind
   exemplar. Same scrub.
@@ -193,14 +193,14 @@ What ships, ships.
 - **WARN**: `src/plugin-sdk/policy/registry.ts:4,49` — comments
   list `(claws / OPA / CEL / yaml shim / future)` as example
   downstream consumers and a `description: 'Markdown workspace →
-  PolicyIR (claws-shaped)'`. The "claws-shaped" string is metadata
+PolicyIR (claws-shaped)'`. The "claws-shaped" string is metadata
   on a registered generator spec; if the description string ends
   up surfaced in CLI listings (`openclaw-policy generate --list`),
   the word leaks at runtime. Generalize to "Markdown workspace →
   PolicyIR (reference impl)."
 - **WARN**: `src/plugin-sdk/policy/build.ts:8` and
   `src/plugin-sdk/policy/types.ts:112` — same `(claws / OPA / CEL /
-  yaml)` enumeration in JSDoc. Comment-only.
+yaml)` enumeration in JSDoc. Comment-only.
 - **WARN**: `src/extensions/policy-from-md-starter/index.ts:2` —
   header calls the pack a "claws-shaped reference generator pack."
   The starter is a reference generator, not specifically
@@ -239,8 +239,8 @@ What ships, ships.
    is to extract these two packs into a separate
    `lobster-yaml-starter` package that's NOT in the upstream PR
    scope at all. Keeps the upstream surface to "universal substrate
-   + neutral starter packs" and lets the lobster-flavored content
-   ship downstream.
+   - neutral starter packs" and lets the lobster-flavored content
+     ship downstream.
 
 4. **`@bic/* → @openclaw/*` rename was clean on package.json deps and
    import paths, but did NOT sweep prose.** Future renames (e.g.,
@@ -262,7 +262,7 @@ BLOCK (residue that taints the fork at PR-open time):
    replace `Microsoft / claws monorepo team`.
 3. `pinch/src/extensions/oclint-rules-lobster-yaml-starter/`
    (whole dir, ~10 files) — delete from upstream PR scope OR rename
-   + de-lobster.
+   - de-lobster.
 4. `pinch/src/shared/starter-values.ts:58,65-71` — purge
    `'lobster'` and `'clawd.invoke'` from
    `STARTER_IN_PROCESS_TOOLS`.
@@ -283,7 +283,7 @@ WARN (residue not visible at fork-time but ages badly):
    policy-substrate's plugin-sdk JSDoc — replace `claws` with
    `host` or drop the enumeration.
 10. `lkg-recovery-substrate/PITFALLS.md:9` and `oc-paths-substrate/
-    PITFALLS.md:7-11` — claws-side cross-references in PITFALLS
+PITFALLS.md:7-11` — claws-side cross-references in PITFALLS
     docs that ship at package root.
 11. lkg-recovery-substrate test fixtures using `*.lobster`
     filenames (cited above) — switch to `.yaml`.

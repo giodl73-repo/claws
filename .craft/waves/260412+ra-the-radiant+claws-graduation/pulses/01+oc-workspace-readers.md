@@ -68,6 +68,7 @@ Each reader handles its own parsing, BOM stripping, and CRLF normalization (Arch
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- monorepo structure, WorkspaceReader interface contract (M-01), BOM/CRLF normalization (M-03)
 - `.craft/roles/claws/platform-eng.md` -- SDK reader patterns, cross-module integration
 

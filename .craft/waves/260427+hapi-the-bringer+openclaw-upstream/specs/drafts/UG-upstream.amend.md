@@ -26,6 +26,7 @@ v0_3_added_2026_04_28: §12 (lint catalog) + §13 (fixer roadmap) per claws-work
 v0.1 had five sections: Contribution roadmap, Decide/track/enforce+review, R5 pre-merge guard, PR sequencing, Scope-flip at publish.
 
 v0.2 **reorganizes** v0.1 as follows:
+
 - §1 (this amendment) replaces v0.1's "Contribution roadmap"
 - §8 supersedes v0.1's "PR sequencing"
 - §9 supersedes v0.1's "Scope-flip at publish"
@@ -34,6 +35,7 @@ v0.2 **reorganizes** v0.1 as follows:
 v0.2 **adds** §2–§7, §10, §10a, and §11 as entirely new sections covering: bot-reviewer operating constraints (§2), enforcement-model shift to runtime-gated (§3), trust-set lifecycle (§4), approval lifecycle audit events (§5), audit attribution (§6), temporal queries (§7), the diff-vs-v0.1 summary (§10), URI scheme extension to runtime config (§10a), and open items deferred to scenarios stage (§11).
 
 v0.3 **adds** §12 and §13 covering the workspace lint diagnostic surface:
+
 - **§12 Workspace lint diagnostic catalog** — 13-code normative table for `@openclaw/workspace/lint`. Severity tiers (error/warn/note), AST-only vs schema-aware sources, engine semantics (schema-DI, dedup rules, sort by offset), evidence base citing 27 distinct `openclaw/openclaw` issues, `oc://config/<path>` URI weaving rules.
 - **§13 Class-by-class fixer roadmap** — 13-row table ordered by risk; PR-1 ships detection-only, each fixer ships in a separate follow-up PR. `OC_CFG_REDACTED_PLACEHOLDER` intentionally has no fixer (in-place fix would discard real secrets).
 - §11 (open items) and §11.1 (companion-guide flag) **remain in force**, with the v0.3 sections appended below.
@@ -56,16 +58,16 @@ The seven material changes (across v0.2 + v0.3):
 
 **Revised v0.2 plan**: 2 surgical OC-core PRs (OC-4 + OC-7); the remaining 5 are dropped, moved, or narrowed.
 
-| # | Original v0.1 | Status v0.2 | Disposition |
-|---|---|---|---|
-| OC-1 | Hook: `before_workspace_file_ingest` | **DROPPED** | No upstream appetite for workspace-level hooks. Workaround: governance via `before_agent_start` + generated-policy runtime checks. **Note**: shifts enforcement model from write-time prevention to runtime gating; see §3. |
-| OC-2 | Hook: `after_workspace_file_ingest` | **DROPPED** | Mirror to OC-1; same disposition. Audit file ingests via the policy plugin's internal event log, not OC's hook stream. |
-| OC-3 | Content hash on workspace cache (`src/agents/workspace.ts`) | **MOVED** | Compute snapshotIds in `@openclaw/snap` at snapshot-commit time, not in OC-core's workspace cache. Cleaner separation; no upstream PR required. |
-| OC-4 | Preserve originals in `stripFrontMatter` (`workspace.ts:91`) | **LANDING** | Surgical PR (~1 line). Preserves original bytes under sibling `raw` key. Non-breaking. Required for governance round-trip on templated SOUL.md / TOOLS.md. |
-| OC-5 | Extend exec-approval audit event taxonomy | **NARROWED** | Original asked for 5 new categories (`file_ingest`, `policy_generate`, `snapshot_promote`, `snapshot_rollback`, `provider_quarantine`). Hardcoded enum upstream is unlikely to accept full reshape. Proposal narrowed to: add `custom_approval` extensible enum value. Our audit manifest carries the specific category in metadata. |
-| OC-6 | Optional bootstrap deferral hook (`bootstrap-files.ts`) | **DROPPED** | Same as OC-1: hook surface won't land. Govern first-load via `before_agent_start` and block if unvetted bootstrap detected. |
-| OC-7 | `requireApproval` envelope stickiness | **LANDING** (corrected) | **Original wording said "field-widening from `boolean` to `boolean \| ApprovalDescriptor \| ApprovalDescriptor[]`" — that is wrong vs current upstream.** Per `src/plugins/hook-types.ts:402-410`, the field is already object-only. The real bug is at `src/plugins/hooks.ts:889-893`: the merger uses `??` (nullish coalesce), absorbing all downstream approvals. Surgical PR (~5 lines): replace `??` with array accumulation; field type bumps from `ApprovalDescriptor` to `ApprovalDescriptor \| ApprovalDescriptor[]`. Codemod migration note covers array-coercion (no boolean was ever in scope). |
-| OC-8/9/10 | First-class native risk + sensitivity metadata | **STAYS IN OUR DOMAIN** | Upstream has zero native concept of R0–R5 / PUBLIC–RESTRICTED. The R0–R5 + sensitivity taxonomy lives entirely in `@openclaw/policy`'s generator and emitted plugin. No upstream PR required. If upstream later adopts native risk metadata, we reduce the emitted plugin from ~200 lines to ~30; backward-compatible via generate flag. |
+| #         | Original v0.1                                                | Status v0.2             | Disposition                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| --------- | ------------------------------------------------------------ | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OC-1      | Hook: `before_workspace_file_ingest`                         | **DROPPED**             | No upstream appetite for workspace-level hooks. Workaround: governance via `before_agent_start` + generated-policy runtime checks. **Note**: shifts enforcement model from write-time prevention to runtime gating; see §3.                                                                                                                                                                                                                                                                                                                                                                                 |
+| OC-2      | Hook: `after_workspace_file_ingest`                          | **DROPPED**             | Mirror to OC-1; same disposition. Audit file ingests via the policy plugin's internal event log, not OC's hook stream.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| OC-3      | Content hash on workspace cache (`src/agents/workspace.ts`)  | **MOVED**               | Compute snapshotIds in `@openclaw/snap` at snapshot-commit time, not in OC-core's workspace cache. Cleaner separation; no upstream PR required.                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| OC-4      | Preserve originals in `stripFrontMatter` (`workspace.ts:91`) | **LANDING**             | Surgical PR (~1 line). Preserves original bytes under sibling `raw` key. Non-breaking. Required for governance round-trip on templated SOUL.md / TOOLS.md.                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| OC-5      | Extend exec-approval audit event taxonomy                    | **NARROWED**            | Original asked for 5 new categories (`file_ingest`, `policy_generate`, `snapshot_promote`, `snapshot_rollback`, `provider_quarantine`). Hardcoded enum upstream is unlikely to accept full reshape. Proposal narrowed to: add `custom_approval` extensible enum value. Our audit manifest carries the specific category in metadata.                                                                                                                                                                                                                                                                        |
+| OC-6      | Optional bootstrap deferral hook (`bootstrap-files.ts`)      | **DROPPED**             | Same as OC-1: hook surface won't land. Govern first-load via `before_agent_start` and block if unvetted bootstrap detected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| OC-7      | `requireApproval` envelope stickiness                        | **LANDING** (corrected) | **Original wording said "field-widening from `boolean` to `boolean \| ApprovalDescriptor \| ApprovalDescriptor[]`" — that is wrong vs current upstream.** Per `src/plugins/hook-types.ts:402-410`, the field is already object-only. The real bug is at `src/plugins/hooks.ts:889-893`: the merger uses `??` (nullish coalesce), absorbing all downstream approvals. Surgical PR (~5 lines): replace `??` with array accumulation; field type bumps from `ApprovalDescriptor` to `ApprovalDescriptor \| ApprovalDescriptor[]`. Codemod migration note covers array-coercion (no boolean was ever in scope). |
+| OC-8/9/10 | First-class native risk + sensitivity metadata               | **STAYS IN OUR DOMAIN** | Upstream has zero native concept of R0–R5 / PUBLIC–RESTRICTED. The R0–R5 + sensitivity taxonomy lives entirely in `@openclaw/policy`'s generator and emitted plugin. No upstream PR required. If upstream later adopts native risk metadata, we reduce the emitted plugin from ~200 lines to ~30; backward-compatible via generate flag.                                                                                                                                                                                                                                                                    |
 
 The four packages (`@openclaw/workspace`, `@openclaw/guardrails`, `@openclaw/policy`, `@openclaw/snap`) ship standalone against today's upstream hook surface. They function with or without OC-4 + OC-7 merging — those PRs are quality-of-life surgical fixes, not dependencies.
 
@@ -85,18 +87,18 @@ All three tag findings P1/P2/P3 inline. Maintainers self-merge after the author 
 
 The following constraints are the spec contract; the bot-preempt-checklist guide (H6 deliverable) is a tactical playbook that operationalizes them per-PR.
 
-| # | Constraint | Source / mechanism |
-|---|---|---|
-| C1 | **10-PR-per-author cap** at `openclaw/openclaw` | Auto-close on PR #11; recorded in `CONTRIBUTING.md` |
-| C2 | **≤ 2 PRs open simultaneously** by the same author | House culture; not enforced by bot but observed; pacing must respect it |
-| C3 | **`plugin-sdk-api-baseline.sha256` must update** for any public-API addition | File at `docs/.generated/plugin-sdk-api-baseline.sha256`; CI fails on stale hash |
-| C4 | **`docs/sdk-overview.md` table must update** for any public-API addition | Reviewers explicitly flag missing entries |
-| C5 | **Swift protocol models must regenerate** for any gateway protocol change | Files at `apps/macos/Sources/OpenClawProtocol/GatewayModels.swift` and `apps/shared/OpenClawKit/Sources/OpenClawProtocol/GatewayModels.swift` |
-| C6 | **CHANGELOG entries land at end-of-section**, never mid-section | Cited in PR review comments; `CLAUDE.md` references this rule |
-| C7 | **`CLAUDE.md` is authoritative** | Reviewers cite it; read before opening any PR |
-| C8 | **No refactor-only PRs accepted** | Cleanup must accompany a concrete fix |
-| C9 | **`r:third-party-extension` and `r:skill` are auto-close labels** | If the package looks like it belongs on ClawHub instead of core, the PR auto-closes; PR description must lead with WHY governance must be core |
-| C10 | **Plugins are treated as adversarial input** | Every new plugin API must scope by `pluginId`, never trust caller-supplied keys; host-boundary input validation is mandatory |
+| #   | Constraint                                                                   | Source / mechanism                                                                                                                             |
+| --- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| C1  | **10-PR-per-author cap** at `openclaw/openclaw`                              | Auto-close on PR #11; recorded in `CONTRIBUTING.md`                                                                                            |
+| C2  | **≤ 2 PRs open simultaneously** by the same author                           | House culture; not enforced by bot but observed; pacing must respect it                                                                        |
+| C3  | **`plugin-sdk-api-baseline.sha256` must update** for any public-API addition | File at `docs/.generated/plugin-sdk-api-baseline.sha256`; CI fails on stale hash                                                               |
+| C4  | **`docs/sdk-overview.md` table must update** for any public-API addition     | Reviewers explicitly flag missing entries                                                                                                      |
+| C5  | **Swift protocol models must regenerate** for any gateway protocol change    | Files at `apps/macos/Sources/OpenClawProtocol/GatewayModels.swift` and `apps/shared/OpenClawKit/Sources/OpenClawProtocol/GatewayModels.swift`  |
+| C6  | **CHANGELOG entries land at end-of-section**, never mid-section              | Cited in PR review comments; `CLAUDE.md` references this rule                                                                                  |
+| C7  | **`CLAUDE.md` is authoritative**                                             | Reviewers cite it; read before opening any PR                                                                                                  |
+| C8  | **No refactor-only PRs accepted**                                            | Cleanup must accompany a concrete fix                                                                                                          |
+| C9  | **`r:third-party-extension` and `r:skill` are auto-close labels**            | If the package looks like it belongs on ClawHub instead of core, the PR auto-closes; PR description must lead with WHY governance must be core |
+| C10 | **Plugins are treated as adversarial input**                                 | Every new plugin API must scope by `pluginId`, never trust caller-supplied keys; host-boundary input validation is mandatory                   |
 
 Companion guide (forthcoming H6 deliverable): `docs/upstream/guides/bot-preempt-checklist.md` operationalizes each constraint into a per-PR checkbox list with command snippets and citation anchors. The guide is tactical; this section is normative — if the guide and the spec disagree, the spec wins.
 
@@ -104,7 +106,7 @@ Companion guide (forthcoming H6 deliverable): `docs/upstream/guides/bot-preempt-
 
 ## §3. Enforcement model: runtime-gated, not write-blocked (NEW — addresses W9)
 
-The original v0.1 spec assumed file-ingest hooks (OC-1/OC-2) would govern *file writes at persist-time* — catch edits to SOUL.md, TOOLS.md, AGENTS.md before they reach disk.
+The original v0.1 spec assumed file-ingest hooks (OC-1/OC-2) would govern _file writes at persist-time_ — catch edits to SOUL.md, TOOLS.md, AGENTS.md before they reach disk.
 
 In v0.2, with OC-1/OC-2 dropped, enforcement shifts to **runtime gating**:
 
@@ -133,8 +135,22 @@ The signing key registry is a content-addressable file at `.openclaw/trust-set/k
 ```json
 {
   "keys": [
-    { "keyId": "ts-2026-q2", "algo": "hmac-sha256", "createdAt": "2026-04-01T00:00:00Z", "status": "active", "rotatedAt": null, "revokedAt": null },
-    { "keyId": "ts-2026-q1", "algo": "hmac-sha256", "createdAt": "2026-01-01T00:00:00Z", "status": "rotated", "rotatedAt": "2026-04-01T00:00:00Z", "revokedAt": null }
+    {
+      "keyId": "ts-2026-q2",
+      "algo": "hmac-sha256",
+      "createdAt": "2026-04-01T00:00:00Z",
+      "status": "active",
+      "rotatedAt": null,
+      "revokedAt": null
+    },
+    {
+      "keyId": "ts-2026-q1",
+      "algo": "hmac-sha256",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "status": "rotated",
+      "rotatedAt": "2026-04-01T00:00:00Z",
+      "revokedAt": null
+    }
   ],
   "active": "ts-2026-q2"
 }
@@ -202,8 +218,8 @@ The original `AuditEntrySummary` had `actor` as optional. Per ciso review W6, au
 ```ts
 export interface AuditEntrySummary {
   // ... existing fields ...
-  sourcePluginId: string;  // required, non-optional in v0.2
-  actor?: { principal: string; identitySource: string };  // unchanged, optional
+  sourcePluginId: string; // required, non-optional in v0.2
+  actor?: { principal: string; identitySource: string }; // unchanged, optional
 }
 ```
 
@@ -230,6 +246,7 @@ openclaw snap resolvePolicy --at <iso8601-timestamp> [--workspace <name>]
 ```
 
 Returns:
+
 ```json
 {
   "snapshotId": "sha256:3a7f...",
@@ -285,21 +302,21 @@ Step 2 must precede step 3 to avoid the transient versioning gap where internal 
 
 ## §10. Diff vs v0.1 — summary
 
-| Section | v0.1 | v0.2 |
-|---|---|---|
-| OC-PR count | 7 (+ optional 3) | 2 (OC-4 + OC-7) |
-| Hook surface PRs | OC-1, OC-2, OC-6 | dropped |
-| Workspace cache PR | OC-3 | moved to snap |
-| Audit taxonomy PR | OC-5 (5 new categories) | OC-5 (narrowed: `custom_approval` enum) |
-| Risk + sensitivity | optional first-class (OC-8/9/10) | stays in our domain |
-| Reviewer model | human area-owner | bot trio (Greptile + Copilot + chatgpt-codex) |
-| Enforcement model | write-time + runtime | runtime-only (write-time via snap stage-on opt-in) |
-| Trust-set lifecycle | not specified | §4 NEW |
-| Approval audit events | not specified | §5 NEW (issued / resolved / expired) |
-| Audit attribution | optional `actor` | mandatory `sourcePluginId` |
-| Temporal queries | not specified | §7 NEW (`snap resolvePolicy --at`) |
-| PR sequencing | dependency order | + 2-PR-open concurrency |
-| Scope-flip | out-of-scope | in-scope, cp-4 closing deliverable |
+| Section               | v0.1                             | v0.2                                               |
+| --------------------- | -------------------------------- | -------------------------------------------------- |
+| OC-PR count           | 7 (+ optional 3)                 | 2 (OC-4 + OC-7)                                    |
+| Hook surface PRs      | OC-1, OC-2, OC-6                 | dropped                                            |
+| Workspace cache PR    | OC-3                             | moved to snap                                      |
+| Audit taxonomy PR     | OC-5 (5 new categories)          | OC-5 (narrowed: `custom_approval` enum)            |
+| Risk + sensitivity    | optional first-class (OC-8/9/10) | stays in our domain                                |
+| Reviewer model        | human area-owner                 | bot trio (Greptile + Copilot + chatgpt-codex)      |
+| Enforcement model     | write-time + runtime             | runtime-only (write-time via snap stage-on opt-in) |
+| Trust-set lifecycle   | not specified                    | §4 NEW                                             |
+| Approval audit events | not specified                    | §5 NEW (issued / resolved / expired)               |
+| Audit attribution     | optional `actor`                 | mandatory `sourcePluginId`                         |
+| Temporal queries      | not specified                    | §7 NEW (`snap resolvePolicy --at`)                 |
+| PR sequencing         | dependency order                 | + 2-PR-open concurrency                            |
+| Scope-flip            | out-of-scope                     | in-scope, cp-4 closing deliverable                 |
 
 ---
 
@@ -317,6 +334,7 @@ oc://config/{section}[/{key}[/{subkey}]][/{index}]       # runtime config
 ```
 
 Examples:
+
 - `oc://TOOLS.md/Tools/send-email/args_from` — workspace tool field
 - `oc://SOUL.md/Boundaries/deny-rule-1` — workspace deny rule
 - `oc://config/channels/matrix/accessToken` — runtime config leaf
@@ -389,28 +407,28 @@ Every `LintFinding` carries:
 
 ### §12.1 Code table
 
-| Code | Severity | Source | Description |
-|---|---|---|---|
-| `OC_CFG_DUPLICATE_KEY` | warn | AST | Same key appears twice in same object; later occurrence silently overrides |
-| `OC_CFG_TRAILING_WHITESPACE` | note | AST | Lines with trailing whitespace |
-| `OC_CFG_MIXED_INDENT` | note | AST | File mixes tabs and spaces in indentation |
-| `OC_CFG_TRAILING_COMMA_INCONSISTENT` | note | AST | Some containers in file have trailing commas, others don't |
-| `OC_CFG_REDACTED_PLACEHOLDER` | error | AST | Value contains `__OPENCLAW_REDACTED__` sentinel — redacted view was serialized back to disk |
-| `OC_CFG_DEAD_COMMENT` | note | Schema + AST | Comment precedes a no-longer-recognized field (post-migration cleanup) |
-| `OC_CFG_UNKNOWN_FIELD` | warn | Schema + AST | Child key not in schema; emits did-you-mean suggestion when within edit-distance ≤ 3 |
-| `OC_CFG_DEPRECATED_FIELD` | warn | Schema | Key marked deprecated; replacement suggested when available |
-| `OC_CFG_LEGACY_FIELD` | warn | Schema | Key migrated away with auto-rewriter available; `doctor --fix` will rewrite |
-| `OC_CFG_TYPE_MISMATCH` | warn | Schema + AST | Value's runtime kind differs from schema kind (`null` always satisfies optional fields) |
-| `OC_CFG_MISSING_REQUIRED_FIELD` | warn | Schema | Schema-required key absent at this object; gateway will reject at startup |
-| `OC_CFG_PLUGIN_ID_COLLISION` | warn | Schema + AST | Same plugin id declared at two distinct sources (e.g. `channels.<x>` AND `plugins.entries.<x>`) |
-| `OC_CFG_SECRET_REF_AMBIGUOUS` | note | Schema + AST | Value at secret-bearing path looks like a partial env reference (`$VAR` without braces) |
+| Code                                 | Severity | Source       | Description                                                                                     |
+| ------------------------------------ | -------- | ------------ | ----------------------------------------------------------------------------------------------- |
+| `OC_CFG_DUPLICATE_KEY`               | warn     | AST          | Same key appears twice in same object; later occurrence silently overrides                      |
+| `OC_CFG_TRAILING_WHITESPACE`         | note     | AST          | Lines with trailing whitespace                                                                  |
+| `OC_CFG_MIXED_INDENT`                | note     | AST          | File mixes tabs and spaces in indentation                                                       |
+| `OC_CFG_TRAILING_COMMA_INCONSISTENT` | note     | AST          | Some containers in file have trailing commas, others don't                                      |
+| `OC_CFG_REDACTED_PLACEHOLDER`        | error    | AST          | Value contains `__OPENCLAW_REDACTED__` sentinel — redacted view was serialized back to disk     |
+| `OC_CFG_DEAD_COMMENT`                | note     | Schema + AST | Comment precedes a no-longer-recognized field (post-migration cleanup)                          |
+| `OC_CFG_UNKNOWN_FIELD`               | warn     | Schema + AST | Child key not in schema; emits did-you-mean suggestion when within edit-distance ≤ 3            |
+| `OC_CFG_DEPRECATED_FIELD`            | warn     | Schema       | Key marked deprecated; replacement suggested when available                                     |
+| `OC_CFG_LEGACY_FIELD`                | warn     | Schema       | Key migrated away with auto-rewriter available; `doctor --fix` will rewrite                     |
+| `OC_CFG_TYPE_MISMATCH`               | warn     | Schema + AST | Value's runtime kind differs from schema kind (`null` always satisfies optional fields)         |
+| `OC_CFG_MISSING_REQUIRED_FIELD`      | warn     | Schema       | Schema-required key absent at this object; gateway will reject at startup                       |
+| `OC_CFG_PLUGIN_ID_COLLISION`         | warn     | Schema + AST | Same plugin id declared at two distinct sources (e.g. `channels.<x>` AND `plugins.entries.<x>`) |
+| `OC_CFG_SECRET_REF_AMBIGUOUS`        | note     | Schema + AST | Value at secret-bearing path looks like a partial env reference (`$VAR` without braces)         |
 
 ### §12.2 Engine semantics
 
 - **Schema is dependency-injected.** AST-only rules fire on every parse. Schema-aware rules consume a `LintSchema` interface (six accessors: `kindOf`, `knownChildKeys`, `requiredChildKeys`, `deprecatedKeys`, `legacyKeys`, `pluginIdSources`). Without a schema injected, schema-aware rules silently skip — the engine is not opinionated about schema source (Zod, JSON Schema, hand-authored).
 - **`OC_CFG_UNKNOWN_FIELD` deduplication.** Keys covered by `deprecatedKeys` or `legacyKeys` are skipped by the unknown-field rule, so a deprecated key fires `OC_CFG_DEPRECATED_FIELD` exclusively.
 - **`OC_CFG_TYPE_MISMATCH` and `null`.** A null value matches any expected kind, by design — null is the universal "absent / explicitly-unset" signal.
-- **`OC_CFG_TRAILING_COMMA_INCONSISTENT`** reports on the *minority* style only; reading "this container is the minority" gives the user a direct cleanup hint.
+- **`OC_CFG_TRAILING_COMMA_INCONSISTENT`** reports on the _minority_ style only; reading "this container is the minority" gives the user a direct cleanup hint.
 - **`OC_CFG_PLUGIN_ID_COLLISION`** reports on every occurrence after the first so the user sees both sites; renderers may group on `code` for one-line summaries.
 - **Findings are sorted by source offset** so renderers walk linearly without resort.
 
@@ -430,23 +448,23 @@ The `oc://config/...` URI shape is the proto-canonicalization PR-2 formalizes. U
 
 ## §13. Class-by-class fixer roadmap (NEW v0.3)
 
-PR-1 ships *detection only* for all 13 codes. Each fixer ships in a separate follow-up PR — small blast radius, easy to revert, easy to review. Roadmap order is rough cost order, not severity order.
+PR-1 ships _detection only_ for all 13 codes. Each fixer ships in a separate follow-up PR — small blast radius, easy to revert, easy to review. Roadmap order is rough cost order, not severity order.
 
-| Order | Code | Fixer scope | Risk |
-|---|---|---|---|
-| 1 | `OC_CFG_TRAILING_WHITESPACE` | Strip trailing whitespace per line | Low — bytes-only, no semantics |
-| 2 | `OC_CFG_LEGACY_FIELD` | Rename key at AST node; preserve all surrounding bytes | Low — well-defined per code |
-| 3 | `OC_CFG_TRAILING_COMMA_INCONSISTENT` | Normalize to majority style; user can override via `.editorconfig`-style hint | Low — opt-in via flag at first |
-| 4 | `OC_CFG_DEAD_COMMENT` | Remove or relocate comment with confirmation | Medium — comment intent ambiguous |
-| 5 | `OC_CFG_DEPRECATED_FIELD` | Rename key; behaviour-preserving for known one-to-one renames | Medium — multi-key renames need per-code logic |
-| 6 | `OC_CFG_UNKNOWN_FIELD` | Apply did-you-mean suggestion (under `--fix-typos` flag) | Medium — false positives at edit-distance 3 |
-| 7 | `OC_CFG_DUPLICATE_KEY` | Drop one occurrence (first or last, user-selectable) | Medium — semantic intent unclear without user input |
-| 8 | `OC_CFG_MIXED_INDENT` | Normalize to one style; full file rewrite | Higher — bytes-many; round-trip must hold |
-| 9 | `OC_CFG_PLUGIN_ID_COLLISION` | Suggest rename; user must decide which source wins | Higher — semantic; defers to user |
-| 10 | `OC_CFG_TYPE_MISMATCH` | Coerce when safe (`"42"` → `42`); error otherwise | Higher — coercion can change semantics |
-| 11 | `OC_CFG_MISSING_REQUIRED_FIELD` | Insert with schema-default; user reviews | Higher — defaults can mask intent |
-| 12 | `OC_CFG_SECRET_REF_AMBIGUOUS` | Wrap `$VAR` → `${VAR}` with confirmation | Higher — false-positive risk on intentional literals |
-| 13 | `OC_CFG_REDACTED_PLACEHOLDER` | **NO FIXER**. Restore from backup is the only safe response | N/A — fixing in-place would discard real secrets |
+| Order | Code                                 | Fixer scope                                                                   | Risk                                                 |
+| ----- | ------------------------------------ | ----------------------------------------------------------------------------- | ---------------------------------------------------- |
+| 1     | `OC_CFG_TRAILING_WHITESPACE`         | Strip trailing whitespace per line                                            | Low — bytes-only, no semantics                       |
+| 2     | `OC_CFG_LEGACY_FIELD`                | Rename key at AST node; preserve all surrounding bytes                        | Low — well-defined per code                          |
+| 3     | `OC_CFG_TRAILING_COMMA_INCONSISTENT` | Normalize to majority style; user can override via `.editorconfig`-style hint | Low — opt-in via flag at first                       |
+| 4     | `OC_CFG_DEAD_COMMENT`                | Remove or relocate comment with confirmation                                  | Medium — comment intent ambiguous                    |
+| 5     | `OC_CFG_DEPRECATED_FIELD`            | Rename key; behaviour-preserving for known one-to-one renames                 | Medium — multi-key renames need per-code logic       |
+| 6     | `OC_CFG_UNKNOWN_FIELD`               | Apply did-you-mean suggestion (under `--fix-typos` flag)                      | Medium — false positives at edit-distance 3          |
+| 7     | `OC_CFG_DUPLICATE_KEY`               | Drop one occurrence (first or last, user-selectable)                          | Medium — semantic intent unclear without user input  |
+| 8     | `OC_CFG_MIXED_INDENT`                | Normalize to one style; full file rewrite                                     | Higher — bytes-many; round-trip must hold            |
+| 9     | `OC_CFG_PLUGIN_ID_COLLISION`         | Suggest rename; user must decide which source wins                            | Higher — semantic; defers to user                    |
+| 10    | `OC_CFG_TYPE_MISMATCH`               | Coerce when safe (`"42"` → `42`); error otherwise                             | Higher — coercion can change semantics               |
+| 11    | `OC_CFG_MISSING_REQUIRED_FIELD`      | Insert with schema-default; user reviews                                      | Higher — defaults can mask intent                    |
+| 12    | `OC_CFG_SECRET_REF_AMBIGUOUS`        | Wrap `$VAR` → `${VAR}` with confirmation                                      | Higher — false-positive risk on intentional literals |
+| 13    | `OC_CFG_REDACTED_PLACEHOLDER`        | **NO FIXER**. Restore from backup is the only safe response                   | N/A — fixing in-place would discard real secrets     |
 
 ### §13.1 Fixer-PR contract
 
@@ -457,4 +475,4 @@ Every fixer-PR follows the same shape:
 - Tests: at minimum, fix-then-re-lint produces zero findings of the target code on the same input; every existing test in this PR's suite still passes
 - Description: cite the catalog entry from this section; cite the issue numbers the fix closes (if any)
 
-`OC_CFG_REDACTED_PLACEHOLDER` is intentionally left without a fixer — the data is already lost when the placeholder lands in the file. The lint *catches* the corruption; only `snap rollback` or backup restore fixes it.
+`OC_CFG_REDACTED_PLACEHOLDER` is intentionally left without a fixer — the data is already lost when the placeholder lands in the file. The lint _catches_ the corruption; only `snap rollback` or backup restore fixes it.

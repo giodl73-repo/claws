@@ -52,6 +52,7 @@ All UI components must respect the color system from Pulse 04 (NO_COLOR/FORCE_CO
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/navigator.md` — UX patterns, progress feedback conventions
 - `.craft/roles/claws/platform-eng.md` — CLI rendering, TTY detection, cross-platform terminal compatibility
 

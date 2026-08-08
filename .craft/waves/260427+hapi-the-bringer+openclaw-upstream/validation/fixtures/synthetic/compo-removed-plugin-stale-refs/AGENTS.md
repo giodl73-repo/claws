@@ -6,6 +6,7 @@ trust: composition
 # compo-removed-plugin-stale-refs
 
 Composition workspace bringing together 1 plugin(s):
+
 - `plugins/active/`
 
 Each plugin contributes its own AGENTS.md, TOOLS.md, manifest.json under

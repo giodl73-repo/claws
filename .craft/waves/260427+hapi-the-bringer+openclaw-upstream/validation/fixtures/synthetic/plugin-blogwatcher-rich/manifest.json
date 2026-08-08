@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "blogwatcher plugin (search)",
   "contributes": {
-    "tools": [
-      "blogwatcher/list-feeds",
-      "blogwatcher/fetch"
-    ],
-    "skills": [
-      "blogwatcher/list-feeds",
-      "blogwatcher/fetch"
-    ],
-    "workflows": [
-      "blogwatcher-flow.lobster"
-    ],
+    "tools": ["blogwatcher/list-feeds", "blogwatcher/fetch"],
+    "skills": ["blogwatcher/list-feeds", "blogwatcher/fetch"],
+    "workflows": ["blogwatcher-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

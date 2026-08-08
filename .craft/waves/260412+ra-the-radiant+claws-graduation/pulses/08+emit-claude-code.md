@@ -57,6 +57,7 @@ This is the target that proves the free-tier value proposition: "compile your go
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/codegen.md` -- code generation patterns, template separation, output validation
 - `.craft/roles/claws/platform-eng.md` -- SDK emit conventions, Claude Code workspace structure
 

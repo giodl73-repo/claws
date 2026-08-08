@@ -6,6 +6,7 @@ trust: composition
 # compo-test-stack
 
 Composition workspace bringing together 3 plugin(s):
+
 - `plugins/playwright/`
 - `plugins/vitest/`
 - `plugins/storybook/`

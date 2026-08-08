@@ -53,9 +53,11 @@ After all items processed:
 **Total Items:** [X] | **Approved (ready):** [Y] | **Skipped:** [Z]
 
 ### Approved Todos (Ready for Work):
+
 - `042-ready-p1-transaction-boundaries.md` - Transaction boundary issue
 
 ### Skipped (Deleted):
+
 - Item #5: [reason]
 ```
 

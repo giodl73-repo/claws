@@ -33,18 +33,18 @@ dialtone-tokens → dialtone-css → dialtone-vue → dialtone-documentation
 
 All builds use Nx. Run from the repo root:
 
-| Package | Build | Test | Lint |
-| --------- | ------- | ------ | ------ |
-| dialtone-tokens | `pnpm nx run dialtone-tokens:build` | — | — |
-| dialtone-css | `pnpm nx run dialtone-css:build` | — | `pnpm nx run dialtone-css:lint` |
-| dialtone-vue | `pnpm nx run dialtone-vue:build` | `pnpm nx run dialtone-vue:test` | `pnpm nx run dialtone-vue:lint` |
-| dialtone-documentation | `pnpm nx run dialtone-documentation:build` | — | `pnpm nx run dialtone-documentation:lint` |
-| dialtone-mcp-server | `pnpm nx run dialtone-mcp-server:build` | — | — |
-| language-server | `pnpm nx run language-server:build` | — | — |
-| eslint-plugin-dialtone | — | `pnpm nx run eslint-plugin-dialtone:test` (Mocha) | — |
-| stylelint-plugin-dialtone | — | `pnpm nx run stylelint-plugin-dialtone:test` (node --test) | — |
-| postcss-responsive-variations | — | `pnpm nx run postcss-responsive-variations:test` (Jest) | — |
-| All | `pnpm nx run dialtone:build` | `pnpm nx run dialtone:test:all` | `pnpm nx run dialtone:lint:all` |
+| Package                       | Build                                      | Test                                                       | Lint                                      |
+| ----------------------------- | ------------------------------------------ | ---------------------------------------------------------- | ----------------------------------------- |
+| dialtone-tokens               | `pnpm nx run dialtone-tokens:build`        | —                                                          | —                                         |
+| dialtone-css                  | `pnpm nx run dialtone-css:build`           | —                                                          | `pnpm nx run dialtone-css:lint`           |
+| dialtone-vue                  | `pnpm nx run dialtone-vue:build`           | `pnpm nx run dialtone-vue:test`                            | `pnpm nx run dialtone-vue:lint`           |
+| dialtone-documentation        | `pnpm nx run dialtone-documentation:build` | —                                                          | `pnpm nx run dialtone-documentation:lint` |
+| dialtone-mcp-server           | `pnpm nx run dialtone-mcp-server:build`    | —                                                          | —                                         |
+| language-server               | `pnpm nx run language-server:build`        | —                                                          | —                                         |
+| eslint-plugin-dialtone        | —                                          | `pnpm nx run eslint-plugin-dialtone:test` (Mocha)          | —                                         |
+| stylelint-plugin-dialtone     | —                                          | `pnpm nx run stylelint-plugin-dialtone:test` (node --test) | —                                         |
+| postcss-responsive-variations | —                                          | `pnpm nx run postcss-responsive-variations:test` (Jest)    | —                                         |
+| All                           | `pnpm nx run dialtone:build`               | `pnpm nx run dialtone:test:all`                            | `pnpm nx run dialtone:lint:all`           |
 
 ## Commit Convention
 
@@ -124,17 +124,18 @@ Hooks and tools that keep `packages/dialtone-docs/src/content/` in sync with sou
 
 ### Package → doc mapping
 
-| Source package | Doc content file |
-| --- | --- |
-| `packages/dialtone-tokens/` | `development-design-tokens.md`, `architecture-design-token-pipeline.md` |
-| `packages/dialtone-css/` | `development-css-utilities.md` |
-| `packages/dialtone-vue/` | `development-component-workflow.md`, `reference-component-api-patterns.md` |
-| `packages/dialtone-icons/` | `development-icons.md` |
-| `.github/workflows/` | `workflow-ci-pipeline.md` |
+| Source package              | Doc content file                                                           |
+| --------------------------- | -------------------------------------------------------------------------- |
+| `packages/dialtone-tokens/` | `development-design-tokens.md`, `architecture-design-token-pipeline.md`    |
+| `packages/dialtone-css/`    | `development-css-utilities.md`                                             |
+| `packages/dialtone-vue/`    | `development-component-workflow.md`, `reference-component-api-patterns.md` |
+| `packages/dialtone-icons/`  | `development-icons.md`                                                     |
+| `.github/workflows/`        | `workflow-ci-pipeline.md`                                                  |
 
 ### Session cache
 
 All tracking data lives in `.claude/tsc-cache/<session>/` (gitignored):
+
 - `edited-files.log` — tab-separated: `timestamp\tfilepath\trepo`
 - `affected-repos.txt` — one package per line
 - `commands.txt` — NX build/test commands for affected packages
@@ -154,6 +155,7 @@ Run locally: `pnpm nx run dialtone-docs:check-freshness`
 `.coderabbit.yaml` controls path filters, reviewer routing, and per-path review guidance.
 
 Keep it in sync when:
+
 - A new package is added → add a `path_instructions` entry and any `path_filters` exclusion for build output
 - A `.claude/rules/*.md` file is added/renamed → update the `Follow the conventions in …` reference in the matching `path_instructions` entry
 - Team member joins → add handle to `reviews.suggested_reviewers_instructions` and `.github/CODEOWNERS`
@@ -162,14 +164,14 @@ Keep it in sync when:
 
 ## Key Files Reference
 
-| File | Purpose |
-| ------ | --------- |
-| `commitlint.config.cjs` | Commit format rules |
-| `parser-preset.cjs` | Commit message parser regex |
-| `.github/COMMIT_CONVENTION.md` | Commit convention documentation |
-| `.github/pull_request_template.md` | PR template |
-| `common/components_list.js` | All 58+ component filenames |
-| `scripts/build-dialtone-vue-docs.mjs` | Generates component-documentation.json |
-| `packages/dialtone-css/gulpfile.cjs` | CSS build pipeline |
-| `packages/dialtone-tokens/tokens/$metadata.json` | Token sets build order |
-| `apps/dialtone-documentation/docs/_data/site-nav.json` | Sidebar navigation |
+| File                                                   | Purpose                                |
+| ------------------------------------------------------ | -------------------------------------- |
+| `commitlint.config.cjs`                                | Commit format rules                    |
+| `parser-preset.cjs`                                    | Commit message parser regex            |
+| `.github/COMMIT_CONVENTION.md`                         | Commit convention documentation        |
+| `.github/pull_request_template.md`                     | PR template                            |
+| `common/components_list.js`                            | All 58+ component filenames            |
+| `scripts/build-dialtone-vue-docs.mjs`                  | Generates component-documentation.json |
+| `packages/dialtone-css/gulpfile.cjs`                   | CSS build pipeline                     |
+| `packages/dialtone-tokens/tokens/$metadata.json`       | Token sets build order                 |
+| `apps/dialtone-documentation/docs/_data/site-nav.json` | Sidebar navigation                     |

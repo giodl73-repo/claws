@@ -94,6 +94,7 @@ agent-browser snapshot -i
 ```
 
 Use `agent-browser` commands to interact with the page:
+
 - `agent-browser click @ref` -- click elements
 - `agent-browser fill @ref "text"` -- fill form fields
 - `agent-browser snapshot -i` -- capture current state
@@ -102,6 +103,7 @@ Use `agent-browser` commands to interact with the page:
 #### Capture the bug state
 
 When the bug is reproduced:
+
 1. Take a screenshot of the error state
 2. Check for console errors: look at browser output and any visible error messages
 3. Record the exact sequence of steps that triggered it

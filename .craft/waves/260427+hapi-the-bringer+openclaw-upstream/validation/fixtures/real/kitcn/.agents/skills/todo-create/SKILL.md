@@ -14,10 +14,10 @@ The `.context/compound-engineering/todos/` directory is a file-based tracking sy
 
 ## Directory Paths
 
-| Purpose | Path |
-|---------|------|
+| Purpose                    | Path                                   |
+| -------------------------- | -------------------------------------- |
 | **Canonical (write here)** | `.context/compound-engineering/todos/` |
-| **Legacy (read-only)** | `todos/` |
+| **Legacy (read-only)**     | `todos/`                               |
 
 ## File Naming Convention
 
@@ -42,7 +42,7 @@ status: ready
 priority: p1
 issue_id: "002"
 tags: [rails, performance]
-dependencies: ["001"]     # Issue IDs this is blocked by
+dependencies: ["001"] # Issue IDs this is blocked by
 ---
 ```
 
@@ -76,8 +76,8 @@ Load the `todo-triage` skill for an interactive approval workflow.
 ### Managing Dependencies
 
 ```yaml
-dependencies: ["002", "005"]  # Blocked by these issues
-dependencies: []               # No blockers
+dependencies: ["002", "005"] # Blocked by these issues
+dependencies: [] # No blockers
 ```
 
 To check blockers: search for `{dep_id}-complete-*.md` in both paths. Missing matches = incomplete blockers.
@@ -91,12 +91,12 @@ To check blockers: search for `{dep_id}-complete-*.md` in both paths. Missing ma
 
 ## Integration with Workflows
 
-| Trigger | Flow |
-|---------|------|
-| Code review | `/ce:review` -> Findings -> `/todo-triage` -> Todos |
+| Trigger           | Flow                                                           |
+| ----------------- | -------------------------------------------------------------- |
+| Code review       | `/ce:review` -> Findings -> `/todo-triage` -> Todos            |
 | Autonomous review | `/ce:review mode:autofix` -> Residual todos -> `/todo-resolve` |
-| Code TODOs | `/todo-resolve` -> Fixes + Complex todos |
-| Planning | Brainstorm -> Create todo -> Work -> Complete |
+| Code TODOs        | `/todo-resolve` -> Fixes + Complex todos                       |
+| Planning          | Brainstorm -> Create todo -> Work -> Complete                  |
 
 ## Key Distinction
 
@@ -115,6 +115,7 @@ Replace with a concise title describing what needs to be done.
 What is broken, missing, or needs improvement? Provide clear context about why this matters.
 
 **Example:**
+
 - Template system lacks comprehensive test coverage for edge cases discovered during PR review
 - Email service is missing proper error handling for rate-limit scenarios
 - Documentation doesn't cover the new authentication flow
@@ -129,6 +130,7 @@ Investigation results, root cause analysis, and key discoveries.
 - Related issues or patterns discovered
 
 **Example format:**
+
 - Identified 12 missing test scenarios in `app/models/user_test.rb`
 - Current coverage: 60% of code paths
 - Missing: empty inputs, special characters, large payloads
@@ -143,10 +145,12 @@ Present multiple options with pros, cons, effort estimates, and risk assessment.
 **Approach:** Describe the solution clearly.
 
 **Pros:**
+
 - Benefit 1
 - Benefit 2
 
 **Cons:**
+
 - Drawback 1
 - Drawback 2
 
@@ -161,10 +165,12 @@ Present multiple options with pros, cons, effort estimates, and risk assessment.
 **Approach:** Describe the solution clearly.
 
 **Pros:**
+
 - Benefit 1
 - Benefit 2
 
 **Cons:**
+
 - Drawback 1
 - Drawback 2
 
@@ -190,15 +196,18 @@ Present multiple options with pros, cons, effort estimates, and risk assessment.
 Affected files, related components, database changes, or architectural considerations.
 
 **Affected files:**
+
 - `app/models/user.rb:45` - full_name method
 - `app/services/user_service.rb:12` - validation logic
 - `test/models/user_test.rb` - existing tests
 
 **Related components:**
+
 - UserMailer (depends on user validation)
 - AccountPolicy (authorization checks)
 
 **Database changes (if any):**
+
 - Migration needed? Yes / No
 - New columns/tables? Describe here
 
@@ -232,12 +241,14 @@ Chronological record of work sessions, actions taken, and learnings.
 **By:** Claude Code
 
 **Actions:**
+
 - Identified 12 missing test scenarios
 - Analyzed existing test coverage (file:line references)
 - Reviewed similar patterns in codebase
 - Drafted 3 solution approaches
 
 **Learnings:**
+
 - Similar issues exist in related modules
 - Current test setup supports both unit and integration tests
 - Performance testing would be valuable addition

@@ -57,6 +57,7 @@ Five checks ship initially: config-schema (validates claws.json against the curr
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/platform-eng.md` — version compatibility, artifact management, upgrade paths
 - `.craft/roles/claws/compliance.md` — policy validation, schema compliance
 

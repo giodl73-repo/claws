@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "azure-cli plugin (infra)",
   "contributes": {
-    "tools": [
-      "azure-cli/list-resources",
-      "azure-cli/create-rg"
-    ],
-    "skills": [
-      "azure-cli/list-resources",
-      "azure-cli/create-rg"
-    ],
-    "workflows": [
-      "azure-cli-flow.lobster"
-    ],
+    "tools": ["azure-cli/list-resources", "azure-cli/create-rg"],
+    "skills": ["azure-cli/list-resources", "azure-cli/create-rg"],
+    "workflows": ["azure-cli-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

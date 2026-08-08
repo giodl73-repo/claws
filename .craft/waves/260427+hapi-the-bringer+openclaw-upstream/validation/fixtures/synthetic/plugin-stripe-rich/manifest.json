@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "stripe plugin (finance)",
   "contributes": {
-    "tools": [
-      "stripe/create-charge",
-      "stripe/list-customers"
-    ],
-    "skills": [
-      "stripe/create-charge",
-      "stripe/list-customers"
-    ],
-    "workflows": [
-      "stripe-flow.lobster"
-    ],
+    "tools": ["stripe/create-charge", "stripe/list-customers"],
+    "skills": ["stripe/create-charge", "stripe/list-customers"],
+    "workflows": ["stripe-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

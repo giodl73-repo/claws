@@ -100,6 +100,7 @@ npm run build
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/skill-author.md` -- matcher ergonomics, assertion message clarity, test workflow
 - `.craft/roles/craft/architect.md` -- package boundaries, size budget, dependency rules, standalone verification
 
@@ -120,9 +121,11 @@ npm run build
 ## Review Amendments (R1)
 
 ### C10: Getting-Started Doc (CP-4 Gate)
+
 - [ ] Write `docs/claws/getting-started/tutorial.md` — full getting-started tutorial: init → build → pinch → test
 - [ ] This is the capstone doc that ties all 4 checkpoints together
 
 ### Dragon: Malicious Skill Detection Test
+
 - [ ] Add test: skill declares @classify('R1') but handler calls R5 tool → GovernanceValidator catches mismatch
 - [ ] This validates that self-declared risk levels are verified against actual behavior

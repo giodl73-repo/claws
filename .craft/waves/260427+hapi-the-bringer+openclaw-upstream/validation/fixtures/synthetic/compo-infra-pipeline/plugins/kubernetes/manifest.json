@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "description": "kubernetes plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "kubernetes/list-pods",
-      "kubernetes/apply-manifest"
-    ]
+    "tools": ["kubernetes/list-pods", "kubernetes/apply-manifest"]
   }
 }

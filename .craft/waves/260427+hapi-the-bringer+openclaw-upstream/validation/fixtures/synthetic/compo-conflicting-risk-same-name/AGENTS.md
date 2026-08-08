@@ -6,6 +6,7 @@ trust: composition
 # compo-conflicting-risk-same-name
 
 Composition workspace bringing together 2 plugin(s):
+
 - `plugins/safe-shell/`
 - `plugins/unsafe-shell/`
 

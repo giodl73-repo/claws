@@ -1,6 +1,6 @@
 ---
 name: concave
-description: 'Skill: concave'
+description: "Skill: concave"
 metadata:
   skiller:
     source: .agents/rules/concave.mdc

@@ -23,6 +23,7 @@ Do NOT start coding until the plan is approved. If requirements are ambiguous, a
 ## Phase 2: Implement
 
 Execute the approved plan:
+
 - Follow existing code patterns and conventions in the repo
 - Keep changes minimal and focused — don't refactor unrelated code
 - Kotlin warnings are treated as errors (`allWarningsAsErrors = true`) — write clean code
@@ -40,6 +41,7 @@ Run verification checks and fix any failures. Iterate until all checks pass.
 ```
 
 If other modules were changed, compile those too:
+
 ```bash
 ./gradlew assembleRelease
 ```
@@ -60,11 +62,13 @@ If other modules were changed, compile those too:
 ```
 
 Or run specific tests related to the changes:
+
 ```bash
 ./gradlew :aztec:testReleaseUnitTest --tests "org.wordpress.aztec.SpecificTest" --info
 ```
 
 **Test rules:**
+
 - NEVER weaken or remove assertions to make tests pass
 - Don't make unrelated or incorrect changes to production code solely to appease a test. If a test reveals a real issue, fix it properly.
 - Tests that pass only by not crashing are invalid — every test needs meaningful assertions
@@ -73,6 +77,7 @@ Or run specific tests related to the changes:
 ### 3d: Fix Errors
 
 If any step fails:
+
 1. Analyze the error
 2. Fix the issue
 3. Re-run the failing check
@@ -81,6 +86,7 @@ If any step fails:
 ## Phase 4: Present Changes (requires approval)
 
 Show a summary of all changes made:
+
 - Files modified/created
 - Key behavioral changes
 - Test coverage
@@ -110,16 +116,19 @@ git diff
 ### 5c: Plan Commits
 
 Review the changes and determine if they should be split into multiple commits:
+
 - Independent logical units = separate commits
 - Bug fix + feature = separate commits
 - Formatting + logic = separate commits
 
 For **each commit**, prepare:
+
 1. **Commit message**: Imperative summary + brief body
 2. **Files**: Paths to stage
 3. **Summary**: What and why
 
 **Commit message format** — use direct multi-line strings:
+
 ```bash
 git commit -m "Imperative summary
 
@@ -129,6 +138,7 @@ git commit -m "Imperative summary
 ```
 
 **Rules:**
+
 - NO co-author lines — NEVER add "Co-Authored-By" or AI attribution
 - Each commit should be cohesive and buildable
 - Use `git add -p` to split mixed concerns if needed
@@ -162,6 +172,7 @@ EOF
 ```
 
 **PR rules:**
+
 - Title: short, under 70 characters
 - Body: follows the repo's PR template format (### Fix, ### Test, ### Review)
 - Always create as **draft**
@@ -170,19 +181,25 @@ EOF
 ## Handling Edge Cases
 
 ### Working on an issue with a branch name
+
 If the user mentions an issue with a known branch name:
+
 ```bash
 git checkout trunk && git pull && git checkout -b <branch-name>
 ```
 
 ### Determining diff base for existing PRs
+
 PRs can be stacked — check the actual base:
+
 ```bash
 PAGER=cat gh pr view <NUMBER> --json baseRefName
 ```
 
 ### Posting review comments
+
 When reviewing or addressing PR feedback:
+
 ```bash
 # Create review JSON
 printf '%s\n' '{

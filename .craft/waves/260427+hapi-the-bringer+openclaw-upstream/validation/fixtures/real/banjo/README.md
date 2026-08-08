@@ -8,10 +8,10 @@ Banjo Duet is a Second Brain for your code — run [Claude Code](https://docs.an
 
 ## Editor Support
 
-| Editor | Installation |
-|--------|--------------|
-| **[Zed](docs/zed.md)** | Extensions → "Banjo Duet" → Install |
-| **[Neovim](docs/nvim.md)** | `{ "joelreymont/banjo" }` with lazy.nvim |
+| Editor                     | Installation                                            |
+| -------------------------- | ------------------------------------------------------- |
+| **[Zed](docs/zed.md)**     | Extensions → "Banjo Duet" → Install                     |
+| **[Neovim](docs/nvim.md)** | `{ "joelreymont/banjo" }` with lazy.nvim                |
 | **[Emacs](docs/emacs.md)** | `(use-package banjo :load-path "/path/to/banjo/emacs")` |
 
 ## Features
@@ -68,27 +68,27 @@ Banjo is written in Zig and implements the [Agent Client Protocol (ACP)](https:/
 
 ### Key Components
 
-| Module | Purpose |
-|--------|---------|
-| `src/acp/agent.zig` | ACP agent implementation |
-| `src/core/claude_bridge.zig` | Claude Code subprocess |
-| `src/core/codex_bridge.zig` | Codex app-server subprocess |
-| `src/ws/server.zig` | WebSocket server for Neovim |
-| `src/lsp/` | LSP server for code notes |
-| `nvim/lua/banjo/` | Neovim Lua plugin |
+| Module                       | Purpose                     |
+| ---------------------------- | --------------------------- |
+| `src/acp/agent.zig`          | ACP agent implementation    |
+| `src/core/claude_bridge.zig` | Claude Code subprocess      |
+| `src/core/codex_bridge.zig`  | Codex app-server subprocess |
+| `src/ws/server.zig`          | WebSocket server for Neovim |
+| `src/lsp/`                   | LSP server for code notes   |
+| `nvim/lua/banjo/`            | Neovim Lua plugin           |
 
 ### Documentation
 
-| Doc | Contents |
-|-----|----------|
-| [docs/acp-protocol.md](docs/acp-protocol.md) | ACP specification |
-| [docs/acp-websocket.md](docs/acp-websocket.md) | ACP WebSocket transport |
-| [docs/wire-formats.md](docs/wire-formats.md) | JSON-RPC message schemas |
-| [docs/claude-code.md](docs/claude-code.md) | Claude Code CLI integration |
-| [docs/codex.md](docs/codex.md) | Codex app-server protocol |
-| [docs/zed.md](docs/zed.md) | Zed user guide |
-| [docs/nvim.md](docs/nvim.md) | Neovim user guide |
-| [docs/emacs.md](docs/emacs.md) | Emacs user guide |
+| Doc                                            | Contents                    |
+| ---------------------------------------------- | --------------------------- |
+| [docs/acp-protocol.md](docs/acp-protocol.md)   | ACP specification           |
+| [docs/acp-websocket.md](docs/acp-websocket.md) | ACP WebSocket transport     |
+| [docs/wire-formats.md](docs/wire-formats.md)   | JSON-RPC message schemas    |
+| [docs/claude-code.md](docs/claude-code.md)     | Claude Code CLI integration |
+| [docs/codex.md](docs/codex.md)                 | Codex app-server protocol   |
+| [docs/zed.md](docs/zed.md)                     | Zed user guide              |
+| [docs/nvim.md](docs/nvim.md)                   | Neovim user guide           |
+| [docs/emacs.md](docs/emacs.md)                 | Emacs user guide            |
 
 ## Development
 

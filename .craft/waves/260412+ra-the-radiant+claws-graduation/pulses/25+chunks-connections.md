@@ -57,6 +57,7 @@ Critical rule: tools without an explicit risk classification default to R5 (P-27
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- thin HTTP adapter pattern, SDK-owns-logic rule
 - `.craft/roles/claws/gateway-eng.md` -- risk classification, R5 enforcement, per-tool lock derivation
 

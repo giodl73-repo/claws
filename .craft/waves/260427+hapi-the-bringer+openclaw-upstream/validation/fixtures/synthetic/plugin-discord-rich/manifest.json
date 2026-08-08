@@ -4,18 +4,9 @@
   "version": "0.1.0",
   "description": "discord plugin (communication)",
   "contributes": {
-    "tools": [
-      "discord/post-message",
-      "discord/list-channels",
-      "discord/react"
-    ],
-    "skills": [
-      "discord/post-message",
-      "discord/list-channels"
-    ],
-    "workflows": [
-      "discord-flow.lobster"
-    ],
+    "tools": ["discord/post-message", "discord/list-channels", "discord/react"],
+    "skills": ["discord/post-message", "discord/list-channels"],
+    "workflows": ["discord-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

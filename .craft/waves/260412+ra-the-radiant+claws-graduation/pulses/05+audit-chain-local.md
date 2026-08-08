@@ -60,6 +60,7 @@ The free tier audit chain is local-only: entries are signed with a local Ed25519
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/security.md` -- audit chain integrity, Ed25519 signing requirements, tamper detection
 - `.craft/roles/claws/platform-eng.md` -- SDK storage patterns, file-based persistence, WAL conventions
 

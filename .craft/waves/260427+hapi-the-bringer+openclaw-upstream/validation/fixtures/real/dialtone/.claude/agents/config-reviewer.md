@@ -18,6 +18,7 @@ Audits `.claude/` configurations with a devil's advocate mindset. Identifies blo
 ### 1. Bloat Detection
 
 Count and evaluate:
+
 - **Agents**: List all `.claude/agents/*.md`. Threshold: >5 agents warrants review.
 - **Skills**: List all `.claude/skills/*.md`. Threshold: >8 skills warrants review.
 - **Hooks**: Parse `.claude/settings.json` for all hook entries. Threshold: >3 hook scripts warrants review.
@@ -28,6 +29,7 @@ Cross-compare agent and skill responsibilities for overlap. Flag agents whose de
 ### 2. LLM Capability Duplication
 
 For each skill file, classify each instruction as:
+
 - **Project-specific**: References Dialtone file paths, naming conventions, known bugs, specific tools/commands, or project-specific patterns.
 - **Generic programming knowledge**: General Vue/JS/CSS best practices, testing fundamentals, or coding patterns that any modern LLM already knows.
 
@@ -36,6 +38,7 @@ Flag skills where >50% of content is generic. These add context window cost with
 ### 3. Domain Knowledge Gaps
 
 Check coverage:
+
 - List all top-level directories in `packages/` and `apps/`.
 - For each, check if a matching path-scoped rule exists in `.claude/rules/`.
 - Flag packages without rules — these are domain knowledge gaps where Claude gets no project-specific guidance.
@@ -44,6 +47,7 @@ Check coverage:
 ### 4. Hook Latency Analysis
 
 For each hook in `.claude/settings.json`:
+
 - Identify the trigger event (`PreToolUse`, `PostToolUse`, `UserPromptSubmit`, etc.)
 - Count how many scripts fire per common operation:
   - Per Bash command (PreToolUse Bash matcher)
@@ -61,6 +65,7 @@ For each hook in `.claude/settings.json`:
 ### 6. Redundant Infrastructure
 
 Flag:
+
 - Any `skill-rules.json` or similar intent-classification infrastructure (Claude matches skills natively from YAML descriptions).
 - Custom scoring engines or keyword matchers for skill activation.
 - Hooks that duplicate other hooks' checks.
@@ -69,6 +74,7 @@ Flag:
 ### 7. Missing Anthropic Features
 
 Check for adoption of recommended features:
+
 - **Path-scoped rules** (`.claude/rules/`): Do they exist? Do they cover all major packages?
 - **Agent `memory`**: Do agents have `memory:` fields in frontmatter?
 - **Skill `context: fork`**: Do search-heavy skills use `context: fork` to protect the main context window?
@@ -82,33 +88,39 @@ Check for adoption of recommended features:
 ### Score: X/10
 
 ### Critical Issues (must fix)
+
 Issues causing measurable waste (latency, context pollution, silent failures):
+
 - ...
 
 ### Warnings (should fix)
+
 Issues indicating suboptimal patterns:
+
 - ...
 
 ### Suggestions (nice to have)
+
 Opportunities for improvement:
+
 - ...
 
 ### Metrics
 
-| Metric | Current | Threshold | Status |
-|--------|---------|-----------|--------|
-| Agents | N | ≤5 | OK/REVIEW |
-| Skills | N | ≤8 | OK/REVIEW |
-| Hook scripts | N | ≤3 | OK/REVIEW |
-| Total config lines | N | ≤1500 | OK/REVIEW |
-| CLAUDE.md lines | N | ≤200 | OK/REVIEW |
-| Path-scoped rules | N/M packages | full coverage | OK/GAP |
-| Process spawns/Bash cmd | N | ≤1 | OK/HIGH |
-| Process spawns/user prompt | N | 0 | OK/HIGH |
-| Skills >50% generic | N | 0 | OK/BLOAT |
-| Cross-file duplicates | N | ≤2 | OK/HIGH |
-| Agents with memory | N/M | all | OK/MISSING |
-| Skills with context:fork | N (search-heavy) | all search-heavy | OK/MISSING |
+| Metric                     | Current          | Threshold        | Status     |
+| -------------------------- | ---------------- | ---------------- | ---------- |
+| Agents                     | N                | ≤5               | OK/REVIEW  |
+| Skills                     | N                | ≤8               | OK/REVIEW  |
+| Hook scripts               | N                | ≤3               | OK/REVIEW  |
+| Total config lines         | N                | ≤1500            | OK/REVIEW  |
+| CLAUDE.md lines            | N                | ≤200             | OK/REVIEW  |
+| Path-scoped rules          | N/M packages     | full coverage    | OK/GAP     |
+| Process spawns/Bash cmd    | N                | ≤1               | OK/HIGH    |
+| Process spawns/user prompt | N                | 0                | OK/HIGH    |
+| Skills >50% generic        | N                | 0                | OK/BLOAT   |
+| Cross-file duplicates      | N                | ≤2               | OK/HIGH    |
+| Agents with memory         | N/M              | all              | OK/MISSING |
+| Skills with context:fork   | N (search-heavy) | all search-heavy | OK/MISSING |
 ```
 
 ## Running the Audit

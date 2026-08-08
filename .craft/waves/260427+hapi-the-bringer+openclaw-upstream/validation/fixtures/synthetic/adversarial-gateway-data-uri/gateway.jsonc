@@ -2,7 +2,7 @@
   "version": "0.1.0",
   "plugins": {
     "entries": {
-      "weird": { "endpoint": "data:text/plain;base64,SGVsbG8=" }
-    }
-  }
+      "weird": { "endpoint": "data:text/plain;base64,SGVsbG8=" },
+    },
+  },
 }

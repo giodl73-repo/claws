@@ -1,7 +1,7 @@
 ---
 name: ce:review
 description: Structured code review using tiered persona agents, confidence-gated findings, and a merge/dedup pipeline. Use when reviewing code changes before creating a PR.
-argument-hint: '[blank to review current branch, or provide PR link]'
+argument-hint: "[blank to review current branch, or provide PR link]"
 ---
 
 # Code Review
@@ -20,13 +20,13 @@ Reviews code changes using dynamically selected reviewer personas. Spawns parall
 
 Parse `$ARGUMENTS` for the following optional tokens. Strip each recognized token before interpreting the remainder as the PR number, GitHub URL, or branch name.
 
-| Token | Example | Effect |
-|-------|---------|--------|
-| `mode:autofix` | `mode:autofix` | Select autofix mode (see Mode Detection below) |
-| `mode:report-only` | `mode:report-only` | Select report-only mode |
-| `mode:headless` | `mode:headless` | Select headless mode for programmatic callers (see Mode Detection below) |
-| `base:<sha-or-ref>` | `base:abc1234` or `base:origin/main` | Skip scope detection — use this as the diff base directly |
-| `plan:<path>` | `plan:docs/plans/2026-03-25-001-feat-foo-plan.md` | Load this plan for requirements verification |
+| Token               | Example                                           | Effect                                                                   |
+| ------------------- | ------------------------------------------------- | ------------------------------------------------------------------------ |
+| `mode:autofix`      | `mode:autofix`                                    | Select autofix mode (see Mode Detection below)                           |
+| `mode:report-only`  | `mode:report-only`                                | Select report-only mode                                                  |
+| `mode:headless`     | `mode:headless`                                   | Select headless mode for programmatic callers (see Mode Detection below) |
+| `base:<sha-or-ref>` | `base:abc1234` or `base:origin/main`              | Skip scope detection — use this as the diff base directly                |
+| `plan:<path>`       | `plan:docs/plans/2026-03-25-001-feat-foo-plan.md` | Load this plan for requirements verification                             |
 
 All tokens are optional. Each one present means one less thing to infer. When absent, fall back to existing behavior for that stage.
 
@@ -34,12 +34,12 @@ All tokens are optional. Each one present means one less thing to infer. When ab
 
 ## Mode Detection
 
-| Mode | When | Behavior |
-|------|------|----------|
-| **Interactive** (default) | No mode token present | Review, apply safe_auto fixes automatically, present findings, ask for policy decisions on gated/manual findings, and optionally continue into fix/push/PR next steps |
-| **Autofix** | `mode:autofix` in arguments | No user interaction. Review, apply only policy-allowed `safe_auto` fixes, re-review in bounded rounds, write a run artifact, and emit residual downstream work when needed |
-| **Report-only** | `mode:report-only` in arguments | Strictly read-only. Review and report only, then stop with no edits, artifacts, todos, commits, pushes, or PR actions |
-| **Headless** | `mode:headless` in arguments | Programmatic mode for skill-to-skill invocation. Apply `safe_auto` fixes silently (single pass), return all other findings as structured text output, write run artifacts, skip todos, and return "Review complete" signal. No interactive prompts. |
+| Mode                      | When                            | Behavior                                                                                                                                                                                                                                            |
+| ------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Interactive** (default) | No mode token present           | Review, apply safe_auto fixes automatically, present findings, ask for policy decisions on gated/manual findings, and optionally continue into fix/push/PR next steps                                                                               |
+| **Autofix**               | `mode:autofix` in arguments     | No user interaction. Review, apply only policy-allowed `safe_auto` fixes, re-review in bounded rounds, write a run artifact, and emit residual downstream work when needed                                                                          |
+| **Report-only**           | `mode:report-only` in arguments | Strictly read-only. Review and report only, then stop with no edits, artifacts, todos, commits, pushes, or PR actions                                                                                                                               |
+| **Headless**              | `mode:headless` in arguments    | Programmatic mode for skill-to-skill invocation. Apply `safe_auto` fixes silently (single pass), return all other findings as structured text output, write run artifacts, skip todos, and return "Review complete" signal. No interactive prompts. |
 
 ### Autofix mode rules
 
@@ -74,23 +74,23 @@ All tokens are optional. Each one present means one less thing to infer. When ab
 
 All reviewers use P0-P3:
 
-| Level | Meaning | Action |
-|-------|---------|--------|
-| **P0** | Critical breakage, exploitable vulnerability, data loss/corruption | Must fix before merge |
-| **P1** | High-impact defect likely hit in normal usage, breaking contract | Should fix |
+| Level  | Meaning                                                                                    | Action                 |
+| ------ | ------------------------------------------------------------------------------------------ | ---------------------- |
+| **P0** | Critical breakage, exploitable vulnerability, data loss/corruption                         | Must fix before merge  |
+| **P1** | High-impact defect likely hit in normal usage, breaking contract                           | Should fix             |
 | **P2** | Moderate issue with meaningful downside (edge case, perf regression, maintainability trap) | Fix if straightforward |
-| **P3** | Low-impact, narrow scope, minor improvement | User's discretion |
+| **P3** | Low-impact, narrow scope, minor improvement                                                | User's discretion      |
 
 ## Action Routing
 
 Severity answers **urgency**. Routing answers **who acts next** and **whether this skill may mutate the checkout**.
 
-| `autofix_class` | Default owner | Meaning |
-|-----------------|---------------|---------|
-| `safe_auto` | `review-fixer` | Local, deterministic fix suitable for the in-skill fixer when the current mode allows mutation |
-| `gated_auto` | `downstream-resolver` or `human` | Concrete fix exists, but it changes behavior, contracts, permissions, or another sensitive boundary that should not be auto-applied by default |
-| `manual` | `downstream-resolver` or `human` | Actionable work that should be handed off rather than fixed in-skill |
-| `advisory` | `human` or `release` | Report-only output such as learnings, rollout notes, or residual risk |
+| `autofix_class` | Default owner                    | Meaning                                                                                                                                        |
+| --------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `safe_auto`     | `review-fixer`                   | Local, deterministic fix suitable for the in-skill fixer when the current mode allows mutation                                                 |
+| `gated_auto`    | `downstream-resolver` or `human` | Concrete fix exists, but it changes behavior, contracts, permissions, or another sensitive boundary that should not be auto-applied by default |
+| `manual`        | `downstream-resolver` or `human` | Actionable work that should be handed off rather than fixed in-skill                                                                           |
+| `advisory`      | `human` or `release`             | Report-only output such as learnings, rollout notes, or residual risk                                                                          |
 
 Routing rules:
 
@@ -105,42 +105,42 @@ Routing rules:
 
 **Always-on (every review):**
 
-| Agent | Focus |
-|-------|-------|
-| `compound-engineering:review:correctness-reviewer` | Logic errors, edge cases, state bugs, error propagation |
-| `compound-engineering:review:testing-reviewer` | Coverage gaps, weak assertions, brittle tests |
-| `compound-engineering:review:maintainability-reviewer` | Coupling, complexity, naming, dead code, abstraction debt |
+| Agent                                                    | Focus                                                                              |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `compound-engineering:review:correctness-reviewer`       | Logic errors, edge cases, state bugs, error propagation                            |
+| `compound-engineering:review:testing-reviewer`           | Coverage gaps, weak assertions, brittle tests                                      |
+| `compound-engineering:review:maintainability-reviewer`   | Coupling, complexity, naming, dead code, abstraction debt                          |
 | `compound-engineering:review:project-standards-reviewer` | CLAUDE.md and AGENTS.md compliance -- frontmatter, references, naming, portability |
-| `compound-engineering:review:agent-native-reviewer` | Verify new features are agent-accessible |
-| `compound-engineering:research:learnings-researcher` | Search docs/solutions/ for past issues related to this PR |
+| `compound-engineering:review:agent-native-reviewer`      | Verify new features are agent-accessible                                           |
+| `compound-engineering:research:learnings-researcher`     | Search docs/solutions/ for past issues related to this PR                          |
 
 **Cross-cutting conditional (selected per diff):**
 
-| Agent | Select when diff touches... |
-|-------|---------------------------|
-| `compound-engineering:review:security-reviewer` | Auth, public endpoints, user input, permissions |
-| `compound-engineering:review:performance-reviewer` | DB queries, data transforms, caching, async |
-| `compound-engineering:review:api-contract-reviewer` | Routes, serializers, type signatures, versioning |
-| `compound-engineering:review:data-migrations-reviewer` | Migrations, schema changes, backfills |
-| `compound-engineering:review:reliability-reviewer` | Error handling, retries, timeouts, background jobs |
-| `compound-engineering:review:adversarial-reviewer` | Diff >=50 changed non-test/non-generated/non-lockfile lines, or auth, payments, data mutations, external APIs |
-| `compound-engineering:review:previous-comments-reviewer` | Reviewing a PR that has existing review comments or threads |
+| Agent                                                    | Select when diff touches...                                                                                   |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `compound-engineering:review:security-reviewer`          | Auth, public endpoints, user input, permissions                                                               |
+| `compound-engineering:review:performance-reviewer`       | DB queries, data transforms, caching, async                                                                   |
+| `compound-engineering:review:api-contract-reviewer`      | Routes, serializers, type signatures, versioning                                                              |
+| `compound-engineering:review:data-migrations-reviewer`   | Migrations, schema changes, backfills                                                                         |
+| `compound-engineering:review:reliability-reviewer`       | Error handling, retries, timeouts, background jobs                                                            |
+| `compound-engineering:review:adversarial-reviewer`       | Diff >=50 changed non-test/non-generated/non-lockfile lines, or auth, payments, data mutations, external APIs |
+| `compound-engineering:review:previous-comments-reviewer` | Reviewing a PR that has existing review comments or threads                                                   |
 
 **Stack-specific conditional (selected per diff):**
 
-| Agent | Select when diff touches... |
-|-------|---------------------------|
-| `compound-engineering:review:dhh-rails-reviewer` | Rails architecture, service objects, session/auth choices, or Hotwire-vs-SPA boundaries |
-| `compound-engineering:review:kieran-rails-reviewer` | Rails application code where conventions, naming, and maintainability are in play |
-| `compound-engineering:review:kieran-python-reviewer` | Python modules, endpoints, scripts, or services |
-| `compound-engineering:review:kieran-typescript-reviewer` | TypeScript components, services, hooks, utilities, or shared types |
-| `compound-engineering:review:julik-frontend-races-reviewer` | Stimulus/Turbo controllers, DOM events, timers, animations, or async UI flows |
+| Agent                                                       | Select when diff touches...                                                             |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `compound-engineering:review:dhh-rails-reviewer`            | Rails architecture, service objects, session/auth choices, or Hotwire-vs-SPA boundaries |
+| `compound-engineering:review:kieran-rails-reviewer`         | Rails application code where conventions, naming, and maintainability are in play       |
+| `compound-engineering:review:kieran-python-reviewer`        | Python modules, endpoints, scripts, or services                                         |
+| `compound-engineering:review:kieran-typescript-reviewer`    | TypeScript components, services, hooks, utilities, or shared types                      |
+| `compound-engineering:review:julik-frontend-races-reviewer` | Stimulus/Turbo controllers, DOM events, timers, animations, or async UI flows           |
 
 **CE conditional (migration-specific):**
 
-| Agent | Select when diff includes migration files |
-|-------|------------------------------------------|
-| `compound-engineering:review:schema-drift-detector` | Cross-references schema.rb against included migrations |
+| Agent                                                       | Select when diff includes migration files                   |
+| ----------------------------------------------------------- | ----------------------------------------------------------- |
+| `compound-engineering:review:schema-drift-detector`         | Cross-references schema.rb against included migrations      |
 | `compound-engineering:review:deployment-verification-agent` | Produces deployment checklist with SQL verification queries |
 
 ## Review Scope
@@ -311,7 +311,7 @@ Intent: Simplify tax calculation by replacing the multi-tier rate lookup
 with a flat-rate computation. Must not regress edge cases in tax-exempt handling.
 ```
 
-Pass this to every reviewer in their spawn prompt. Intent shapes *how hard each reviewer looks*, not which reviewers are selected.
+Pass this to every reviewer in their spawn prompt. Intent shapes _how hard each reviewer looks_, not which reviewers are selected.
 
 **When intent is ambiguous:**
 
@@ -327,6 +327,7 @@ Locate the plan document so Stage 6 can verify requirements completeness. Check 
 3. **Auto-discover.** Extract 2-3 keywords from the branch name (e.g., `feat/onboarding-skill` -> `onboarding`, `skill`). Glob `docs/plans/*` and filter filenames containing those keywords. If exactly one match, use it. If multiple matches or the match looks ambiguous (e.g., generic keywords like `review`, `fix`, `update` that could hit many plans), **skip auto-discovery** — a wrong plan is worse than no plan. If zero matches, skip.
 
 **Confidence tagging:** Record how the plan was found:
+
 - `plan:` argument -> `plan_source: explicit` (high confidence)
 - Single unambiguous PR body match -> `plan_source: explicit` (high confidence)
 - Multiple/ambiguous PR body matches -> `plan_source: inferred` (lower confidence)
@@ -376,11 +377,11 @@ Pass the resulting path list to the `project-standards` persona inside a `<stand
 
 Persona sub-agents do focused, scoped work and should use cheaper/faster models to reduce cost and latency. The orchestrator itself stays on the default (most capable) model.
 
-| Platform | Persona agent model | How to set |
-|----------|-------------------|------------|
-| **Claude Code** | Haiku | Pass `model: "haiku"` in the Agent tool call |
-| **Codex** | GPT-4o mini | Set the model parameter to `gpt-4o-mini` in the agent spawn config |
-| **Other platforms** | Cheapest capable model available | Use the platform's equivalent of a fast/cheap tier |
+| Platform            | Persona agent model              | How to set                                                         |
+| ------------------- | -------------------------------- | ------------------------------------------------------------------ |
+| **Claude Code**     | Haiku                            | Pass `model: "haiku"` in the Agent tool call                       |
+| **Codex**           | GPT-4o mini                      | Set the model parameter to `gpt-4o-mini` in the agent spawn config |
+| **Other platforms** | Cheapest capable model available | Use the platform's equivalent of a fast/cheap tier                 |
 
 CE always-on agents (agent-native-reviewer, learnings-researcher) and CE conditional agents (schema-drift-detector, deployment-verification-agent) also use the cheaper model tier since they perform scoped, focused work.
 
@@ -425,15 +426,15 @@ Convert multiple reviewer JSON payloads into one deduplicated, confidence-gated 
 3. **Deduplicate.** Compute fingerprint: `normalize(file) + line_bucket(line, +/-3) + normalize(title)`. When fingerprints match, merge: keep highest severity, keep highest confidence with strongest evidence, union evidence, note which reviewers flagged it.
 4. **Cross-reviewer agreement.** When 2+ independent reviewers flag the same issue (same fingerprint), boost the merged confidence by 0.10 (capped at 1.0). Cross-reviewer agreement is strong signal -- independent reviewers converging on the same issue is more reliable than any single reviewer's confidence. Note the agreement in the Reviewer column of the output (e.g., "security, correctness").
 5. **Separate pre-existing.** Pull out findings with `pre_existing: true` into a separate list.
-5. **Resolve disagreements.** When reviewers flag the same code region but disagree on severity, autofix_class, or owner, record the disagreement in the finding's evidence (e.g., "security rated P0, correctness rated P1 -- keeping P0"). This transparency helps the user understand why a finding was routed the way it was.
-6. **Normalize routing.** For each merged finding, set the final `autofix_class`, `owner`, and `requires_verification`. If reviewers disagree, keep the most conservative route. Synthesis may narrow a finding from `safe_auto` to `gated_auto` or `manual`, but must not widen it without new evidence.
-7. **Partition the work.** Build three sets:
+6. **Resolve disagreements.** When reviewers flag the same code region but disagree on severity, autofix_class, or owner, record the disagreement in the finding's evidence (e.g., "security rated P0, correctness rated P1 -- keeping P0"). This transparency helps the user understand why a finding was routed the way it was.
+7. **Normalize routing.** For each merged finding, set the final `autofix_class`, `owner`, and `requires_verification`. If reviewers disagree, keep the most conservative route. Synthesis may narrow a finding from `safe_auto` to `gated_auto` or `manual`, but must not widen it without new evidence.
+8. **Partition the work.** Build three sets:
    - in-skill fixer queue: only `safe_auto -> review-fixer`
    - residual actionable queue: unresolved `gated_auto` or `manual` findings whose owner is `downstream-resolver`
    - report-only queue: `advisory` findings plus anything owned by `human` or `release`
-8. **Sort.** Order by severity (P0 first) -> confidence (descending) -> file path -> line number.
-9. **Collect coverage data.** Union residual_risks and testing_gaps across reviewers.
-10. **Preserve CE agent artifacts.** Keep the learnings, agent-native, schema-drift, and deployment-verification outputs alongside the merged finding set. Do not drop unstructured agent output just because it does not match the persona JSON schema.
+9. **Sort.** Order by severity (P0 first) -> confidence (descending) -> file path -> line number.
+10. **Collect coverage data.** Union residual_risks and testing_gaps across reviewers.
+11. **Preserve CE agent artifacts.** Keep the learnings, agent-native, schema-drift, and deployment-verification outputs alongside the merged finding set. Do not drop unstructured agent output just because it does not match the persona JSON schema.
 
 ### Stage 6: Synthesize and present
 
@@ -444,7 +445,7 @@ Assemble the final report using the review output template included below:
 3. **Requirements Completeness.** Include only when a plan was found in Stage 2b. For each requirement (R1, R2, etc.) and implementation unit in the plan, report whether corresponding work appears in the diff. Use a simple checklist: met / not addressed / partially addressed. Routing depends on `plan_source`:
    - **`explicit`** (caller-provided or PR body): Flag unaddressed requirements as P1 findings with `autofix_class: manual`, `owner: downstream-resolver`. These enter the residual actionable queue and can become todos.
    - **`inferred`** (auto-discovered): Flag unaddressed requirements as P3 findings with `autofix_class: advisory`, `owner: human`. These stay in the report only — no todos, no autonomous follow-up. An inferred plan match is a hint, not a contract.
-   Omit this section entirely when no plan was found — do not mention the absence of a plan.
+     Omit this section entirely when no plan was found — do not mention the absence of a plan.
 4. **Applied Fixes.** Include only if a fix phase ran in this invocation.
 5. **Residual Actionable Work.** Include when unresolved actionable findings were handed off or should be handed off.
 6. **Pre-existing.** Separate section, does not count toward verdict.
@@ -522,6 +523,7 @@ Review complete
 ```
 
 **Formatting rules:**
+
 - The `[needs-verification]` marker appears only on findings where `requires_verification: true`.
 - The `Artifact:` line gives callers the path to the full run artifact for machine-readable access to the complete findings schema. The text envelope is the primary handoff; the artifact is for debugging and full-fidelity access.
 - Findings with `owner: release` appear in the Advisory section (they are operational/rollout items, not code fixes).
@@ -663,53 +665,53 @@ Spawned on every review regardless of diff content.
 
 **Persona agents (structured JSON output):**
 
-| Persona | Agent | Focus |
-|---------|-------|-------|
-| `correctness` | `compound-engineering:review:correctness-reviewer` | Logic errors, edge cases, state bugs, error propagation, intent compliance |
-| `testing` | `compound-engineering:review:testing-reviewer` | Coverage gaps, weak assertions, brittle tests, missing edge case tests |
-| `maintainability` | `compound-engineering:review:maintainability-reviewer` | Coupling, complexity, naming, dead code, premature abstraction |
+| Persona             | Agent                                                    | Focus                                                                                                             |
+| ------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `correctness`       | `compound-engineering:review:correctness-reviewer`       | Logic errors, edge cases, state bugs, error propagation, intent compliance                                        |
+| `testing`           | `compound-engineering:review:testing-reviewer`           | Coverage gaps, weak assertions, brittle tests, missing edge case tests                                            |
+| `maintainability`   | `compound-engineering:review:maintainability-reviewer`   | Coupling, complexity, naming, dead code, premature abstraction                                                    |
 | `project-standards` | `compound-engineering:review:project-standards-reviewer` | CLAUDE.md and AGENTS.md compliance -- frontmatter, references, naming, cross-platform portability, tool selection |
 
 **CE agents (unstructured output, synthesized separately):**
 
-| Agent | Focus |
-|-------|-------|
-| `compound-engineering:review:agent-native-reviewer` | Verify new features are agent-accessible |
+| Agent                                                | Focus                                                                            |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `compound-engineering:review:agent-native-reviewer`  | Verify new features are agent-accessible                                         |
 | `compound-engineering:research:learnings-researcher` | Search docs/solutions/ for past issues related to this PR's modules and patterns |
 
 ## Conditional (7 personas)
 
 Spawned when the orchestrator identifies relevant patterns in the diff. The orchestrator reads the full diff and reasons about selection -- this is agent judgment, not keyword matching.
 
-| Persona | Agent | Select when diff touches... |
-|---------|-------|---------------------------|
-| `security` | `compound-engineering:review:security-reviewer` | Auth middleware, public endpoints, user input handling, permission checks, secrets management |
-| `performance` | `compound-engineering:review:performance-reviewer` | Database queries, ORM calls, loop-heavy data transforms, caching layers, async/concurrent code |
-| `api-contract` | `compound-engineering:review:api-contract-reviewer` | Route definitions, serializer/interface changes, event schemas, exported type signatures, API versioning |
-| `data-migrations` | `compound-engineering:review:data-migrations-reviewer` | Migration files, schema changes, backfill scripts, data transformations |
-| `reliability` | `compound-engineering:review:reliability-reviewer` | Error handling, retry logic, circuit breakers, timeouts, background jobs, async handlers, health checks |
-| `adversarial` | `compound-engineering:review:adversarial-reviewer` | Diff has >=50 changed non-test, non-generated, non-lockfile lines, OR touches auth, payments, data mutations, external API integrations, or other high-risk domains |
-| `previous-comments` | `compound-engineering:review:previous-comments-reviewer` | Reviewing a PR that has existing review comments or review threads from prior review rounds |
+| Persona             | Agent                                                    | Select when diff touches...                                                                                                                                         |
+| ------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `security`          | `compound-engineering:review:security-reviewer`          | Auth middleware, public endpoints, user input handling, permission checks, secrets management                                                                       |
+| `performance`       | `compound-engineering:review:performance-reviewer`       | Database queries, ORM calls, loop-heavy data transforms, caching layers, async/concurrent code                                                                      |
+| `api-contract`      | `compound-engineering:review:api-contract-reviewer`      | Route definitions, serializer/interface changes, event schemas, exported type signatures, API versioning                                                            |
+| `data-migrations`   | `compound-engineering:review:data-migrations-reviewer`   | Migration files, schema changes, backfill scripts, data transformations                                                                                             |
+| `reliability`       | `compound-engineering:review:reliability-reviewer`       | Error handling, retry logic, circuit breakers, timeouts, background jobs, async handlers, health checks                                                             |
+| `adversarial`       | `compound-engineering:review:adversarial-reviewer`       | Diff has >=50 changed non-test, non-generated, non-lockfile lines, OR touches auth, payments, data mutations, external API integrations, or other high-risk domains |
+| `previous-comments` | `compound-engineering:review:previous-comments-reviewer` | Reviewing a PR that has existing review comments or review threads from prior review rounds                                                                         |
 
 ## Stack-Specific Conditional (5 personas)
 
 These reviewers keep their original opinionated lens. They are additive with the cross-cutting personas above, not replacements for them.
 
-| Persona | Agent | Select when diff touches... |
-|---------|-------|---------------------------|
-| `dhh-rails` | `compound-engineering:review:dhh-rails-reviewer` | Rails architecture, service objects, authentication/session choices, Hotwire-vs-SPA boundaries, or abstractions that may fight Rails conventions |
-| `kieran-rails` | `compound-engineering:review:kieran-rails-reviewer` | Rails controllers, models, views, jobs, components, routes, or other application-layer Ruby code where clarity and conventions matter |
-| `kieran-python` | `compound-engineering:review:kieran-python-reviewer` | Python modules, endpoints, services, scripts, or typed domain code |
-| `kieran-typescript` | `compound-engineering:review:kieran-typescript-reviewer` | TypeScript components, services, hooks, utilities, or shared types |
-| `julik-frontend-races` | `compound-engineering:review:julik-frontend-races-reviewer` | Stimulus/Turbo controllers, DOM event wiring, timers, async UI flows, animations, or frontend state transitions with race potential |
+| Persona                | Agent                                                       | Select when diff touches...                                                                                                                      |
+| ---------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `dhh-rails`            | `compound-engineering:review:dhh-rails-reviewer`            | Rails architecture, service objects, authentication/session choices, Hotwire-vs-SPA boundaries, or abstractions that may fight Rails conventions |
+| `kieran-rails`         | `compound-engineering:review:kieran-rails-reviewer`         | Rails controllers, models, views, jobs, components, routes, or other application-layer Ruby code where clarity and conventions matter            |
+| `kieran-python`        | `compound-engineering:review:kieran-python-reviewer`        | Python modules, endpoints, services, scripts, or typed domain code                                                                               |
+| `kieran-typescript`    | `compound-engineering:review:kieran-typescript-reviewer`    | TypeScript components, services, hooks, utilities, or shared types                                                                               |
+| `julik-frontend-races` | `compound-engineering:review:julik-frontend-races-reviewer` | Stimulus/Turbo controllers, DOM event wiring, timers, async UI flows, animations, or frontend state transitions with race potential              |
 
 ## CE Conditional Agents (migration-specific)
 
 These CE-native agents provide specialized analysis beyond what the persona agents cover. Spawn them when the diff includes database migrations, schema.rb, or data backfills.
 
-| Agent | Focus |
-|-------|-------|
-| `compound-engineering:review:schema-drift-detector` | Cross-references schema.rb changes against included migrations to catch unrelated drift |
+| Agent                                                       | Focus                                                                                        |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `compound-engineering:review:schema-drift-detector`         | Cross-references schema.rb changes against included migrations to catch unrelated drift      |
 | `compound-engineering:review:deployment-verification-agent` | Produces Go/No-Go deployment checklist with SQL verification queries and rollback procedures |
 
 ## Selection rules
@@ -792,15 +794,15 @@ Diff:
 
 ## Variable Reference
 
-| Variable | Source | Description |
-|----------|--------|-------------|
-| `{persona_file}` | Agent markdown file content | The full persona definition (identity, failure modes, calibration, suppress conditions) |
-| `{diff_scope_rules}` | `references/diff-scope.md` content | Primary/secondary/pre-existing tier rules |
-| `{schema}` | `references/findings-schema.json` content | The JSON schema reviewers must conform to |
-| `{intent_summary}` | Stage 2 output | 2-3 line description of what the change is trying to accomplish |
-| `{pr_metadata}` | Stage 1 output | PR title, body, and URL when reviewing a PR. Empty string when reviewing a branch or standalone checkout |
-| `{file_list}` | Stage 1 output | List of changed files from the scope step |
-| `{diff}` | Stage 1 output | The actual diff content to review |
+| Variable             | Source                                    | Description                                                                                              |
+| -------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `{persona_file}`     | Agent markdown file content               | The full persona definition (identity, failure modes, calibration, suppress conditions)                  |
+| `{diff_scope_rules}` | `references/diff-scope.md` content        | Primary/secondary/pre-existing tier rules                                                                |
+| `{schema}`           | `references/findings-schema.json` content | The JSON schema reviewers must conform to                                                                |
+| `{intent_summary}`   | Stage 2 output                            | 2-3 line description of what the change is trying to accomplish                                          |
+| `{pr_metadata}`      | Stage 1 output                            | PR title, body, and URL when reviewing a PR. Empty string when reviewing a branch or standalone checkout |
+| `{file_list}`        | Stage 1 output                            | List of changed files from the scope step                                                                |
+| `{diff}`             | Stage 1 output                            | The actual diff content to review                                                                        |
 
 ### Diff Scope Rules
 
@@ -834,138 +836,138 @@ Unchanged code within the same function, method, or block as a changed line. If 
 
 Issues in unchanged code that the diff didn't touch and doesn't interact with. Mark these as `"pre_existing": true` in your output. They're reported separately and don't count toward the review verdict.
 
-**The rule:** If you'd flag the same issue on an identical diff that didn't include the surrounding file, it's pre-existing. If the diff makes the issue *newly relevant* (e.g., a new caller hits an existing buggy function), it's secondary.
+**The rule:** If you'd flag the same issue on an identical diff that didn't include the surrounding file, it's pre-existing. If the diff makes the issue _newly relevant_ (e.g., a new caller hits an existing buggy function), it's secondary.
 
 ### Findings Schema
 
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Code Review Findings",
-  "description": "Structured output schema for code review sub-agents",
-  "type": "object",
-  "required": ["reviewer", "findings", "residual_risks", "testing_gaps"],
-  "properties": {
-    "reviewer": {
-      "type": "string",
-      "description": "Persona name that produced this output (e.g., 'correctness', 'security')"
-    },
-    "findings": {
-      "type": "array",
-      "description": "List of code review findings. Empty array if no issues found.",
-      "items": {
-        "type": "object",
-        "required": [
-          "title",
-          "severity",
-          "file",
-          "line",
-          "why_it_matters",
-          "autofix_class",
-          "owner",
-          "requires_verification",
-          "confidence",
-          "evidence",
-          "pre_existing"
-        ],
-        "properties": {
-          "title": {
-            "type": "string",
-            "description": "Short, specific issue title. 10 words or fewer.",
-            "maxLength": 100
-          },
-          "severity": {
-            "type": "string",
-            "enum": ["P0", "P1", "P2", "P3"],
-            "description": "Issue severity level"
-          },
-          "file": {
-            "type": "string",
-            "description": "Relative file path from repository root"
-          },
-          "line": {
-            "type": "integer",
-            "description": "Primary line number of the issue",
-            "minimum": 1
-          },
-          "why_it_matters": {
-            "type": "string",
-            "description": "Impact and failure mode -- not 'what is wrong' but 'what breaks'"
-          },
-          "autofix_class": {
-            "type": "string",
-            "enum": ["safe_auto", "gated_auto", "manual", "advisory"],
-            "description": "Reviewer's conservative recommendation for how this issue should be handled after synthesis"
-          },
-          "owner": {
-            "type": "string",
-            "enum": ["review-fixer", "downstream-resolver", "human", "release"],
-            "description": "Who should own the next action for this finding after synthesis"
-          },
-          "requires_verification": {
-            "type": "boolean",
-            "description": "Whether any fix for this finding must be re-verified with targeted tests or a follow-up review pass"
-          },
-          "suggested_fix": {
-            "type": ["string", "null"],
-            "description": "Concrete minimal fix. Omit or null if no good fix is obvious -- a bad suggestion is worse than none."
-          },
-          "confidence": {
-            "type": "number",
-            "description": "Reviewer confidence in this finding, calibrated per persona",
-            "minimum": 0.0,
-            "maximum": 1.0
-          },
-          "evidence": {
-            "type": "array",
-            "description": "Code-grounded evidence: snippets, line references, or pattern descriptions. At least 1 item.",
-            "items": { "type": "string" },
-            "minItems": 1
-          },
-          "pre_existing": {
-            "type": "boolean",
-            "description": "True if this issue exists in unchanged code unrelated to the current diff"
-          }
-        }
-      }
-    },
-    "residual_risks": {
-      "type": "array",
-      "description": "Risks the reviewer noticed but could not confirm as findings",
-      "items": { "type": "string" }
-    },
-    "testing_gaps": {
-      "type": "array",
-      "description": "Missing test coverage the reviewer identified",
-      "items": { "type": "string" }
-    }
-    },
+"$schema": "http://json-schema.org/draft-07/schema#",
+"title": "Code Review Findings",
+"description": "Structured output schema for code review sub-agents",
+"type": "object",
+"required": ["reviewer", "findings", "residual_risks", "testing_gaps"],
+"properties": {
+"reviewer": {
+"type": "string",
+"description": "Persona name that produced this output (e.g., 'correctness', 'security')"
+},
+"findings": {
+"type": "array",
+"description": "List of code review findings. Empty array if no issues found.",
+"items": {
+"type": "object",
+"required": [
+"title",
+"severity",
+"file",
+"line",
+"why_it_matters",
+"autofix_class",
+"owner",
+"requires_verification",
+"confidence",
+"evidence",
+"pre_existing"
+],
+"properties": {
+"title": {
+"type": "string",
+"description": "Short, specific issue title. 10 words or fewer.",
+"maxLength": 100
+},
+"severity": {
+"type": "string",
+"enum": ["P0", "P1", "P2", "P3"],
+"description": "Issue severity level"
+},
+"file": {
+"type": "string",
+"description": "Relative file path from repository root"
+},
+"line": {
+"type": "integer",
+"description": "Primary line number of the issue",
+"minimum": 1
+},
+"why_it_matters": {
+"type": "string",
+"description": "Impact and failure mode -- not 'what is wrong' but 'what breaks'"
+},
+"autofix_class": {
+"type": "string",
+"enum": ["safe_auto", "gated_auto", "manual", "advisory"],
+"description": "Reviewer's conservative recommendation for how this issue should be handled after synthesis"
+},
+"owner": {
+"type": "string",
+"enum": ["review-fixer", "downstream-resolver", "human", "release"],
+"description": "Who should own the next action for this finding after synthesis"
+},
+"requires_verification": {
+"type": "boolean",
+"description": "Whether any fix for this finding must be re-verified with targeted tests or a follow-up review pass"
+},
+"suggested_fix": {
+"type": ["string", "null"],
+"description": "Concrete minimal fix. Omit or null if no good fix is obvious -- a bad suggestion is worse than none."
+},
+"confidence": {
+"type": "number",
+"description": "Reviewer confidence in this finding, calibrated per persona",
+"minimum": 0.0,
+"maximum": 1.0
+},
+"evidence": {
+"type": "array",
+"description": "Code-grounded evidence: snippets, line references, or pattern descriptions. At least 1 item.",
+"items": { "type": "string" },
+"minItems": 1
+},
+"pre_existing": {
+"type": "boolean",
+"description": "True if this issue exists in unchanged code unrelated to the current diff"
+}
+}
+}
+},
+"residual_risks": {
+"type": "array",
+"description": "Risks the reviewer noticed but could not confirm as findings",
+"items": { "type": "string" }
+},
+"testing_gaps": {
+"type": "array",
+"description": "Missing test coverage the reviewer identified",
+"items": { "type": "string" }
+}
+},
 
-  "_meta": {
-    "confidence_thresholds": {
-      "suppress": "Below 0.60 -- do not report. Finding is speculative noise. Exception: P0 findings at 0.50+ may be reported.",
-      "flag": "0.60-0.69 -- include only when the issue is clearly actionable with concrete evidence.",
-      "confident": "0.70-0.84 -- real and important. Report with full evidence.",
-      "certain": "0.85-1.00 -- verifiable from the code alone. Report."
-    },
-    "severity_definitions": {
-      "P0": "Critical breakage, exploitable vulnerability, data loss/corruption. Must fix before merge.",
-      "P1": "High-impact defect likely hit in normal usage, breaking contract. Should fix.",
-      "P2": "Moderate issue with meaningful downside (edge case, perf regression, maintainability trap). Fix if straightforward.",
-      "P3": "Low-impact, narrow scope, minor improvement. User's discretion."
-    },
-    "autofix_classes": {
-      "safe_auto": "Local, deterministic code or test fix suitable for the in-skill fixer in autonomous mode.",
-      "gated_auto": "Concrete fix exists, but it changes behavior, permissions, contracts, or other sensitive areas that deserve explicit approval.",
-      "manual": "Actionable issue that should become residual work rather than an in-skill autofix.",
-      "advisory": "Informational or operational item that should be surfaced in the report only."
-    },
-    "owners": {
-      "review-fixer": "The in-skill fixer can own this when policy allows.",
-      "downstream-resolver": "Turn this into residual work for later resolution.",
-      "human": "A person must make a judgment call before code changes should continue.",
-      "release": "Operational or rollout follow-up; do not convert into code-fix work automatically."
-    }
-  }
+"_meta": {
+"confidence_thresholds": {
+"suppress": "Below 0.60 -- do not report. Finding is speculative noise. Exception: P0 findings at 0.50+ may be reported.",
+"flag": "0.60-0.69 -- include only when the issue is clearly actionable with concrete evidence.",
+"confident": "0.70-0.84 -- real and important. Report with full evidence.",
+"certain": "0.85-1.00 -- verifiable from the code alone. Report."
+},
+"severity_definitions": {
+"P0": "Critical breakage, exploitable vulnerability, data loss/corruption. Must fix before merge.",
+"P1": "High-impact defect likely hit in normal usage, breaking contract. Should fix.",
+"P2": "Moderate issue with meaningful downside (edge case, perf regression, maintainability trap). Fix if straightforward.",
+"P3": "Low-impact, narrow scope, minor improvement. User's discretion."
+},
+"autofix_classes": {
+"safe_auto": "Local, deterministic code or test fix suitable for the in-skill fixer in autonomous mode.",
+"gated_auto": "Concrete fix exists, but it changes behavior, permissions, contracts, or other sensitive areas that deserve explicit approval.",
+"manual": "Actionable issue that should become residual work rather than an in-skill autofix.",
+"advisory": "Informational or operational item that should be surfaced in the report only."
+},
+"owners": {
+"review-fixer": "The in-skill fixer can own this when policy allows.",
+"downstream-resolver": "Turn this into residual work for later resolution.",
+"human": "A person must make a judgment call before code changes should continue.",
+"release": "Operational or rollout follow-up; do not convert into code-fix work automatically."
+}
+}
 }
 
 ### Review Output Template
@@ -986,33 +988,34 @@ Use this **exact format** when presenting synthesized review findings. Findings 
 **Mode:** autofix
 
 **Reviewers:** correctness, testing, maintainability, security, api-contract
+
 - security -- new public endpoint accepts user-provided format parameter
 - api-contract -- new /api/orders/export route with response schema
 
 ### P0 -- Critical
 
-| # | File | Issue | Reviewer | Confidence | Route |
-|---|------|-------|----------|------------|-------|
-| 1 | `orders_controller.rb:42` | User-supplied ID in account lookup without ownership check | security | 0.92 | `gated_auto -> downstream-resolver` |
+| #   | File                      | Issue                                                      | Reviewer | Confidence | Route                               |
+| --- | ------------------------- | ---------------------------------------------------------- | -------- | ---------- | ----------------------------------- |
+| 1   | `orders_controller.rb:42` | User-supplied ID in account lookup without ownership check | security | 0.92       | `gated_auto -> downstream-resolver` |
 
 ### P1 -- High
 
-| # | File | Issue | Reviewer | Confidence | Route |
-|---|------|-------|----------|------------|-------|
-| 2 | `export_service.rb:87` | Loads all orders into memory -- unbounded for large accounts | performance | 0.85 | `safe_auto -> review-fixer` |
-| 3 | `export_service.rb:91` | No pagination -- response size grows linearly with order count | api-contract, performance | 0.80 | `manual -> downstream-resolver` |
+| #   | File                   | Issue                                                          | Reviewer                  | Confidence | Route                           |
+| --- | ---------------------- | -------------------------------------------------------------- | ------------------------- | ---------- | ------------------------------- |
+| 2   | `export_service.rb:87` | Loads all orders into memory -- unbounded for large accounts   | performance               | 0.85       | `safe_auto -> review-fixer`     |
+| 3   | `export_service.rb:91` | No pagination -- response size grows linearly with order count | api-contract, performance | 0.80       | `manual -> downstream-resolver` |
 
 ### P2 -- Moderate
 
-| # | File | Issue | Reviewer | Confidence | Route |
-|---|------|-------|----------|------------|-------|
-| 4 | `export_service.rb:45` | Missing error handling for CSV serialization failure | correctness | 0.75 | `safe_auto -> review-fixer` |
+| #   | File                   | Issue                                                | Reviewer    | Confidence | Route                       |
+| --- | ---------------------- | ---------------------------------------------------- | ----------- | ---------- | --------------------------- |
+| 4   | `export_service.rb:45` | Missing error handling for CSV serialization failure | correctness | 0.75       | `safe_auto -> review-fixer` |
 
 ### P3 -- Low
 
-| # | File | Issue | Reviewer | Confidence | Route |
-|---|------|-------|----------|------------|-------|
-| 5 | `export_helper.rb:12` | Format detection could use early return instead of nested conditional | maintainability | 0.70 | `advisory -> human` |
+| #   | File                  | Issue                                                                 | Reviewer        | Confidence | Route               |
+| --- | --------------------- | --------------------------------------------------------------------- | --------------- | ---------- | ------------------- |
+| 5   | `export_helper.rb:12` | Format detection could use early return instead of nested conditional | maintainability | 0.70       | `advisory -> human` |
 
 ### Applied Fixes
 
@@ -1020,16 +1023,16 @@ Use this **exact format** when presenting synthesized review findings. Findings 
 
 ### Residual Actionable Work
 
-| # | File | Issue | Route | Next Step |
-|---|------|-------|-------|-----------|
-| 1 | `orders_controller.rb:42` | Ownership check missing on export lookup | `gated_auto -> downstream-resolver` | Create residual todo and require explicit approval before behavior change |
-| 2 | `export_service.rb:91` | Pagination contract needs a broader API decision | `manual -> downstream-resolver` | Create residual todo with contract and client impact details |
+| #   | File                      | Issue                                            | Route                               | Next Step                                                                 |
+| --- | ------------------------- | ------------------------------------------------ | ----------------------------------- | ------------------------------------------------------------------------- |
+| 1   | `orders_controller.rb:42` | Ownership check missing on export lookup         | `gated_auto -> downstream-resolver` | Create residual todo and require explicit approval before behavior change |
+| 2   | `export_service.rb:91`    | Pagination contract needs a broader API decision | `manual -> downstream-resolver`     | Create residual todo with contract and client impact details              |
 
 ### Pre-existing Issues
 
-| # | File | Issue | Reviewer |
-|---|------|-------|----------|
-| 1 | `orders_controller.rb:12` | Broad rescue masking failed permission check | correctness |
+| #   | File                      | Issue                                        | Reviewer    |
+| --- | ------------------------- | -------------------------------------------- | ----------- |
+| 1   | `orders_controller.rb:12` | Broad rescue masking failed permission check | correctness |
 
 ### Learnings & Past Solutions
 
@@ -1071,7 +1074,7 @@ Use this **exact format** when presenting synthesized review findings. Findings 
 - **Always include file:line location** for code review issues
 - **Reviewer column** shows which persona(s) flagged the issue. Multiple reviewers = cross-reviewer agreement.
 - **Confidence column** shows the finding's confidence score
-- **Route column** shows the synthesized handling decision as ``<autofix_class> -> <owner>``.
+- **Route column** shows the synthesized handling decision as `<autofix_class> -> <owner>`.
 - **Header includes** scope, intent, and reviewer team with per-conditional justifications
 - **Mode line** -- include `interactive`, `autofix`, `report-only`, or `headless`
 - **Applied Fixes section** -- include only when a fix phase ran in this review invocation

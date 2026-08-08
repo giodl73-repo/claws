@@ -27,6 +27,7 @@ exit codes / output / config aggregate cleanly?
 ## Per-substrate findings
 
 ### `oc-paths-substrate` (`openclaw-path`)
+
 - **NIT** — `--cwd` flag for the workspace directory is the **only** CLI
   in the bundle that takes the workspace via flag rather than positional.
   pinch / lkg / policy take positional `<workspace-dir>`. For a fleet
@@ -35,23 +36,25 @@ exit codes / output / config aggregate cleanly?
   better. (`src/cli/index.ts:174-178`)
 - **WARN** — `--file` overrides the path-derived FS location entirely.
   Across a fleet, operators may inadvertently address a file inside a
-  *different* workspace than the OcPath's `file` slot implies. No
+  _different_ workspace than the OcPath's `file` slot implies. No
   guard rejects `--file` pointing outside `--cwd`. (`src/cli/index.ts:173-178`)
 - **NIT** — exit-code semantics for `find` with zero matches is `1`
   ("no findings"), conflicting with `0 = clean` in pinch/lkg. Operators
   scripting against multiple CLIs will trip on this.
 
 ### `pinch` (`openclaw-lint`)
+
 - **WARN** — `--severity-min` filters at OUTPUT time but does NOT change
   exit code semantics: a workspace with 100 `info` findings exits 0,
   same as a clean workspace. For fleet drift detection I want a knob
   that says "exit 1 if any finding meets `severity-min`." Currently
-  the only way is to filter *and then* check stdout. (`src/cli/index.ts:170-201`)
+  the only way is to filter _and then_ check stdout. (`src/cli/index.ts:170-201`)
 - **NIT** — `--severity <id>=<level>` overrides take a different syntax
   shape than `--skip <id>` / `--only <pat>`. Fleet config templates are
   harder to parameterize. Consider a homogeneous repeatable form.
 
 ### `oc-paths-doctor` (no CLI)
+
 - **BLOCK** — there is no `openclaw-doctor` bin. The package ships
   adapter-only and slots into the host's existing `openclaw doctor`
   flow via `registerDoctorHealthContribution`. The user prompt named
@@ -65,6 +68,7 @@ exit codes / output / config aggregate cleanly?
   remove it from the "4 CLIs" framing.
 
 ### `lkg-recovery-substrate` (`openclaw-lkg`)
+
 - **WARN** — `lkg-health.json` lives at `<root>/.openclaw/lkg-health.json`
   per workspace (`src/extensions/lkg-fs/store.ts:105`). There is no
   fleet-roll-up shape: an operator running 47 workspaces gets 47
@@ -85,6 +89,7 @@ exit codes / output / config aggregate cleanly?
   Pick one shape.
 
 ### `policy-substrate` (`openclaw-policy`)
+
 - **BLOCK** — no fleet command. `openclaw-policy check <workspace>`
   runs per workspace; I script the loop myself. For 47 workspaces I
   want `openclaw-policy check --fleet <root-of-roots>` (or equivalent)
@@ -111,12 +116,14 @@ exit codes / output / config aggregate cleanly?
 ## Fleet-cross-cutting
 
 ### 1. CLI ergonomics consistency (Concern #1)
+
 Mostly good — all four CLIs converge on `--json/--human` TTY-aware
 output, same exit-code family (`0/1/2`), same sentinel-scrub primitive,
 same EPIPE guard pattern (lkg + policy; pinch + path don't install
 the pipe guard — **WARN** on pinch + path: `for ws in 47; do
 openclaw-lint run "$ws" --json; done | head -1` will crash mid-loop
 on Windows). Drifts:
+
 - workspace-dir input: `--cwd` (path) vs positional (others).
 - `--skip` parsing: pinch wants exact rule IDs; lkg auto-detects
   globs by `*` or `/`. Two different mental models for the same flag
@@ -124,6 +131,7 @@ on Windows). Drifts:
 - pipe-guard installed on lkg + policy, absent on pinch + path. **WARN**.
 
 ### 2. workspace.json governance (Concern #2)
+
 - **GOOD** — additive-section schema (`config.ts:7-9`) is exactly the
   right shape for a fleet template. I can `cp workspace.json` across
   47 workspaces without schema rewrites; each substrate reads its
@@ -136,10 +144,11 @@ on Windows). Drifts:
   `'md'` inside `runCmdGenerate`, `lkg.skip` defaults to `[]` inside
   the resolver, etc. Operators templating workspace.json have no
   single "print all defaults" command. Add one (`openclaw-path
-  workspace defaults`?) so my fleet template generator can emit a
+workspace defaults`?) so my fleet template generator can emit a
   fully-populated baseline.
 
 ### 3. LKG fingerprint consistency (Concern #3)
+
 - **WARN** — fingerprints (`makeFingerprint` in `lkg-fs/fingerprint.ts`)
   are deterministic per byte-stream — good. But the per-workspace
   state file with no fleet roll-up means an audit of "do all 47
@@ -149,6 +158,7 @@ on Windows). Drifts:
   subcommand (or a separate aggregator package — fine either way).
 
 ### 4. Drift detection at scale (Concern #4)
+
 - **BLOCK** — covered above. `openclaw-policy check` is the only
   drift verb in the bundle, and it's per-workspace. No fleet summary.
   The CI/CD pipeline pattern I run (`claws drift` on a weekly cron)
@@ -157,6 +167,7 @@ on Windows). Drifts:
   responsible for keeping in sync with substrate output shape.
 
 ### 5. Audit chain at fleet scale (Concern #5)
+
 - **WARN** — `LKGAuditSink` and the doctor `onMutation` hook
   (`oc-doctor/types.ts:94`) both emit per-workspace. Across 47
   workspaces × N fixers × M observations this is a firehose. The
@@ -169,6 +180,7 @@ on Windows). Drifts:
   so my aggregator survives substrate bumps.
 
 ### 6. Sentinel rotation (Concern #6)
+
 - **BLOCK** — `REDACTED_SENTINEL = '__OPENCLAW_REDACTED__'` is a
   module-level constant (`sentinel.ts:25`). Every substrate, every
   CLI, every plugin imports the same literal. There is no per-tenant
@@ -185,6 +197,7 @@ on Windows). Drifts:
   `workspace.json.sentinel.literal`) closes the BLOCK.
 
 ### 7. Multi-tenant LKG store namespace (Concern #7)
+
 - **WARN** — covered under lkg-recovery-substrate above. L-004 makes
   it a CALLER concern; for 47 workspaces with overlapping FS roots
   (the actual fleet shape) this is too thin. Either (a) the store
@@ -194,17 +207,19 @@ on Windows). Drifts:
   collision detection). Today the contract just says "don't do that."
 
 ### 8. Tier classification at fleet scale (Concern #8)
+
 - **WARN** — `FixerTier` (`oc-doctor/types.ts:212`) is exactly the
   knob I want, but `enabledTiers` is **only** a `DoctorContext` field
   on the host adapter — there's no CLI flag in any of the four bins
   to set it. I cannot say `openclaw-doctor --tier=additive` across
   47 workspaces. Recommend: thread `--tier <set>` (or `--allow-tier
-  additive`, repeatable) through the host's doctor invocation and
+additive`, repeatable) through the host's doctor invocation and
   through any future `openclaw-doctor` bin. Until then, fleet-wide
   policy "additive only in CI, regenerative requires human approval"
   is per-host-implementation, not contract.
 
 ### 9. Upgradability (Concern #9)
+
 - **WARN** — `SDK_VERSION = '0.1.0'` is hardcoded in each substrate's
   `index.ts` and never compared against plugin `requires.sdkVersion`
   declarations. Plugins can declare what they were authored against

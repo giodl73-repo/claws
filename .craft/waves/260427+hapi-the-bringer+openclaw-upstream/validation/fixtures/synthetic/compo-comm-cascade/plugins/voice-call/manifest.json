@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "voice-call plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "voice-call/initiate-call"
-    ]
+    "tools": ["voice-call/initiate-call"]
   }
 }

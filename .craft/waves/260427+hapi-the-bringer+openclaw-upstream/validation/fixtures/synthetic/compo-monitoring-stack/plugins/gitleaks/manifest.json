@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "gitleaks plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "gitleaks/scan"
-    ]
+    "tools": ["gitleaks/scan"]
   }
 }

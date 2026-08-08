@@ -59,6 +59,7 @@ WebSocket upgrade requests validate the Origin header -- connections from non-lo
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/architect.md` — system-level design authority for claws packages
 - `.craft/roles/claws/platform-eng.md` — implementation patterns and WebSocket design
 - `.craft/roles/claws/founder.md` — checkpoint gate review authority

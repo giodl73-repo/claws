@@ -10,14 +10,14 @@
 
 ## Totals
 
-| Role | Major | Warning | Notes | Total |
-|------|-------|---------|-------|-------|
-| architect | 4 | 6 | 5 | 15 |
-| dragon | 5 | 5 | 4 | 14 |
-| navigator | 4 | 8 | 3 | 15 |
-| type-system | 4 | 5 | 2 | 11 |
-| **Raw total** | **17** | **24** | **14** | **55** |
-| **After dedup** | **9** | **14** | **8** | **31** |
+| Role            | Major  | Warning | Notes  | Total  |
+| --------------- | ------ | ------- | ------ | ------ |
+| architect       | 4      | 6       | 5      | 15     |
+| dragon          | 5      | 5       | 4      | 14     |
+| navigator       | 4      | 8       | 3      | 15     |
+| type-system     | 4      | 5       | 2      | 11     |
+| **Raw total**   | **17** | **24**  | **14** | **55** |
+| **After dedup** | **9**  | **14**  | **8**  | **31** |
 
 ---
 
@@ -29,12 +29,14 @@
 **Severity**: Major
 
 The PATCH endpoints write OC files but there is no validation contract:
+
 - No rejection schema for governance-violating edits
 - No atomic write+validate (crash between write and recompile = durable invalid state)
 - `locked: true` in chunks is prose, not a server-enforced gate
 - CL-11 guards runtime (ProviderRegistry); CL-10's write path has no equivalent
 
 **Fix**: Define a write-time validation layer in claws-sdk that:
+
 1. Validates the edit against governance rules BEFORE writing the file
 2. Rejects edits that violate R5, fleet locks, or structural constraints
 3. Returns typed error responses (`GovernanceViolation`, `FleetLockViolation`, `R5NonNegotiable`)
@@ -57,11 +59,13 @@ The PATCH endpoints write OC files but there is no validation contract:
 The `editable` record uses three inconsistent path formats (`name`, `tools[*].enabled`, `tools[send-email].enabled`). Partners must build a mini query-language parser.
 
 **Fix**: Use flat keys for simple tabs. For nested tabs (connections), use a `perItem` pattern:
+
 ```json
 "editable": {
   "enabled": { "type": "boolean", "perItem": "tools", "itemKey": "tool" }
 }
 ```
+
 Or embed editability directly in each data item instead of a separate record.
 
 ### CONSENSUS-M4: Fleet policy bypass via PATCH
@@ -90,8 +94,14 @@ PATCH has no fleet-awareness. A local admin could override a fleet-locked tool s
 Partners have no contract for error states. No typed error responses for validation rejection, governance block, fleet lock, or recompilation failure.
 
 **Fix**: Define error response schema:
+
 ```json
-{ "status": "rejected", "error": "R5_NON_NEGOTIABLE", "field": "tools[send-email].enabled", "message": "..." }
+{
+  "status": "rejected",
+  "error": "R5_NON_NEGOTIABLE",
+  "field": "tools[send-email].enabled",
+  "message": "..."
+}
 ```
 
 ### CONSENSUS-W2: Chunk types not connected to CL-11
@@ -107,25 +117,25 @@ Governance context in chunks uses `riskLevel?: number` + `riskLabel?: string` �
 
 ## Unique Major Findings
 
-| ID | Role | Finding |
-|----|------|---------|
+| ID   | Role      | Finding                                                                                               |
+| ---- | --------- | ----------------------------------------------------------------------------------------------------- |
 | U-M1 | architect | Chunk assembly logic (join parsed files + compiled governance + fleet) has no stated SDK package home |
-| U-M2 | architect | MEMORY.md + TOOLS.md dual-file ownership for knowledge sources — PATCH can't target one file |
-| U-M3 | dragon | Trust escalation API has no authorization or manager approval verification |
-| U-M4 | navigator | Gap tables have no priority/severity — PM can't sequence work |
+| U-M2 | architect | MEMORY.md + TOOLS.md dual-file ownership for knowledge sources — PATCH can't target one file          |
+| U-M3 | dragon    | Trust escalation API has no authorization or manager approval verification                            |
+| U-M4 | navigator | Gap tables have no priority/severity — PM can't sequence work                                         |
 
 ## Unique Warnings (selected)
 
-| ID | Role | Finding |
-|----|------|---------|
-| U-W1 | architect | SSE events don't compose with CL-11 ApprovalRequestEvent/ResponseEvent |
-| U-W2 | navigator | `locked` field conflates governance locks and fleet locks |
-| U-W3 | type-system | `Chunk<T = unknown>` has no constraint — allows `Chunk<any>` |
-| U-W4 | type-system | PATCH operation is a raw string, not a discriminated union |
-| U-W5 | type-system | `trustTier`, `dataLabel`, `fleetOverrides` are raw strings, no enum types |
-| U-W6 | dragon | Lossless principle tension — PATCH makes claws a file author, not just compiler |
-| U-W7 | dragon | Loop sync deny-rule removal is post-hoc (recompile + warn) not pre-gated |
-| U-W8 | dragon | POST /api/onboard has no content validation before writing SOUL.md |
+| ID   | Role        | Finding                                                                         |
+| ---- | ----------- | ------------------------------------------------------------------------------- |
+| U-W1 | architect   | SSE events don't compose with CL-11 ApprovalRequestEvent/ResponseEvent          |
+| U-W2 | navigator   | `locked` field conflates governance locks and fleet locks                       |
+| U-W3 | type-system | `Chunk<T = unknown>` has no constraint — allows `Chunk<any>`                    |
+| U-W4 | type-system | PATCH operation is a raw string, not a discriminated union                      |
+| U-W5 | type-system | `trustTier`, `dataLabel`, `fleetOverrides` are raw strings, no enum types       |
+| U-W6 | dragon      | Lossless principle tension — PATCH makes claws a file author, not just compiler |
+| U-W7 | dragon      | Loop sync deny-rule removal is post-hoc (recompile + warn) not pre-gated        |
+| U-W8 | dragon      | POST /api/onboard has no content validation before writing SOUL.md              |
 
 ---
 

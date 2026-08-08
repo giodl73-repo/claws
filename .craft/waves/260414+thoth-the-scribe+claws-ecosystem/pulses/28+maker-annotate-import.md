@@ -25,11 +25,13 @@ checkpoint_gate: false
 # Pulse 28: Maker Annotate + Import
 
 ## Objective
+
 Implement the governance annotation engine (`annotate`) and legacy skill migration command (`import`). These two commands work together to bring existing, ungoverned skills under claws governance.
 
 **Annotate Command**: Reads an existing skill's `SKILL.md` and `handler.ts`, analyzes the skill's capabilities (tool usage patterns, OBO indicators, data labels), and suggests governance frontmatter additions. The analysis is collect-all-errors — it reports all suggestions at once rather than failing on the first issue.
 
 Capability analysis includes:
+
 - **OBO pattern detection** — identifies capabilities like `send-email`, `post-message`, `submit-form` that indicate the skill acts on behalf of users
 - **Risk inference** — determines risk level (R1-R5) from tool usage patterns (browser control = R4, file read = R2, etc.)
 - **Data label suggestion** — infers data sensitivity labels from tool capabilities and content patterns
@@ -40,11 +42,13 @@ Capability analysis includes:
 **Integration Coverage Hardening** (THOTH-INTEGRATION-COVERAGE): annotate area at 61% is well below the 90% target. This pulse adds 3 additional L1 integration tests covering multi-skill workspace annotation, cross-capability OBO detection, and import-to-annotate governance verification to close the gap to 90%+.
 
 **Scenario-driven requirements**:
+
 - Prompt-only skills have tier ceiling (S02-F01) — skills without handler code are capped at DECLARED tier
 - Frontmatter-to-decorator propagation (S02-F02) — annotations in SKILL.md frontmatter generate corresponding decorators
 - Tier detection from workspace state (S02-F05) — import infers appropriate tier from existing workspace governance level
 
 ## Deliverables
+
 - [ ] `claws-sdk/src/maker/annotate.ts` — capability analysis: OBO pattern detection, risk inference, data label suggestion, collect-all-errors reporting
 - [ ] `claws-sdk/src/maker/import.ts` — legacy migration: .claws/ directory scaffolding, annotation injection, original files untouched (add-only)
 - [ ] `claws-sdk/tests/maker/annotate.unit.test.ts` — L0: OBO detection from send-email capability (1), risk inference from tool patterns (1), data label suggestion (1), collect-all-errors for frontmatter (1)
@@ -57,6 +61,7 @@ Capability analysis includes:
 - [ ] `claws-sdk/tests/fixtures/ungoverned-skill/` — existing skill without governance metadata (SKILL.md + handler.ts, no .claws/)
 
 ## Acceptance Criteria
+
 - [ ] Annotate detects OBO patterns from tool capabilities (send-email, post-message, etc.)
 - [ ] Annotate infers correct risk level from tool usage patterns
 - [ ] Annotate suggests appropriate data labels
@@ -73,14 +78,18 @@ Capability analysis includes:
 - [ ] `npx tsc --noEmit` exits 0
 
 ## Governing Roles
+
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — overall claws architecture and SDK boundaries
 - `.craft/roles/claws/platform-eng.md` — implementation patterns, cross-platform concerns
 
 ## Dependencies
+
 - Pulse 27 (maker-scaffold) — types, templates, and barrel exports used by annotate and import
 
 ## Test Gates
+
 - [ ] L0 unit (6 tests): OBO detection from send-email capability, risk inference from tool patterns, data label suggestion, collect-all-errors for frontmatter, .claws/ structure created, original files untouched
 - [ ] L1 integration (5 tests): annotate on fixture skill suggests correct frontmatter, annotate → accuracy report → apply suggestions on multi-skill workspace, annotate detects OBO patterns across 3 capability types (email, social, transact), import legacy skill creates complete governance structure, import legacy skill → annotate → verify governance structure complete
 - [ ] L2 e2e (1 test): annotate + import on ungoverned fixture skill

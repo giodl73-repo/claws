@@ -57,6 +57,7 @@ Add session HTTP routes to `claws serve`. Four endpoints expose the session mode
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, SDK-owns-logic rule, thin HTTP adapter pattern
 - `.craft/roles/claws/gateway-eng.md` — serve API design, route registration conventions, error mapping
 

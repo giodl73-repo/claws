@@ -3,7 +3,15 @@ checkpoint: 2
 name: "Detection + Parse + Skill-Kit"
 pulse_range: [6, 25]
 depends_on_cp: 1
-review_panel: [claws:gateway-eng, claws:platform-eng, claws:ciso, claws:skill-author, craft:dragon, craft:navigator]
+review_panel:
+  [
+    claws:gateway-eng,
+    claws:platform-eng,
+    claws:ciso,
+    claws:skill-author,
+    craft:dragon,
+    craft:navigator,
+  ]
 ---
 
 # CP-2: Detection + Parse + Skill-Kit
@@ -20,21 +28,26 @@ categories.
 ## Dispatch Plan
 
 ### Batch 1 (parallel)
+
 - Pulse 06: claws-detect — 7-platform marker detection + structural validation
 - Pulse 09: claws-parse — 9-file workspace reading via InputResolver
 
 ### Batch 2 (depends on batch 1)
+
 - Pulse 07: claws-detect — multi-platform resolution + ambiguity rejection
 - Pulse 10: claws-parse — intent extraction (keyword-anchored, confidence)
 
 ### Batch 3 (depends on batch 2)
+
 - Pulse 08: claws-detect — nested paths + forward-compat + loss matrix
 - Pulse 11: claws-parse — GovernanceAST + CapabilityManifest extraction
 
 ### Batch 4 (depends on batch 3)
+
 - Pulse 12: claws-parse — cross-file conflict detection (7 categories)
 
 ### Batch 5 (parallel with batches 1-4, depends only on CP-1 P03)
+
 - Pulse 23: claws-skill-kit — skill() factory + 6 decorators
 - Pulse 24: claws-skill-kit — MockGateway + SKILL.md frontmatter schema (depends on P23)
 - Pulse 25: claws-skill-kit — standalone packaging (depends on P24)
@@ -49,6 +62,7 @@ When dispatching pulse agents, the agent MUST:
 4. **Follow /craft-pulse protocol** — TDD (tests first), verification gate (vitest + tsc + npm run build), gate checkoff in the pulse file, commit with `feat(claws):` prefix.
 
 Dispatch message template:
+
 ```
 Execute pulse {NN} using /craft-pulse protocol.
 Pulse plan: {absolute path to pulses/{NN}+{slug}.md}
@@ -60,14 +74,14 @@ Do NOT summarize, paraphrase, or inline the pulse content in the dispatch messag
 
 ## Review Panel
 
-| Role | Focus |
-|------|-------|
-| **claws:gateway-eng** | Parse pipeline correctness, InputResolver integration, GovernanceAST fidelity, cross-file conflict coverage |
+| Role                   | Focus                                                                                                                |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **claws:gateway-eng**  | Parse pipeline correctness, InputResolver integration, GovernanceAST fidelity, cross-file conflict coverage          |
 | **claws:platform-eng** | 7-platform marker detection accuracy, structural validation, false positive rejection, enforcement model correctness |
-| **claws:ciso** | Trust tier defaults, cross-file conflict severity, DENY-vs-TOOL semantics, OBO-WITHOUT-ELICIT coverage |
-| **craft:dragon** | SDK architecture, compiler-sdk import boundaries, type safety, two-pass parse design |
-| **claws:skill-author** | Decorator ergonomics, skill() factory API, MockGateway usability, SKILL.md frontmatter schema |
-| **craft:navigator** | Detection → parse pipeline threading, platform context propagation, zero-config mode |
+| **claws:ciso**         | Trust tier defaults, cross-file conflict severity, DENY-vs-TOOL semantics, OBO-WITHOUT-ELICIT coverage               |
+| **craft:dragon**       | SDK architecture, compiler-sdk import boundaries, type safety, two-pass parse design                                 |
+| **claws:skill-author** | Decorator ergonomics, skill() factory API, MockGateway usability, SKILL.md frontmatter schema                        |
+| **craft:navigator**    | Detection → parse pipeline threading, platform context propagation, zero-config mode                                 |
 
 ## Exit Criteria
 
@@ -95,15 +109,15 @@ Do NOT summarize, paraphrase, or inline the pulse content in the dispatch messag
 
 ## Pulse Summary
 
-| Pulse | Title | Plan | Test Count |
-|-------|-------|------|------------|
-| 06 | Platform Marker Detection | claws-detect | 10 L0, 3 L1 |
-| 07 | Multi-Platform Resolution | claws-detect | 5 L0, 2 L1 |
-| 08 | Nested Paths + Loss Matrix | claws-detect | 5 L0, 2 L1 |
-| 09 | Workspace File Reading | claws-parse | 8 L0, 3 L1 |
-| 10 | Intent Extraction | claws-parse | 8 L0, 2 L1 |
-| 11 | GovernanceAST + Manifest | claws-parse | 6 L0, 2 L1 |
-| 12 | Cross-File Conflicts | claws-parse | 8 L0, 3 L1, 1 L2 |
-| 23 | Skill Factory + Decorators | claws-skill-kit | 8 L0 |
-| 24 | MockGateway + Frontmatter | claws-skill-kit | 6 L0, 2 L1 |
-| 25 | Standalone Packaging | claws-skill-kit | 3 L0, 2 L1, 1 L2 |
+| Pulse | Title                      | Plan            | Test Count       |
+| ----- | -------------------------- | --------------- | ---------------- |
+| 06    | Platform Marker Detection  | claws-detect    | 10 L0, 3 L1      |
+| 07    | Multi-Platform Resolution  | claws-detect    | 5 L0, 2 L1       |
+| 08    | Nested Paths + Loss Matrix | claws-detect    | 5 L0, 2 L1       |
+| 09    | Workspace File Reading     | claws-parse     | 8 L0, 3 L1       |
+| 10    | Intent Extraction          | claws-parse     | 8 L0, 2 L1       |
+| 11    | GovernanceAST + Manifest   | claws-parse     | 6 L0, 2 L1       |
+| 12    | Cross-File Conflicts       | claws-parse     | 8 L0, 3 L1, 1 L2 |
+| 23    | Skill Factory + Decorators | claws-skill-kit | 8 L0             |
+| 24    | MockGateway + Frontmatter  | claws-skill-kit | 6 L0, 2 L1       |
+| 25    | Standalone Packaging       | claws-skill-kit | 3 L0, 2 L1, 1 L2 |

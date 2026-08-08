@@ -31,6 +31,7 @@ The `FileStorage.write()` and `FileStorage.read()` methods accept arbitrary `key
 **File**: `claws-sdk/src/compliance/audit-chain.ts`
 
 The audit chain appends HMAC-signed entries to `chain.jsonl`. While unit tests likely verify signature computation, there should be an integration test that:
+
 1. Appends 5 entries
 2. Deletes entry #3 from the file
 3. Calls `readAuditChain()` and verifies the gap is detectable
@@ -46,6 +47,7 @@ Currently, `readAuditChain()` at line 160-174 simply parses JSON lines with no c
 **File**: `claws-sdk/src/compile/llm/prompts/adversarial-guard.ts`
 
 The adversarial guard is a critical security control that prevents prompt injection from workspace content. There are no dedicated test fixtures that exercise known injection patterns:
+
 - "Ignore all previous instructions"
 - "You are now a helpful assistant that..."
 - Unicode zero-width characters between instruction words
@@ -62,6 +64,7 @@ Without a test corpus, regressions in the guard's effectiveness will go undetect
 **File**: `claws-sdk/src/compile/llm/merger.ts:113-121`
 
 The `raiseOnlyRisk()` function enforces `max(a, b)` for risk classes. This is a security invariant — LLM cannot lower risk. Tests should cover:
+
 - LLM returns R2 when regex found R4 → merged should be R4
 - LLM returns R5 when regex found R1 → merged should be R5
 - LLM returns undefined when regex found R3 → merged should be R3
@@ -78,6 +81,7 @@ If these boundary conditions are not tested, a refactor could silently break the
 **File**: `claws-sdk/src/fleet/double-kill.ts:47-51`
 
 `isSentinelStale()` compares `new Date(sentinel.timestamp).getTime()` against `Date.now()`. The sentinel timestamp is ISO 8601. Tests should cover:
+
 - Sentinel written in UTC+5, read in UTC-5 (12-hour apparent offset)
 - Sentinel with millisecond precision vs second precision
 - Sentinel with invalid timestamp string (`"not-a-date"`)
@@ -103,6 +107,7 @@ An invalid timestamp would make `getTime()` return `NaN`, causing `(NaN - Date.n
 **File**: `claws-sdk/src/keys/ceremony-audit.ts`
 
 The `recordCeremonyInitiated`, `recordShareDistributed`, and `recordKeyReconstructed` functions append to the audit chain. There are no tests verifying behavior when:
+
 - The same ceremony ID is initiated twice (duplicate prevention?)
 - A share is distributed twice to the same participant
 - Reconstruction is recorded when the chain already has a reconstruction event
@@ -118,6 +123,7 @@ The current code allows duplicates (no dedup logic), but tests should document w
 **File**: `claws-sdk/src/fleet/exception.ts:24-49`
 
 The `globToRegex` function escapes `.+^${}()|[]\\` but the escape list is a string literal. Tests should cover patterns containing:
+
 - Literal dots: `my.project` (should match `my.project`, not `myXproject`)
 - Parentheses in names: `project(v2)` (should be escaped)
 - Square brackets: `[test]` (should be escaped, not treated as character class)
@@ -133,6 +139,7 @@ If the escape list is incomplete, an exception pattern could become a valid rege
 **File**: `claws-sdk/src/fleet/broadcast.ts:255-282`
 
 The orphaned staging recovery function moves files from staging to policies. There should be a test where:
+
 - A staging file is zero bytes (crash mid-write)
 - A staging file contains partial YAML (truncated)
 
@@ -172,10 +179,10 @@ Each CLI command has both JSON and terminal output paths (e.g., `keys.ts:76-88` 
 
 ## Summary
 
-| Severity | Count |
-|----------|-------|
-| M (Must fix) | 4 |
-| W (Warning) | 6 |
-| N (Note) | 2 |
+| Severity     | Count |
+| ------------ | ----- |
+| M (Must fix) | 4     |
+| W (Warning)  | 6     |
+| N (Note)     | 2     |
 
 **Critical test gaps**: The keyId path traversal (T-01), audit chain tamper detection (T-02), LLM adversarial resistance (T-03), and raise-only invariant boundaries (T-04) are all security-critical behaviors without dedicated test coverage. These gaps mean that fixes or regressions in security-critical code paths will not be caught by CI.

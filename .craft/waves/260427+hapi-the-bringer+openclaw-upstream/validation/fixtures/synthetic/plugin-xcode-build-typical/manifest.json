@@ -4,14 +4,7 @@
   "version": "0.1.0",
   "description": "xcode-build plugin (mobile)",
   "contributes": {
-    "tools": [
-      "xcode-build/build",
-      "xcode-build/archive",
-      "xcode-build/simulator-list"
-    ],
-    "skills": [
-      "xcode-build/build",
-      "xcode-build/archive"
-    ]
+    "tools": ["xcode-build/build", "xcode-build/archive", "xcode-build/simulator-list"],
+    "skills": ["xcode-build/build", "xcode-build/archive"]
   }
 }

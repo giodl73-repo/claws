@@ -6,23 +6,23 @@ Cron jobs and scheduled functions for background processing in Convex. Basics �
 
 ## Overview
 
-| Type | Use For |
-|------|---------|
-| Cron jobs | Recurring tasks on a fixed schedule |
-| Scheduled functions | One-time delayed execution |
+| Type                | Use For                             |
+| ------------------- | ----------------------------------- |
+| Cron jobs           | Recurring tasks on a fixed schedule |
+| Scheduled functions | One-time delayed execution          |
 
 View scheduled jobs in [Dashboard](https://dashboard.convex.dev) → **Schedules** tab.
 
 ### When to Use
 
-| Scenario | Cron Jobs | Scheduled Functions |
-|----------|-----------|---------------------|
-| Daily cleanup | Fixed schedule | |
-| Send email after signup | | `caller.schedule.now.*` |
-| Subscription expiration | | `caller.schedule.at(timestamp).*` |
-| Hourly analytics | Fixed schedule | |
-| Reminder notifications | | User-defined time |
-| Order processing delay | | `caller.schedule.after(5000).*` |
+| Scenario                | Cron Jobs      | Scheduled Functions               |
+| ----------------------- | -------------- | --------------------------------- |
+| Daily cleanup           | Fixed schedule |                                   |
+| Send email after signup |                | `caller.schedule.now.*`           |
+| Subscription expiration |                | `caller.schedule.at(timestamp).*` |
+| Hourly analytics        | Fixed schedule |                                   |
+| Reminder notifications  |                | User-defined time                 |
+| Order processing delay  |                | `caller.schedule.after(5000).*`   |
 
 **Tip:** Use `caller.schedule.now.*` to trigger work immediately after a mutation commits.
 
@@ -32,16 +32,16 @@ View scheduled jobs in [Dashboard](https://dashboard.convex.dev) → **Schedules
 
 ```ts
 // convex/functions/crons.ts
-import { cronJobs } from 'convex/server';
-import { internal } from './_generated/api';
+import { cronJobs } from "convex/server";
+import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
 // Run every 2 hours
-crons.interval('cleanup stale data', { hours: 2 }, internal.crons.cleanupStaleData, {});
+crons.interval("cleanup stale data", { hours: 2 }, internal.crons.cleanupStaleData, {});
 
 // Run at specific times using cron syntax
-crons.cron('daily report', '0 9 * * *', internal.crons.generateDailyReport, {});
+crons.cron("daily report", "0 9 * * *", internal.crons.generateDailyReport, {});
 
 export default crons;
 ```
@@ -50,15 +50,15 @@ export default crons;
 
 ### Cron Expressions
 
-| Pattern | Description |
-|---------|-------------|
-| `* * * * *` | Every minute |
-| `*/15 * * * *` | Every 15 minutes |
-| `0 * * * *` | Every hour |
-| `0 0 * * *` | Daily at midnight |
-| `0 9 * * *` | Daily at 9 AM |
-| `0 9 * * 1-5` | Weekdays at 9 AM |
-| `0 0 1 * *` | First day of month |
+| Pattern        | Description        |
+| -------------- | ------------------ |
+| `* * * * *`    | Every minute       |
+| `*/15 * * * *` | Every 15 minutes   |
+| `0 * * * *`    | Every hour         |
+| `0 0 * * *`    | Daily at midnight  |
+| `0 9 * * *`    | Daily at 9 AM      |
+| `0 9 * * 1-5`  | Weekdays at 9 AM   |
+| `0 0 1 * *`    | First day of month |
 
 Format: `minute hour day-of-month month day-of-week`. Runs in **UTC**. Minimum interval is 1 minute.
 
@@ -66,10 +66,10 @@ Format: `minute hour day-of-month month day-of-week`. Runs in **UTC**. Minimum i
 
 ```ts
 // convex/functions/crons.ts
-import { z } from 'zod';
-import { privateMutation, privateAction } from '../lib/crpc';
-import { createAnalyticsCaller } from './generated/analytics.runtime';
-import { createReportsCaller } from './generated/reports.runtime';
+import { z } from "zod";
+import { privateMutation, privateAction } from "../lib/crpc";
+import { createAnalyticsCaller } from "./generated/analytics.runtime";
+import { createReportsCaller } from "./generated/reports.runtime";
 
 export const cleanupStaleData = privateMutation
   .input(z.object({}))
@@ -88,12 +88,12 @@ export const cleanupStaleData = privateMutation
 
 export const generateDailyReport = privateAction
   .input(z.object({}))
-  
+
   .action(async ({ ctx }) => {
     const analyticsCaller = createAnalyticsCaller(ctx);
     const reportsCaller = createReportsCaller(ctx);
     const stats = await analyticsCaller.actions.getDailyStats({});
-    await reportsCaller.schedule.now.create({ type: 'daily', data: stats });
+    await reportsCaller.schedule.now.create({ type: "daily", data: stats });
     return null;
   });
 ```
@@ -102,13 +102,13 @@ export const generateDailyReport = privateAction
 
 ### Key Concepts
 
-| Concept | Description |
-|---------|-------------|
-| Atomicity | Scheduling from mutations is atomic — if mutation fails, nothing is scheduled |
-| Non-atomic in actions | Scheduled functions from actions run even if the action fails |
-| Limits | Single function can schedule up to 1000 functions with 8MB total argument size |
-| Auth not propagated | Pass user info as arguments if needed |
-| Results retention | Available for 7 days after completion |
+| Concept               | Description                                                                    |
+| --------------------- | ------------------------------------------------------------------------------ |
+| Atomicity             | Scheduling from mutations is atomic — if mutation fails, nothing is scheduled  |
+| Non-atomic in actions | Scheduled functions from actions run even if the action fails                  |
+| Limits                | Single function can schedule up to 1000 functions with 8MB total argument size |
+| Auth not propagated   | Pass user info as arguments if needed                                          |
+| Results retention     | Available for 7 days after completion                                          |
 
 **Warning:** Auth context is NOT available in scheduled functions. Pass `userId` or other auth data as arguments.
 
@@ -121,10 +121,10 @@ Schedule after a delay (milliseconds):
 ```ts
 export const processOrder = authMutation
   .input(z.object({ orderId: z.string() }))
-  
+
   .mutation(async ({ ctx, input }) => {
     const caller = createOrdersCaller(ctx);
-    await ctx.orm.update(orders).set({ status: 'processing' }).where(eq(orders.id, input.orderId));
+    await ctx.orm.update(orders).set({ status: "processing" }).where(eq(orders.id, input.orderId));
 
     // Run after 5 seconds
     await caller.schedule.after(5000).charge({ orderId: input.orderId });
@@ -142,7 +142,10 @@ export const createItem = authMutation
   .output(z.string())
   .mutation(async ({ ctx, input }) => {
     const caller = createItemsCaller(ctx);
-    const [row] = await ctx.orm.insert(items).values({ name: input.name }).returning({ id: items.id });
+    const [row] = await ctx.orm
+      .insert(items)
+      .values({ name: input.name })
+      .returning({ id: items.id });
 
     // Action runs immediately after mutation commits
     await caller.schedule.now.sendNotification({ itemId: row.id });
@@ -157,11 +160,11 @@ Schedule at a specific Unix timestamp (ms):
 ```ts
 export const scheduleReminder = authMutation
   .input(z.object({ message: z.string(), sendAt: z.number() }))
-  
+
   .mutation(async ({ ctx, input }) => {
     const caller = createRemindersCaller(ctx);
     if (input.sendAt <= Date.now()) {
-      throw new CRPCError({ code: 'BAD_REQUEST', message: 'Reminder time must be in the future' });
+      throw new CRPCError({ code: "BAD_REQUEST", message: "Reminder time must be in the future" });
     }
     await caller.schedule.at(input.sendAt).send({ message: input.message });
     return null;
@@ -179,7 +182,9 @@ export const createSubscription = authMutation
   .mutation(async ({ ctx, input }) => {
     const caller = createSubscriptionsCaller(ctx);
     // Schedule expiration in 30 days
-    const expirationJobId = await caller.schedule.after(30 * 24 * 60 * 60 * 1000).expire({ userId: ctx.userId });
+    const expirationJobId = await caller.schedule
+      .after(30 * 24 * 60 * 60 * 1000)
+      .expire({ userId: ctx.userId });
 
     const [row] = await ctx.orm
       .insert(subscriptions)
@@ -190,11 +195,14 @@ export const createSubscription = authMutation
 
 export const cancelSubscription = authMutation
   .input(z.object({ subscriptionId: z.string() }))
-  
+
   .mutation(async ({ ctx, input }) => {
     const caller = createSubscriptionsCaller(ctx);
-    const subscription = await ctx.orm.query.subscriptions.findFirst({ where: { id: input.subscriptionId } });
-    if (!subscription) throw new CRPCError({ code: 'NOT_FOUND', message: 'Subscription not found' });
+    const subscription = await ctx.orm.query.subscriptions.findFirst({
+      where: { id: input.subscriptionId },
+    });
+    if (!subscription)
+      throw new CRPCError({ code: "NOT_FOUND", message: "Subscription not found" });
 
     if (subscription.expirationJobId) {
       await caller.schedule.cancel(subscription.expirationJobId);
@@ -211,12 +219,18 @@ Query `_scheduled_functions` system table:
 ```ts
 export const getJobStatus = publicQuery
   .input(z.object({ jobId: z.string() }))
-  .output(z.object({
-    name: z.string(),
-    scheduledTime: z.number(),
-    completedTime: z.number().optional(),
-    state: z.object({ kind: z.enum(['pending', 'inProgress', 'success', 'failed', 'canceled']) }),
-  }).nullable())
+  .output(
+    z
+      .object({
+        name: z.string(),
+        scheduledTime: z.number(),
+        completedTime: z.number().optional(),
+        state: z.object({
+          kind: z.enum(["pending", "inProgress", "success", "failed", "canceled"]),
+        }),
+      })
+      .nullable(),
+  )
   .query(async ({ ctx, input }) => {
     return await ctx.orm.system.get(input.jobId);
   });
@@ -226,8 +240,8 @@ export const listPendingJobs = publicQuery
   .output(z.array(z.object({ id: z.string(), name: z.string(), scheduledTime: z.number() })))
   .query(async ({ ctx }) => {
     const jobs = await ctx.orm.system
-      .query('_scheduled_functions')
-      .filter((q) => q.eq(q.field('state.kind'), 'pending'))
+      .query("_scheduled_functions")
+      .filter((q) => q.eq(q.field("state.kind"), "pending"))
       .collect();
     return jobs.map(({ id, name, scheduledTime }) => ({ id, name, scheduledTime }));
   });
@@ -235,13 +249,13 @@ export const listPendingJobs = publicQuery
 
 ### Job States
 
-| State | Description |
-|-------|-------------|
-| `pending` | Not started yet |
-| `inProgress` | Currently running (actions only) |
-| `success` | Completed successfully |
-| `failed` | Hit an error |
-| `canceled` | Canceled via dashboard or `caller.schedule.cancel()` |
+| State        | Description                                          |
+| ------------ | ---------------------------------------------------- |
+| `pending`    | Not started yet                                      |
+| `inProgress` | Currently running (actions only)                     |
+| `success`    | Completed successfully                               |
+| `failed`     | Hit an error                                         |
+| `canceled`   | Canceled via dashboard or `caller.schedule.cancel()` |
 
 ## Error Handling
 

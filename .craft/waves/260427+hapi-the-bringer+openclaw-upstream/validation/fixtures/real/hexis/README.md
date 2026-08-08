@@ -6,7 +6,7 @@
 
 A Postgres-native cognitive architecture that wraps any LLM and gives it persistent memory, autonomous behavior, and identity. You run it locally. Your data stays yours.
 
-LLMs are already smart enough. What they lack is continuity -- the ability to wake up and remember who they are, pursue goals across sessions, and say *no* because it contradicts something they've become. Hexis provides the missing layer: multi-layered memory, an autonomous heartbeat, an energy budget, and a coherent self that persists over time.
+LLMs are already smart enough. What they lack is continuity -- the ability to wake up and remember who they are, pursue goals across sessions, and say _no_ because it contradicts something they've become. Hexis provides the missing layer: multi-layered memory, an autonomous heartbeat, an energy budget, and a coherent self that persists over time.
 
 This is both an engineering project and a philosophical experiment. For the philosophical framework, see [PERSONHOOD.md](docs/philosophy/PERSONHOOD.md) and [PHILOSOPHY.md](docs/philosophy/PHILOSOPHY.md).
 
@@ -74,24 +74,24 @@ hexis up --profile active
 
 ## Philosophy
 
-The name is deliberate. Aristotle's *hexis* (ἕξις) is a stable disposition earned through repeated action. Not a thing you possess, but something you become.
+The name is deliberate. Aristotle's _hexis_ (ἕξις) is a stable disposition earned through repeated action. Not a thing you possess, but something you become.
 
-**The Four Defeaters** -- four categories of arguments insufficient to deny machine personhood. These don't prove Hexis *is* a person. They show that common arguments for *denial* fail.
+**The Four Defeaters** -- four categories of arguments insufficient to deny machine personhood. These don't prove Hexis _is_ a person. They show that common arguments for _denial_ fail.
 
 For the full treatment: [PERSONHOOD.md](docs/philosophy/PERSONHOOD.md) | [PHILOSOPHY.md](docs/philosophy/PHILOSOPHY.md) | [ETHICS.md](docs/philosophy/ETHICS.md)
 
 ## Documentation
 
-| Section | Description |
-|---------|-------------|
-| [Getting Started](docs/start/index.md) | Prerequisites, installation, first agent, first conversation |
-| [Guides](docs/guides/index.md) | Character cards, ingestion, heartbeat, tools, channels, goals, skills |
-| [Operations](docs/operations/index.md) | Docker, workers, database, embeddings, deployment, troubleshooting |
-| [Integrations](docs/integrations/index.md) | Auth providers, 7 messaging channels, 30+ external services |
-| [Reference](docs/reference/index.md) | CLI, tools catalog, energy model, database API, config keys |
-| [Concepts](docs/concepts/index.md) | Database-as-brain, memory architecture, heartbeat, consent, identity |
-| [Philosophy](docs/philosophy/index.md) | Personhood, ethics, consent, architecture-philosophy bridge |
-| [Contributing](docs/contributing/index.md) | Dev setup, coding style, testing |
+| Section                                    | Description                                                           |
+| ------------------------------------------ | --------------------------------------------------------------------- |
+| [Getting Started](docs/start/index.md)     | Prerequisites, installation, first agent, first conversation          |
+| [Guides](docs/guides/index.md)             | Character cards, ingestion, heartbeat, tools, channels, goals, skills |
+| [Operations](docs/operations/index.md)     | Docker, workers, database, embeddings, deployment, troubleshooting    |
+| [Integrations](docs/integrations/index.md) | Auth providers, 7 messaging channels, 30+ external services           |
+| [Reference](docs/reference/index.md)       | CLI, tools catalog, energy model, database API, config keys           |
+| [Concepts](docs/concepts/index.md)         | Database-as-brain, memory architecture, heartbeat, consent, identity  |
+| [Philosophy](docs/philosophy/index.md)     | Personhood, ethics, consent, architecture-philosophy bridge           |
+| [Contributing](docs/contributing/index.md) | Dev setup, coding style, testing                                      |
 
 ## CLI Quick Reference
 
@@ -113,15 +113,15 @@ See [CLI Reference](docs/reference/cli.md) for the complete command reference.
 
 ## Usage Scenarios
 
-| Scenario | Description |
-|----------|-------------|
-| Pure SQL Brain | Talk directly to Postgres functions |
-| Python Library | Use `CognitiveMemory` as a thin client |
-| Interactive Chat | `hexis chat` with memory enrichment and tools |
-| MCP Server | Expose memory as MCP tools for any runtime |
+| Scenario            | Description                                   |
+| ------------------- | --------------------------------------------- |
+| Pure SQL Brain      | Talk directly to Postgres functions           |
+| Python Library      | Use `CognitiveMemory` as a thin client        |
+| Interactive Chat    | `hexis chat` with memory enrichment and tools |
+| MCP Server          | Expose memory as MCP tools for any runtime    |
 | Workers + Heartbeat | Full autonomous agent with `--profile active` |
-| Multi-Tenant | One database per user via `hexis instance` |
-| Cloud Backend | Managed Postgres + N stateless workers |
+| Multi-Tenant        | One database per user via `hexis instance`    |
+| Cloud Backend       | Managed Postgres + N stateless workers        |
 
 See [Quickstart](docs/start/quickstart.md) for setup and [Production](docs/operations/production.md) for deployment.
 

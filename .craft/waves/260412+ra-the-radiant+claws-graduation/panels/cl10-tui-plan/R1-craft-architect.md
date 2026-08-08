@@ -81,13 +81,13 @@ The plan lists 9 components but the 15 screens require more. Missing from the co
 
 ## Lens Checklist
 
-| Lens Question | Verdict | Evidence |
-|---|---|---|
-| Does this change respect the SDK-owns-logic boundary? | PASS | TUI is a pure rendering adapter; all logic stays in claws-serve. No SDK business logic in the TUI. |
-| Are dependency arrows pointing inward (CLI -> SDK -> types)? | WARN | Plan declares `claws-sdk` dependency without pinning to `/types` subpath. Risk of importing compiler internals (W1). |
-| Would a new contributor understand the module's responsibility from its location? | FAIL | A new `claws-tui/` package alongside `claws-cli/` raises the question: "why are there two CLI packages?" The TUI is a CLI subcommand, not a separate system (M2). |
-| One responsibility per module, one direction per dependency? | WARN | `<ChunkPanel>` is described as generic but covers 9 different data shapes. Needs clarification (W3). |
-| If you have to explain which package owns it, the boundary is wrong? | FAIL | "Is `claws tui` in claws-tui or claws-cli?" requires explanation. The answer should be obvious from the package name (M2). |
+| Lens Question                                                                     | Verdict | Evidence                                                                                                                                                          |
+| --------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Does this change respect the SDK-owns-logic boundary?                             | PASS    | TUI is a pure rendering adapter; all logic stays in claws-serve. No SDK business logic in the TUI.                                                                |
+| Are dependency arrows pointing inward (CLI -> SDK -> types)?                      | WARN    | Plan declares `claws-sdk` dependency without pinning to `/types` subpath. Risk of importing compiler internals (W1).                                              |
+| Would a new contributor understand the module's responsibility from its location? | FAIL    | A new `claws-tui/` package alongside `claws-cli/` raises the question: "why are there two CLI packages?" The TUI is a CLI subcommand, not a separate system (M2). |
+| One responsibility per module, one direction per dependency?                      | WARN    | `<ChunkPanel>` is described as generic but covers 9 different data shapes. Needs clarification (W3).                                                              |
+| If you have to explain which package owns it, the boundary is wrong?              | FAIL    | "Is `claws tui` in claws-tui or claws-cli?" requires explanation. The answer should be obvious from the package name (M2).                                        |
 
 ---
 
@@ -96,6 +96,7 @@ The plan lists 9 components but the 15 screens require more. Missing from the co
 The claws-tui plan has the right product instinct -- a TUI that exercises the real API is a powerful validation tool and demo surface. The problem is structural. The plan proposes a new package where a subcommand suffices (M2), builds on an API that does not yet exist without modeling the dependency (M1, M3), underestimates pulse count for the interaction complexity (M4), and leaves the generic component design ambiguous (W3). The demo fixture is described narratively but not specified reproducibly (W2).
 
 The plan needs three changes before it is ready for wave execution:
+
 1. Resolve the package boundary question (subcommand vs. separate package, with justification).
 2. Model the CL-10 API implementation as an explicit prerequisite or parallel work stream with a mock server contract.
 3. Expand the pulse breakdown to 10-11 pulses to match the actual screen and interaction count.

@@ -12,7 +12,7 @@ Dispatch DAG is cycle-free; checkpoint membership is consistent; F-38 hard-depen
 
 ### HC-BLOCK (1)
 
-1. **Pulse 06 has stale PR numbering from restructure** — `pulses\06+pr3-oc4-stripfrontmatter.md` line 16 says "Open PR-2 against github.com/openclaw/openclaw modifying..." but the 2026-04-27 restructure ("lets make B PR 2") moved this to PR-3. Multiple occurrences throughout the pulse content. **Consequence**: executor creates the wrong PR title and risks auto-close on upstream. **Suggested fix**: replace_all "PR-2" → "PR-3" in this pulse file. *(Applied 2026-04-27)*
+1. **Pulse 06 has stale PR numbering from restructure** — `pulses\06+pr3-oc4-stripfrontmatter.md` line 16 says "Open PR-2 against github.com/openclaw/openclaw modifying..." but the 2026-04-27 restructure ("lets make B PR 2") moved this to PR-3. Multiple occurrences throughout the pulse content. **Consequence**: executor creates the wrong PR title and risks auto-close on upstream. **Suggested fix**: replace_all "PR-2" → "PR-3" in this pulse file. _(Applied 2026-04-27)_
 
 ### HC-WARN (2)
 

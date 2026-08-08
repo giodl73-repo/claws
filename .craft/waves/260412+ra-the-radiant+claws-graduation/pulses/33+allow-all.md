@@ -62,6 +62,7 @@ Key edge case: an all-R5 workspace (every tool is R5) → allow-all approves 0 t
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — SDK-owns-logic rule, batch operation patterns
 - `.craft/roles/claws/platform-eng.md` — route handler patterns, audit trail integration
 - `.craft/roles/claws/ciso.md` — R5 exclusion enforcement, audit trail requirements

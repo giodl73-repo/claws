@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "camsnap plugin (system)",
   "contributes": {
-    "tools": [
-      "camsnap/take-photo"
-    ],
-    "skills": [
-      "camsnap/take-photo"
-    ]
+    "tools": ["camsnap/take-photo"],
+    "skills": ["camsnap/take-photo"]
   }
 }

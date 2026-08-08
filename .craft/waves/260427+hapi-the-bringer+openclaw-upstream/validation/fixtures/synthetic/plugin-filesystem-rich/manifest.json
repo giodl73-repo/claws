@@ -4,19 +4,9 @@
   "version": "0.1.0",
   "description": "filesystem plugin (system)",
   "contributes": {
-    "tools": [
-      "filesystem/read",
-      "filesystem/write",
-      "filesystem/list",
-      "filesystem/delete"
-    ],
-    "skills": [
-      "filesystem/read",
-      "filesystem/write"
-    ],
-    "workflows": [
-      "filesystem-flow.lobster"
-    ],
+    "tools": ["filesystem/read", "filesystem/write", "filesystem/list", "filesystem/delete"],
+    "skills": ["filesystem/read", "filesystem/write"],
+    "workflows": ["filesystem-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

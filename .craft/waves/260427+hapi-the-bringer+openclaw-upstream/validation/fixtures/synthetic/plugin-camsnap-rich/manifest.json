@@ -4,15 +4,9 @@
   "version": "0.1.0",
   "description": "camsnap plugin (system)",
   "contributes": {
-    "tools": [
-      "camsnap/take-photo"
-    ],
-    "skills": [
-      "camsnap/take-photo"
-    ],
-    "workflows": [
-      "camsnap-flow.lobster"
-    ],
+    "tools": ["camsnap/take-photo"],
+    "skills": ["camsnap/take-photo"],
+    "workflows": ["camsnap-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

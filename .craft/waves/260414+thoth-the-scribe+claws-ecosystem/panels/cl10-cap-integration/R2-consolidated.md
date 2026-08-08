@@ -9,12 +9,12 @@
 
 ## R1 Resolution
 
-| Severity | R1 Total | Resolved | Partial | Unresolved |
-|----------|----------|----------|---------|------------|
-| Major | 9 | **6** | 2 | 1 |
-| Warning | 14 | **7** | 4 | 3 |
-| Notes | 8 | **6** | 1 | 1 |
-| **Total** | **31** | **19** | **7** | **5** |
+| Severity  | R1 Total | Resolved | Partial | Unresolved |
+| --------- | -------- | -------- | ------- | ---------- |
+| Major     | 9        | **6**    | 2       | 1          |
+| Warning   | 14       | **7**    | 4       | 3          |
+| Notes     | 8        | **6**    | 1       | 1          |
+| **Total** | **31**   | **19**   | **7**   | **5**      |
 
 **All 5 R1 blockers RESOLVED**: write-time validation, sole write surface, editable
 syntax design decision, fleet lock enforcement, R5 excluded from "Allow all".
@@ -60,14 +60,14 @@ route through the same write-time validation layer.
 
 ## Unique R2 Findings
 
-| ID | Role | Severity | Finding |
-|----|------|----------|---------|
-| U-R2-1 | architect | Major | `OC_PROTECTED_FILES` invariant in `amend/apply.ts` prohibits writing to the 9 OC files. PATCH must resolve: sidecar files, new module, or amend the invariant. |
-| U-R2-2 | type-system | Warning | `lock.locked: boolean` is redundant with `lock.source` — `{ locked: false, source: 'r5' }` is an invalid state |
-| U-R2-3 | dragon | Warning | Trust escalation has error type but no authorization mechanism or request schema |
-| U-R2-4 | navigator | Warning | Gap tables still lack priority/severity column |
-| U-R2-5 | dragon | Warning | POST /api/onboard has no content validation |
-| U-R2-6 | type-system | Warning | `editable.type` missing `'object'` variant for nested fields like `managedBy` |
+| ID     | Role        | Severity | Finding                                                                                                                                                        |
+| ------ | ----------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| U-R2-1 | architect   | Major    | `OC_PROTECTED_FILES` invariant in `amend/apply.ts` prohibits writing to the 9 OC files. PATCH must resolve: sidecar files, new module, or amend the invariant. |
+| U-R2-2 | type-system | Warning  | `lock.locked: boolean` is redundant with `lock.source` — `{ locked: false, source: 'r5' }` is an invalid state                                                 |
+| U-R2-3 | dragon      | Warning  | Trust escalation has error type but no authorization mechanism or request schema                                                                               |
+| U-R2-4 | navigator   | Warning  | Gap tables still lack priority/severity column                                                                                                                 |
+| U-R2-5 | dragon      | Warning  | POST /api/onboard has no content validation                                                                                                                    |
+| U-R2-6 | type-system | Warning  | `editable.type` missing `'object'` variant for nested fields like `managedBy`                                                                                  |
 
 ---
 

@@ -10,19 +10,19 @@ Date: 2026-04-15
 
 ### Plans in scope
 
-| Plan | Status | Atoms | Specs |
-|------|--------|-------|-------|
-| claws-base-cli | Closed | atom:error-contract | CL-01, CL-05 |
-| claws-init-uninstall | Closed | atom:claws-init, atom:claws-uninstall, atom:claws-bypass, atom:claws-json | CL-01, CL-03, CL-05 |
-| claws-three-rings | Closed | atom:claws-watch, atom:claws-doctor, atom:three-rings, atom:upgrade-lifecycle | CL-05, CL-01, CL-03 |
-| claws-snap-restore | Closed | atom:snap, atom:snap-restore | CL-01, CL-05 |
-| claws-fleet-ops | Closed | atom:fleet-broadcast, atom:fleet-drift, atom:fleet-scan, atom:fleet-doctor, atom:fleet-comply, atom:kill-switch | CL-01, CL-02, CL-03, CL-05 |
-| claws-key-management | Closed | atom:key-management | CL-02 |
-| claws-scaffold | Closed | atom:tier-adoption, atom:claws-compiler, atom:skill-kit, atom:governance-badge | CL-05 |
-| claws-annotate | Closed | atom:tier-adoption, atom:claws-compiler, atom:skill-kit | CL-05 |
-| claws-publish | Closed | atom:claws-publish, atom:governance-badge, atom:tier-adoption, atom:claws-compiler | CL-05, CL-06 |
-| claws-llm-extraction | Closed | atom:governance-ir, atom:workspace-format, atom:eval-harness | CL-01, CL-04, CL-09 |
-| claws-oc-format-alignment | Closed | atom:workspace-format, atom:governance-ir | CL-01, CL-04 |
+| Plan                      | Status | Atoms                                                                                                           | Specs                      |
+| ------------------------- | ------ | --------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| claws-base-cli            | Closed | atom:error-contract                                                                                             | CL-01, CL-05               |
+| claws-init-uninstall      | Closed | atom:claws-init, atom:claws-uninstall, atom:claws-bypass, atom:claws-json                                       | CL-01, CL-03, CL-05        |
+| claws-three-rings         | Closed | atom:claws-watch, atom:claws-doctor, atom:three-rings, atom:upgrade-lifecycle                                   | CL-05, CL-01, CL-03        |
+| claws-snap-restore        | Closed | atom:snap, atom:snap-restore                                                                                    | CL-01, CL-05               |
+| claws-fleet-ops           | Closed | atom:fleet-broadcast, atom:fleet-drift, atom:fleet-scan, atom:fleet-doctor, atom:fleet-comply, atom:kill-switch | CL-01, CL-02, CL-03, CL-05 |
+| claws-key-management      | Closed | atom:key-management                                                                                             | CL-02                      |
+| claws-scaffold            | Closed | atom:tier-adoption, atom:claws-compiler, atom:skill-kit, atom:governance-badge                                  | CL-05                      |
+| claws-annotate            | Closed | atom:tier-adoption, atom:claws-compiler, atom:skill-kit                                                         | CL-05                      |
+| claws-publish             | Closed | atom:claws-publish, atom:governance-badge, atom:tier-adoption, atom:claws-compiler                              | CL-05, CL-06               |
+| claws-llm-extraction      | Closed | atom:governance-ir, atom:workspace-format, atom:eval-harness                                                    | CL-01, CL-04, CL-09        |
+| claws-oc-format-alignment | Closed | atom:workspace-format, atom:governance-ir                                                                       | CL-01, CL-04               |
 
 ### Specs touched
 
@@ -43,27 +43,27 @@ CL-01, CL-02, CL-03, CL-04, CL-05, CL-06, CL-09
 
 All 11 plans reference existing claws atoms (C01-C93). No new atoms need registration.
 
-| Atom | ID | Authority updated? | Mirrors consistent? |
-|------|----|-------------------|-------------------|
-| atom:error-contract | C44 | Yes (spec authority) | Yes |
-| atom:claws-init | C32 | Yes (spec authority) | Yes |
-| atom:claws-uninstall | C33 | Yes (spec authority) | Yes |
-| atom:claws-watch | C80 | Yes (spec authority) | Yes |
-| atom:claws-doctor | C81 | Yes (spec authority) | Yes |
-| atom:three-rings | C40 | Yes (spec authority) | Yes |
-| atom:snap | C31 | Yes (spec authority) | Yes |
-| atom:snap-restore | C84 | Yes (spec authority) | Yes |
-| atom:fleet-broadcast | C60 | Yes (spec authority) | Yes |
-| atom:fleet-drift | C61 | Yes (spec authority) | Yes |
-| atom:fleet-scan | C62 | Yes (spec authority) | Yes |
-| atom:fleet-doctor | C63 | Yes (spec authority) | Yes |
-| atom:fleet-comply | C64 | Yes (spec authority) | Yes |
-| atom:kill-switch | C17 | Yes (spec authority) | Yes |
-| atom:key-management | C16 | Yes (spec authority) | Yes |
-| atom:claws-publish | C93 | Yes (spec authority) | Yes |
-| atom:governance-badge | C42 | Yes (spec authority) | Yes |
-| atom:tier-adoption | C45 | Yes (spec authority) | Yes |
-| atom:governance-ir | C02 | Yes (spec authority) | Yes |
+| Atom                  | ID  | Authority updated?   | Mirrors consistent? |
+| --------------------- | --- | -------------------- | ------------------- |
+| atom:error-contract   | C44 | Yes (spec authority) | Yes                 |
+| atom:claws-init       | C32 | Yes (spec authority) | Yes                 |
+| atom:claws-uninstall  | C33 | Yes (spec authority) | Yes                 |
+| atom:claws-watch      | C80 | Yes (spec authority) | Yes                 |
+| atom:claws-doctor     | C81 | Yes (spec authority) | Yes                 |
+| atom:three-rings      | C40 | Yes (spec authority) | Yes                 |
+| atom:snap             | C31 | Yes (spec authority) | Yes                 |
+| atom:snap-restore     | C84 | Yes (spec authority) | Yes                 |
+| atom:fleet-broadcast  | C60 | Yes (spec authority) | Yes                 |
+| atom:fleet-drift      | C61 | Yes (spec authority) | Yes                 |
+| atom:fleet-scan       | C62 | Yes (spec authority) | Yes                 |
+| atom:fleet-doctor     | C63 | Yes (spec authority) | Yes                 |
+| atom:fleet-comply     | C64 | Yes (spec authority) | Yes                 |
+| atom:kill-switch      | C17 | Yes (spec authority) | Yes                 |
+| atom:key-management   | C16 | Yes (spec authority) | Yes                 |
+| atom:claws-publish    | C93 | Yes (spec authority) | Yes                 |
+| atom:governance-badge | C42 | Yes (spec authority) | Yes                 |
+| atom:tier-adoption    | C45 | Yes (spec authority) | Yes                 |
+| atom:governance-ir    | C02 | Yes (spec authority) | Yes                 |
 
 ### Stale atom flags
 
@@ -73,16 +73,16 @@ None. All atoms are consistent with their authorities.
 
 ## Phase 3: Count Reconciliation
 
-| Metric | Before (per CLAUDE.md) | After (actual) | Authority | Stale? |
-|--------|----------------------|---------------|-----------|--------|
-| Specs | 7 (CL-01..CL-07) | 12 (CL-01..CL-12) | SPECS.md | **YES** -- CLAUDE.md says 7, actual is 12 |
-| Concept guides | unknown | 89 | docs/claws/concepts/ | **YES** -- concepts README does not state total count |
-| How-to guides | unknown | 14 | docs/claws/how-to/ | N/A |
-| Stories | unknown | 3 | docs/claws/stories/ | N/A |
-| Pitfalls | 50 | 50 | PITFALLS.md | OK |
-| Commands | 40 | 40 | COMMAND-MAP.md | OK |
-| Atoms | 62 | 62 | ATOMS.md | OK |
-| Roles | 8 | 8 | .craft/roles/claws/ | OK |
+| Metric         | Before (per CLAUDE.md) | After (actual)    | Authority            | Stale?                                                |
+| -------------- | ---------------------- | ----------------- | -------------------- | ----------------------------------------------------- |
+| Specs          | 7 (CL-01..CL-07)       | 12 (CL-01..CL-12) | SPECS.md             | **YES** -- CLAUDE.md says 7, actual is 12             |
+| Concept guides | unknown                | 89                | docs/claws/concepts/ | **YES** -- concepts README does not state total count |
+| How-to guides  | unknown                | 14                | docs/claws/how-to/   | N/A                                                   |
+| Stories        | unknown                | 3                 | docs/claws/stories/  | N/A                                                   |
+| Pitfalls       | 50                     | 50                | PITFALLS.md          | OK                                                    |
+| Commands       | 40                     | 40                | COMMAND-MAP.md       | OK                                                    |
+| Atoms          | 62                     | 62                | ATOMS.md             | OK                                                    |
+| Roles          | 8                      | 8                 | .craft/roles/claws/  | OK                                                    |
 
 ### Stale counts to fix
 
@@ -98,15 +98,15 @@ None. All atoms are consistent with their authorities.
 
 ## Phase 4: Design Doc Sync
 
-| Design doc | Checked? | Stale? | Issue |
-|------------|----------|--------|-------|
-| design/claws/CLAUDE.md | Yes | **YES** | Spec count (7 vs 12), status ("Not started" vs implemented), spec index (missing CL-08..CL-12) |
-| design/claws/README.md | Yes | **YES** | Spec count, stale paths (GLINT-MAP -> COMMAND-MAP), directory structure |
-| design/claws/SPECS.md | Yes | No | Already shows 12 specs, version 1.1 |
-| design/claws/ATOMS.md | Yes | No | 62 atoms, all consistent |
-| design/claws/COMMAND-MAP.md | Yes | No | 40 commands, v1.0 |
-| design/claws/PITFALLS.md | Yes | No | 50 pitfalls, v1.1 |
-| design/README.md | Yes | **YES** | Does not list claws/ or compiler/ or works/ design areas |
+| Design doc                  | Checked? | Stale?  | Issue                                                                                          |
+| --------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------- |
+| design/claws/CLAUDE.md      | Yes      | **YES** | Spec count (7 vs 12), status ("Not started" vs implemented), spec index (missing CL-08..CL-12) |
+| design/claws/README.md      | Yes      | **YES** | Spec count, stale paths (GLINT-MAP -> COMMAND-MAP), directory structure                        |
+| design/claws/SPECS.md       | Yes      | No      | Already shows 12 specs, version 1.1                                                            |
+| design/claws/ATOMS.md       | Yes      | No      | 62 atoms, all consistent                                                                       |
+| design/claws/COMMAND-MAP.md | Yes      | No      | 40 commands, v1.0                                                                              |
+| design/claws/PITFALLS.md    | Yes      | No      | 50 pitfalls, v1.1                                                                              |
+| design/README.md            | Yes      | **YES** | Does not list claws/ or compiler/ or works/ design areas                                       |
 
 ---
 
@@ -152,6 +152,7 @@ Current entry: `| claws | design/claws/ (CL specs) | docs/claws/ (concepts, how-
 **MISSING**: All 11 Anubis plans and all 11 Ptah plans are absent from PLANS.md. 22 plans total need to be added.
 
 Anubis plans (11):
+
 - claws-base-cli (Closed, anubis)
 - claws-init-uninstall (Closed, anubis)
 - claws-three-rings (Closed, anubis)
@@ -165,6 +166,7 @@ Anubis plans (11):
 - claws-oc-format-alignment (Closed, anubis)
 
 Ptah plans (11):
+
 - claws-sdk-bootstrap (Implemented, ptah)
 - claws-governance-ir (Implemented, ptah)
 - claws-detect (Implemented, ptah)
@@ -180,6 +182,7 @@ Ptah plans (11):
 ### WAVES.md
 
 **MISSING**: Both Ptah (XC) and Anubis (XCIV) waves are absent. Need 2 entries:
+
 - Ptah the Craftsman (XC) -- completed 2026-04-13
 - Anubis the Judge (XCIV) -- completed 2026-04-14
 
@@ -224,8 +227,8 @@ Only CL-10 has an "Implementation Path" section. The original 7 specs (CL-01..CL
 
 ## New Stale Items
 
-| Item | Issue | Severity |
-|------|-------|----------|
-| design/README.md | Still missing compiler/ and works/ areas (only claws added) | Medium |
-| CODEBASE.md | Missing claws-sdk, claws-cli, claws-skill-kit, claws-test package entries | Medium |
-| design/claws/README.md | Research question table still references old Q12 numbering | Low |
+| Item                   | Issue                                                                     | Severity |
+| ---------------------- | ------------------------------------------------------------------------- | -------- |
+| design/README.md       | Still missing compiler/ and works/ areas (only claws added)               | Medium   |
+| CODEBASE.md            | Missing claws-sdk, claws-cli, claws-skill-kit, claws-test package entries | Medium   |
+| design/claws/README.md | Research question table still references old Q12 numbering                | Low      |

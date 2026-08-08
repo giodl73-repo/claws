@@ -4,7 +4,19 @@ slug: compile-pipeline-e2e
 plan: claws-sdk-graduation
 depends_on: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 governing_roles: [craft:architect, craft:conformance, claws:platform-eng]
-scenario_codes: [cross-package/S01, cross-package/S03, emit-oc/S02, emit-cc/S02, governance/S01, execution/S01, backward-compat/S01, context/S01, relax/S01, pitfall-coverage/S01]
+scenario_codes:
+  [
+    cross-package/S01,
+    cross-package/S03,
+    emit-oc/S02,
+    emit-cc/S02,
+    governance/S01,
+    execution/S01,
+    backward-compat/S01,
+    context/S01,
+    relax/S01,
+    pitfall-coverage/S01,
+  ]
 stage: implementation
 test_tiers:
   L0_unit: 2
@@ -55,6 +67,7 @@ This pulse creates comprehensive E2E and acceptance tests that exercise the full
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- monorepo structure, pipeline integration, graduation invariant
 - `.craft/roles/craft/conformance.md` -- import scanning, dependency validation, graduation criteria
 - `.craft/roles/claws/platform-eng.md` -- SDK integration patterns, E2E test conventions

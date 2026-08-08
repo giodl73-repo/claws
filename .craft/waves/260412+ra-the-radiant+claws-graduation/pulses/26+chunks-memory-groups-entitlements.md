@@ -59,6 +59,7 @@ Memory chunk includes knowledge source array with per-source data labels (PUBLIC
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` -- thin HTTP adapter pattern, SDK-owns-logic rule
 - `.craft/roles/claws/gateway-eng.md` -- knowledge source governance, data label enforcement, entitlements model
 

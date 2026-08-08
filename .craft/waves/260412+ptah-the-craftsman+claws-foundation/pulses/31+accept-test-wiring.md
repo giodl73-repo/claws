@@ -43,40 +43,46 @@ claws-sdk/tests/accept/
 ```
 
 ### D2: Manifest Configuration
+
 - `claws-sdk/tests/accept/scenarios/manifest.yaml` — filtered copy of `design/claws/scenarios/manifest.yaml` with only Ptah-scoped series (Phase 1 + cross-cutting)
 - Anubis/Thoth series excluded (fleet-sim stubs, advanced security-sim scenarios not materialized)
 - Pin `min:` counts to match materialized fixture counts (74 total)
 - fail-mode series dispatches to BOTH pinch-sim and security-sim — both runners execute per scenario
 
 ### D3: Full Acceptance Run
+
 - Execute all ~95 Ptah scenarios
 - Fix any compilation failures (pipeline bugs exposed by scenarios)
 - Tune expect blocks where compiler output differs from spec predictions
 - Document any scenarios that expose real bugs → file as findings
 
 ### D4: Acceptance Scorecard
+
 Write `claws-sdk/tests/accept/SCORECARD.md`:
 
 ```markdown
 # claws Acceptance Scorecard — Ptah Wave
 
-| Series | Scenarios | Pass | Fail | Skip | Coverage |
-|--------|-----------|------|------|------|----------|
-| compile-pipeline | 8 | ? | ? | ? | CL-04 |
-| governance-rules | 12 | ? | ? | ? | CL-02 |
-| fail-mode | 6 | ? | ? | ? | CL-02 |
-| ... | ... | ... | ... | ... | ... |
-| **Total** | **~95** | **?** | **?** | **?** | |
+| Series           | Scenarios | Pass  | Fail  | Skip  | Coverage |
+| ---------------- | --------- | ----- | ----- | ----- | -------- |
+| compile-pipeline | 8         | ?     | ?     | ?     | CL-04    |
+| governance-rules | 12        | ?     | ?     | ?     | CL-02    |
+| fail-mode        | 6         | ?     | ?     | ?     | CL-02    |
+| ...              | ...       | ...   | ...   | ...   | ...      |
+| **Total**        | **~95**   | **?** | **?** | **?** |          |
 
 ## Findings
+
 - (bugs discovered by acceptance tests)
 
 ## Skipped
+
 - Fleet-sim series (Anubis wave)
 - Security-sim series beyond fail-mode (Thoth wave)
 ```
 
 ### D5: CI Integration
+
 - Add `npm run test:accept` to package.json scripts
 - Add acceptance test project to `vitest.config.ts`
 - Wire into CI as optional check (non-blocking for Ptah, blocking for Anubis)

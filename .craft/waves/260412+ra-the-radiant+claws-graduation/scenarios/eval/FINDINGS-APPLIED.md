@@ -11,6 +11,7 @@
 ## Summary of Changes
 
 ### CL-08 Package Architecture
+
 - **Zero dependencies**: eval row must show zero @craftworks/ deps in dependency matrix, dual-format export requirement (CJS + ESM) for all core packages
 - **Rubric validation**: weight validation invariant in createRubric contract, schema version in EvaluationResult type, error message quality requirements for factory functions
 - **Pass@k evaluation**: must evaluate all samples (not short-circuit), statelessness requirement for multi-sample evaluation, separate PassAtKResult fields for boolean vs statistical

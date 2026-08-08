@@ -22,6 +22,7 @@ This project follows a **coordinator-centric star topology** multi-agent workflo
 ## Workflow Architecture
 
 **Star Topology with Coordinator Hub:**
+
 ```
 User Request
     ↓
@@ -54,6 +55,7 @@ Each specialist agent has access to domain-specific tools:
 ![Agents and Tools](assets/agent_tools.png)
 
 **Tool Integration:**
+
 - **Custom Web Search**: Replaces Bing Search, used by Venue Specialist and Catering Coordinator
 - **Weather Tool**: Open-Meteo API (free, no key required), used by Logistics Manager
 - **Calendar Tools**: iCalendar (.ics) management with create/list/delete operations, used by Logistics Manager
@@ -89,7 +91,7 @@ spec-to-agents/
 │       └── tools/ # contains reusable tool definitions for agents
 │           └── __init__.py
 ├── tests/ # contains units tests for agents and tools
-├── .env  
+├── .env
 └── pyproject.toml
 ```
 
@@ -116,9 +118,11 @@ spec-to-agents/
 - `uv run mypy .` - Run type checking
 
 **Project-specific Commands:**
+
 - `uv run app` - Start the Agent Framework DevUI for testing and debugging agents/workflows
 
 ### Technology Stack Focus
+
 - **Python 3.11+**: Latest stable version with modern features
 - **Pydantic**: Data validation and settings management
 - **Agent Framework**: Building and orchestrating agents
@@ -128,12 +132,14 @@ spec-to-agents/
 ### Code Organization and Modularity
 
 **Prefer highly modular code** that separates concerns into distinct modules. This improves:
+
 - **Testability**: Each module can be tested in isolation
 - **Reusability**: Modules can be used independently
 - **Maintainability**: Changes are localized to specific modules
 - **Readability**: Clear separation of concerns makes code easier to understand
 
 **Guidelines**:
+
 - Keep modules focused on a single responsibility
 - Use clear module boundaries and minimal public APIs
 - Prefer composition over large monolithic modules
@@ -142,12 +148,14 @@ spec-to-agents/
 ### Code Organization and Modularity
 
 **Prefer highly modular code** that separates concerns into distinct modules. This improves:
+
 - **Testability**: Each module can be tested in isolation
 - **Reusability**: Modules can be used independently
 - **Maintainability**: Changes are localized to specific modules
 - **Readability**: Clear separation of concerns makes code easier to understand
 
 **Guidelines**:
+
 - Keep modules focused on a single responsibility
 - Use clear module boundaries and minimal public APIs
 - Prefer composition over large monolithic modules
@@ -168,6 +176,7 @@ When agents are created with `store=True`, the Azure AI Agent Client leverages s
 4. **No Manual Tracking**: No need for `full_conversation` passing or manual message arrays
 
 **Implementation:**
+
 ```python
 agent = client.create_agent(
     name="Agent Name",
@@ -178,6 +187,7 @@ agent = client.create_agent(
 ```
 
 **Benefits:**
+
 - Eliminates manual conversation tracking in coordinator
 - Conversation persists across workflow sessions
 - Simplifies coordinator logic significantly
@@ -192,11 +202,13 @@ agent = client.create_agent(
 **Error:** "No thread ID was provided, but chat messages includes tool results"
 
 **Solution:** The `convert_tool_content_to_text()` function converts tool-related content to text summaries:
+
 - `FunctionCallContent` → `"[Tool Call: tool_name({args})]"`
 - `FunctionResultContent` → `"[Tool Result for call_id: result]"`
 - Other content types passed through unchanged
 
 **When To Use:**
+
 - When passing messages between agents with different service thread IDs
 - In `_route_to_agent()`: Before sending messages to specialists
 - In `_synthesize_plan()`: Before sending conversation to coordinator
@@ -221,6 +233,7 @@ The workflow supports pausing for user input using framework-native patterns.
 8. **Coordinator Continues**: Routes back to requesting specialist with feedback
 
 **Implementation:**
+
 ```python
 # In coordinator
 await ctx.request_info(
@@ -251,6 +264,7 @@ async def on_human_feedback(
 ```
 
 **Key Benefits:**
+
 - Automatic conversation preservation via checkpointing
 - No manual state tracking required
 - DevUI integration out-of-the-box
@@ -284,6 +298,7 @@ class SpecialistOutput(BaseModel):
 ```
 
 **Routing Logic:**
+
 ```python
 if specialist_output.user_input_needed:
     await ctx.request_info(...)  # Pause for human input
@@ -294,6 +309,7 @@ else:
 ```
 
 **Benefits:**
+
 - Specialists control their own routing
 - No hardcoded agent sequence
 - Enables conditional logic (e.g., skip agents based on context)
@@ -320,6 +336,7 @@ workflow = (
 ```
 
 **Benefits:**
+
 - Simple mental model: all routing through coordinator hub
 - Easy to debug and trace execution
 - Natural fit for human-in-the-loop mediation
@@ -338,6 +355,7 @@ workflow = (
 - For Python: Add comprehensive numpy-style docstrings to all functions, classes, and modules
 
 **Avoid Over-Documenting:**
+
 - Do NOT document obvious behavior (e.g., a function named `get_name` that returns a name doesn't need extensive documentation)
 - Focus documentation on WHY and HOW, not WHAT (the code itself shows what it does)
 - Document edge cases, non-obvious behavior, and important constraints
@@ -371,6 +389,7 @@ workflow = (
       import math
       return math.pi * radius ** 2
   ```
+
 - Use proper built-in type annotations (e.g. `dict[..., ...]`, `list[...]`, `tuple[...]`) and only using `typing` module when needed.
 - Prefer to use `|` for union types instead of `Union[...]`, `type | None` instead of `Optional[...]`, etc.
 - Break down complex functions into smaller, more manageable functions.
@@ -405,6 +424,7 @@ You have a collection of tools available to assist with development and debuggin
   - **When to use:** Interact with DevUI for testing the workflow end-to-end from prompt to final result. Prefer using this as your default snapshot testing tool. You also have the ability to use `playwright` for viewing the browser console logs and network requests to help debug issues that may arise.
 
 # Updates to This Document
+
 - Update this document as needed to reflect changes in development practices or project structure
   - Updates usually come in the form of the package structure changing
 - Do NOT contradict existing guidelines in the document

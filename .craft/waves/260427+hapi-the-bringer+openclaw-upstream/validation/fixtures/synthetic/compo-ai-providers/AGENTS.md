@@ -6,6 +6,7 @@ trust: composition
 # compo-ai-providers
 
 Composition workspace bringing together 3 plugin(s):
+
 - `plugins/openai/`
 - `plugins/anthropic/`
 - `plugins/ollama/`

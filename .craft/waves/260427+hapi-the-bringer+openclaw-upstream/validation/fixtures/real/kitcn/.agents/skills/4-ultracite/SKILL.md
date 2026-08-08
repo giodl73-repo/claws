@@ -1,6 +1,6 @@
 ---
 name: 4-ultracite
-description: 'Skill: 4-ultracite'
+description: "Skill: 4-ultracite"
 metadata:
   skiller:
     source: .agents/rules/4-ultracite.mdc

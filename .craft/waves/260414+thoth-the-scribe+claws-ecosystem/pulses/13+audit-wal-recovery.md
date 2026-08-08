@@ -51,6 +51,7 @@ After a successful approval completes (approved or rejected), the corresponding 
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/ciso.md` — crash recovery security, approval timeout integrity, WAL design
 - `.craft/roles/claws/platform-eng.md` — file I/O patterns, JSONL format, crash recovery implementation
 

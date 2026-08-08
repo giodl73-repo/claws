@@ -13,6 +13,7 @@ Evaluating whether the 25-package decomposition produces clean dependency graphs
 ## Findings
 
 ### F01 — Dependency graph has a hidden diamond through compilation-host [M]
+
 **Severity**: Must-address
 **Category**: Dependency structure
 
@@ -21,6 +22,7 @@ The plan's dependency graph shows compilation-host depending on oc-readers, oc-i
 **Recommendation**: oc-ir must use exact version pins in all packages that depend on it, or all downstream packages must declare it as a peerDependency. The peerDependency model is correct here: oc-ir is a shared type system, not an implementation detail. Every package that touches IR types should declare `"peerDependencies": { "@craftworks/oc-ir": "^2.x" }`.
 
 ### F02 — The plan extracts by origin (compiler-sdk vs agent-sdk), not by architectural seam [M]
+
 **Severity**: Must-address
 **Category**: Boundary placement
 
@@ -29,6 +31,7 @@ The package map has two sections: "From compiler-sdk (12 packages)" and "From ag
 **Recommendation**: Redraw boundaries by domain, not by origin. Governance is one package. The evaluation framework is either standalone (if it genuinely has no compiler deps) or part of the execution domain. The question isn't "which SDK did this code come from?" but "which domain does this code serve?"
 
 ### F03 — "SDK becomes thin orchestrator" creates a re-export maintenance tax [W]
+
 **Severity**: Warning
 **Category**: Maintenance burden
 
@@ -37,6 +40,7 @@ The plan shows compiler-sdk as `export * from '@craftworks/oc-readers'` times 10
 **Recommendation**: Replace `export *` with explicit named re-exports for compiler-sdk's public API surface. This creates a curated facade rather than an accidental aggregation. Yes, this is more maintenance — but it catches collisions at build time and gives the SDK a deliberate, documented API.
 
 ### F04 — oc-readers and oc-ir should be one package [M]
+
 **Severity**: Must-address
 **Category**: Boundary placement
 
@@ -45,6 +49,7 @@ The plan splits forma/ into @craftworks/oc-readers (read 9 OC workspace files) a
 **Recommendation**: Merge into @craftworks/oc (or @craftworks/forma). One package: read workspaces, get typed IR back. Saves one package and eliminates a mandatory transitive dependency.
 
 ### F05 — input-resolver placement in Phase 3 suggests misclassified dependency [W]
+
 **Severity**: Warning
 **Category**: Dependency ordering
 
@@ -53,6 +58,7 @@ input-resolver depends on oc-readers and crypto. It's placed in Phase 3 (framewo
 **Recommendation**: Verify input-resolver's actual dependency set. If it only depends on Phase 1-2 packages, move it to Phase 2 and execute it in parallel with oc-readers.
 
 ### F06 — The dependency graph is acyclic but barely — skill-resolver has unclear deps [W]
+
 **Severity**: Warning
 **Category**: Dependency structure
 
@@ -61,6 +67,7 @@ skill-resolver depends on oc-ir per the dependency table, but the dependency gra
 **Recommendation**: Audit skill-resolver's actual import graph before extraction. Use `madge` on the current compiler-sdk to map skill-resolver's real dependencies. The plan's dependency table appears incomplete for this package.
 
 ### F07 — workspace-discovery and platform-detect overlap [N]
+
 **Severity**: Note
 **Category**: Boundary clarity
 
@@ -69,6 +76,7 @@ skill-resolver depends on oc-ir per the dependency table, but the dependency gra
 **Recommendation**: Consider merging into @craftworks/workspace (discovery + platform detection). If they're genuinely independent (discovery doesn't need detection, detection doesn't need discovery), keep separate but document the distinction clearly.
 
 ### F08 — No shared types package in the graph [M]
+
 **Severity**: Must-address
 **Category**: Dependency structure
 
@@ -77,6 +85,7 @@ The dependency graph has no shared types layer. Every package defines its own ty
 **Recommendation**: Either (a) make oc-ir and crypto explicitly "type authority" packages with stability guarantees beyond normal semver, or (b) extract a @craftworks/types package that holds the shared interfaces (IR types, crypto types, governance types) with stricter versioning. Option (a) is simpler but requires discipline. Option (b) is more explicit but adds a package.
 
 ### F09 — The "zero circular deps" validation needs enforcement, not just checking [N]
+
 **Severity**: Note
 **Category**: CI/CD
 
@@ -88,8 +97,8 @@ H1 validates "npx madge --circular shows zero circular deps between extracted pa
 
 The dependency graph is acyclic today but has diamonds through oc-ir that will cause npm deduplication issues for external consumers. Package boundaries follow SDK origin rather than domain architecture — governance, workspace discovery, and forma are split across packages that should be unified. The thin-SDK re-export model works but needs explicit named exports to prevent collision as packages grow. The most impactful consolidations: merge oc-readers + oc-ir, merge governance-primitives + governance-runtime, merge workspace-discovery + platform-detect. This alone drops from 25 to 22, and further emitter consolidation drops to ~12.
 
-| Severity | Count |
-|----------|-------|
-| Must-address | 4 |
-| Warning | 3 |
-| Note | 2 |
+| Severity     | Count |
+| ------------ | ----- |
+| Must-address | 4     |
+| Warning      | 3     |
+| Note         | 2     |

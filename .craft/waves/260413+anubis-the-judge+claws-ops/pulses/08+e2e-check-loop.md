@@ -52,6 +52,7 @@ This test proves that the check command correctly identifies governance violatio
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/skill-author.md` — violation semantics from the author perspective, diagnostic field requirements
 - `.craft/roles/craft/navigator.md` — UX expectations for check output, exit code conventions
 

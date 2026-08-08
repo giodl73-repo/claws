@@ -6,6 +6,7 @@ trust: composition
 # compo-music-controls
 
 Composition workspace bringing together 2 plugin(s):
+
 - `plugins/spotify/`
 - `plugins/sonos/`
 

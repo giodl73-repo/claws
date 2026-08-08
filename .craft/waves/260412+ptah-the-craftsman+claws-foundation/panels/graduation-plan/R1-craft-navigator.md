@@ -189,10 +189,10 @@ Upsell messages in CLI tools are notoriously irritating if done wrong (see: npm 
 ## Summary
 
 | Severity | Count |
-|----------|-------|
-| MAJOR | 4 |
-| WARNING | 6 |
-| Total | 10 |
+| -------- | ----- |
+| MAJOR    | 4     |
+| WARNING  | 6     |
+| Total    | 10    |
 
 ## Recommendation
 

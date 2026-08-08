@@ -92,6 +92,7 @@ npm run build
 ## Checkpoint Gate
 
 This is the CP-3 gate pulse. All CP-3 exit criteria must be met:
+
 - [ ] All 29 governance rules apply to CapabilityManifest
 - [ ] R5 tools flagged as OBO with elicitation gate
 - [ ] Gateway plugin type-checks against OC plugin types
@@ -111,6 +112,7 @@ This is the CP-3 gate pulse. All CP-3 exit criteria must be met:
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/platform-eng.md` — multi-platform emission, loss matrix, platform adapters
 - `.craft/roles/craft/architect.md` — system architecture, cross-platform consistency, emit pipeline
 - `.craft/roles/craft/dragon.md` — security review, --strict-loss enforcement, R5 non-negotiability
@@ -118,16 +120,20 @@ Load these role files before starting:
 ## Review Amendments (R1)
 
 ### C03: Loss Matrix Uses Shared Module
+
 - [ ] Import loss matrix types from `claws-sdk/src/types/loss-matrix.ts` (shared with detect)
 - [ ] No local loss matrix definition in emit/ — single source of truth
 
 ### Platform-Eng: --strict-loss Reporting
+
 - [ ] --strict-loss error output MUST include: which platforms blocked, which R5 tools, which governance capabilities missing
 - [ ] Not just "blocked" — actionable output showing what to fix
 
 ### CISO: R5 Default Strict
+
 - [ ] R5 tools default to --strict-loss behavior (non-configurable per CL-02)
 - [ ] `--allow-advisory-r5` explicit opt-in required to emit R5 governance to advisory platforms
 
 ### C10: Getting-Started Doc (CP-3 Gate)
+
 - [ ] Write `docs/claws/getting-started/rules-reference.md` — 1-2 pages: 29 rules, severity levels, how to read pinch output

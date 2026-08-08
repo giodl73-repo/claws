@@ -34,18 +34,14 @@ export default defineAuth((ctx) => ({
         const roleSuffix = data.role ? ` as ${data.role}` : "";
         const acceptUrl = `${process.env.SITE_URL!}/w/${data.organization.slug}?invite=${data.id}`;
 
-        await schedulerCtx.scheduler.runAfter(
-          0,
-          internal.plugins.email.sendTemplatedEmail,
-          {
-            to: data.email,
-            subject: `${inviterName} invited you to join ${organizationName}`,
-            title: `Invitation to join ${organizationName}`,
-            body: `${inviterName} (${data.inviter.user.email}) invited you to join ${organizationName}${roleSuffix}.`,
-            ctaLabel: "Accept invitation",
-            ctaUrl: acceptUrl,
-          }
-        );
+        await schedulerCtx.scheduler.runAfter(0, internal.plugins.email.sendTemplatedEmail, {
+          to: data.email,
+          subject: `${inviterName} invited you to join ${organizationName}`,
+          title: `Invitation to join ${organizationName}`,
+          body: `${inviterName} (${data.inviter.user.email}) invited you to join ${organizationName}${roleSuffix}.`,
+          ctaLabel: "Accept invitation",
+          ctaUrl: acceptUrl,
+        });
       },
     }),
   ],
@@ -76,16 +72,7 @@ export const authClient = createAuthClient({
 
 ```ts
 // convex/functions/schema.ts
-import {
-  convexTable,
-  defineSchema,
-  id,
-  index,
-  integer,
-  json,
-  text,
-  timestamp,
-} from "kitcn/orm";
+import { convexTable, defineSchema, id, index, integer, json, text, timestamp } from "kitcn/orm";
 
 export const organization = convexTable(
   "organization",
@@ -96,7 +83,7 @@ export const organization = convexTable(
     createdAt: timestamp().notNull().defaultNow(),
     metadata: json<Record<string, unknown>>(),
   },
-  (t) => [index("slug").on(t.slug), index("name").on(t.name)]
+  (t) => [index("slug").on(t.slug), index("name").on(t.name)],
 );
 
 export const member = convexTable(
@@ -111,7 +98,7 @@ export const member = convexTable(
     index("userId").on(t.userId),
     index("organizationId_userId").on(t.organizationId, t.userId),
     index("organizationId_role").on(t.organizationId, t.role),
-  ]
+  ],
 );
 
 export const invitation = convexTable(
@@ -128,13 +115,9 @@ export const invitation = convexTable(
   (t) => [
     index("email").on(t.email),
     index("status").on(t.status),
-    index("email_organizationId_status").on(
-      t.email,
-      t.organizationId,
-      t.status
-    ),
+    index("email_organizationId_status").on(t.email, t.organizationId, t.status),
     index("organizationId_status").on(t.organizationId, t.status),
-  ]
+  ],
 );
 
 // Add to existing session table
@@ -156,7 +139,7 @@ export const team = convexTable(
     createdAt: timestamp().notNull().defaultNow(),
     updatedAt: integer(),
   },
-  (t) => [index("organizationId").on(t.organizationId)]
+  (t) => [index("organizationId").on(t.organizationId)],
 );
 
 export const teamMember = convexTable(
@@ -166,7 +149,7 @@ export const teamMember = convexTable(
     userId: id("user").notNull(),
     createdAt: timestamp(),
   },
-  (t) => [index("teamId").on(t.teamId), index("userId").on(t.userId)]
+  (t) => [index("teamId").on(t.teamId), index("userId").on(t.userId)],
 );
 ```
 
@@ -193,11 +176,7 @@ Then add matching columns in your schema.
 ```ts
 // convex/shared/auth-shared.ts
 import { createAccessControl } from "better-auth/plugins/access";
-import {
-  defaultStatements,
-  memberAc,
-  ownerAc,
-} from "better-auth/plugins/organization/access";
+import { defaultStatements, memberAc, ownerAc } from "better-auth/plugins/organization/access";
 
 const statement = { ...defaultStatements } as const;
 export const ac = createAccessControl(statement);
@@ -269,7 +248,7 @@ import type { AuthCtx } from "../crpc";
 export const hasPermission = async (
   ctx: AuthCtx,
   body: { permissions: Record<string, string[]> },
-  shouldThrow = true
+  shouldThrow = true,
 ) => {
   const result = await ctx.auth.api.hasPermission({
     body,
@@ -323,14 +302,13 @@ export const listOrganizations = authQuery
           name: z.string(),
           plan: z.string(),
           slug: z.string(),
-        })
+        }),
       ),
-    })
+    }),
   )
   .query(async ({ ctx }) => {
     const orgs = await listUserOrganizations(ctx, ctx.userId);
-    if (!orgs?.length)
-      return { canCreateOrganization: true, organizations: [] };
+    if (!orgs?.length) return { canCreateOrganization: true, organizations: [] };
 
     const activeOrgId = ctx.user.activeOrganization?.id;
     const organizations = orgs
@@ -398,7 +376,7 @@ export const updateOrganization = authMutation
       logo: z.string().url().optional(),
       name: z.string().min(1).max(100).optional(),
       slug: z.string().optional(),
-    })
+    }),
   )
 
   .mutation(async ({ ctx, input }) => {
@@ -453,8 +431,7 @@ export const deleteOrganization = authMutation
     if (input.organizationId === ctx.user.personalOrganizationId) {
       throw new CRPCError({
         code: "FORBIDDEN",
-        message:
-          "Personal organizations can be deleted only by deleting your account.",
+        message: "Personal organizations can be deleted only by deleting your account.",
       });
     }
     if (input.organizationId === ctx.user.activeOrganization?.id) {
@@ -493,7 +470,7 @@ export const inviteMember = authMutation
       email: z.string().email(),
       organizationId: z.string(),
       role: z.enum(["owner", "member"]),
-    })
+    }),
   )
 
   .mutation(async ({ ctx, input }) => {
@@ -528,10 +505,7 @@ export const inviteMember = authMutation
       limit: DEFAULT_LIST_LIMIT,
     });
     for (const inv of existing) {
-      await ctx.orm
-        .update(invitation)
-        .set({ status: "canceled" })
-        .where(eq(invitation.id, inv.id));
+      await ctx.orm.update(invitation).set({ status: "canceled" }).where(eq(invitation.id, inv.id));
     }
 
     await ctx.auth.api.createInvitation({
@@ -653,8 +627,8 @@ export const listUserInvitations = authQuery
         organizationName: z.string(),
         organizationSlug: z.string(),
         role: z.string(),
-      })
-    )
+      }),
+    ),
   )
   .query(async ({ ctx }) => {
     const invitations = await ctx.orm.query.invitation.findMany({
@@ -707,8 +681,8 @@ export const listPendingInvitations = authQuery
         organizationId: z.string(),
         role: z.string(),
         status: z.string(),
-      })
-    )
+      }),
+    ),
   )
   .query(async ({ ctx, input }) => {
     const org = await ctx.orm.query.organization.findFirst({
@@ -719,7 +693,7 @@ export const listPendingInvitations = authQuery
     const canManage = await hasPermission(
       ctx,
       { organizationId: org.id, permissions: { invitation: ["create"] } },
-      false
+      false,
     );
     if (!canManage) return [];
 
@@ -755,11 +729,7 @@ export const listPendingInvitations = authQuery
 
 ```ts
 export const getActiveMember = authQuery
-  .output(
-    z
-      .object({ id: z.string(), createdAt: z.date(), role: z.string() })
-      .nullable()
-  )
+  .output(z.object({ id: z.string(), createdAt: z.date(), role: z.string() }).nullable())
   .query(async ({ ctx }) => {
     if (!ctx.user.activeOrganization) return null;
     const m = await ctx.orm.query.member.findFirst({
@@ -816,9 +786,9 @@ export const listMembers = authQuery
             name: z.string().nullable(),
           }),
           userId: z.string(),
-        })
+        }),
       ),
-    })
+    }),
   )
   .query(async ({ ctx, input }) => {
     const org = await ctx.orm.query.organization.findFirst({

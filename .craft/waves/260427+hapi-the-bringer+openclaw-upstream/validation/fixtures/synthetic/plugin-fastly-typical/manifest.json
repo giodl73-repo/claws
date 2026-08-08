@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "fastly plugin (infra)",
   "contributes": {
-    "tools": [
-      "fastly/purge",
-      "fastly/list-services"
-    ],
-    "skills": [
-      "fastly/purge",
-      "fastly/list-services"
-    ]
+    "tools": ["fastly/purge", "fastly/list-services"],
+    "skills": ["fastly/purge", "fastly/list-services"]
   }
 }

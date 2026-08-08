@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "flux plugin (infra)",
   "contributes": {
-    "tools": [
-      "flux/reconcile",
-      "flux/suspend"
-    ],
-    "skills": [
-      "flux/reconcile",
-      "flux/suspend"
-    ]
+    "tools": ["flux/reconcile", "flux/suspend"],
+    "skills": ["flux/reconcile", "flux/suspend"]
   }
 }

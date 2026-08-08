@@ -22,6 +22,7 @@ status: complete
 ## Major Findings
 
 ### M-01: Snapshot manifest format underspecified — no schema version or migration path
+
 **Pulse**: 19 (snap-save-restore)
 **Role**: craft:architect, claws:ciso
 
@@ -32,26 +33,30 @@ The SnapshotManifest type includes `files[]`, `SHA-256 hashes`, `timestamp`, `cl
 ---
 
 ### M-02: Semantic diff requires double compilation — no cheaper path specified
+
 **Pulse**: 21 (snap-diff)
 **Role**: claws:gateway-eng, craft:architect
 
 The pulse states: "compile both snapshots through the analysis pipeline and compare the resulting GovernanceIR." For any non-trivial workspace, this means invoking the full parse-extract-analyze pipeline twice per diff. The CP-3 exit criteria require diff to be part of the e2e loop (P27), and the <120s budget for 3 workspaces (line 39 of cp-3.md) will be consumed almost entirely by six compilations (2 snapshots x 3 workspaces).
 
 The pulse plan has no discussion of:
+
 - Caching compiled IR alongside the snapshot at save time (so diff only loads, never recompiles)
 - A fast-path hash comparison that skips compilation when file hashes are identical
 
-**Recommendation**: Amend P19 to save the compiled GovernanceIR *inside* the snapshot directory (it's already listed as a captured file but not explicitly compiled fresh at save time). Amend P21 to load pre-compiled IR from both snapshots instead of recompiling. This eliminates the double-compilation cost and makes diff O(IR-size) instead of O(compile-time).
+**Recommendation**: Amend P19 to save the compiled GovernanceIR _inside_ the snapshot directory (it's already listed as a captured file but not explicitly compiled fresh at save time). Amend P21 to load pre-compiled IR from both snapshots instead of recompiling. This eliminates the double-compilation cost and makes diff O(IR-size) instead of O(compile-time).
 
 ---
 
 ### M-03: Broadcast atomicity claim is not achievable with the specified write sequence
+
 **Pulse**: 23 (fleet-broadcast)
 **Role**: claws:platform-eng, claws:ciso
 
 The pulse claims "manifest atomicity (write manifest.json first with planned changes, then write files, verify after)." This is not atomic — it is a two-phase write without rollback. If power loss or a crash occurs after writing manifest.json but before writing all policy files, the workspace is left in an inconsistent state: the manifest claims files were written, but they don't exist (or are partial).
 
 True atomicity on a filesystem requires either:
+
 1. Write-to-temp + atomic rename (rename is atomic on NTFS and ext4)
 2. A journal/WAL that can detect incomplete writes on next read
 
@@ -62,10 +67,12 @@ The current plan also doesn't address what happens when the verify-after step fa
 ---
 
 ### M-04: Kill sentinel file reliability — agent may not poll the filesystem
+
 **Pulse**: 25 (fleet-kill)
 **Role**: claws:gateway-eng
 
 The sentinel file path (`.claws/KILL`) assumes that a running gateway process or agent actively polls the filesystem for this file. The pulse plan does not specify:
+
 - Who reads the KILL file and at what frequency
 - What happens if the agent framework has no filesystem polling (e.g., Bedrock agents, LangGraph running remotely)
 - The expected latency between KILL file creation and actual execution halt
@@ -79,10 +86,12 @@ For the SIGTERM path, `gateway.pid` implies a long-running process, but current 
 ---
 
 ### M-05: Drift hash composition is not deterministic across platforms
+
 **Pulse**: 22 (fleet-drift)
 **Role**: claws:platform-eng, claws:ciso
 
 The pulse specifies "SHA-256 of concatenated hashes of claws.json + policies/ files + governance-ir.json." This composite hash is sensitive to:
+
 1. **File enumeration order**: `policies/` directory listing order differs between NTFS (case-insensitive, insertion-ordered) and ext4 (inode-ordered). If hashes are concatenated in directory listing order, the same workspace produces different composite hashes on Windows vs Linux.
 2. **Line endings**: Git checkout on Windows may convert LF to CRLF in JSON/YAML files, changing file hashes even though content is semantically identical.
 3. **JSON key ordering**: If governance-ir.json is regenerated (not byte-copied), JSON.stringify key order may differ.
@@ -96,10 +105,12 @@ A hash that varies by platform breaks fleet operations in mixed-OS environments 
 ## Warning Findings
 
 ### W-01: Exception registry in fleet-exceptions.json has no authorization model
+
 **Pulse**: 22 (fleet-drift)
 **Role**: claws:ciso
 
 The exception registry stores "workspace pattern, reason, approver, expiry date" but there is no specification for:
+
 - Who is authorized to create exceptions (any user? only CISO role?)
 - Whether exceptions are signed (can an attacker add an exception to suppress drift alerts?)
 - Whether exceptions are included in the audit chain
@@ -111,6 +122,7 @@ An unsigned exception file is a trivial bypass for drift detection: modify the p
 ---
 
 ### W-02: Fleet runner parallelism may hit Windows file locking on .claws/ dirs
+
 **Pulse**: 20 (fleet-scan), 23 (fleet-broadcast)
 **Role**: claws:platform-eng
 
@@ -123,6 +135,7 @@ P23 has retry logic for EBUSY, but P20 (scan) and P22 (drift) have no retry logi
 ---
 
 ### W-03: E2e test (P27) depends on all 8 prior pulses — fragile and slow
+
 **Pulse**: 27 (e2e-fleet-loop)
 **Role**: craft:architect
 
@@ -135,6 +148,7 @@ There is no intermediate verification step — the test goes from "all primitive
 ---
 
 ### W-04: Fleet-report compliance matrix assumes framework detection exists
+
 **Pulse**: 26 (fleet-report)
 **Role**: claws:compliance, craft:architect
 
@@ -147,6 +161,7 @@ P26 deliverables don't include a framework classifier. The matrix will have empt
 ---
 
 ### W-05: Snapshot promote "signer" field is just a string — no identity verification
+
 **Pulse**: 24 (snap-promote)
 **Role**: claws:ciso
 
@@ -159,6 +174,7 @@ CP-4 introduces key management (P28+), but P24 in CP-3 should at least reserve t
 ---
 
 ### W-06: Kill audit uses different event format than existing AuditEvent/AuditChainEntry
+
 **Pulse**: 25 (fleet-kill)
 **Role**: claws:gateway-eng, claws:ciso
 
@@ -171,6 +187,7 @@ The kill audit as specified would be a different, simpler format — breaking th
 ---
 
 ### W-07: Double-kill TTL is configurable but no default is specified
+
 **Pulse**: 25 (fleet-kill)
 **Role**: claws:gateway-eng
 
@@ -183,12 +200,13 @@ P25 mentions "within configured TTL" for determining if a sentinel is stale, but
 ## Note Findings
 
 ### N-01: Test count totals across CP-3 pulses don't match exit criteria
+
 **Role**: craft:architect
 
 CP-3 exit criteria specify "L0: 35+ unit tests, L1: 14+ integration, L2: 7+ e2e." Summing the pulse test_tiers:
 
 | Tier | P19 | P20 | P21 | P22 | P23 | P24 | P25 | P26 | P27 | Total | Target |
-|------|-----|-----|-----|-----|-----|-----|-----|-----|-----|-------|--------|
+| ---- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ----- | ------ |
 | L0   | 8   | 6   | 5   | 6   | 6   | 4   | 6   | 4   | 0   | 45    | 35+    |
 | L1   | 3   | 3   | 2   | 2   | 3   | 2   | 2   | 2   | 0   | 19    | 14+    |
 | L2   | 0   | 0   | 0   | 0   | 0   | 0   | 0   | 0   | 1   | 1     | 7+     |
@@ -200,6 +218,7 @@ L0 and L1 exceed targets, but **L2 is 1 against a target of 7+**. The e2e target
 ---
 
 ### N-02: No `.gitignore` guidance for snapshot and fleet directories
+
 **Pulse**: 19, 20, 22
 **Role**: claws:platform-eng
 
@@ -210,6 +229,7 @@ Snapshots go into `.claws/snapshots/`, fleet manifests into `.claws/fleet-manife
 ---
 
 ### N-03: Scan marker list may need extensibility
+
 **Pulse**: 20 (fleet-scan)
 **Role**: claws:platform-eng
 
@@ -220,6 +240,7 @@ The hardcoded marker list (SOUL.md, CLAUDE.md, .cursorrules, .cursor/rules, AGEN
 ---
 
 ### N-04: Fleet-report default format detection (TTY vs pipe) is not testable in CI
+
 **Pulse**: 26 (fleet-report)
 **Role**: claws:platform-eng
 
@@ -230,6 +251,7 @@ The acceptance criteria state "Default format is table when stdout is TTY, JSON 
 ---
 
 ### N-05: Audit chain append concurrency during fleet-wide kill
+
 **Pulse**: 25 (fleet-kill)
 **Role**: claws:ciso
 
@@ -241,10 +263,10 @@ Fleet-wide kill iterates all workspaces and activates kill on each. Since each w
 
 ## Summary
 
-| Severity | Count | Key themes |
-|----------|-------|------------|
-| Major    | 5     | Manifest schema version, double-compilation cost, broadcast atomicity, kill path semantics, drift hash determinism |
+| Severity | Count | Key themes                                                                                                                                     |
+| -------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Major    | 5     | Manifest schema version, double-compilation cost, broadcast atomicity, kill path semantics, drift hash determinism                             |
 | Warning  | 7     | Exception signing, Windows file locking, e2e fragility, framework detection gap, signer identity, audit format inconsistency, kill TTL default |
-| Note     | 5     | Test count mismatch, gitignore guidance, marker extensibility, TTY testing, audit concurrency |
+| Note     | 5     | Test count mismatch, gitignore guidance, marker extensibility, TTY testing, audit concurrency                                                  |
 
 **Pulses requiring edits**: P19 (M-01, M-02), P21 (M-02), P22 (M-05, W-01), P23 (M-03, W-04), P24 (W-05), P25 (M-04, W-06, W-07), P27 (N-01)

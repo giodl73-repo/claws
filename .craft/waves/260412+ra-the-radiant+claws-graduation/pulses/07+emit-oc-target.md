@@ -58,6 +58,7 @@ The free tier supports exactly 2 emit targets: OC (this pulse) and Claude Code (
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/codegen.md` -- code generation patterns, emitter design, output validation
 - `.craft/roles/claws/platform-eng.md` -- SDK emit conventions, Gateway plugin structure
 

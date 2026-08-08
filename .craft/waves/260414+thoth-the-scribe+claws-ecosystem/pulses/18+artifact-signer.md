@@ -58,6 +58,7 @@ The THOTH-FINDINGS C-02 fix makes PBKDF2 iteration count configurable via claws.
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/ciso.md` — cryptographic signing requirements, PBKDF2 security, RFC 3161 TSA integration
 - `.craft/roles/craft/architect.md` — SDK integration patterns, compiler-sdk integrity wrapping, configuration design
 

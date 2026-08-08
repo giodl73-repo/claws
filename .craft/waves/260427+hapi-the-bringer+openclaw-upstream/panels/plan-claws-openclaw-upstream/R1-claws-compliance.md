@@ -1,9 +1,11 @@
 # Plan Review · claws-openclaw-upstream · R1
+
 **Reviewer**: claws:compliance
 **Date**: 2026-04-27
 **Verdict**: APPROVE-WITH-WARNINGS
 
 ## Summary
+
 The plan establishes hash-chained audit integrity and approval-handle replay-resistance mechanisms that satisfy tamper-evidence requirements. However, three critical compliance gaps remain unspecified: (1) ComplianceReport signature key rotation and lifecycle, (2) mandatory field mappings in the audit-stream adapter (timestamp granularity, actor identity correlation), and (3) discovery/e-discovery query patterns. These block SOC 2 Type II and HIPAA pre-audit readiness unless addressed in follow-up specifications.
 
 ## Findings
@@ -29,7 +31,7 @@ The plan establishes hash-chained audit integrity and approval-handle replay-res
 2. **External-export integrity relies on caller-side validation** — The audit/export.ts functions are pure transformers; they assume the input AuditEntry array is already integrity-verified. If a caller exports stale or re-ordered events, the SIEM receives them without evidence of tampering. Suggested action: Publish expected-format contracts in the adapter-audits.md (H6) and add a --verify flag to snap export to re-verify the chain before formatting.
 
 ## Strengths
+
 - **Hash-chained HMAC-SHA256 audit integrity is cryptographically sound**: chain.ts and verify.ts implement canonical-JSON canonicalization (RFC 8785 JCS) ensuring cross-platform byte-identical hashing and timing-safe comparison to resist side-channel attacks. This satisfies tamper-evidence table stakes for SOC 2 and HIPAA.
 - **Approval-handle replay-resistance is well-specified**: handle.ts implements nonce + sequenceNumber + timing-safe verification with fail-closed TTL semantics, satisfying non-repudiation for approval audit trails.
 - **Compliance report structure is auditor-friendly**: renderReport renders Markdown/SARIF/JSON/HTML with requirement IDs, evidence references, and gaps clearly demarcated—CISO teams can hand this to Big 4 auditors immediately.
-

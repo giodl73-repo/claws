@@ -52,6 +52,7 @@ This pulse also configures the dual-coverage CI gate for claws-sdk: two vitest p
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/architect.md` — monorepo structure, type design patterns, barrel export conventions
 - `.craft/roles/claws/platform-eng.md` — SDK type foundations, cross-module integration patterns
 

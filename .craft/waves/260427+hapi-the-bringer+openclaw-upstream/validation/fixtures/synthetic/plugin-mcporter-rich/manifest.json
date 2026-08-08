@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "mcporter plugin (developer)",
   "contributes": {
-    "tools": [
-      "mcporter/list-mcp-servers",
-      "mcporter/register-server"
-    ],
-    "skills": [
-      "mcporter/list-mcp-servers",
-      "mcporter/register-server"
-    ],
-    "workflows": [
-      "mcporter-flow.lobster"
-    ],
+    "tools": ["mcporter/list-mcp-servers", "mcporter/register-server"],
+    "skills": ["mcporter/list-mcp-servers", "mcporter/register-server"],
+    "workflows": ["mcporter-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

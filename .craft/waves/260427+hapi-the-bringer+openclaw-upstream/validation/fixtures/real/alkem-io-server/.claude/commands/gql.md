@@ -33,12 +33,24 @@ IMPORTANT: The query must be written to a file to avoid shell escaping issues wi
 ## Examples
 
 ### Simple query — current user
+
 ```graphql
-query { me { user { id nameID profile { displayName } } } }
+query {
+  me {
+    user {
+      id
+      nameID
+      profile {
+        displayName
+      }
+    }
+  }
+}
 ```
 
 ### Query with variables — space by ID
-```graphql
+
+````graphql
 query SpaceById($id: UUID!) {
   lookup {
     space(ID: $id) {
@@ -58,12 +70,23 @@ mutation UpdateProfile($input: UpdateProfileDirectInput!) {
     displayName
   }
 }
-```
+````
+
 Variables: `{"input": {"profileID": "some-uuid", "displayName": "New Name"}}`
 
 ### Introspection — list all query fields
+
 ```graphql
-query { __schema { queryType { fields { name description } } } }
+query {
+  __schema {
+    queryType {
+      fields {
+        name
+        description
+      }
+    }
+  }
+}
 ```
 
 ## Troubleshooting

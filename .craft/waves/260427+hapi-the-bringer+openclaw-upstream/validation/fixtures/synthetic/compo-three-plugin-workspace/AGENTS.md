@@ -6,6 +6,7 @@ trust: composition
 # compo-three-plugin-workspace
 
 Composition workspace bringing together 3 plugin(s):
+
 - `plugins/github/`
 - `plugins/linear/`
 - `plugins/slack/`

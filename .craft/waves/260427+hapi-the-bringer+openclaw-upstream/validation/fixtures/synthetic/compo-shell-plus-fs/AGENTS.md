@@ -6,6 +6,7 @@ trust: composition
 # compo-shell-plus-fs
 
 Composition workspace bringing together 2 plugin(s):
+
 - `plugins/shell/`
 - `plugins/filesystem/`
 

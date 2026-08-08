@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "vllm plugin (ai_ml)",
   "contributes": {
-    "tools": [
-      "vllm/generate"
-    ],
-    "skills": [
-      "vllm/generate"
-    ]
+    "tools": ["vllm/generate"],
+    "skills": ["vllm/generate"]
   }
 }

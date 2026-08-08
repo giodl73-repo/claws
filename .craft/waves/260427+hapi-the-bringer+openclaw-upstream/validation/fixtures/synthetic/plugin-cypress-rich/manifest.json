@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "cypress plugin (testing)",
   "contributes": {
-    "tools": [
-      "cypress/run-test",
-      "cypress/list-specs"
-    ],
-    "skills": [
-      "cypress/run-test",
-      "cypress/list-specs"
-    ],
-    "workflows": [
-      "cypress-flow.lobster"
-    ],
+    "tools": ["cypress/run-test", "cypress/list-specs"],
+    "skills": ["cypress/run-test", "cypress/list-specs"],
+    "workflows": ["cypress-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

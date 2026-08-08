@@ -16,7 +16,7 @@
 
 **Behavior change** at `src/plugins/hooks.ts:1008-1013` and `src/plugins/trusted-tool-policy.ts:43-45`: the existing `??` (nullish-coalesce) merger is **first-wins** — the first plugin that returns a `requireApproval` descriptor wins, every subsequent plugin's `requireApproval` is silently dropped. This is a **chain-of-custody bug** for governance plugins enforcing R5 (irreversible-external) or RESTRICTED-data invariants — plugin-A's approval requirement can be silently discarded by plugin-B returning no approval, leaving the agent free to act on a tool that should have required external review.
 
-**Why this is folded into the PolicyIR PR**: same chain-of-custody story at a different layer. PolicyIR + `ctx.lkgFingerprint` deliver chain-of-custody for the *artifact* (which version of the policy was evaluated against). The merger fix delivers chain-of-custody for the *enforcement* (every plugin's decision survives the merger). End-to-end policy chain-of-custody is the unified story; splitting these two would orphan one half.
+**Why this is folded into the PolicyIR PR**: same chain-of-custody story at a different layer. PolicyIR + `ctx.lkgFingerprint` deliver chain-of-custody for the _artifact_ (which version of the policy was evaluated against). The merger fix delivers chain-of-custody for the _enforcement_ (every plugin's decision survives the merger). End-to-end policy chain-of-custody is the unified story; splitting these two would orphan one half.
 
 **The fix**: merger becomes **conjunctive** — every plugin's `requireApproval` survives, the companion app receives an array of approval descriptors, all must be approved before the action proceeds. Field widens from `ApprovalDescriptor` to `ApprovalDescriptor | ApprovalDescriptor[]` at `hook-types.ts:421-433`. Both call sites (`hooks.ts` and `trusted-tool-policy.ts`) import the same `mergeApprovals` helper from a new shared module (`src/plugins/approval-merge.ts`).
 
@@ -25,8 +25,6 @@
 **Swift protocol model regen** for `apps/macos/Sources/OpenClawProtocol/GatewayModels.swift` and `apps/shared/OpenClawKit/Sources/OpenClawProtocol/GatewayModels.swift` to accept the widened field shape.
 
 ~10 lines of source change across two sites + 1 shared helper module + 1 try/catch wrapper + 2 Swift model regens. Test plan covers F-17..F-25 from the wave's findings catalog (multi-plugin merger collects all descriptors; plugin-A's approval survives plugin-B's exception; conjunctive AND on the supervisor side; existing tests asserting first-wins must update — break is the proof).
-
-
 
 ## Change Type
 

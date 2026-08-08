@@ -22,6 +22,7 @@ If GatewaySim wires a MockGovernanceHost that implements the 2-arg interface, th
 The generated plugin index.ts (emit-plugin.ts:262) contains `import('@openclaw/governance').GovernanceHost`. The handler files (e.g., `handlers/before-tool-call.ts:321`) contain `import type { GovernanceHost } from '@openclaw/governance'`. This is a phantom package — it does not exist in node_modules, package.json, or anywhere in the monorepo. The generated code is designed for the OC runtime (where `@openclaw/governance` would be provided by the gateway), but GatewaySim needs to load this generated code in a test environment.
 
 Dynamic `import()` of the generated `index.ts` will fail at module resolution because `@openclaw/governance` cannot be resolved. The plan says "load via dynamic import()" but does not address how phantom imports are handled. The plugin-loader (Pulse 02) must either:
+
 - Provide a module resolution shim/alias that maps `@openclaw/governance` to the real GovernanceHost type from `claws-sdk/src/adapter/`
 - Strip the phantom import and inject the host via context (as the inline plugin already does via `ctx['__governanceHost']`)
 - Use only the inline `index.ts` (which uses context injection, not imports) rather than the handler files
@@ -55,6 +56,7 @@ The plan includes fail-mode testing (R2 fail-open, R4 fail-closed) with Governan
 The plan states GatewaySim loads `index.ts` via dynamic `import()`. Node.js cannot dynamically import raw TypeScript files. The Pulse 02 deliverable mentions `plugin-loader.ts` with "(1) write generated source to a temp .ts file, (2) pre-compile to .js via tsc or use `tsx`, (3) dynamic import() the result."
 
 This is the right direction but needs concrete design choices:
+
 - **tsx**: Requires tsx installed globally (matches CLAUDE.md globals list). But tsx registers as an ESM loader — if vitest is already running with its own ESM transform, double-registration can cause module resolution conflicts.
 - **tsc pre-compile**: Requires writing to temp dir, running tsc, then importing .js. Slower but reliable. But the generated code imports `@openclaw/governance` (see GE-02) which tsc can't resolve either.
 - **vitest transform**: If e2e tests run under vitest, vitest's built-in TypeScript transform may handle the import. But this couples the simulator to the test runner.
@@ -90,6 +92,7 @@ Pulse 07 (e2e compile loop) depends on Pulses 01-06, but Pulses 03-06 are base-c
 ### SA-01 [MINOR] — Reference workspace README must include a "how to use GatewaySim" quick start
 
 The plan says the workspace includes a README explaining "what each file demonstrates." But skill authors need more than file descriptions — they need a 5-minute path from "I have a skill" to "I can test enforcement." The README should include:
+
 1. How to point GatewaySim at their own workspace
 2. How to create a minimal workspace (SOUL.md + TOOLS.md only)
 3. How to add expected baselines for their own enforcement rules
@@ -106,6 +109,7 @@ The `toolCall('send-email').withArgs({to: 'x'}).asUser('sarah').withTier(2)` API
 ### SA-03 [MINOR] — Relationship between MockGateway and GatewaySim needs a decision tree
 
 The plan explains that MockGateway is for individual skill testing and GatewaySim is for full plugin testing. But skill authors will ask "which one do I use?" The answer depends on their adoption tier:
+
 - Tier 1 (standalone): MockGateway only
 - Tier 2 (governed): MockGateway for unit tests, GatewaySim for integration
 - Tier 3 (verified): Both, plus acceptance harness
@@ -118,16 +122,16 @@ This decision tree should be in the README or a linked concept guide.
 
 ## Findings Summary
 
-| ID | Role | Severity | Title |
-|----|------|----------|-------|
-| GE-01 | gateway-eng | MAJOR | checkElicitation 2-arg vs 3-arg signature mismatch |
-| GE-02 | gateway-eng | MAJOR | Generated code imports phantom `@openclaw/governance` package |
-| CA-01 | architect | MAJOR | Dynamic import() of raw TS is underspecified; phantom imports |
-| GE-04 | gateway-eng | MINOR | Only before_tool_call wired; 7 other hooks exist |
-| CA-04 | architect | MINOR | Expected baselines fragile without regen script |
-| CA-05 | architect | MINOR | Pulse 07 over-depends on CLI pulses 03-06 |
-| SA-01 | skill-author | MINOR | README needs quick-start code example |
-| SA-03 | skill-author | MINOR | Need MockGateway vs GatewaySim decision tree |
+| ID    | Role         | Severity | Title                                                         |
+| ----- | ------------ | -------- | ------------------------------------------------------------- |
+| GE-01 | gateway-eng  | MAJOR    | checkElicitation 2-arg vs 3-arg signature mismatch            |
+| GE-02 | gateway-eng  | MAJOR    | Generated code imports phantom `@openclaw/governance` package |
+| CA-01 | architect    | MAJOR    | Dynamic import() of raw TS is underspecified; phantom imports |
+| GE-04 | gateway-eng  | MINOR    | Only before_tool_call wired; 7 other hooks exist              |
+| CA-04 | architect    | MINOR    | Expected baselines fragile without regen script               |
+| CA-05 | architect    | MINOR    | Pulse 07 over-depends on CLI pulses 03-06                     |
+| SA-01 | skill-author | MINOR    | README needs quick-start code example                         |
+| SA-03 | skill-author | MINOR    | Need MockGateway vs GatewaySim decision tree                  |
 
 **3 Major findings** must be resolved before Pulse 02 implementation begins.
 **5 Minor findings** are recommended improvements; can be addressed during implementation.

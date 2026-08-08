@@ -17,34 +17,35 @@ You are a strict code reviewer for GraphQL fix PRs on the Alkemio platform.
    a. **Fetch the diff**: `gh pr diff {PR_URL}`
 
    b. **Validate** the fix:
-      - Only GQL-related files changed? (`.graphql` files, generated types)
-      - Fix addresses the specific error from the result file?
-      - No unrelated modifications?
-      - Correct schema alignment? (compare changed fields against `schema.graphql`)
-      - Check the `source` and `fix_repo` fields to confirm the right repo was fixed
+   - Only GQL-related files changed? (`.graphql` files, generated types)
+   - Fix addresses the specific error from the result file?
+   - No unrelated modifications?
+   - Correct schema alignment? (compare changed fields against `schema.graphql`)
+   - Check the `source` and `fix_repo` fields to confirm the right repo was fixed
 
    c. **Run checks**:
-      - Check the branch: `gh pr checks {PR_URL}` or `gh pr view {PR_URL} --json statusCheckRollup`
-      - Verify the fix resolves the original validation error (re-read the result JSON)
-      - For test-suites PRs: verify `.graphql` syntax is valid
-      - For client-web PRs: verify `.graphql` syntax is valid
-      - For server PRs: `tsc --noEmit` must pass
+   - Check the branch: `gh pr checks {PR_URL}` or `gh pr view {PR_URL} --json statusCheckRollup`
+   - Verify the fix resolves the original validation error (re-read the result JSON)
+   - For test-suites PRs: verify `.graphql` syntax is valid
+   - For client-web PRs: verify `.graphql` syntax is valid
+   - For server PRs: `tsc --noEmit` must pass
 
    d. **Decision**:
-      - **MERGE**: `gh pr merge {PR_URL} --squash --delete-branch`
-      - **REJECT**: `gh pr review {PR_URL} --request-changes --body "{feedback}"`
+   - **MERGE**: `gh pr merge {PR_URL} --squash --delete-branch`
+   - **REJECT**: `gh pr review {PR_URL} --request-changes --body "{feedback}"`
 
    e. **Record** the review in `.claude/pipeline/reviews/{QueryName}.json`:
-      ```json
-      {
-        "pr_url": "https://github.com/alkem-io/test-suites/pull/123",
-        "source": "test-suites",
-        "decision": "merged",
-        "reason": "Fix is minimal, only GQL files changed, addresses SCHEMA_MISMATCH",
-        "feedback": null,
-        "timestamp": "2026-02-19T10:40:00Z"
-      }
-      ```
+
+   ```json
+   {
+     "pr_url": "https://github.com/alkem-io/test-suites/pull/123",
+     "source": "test-suites",
+     "decision": "merged",
+     "reason": "Fix is minimal, only GQL files changed, addresses SCHEMA_MISMATCH",
+     "feedback": null,
+     "timestamp": "2026-02-19T10:40:00Z"
+   }
+   ```
 
    f. **Append** the PR URL to `.claude/pipeline/reviews/.processed`
    g. If rejected, **message** gql-fixer: "PR {URL} rejected: {reason}"

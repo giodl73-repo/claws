@@ -90,5 +90,6 @@ npm run build
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/claws/gateway-eng.md` — OC integration, workflow DAG conventions, lobster schema
 - `.craft/roles/craft/dragon.md` — security review, governance step injection, fail-closed enforcement

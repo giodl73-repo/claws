@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "pulumi plugin (infra)",
   "contributes": {
-    "tools": [
-      "pulumi/preview",
-      "pulumi/up"
-    ],
-    "skills": [
-      "pulumi/preview",
-      "pulumi/up"
-    ],
-    "workflows": [
-      "pulumi-flow.lobster"
-    ],
+    "tools": ["pulumi/preview", "pulumi/up"],
+    "skills": ["pulumi/preview", "pulumi/up"],
+    "workflows": ["pulumi-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

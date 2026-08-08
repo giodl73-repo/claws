@@ -1,24 +1,71 @@
 ---
 name: kitcn
 description: ALWAYS use this skill when working with convex or kitcn. Covers both setup and e2e feature paths using cRPC + ORM + auth + React.
-sources: [www/content/docs/concepts.mdx, www/content/docs/orm/index.mdx, www/content/docs/orm/schema/relations.mdx, www/content/docs/orm/schema/triggers.mdx, www/content/docs/orm/queries/aggregates.mdx, www/content/docs/orm/queries/pagination.mdx, www/content/docs/server/error-handling.mdx, www/content/docs/server/http.mdx, www/content/docs/server/middlewares.mdx, www/content/docs/server/procedures.mdx, www/content/docs/server/server-side-calls.mdx, www/content/docs/react/queries.mdx, www/content/docs/react/mutations.mdx, www/content/docs/react/infinite-queries.mdx, www/content/docs/auth/client.mdx, www/content/docs/auth/server.mdx]
-metadata: { sources: [www/content/docs/concepts.mdx, www/content/docs/orm/index.mdx, www/content/docs/orm/schema/relations.mdx, www/content/docs/orm/schema/triggers.mdx, www/content/docs/orm/queries/aggregates.mdx, www/content/docs/orm/queries/pagination.mdx, www/content/docs/server/error-handling.mdx, www/content/docs/server/http.mdx, www/content/docs/server/middlewares.mdx, www/content/docs/server/procedures.mdx, www/content/docs/server/server-side-calls.mdx, www/content/docs/react/queries.mdx, www/content/docs/react/mutations.mdx, www/content/docs/react/infinite-queries.mdx, www/content/docs/auth/client.mdx, www/content/docs/auth/server.mdx] }
+sources:
+  [
+    www/content/docs/concepts.mdx,
+    www/content/docs/orm/index.mdx,
+    www/content/docs/orm/schema/relations.mdx,
+    www/content/docs/orm/schema/triggers.mdx,
+    www/content/docs/orm/queries/aggregates.mdx,
+    www/content/docs/orm/queries/pagination.mdx,
+    www/content/docs/server/error-handling.mdx,
+    www/content/docs/server/http.mdx,
+    www/content/docs/server/middlewares.mdx,
+    www/content/docs/server/procedures.mdx,
+    www/content/docs/server/server-side-calls.mdx,
+    www/content/docs/react/queries.mdx,
+    www/content/docs/react/mutations.mdx,
+    www/content/docs/react/infinite-queries.mdx,
+    www/content/docs/auth/client.mdx,
+    www/content/docs/auth/server.mdx,
+  ]
+metadata:
+  {
+    sources:
+      [
+        www/content/docs/concepts.mdx,
+        www/content/docs/orm/index.mdx,
+        www/content/docs/orm/schema/relations.mdx,
+        www/content/docs/orm/schema/triggers.mdx,
+        www/content/docs/orm/queries/aggregates.mdx,
+        www/content/docs/orm/queries/pagination.mdx,
+        www/content/docs/server/error-handling.mdx,
+        www/content/docs/server/http.mdx,
+        www/content/docs/server/middlewares.mdx,
+        www/content/docs/server/procedures.mdx,
+        www/content/docs/server/server-side-calls.mdx,
+        www/content/docs/react/queries.mdx,
+        www/content/docs/react/mutations.mdx,
+        www/content/docs/react/infinite-queries.mdx,
+        www/content/docs/auth/client.mdx,
+        www/content/docs/auth/server.mdx,
+      ],
+  }
 ---
+
 # kitcn Core Skill (80% Path)
+
 Use this file first for everyday feature delivery in an already configured kitcn app.
+
 - If setup/bootstrap/env/auth wiring or project structure mirroring is missing, use `references/setup/index.md` (then the relevant setup file).
 - If the task is advanced or niche, load only the specific feature reference listed at the end.
+
 ## Scope
+
 In scope:
+
 - Add or update schema tables, indexes, relations, and triggers.
 - Implement cRPC procedures (`query`, `mutation`, `action`, `httpAction`) with runtime auth + rate limits.
 - Implement feature UI with `useCRPC()` + TanStack Query.
 - Add minimal high-value tests for auth, errors, and side effects.
-Out of scope:
+  Out of scope:
 - Greenfield setup/install/env/bootstrap.
 - Full plugin deep-dives (admin/organizations/polar).
 - Internal package-level parity testing.
+
 ## Skill Contract
+
 1. Favor `ctx.orm` for app data access.
 2. Keep list/read paths bounded and index-aware.
 3. Use cRPC builders and middleware; avoid raw handler objects for new feature code.
@@ -26,11 +73,15 @@ Out of scope:
 5. Prefer schema triggers for cross-row invariants, but move invariant maintenance to explicit mutation helpers if trigger execution is unstable (for example init/seed hangs or recursive write paths).
 6. Keep auth/rate-limit checks server-side.
 7. **Inter-procedure calls**: `create<Module>Handler(ctx)` in queries/mutations (zero overhead) unless validation is relevant, `create<Module>Caller(ctx)` in actions/HTTP routes. In action context use `caller.actions.*` for action procedures and `caller.schedule.*` for scheduling. Import from `./generated/<module>.runtime`. Never call `ctx.runQuery`/`ctx.runMutation`/`ctx.runAction` directly for module procedures.
+
 ## Shortcut Mode (tRPC + Drizzle Mental Model)
+
 Default assumption:
+
 - cRPC behavior is tRPC-like (builder chain + middleware + TanStack options).
 - ORM behavior is Drizzle-like (schema, relations, `findMany/findFirst`, `insert/update/delete`).
-Only remember these non-parity deltas:
+  Only remember these non-parity deltas:
+
 1. Procedure input root must be `z.object(...)` (no primitive root args).
 2. No `z.void()` outputs; omit `.output(...)` for no-value mutations.
 3. Stacked `.input(...)` calls merge input shapes.
@@ -61,15 +112,21 @@ Only remember these non-parity deltas:
 28. Async mutation batching is the default (codegen wires it). Customize per call: `execute({ batchSize, delayMs })`. Opt into sync: `execute({ mode: 'sync' })` or `defineSchema(..., { defaults: { mutationExecutionMode: 'sync' } })`. Relevant defaults: `mutationBatchSize`, `mutationLeafBatchSize`, `mutationMaxRows`, `mutationScheduleCallCap`.
 29. Polymorphic unions are schema-first: use `actionType: discriminator({ variants, as? })` in `convexTable(...)`. Query config does not include a `polymorphic` option. Writes stay flat; reads synthesize nested `details` (or custom alias). Use `withVariants: true` to auto-load all `one()` relations on discriminator tables.
 30. Do not add manual ORM mutation batching loops in app/plugin code by default. Convex runtime batching already handles mutation execution. Prefer set-based deletes/updates over per-row loops. Only add explicit chunking when batching external side effects (for example Resend API calls) or bounded cleanup sweeps.
+
 ## Directory Boundary (Important)
+
 Use `references/setup/` when the task needs:
+
 1. Project/file structure setup → `setup/index.md` + `setup/server.md`
 2. Auth bootstrap → `setup/auth.md`
 3. Client/provider wiring → `setup/react.md`
 4. Framework-specific setup → `setup/next.md` or `setup/start.md`
-For full template-level recreation: start with `setup/index.md`, then load relevant setup files, then load selected feature refs.
+   For full template-level recreation: start with `setup/index.md`, then load relevant setup files, then load selected feature refs.
+
 ## First-Pass Feature Intake (Do This Before Edits)
+
 Lock these decisions first:
+
 1. Auth level per endpoint: `public` / `optionalAuth` / `auth` / `private`.
 2. Data invariants: what must always be true after writes?
 3. Query shape: list, detail, relation-loaded, search, or stream composition.
@@ -77,8 +134,11 @@ Lock these decisions first:
 5. Side effects: trigger vs scheduled function vs inline mutation.
 6. UI consumption: client hook only, RSC prefetch, or server-only caller.
 7. Risk paths: unauthorized, forbidden, not found, conflicts, rate limit.
+
 ## Canonical File Targets
+
 Typical feature touches:
+
 - `convex/functions/schema.ts`
 - `convex/functions/<feature>.ts`
 - `convex/lib/crpc.ts` (only if middleware/procedure builder changes)
@@ -86,7 +146,9 @@ Typical feature touches:
 - `src/**` feature UI files
 - `convex/functions/http.ts` or `convex/routers/**` for HTTP endpoints
 - `convex/functions/crons.ts` or scheduled handlers if needed
+
 ## E2E Build Order (Default)
+
 1. Schema + indexes + relations.
 2. Trigger hooks for cross-row invariants (or explicit mutation-side sync if trigger path is unstable).
 3. Procedures with strict input/output + auth + rate limits.
@@ -99,15 +161,7 @@ Typical feature touches:
 ### 1) Schema + Relations + Trigger
 
 ```ts
-import {
-  convexTable,
-  defineSchema,
-  id,
-  integer,
-  index,
-  text,
-  timestamp,
-} from "kitcn/orm";
+import { convexTable, defineSchema, id, integer, index, text, timestamp } from "kitcn/orm";
 
 export const project = convexTable(
   "project",
@@ -119,7 +173,7 @@ export const project = convexTable(
       .defaultNow()
       .$onUpdateFn(() => new Date()),
   },
-  (t) => [index("ownerId_updatedAt").on(t.ownerId, t.updatedAt)]
+  (t) => [index("ownerId_updatedAt").on(t.ownerId, t.updatedAt)],
 );
 
 export const task = convexTable(
@@ -133,7 +187,7 @@ export const task = convexTable(
       .defaultNow()
       .$onUpdateFn(() => new Date()),
   },
-  (t) => [index("projectId_updatedAt").on(t.projectId, t.updatedAt)]
+  (t) => [index("projectId_updatedAt").on(t.projectId, t.updatedAt)],
 );
 
 export default defineSchema({ project, task })
@@ -192,31 +246,27 @@ function requireAuth<T>(user: T | null): T {
   return user;
 }
 export const publicQuery = c.query.meta({ auth: "optional" });
-export const authQuery = c.query
-  .meta({ auth: "required" })
-  .use(async ({ ctx, next }) => {
-    const auth = getAuth(ctx);
-    const session = await auth.api.getSession({
-      headers: await getHeaders(ctx),
-    });
-    const user = requireAuth(session?.user ?? null);
-    return next({ ctx: { ...ctx, user, userId: user.id } });
+export const authQuery = c.query.meta({ auth: "required" }).use(async ({ ctx, next }) => {
+  const auth = getAuth(ctx);
+  const session = await auth.api.getSession({
+    headers: await getHeaders(ctx),
   });
-export const authMutation = c.mutation
-  .meta({ auth: "optional" })
-  .use(async ({ ctx, next }) => {
-    const auth = getAuth(ctx);
-    const session = await auth.api.getSession({
-      headers: await getHeaders(ctx),
-    });
-    return next({
-      ctx: {
-        ...ctx,
-        user: session?.user ?? null,
-        userId: session?.user?.id ?? null,
-      },
-    });
+  const user = requireAuth(session?.user ?? null);
+  return next({ ctx: { ...ctx, user, userId: user.id } });
+});
+export const authMutation = c.mutation.meta({ auth: "optional" }).use(async ({ ctx, next }) => {
+  const auth = getAuth(ctx);
+  const session = await auth.api.getSession({
+    headers: await getHeaders(ctx),
   });
+  return next({
+    ctx: {
+      ...ctx,
+      user: session?.user ?? null,
+      userId: session?.user?.id ?? null,
+    },
+  });
+});
 ```
 
 Builder rules that matter:
@@ -245,7 +295,7 @@ export const listProjects = authQuery
       orderBy: { updatedAt: "desc" },
       cursor: input.cursor,
       limit: input.limit,
-    })
+    }),
   );
 
 export const renameProject = authMutation
@@ -258,10 +308,7 @@ export const renameProject = authMutation
     if (!current) {
       throw new CRPCError({ code: "NOT_FOUND", message: "Project not found" });
     }
-    await ctx.orm
-      .update(project)
-      .set({ name: input.name })
-      .where(eq(project.id, current.id));
+    await ctx.orm.update(project).set({ name: input.name }).where(eq(project.id, current.id));
     return null;
   });
 ```
@@ -451,7 +498,7 @@ Before calling a feature done:
 | `orderBy` written as array objects                              | Use object form: `orderBy: { updatedAt: "desc" }`                                                                                                                                    |
 | Using `ctx.db` for policy-sensitive reads                       | Use `ctx.orm` (RLS/constraints path)                                                                                                                                                 |
 | Throwing generic `Error` for expected outcomes                  | Throw `CRPCError` with explicit code                                                                                                                                                 |
-| Infinite list with TanStack native hook directly                | Use `useInfiniteQuery` from `kitcn/react`                                                                                                                                    |
+| Infinite list with TanStack native hook directly                | Use `useInfiniteQuery` from `kitcn/react`                                                                                                                                            |
 | Primitive root input (`z.string()`)                             | Use root `z.object(...)` input schema                                                                                                                                                |
 | Returning nothing with `z.void()`                               | Omit explicit output                                                                                                                                                                 |
 | Manual pagination wrappers for infinite endpoints               | Use `.paginated({ limit, item })`                                                                                                                                                    |

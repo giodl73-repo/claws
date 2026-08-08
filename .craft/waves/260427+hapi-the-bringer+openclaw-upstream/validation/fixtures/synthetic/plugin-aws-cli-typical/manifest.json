@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "aws-cli plugin (infra)",
   "contributes": {
-    "tools": [
-      "aws-cli/describe",
-      "aws-cli/create-instance"
-    ],
-    "skills": [
-      "aws-cli/describe",
-      "aws-cli/create-instance"
-    ]
+    "tools": ["aws-cli/describe", "aws-cli/create-instance"],
+    "skills": ["aws-cli/describe", "aws-cli/create-instance"]
   }
 }

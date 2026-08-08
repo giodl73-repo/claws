@@ -21,12 +21,12 @@ note: 3
 
 ## Panel
 
-| Role | Verdict | Findings | Major | Warning | Note |
-|------|---------|----------|-------|---------|------|
-| craft:architect | conditional-pass | 12 | 3 | 5 | 4 |
-| claws:gateway-eng | conditional-pass | 13 | 4 | 5 | 4 |
-| claws:platform-eng | conditional-pass | 12 | 3 | 5 | 4 |
-| claws:skill-author | conditional-pass | 12 | 3 | 5 | 4 |
+| Role               | Verdict          | Findings | Major | Warning | Note |
+| ------------------ | ---------------- | -------- | ----- | ------- | ---- |
+| craft:architect    | conditional-pass | 12       | 3     | 5       | 4    |
+| claws:gateway-eng  | conditional-pass | 13       | 4     | 5       | 4    |
+| claws:platform-eng | conditional-pass | 12       | 3     | 5       | 4    |
+| claws:skill-author | conditional-pass | 12       | 3     | 5       | 4    |
 
 All four reviewers issued conditional-pass with Major findings requiring resolution before implementation.
 
@@ -168,17 +168,17 @@ Pulse 09 calls `claws init` but this command is delivered in CP-2 (Pulses 10-11)
 
 ## Deduped Warning Summary
 
-| ID | Source(s) | Pulse(s) | Finding |
-|----|-----------|----------|---------|
-| W-01 | Architect | 03, 04 | Batch 2 false dependency on Pulse 02 |
-| W-02 | Architect | 07-09 | E2E tests in claws-sdk but test CLI commands |
-| W-03 | Architect | 05 | Pulse 05 dependency direction inverted |
-| W-04 | Architect | 02 | No subpath export for testing module |
-| W-05 | Architect | 09 | L3 acceptance test with no L3 infrastructure |
-| W-06 | Platform-eng | 04 | FORCE_COLOR missing, dual color module |
-| W-07 | Platform-eng | 03,04,06 | Existing code at planned deliverable paths |
-| W-08 | Platform-eng | 07-09 | No temp dir cleanup strategy for e2e |
-| W-09 | Skill-author | 01 | Fixture skills lack adoption tier annotations |
+| ID   | Source(s)    | Pulse(s) | Finding                                       |
+| ---- | ------------ | -------- | --------------------------------------------- |
+| W-01 | Architect    | 03, 04   | Batch 2 false dependency on Pulse 02          |
+| W-02 | Architect    | 07-09    | E2E tests in claws-sdk but test CLI commands  |
+| W-03 | Architect    | 05       | Pulse 05 dependency direction inverted        |
+| W-04 | Architect    | 02       | No subpath export for testing module          |
+| W-05 | Architect    | 09       | L3 acceptance test with no L3 infrastructure  |
+| W-06 | Platform-eng | 04       | FORCE_COLOR missing, dual color module        |
+| W-07 | Platform-eng | 03,04,06 | Existing code at planned deliverable paths    |
+| W-08 | Platform-eng | 07-09    | No temp dir cleanup strategy for e2e          |
+| W-09 | Skill-author | 01       | Fixture skills lack adoption tier annotations |
 
 ---
 

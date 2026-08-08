@@ -6,6 +6,7 @@ trust: composition
 # compo-secrets-stack
 
 Composition workspace bringing together 2 plugin(s):
+
 - `plugins/hashicorp-vault/`
 - `plugins/1password/`
 

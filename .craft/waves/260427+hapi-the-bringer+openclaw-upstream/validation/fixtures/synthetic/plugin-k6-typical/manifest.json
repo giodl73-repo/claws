@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "k6 plugin (testing)",
   "contributes": {
-    "tools": [
-      "k6/run-load-test"
-    ],
-    "skills": [
-      "k6/run-load-test"
-    ]
+    "tools": ["k6/run-load-test"],
+    "skills": ["k6/run-load-test"]
   }
 }

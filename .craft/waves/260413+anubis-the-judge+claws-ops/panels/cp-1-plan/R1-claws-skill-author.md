@@ -23,11 +23,11 @@ Evaluating CP-1 from the perspective of a skill author who publishes OC skills a
 
 ### M-01: Reference workspace is infrastructure-facing, not skill-author-facing
 
-**Pulse 01** creates a reference workspace with 9 OC files, 12 tools, 2 agents, and 3 skills. The deliverables list every file as a fixture artifact. But there is no documentation within the fixture explaining *why* each file exists, what governance pattern it demonstrates, or how a skill author would learn from it.
+**Pulse 01** creates a reference workspace with 9 OC files, 12 tools, 2 agents, and 3 skills. The deliverables list every file as a fixture artifact. But there is no documentation within the fixture explaining _why_ each file exists, what governance pattern it demonstrates, or how a skill author would learn from it.
 
 A new developer encountering `fixtures/oc-reference-workspace/` sees 15+ files with no README, no comments explaining the design choices (why R3 on summarize? why R5 on email-drafter?), and no mapping from "I want to build a governed skill" to "here's what each file teaches you." The fixture is built for machines (golden-master assertions), not humans (learning). This matters because Pulse 09 uses this workspace as the "day 1" experience foundation.
 
-**Recommendation**: Add a `fixtures/oc-reference-workspace/README.md` with a skill-author-oriented walkthrough: what each file does, what governance pattern it demonstrates, and what violations are *intentionally* embedded (and why). This costs 30 minutes and turns the fixture into a teaching tool.
+**Recommendation**: Add a `fixtures/oc-reference-workspace/README.md` with a skill-author-oriented walkthrough: what each file does, what governance pattern it demonstrates, and what violations are _intentionally_ embedded (and why). This costs 30 minutes and turns the fixture into a teaching tool.
 
 ---
 
@@ -43,7 +43,7 @@ If docsUrl points to a 404, it is worse than no URL at all. The skill author cli
 
 ### M-03: E2E init loop (Pulse 09) does not test the "no OC workspace" path
 
-Pulse 09 copies the reference workspace to a temp dir, removes claws.json and .claws/, then runs `claws init`. But this still means the workspace has SOUL.md, TOOLS.md, AGENTS.md, and all the other OC files already present. Every real skill author starts with *some* OC files, but many start with just SOUL.md and TOOLS.md -- or even nothing at all.
+Pulse 09 copies the reference workspace to a temp dir, removes claws.json and .claws/, then runs `claws init`. But this still means the workspace has SOUL.md, TOOLS.md, AGENTS.md, and all the other OC files already present. Every real skill author starts with _some_ OC files, but many start with just SOUL.md and TOOLS.md -- or even nothing at all.
 
 The init-uninstall plan (H1) specifies `claws init` with no flags defaults to `--template minimal` and explicitly lists a scenario `init/no-workspace-files -- init with no platform marker files prompts for platform selection`. But Pulse 09's e2e test only covers the happy path where all 9 OC files exist.
 
@@ -53,17 +53,17 @@ The init-uninstall plan (H1) specifies `claws init` with no flags defaults to `-
 
 ### W-01: Test gates test system correctness, not skill-author experience
 
-Across all 9 pulses, the test gates verify structural correctness: "fixture files parseable," "SARIF validates against schema," "GatewaySim loads plugin," "exit code is 1." None of the tests verify the *quality* of what the skill author sees.
+Across all 9 pulses, the test gates verify structural correctness: "fixture files parseable," "SARIF validates against schema," "GatewaySim loads plugin," "exit code is 1." None of the tests verify the _quality_ of what the skill author sees.
 
-For example, Pulse 08 (e2e-check-loop) verifies that "every reported violation has non-empty WHAT, HOW, and WHERE fields." But it does not verify that those fields contain *useful* text. A WHAT field of "violation" and a HOW field of "fix it" would pass the test. The skill author would get nothing.
+For example, Pulse 08 (e2e-check-loop) verifies that "every reported violation has non-empty WHAT, HOW, and WHERE fields." But it does not verify that those fields contain _useful_ text. A WHAT field of "violation" and a HOW field of "fix it" would pass the test. The skill author would get nothing.
 
-**Recommendation**: Add at least one assertion per e2e test that checks the *content quality* of user-facing output -- e.g., WHAT contains the tool name that violated, HOW contains an actionable verb ("add," "remove," "change"), WHERE contains a real file path that exists in the workspace.
+**Recommendation**: Add at least one assertion per e2e test that checks the _content quality_ of user-facing output -- e.g., WHAT contains the tool name that violated, HOW contains an actionable verb ("add," "remove," "change"), WHERE contains a real file path that exists in the workspace.
 
 ---
 
 ### W-02: No "getting started" narrative threads through the pulses
 
-CP-1 builds formatters, error contracts, config loaders, progress bars, and three e2e loops. But there is no pulse or deliverable that produces a "getting started" experience. The closest thing is Pulse 09 (init loop), but that is an e2e *test*, not a user-facing artifact.
+CP-1 builds formatters, error contracts, config loaders, progress bars, and three e2e loops. But there is no pulse or deliverable that produces a "getting started" experience. The closest thing is Pulse 09 (init loop), but that is an e2e _test_, not a user-facing artifact.
 
 After CP-1 ships, a skill author who runs `claws --help` will see... what? The pulses build the plumbing but never specify what the CLI says when you type `claws` with no arguments, what `claws --help` shows, or what the first-run banner communicates. Pulse 05 creates a banner with "version string and claws name" -- but the banner is the first thing a skill author sees. Is it welcoming? Does it tell them what to do next?
 

@@ -33,6 +33,7 @@ The SDK defines `RegistryClient` as an interface in `publish/atomicity.ts:52-58`
 **Files**: `claws-sdk/src/config/bypass.ts` and `claws-sdk/src/init/bypass.ts`
 
 The SDK has two bypass evaluation modules:
+
 - `config/bypass.ts` — pure evaluator, returns state + audit event
 - `init/bypass.ts` — async evaluator, writes audit chain directly
 
@@ -138,10 +139,10 @@ The `doctor/` module contains both diagnostic health checks (`checks/`) and sche
 
 ## Summary
 
-| Severity | Count |
-|----------|-------|
-| M (Must fix) | 2 |
-| W (Warning) | 6 |
-| N (Note) | 3 |
+| Severity     | Count |
+| ------------ | ----- |
+| M (Must fix) | 2     |
+| W (Warning)  | 6     |
+| N (Note)     | 3     |
 
 **Key architectural concerns**: The CLI contains business logic for registry client construction (A-01), and the dual bypass modules (A-02) create a maintenance and divergence risk. The fleet module's 18-file size (A-04) and un-curated barrel exports (A-09) are structural debt that will compound as the codebase grows.

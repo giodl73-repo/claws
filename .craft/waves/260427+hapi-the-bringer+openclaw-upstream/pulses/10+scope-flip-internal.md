@@ -20,6 +20,7 @@ This pulse is INTERNAL to our monorepo; not an upstream PR.
 ## Deliverables
 
 ### Package renames
+
 - [ ] `packages/openclaw-workspace/package.json` — `name: '@bic/openclaw-workspace'` → `'@openclaw/workspace'`
 - [ ] `packages/openclaw-guardrails/package.json` — same rename
 - [ ] `packages/openclaw-policy/package.json` — same rename
@@ -27,6 +28,7 @@ This pulse is INTERNAL to our monorepo; not an upstream PR.
 - [ ] `packages/openclaw-lsp/package.json` — same rename (LSP package was carried along; ships with workspace)
 
 ### Cross-package import updates
+
 - [ ] All `import ... from '@bic/openclaw-workspace'` → `'@openclaw/workspace'` across:
   - `packages/openclaw-guardrails/src/`, `tests/`
   - `packages/openclaw-policy/src/`, `tests/`
@@ -40,20 +42,24 @@ This pulse is INTERNAL to our monorepo; not an upstream PR.
 - [ ] Subpath imports preserved: `'@openclaw/workspace/canonicalize'`, `'@openclaw/guardrails/audit'`, etc.
 
 ### Workspace + tsconfig + test config
+
 - [ ] Root `package.json` `workspaces` array — entries unchanged (paths remain `packages/openclaw-*`)
 - [ ] `tsconfig.json` path mappings updated if present (e.g., `compilerOptions.paths`)
 - [ ] vitest configs / aliases updated if any reference `@bic/openclaw-*`
 
 ### Lockfile
+
 - [ ] `package-lock.json` (or `pnpm-lock.yaml`, depending on workspace) regenerated post-rename
 
 ### CI verification
+
 - [ ] `npm run build` (workspace-wide) green
 - [ ] `npm run test` (workspace-wide) green
 - [ ] `npm run typecheck` green if defined
 - [ ] No leftover `@bic/openclaw-` references: `grep -r "@bic/openclaw" packages/ --include="*.ts" --include="*.json"` returns zero
 
 ### Internal CHANGELOG
+
 - [ ] `docs/upstream/CHANGELOG.md` — append v0.2 closeout entry recording: 4 upstream PR merge SHAs + scope-flip commit SHA + post-rename build SHA
 
 ## TDD Tests
@@ -109,12 +115,12 @@ The implicit contract is "all 7 upstream PRs merge → scope-flip happens." Real
 
 **Decision matrix at scope-flip time:**
 
-| State | Action |
-|---|---|
-| All 4 package PRs (PR-1, PR-3, PR-5, PR-6) merged | Run scope-flip (all 4 packages renamed in one commit) |
+| State                                                                              | Action                                                                                                                                             |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| All 4 package PRs (PR-1, PR-3, PR-5, PR-6) merged                                  | Run scope-flip (all 4 packages renamed in one commit)                                                                                              |
 | 3 of 4 package PRs merged, 1 deferred upstream (e.g., needed split per maintainer) | Run scope-flip on the 3 merged packages; record deferred package in `docs/upstream/CHANGELOG.md` as "scope-flip skipped: package not yet upstream" |
-| 2 or fewer package PRs merged | DO NOT run scope-flip. Defer the entire pulse to the next wave. Record state in `docs/upstream/CHANGELOG.md`. |
-| OC-4 (PR-2) or OC-7 (PR-4) deferred | No effect on scope-flip — these are upstream-internal patches, not package renames |
+| 2 or fewer package PRs merged                                                      | DO NOT run scope-flip. Defer the entire pulse to the next wave. Record state in `docs/upstream/CHANGELOG.md`.                                      |
+| OC-4 (PR-2) or OC-7 (PR-4) deferred                                                | No effect on scope-flip — these are upstream-internal patches, not package renames                                                                 |
 
 **Recording**: every scope-flip attempt (whether full, partial, or deferred) appends an entry to `docs/upstream/CHANGELOG.md` with the date, the four package PR merge SHAs (or "(deferred)"), and the scope-flip commit SHA (or "(deferred)"). This gives the next wave's planner a clean state to resume from.
 

@@ -76,6 +76,7 @@ Implement the `claws check` command which runs the full compile+analyze pipeline
 ## Governing Roles
 
 Load these role files before starting:
+
 - `.craft/roles/craft/navigator.md` -- CLI command flow, output rendering patterns
 - `.craft/roles/claws/new-hire.md` -- error message clarity, first-time user experience
 - `.craft/roles/claws/power-user.md` -- --json flag, advanced filtering, workflow integration

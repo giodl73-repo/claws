@@ -20,6 +20,7 @@ CP-2 introduces four new SDK modules (`init/`, `watch/`, `doctor/`, `amend/`) an
 ### M-01: Duplicate sidecar scaffolding functions
 
 **Files**:
+
 - `claws-sdk/src/types/sidecar.ts:84` — `initSidecar()`
 - `claws-sdk/src/init/sidecar-scaffold.ts:25` — `scaffoldSidecar()`
 
@@ -36,6 +37,7 @@ The orchestrator calls `scaffoldSidecar()`, meaning the `.claws/.gitignore` is n
 ### M-02: Policy template schema does not match doctor validation
 
 **Files**:
+
 - `claws-sdk/src/doctor/checks/policy-syntax.ts:19` — `REQUIRED_FIELDS = ['name', 'version', 'rules']`
 - `claws-sdk/src/init/templates/soc2.ts` (and hipaa, eu-ai-act) — templates emit `policy:`, `framework:`, `level:`, `rules:`
 
@@ -66,6 +68,7 @@ Additionally, `types/sidecar.ts` imports `mkdir` and `writeFile` from `node:fs/p
 ### W-01: Gitignore coverage gap between workspace and sidecar
 
 **Files**:
+
 - `claws-sdk/src/init/gitignore-update.ts:14` — adds `.claws/keys/`, `.claws/secrets/`
 - `claws-sdk/src/types/sidecar.ts:69` — lists `.claws/keys`, `.claws/secrets`, `.claws/cache`, `.claws/runtime`
 
@@ -106,6 +109,7 @@ The comment says "The full recompile is triggered by the calling context" but th
 ### W-04: Watch command's `onBatch` callback is async but not awaited in Debouncer
 
 **Files**:
+
 - `claws-sdk/src/watch/debounce.ts:51` — `setTimeout(() => this.flush(), ...)`
 - `claws-sdk/src/watch/debounce.ts:66` — `this.onBatch(files)` (synchronous call)
 - `claws-sdk/src/watch/watcher.ts:85` — `(files) => this.processBatch(files)` — `processBatch` is async
@@ -133,6 +137,7 @@ The init barrel exports `getTemplate`, `listTemplateNames`, `TemplateNotFoundErr
 ### N-02: `fileExists` helper duplicated across modules
 
 **Files**:
+
 - `claws-sdk/src/init/orchestrator.ts:121-128` — `fileExists()`
 - `claws-sdk/src/init/uninstall.ts:178-184` — `exists()`
 
@@ -145,6 +150,7 @@ Both are identical `access()`-based existence checks. Minor duplication; could s
 ### N-03: `init` command signature differs from other CLI commands
 
 **Files**:
+
 - `claws-cli/src/commands/init.ts:35` — `runInit(workspaceRoot, opts)` takes raw string
 - `claws-cli/src/commands/watch.ts:38` — `runWatch(ctx, opts)` takes `PlatformContext`
 - `claws-cli/src/commands/doctor.ts:104` — `runDoctorCmd(ctx, opts)` takes `PlatformContext`
@@ -180,16 +186,16 @@ The migration creates `{ ...config }` (shallow copy) then mutates it with `delet
 
 ## Architecture Checklist
 
-| Check | Status | Notes |
-|-------|--------|-------|
-| SDK-owns-logic boundary | PASS | All business logic in claws-sdk; CLI is pure adapter |
-| Dependency arrows inward (CLI -> SDK -> types) | PASS | No reverse imports found |
-| No circular dependencies between new modules | PASS | init, watch, doctor, amend are fully independent |
-| Module responsibility clarity | PASS | Single responsibility per file throughout |
-| Subpath export correctness | PASS | `./init`, `./watch`, `./doctor`, `./amend` all wired in package.json |
-| Public API surface design | WARN | init barrel re-exports more than needed (N-01) |
-| No layer violations | FAIL | types/sidecar.ts contains I/O logic (M-03) |
-| Template/validator coherence | FAIL | policy-syntax REQUIRED_FIELDS mismatch (M-02) |
+| Check                                          | Status | Notes                                                                |
+| ---------------------------------------------- | ------ | -------------------------------------------------------------------- |
+| SDK-owns-logic boundary                        | PASS   | All business logic in claws-sdk; CLI is pure adapter                 |
+| Dependency arrows inward (CLI -> SDK -> types) | PASS   | No reverse imports found                                             |
+| No circular dependencies between new modules   | PASS   | init, watch, doctor, amend are fully independent                     |
+| Module responsibility clarity                  | PASS   | Single responsibility per file throughout                            |
+| Subpath export correctness                     | PASS   | `./init`, `./watch`, `./doctor`, `./amend` all wired in package.json |
+| Public API surface design                      | WARN   | init barrel re-exports more than needed (N-01)                       |
+| No layer violations                            | FAIL   | types/sidecar.ts contains I/O logic (M-03)                           |
+| Template/validator coherence                   | FAIL   | policy-syntax REQUIRED_FIELDS mismatch (M-02)                        |
 
 ---
 

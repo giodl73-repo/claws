@@ -24,7 +24,7 @@ expect:
     unaffected_agents: [agent-A]
   tool_blocking:
     granularity: per_session
-    agent_b_all_tools_block.source: 'r5'
+    agent_b_all_tools_block.source: "r5"
     agent_a_t1_tools_operational: true
     lock_source: "structural_violation"
   recovery:

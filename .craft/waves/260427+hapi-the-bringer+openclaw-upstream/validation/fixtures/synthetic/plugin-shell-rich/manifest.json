@@ -4,15 +4,9 @@
   "version": "0.1.0",
   "description": "shell plugin (system)",
   "contributes": {
-    "tools": [
-      "shell/exec"
-    ],
-    "skills": [
-      "shell/exec"
-    ],
-    "workflows": [
-      "shell-flow.lobster"
-    ],
+    "tools": ["shell/exec"],
+    "skills": ["shell/exec"],
+    "workflows": ["shell-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

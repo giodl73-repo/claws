@@ -4,17 +4,9 @@
   "version": "0.1.0",
   "description": "things plugin (productivity)",
   "contributes": {
-    "tools": [
-      "things/create-todo",
-      "things/list-todos"
-    ],
-    "skills": [
-      "things/create-todo",
-      "things/list-todos"
-    ],
-    "workflows": [
-      "things-flow.lobster"
-    ],
+    "tools": ["things/create-todo", "things/list-todos"],
+    "skills": ["things/create-todo", "things/list-todos"],
+    "workflows": ["things-flow.lobster"],
     "doctorContract": "./doctor-contract-api.ts"
   }
 }

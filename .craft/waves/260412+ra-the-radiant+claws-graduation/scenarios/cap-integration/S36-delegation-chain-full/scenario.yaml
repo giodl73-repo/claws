@@ -19,7 +19,7 @@ expect:
     per_hop_agent_id: true
   trust_tier:
     effective_is_min_of_chain: true
-    escalation_within_chain_block.source: 'r5'
+    escalation_within_chain_block.source: "r5"
   limits:
     max_depth: 5
     cycle_detection: true

@@ -17,19 +17,19 @@ description: "CSS utility class creation and updates. Use when adding, modifying
 
 Match the CSS property to an existing `.less` file:
 
-| Property Type | File |
-| --- | --- |
-| `display`, `position`, `overflow`, `opacity`, `visibility`, `z-index` | `layout.less` |
-| `margin`, `padding` | `spacing.less` |
-| `flex-*` properties | `flex.less` |
-| `grid-*` properties | `grid.less` |
-| `width`, `height`, `max-*`, `min-*` | `sizing.less` |
-| `font-*`, `text-*`, `line-height` | `typography.less` |
-| `color` | `colors.less` |
-| `background-*` | `backgrounds.less` |
-| `border`, `border-radius` | `borders.less` |
-| `box-shadow`, `transform`, `transition` | `effects.less` |
-| `cursor`, `pointer-events`, `user-select` | `interactivity.less` |
+| Property Type                                                         | File                 |
+| --------------------------------------------------------------------- | -------------------- |
+| `display`, `position`, `overflow`, `opacity`, `visibility`, `z-index` | `layout.less`        |
+| `margin`, `padding`                                                   | `spacing.less`       |
+| `flex-*` properties                                                   | `flex.less`          |
+| `grid-*` properties                                                   | `grid.less`          |
+| `width`, `height`, `max-*`, `min-*`                                   | `sizing.less`        |
+| `font-*`, `text-*`, `line-height`                                     | `typography.less`    |
+| `color`                                                               | `colors.less`        |
+| `background-*`                                                        | `backgrounds.less`   |
+| `border`, `border-radius`                                             | `borders.less`       |
+| `box-shadow`, `transform`, `transition`                               | `effects.less`       |
+| `cursor`, `pointer-events`, `user-select`                             | `interactivity.less` |
 
 All 11 files: `backgrounds.less`, `borders.less`, `colors.less`, `effects.less`, `flex.less`, `grid.less`, `interactivity.less`, `layout.less`, `sizing.less`, `spacing.less`, `typography.less`. Only create a new file if truly needed, and add it to the gulp build pipeline.
 

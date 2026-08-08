@@ -4,11 +4,7 @@
   "version": "0.1.0",
   "description": "1password plugin (work)",
   "contributes": {
-    "tools": [
-      "1password/get-secret"
-    ],
-    "skills": [
-      "1password/get-secret"
-    ]
+    "tools": ["1password/get-secret"],
+    "skills": ["1password/get-secret"]
   }
 }

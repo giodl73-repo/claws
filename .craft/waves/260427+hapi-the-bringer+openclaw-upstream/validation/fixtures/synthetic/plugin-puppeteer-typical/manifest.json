@@ -4,13 +4,7 @@
   "version": "0.1.0",
   "description": "puppeteer plugin (testing)",
   "contributes": {
-    "tools": [
-      "puppeteer/screenshot",
-      "puppeteer/pdf"
-    ],
-    "skills": [
-      "puppeteer/screenshot",
-      "puppeteer/pdf"
-    ]
+    "tools": ["puppeteer/screenshot", "puppeteer/pdf"],
+    "skills": ["puppeteer/screenshot", "puppeteer/pdf"]
   }
 }

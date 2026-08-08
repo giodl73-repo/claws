@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "description": "trivy plugin (composition fixture)",
   "contributes": {
-    "tools": [
-      "trivy/scan-image"
-    ]
+    "tools": ["trivy/scan-image"]
   }
 }

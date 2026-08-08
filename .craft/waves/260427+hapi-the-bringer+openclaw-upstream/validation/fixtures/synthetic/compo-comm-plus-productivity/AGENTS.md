@@ -6,6 +6,7 @@ trust: composition
 # compo-comm-plus-productivity
 
 Composition workspace bringing together 2 plugin(s):
+
 - `plugins/slack/`
 - `plugins/notion/`
 
