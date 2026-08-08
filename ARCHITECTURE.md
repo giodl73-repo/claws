@@ -13,8 +13,8 @@ skills.sh / Git ----> create ---> Claw package ---------> reference parser
 exact packages -----/              ClawHub coordinate --/         |
                                    GitHub commit -------/          v
                                                           harness adapter
-                                                         /               \
-                                                   OpenClaw          future Hermes
+                                                   /             |             \
+                                             OpenClaw     Codex workspace   future Hermes
 ```
 
 These are deliberately independent extension points:
@@ -31,8 +31,10 @@ These are deliberately independent extension points:
    an exact 40-character commit. A provider returns verified package bytes and
    provenance; it cannot change parsing, consent, or mutation policy.
 3. **Harness adapters** translate a validated package into a host-native plan.
-   OpenClaw is the first adapter. Hermes or another harness can implement the
-   same boundary without importing OpenClaw or changing the portable parser.
+   OpenClaw delegates to its native Claws lifecycle. Codex creates a new project
+   workspace from the portable prompt, bootstrap instructions, and declared
+   files. Hermes or another harness can implement the same boundary without
+   importing OpenClaw or changing the portable parser.
 
 The distinction follows existing ecosystems. The skills.sh CLI resolves skills
 from Git repositories and local paths. The
@@ -56,6 +58,9 @@ useful component catalogs; they are not registries of complete Claw packages.
   exclusive with an explicit workspace target that conflicts with `SOUL.md`.
 - The harness remains authoritative for capability disclosure, consent,
   mutation, provenance, and removal.
+- An adapter must fail closed when a package requires semantics it cannot
+  represent. The bounded Codex adapter ignores foreign profiles but blocks
+  Codex profiles and required host behavior whose contract is not yet defined.
 - Mutable catalog aliases such as `latest` may help discovery, but must resolve
   to immutable bytes before preview and must not cross the consent boundary.
 
@@ -74,4 +79,7 @@ useful component catalogs; they are not registries of complete Claw packages.
   exact ClawHub plugin coordinates and emits `profiles/openclaw.yml`.
 - GitHub is currently a complete-Claw transport, not a general dependency
   declaration inside `CLAW.md`.
-- OpenClaw is the only executable harness adapter in this repository.
+- Codex support is currently a create-only portable-core workspace adapter. It
+  requires `--target` to name a nonexistent directory, writes project
+  `AGENTS.md` plus declared workspace files, and does not install dependencies
+  or mutate global config.

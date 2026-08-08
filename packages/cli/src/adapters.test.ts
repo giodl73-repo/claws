@@ -13,6 +13,7 @@ import { inspectLocalPackage } from "./source.js";
 
 const validFixture = resolve("packages", "cli", "test", "fixtures", "valid");
 const bodyOnlyFixture = resolve("packages", "cli", "test", "fixtures", "body-only");
+const codexFixture = resolve("packages", "cli", "test", "fixtures", "codex-basic");
 
 describe("standalone harness adapters", () => {
   beforeEach(() => {
@@ -194,6 +195,70 @@ describe("standalone harness adapters", () => {
     await expect(previewWithHarness("hermes", claw)).rejects.toMatchObject({
       diagnostics: [{ code: "unknown_adapter", phase: "adapter" }],
     });
+  });
+
+  it("dispatches preview and apply through the Codex workspace adapter", async () => {
+    const claw = await inspectLocalPackage(codexFixture);
+    const parent = await mkdtemp(join(tmpdir(), "claws-codex-dispatch-test-"));
+    const target = join(parent, "workspace");
+
+    try {
+      const preview = await previewWithHarness("codex", claw, undefined, process.env, { target });
+      const plan = preview.outcome as { planIntegrity: string };
+      const applied = await applyWithHarness(
+        "codex",
+        claw,
+        plan.planIntegrity,
+        undefined,
+        process.env,
+        { target },
+      );
+
+      expect(preview).toMatchObject({
+        id: "codex",
+        outcome: { ready: true, target: resolve(target) },
+      });
+      expect(applied).toMatchObject({
+        id: "codex",
+        outcome: { status: "complete", target: resolve(target) },
+      });
+      await expect(readFile(join(target, "AGENTS.md"), "utf8")).resolves.toContain(
+        "Review code for correctness",
+      );
+    } finally {
+      await rm(parent, { recursive: true, force: true });
+    }
+  });
+
+  it("previews one portable package through OpenClaw and Codex host adapters", async () => {
+    const claw = await inspectLocalPackage(codexFixture);
+    const parent = await mkdtemp(join(tmpdir(), "claws-cross-harness-test-"));
+    const target = join(parent, "workspace");
+    const run = vi.fn<AdapterRuntime["run"]>().mockResolvedValue({
+      exitCode: 0,
+      stdout: JSON.stringify({ schemaVersion: "openclaw.clawAddPlan.v1", ready: true }),
+      stderr: "",
+    });
+
+    try {
+      const [openclaw, codex] = await Promise.all([
+        previewWithHarness("openclaw", claw, { run }),
+        previewWithHarness("codex", claw, undefined, process.env, { target }),
+      ]);
+
+      expect(openclaw).toMatchObject({
+        id: "openclaw",
+        outcome: { schemaVersion: "openclaw.clawAddPlan.v1", ready: true },
+      });
+      expect(codex).toMatchObject({
+        id: "codex",
+        outcome: { schemaVersion: "claw.codexWorkspacePlan.v0", ready: true },
+      });
+      expect(run).toHaveBeenCalledOnce();
+      await expect(access(target)).rejects.toMatchObject({ code: "ENOENT" });
+    } finally {
+      await rm(parent, { recursive: true, force: true });
+    }
   });
 
   it("preserves a rejected harness-native preview outcome", async () => {
