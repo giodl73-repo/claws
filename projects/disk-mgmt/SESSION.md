@@ -24,10 +24,35 @@
   Hosted Integration is paused and its current worktrees have been released
 - Active branch / PR: local tools on claws-hapi
 - Known dirty state: disk-mgmt allocator tools/docs; local registry gitignored
-- Laptop profile: **heavy** (4–5 projects + 1 merge; claws cap ~50 GB; free target ≥50 GB)
+- Laptop profile: **light** on `LAPTOP-2IACVKSU` (2 projects + 1 merge;
+  claws cap ~30 GB; free target ≥40 GB)
 - Other laptop profile: **heavy** (4–5 projects + merge; claws cap ~50 GB; free target ≥50 GB)
 - Free space trajectory: ~5 → ~10 → ~23 → ~40 → ~253 → ~249 → ~239.7 →
-  ~291.2 → **51.0 GB free** on `DESKTOP-INBLCCK`; at the heavy target
+  ~291.2 → **51.0 GB free** on `DESKTOP-INBLCCK`; **207.2 GB free** on
+  `LAPTOP-2IACVKSU`
+- 2026-08-07 ICELINES closeout: released the merged ICELINES matchup-edge and
+  TRACKER pointer worktrees, pruned their stale registrations, and returned
+  the light-profile allocator to 0/3 slots.
+- 2026-08-07 ICELINES headshot closeout: released the merged headshot worktree
+  and returned the light-profile allocator to 0/3 slots with 206.6 GB free.
+- 2026-08-07 ICELINES discovery closeout: released the merged Matchup Web/TUI
+  worktree and TRACKER pointer merge worktree; allocator returned to 0/3 slots
+  with 198.2 GB free.
+- 2026-08-08 ICELINES observation closeout: released the merged chronological
+  observation worktree and TRACKER pointer merge worktree; allocator returned
+  to 0/3 slots with 191.7 GB free.
+- 2026-08-08 ICELINES publication closeout: released the merged publication
+  catalog worktree and TRACKER pointer merge worktree; allocator returned to
+  0/3 slots with 164.5 GB free after the TRACKER setup hydrated submodules.
+- 2026-08-06 light-laptop cleanup: increased free C: from 7.1 GB to 232.4 GB.
+  Applied bounded pnpm/npm/temp/Git reclaim; released three stale registered,
+  clean worktrees after proving their exact heads existed on remotes
+  (`openclaw-rust-runtime-followup`, `openclaw-rust-sidecar-protocol`, and
+  `openclaw-windows-rust-sidecar`); removed five clean, pushed, unallocated
+  clones; and cleared about 220 GiB of regenerable Cargo `target/` output,
+  primarily under TRACKER/ICELINES worktrees. No source changes, local-only
+  commits, Docker data, WSL data, or remote branches were removed. The local
+  active-worktree registry is now empty (0/3 slots).
 - 2026-08-06 bounded Rust cleanup: after a native ICELINES test compile hit
   `no space on device`, measured only top-level Cargo `target/` trees and ran
   `cargo clean` in two paused/released Hosted Integration worktrees:
