@@ -1,4 +1,4 @@
-import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -214,6 +214,33 @@ describe("standalone local Claw package inspection", () => {
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  it.skipIf(process.platform === "win32")(
+    "rejects a symlinked profiles directory before enumerating it",
+    async () => {
+      const root = await mkdtemp(resolve(tmpdir(), "claw-cli-profile-symlink-"));
+      const external = await mkdtemp(resolve(tmpdir(), "claw-cli-external-profiles-"));
+      try {
+        await cp(fixture("valid"), root, { recursive: true });
+        await rm(resolve(root, "profiles"), { recursive: true });
+        await writeFile(resolve(external, "private.yml"), "schemaVersion: 1\n");
+        await symlink(external, resolve(root, "profiles"), "dir");
+
+        await expect(inspectLocalPackage(root)).rejects.toMatchObject({
+          diagnostics: [
+            {
+              code: "unsafe_harness_profile",
+              phase: "package",
+              path: "profiles",
+            },
+          ],
+        });
+      } finally {
+        await rm(root, { recursive: true, force: true });
+        await rm(external, { recursive: true, force: true });
+      }
+    },
+  );
 
   it("reserves root BOOTSTRAP.md for native seed-once onboarding", async () => {
     const root = await mkdtemp(resolve(tmpdir(), "claw-cli-bootstrap-target-"));

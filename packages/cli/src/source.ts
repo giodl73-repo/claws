@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readdir, realpath, stat } from "node:fs/promises";
+import { realpath, stat } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import {
   conflictsWithClawPath,
@@ -231,19 +231,27 @@ function referencedPackagePaths(manifest: LocalClawPackage["manifest"]): string[
   ];
 }
 
-async function discoverProfilePaths(root: string): Promise<string[]> {
+async function discoverProfilePaths(sourceRoot: Root): Promise<string[]> {
   let entries;
   try {
-    entries = await readdir(resolve(root, "profiles"), { withFileTypes: true });
+    entries = await sourceRoot.list("profiles", { withFileTypes: true });
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+    if (error instanceof FsSafeError && error.code === "not-found") return [];
+    if (error instanceof FsSafeError) {
+      throw new CliError({
+        code: "unsafe_harness_profile",
+        phase: "package",
+        message: `Could not safely enumerate harness profiles: ${error.message}`,
+        path: "profiles",
+      });
+    }
     throw error;
   }
   const paths: string[] = [];
   for (const entry of entries) {
     if (!/\.ya?ml$/i.test(entry.name)) continue;
     const path = `profiles/${entry.name}`;
-    if (!entry.isFile() || entry.isSymbolicLink()) {
+    if (!entry.isFile || entry.isSymbolicLink) {
       throw new CliError({
         code: "unsafe_harness_profile",
         phase: "package",
@@ -349,7 +357,7 @@ export async function inspectLocalPackage(input: string): Promise<LocalClawPacka
       path: "$.metadata.openclaw.config",
     });
   }
-  const profilePaths = await discoverProfilePaths(root);
+  const profilePaths = await discoverProfilePaths(sourceRoot);
   const packageBootstrap = await loadPackageFile(sourceRoot, "BOOTSTRAP.md", MAX_BOOTSTRAP_BYTES);
   if (packageBootstrap && (packageBootstrap.text === undefined || !packageBootstrap.text.trim())) {
     throw new CliError({
