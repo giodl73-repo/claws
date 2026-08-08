@@ -72,6 +72,8 @@ export function formatClawSummary(claw: LocalClawPackage): string {
     `Workspace   ${summary.workspaceFileCount} files`,
     `Skills      ${summary.skillCount}`,
     `Plugins     ${summary.pluginCount}`,
+    `Bootstrap   ${summary.hasPackageBootstrap ? "package-root BOOTSTRAP.md" : "none"}`,
+    ...(summary.profilePaths.length ? [`Profiles    ${summary.profilePaths.join(", ")}`] : []),
     `MCP         ${summary.mcpServerCount}`,
     `Schedules   ${summary.cronJobCount}`,
     `Integrity   ${claw.source.integrity}`,

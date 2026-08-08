@@ -258,6 +258,13 @@ const manifestSchema = z
     }
     manifest.workspace.files.forEach((file, index) => {
       const destinationKey = portableClawPathKey(file.path);
+      if (destinationKey === portableClawPathKey("BOOTSTRAP.md")) {
+        context.addIssue({
+          code: "custom",
+          path: ["workspace", "files", index, "path"],
+          message: "Root BOOTSTRAP.md is reserved for the package-root seed-once bootstrap file.",
+        });
+      }
       if (conflictsWithClawPath(workspaceTargets, destinationKey)) {
         context.addIssue({
           code: "custom",

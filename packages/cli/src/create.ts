@@ -23,6 +23,7 @@ export type CreateClawOptions = {
   description: string;
   soulPath: string;
   agentsPath?: string;
+  bootstrapPath?: string;
   packageName?: string;
   version?: string;
   skills?: string[];
@@ -197,6 +198,16 @@ function packageDependency(kind: "skill" | "plugin", coordinate: string) {
   return { kind, source: "clawhub" as const, ref: parsed.packageName, version: parsed.version };
 }
 
+function extensionId(ref: string): string {
+  const packageName = ref.split("/").at(-1) ?? "plugin";
+  const normalized = packageName
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const prefixed = /^[a-z]/.test(normalized) ? normalized : `plugin-${normalized || "extension"}`;
+  return prefixed.slice(0, 64);
+}
+
 async function writeRelative(root: string, path: string, bytes: string | Buffer): Promise<void> {
   if (!isSafeClawRelativePath(path)) {
     fail("unsafe_create_output", "Generated package paths must remain package-relative.", path);
@@ -237,9 +248,13 @@ export async function createClawPackage(options: CreateClawOptions): Promise<Loc
   const agents = options.agentsPath
     ? await readBoundedText(resolve(options.agentsPath), MAX_PROMPT_BYTES, "AGENTS input")
     : undefined;
+  const bootstrap = options.bootstrapPath
+    ? await readBoundedText(resolve(options.bootstrapPath), 2 * 1024 * 1024, "BOOTSTRAP input")
+    : undefined;
 
   const vendoredSkills: VendoredSkill[] = [];
   const packages = [];
+  const extensions = [];
   for (const source of options.skills ?? []) {
     if (source.startsWith("clawhub:")) {
       packages.push(packageDependency("skill", source));
@@ -248,7 +263,22 @@ export async function createClawPackage(options: CreateClawOptions): Promise<Loc
     }
   }
   for (const source of options.plugins ?? []) {
-    packages.push(packageDependency("plugin", source));
+    const plugin = packageDependency("plugin", source);
+    extensions.push({
+      id: extensionId(plugin.ref),
+      kind: "plugin" as const,
+      format: "openclaw" as const,
+      source: plugin.source,
+      ref: plugin.ref,
+      version: plugin.version,
+    });
+  }
+  const extensionIds = new Set<string>();
+  for (const extension of extensions) {
+    if (extensionIds.has(extension.id)) {
+      fail("duplicate_extension", `More than one plugin maps to extension id ${extension.id}.`);
+    }
+    extensionIds.add(extension.id);
   }
   const names = new Set<string>();
   for (const skill of vendoredSkills) {
@@ -306,6 +336,16 @@ export async function createClawPackage(options: CreateClawOptions): Promise<Loc
     );
     if (agents) {
       await writeRelative(output, "workspace/AGENTS.md", agents);
+    }
+    if (bootstrap) {
+      await writeRelative(output, "BOOTSTRAP.md", bootstrap);
+    }
+    if (extensions.length > 0) {
+      await writeRelative(
+        output,
+        "profiles/openclaw.yml",
+        stringify({ schemaVersion: 1, agent: {}, extensions }),
+      );
     }
     for (const skill of vendoredSkills) {
       for (const file of skill.files) {

@@ -1,4 +1,4 @@
-import { cp, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -21,7 +21,8 @@ describe("standalone local Claw package inspection", () => {
         agent: { id: "incident-triage", name: "Incident triage" },
         bootstrapFiles: ["AGENTS.md", "SOUL.md"],
         hasPortablePrompt: false,
-        openClawProfilePath: "profiles/openclaw.yml",
+        hasPackageBootstrap: false,
+        profilePaths: ["profiles/openclaw.yml"],
       },
     });
     expect(JSON.stringify({ source: result.source, summary: result.summary })).not.toContain(
@@ -145,5 +146,120 @@ describe("standalone local Claw package inspection", () => {
         },
       ],
     });
+  });
+
+  it("integrity-binds conventional profiles and package-root bootstrap", async () => {
+    const root = await mkdtemp(resolve(tmpdir(), "claw-cli-v1-layers-"));
+    try {
+      await cp(fixture("valid"), root, { recursive: true });
+      await writeFile(resolve(root, "BOOTSTRAP.md"), "# First run\n\nAsk how I work.\n");
+      await writeFile(resolve(root, "profiles", "codex.yml"), "schemaVersion: 1\n");
+      const first = await inspectLocalPackage(root);
+      expect(first.summary).toMatchObject({
+        hasPackageBootstrap: true,
+        profilePaths: ["profiles/codex.yml", "profiles/openclaw.yml"],
+      });
+      expect(first.payload.map((entry) => entry.path)).toEqual(
+        expect.arrayContaining(["BOOTSTRAP.md", "profiles/codex.yml", "profiles/openclaw.yml"]),
+      );
+
+      await writeFile(resolve(root, "profiles", "codex.yml"), "schemaVersion: 1\nmode: project\n");
+      const changed = await inspectLocalPackage(root);
+      expect(changed.source.integrity).not.toBe(first.source.integrity);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects retired profile pointers with migration guidance", async () => {
+    const root = await mkdtemp(resolve(tmpdir(), "claw-cli-profile-pointer-"));
+    try {
+      await cp(fixture("valid"), root, { recursive: true });
+      const manifestPath = resolve(root, "CLAW.md");
+      const manifest = await readFile(manifestPath, "utf8");
+      await writeFile(
+        manifestPath,
+        manifest.replace(
+          "workspace:\n",
+          "metadata:\n  openclaw.config: profiles/openclaw.yml\nworkspace:\n",
+        ),
+      );
+      await expect(inspectLocalPackage(root)).rejects.toMatchObject({
+        diagnostics: [
+          expect.objectContaining({
+            code: "legacy_openclaw_profile_pointer",
+            path: "$.metadata.openclaw.config",
+          }),
+        ],
+      });
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects empty bootstrap and nonconventional profile names", async () => {
+    const root = await mkdtemp(resolve(tmpdir(), "claw-cli-invalid-layers-"));
+    try {
+      await cp(fixture("valid"), root, { recursive: true });
+      await writeFile(resolve(root, "BOOTSTRAP.md"), " \n");
+      await expect(inspectLocalPackage(root)).rejects.toMatchObject({
+        diagnostics: [expect.objectContaining({ code: "package_bootstrap_invalid" })],
+      });
+      await rm(resolve(root, "BOOTSTRAP.md"));
+      await writeFile(resolve(root, "profiles", "OpenClaw.yaml"), "schemaVersion: 1\n");
+      await expect(inspectLocalPackage(root)).rejects.toMatchObject({
+        diagnostics: [expect.objectContaining({ code: "invalid_harness_profile_path" })],
+      });
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it.skipIf(process.platform === "win32")(
+    "rejects a symlinked profiles directory before enumerating it",
+    async () => {
+      const root = await mkdtemp(resolve(tmpdir(), "claw-cli-profile-symlink-"));
+      const external = await mkdtemp(resolve(tmpdir(), "claw-cli-external-profiles-"));
+      try {
+        await cp(fixture("valid"), root, { recursive: true });
+        await rm(resolve(root, "profiles"), { recursive: true });
+        await writeFile(resolve(external, "private.yml"), "schemaVersion: 1\n");
+        await symlink(external, resolve(root, "profiles"), "dir");
+
+        await expect(inspectLocalPackage(root)).rejects.toMatchObject({
+          diagnostics: [
+            {
+              code: "unsafe_harness_profile",
+              phase: "package",
+              path: "profiles",
+            },
+          ],
+        });
+      } finally {
+        await rm(root, { recursive: true, force: true });
+        await rm(external, { recursive: true, force: true });
+      }
+    },
+  );
+
+  it("reserves root BOOTSTRAP.md for native seed-once onboarding", async () => {
+    const root = await mkdtemp(resolve(tmpdir(), "claw-cli-bootstrap-target-"));
+    try {
+      await cp(fixture("valid"), root, { recursive: true });
+      const manifestPath = resolve(root, "CLAW.md");
+      const manifest = await readFile(manifestPath, "utf8");
+      await writeFile(
+        manifestPath,
+        manifest.replace(
+          "  bootstrapFiles:\n",
+          "  files:\n    - source: workspace/AGENTS.md\n      path: BOOTSTRAP.md\n  bootstrapFiles:\n",
+        ),
+      );
+      await expect(inspectLocalPackage(root)).rejects.toMatchObject({
+        diagnostics: [expect.objectContaining({ code: "invalid_manifest" })],
+      });
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 });

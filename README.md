@@ -11,7 +11,7 @@ pnpm build
 pnpm proof:pack
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create
-OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create ./financial-analyst --id financial-analyst --name "Financial Analyst" --description "Analyzes companies from primary sources." --soul ./SOUL.md --skill ./.agents/skills/research --plugin clawhub:@publisher/sec-filings@1.0.0
+OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create ./financial-analyst --id financial-analyst --name "Financial Analyst" --description "Analyzes companies from primary sources." --soul ./SOUL.md --bootstrap ./BOOTSTRAP.md --skill ./.agents/skills/research --plugin clawhub:@publisher/sec-filings@1.0.0
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --dry-run
 OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- ./path/to/claw --agent openclaw --yes --plan-integrity sha256:<reviewed-digest>
 CLAWHUB_REGISTRY_URL=https://registry.example OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- clawhub:@publisher/claw@1.0.0 --agent openclaw --dry-run
@@ -53,11 +53,22 @@ automation must continue to choose preview or apply explicitly.
 
 ## Current Scope
 
-The current slice constructs a Claw from persona files, local skills, and exact
-ClawHub skill/plugin dependencies. Local skill directories are vendored into
-the package; this also provides a bounded bridge from skills installed by tools
+The current slice constructs a schema-v1 Claw from persona files, optional
+first-run instructions, local skills, exact ClawHub skill dependencies, and
+OpenClaw-native extensions. Local skill directories are vendored into the
+package; this also provides a bounded bridge from skills installed by tools
 such as the [skills.sh CLI](https://github.com/vercel-labs/skills). Construction
 does not apply the result and never overwrites an existing destination.
+Selected plugins are emitted as native extensions in
+`profiles/openclaw.yml`, not as new portable package semantics.
+
+Schema v1 uses conventional package paths. Optional `profiles/<harness>.yml`
+files are discovered without a manifest pointer, and optional package-root
+`BOOTSTRAP.md` is bounded, UTF-8 validated, and integrity-bound for native
+seed-once onboarding. Schemas, references, templates, examples, fixtures, and
+visual assets remain ordinary declared `workspace.files`; directory names add
+no execution authority or automatic context loading. The selected harness
+interprets only its profile and remains authoritative for mutation policy.
 
 Construction imports the selected `SOUL.md` content into the Markdown body of
 the generated `CLAW.md`; it does not emit a second `SOUL.md` sidecar. A
@@ -103,9 +114,11 @@ OPENCLAW_EXPERIMENTAL_CLAWS=1 pnpm claws-dev -- create ./web-reviewer \
   --skill ./.agents/skills/web-design-guidelines
 ```
 
-Repeat `--skill` to compose a set and use exact
-`--plugin clawhub:<package>@<version>` coordinates for plugin dependencies. A
-future direct skills.sh importer can collapse the two commands while retaining
+Repeat `--skill` to compose a set. Exact
+`--plugin clawhub:<package>@<version>` coordinates become OpenClaw-native
+extension declarations in `profiles/openclaw.yml`; they are not duplicated in
+portable `packages`. Use `--bootstrap` to copy reviewed first-run instructions.
+A future direct skills.sh importer can collapse the two commands while retaining
 the same vendored-byte and integrity model.
 
 Because OpenClaw binds local development plans to the absolute package path,

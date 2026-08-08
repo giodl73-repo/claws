@@ -153,6 +153,8 @@ describe("standalone Claw CLI", () => {
         "Analyzes evidence.",
         "--soul",
         "./SOUL.md",
+        "--bootstrap",
+        "./BOOTSTRAP.md",
         "--skill",
         "./skills/research",
         "--plugin",
@@ -173,6 +175,7 @@ describe("standalone Claw CLI", () => {
       name: "Analyst",
       description: "Analyzes evidence.",
       soulPath: "./SOUL.md",
+      bootstrapPath: "./BOOTSTRAP.md",
       skills: ["./skills/research"],
       plugins: ["clawhub:@example/plugin@1.0.0"],
     });
