@@ -20,7 +20,59 @@
 - Skills to use: `project-session`, `openclaw-pr-maintainer`, `gitcrawl` when
   available.
 
+## Resume Snapshot
+
+- Last updated: 2026-08-08.
+- Last agent: GitHub Copilot CLI.
+- Current focus: land the remaining Claws implementation series one PR at a
+  time through the official maintainer workflow.
+- Completed: OpenClaw PR #115237 merged as
+  `60fc2fe64d8ec2988a555a638dc1074d31e5760b` on 2026-08-07T11:04:52Z.
+  PR #115962 merged as `7774f9a36c12eb5f63e6ef33b3da2af065b09707`
+  on 2026-08-08T01:51:46Z. PR #115371 merged as
+  `a3094582ffc5473df9a48be4486f3f240e14484f` on 2026-08-08T19:32:26Z.
+  Awesome Claws #4 merged as `254ac780a3835e36b862b2708af7cbe477c1c590`.
+  Standalone Claws #1 merged as
+  `530d5edb56618814ad3526dc4af494157a389e6e`; its stacked #2 was replaced by
+  #3 and merged as `250e41588a54d23ab53b49eef5e7b2eeee83ea03`.
+  Awesome Claws #1 merged as
+  `2f2ea9f797d1861713cc100beae9466bf6afe9d5`.
+- Remaining portfolio: RFC #48/#52/#56; OpenClaw #112828/#117037; ClawHub
+  #3328/#3359; Awesome Claws #2. Closed OpenClaw #112808 is superseded as a
+  standalone slice by combined lifecycle PR #112828. Closed standalone #2 is
+  superseded by merged replacement #3.
+- Next: decide whether to split Awesome Claws #2 into a merged-runtime golden
+  proof and a dependency-gated exact build/publish proof. Otherwise retarget
+  OpenClaw #117037 to `main`, advance ClawHub #3359, and keep Awesome #2
+  blocked until those exact-artifact dependencies are real. Restack #112828
+  directly onto `main` before any landing review.
+- Known dirty state: `claws-hapi` has unrelated user changes outside this
+  project session; do not revert or include them.
+- Blocking question: none.
+
 ## Current Session
+
+### 2026-08-08 owned Claws stack landed
+
+- Merged Awesome Claws #4, standalone Claws #1, replacement standalone Claws
+  #3, and Awesome Claws #1 in the agreed owned-repository order.
+- Standalone #1 replaced raw profile-directory enumeration with `fs-safe`
+  rooted listing and added a symlink regression. Standalone #3 creates,
+  verifies, and chmods every nested Codex workspace component to owner-only
+  `0700`; exact-head hosted validation passed before merge.
+- Awesome #1 was replayed onto the #4 identity fix. Its generator and catalog
+  validator now guarantee `agent.identity.name === agent.name` for all 50
+  generated Claws. Screenshot filtering rejects unknown ids instead of
+  succeeding with zero captures.
+- Awesome #1 proof at head `92599888e012`: catalog checks passed all 50,
+  current OpenClaw `main` preview passed 48/48 extension-free packages,
+  Executive Assistant passed the complete deterministic lifecycle, and visual
+  proof passed 30/30 desktop/mobile renders.
+- `software-maintainer` and `travel-concierge` remain exact-runtime
+  dependency-gated because current upstream `main` does not contain merged
+  #115962 commit `7774f9a36c1` and rejects the profile `extensions` key. This
+  does not block the repository-local experimental corpus or claim public
+  ClawHub publication.
 
 ### 2026-07-31 Claw application-framework addendum
 
