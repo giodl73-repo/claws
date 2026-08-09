@@ -10,19 +10,24 @@
   `projects/openclaw-design/specs/nodes-devices-pairing.md`.
 - Transition hypothesis:
   `projects/enterpriseclaw/rust-transition-strategy.md`.
-- Fork-only implementation worktree: `C:\src\openclaw-rust-node`.
-- Fork branch: `user/giodl/ec026-rust-node-evidence`.
-- Fork base revision:
-  `bde1602e6e86fd91dd0bec3aae714e059e556c4d`.
-- Rust slice:
-  `experiments/rust-node-profile/`.
-- Shared fixtures:
-  `packages/gateway-protocol/fixtures/rust-node-profile/`.
+- Historical validator worktree: `C:\src\openclaw-rust-node`; read-only because
+  its protocol-v1 proof is obsolete against current Gateway protocol 4.
+- Current controlled-fork proof:
+  `https://github.com/giodl73-repo/openclaw/pull/222`.
+- Proof source head:
+  `0679dace040ade395c9a2c2f739abd57ff9cf883`.
+- Proof merge commit:
+  `3010349dca462492420ba4a1233d0d65c512b5a9`.
+- Current Rust slice:
+  `experiments/rust-gateway-live-admission/`.
+- Current fixture:
+  `.lobster/rust-gateway-live-admission-fixture.json`.
 - Proposal status: EC-026 is a local scoped draft.
-- Rust implementation status: one fork-only Cargo artifact now validates a
-  bounded protocol-v1 connect and `system.which` invocation profile. It has no
-  Gateway connection, effect execution, canary authority, state migration, or
-  deletion proof.
+- Rust implementation status: one clean-built fork-only Rust process now
+  completes the real protocol-v4 Gateway challenge, device-v3 signature,
+  device-token, and empty capability-surface handshake. The same process is
+  refused when it offers protocol 1. It has no invocation execution, effect
+  authority, readiness, canary selection, state migration, or deletion proof.
 - Evidence grade: B.
 
 ## Claim Classification
@@ -32,8 +37,9 @@
 | The TypeScript node runtime has mature identity, pairing, protocol, capability, invocation, cancellation, reconnect, and revocation behavior. | Current source/proof | Node/device source audit and extensive current tests |
 | The TypeScript Gateway can remain the initial coordinator and compatibility boundary. | Target design grounded in current architecture | Rust transition strategy |
 | Rust is the authoritative node owner today. | Unsupported | No Rust implementation or canary evidence |
-| A bounded Rust process can validate one narrow node connect/invoke profile behind the current protocol. | Fork proof | Cargo artifact plus five shared accepted/failure fixtures |
-| A bounded Rust process could replace one node profile behind the current protocol. | Target hypothesis | No live Gateway or execution canary |
+| A bounded Rust process can complete one real authenticated current-protocol node admission. | Fork proof | Merged PR #222: protocol 4 accepted, protocol 1 refused |
+| A bounded Rust process can execute one owner-admitted invocation. | Unsupported | Live admission declares no commands and dispatches no invocation |
+| A bounded Rust process could replace one node profile behind the current protocol. | Target hypothesis | No execution canary, readiness, migration, or release proof |
 | TypeScript node behavior can be deleted after Rust promotion. | Target hypothesis | Exact deletion inventory and proof absent |
 
 ## Current Compatibility Baseline
@@ -65,9 +71,9 @@ Rust implementation may silently claim to solve.
 | Rust artifact/release | Release owner | Local Cargo artifact only |
 | Local node state generation | Rust node runtime | Unproven |
 | Imported TypeScript state receipt | Migration relationship | Unproven |
-| Rust connection incarnation | Rust node runtime/protocol | Unproven |
+| Rust connection incarnation | Rust node runtime/protocol | Live authenticated connection observed; restart continuity unproven |
 | Supported capability profile | Rust node runtime | Contract only |
-| Rust invocation execution | Rust node runtime | Admission validation only; execution unproven |
+| Rust invocation execution | Rust node runtime | Unproven; current live slice declares zero commands |
 | Rust readiness result | Rust activating owner | Unproven |
 | Update/recovery result | Release/runtime owners | Unproven |
 
@@ -117,9 +123,10 @@ external-effect certainty remain governed by their existing contracts.
 
 ## Representative Proof Plan
 
-1. Build one immutable Rust node artifact. **Complete for the bounded
-   validator slice.**
-2. Fresh-install it beside a TypeScript Gateway.
+1. Build one immutable Rust node artifact. **Complete for the bounded live
+   admission slice.**
+2. Fresh-install it beside a TypeScript Gateway. **Complete in a fresh
+   test-owned Cargo target with a loopback Gateway.**
 3. Pass one accepted and one structured-failure fixture in every conformance
    area above. **Connect/invoke subset complete; lifecycle areas remain.**
 4. Run shadow-safe comparisons without dispatching effects twice.
@@ -144,8 +151,8 @@ external-effect certainty remain governed by their existing contracts.
 
 | Target claim | Required proof | Status |
 | --- | --- | --- |
-| A Rust node implementation exists and is installable. | Built artifact and fresh-install record | Partial: local Cargo artifact exists; clean install packaging remains |
-| Rust matches TypeScript behavior for the supported profile. | Shared conformance suite | Partial: five owner-wire fixtures cover connect/invoke admission only |
+| A Rust node implementation exists and is installable. | Built artifact and fresh-install record | Partial: clean-built executable crosses live admission; packaging remains |
+| Rust matches TypeScript behavior for the supported profile. | Shared conformance suite | Partial: current admission and obsolete-protocol refusal only |
 | One implementation owns every effect during migration. | Admission-routing and no-dual-dispatch proof | Blocked |
 | Rust state migration and rollback are safe. | Versioned migration/recovery fixture | Blocked |
 | Operational budgets are acceptable. | Measured canary results | Blocked |
@@ -153,7 +160,8 @@ external-effect certainty remain governed by their existing contracts.
 
 ## Evidence-Ready Disposition
 
-EC-026 moves from C to B and remains not evidence-ready. A real Rust artifact
-and bounded accepted/failure fixture set now exist, but live Gateway
-connection, invocation execution, lifecycle, single-authority canary,
-migration, release, operational, and deletion claims remain unproven.
+EC-026 remains B and is not evidence-ready. A real Rust artifact now crosses
+the live authenticated Gateway boundary with current-protocol acceptance and
+obsolete-protocol refusal. Invocation execution, readiness, lifecycle,
+single-authority canary selection, migration, release, operational, and
+deletion claims remain unproven.

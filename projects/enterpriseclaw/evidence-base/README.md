@@ -101,6 +101,13 @@ All five moved to A after audited accepted/failure proof.
 - EC-031 durable restart-portable lease; and
 - EC-034 multi-unit fan-out and targeted repair.
 
+EC-026 now has merged live cross-language admission proof: a clean-built Rust
+process completes the current protocol-v4 authenticated node handshake with an
+owner-approved empty capability surface, while protocol v1 fails closed with
+`PROTOCOL_MISMATCH`. It remains B because invocation execution, readiness,
+single-authority selection, migration, release, operations, and deletion are
+still unproven.
+
 The standalone fleet rollout/recovery simulation now proves immutable target
 membership, durable parent/child acceptance, lost-ack reconciliation, targeted
 repair, compatibility-before-mutation, generation-bound readiness,

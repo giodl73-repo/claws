@@ -137,6 +137,8 @@ decision or action.
 | `giodl73-repo/openclaw` | #207 | `lobster/evid-001-source-admission` | Merged | Bind per-commit B3 conflict resolutions to exact queue-prefix trees and carried identities. |
 | `giodl73-repo/openclaw` | #208 | `lobster/evid-001-carried-sources` | Merged | Admit the exact #107026/#104018/#113421 evidence stack and executable owner-projection fixture with authority `none`. |
 | `giodl73-repo/openclaw` | #209 | `lobster/evid-002-hosting-profiles` | Merged | Admit #113422/#114636 hosting profiles, catalog, validation, and release evidence with six bounded B3 resolutions and authority `none`. |
+| `giodl73-repo/openclaw` | #210-#221 | EVID-003 through EVID-014 branches | Merged | Add bounded owner-first evidence for usage, leases, checkpoints, lifecycle, node trust, authorized actions, release, session copies, compatibility, protocol evolution, restore, and targeted Fleet repair. |
+| `giodl73-repo/openclaw` | #222 | `lobster/evid-015-rust-gateway-canary` | Merged | Prove a clean-built Rust process crosses the current authenticated Gateway boundary with zero authority and obsolete protocol v1 fails closed. |
 | `openclaw/openclaw` | Current and future implementation | Per worktree | Reference | Test whether implementation remains consistent with the architecture. |
 | `openclaw/rfcs` | Normative proposals | Per RFC | Reference | Express focused contracts without duplicating the architecture notebook. |
 

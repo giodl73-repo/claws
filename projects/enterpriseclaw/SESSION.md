@@ -26,7 +26,7 @@
 
 ## Current Session
 
-- Last updated: 2026-08-06
+- Last updated: 2026-08-09
 - Last agent: GitHub Copilot CLI
 - Presentation: the authoritative shared Peter/Vincent deck is the 19-slide
   OneDrive presentation `EnterpriseClaw - Peter and Vincent - 2026-08-05.pptx`.
@@ -115,7 +115,15 @@
   settlement, session/memory, approval/authority, Teams identity, and
   version/config families. Its executive framing treats "agent hung" as a
   symptom requiring owner-native state rather than a single model defect.
-- Current focus: deliver the Peter/Vincent Lobster plugin-and-patch assessment,
+- Current focus: advance the controlled-fork evidence series. EVID-015 merged
+  as `giodl73-repo/openclaw` PR #222 at
+  `3010349dca462492420ba4a1233d0d65c512b5a9`: a clean-built Rust process
+  completed the real protocol-v4 authenticated Gateway handshake with an
+  owner-approved empty capability surface, while protocol v1 failed closed
+  with `PROTOCOL_MISMATCH`. EC-026 remains B; the next bounded proof is one
+  side-effect-free live invocation with exact connection/pairing correlation
+  and structured unsupported-command refusal.
+- Prior release-migration focus: deliver the Peter/Vincent Lobster plugin-and-patch assessment,
   then continue migrating the controlled EnterpriseClaw fork from its
   August-main baseline to signed OpenClaw `v2026.6.33` and rebuilding Lobster's
   downstream adoption layer without granting release or runtime authority.
@@ -627,6 +635,9 @@
   `@clawsweeper re-review` request. It remains non-draft but still
   `CONFLICTING` / `DIRTY` against current `main`, with Gateway-owner/RFC
   decisions still required.
+- EVID-015 worktree: `C:\src\openclaw-evid-015-rust-gateway` is clean at source
+  head `0679dace040ade395c9a2c2f739abd57ff9cf883`; PR #222 is merged. The older
+  `C:\src\openclaw-rust-node` protocol-v1 validator is stale and read-only.
 - Known dirty state: The wider checkout contains unrelated user changes.
   Preserve them. `projects/openclaw-design/` and this area are coherent
   documentation additions. This session added
@@ -639,7 +650,10 @@
   `C:\src\openclaw-pr100960-command-inventory` worktree was dirtied by a
   failed dependency install under unsupported Node `v24.14.0`; use the clean
   `-clean` worktree for #100960 continuation.
-- Blocking question: compare the 22-file generated artifact against Lobster PR
+- EVID-015 blocker: none. EVID-016 must remain side-effect-free and must not
+  promote admission or invocation receipt to runtime readiness or Rust
+  authority.
+- Broader blocking question: compare the 22-file generated artifact against Lobster PR
   #6839's original 27 inputs, resolve excluded `0014`, `0020`, `0021`, `0023`,
   `0025`, and `0027`, remove stale timeout patcher/scripts, and obtain
   OpenClaw changed-source, container/image, Lobster adapter, rollback, and

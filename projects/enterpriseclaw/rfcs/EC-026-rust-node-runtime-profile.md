@@ -30,13 +30,15 @@ baseline. It already provides:
 - presence, wake, pending work, and stale-session cleanup; and
 - command policy, approval, dangerousness, and operator-scope gates.
 
-A working-tree-local, untracked Rust proof now exists at
-`C:\src\openclaw-rust-node`. It builds an executable and runs five shared wire
-fixtures covering one protocol-v1 connect, one bounded `system.which`
-invocation, unsupported protocol, unsupported command, and
-missing-idempotency outcomes. It is not a committed or accepted artifact and
-does not connect to a Gateway, execute effects, migrate state, or establish
-runtime authority. TypeScript therefore remains the authoritative owner.
+A merged controlled-fork proof now exists in
+`giodl73-repo/openclaw` PR #222 at
+`3010349dca462492420ba4a1233d0d65c512b5a9`. It clean-builds a Rust process,
+completes the real protocol-v4 Gateway nonce, device-v3 signature,
+device-token, and empty capability-surface handshake, and proves protocol v1
+fails closed with `PROTOCOL_MISMATCH`. It does not execute an invocation,
+prove readiness, migrate state, or establish runtime authority. The earlier
+`C:\src\openclaw-rust-node` protocol-v1 validator is historical evidence only.
+TypeScript remains the authoritative owner.
 
 ## Investment Reconciliation
 
@@ -49,8 +51,9 @@ runtime authority. TypeScript therefore remains the authoritative owner.
   owner, not a Rust node identity or transport dependency.
 - No live OpenClaw issue or PR currently owns a Rust node runtime or
   language-neutral node conformance package.
-- The immediate next proof is a committed clean-install artifact that connects
-  to a disposable Gateway. It is not a production rollout.
+- The immediate next proof is one owner-admitted, side-effect-free live
+  invocation with exact connection/pairing correlation and one structured
+  unsupported-command refusal. It is not an effect-owning production canary.
 
 ## Supported Profile
 

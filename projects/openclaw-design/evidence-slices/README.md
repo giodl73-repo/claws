@@ -11,6 +11,7 @@ not implementation plans or normative RFCs.
 | Provider candidate attempt and usage | Source-framed; identity split revised | `provider-attempt-usage.md` |
 | Remote node invocation trust | Source-framed; dispatch/settlement evidence proposed | `remote-node-invocation-trust.md` |
 | Session export and deletion propagation | Source-framed; export/delete contracts split | `session-export-deletion-propagation.md` |
+| Rust Gateway live admission | Implemented and merged; authenticated protocol 4 accepted and obsolete protocol 1 refused | `rust-gateway-live-admission.md` |
 
 Cross-slice result:
 `evidence-header-comparison.md`.
