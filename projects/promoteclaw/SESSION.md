@@ -5,8 +5,8 @@
 - Repaired review/runtime heads through `9002ca84cf`, `d0ea1609ee`, and
   `ed5ea6cd67`: preserved engine-only SQLite cleanup, exact rollout-policy
   ownership, and same-owner ProxyPipe reconnect fencing while work is in flight.
-- Merged current Lobster `main` `ff91d21c784c` and published exact head
-  `48126edbf0` to `promoteclaw/openclaw-2026.7.1`.
+- Merged current Lobster `main` `ff91d21c784c`; merge repair head was
+  `48126edbf0`.
 - Semantically re-derived main's privileged middleware as patch `0037` against
   the exact post-`0036` OpenClaw 2026.7.1 stack. All 35 patches apply cleanly.
 - Natural Runtime `175838540` failed only compile-cache smoke: 4,381 baked
@@ -19,6 +19,10 @@
   hygiene. Exact-head evidence and re-review requests were posted.
 - Required Runtime and GitHubPop checks must attach naturally. Never manually
   queue ADO.
+- Natural Runtime `175847773` then failed only because the scoped JS runner
+  retained main-5.28-only `attempt-sensitivity-label.test.ts`, which the 7.1
+  patch stack does not create. Removed that one stale entry and published
+  exact head `4b20974def`; m365mail had passed 157/157 before the early stop.
 
 ## 2026-08-06 OpenClaw 2026.6.33 restack #7055
 
