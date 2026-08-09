@@ -1,5 +1,25 @@
 # PromoteClaw Session Context
 
+## 2026-08-09 OpenClaw 2026.7.1 exact-head repair #5402
+
+- Repaired review/runtime heads through `9002ca84cf`, `d0ea1609ee`, and
+  `ed5ea6cd67`: preserved engine-only SQLite cleanup, exact rollout-policy
+  ownership, and same-owner ProxyPipe reconnect fencing while work is in flight.
+- Merged current Lobster `main` `ff91d21c784c` and published exact head
+  `48126edbf0` to `promoteclaw/openclaw-2026.7.1`.
+- Semantically re-derived main's privileged middleware as patch `0037` against
+  the exact post-`0036` OpenClaw 2026.7.1 stack. All 35 patches apply cleanly.
+- Natural Runtime `175838540` failed only compile-cache smoke: 4,381 baked
+  files and 327 warm-tail rewrites against the stale fixed 250 budget. The gate
+  now scales to 8% of the baked graph (351 here), still well below the observed
+  cold tail of about 1,000+.
+- Proof passed: 22 SQLite tests, 6 owner-enforcement tests, 37 middleware tests
+  plus synchronous-exec regression, policy 19 + registry 15 tests, Rust fmt,
+  Linux/WSL clippy, pristine patch applicability, shell syntax, and diff
+  hygiene. Exact-head evidence and re-review requests were posted.
+- Required Runtime and GitHubPop checks must attach naturally. Never manually
+  queue ADO.
+
 ## 2026-08-06 OpenClaw 2026.6.33 restack #7055
 
 - Merged current Lobster `main`, resolved the promotion conflicts, re-derived
