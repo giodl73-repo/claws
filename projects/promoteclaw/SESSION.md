@@ -23,6 +23,11 @@
   retained main-5.28-only `attempt-sensitivity-label.test.ts`, which the 7.1
   patch stack does not create. Removed that one stale entry and published
   exact head `4b20974def`; m365mail had passed 157/157 before the early stop.
+- Natural exact-head Runtime `175849722` is fully green (65 contexts). Compile
+  cache proof is 4,385 baked, Gateway ready in 8s, and 327 fresh against the
+  derived 351 threshold. Remaining blockers are GitHubPop and dspektor G1,
+  which requires an explicit human owner decision on the combined
+  Candidate-only canary blast radius.
 
 ## 2026-08-06 OpenClaw 2026.6.33 restack #7055
 
