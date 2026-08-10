@@ -101,14 +101,13 @@ All five moved to A after audited accepted/failure proof.
 - EC-031 durable restart-portable lease; and
 - EC-034 multi-unit fan-out and targeted repair.
 
-EC-026 now has merged live cross-language admission and bounded invocation
-proof: a clean-built Rust process completes the current authenticated node
-handshake, receives operator approval for exactly `system.which`, and settles
-one connection- and pairing-generation-fenced result. An allowlisted but
-undeclared command is refused before Rust dispatch. It remains B because a
-complete runtime profile, effects, readiness, restart/reconnect, single-
-authority selection, migration, release, operations, and deletion are still
-unproven.
+EC-026 now has merged live cross-language admission, bounded invocation, and
+connection-replacement proof. A replacement Rust process retires the old
+connection's pending invoke, the old late result is refused as pairing changed,
+and only the replacement settles fresh work while pairing generation remains
+stable. It remains B because a complete runtime profile, effects, readiness,
+cold restart/recovery, single-authority selection, migration, release,
+operations, and deletion are still unproven.
 
 The standalone fleet rollout/recovery simulation now proves immutable target
 membership, durable parent/child acceptance, lost-ack reconciliation, targeted

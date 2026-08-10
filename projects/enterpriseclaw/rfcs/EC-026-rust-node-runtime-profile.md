@@ -30,14 +30,14 @@ baseline. It already provides:
 - presence, wake, pending work, and stale-session cleanup; and
 - command policy, approval, dangerousness, and operator-scope gates.
 
-A second merged controlled-fork proof now exists in
-`giodl73-repo/openclaw` PR #223 at
-`5bfec98e44c1d7ee4fb463f2f5f7b8dd5e171ee9`. Building on PR #222 admission,
-it approves exactly `system.which`, executes one side-effect-free invocation
-through connection- and pairing-generation-fenced Gateway dispatch, and
-refuses undeclared `system.notify` before Rust dispatch. It does not prove a
-general runtime profile, effects, readiness, restart, state, migration, or
-runtime authority. The earlier
+A third merged controlled-fork proof now exists in
+`giodl73-repo/openclaw` PR #224 at
+`71e7463f2e68f7e03505f98fa071ac52ad21e4ca`. Building on PR #222 admission
+and PR #223 invocation, it replaces an in-flight Rust connection, settles the
+old invoke as disconnected, refuses that connection's late result as pairing
+changed, and accepts fresh work only through the replacement connection. It
+does not prove a general runtime profile, effects, readiness, cold restart,
+state, migration, or runtime authority. The earlier
 `C:\src\openclaw-rust-node` protocol-v1 validator is historical evidence only.
 TypeScript remains the authoritative owner.
 
@@ -52,9 +52,10 @@ TypeScript remains the authoritative owner.
   owner, not a Rust node identity or transport dependency.
 - No live OpenClaw issue or PR currently owns a Rust node runtime or
   language-neutral node conformance package.
-- The immediate next proof is restart/reconnect continuity for the same bounded
-  profile: a new connection incarnation must fence late results from the old
-  route. It is not an effect-owning production canary.
+- The immediate next proof is durable cold restart for the same bounded
+  profile: restart the Gateway and Rust process from persisted pairing state,
+  reconnect without new approval, and settle one fresh invocation. It is not
+  an effect-owning production canary.
 
 ## Supported Profile
 

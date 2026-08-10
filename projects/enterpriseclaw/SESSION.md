@@ -115,15 +115,14 @@
   settlement, session/memory, approval/authority, Teams identity, and
   version/config families. Its executive framing treats "agent hung" as a
   symptom requiring owner-native state rather than a single model defect.
-- Current focus: advance the controlled-fork evidence series. EVID-016 merged
-  as `giodl73-repo/openclaw` PR #223 at
-  `5bfec98e44c1d7ee4fb463f2f5f7b8dd5e171ee9`: the admitted Rust process
-  received operator approval for exactly `system.which`, settled one live
-  invocation through connection- and pairing-generation-fenced Gateway
-  dispatch, and never received the undeclared `system.notify` refusal lane.
-  EC-026 remains B; the next bounded proof is restart/reconnect continuity with
-  a new connection incarnation and late-result fencing, still authority
-  `none`.
+- Current focus: advance the controlled-fork evidence series. EVID-017 merged
+  as `giodl73-repo/openclaw` PR #224 at
+  `71e7463f2e68f7e03505f98fa071ac52ad21e4ca`: a replacement Rust process
+  retired the old connection's pending invoke, the superseded connection's
+  late result was refused as pairing changed, and only the replacement settled
+  fresh `system.which` work while pairing generation remained stable. EC-026
+  remains B; the next bounded proof is a cold Gateway/Rust restart from durable
+  pairing state, still authority `none`.
 - Prior release-migration focus: deliver the Peter/Vincent Lobster plugin-and-patch assessment,
   then continue migrating the controlled EnterpriseClaw fork from its
   August-main baseline to signed OpenClaw `v2026.6.33` and rebuilding Lobster's
@@ -636,9 +635,9 @@
   `@clawsweeper re-review` request. It remains non-draft but still
   `CONFLICTING` / `DIRTY` against current `main`, with Gateway-owner/RFC
   decisions still required.
-- EVID-016 worktree: `C:\src\openclaw-evid-016-rust-invocation` is at source
-  head `3d541fcf061f200c5a56d926e29633a9fe3c7306`; PR #223 is merged. The older
-  EVID-015 and protocol-v1 validator worktrees are historical evidence only.
+- EVID-017 worktree: `C:\src\openclaw-evid-017-rust-reconnect` is clean at
+  source head `aff12ddadfc30fc6502b70d9b0d2af1c8c28b95b`; PR #224 is merged.
+  Older EVID-015/EVID-016 and protocol-v1 worktrees are historical evidence.
 - Known dirty state: The wider checkout contains unrelated user changes.
   Preserve them. `projects/openclaw-design/` and this area are coherent
   documentation additions. This session added
@@ -651,8 +650,8 @@
   `C:\src\openclaw-pr100960-command-inventory` worktree was dirtied by a
   failed dependency install under unsupported Node `v24.14.0`; use the clean
   `-clean` worktree for #100960 continuation.
-- EVID-016 blocker: none. The next slice must keep the command side-effect-free
-  and must not promote reconnect continuity to runtime readiness or Rust
+- EVID-017 blocker: none. The next slice must keep the command side-effect-free
+  and must not promote cold restart continuity to runtime readiness or Rust
   authority.
 - Broader blocking question: compare the 22-file generated artifact against Lobster PR
   #6839's original 27 inputs, resolve excluded `0014`, `0020`, `0021`, `0023`,
