@@ -96,17 +96,19 @@ All five moved to A after audited accepted/failure proof.
 - EC-001 cross-owner projection envelope;
 - EC-021 cross-owner restore composition;
 - EC-022 language-neutral compatibility;
-- EC-026 live Rust/Gateway admission;
+- EC-026 live Rust/Gateway admission and bounded invocation;
 - EC-027 cross-family required metadata;
 - EC-031 durable restart-portable lease; and
 - EC-034 multi-unit fan-out and targeted repair.
 
-EC-026 now has merged live cross-language admission proof: a clean-built Rust
-process completes the current protocol-v4 authenticated node handshake with an
-owner-approved empty capability surface, while protocol v1 fails closed with
-`PROTOCOL_MISMATCH`. It remains B because invocation execution, readiness,
-single-authority selection, migration, release, operations, and deletion are
-still unproven.
+EC-026 now has merged live cross-language admission and bounded invocation
+proof: a clean-built Rust process completes the current authenticated node
+handshake, receives operator approval for exactly `system.which`, and settles
+one connection- and pairing-generation-fenced result. An allowlisted but
+undeclared command is refused before Rust dispatch. It remains B because a
+complete runtime profile, effects, readiness, restart/reconnect, single-
+authority selection, migration, release, operations, and deletion are still
+unproven.
 
 The standalone fleet rollout/recovery simulation now proves immutable target
 membership, durable parent/child acceptance, lost-ack reconciliation, targeted

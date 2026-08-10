@@ -12,6 +12,7 @@ not implementation plans or normative RFCs.
 | Remote node invocation trust | Source-framed; dispatch/settlement evidence proposed | `remote-node-invocation-trust.md` |
 | Session export and deletion propagation | Source-framed; export/delete contracts split | `session-export-deletion-propagation.md` |
 | Rust Gateway live admission | Implemented and merged; authenticated protocol 4 accepted and obsolete protocol 1 refused | `rust-gateway-live-admission.md` |
+| Rust Gateway side-effect-free invocation | Implemented and merged; one owner-approved `system.which` executed and one undeclared command refused before Rust dispatch | `rust-gateway-side-effect-free-invocation.md` |
 
 Cross-slice result:
 `evidence-header-comparison.md`.

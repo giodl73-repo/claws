@@ -30,13 +30,14 @@ baseline. It already provides:
 - presence, wake, pending work, and stale-session cleanup; and
 - command policy, approval, dangerousness, and operator-scope gates.
 
-A merged controlled-fork proof now exists in
-`giodl73-repo/openclaw` PR #222 at
-`3010349dca462492420ba4a1233d0d65c512b5a9`. It clean-builds a Rust process,
-completes the real protocol-v4 Gateway nonce, device-v3 signature,
-device-token, and empty capability-surface handshake, and proves protocol v1
-fails closed with `PROTOCOL_MISMATCH`. It does not execute an invocation,
-prove readiness, migrate state, or establish runtime authority. The earlier
+A second merged controlled-fork proof now exists in
+`giodl73-repo/openclaw` PR #223 at
+`5bfec98e44c1d7ee4fb463f2f5f7b8dd5e171ee9`. Building on PR #222 admission,
+it approves exactly `system.which`, executes one side-effect-free invocation
+through connection- and pairing-generation-fenced Gateway dispatch, and
+refuses undeclared `system.notify` before Rust dispatch. It does not prove a
+general runtime profile, effects, readiness, restart, state, migration, or
+runtime authority. The earlier
 `C:\src\openclaw-rust-node` protocol-v1 validator is historical evidence only.
 TypeScript remains the authoritative owner.
 
@@ -51,9 +52,9 @@ TypeScript remains the authoritative owner.
   owner, not a Rust node identity or transport dependency.
 - No live OpenClaw issue or PR currently owns a Rust node runtime or
   language-neutral node conformance package.
-- The immediate next proof is one owner-admitted, side-effect-free live
-  invocation with exact connection/pairing correlation and one structured
-  unsupported-command refusal. It is not an effect-owning production canary.
+- The immediate next proof is restart/reconnect continuity for the same bounded
+  profile: a new connection incarnation must fence late results from the old
+  route. It is not an effect-owning production canary.
 
 ## Supported Profile
 
