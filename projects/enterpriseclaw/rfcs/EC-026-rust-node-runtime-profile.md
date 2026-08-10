@@ -30,15 +30,16 @@ baseline. It already provides:
 - presence, wake, pending work, and stale-session cleanup; and
 - command policy, approval, dangerousness, and operator-scope gates.
 
-A fourth merged controlled-fork proof now exists in
-`giodl73-repo/openclaw` PR #225 at
-`219dc421b771e29eaff5063b9cbea5fec5d9a93c`. Building on PR #222 admission,
-PR #223 invocation, and PR #224 replacement fencing, it observes the original
-Gateway exit, starts fresh Gateway and Rust process incarnations, reloads the
-persisted device identity and owner-issued node token, retains the pairing
-generation without renewed approval, and executes fresh bounded work. It does
-not prove a general runtime profile, effects, readiness, unclean crash
-recovery, Rust-owned state, migration, or runtime authority. The earlier
+A fifth merged controlled-fork proof now exists in
+`giodl73-repo/openclaw` PR #226 at
+`a3321330673247fb7184f308c763361f9d798bdd`. Building on PR #222 admission,
+PR #223 invocation, PR #224 replacement fencing, and PR #225 clean restart, it
+kills the Gateway and delayed Rust worker after dispatch. The caller loses
+transport; a fresh Gateway reuses the durable pairing generation, explicitly
+ignores the old request ID, and accepts one distinct fresh request without
+renewed approval. It does not prove a general runtime profile, effects,
+readiness, durable crash recovery, Rust-owned state, migration, or runtime
+authority. The earlier
 `C:\src\openclaw-rust-node` protocol-v1 validator is historical evidence only.
 TypeScript remains the authoritative owner.
 
@@ -53,11 +54,10 @@ TypeScript remains the authoritative owner.
   owner, not a Rust node identity or transport dependency.
 - No live OpenClaw issue or PR currently owns a Rust node runtime or
   language-neutral node conformance package.
-- The immediate next proof is unclean restart fencing for the same bounded
-  profile: crash the Gateway and Rust process with work in flight, restart from
-  persisted pairing state, prove old work is not resurrected or double-settled,
-  and settle one fresh invocation. It is not an effect-owning production
-  canary.
+- The immediate next proof is owner-driven deadline and cancellation behavior
+  for the same bounded profile: cancel or expire delayed side-effect-free work,
+  require the owner-native terminal outcome, ignore the late Rust result, and
+  settle one fresh invocation. It is not an effect-owning production canary.
 
 ## Supported Profile
 

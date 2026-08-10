@@ -102,12 +102,14 @@ All five moved to A after audited accepted/failure proof.
 - EC-034 multi-unit fan-out and targeted repair.
 
 EC-026 now has merged live cross-language admission, bounded invocation,
-connection replacement, and clean cold-restart continuity proof. Fresh Gateway
-and Rust processes reuse durable pairing and the persisted owner-issued token
-without renewed approval, retain the pairing generation, and execute fresh
-bounded work. It remains B because a complete runtime profile, effects,
-readiness, unclean crash recovery, single-authority selection, migration,
-release, operations, and deletion are still unproven.
+connection replacement, clean cold-restart continuity, and unclean-restart
+settlement-fencing proof. Fresh Gateway and Rust processes reuse durable pairing
+and the persisted owner-issued token without renewed approval. After a crash,
+the caller loses transport, the restarted Gateway explicitly ignores the old
+request ID, and one distinct fresh request settles. It remains B because a
+complete runtime profile, effects, readiness, durable crash recovery,
+single-authority selection, migration, release, operations, and deletion are
+still unproven.
 
 The standalone fleet rollout/recovery simulation now proves immutable target
 membership, durable parent/child acceptance, lost-ack reconciliation, targeted

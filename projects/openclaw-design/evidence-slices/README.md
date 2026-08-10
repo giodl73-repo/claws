@@ -15,6 +15,7 @@ not implementation plans or normative RFCs.
 | Rust Gateway side-effect-free invocation | Implemented and merged; one owner-approved `system.which` executed and one undeclared command refused before Rust dispatch | `rust-gateway-side-effect-free-invocation.md` |
 | Rust Gateway reconnect continuity | Implemented and merged; replacement connection retires old work, refuses its late result, and alone settles fresh work | `rust-gateway-reconnect-continuity.md` |
 | Rust Gateway cold-restart continuity | Implemented and merged; fresh Gateway and Rust processes reuse durable pairing without renewed approval and execute fresh bounded work | `rust-gateway-cold-restart-continuity.md` |
+| Rust Gateway unclean-restart fencing | Implemented and merged; an in-flight caller loses transport, the restarted Gateway ignores the old request ID, and one distinct fresh request settles | `rust-gateway-unclean-restart-fencing.md` |
 
 Cross-slice result:
 `evidence-header-comparison.md`.
