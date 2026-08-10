@@ -14,6 +14,7 @@ not implementation plans or normative RFCs.
 | Rust Gateway live admission | Implemented and merged; authenticated protocol 4 accepted and obsolete protocol 1 refused | `rust-gateway-live-admission.md` |
 | Rust Gateway side-effect-free invocation | Implemented and merged; one owner-approved `system.which` executed and one undeclared command refused before Rust dispatch | `rust-gateway-side-effect-free-invocation.md` |
 | Rust Gateway reconnect continuity | Implemented and merged; replacement connection retires old work, refuses its late result, and alone settles fresh work | `rust-gateway-reconnect-continuity.md` |
+| Rust Gateway cold-restart continuity | Implemented and merged; fresh Gateway and Rust processes reuse durable pairing without renewed approval and execute fresh bounded work | `rust-gateway-cold-restart-continuity.md` |
 
 Cross-slice result:
 `evidence-header-comparison.md`.

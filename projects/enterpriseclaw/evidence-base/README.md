@@ -67,7 +67,7 @@ current Cron source and
 tests proved independent schedule, occurrence, restart, admission,
 cancellation, and ABA-safe ownership.
 
-EC-026 now has a real fork-only Rust artifact plus five language-neutral
+EC-026 now has a real fork-only Rust artifact plus six language-neutral
 accepted/failure fixtures for one bounded connect/invoke profile. EC-034 now
 has two unlike source-backed target families: Lobster version-slot rollout and
 OpenClaw Fleet tenant-cell lifecycle. Both move to B. Canary, migration,
@@ -101,13 +101,13 @@ All five moved to A after audited accepted/failure proof.
 - EC-031 durable restart-portable lease; and
 - EC-034 multi-unit fan-out and targeted repair.
 
-EC-026 now has merged live cross-language admission, bounded invocation, and
-connection-replacement proof. A replacement Rust process retires the old
-connection's pending invoke, the old late result is refused as pairing changed,
-and only the replacement settles fresh work while pairing generation remains
-stable. It remains B because a complete runtime profile, effects, readiness,
-cold restart/recovery, single-authority selection, migration, release,
-operations, and deletion are still unproven.
+EC-026 now has merged live cross-language admission, bounded invocation,
+connection replacement, and clean cold-restart continuity proof. Fresh Gateway
+and Rust processes reuse durable pairing and the persisted owner-issued token
+without renewed approval, retain the pairing generation, and execute fresh
+bounded work. It remains B because a complete runtime profile, effects,
+readiness, unclean crash recovery, single-authority selection, migration,
+release, operations, and deletion are still unproven.
 
 The standalone fleet rollout/recovery simulation now proves immutable target
 membership, durable parent/child acceptance, lost-ack reconciliation, targeted

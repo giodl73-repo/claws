@@ -115,14 +115,15 @@
   settlement, session/memory, approval/authority, Teams identity, and
   version/config families. Its executive framing treats "agent hung" as a
   symptom requiring owner-native state rather than a single model defect.
-- Current focus: advance the controlled-fork evidence series. EVID-017 merged
-  as `giodl73-repo/openclaw` PR #224 at
-  `71e7463f2e68f7e03505f98fa071ac52ad21e4ca`: a replacement Rust process
-  retired the old connection's pending invoke, the superseded connection's
-  late result was refused as pairing changed, and only the replacement settled
-  fresh `system.which` work while pairing generation remained stable. EC-026
-  remains B; the next bounded proof is a cold Gateway/Rust restart from durable
-  pairing state, still authority `none`.
+- Current focus: advance the controlled-fork evidence series. EVID-018 merged
+  as `giodl73-repo/openclaw` PR #225 at
+  `219dc421b771e29eaff5063b9cbea5fec5d9a93c`: the original Gateway exit was
+  observed, fresh Gateway and Rust process incarnations reloaded durable
+  pairing and the persisted owner-issued node token, no renewed approval
+  appeared, pairing generation remained stable, and fresh `system.which` work
+  succeeded with authority `none`. EC-026 remains B; the next bounded proof is
+  unclean restart with in-flight work fenced from resurrection or duplicate
+  settlement.
 - Prior release-migration focus: deliver the Peter/Vincent Lobster plugin-and-patch assessment,
   then continue migrating the controlled EnterpriseClaw fork from its
   August-main baseline to signed OpenClaw `v2026.6.33` and rebuilding Lobster's

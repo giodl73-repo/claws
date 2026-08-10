@@ -15,24 +15,29 @@
 - Current controlled-fork proofs:
   `https://github.com/giodl73-repo/openclaw/pull/222` and
   `https://github.com/giodl73-repo/openclaw/pull/223` and
-  `https://github.com/giodl73-repo/openclaw/pull/224`.
+  `https://github.com/giodl73-repo/openclaw/pull/224` and
+  `https://github.com/giodl73-repo/openclaw/pull/225`.
 - Latest proof source head:
-  `aff12ddadfc30fc6502b70d9b0d2af1c8c28b95b`.
+  `d9889335030e80bcb40a48a799e83ef67114d1e9`.
 - Latest proof merge commit:
-  `71e7463f2e68f7e03505f98fa071ac52ad21e4ca`.
+  `219dc421b771e29eaff5063b9cbea5fec5d9a93c`.
 - Current Rust slice:
   `experiments/rust-gateway-live-admission/`.
 - Current fixtures:
   `.lobster/rust-gateway-live-admission-fixture.json` and
   `.lobster/rust-gateway-side-effect-free-invocation-fixture.json` and
-  `.lobster/rust-gateway-reconnect-continuity-fixture.json`.
+  `.lobster/rust-gateway-reconnect-continuity-fixture.json` and
+  `.lobster/rust-gateway-cold-restart-continuity-fixture.json`.
 - Proposal status: EC-026 is a local scoped draft.
 - Rust implementation status: one clean-built fork-only Rust process completes
   current admission and one owner-approved, side-effect-free `system.which`
   invocation. A second process can replace the same identity's connection:
   pending old work settles disconnected, its late result is refused, and only
-  the replacement settles fresh work. It has no effect authority, readiness,
-  cold restart, canary selection, state migration, release, or deletion proof.
+  the replacement settles fresh work. Fresh Gateway and Rust processes can
+  then reload durable pairing and the persisted owner-issued token, retain the
+  pairing generation without renewed approval, and execute fresh bounded work.
+  It has no effect authority, readiness, unclean crash recovery, canary
+  selection, state migration, release, or deletion proof.
 - Evidence grade: B.
 
 ## Claim Classification
@@ -45,6 +50,7 @@
 | A bounded Rust process can complete one real authenticated current-protocol node admission. | Fork proof | Merged PR #222: protocol 4 accepted, protocol 1 refused |
 | A bounded Rust process can execute one owner-admitted invocation. | Fork proof | Merged PR #223: one fenced `system.which` result; undeclared `system.notify` refused before Rust dispatch |
 | A replacement Rust connection fences superseded work. | Fork proof | Merged PR #224: old invoke disconnected, late result refused as pairing changed, fresh replacement invoke accepted |
+| Fresh Gateway and Rust processes can reuse durable pairing without renewed approval. | Fork proof | Merged PR #225: original process exit observed, new process IDs, persisted identity/token reloaded, stable pairing generation, and fresh `system.which` accepted |
 | A bounded Rust process could replace one node profile behind the current protocol. | Target hypothesis | No readiness, authority-selection, migration, or release proof |
 | TypeScript node behavior can be deleted after Rust promotion. | Target hypothesis | Exact deletion inventory and proof absent |
 
@@ -77,7 +83,7 @@ Rust implementation may silently claim to solve.
 | Rust artifact/release | Release owner | Local Cargo artifact only |
 | Local node state generation | Rust node runtime | Unproven |
 | Imported TypeScript state receipt | Migration relationship | Unproven |
-| Rust connection incarnation | Rust node runtime/protocol | Replacement connection and late-result fencing proven; cold process/Gateway restart unproven |
+| Rust connection incarnation | Rust node runtime/protocol | Replacement connection, late-result fencing, and clean cold process/Gateway restart proven; crash recovery unproven |
 | Supported capability profile | Rust node runtime | Partial: one approved side-effect-free command only |
 | Rust invocation execution | Rust node runtime | One `system.which` invocation proven; general execution unproven |
 | Rust readiness result | Rust activating owner | Unproven |
@@ -135,8 +141,8 @@ external-effect certainty remain governed by their existing contracts.
    test-owned Cargo target with a loopback Gateway.**
 3. Pass one accepted and one structured-failure fixture in every conformance
    area above. **Connect, one bounded invocation/refusal, and live replacement
-   reconnect are complete; streaming, deadlines, cancellation, cold restart,
-   and update remain.**
+   reconnect, and clean cold restart are complete; streaming, deadlines,
+   cancellation, crash recovery, and update remain.**
 4. Run shadow-safe comparisons without dispatching effects twice.
 5. Canary one node/deployment unit as Rust-authoritative.
 6. Restart, reconnect, update, and exercise downgrade refusal.
@@ -160,7 +166,7 @@ external-effect certainty remain governed by their existing contracts.
 | Target claim | Required proof | Status |
 | --- | --- | --- |
 | A Rust node implementation exists and is installable. | Built artifact and fresh-install record | Partial: clean-built executable crosses live admission; packaging remains |
-| Rust matches TypeScript behavior for the supported profile. | Shared conformance suite | Partial: admission, one `system.which` result/refusal lane, and connection replacement only |
+| Rust matches TypeScript behavior for the supported profile. | Shared conformance suite | Partial: admission, one `system.which` result/refusal lane, connection replacement, and clean cold restart only |
 | One implementation owns every effect during migration. | Admission-routing and no-dual-dispatch proof | Blocked |
 | Rust state migration and rollback are safe. | Versioned migration/recovery fixture | Blocked |
 | Operational budgets are acceptable. | Measured canary results | Blocked |
@@ -172,6 +178,7 @@ EC-026 remains B and is not evidence-ready. A real Rust artifact now crosses
 the live authenticated Gateway boundary and settles one owner-approved,
 side-effect-free invocation with connection and pairing-generation fencing.
 It also proves replacement routing, old-pending settlement, and late-result
-refusal. General execution, effects, readiness, cold restart/recovery,
-single-authority canary selection, migration, release, operational, and
-deletion claims remain unproven.
+refusal. Fresh Gateway and Rust processes also reuse durable pairing without
+renewed approval and execute fresh bounded work. General execution, effects,
+readiness, unclean crash recovery, single-authority canary selection,
+migration, release, operational, and deletion claims remain unproven.
