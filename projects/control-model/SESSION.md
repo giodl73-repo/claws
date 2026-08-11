@@ -24,17 +24,26 @@
 
 - Last updated: 2026-08-11.
 - Last agent: GitHub Copilot CLI.
-- Current focus: Select the first evidence slice after completing team and
-  `.roles` review of the fork-only RFC and M/Lobster adoption issue.
+- Current focus: Gather team feedback on RFC 0029 and the OC1 implementation
+  draft before extracting conversation or artifact behavior.
 - Active branch / PR: fork branch
-  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `b964e72`; no
-  upstream RFC PR. M design issue
-  [gim-home/m#5675](https://github.com/gim-home/m/issues/5675) is open.
+  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `110604c` in
+  [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
+  upstream RFC PR. OpenClaw OC1 is
+  [draft PR #122283](https://github.com/openclaw/openclaw/pull/122283) from
+  `user/giodl/control-model-oc1`. M design issue
+  [gim-home/m#5675](https://github.com/gim-home/m/issues/5675) remains open.
 - Review result: OpenClaw enumerates all authorized applicable view
   descriptors, but materializes only the client-selected deferred payload.
   Discovery is policy-filtered, renderer advertisement is private by default,
   and a compatible user selection remains stable across reconnects and
   artifact revisions.
+- Artifact placement: one stable artifact may render inline, expanded, or in a
+  dedicated surface. Later turns may publish higher revisions. V1 persistence
+  is session-scoped rather than a permanent document store.
+- OC1 result: workspace-only `@openclaw/control-model` implements immutable
+  bounded session snapshots, epoch-safe canonical refresh, typed errors, and
+  subscriber isolation. Conversation and artifact behavior remain excluded.
 - Known dirty state: `claws-hapi` contains unrelated pre-existing project-note
   changes. The dedicated RFC worktree started clean from `openclaw/rfcs`
   `origin/main` at `af708f0`.
@@ -45,6 +54,7 @@
 ## Resume Checklist
 
 - Run: `git -C C:\src\openclaw-rfcs-control-model status --short --branch`.
+- Run: `git -C C:\src\openclaw-control-model-oc1 status --short --branch`.
 - Verify: fork branch exists and no upstream PR was opened.
 - Review: `review-packet.md`, the role findings, and any comments on the M
   design issue.
@@ -62,7 +72,7 @@
 
 ## Open Threads
 
-- Decide the smallest OpenClaw implementation slice after team review.
+- Incorporate review feedback before beginning OC2.
 - Confirm whether `@openclaw/control-model` should publish with the OpenClaw
   calendar release train or remain a workspace package for its first slice.
 - Confirm the first Lobster native component and representative tool result.
