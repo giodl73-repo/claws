@@ -45,6 +45,11 @@ native, structured, or MCP App fallback behavior. Client capability
 advertisement can filter/rank offers but is not authorization or component
 installation.
 
+"All views" means all authorized applicable descriptors, not eager computation
+of every payload. Lobster selects one compatible offer; OpenClaw materializes
+only that deferred view. Discovery must not reveal hidden extensions or tools,
+and extensions do not receive the client's complete renderer inventory.
+
 ### First slice
 
 - Connect through Lobster's existing hosted Gateway seam.
@@ -63,6 +68,7 @@ installation.
   canonical for other clients.
 - Native artifact rendering is host-registered and schema validated.
 - Extension presence and client renderer support are tested independently.
+- Unselected deferred views are not materialized or charged to the request.
 - Third-party executable UI remains sandboxed.
 - At least one duplicate Lobster Gateway reducer/projection path is identified
   for deletion after parity.

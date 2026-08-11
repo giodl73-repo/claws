@@ -16,12 +16,13 @@ The durable name is **OpenClaw Control Model**. `Gateway` names the transport;
 | Architecture, evidence, and PR series | `architecture.md` |
 | Draft `gim-home/m` design issue | `m-issue-draft.md` |
 | Role-review findings | `role-review.md` |
+| Complete team review packet | `review-packet.md` |
 
 ## Active Work
 
 | Repo | PR / Issue | Branch | Status | Purpose |
 | --- | --- | --- | --- | --- |
-| `openclaw/rfcs` fork | [RFC 0029 preview](https://github.com/giodl73-repo/rfcs/tree/user/giodl/rfc-0029-control-model) | `user/giodl/rfc-0029-control-model` at `585c374` | Fork-only draft | Define the OpenClaw-owned headless control model and client-selectable renderer-neutral view offers. |
+| `openclaw/rfcs` fork | [RFC 0029 preview](https://github.com/giodl73-repo/rfcs/tree/user/giodl/rfc-0029-control-model) | `user/giodl/rfc-0029-control-model` at `b964e72` | Fork-only draft | Define the OpenClaw-owned headless control model and client-selectable renderer-neutral view offers. |
 | `gim-home/m` | [#5675](https://github.com/gim-home/m/issues/5675) | n/a | Open design issue | Consume the Control Model through Lobster's hosted Gateway seam, adapt into `SessionView`, and render trusted native artifacts. |
 | `gim-home/m` | [#2511](https://github.com/gim-home/m/issues/2511) | n/a | Related open direction | Native React/JSON-render GenUX direction and swappable renderer discussion. |
 | `gim-home/m` | [#5427](https://github.com/gim-home/m/issues/5427) | n/a | Existing architecture map | One Scout UX package and SuperApp integration decisions. |

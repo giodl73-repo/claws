@@ -35,6 +35,33 @@ support. The answer is yes, with split authority:
 Capability advertisement can reduce wasted work but cannot install code, grant
 trust, or authorize actions.
 
+## Round 2: multi-view review
+
+The corrected "OpenClaw offers all views; Lobster chooses" design was reviewed
+again with the same roles.
+
+| Role | Finding | Revision |
+| --- | --- | --- |
+| Gateway engineer | Eagerly computing every calendar/list/table/app payload would multiply tool latency, memory, and event pressure. | OpenClaw now enumerates bounded descriptors and materializes only the client-selected deferred view. |
+| Cowork UX engineer | A recommendation must not silently override a user's valid selected view after reconnect or streaming revision. | Selection stays client-owned and stable while compatible; fallback or switching is observable. |
+| CISO | View enumeration can reveal installed extensions or denied tools, while renderer advertisement can fingerprint the client. | Discovery is caller/session/policy filtered; the Gateway does not expose the full renderer inventory verbatim to extensions. |
+| Founder | "OpenClaw offers all views" could imply core must implement every presentation and become a universal UI platform. | Core defines the catalog contract; core and installed extensions contribute views. Products remain free to ignore every view and use structured content. |
+| Lobster container engineer | Unselected view generation would add cold-start and per-turn cost. | Deferred materialization is read-only, bounded, selected-only, and separately measurable. |
+
+### Round 2 blocking gates
+
+- Prove descriptor enumeration performs no deferred external work.
+- Prove only the selected deferred view materializes.
+- Prove discovery does not reveal an unauthorized extension, tool, or view.
+- Prove renderer advertisement is bounded and not forwarded verbatim.
+- Prove a compatible user-selected view survives reconnect and later artifact
+  revisions.
+
+### Round 2 verdict
+
+Proceed with the descriptor-plus-selected-materialization model. Do not proceed
+with an artifact envelope that eagerly includes data for every offered view.
+
 ## Blocking gates before implementation
 
 - Prove a browser-safe package graph with no Control UI, framework, route,
