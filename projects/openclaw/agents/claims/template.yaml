@@ -1,0 +1,35 @@
+schemaVersion: 1
+
+task:
+  id: replace-me
+  sourceUrl: null
+  objective: Replace with one observable outcome.
+
+assignment:
+  role: openclaw-builder
+  host: primary-wsl
+  claimedBy: replace-me
+  claimedAt: "YYYY-MM-DDTHH:MM:SSZ"
+  expiresAt: "YYYY-MM-DDTHH:MM:SSZ"
+  status: claimed
+
+source:
+  repository: openclaw/openclaw
+  baseRef: origin/main
+  branch: null
+  worktree: null
+  headSha: null
+
+session:
+  kind: local
+  reference: null
+
+publication:
+  pullRequest: null
+  publicActionsAuthorized: []
+
+handoff:
+  result: null
+  blocker: null
+  nextAction: Create the isolated session and managed worktree.
+

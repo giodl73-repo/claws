@@ -1,0 +1,31 @@
+schemaVersion: 1
+
+hosts:
+  - id: primary-wsl
+    machine: LAPTOP-2IACVKSU
+    runtime: wsl2
+    status: planned
+    purpose: Primary local OpenClaw coding Gateway.
+    capabilities:
+      - linux-toolchain
+      - managed-worktrees
+      - local-private-fixtures
+
+  - id: native-windows
+    machine: LAPTOP-2IACVKSU
+    runtime: windows
+    status: available-on-demand
+    purpose: Windows-native validation and Windows node capabilities.
+    capabilities:
+      - windows-toolchain
+      - windows-node
+
+  - id: team-cloud
+    machine: team.openclaw.ai
+    runtime: cloud
+    status: access-pending
+    purpose: Portable team-hosted OpenClaw development sessions.
+    capabilities:
+      - persistent-sessions
+      - remote-access
+
