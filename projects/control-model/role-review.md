@@ -23,9 +23,12 @@ Reviewed 2026-08-11 against:
 Tom asked whether in-chat UX depends on installed OpenClaw extensions and client
 support. The answer is yes, with split authority:
 
-- installed/enabled extensions determine what artifacts can be produced;
-- the client registry determines what can render natively;
-- the Control Model only normalizes, reconciles, and carries the artifact; and
+- installed/enabled extensions determine what artifacts and view offers can be
+  produced;
+- OpenClaw exposes all applicable renderer-neutral views;
+- the client registry and product choose the compatible view and local view
+  model;
+- the Control Model only normalizes, reconciles, and carries those offers; and
 - absent or mismatched native support uses structured/text or explicit
   sandboxed fallback.
 
