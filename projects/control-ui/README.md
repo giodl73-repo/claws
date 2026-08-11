@@ -63,6 +63,9 @@ After the proof, keep the PR stack small:
 
 ## Related Areas
 
+- `projects/control-model/README.md` for the successor headless-model approach
+  used when Lobster owns the React experience instead of hosting OpenClaw's
+  shipped Lit application.
 - `projects/config-admin/README.md` for shared admin/config UX framing.
 - `projects/hosted-integration/README.md` for host-runtime boundary contracts.
 - `projects/managed-config/README.md` for deployment-owned config authority.

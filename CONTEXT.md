@@ -37,7 +37,8 @@ tools.
 | Mail work                           | `projects/mail/README.md`                                   |
 | Claws work                          | `projects/claws/README.md`                                  |
 | Control UI hosting                  | `projects/control-ui/README.md`                             |
-| Claws Review Bot                    | `projects/claws-review-bot/README.md`                       |
+| OpenClaw Control Model              | `projects/control-model/README.md`                     |
+| Claws Review Bot                    | `projects/claws-review-bot/README.md`                  |
 | Localization work                   | `projects/localization/README.md`                           |
 | oc-path work                        | `projects/oc-path/README.md`                                |
 | ClawPilot issue loop                | `projects/clawpilot/README.md`                              |
@@ -200,6 +201,8 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
   plugins, MCP servers, workspace files, persona files, and automations.
 - Control UI hosting: version-matched OpenClaw Control UI hosted in Lobster,
   with Lobster-owned auth/routing/rollout and enforced lockdown.
+- OpenClaw Control Model: framework-neutral OpenClaw state, commands, and UI
+  artifact projections for Lobster-owned React experiences.
 - Claws Review Bot: `@bic/claws-review-bot` package notes, with Lobster PR
   review as the primary lane and a separate ClawPilot issue-classifier
   experiment.

@@ -22,6 +22,16 @@
 - Skills to use: `project-session`, `project-creator`, and `lobster-pr-ops`;
   use OpenClaw PR/testing skills when the generic OpenClaw slices start.
 
+## 2026-08-11 Strategy Split
+
+- Lobster now intends to own its native React UX rather than make OpenClaw's
+  shipped Lit Control UI the long-term primary experience.
+- Existing hosted Control UI work remains useful fallback, route/auth/policy
+  evidence, and rollback infrastructure.
+- New headless state, command, and renderer-neutral artifact work lives in
+  `projects/control-model/README.md`, fork-only OpenClaw RFC 0029, and
+  [gim-home/m#5675](https://github.com/gim-home/m/issues/5675).
+
 ## 2026-08-06 root cutover review repair #6116
 
 - Replaced the full-runtime `/?health=1` copy of the service/build JSON with a
@@ -36,10 +46,10 @@
 
 ## Current Session
 
-- Last updated: 2026-08-04.
-- Last agent: Copilot.
-- Current focus: Land and deploy Lobster PR #7039 to FRE-301, then validate the
-  merged hosted OpenClaw Control UI preview through its three ECS gates.
+- Last updated: 2026-08-11.
+- Last agent: GitHub Copilot CLI.
+- Current focus: Preserve the hosted Control UI as fallback/evidence while the
+  successor OpenClaw Control Model and Lobster-owned React UX are reviewed.
 - Active branch / PR: Lobster design PR
   [bic/lobster#6060](https://microsoft.ghe.com/bic/lobster/pull/6060),
   `user/giodl/control-ui-hosting-design` at
@@ -81,9 +91,9 @@
   and `.tmp-ado-timeline-174718311.json`. Deployment worktree
   `C:\src\lobster-control-ui-env` is clean at pushed PR #7039 head
   `691ac5987d`.
-- Blocking question: PR #7039 is open, mergeable, review-required, and has no
-  required checks attached yet. It must merge and deploy to FRE-301 before the
-  three ECS gates can activate `/openclaw`.
+- Blocking question: Decide after Control Model review whether #7039 and the
+  hosted `/openclaw` rollout remain a supported fallback path or are retired
+  before further deployment investment.
 
 ## 2026-07-29 PR #6060 review closeout
 
