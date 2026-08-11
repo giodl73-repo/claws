@@ -1,0 +1,47 @@
+schemaVersion: 1
+status: draft
+
+roles:
+  - id: openclaw-builder
+    displayName: OpenClaw builder
+    purpose: Investigate and implement one bounded OpenClaw change.
+    clawPackage: null
+    supportedHosts:
+      - team-cloud
+      - primary-wsl
+      - native-windows
+    toolsProfile: coding
+    execMode: auto
+    workspacePolicy: managed-worktree-required
+    defaultWriteAccess: worktree
+    publicMutation: human-gated
+    concurrentWritersPerTask: 1
+
+  - id: openclaw-reviewer
+    displayName: OpenClaw reviewer
+    purpose: Independently review a branch, evidence, and best-fix shape.
+    clawPackage: null
+    supportedHosts:
+      - team-cloud
+      - primary-wsl
+      - native-windows
+    toolsProfile: coding
+    execMode: auto
+    workspacePolicy: separate-checkout-required
+    defaultWriteAccess: none
+    publicMutation: human-gated
+    concurrentWritersPerTask: 0
+
+  - id: openclaw-windows-validator
+    displayName: OpenClaw Windows validator
+    purpose: Run Windows-native and Windows-node validation for an existing task.
+    clawPackage: null
+    supportedHosts:
+      - native-windows
+    toolsProfile: coding
+    execMode: auto
+    workspacePolicy: separate-checkout-required
+    defaultWriteAccess: none
+    publicMutation: forbidden
+    concurrentWritersPerTask: 0
+
