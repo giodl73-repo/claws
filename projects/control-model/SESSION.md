@@ -27,7 +27,7 @@
 - Current focus: Team review of the fork-only OpenClaw Control Model RFC and
   M/Lobster adoption issue before selecting an implementation slice.
 - Active branch / PR: fork branch
-  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `e0b7e3c`; no
+  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `585c374`; no
   upstream RFC PR. M design issue
   [gim-home/m#5675](https://github.com/gim-home/m/issues/5675) is open.
 - Known dirty state: `claws-hapi` contains unrelated pre-existing project-note
@@ -62,6 +62,9 @@
 - Confirm the first Lobster native component and representative tool result.
 - Decide whether JSON Render is an adopter choice or a future OpenClaw-owned
   artifact dialect; V1 keeps it out of the core contract.
+- Confirm the OpenClaw view-offer discovery carrier; OpenClaw owns all
+  applicable view offers, while each client selects and maps one into its local
+  view model.
 
 ## Session Checkpoints
 

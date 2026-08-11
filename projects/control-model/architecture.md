@@ -66,13 +66,14 @@ Lobster React UX + trusted renderer registry
 | OpenClaw | Protocol, request/event semantics, history/live reconciliation, stable projections, commands, error classes, server authorization, compatibility, conformance |
 | Lobster/M | React composition, `SessionView`, component catalog, Fluent/M365 theming, tenant auth/routing, telemetry, rollout |
 | Tool or MCP server | Structured domain output and optional UI resource/template reference |
-| Host renderer | Trust decision, native component registration, action binding, fallback choice |
+| OpenClaw core/extensions | Available renderer-neutral view offers and their semantics |
+| Host renderer | View selection, product view-model mapping, trust decision, native component registration, action binding, fallback choice |
 
 Installed and enabled OpenClaw extensions determine which artifacts exist.
-The client determines which artifact versions it can render natively. The
-Control Model neither invents extension capabilities nor installs client
-components; it normalizes the artifact and exposes the safe native,
-structured, or MCP App rendering choice.
+OpenClaw exposes every applicable renderer-neutral view offer. The client
+determines which view it wants, which versions it can render natively, and how
+the selected projection maps into its own view model. The Control Model neither
+invents extension capabilities nor installs client components.
 
 ### V1 boundaries
 
@@ -181,10 +182,13 @@ error; the package must not silently convert rejection into success.
 export interface UiArtifact {
   id: string;
   revision: number;
-  templateUri: string;
-  dataVersion: number;
-  data: JsonValue;
   structuredContent?: JsonValue;
+  views: Array<{
+    id: string;
+    templateUri: string;
+    dataVersion: number;
+    data: JsonValue;
+  }>;
   state: "pending" | "ready" | "failed" | "expired";
   source: {
     sessionKey: string;
@@ -195,11 +199,11 @@ export interface UiArtifact {
 }
 ```
 
-`templateUri` is an opaque identifier, not executable code and not a trust
-claim. A host may map a registered URI to a native component. Unknown URIs
-render structured/text output or an explicitly supplied sandboxed fallback.
-`dataVersion` selects an accepted schema in that exact reviewed host
-registration.
+OpenClaw core/extensions may offer calendar, list, table, summary, or other
+views over one artifact. `templateUri` is an opaque identifier, not executable
+code and not a trust claim. A host selects a compatible offer and may map it to
+a native component or its existing product view model. Unknown views render
+structured/text output or an explicitly supplied sandboxed fallback.
 
 V1 uses full immutable artifact revisions. JSON Patch/JSONL streaming can be an
 adopter detail or a later negotiated dialect after real evidence shows it is
@@ -207,8 +211,9 @@ needed. A component catalog is host-owned and never supplied as executable
 code by a tool result.
 
 A client may advertise exact supported template/data-version pairs as an
-optimization. The current local registry remains authoritative, advertisement
-does not grant trust, and extensions must preserve structured/text or explicit
+optimization. OpenClaw can filter or rank its offered views, but the current
+local registry and product preference remain authoritative. Advertisement does
+not grant trust, and extensions must preserve structured/text or explicit
 sandboxed fallback behavior when native support is absent.
 
 ### Security invariants

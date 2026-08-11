@@ -36,11 +36,14 @@ M/Lobster components into OpenClaw.
 ### Capability split
 
 Installed and enabled OpenClaw extensions determine which artifacts and
-structured results can be produced. The client determines which artifact
-versions and native renderers it has installed and trusts. The Control Model
-does not invent either capability; it normalizes the emitted artifact and
-preserves native, structured, or MCP App fallback behavior. Client capability
-advertisement is an optimization, not authorization or component installation.
+structured results can be produced. OpenClaw core/extensions expose all
+applicable renderer-neutral views for that artifact. The client determines
+which view it wants, which native renderers it has installed and trusts, and
+how the selected projection maps into its own view model. The Control Model
+does not invent either capability; it carries the available views and preserves
+native, structured, or MCP App fallback behavior. Client capability
+advertisement can filter/rank offers but is not authorization or component
+installation.
 
 ### First slice
 
@@ -56,6 +59,8 @@ advertisement is an optimization, not authorization or component installation.
 - The shared UX imports no OpenClaw Lit component or private Control UI module.
 - React components do not parse raw Gateway events.
 - M continues to expose `SessionView` to the renderer.
+- Lobster can select among OpenClaw-provided views without making its selection
+  canonical for other clients.
 - Native artifact rendering is host-registered and schema validated.
 - Extension presence and client renderer support are tested independently.
 - Third-party executable UI remains sandboxed.
