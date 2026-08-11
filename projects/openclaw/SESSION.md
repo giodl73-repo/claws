@@ -16,8 +16,12 @@
   OpenClaw agents to develop `openclaw/openclaw`. Canonical guide:
   `projects/openclaw/openclaw-development-agents.md`. No OpenClaw coding agent
   has been started for this rollout.
-- Agent rollout next step: review the three draft role names, package approved
+- Agent rollout next step: review the four draft role names, package approved
   roles as experimental Claws, then choose one bounded supervised pilot.
+- Role catalog now also includes `openclaw-merger`, which owns the complete
+  maintainer-authorized `review-pr -> prepare-pr -> merge-pr verify/run`
+  landing transaction. Verification and rebase remain inside this role;
+  independent review remains in `openclaw-reviewer`.
 - The remaining CLI catalog bullets in this section preserve the prior
   implementation handoff; they are not the active agent-rollout workstream.
 - Current working set: normalized catalog inventory plus scoped lenses over

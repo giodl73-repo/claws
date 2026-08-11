@@ -32,6 +32,27 @@ roles:
     publicMutation: human-gated
     concurrentWritersPerTask: 0
 
+  - id: openclaw-merger
+    displayName: OpenClaw merger
+    purpose: Prepare, verify, and deterministically land one maintainer-authorized PR.
+    clawPackage: null
+    supportedHosts:
+      - primary-wsl
+      - team-cloud
+    toolsProfile: coding
+    execMode: auto
+    workspacePolicy: maintainer-workflow-required
+    defaultWriteAccess: pr-head
+    publicMutation: per-pr-human-authorization-required
+    concurrentWritersPerTask: 1
+    workflow:
+      - review-pr
+      - prepare-pr
+      - merge-pr-verify
+      - merge-pr-run
+      - confirm-merged
+      - post-merge-cleanup
+
   - id: openclaw-windows-validator
     displayName: OpenClaw Windows validator
     purpose: Run Windows-native and Windows-node validation for an existing task.
@@ -44,4 +65,3 @@ roles:
     defaultWriteAccess: none
     publicMutation: forbidden
     concurrentWritersPerTask: 0
-

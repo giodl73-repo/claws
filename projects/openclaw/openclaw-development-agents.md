@@ -18,6 +18,7 @@ public PR or changes an existing PR.
 | OpenClaw sub-agent | Independent research, a focused test lane, or a bounded follow-up that the parent can verify | The work shares a mutable checkout or requires constant coordination with the parent |
 | OpenClaw ACP or Codex harness | Work that specifically needs an external coding harness behind OpenClaw's session, policy, and delivery controls | A native OpenClaw agent can complete the task directly |
 | Caclawphony | Maintainer PR triage, review, preparation, and merge stages with explicit human gates | Interactive feature development or exploratory implementation |
+| OpenClaw merger role | One maintainer-authorized PR landing through review, prepare, verify, deterministic merge, and cleanup | The PR has not received explicit landing authorization or needs unresolved product/security judgment |
 
 Cloud and local sessions follow the same source-control, permission, validation,
 and publication rules. The hosting location does not change the authority of
@@ -238,6 +239,11 @@ claim under `projects/openclaw/agents/claims/active/`, pull again, and verify
 that no competing writer claimed the same task or branch. Git provides visible
 coordination but not an atomic lease; conflicting claims require a human
 ownership decision before either writer continues.
+
+The `openclaw-merger` role owns the complete landing sequence for one authorized
+PR. Keep independent review in `openclaw-reviewer`, but do not split verify or
+rebase into separate roles: those steps determine the exact head that may be
+merged and must stay within the merger's head-pinned transaction.
 
 ## Apply the hard rules
 

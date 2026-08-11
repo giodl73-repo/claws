@@ -15,6 +15,7 @@ For example:
 ```text
 openclaw-builder@primary-wsl
 openclaw-reviewer@team-cloud
+openclaw-merger@primary-wsl
 ```
 
 The role ID can be the same on several Gateways because each Gateway has its
@@ -26,12 +27,42 @@ own state. The qualified name is required in cross-machine notes.
 | --- | --- | --- |
 | `openclaw-builder` | Investigate and implement one bounded OpenClaw task in an isolated worktree | Worktree write; public actions human-gated |
 | `openclaw-reviewer` | Independently review a branch, evidence, and best-fix shape | Read-only |
+| `openclaw-merger` | Run the complete maintainer-authorized prepare, verify, merge, and cleanup flow | PR-head write and merge mutation for one explicitly authorized PR |
 | `openclaw-windows-validator` | Run Windows-native or Windows-node validation | Read-only unless the task explicitly authorizes a fix branch |
 
 Keep the roster small. Add a role only when it needs a meaningfully different
 workspace contract, tool policy, platform, or trust boundary. Create sessions
 for individual issues and projects; do not create a new configured agent role
 for each task.
+
+## Merger contract
+
+`openclaw-merger` owns one safety-critical landing transaction. It does not
+mean "run the final merge command."
+
+For one explicitly authorized PR, it must:
+
+1. refresh and read the private `openclaw/maintainers` workflow;
+2. verify live PR, review, ClawSweeper, proof, and required-check state;
+3. use the maintainer sequence `review-pr -> prepare-pr -> merge-pr`;
+4. run `scripts/pr-prepare run <PR>` when preparation is required;
+5. rebase only when relevant main drift, a real conflict, required checks, or
+   maintainer direction requires it;
+6. run `scripts/pr-merge verify <PR>`;
+7. pause for maintainer judgment when evidence, scope, or risk changed;
+8. run `scripts/pr-merge run <PR>`;
+9. confirm GitHub reports `MERGED`, then report merge SHA, attribution, comment,
+   and cleanup outcome.
+
+The role must not use `gh pr merge --auto`, push directly, merge without
+head-SHA pinning, or treat wrapper success as a substitute for maintainer
+judgment.
+
+Do not split verifier or rebaser into separate roles yet. Verification and
+rebase decisions affect the exact head that is authorized to merge and belong
+inside the merger's transaction. `openclaw-reviewer` remains separate because
+independent review is a useful trust boundary. Add narrower roles later only if
+throughput data shows a real need and the artifact handoff stays deterministic.
 
 ## Portable definitions
 
@@ -103,4 +134,3 @@ separate checkouts and the claim records their distinct role.
 Claims should expire after 24 hours unless renewed. An expired claim does not
 authorize another writer automatically: inspect the branch, session, and
 worktree first, then record an explicit takeover.
-
