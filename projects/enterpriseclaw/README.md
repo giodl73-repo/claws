@@ -70,6 +70,8 @@ decision or action.
 | Executive five-box overview and top-down narrative | `executive-overview.md` |
 | Executive agent-harness competitive landscape | `executive-competitive-landscape-2026-08-02.md` |
 | Slide-ready presentation materials | `presentation-materials/README.md` |
+| Interactive controlled-fork executive overview | `artifacts/enterpriseclaw-fork-executive-overview-2026-08-11.html` |
+| Compact Teams-ready controlled-fork executive card | `artifacts/enterpriseclaw-teams-executive-card-2026-08-11.html` |
 | Ideal target architecture | `target-architecture.md` |
 | Shared commandments and contract-review grammar | `contract-principles.md` |
 | Shared interface, API, envelope, and state-machine patterns | `contract-interface-patterns.md` |
@@ -88,6 +90,9 @@ decision or action.
 | Live PRE-001 fork sync, protection, checkout, and baseline record | `fork-preflight-2026-08-02.md` |
 | Current fork/image, upstream-source, RFC, and patch execution roadmap | `current-roadmap-2026-08-04.md` |
 | Exact Lobster image patch manifest choices for 28-file and 30-file paths | `lobster-image-patch-manifest-2026-08-06.md` |
+| Current 37-row Lobster 6.33 image queue versus controlled-fork reconciliation | `lobster-633-fork-patch-reconciliation-2026-08-11.md` |
+| Team contribution and linked controlled-fork/Lobster promotion process | `controlled-fork-contribution-and-lobster-promotion-process.md` |
+| Normative controlled-fork process v1 and promotion-unit schema | `specs/controlled-fork-process-v1.md` |
 | Final Lobster size, code-area, ProxyPipe, work, and ownership assessment | `lobster-final-assessment-2026-08-04.md` |
 | Current Lobster plugin and patch disposition ledger | `lobster-plugin-patch-disposition-2026-08-05.md` |
 | Lobster/OpenClaw operational issue, merged-fix, and workaround audit | `lobster-openclaw-operational-issue-audit-2026-08-05.md` |

@@ -1,0 +1,424 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/giodl_microsoft/claws/projects/enterpriseclaw/specs/controlled-fork-promotion-unit.schema.json",
+  "title": "EnterpriseClaw Controlled-Fork Promotion Unit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "changeId",
+    "title",
+    "intent",
+    "state",
+    "vanillaBase",
+    "fork",
+    "ownership",
+    "source",
+    "disposition",
+    "evidence",
+    "replacement",
+    "rollback"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "changeId": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]+-[A-Z0-9][A-Z0-9._-]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "intent": {
+      "enum": [
+        "evidence-only",
+        "fork-only",
+        "lobster-candidate"
+      ]
+    },
+    "state": {
+      "enum": [
+        "proposed",
+        "quarantined",
+        "fork-proven",
+        "lobster-validated",
+        "promoted",
+        "upstream-replaced",
+        "carry-deleted"
+      ]
+    },
+    "vanillaBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "label",
+        "commit"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "format": "uri"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit": {
+          "$ref": "#/$defs/sha"
+        }
+      }
+    },
+    "fork": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "pullRequest",
+        "headSha"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "format": "uri"
+        },
+        "pullRequest": {
+          "type": "string",
+          "format": "uri"
+        },
+        "headSha": {
+          "$ref": "#/$defs/sha"
+        },
+        "mergeSha": {
+          "$ref": "#/$defs/nullableSha"
+        }
+      }
+    },
+    "ownership": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "contractIds",
+        "authority"
+      ],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contractIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^EC-[0-9]{3}$"
+          },
+          "uniqueItems": true
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1,
+          "default": "none"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "sourceSha"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "upstream-forward-fix",
+            "fork-originated",
+            "downstream-extraction",
+            "evidence-only"
+          ]
+        },
+        "sourceSha": {
+          "$ref": "#/$defs/sha"
+        },
+        "upstreamPullRequest": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "upstreamMergeSha": {
+          "$ref": "#/$defs/nullableSha"
+        },
+        "containingRelease": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "disposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "classification",
+        "carriedAs"
+      ],
+      "properties": {
+        "classification": {
+          "enum": [
+            "quarantined",
+            "evidence-only",
+            "release-eligible",
+            "active",
+            "superseded",
+            "deleted"
+          ]
+        },
+        "carriedAs": {
+          "enum": [
+            "source-commit",
+            "generated-patch",
+            "package-artifact",
+            "image-artifact",
+            "fixture-only"
+          ]
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixtureIds",
+        "acceptedResult",
+        "structuredFailure",
+        "validation"
+      ],
+      "properties": {
+        "fixtureIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "acceptedResult": {
+          "type": "string",
+          "minLength": 1
+        },
+        "structuredFailure": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validation": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "lobster": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pullRequest",
+        "consumptionMode",
+        "input"
+      ],
+      "properties": {
+        "pullRequest": {
+          "type": "string",
+          "format": "uri"
+        },
+        "consumptionMode": {
+          "enum": [
+            "generated-patch",
+            "fork-source",
+            "package-artifact",
+            "image-artifact"
+          ]
+        },
+        "input": {
+          "type": "string",
+          "minLength": 7
+        },
+        "validationGeneration": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "replacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "description",
+        "deletionConditions"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "upstreamRfc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "upstreamPullRequest": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "containingRelease": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "deletionConditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "description",
+        "priorInput"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "priorInput": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "deletionEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "replacementRelease",
+        "regressionPassed",
+        "oldPathAbsent",
+        "consumerUpdated"
+      ],
+      "properties": {
+        "replacementRelease": {
+          "type": "string",
+          "minLength": 1
+        },
+        "regressionPassed": {
+          "const": true
+        },
+        "oldPathAbsent": {
+          "const": true
+        },
+        "consumerUpdated": {
+          "const": true
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "intent": {
+            "const": "lobster-candidate"
+          }
+        },
+        "required": [
+          "intent"
+        ]
+      },
+      "then": {
+        "required": [
+          "lobster"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "source": {
+            "properties": {
+              "kind": {
+                "const": "upstream-forward-fix"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "source": {
+            "required": [
+              "upstreamPullRequest",
+              "containingRelease"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "carry-deleted"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "required": [
+          "deletionEvidence"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "nullableSha": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{40}$"
+    }
+  }
+}

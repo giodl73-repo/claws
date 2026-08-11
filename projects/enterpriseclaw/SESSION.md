@@ -1617,6 +1617,20 @@
   version` returned `2.16.1`, and the Dockerized rerun passed msteams
   patched-source tests, upstream evidence/readiness/hosting scoped tests, and
   vendored m365mail tests. The worktree stayed clean.
+- 2026-08-11 controlled-fork reconciliation:
+  `lobster-633-fork-patch-reconciliation-2026-08-11.md` maps every physical
+  patch in Lobster PR #7055 head
+  `4b011a77bfffdffb0dc9ea5ba83dad5502a41002` to the controlled-fork state.
+  The fork is intentionally not patch-equivalent: it carries admitted
+  EnterpriseClaw source and evidence, while Lobster retains a self-contained
+  37-file image queue for signed OpenClaw `v2026.6.33`. Only reaction-target
+  rendering (`0026`) and structured node command policy (`0034`) are currently
+  recorded as upstream-equivalent; all other rows are fork-present, mixed,
+  missing, or intentionally Lobster-only. Historical `0020`, `0021`, and
+  `0023` are explicitly resolved even though they are not physical #7055
+  files. This preserves the option to replay #7055 directly without first
+  promoting 2026.6.11, but promotion still requires its failing and missing
+  validation gates to clear.
 
 ## Session Checkpoints
 

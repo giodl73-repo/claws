@@ -1,0 +1,915 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A visual executive overview of the EnterpriseClaw controlled OpenClaw fork.">
+  <title>EnterpriseClaw — OpenClaw, Ready for Enterprise Proof</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.55;
+      margin: 0;
+    }
+    a {
+      color: var(--cp-link);
+      text-decoration-color: var(--cp-border-strong);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 4px;
+    }
+    a:hover { color: var(--cp-accent); text-decoration-color: var(--cp-accent); }
+    button, .button {
+      align-items: center;
+      appearance: none;
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border-strong);
+      border-radius: .625rem;
+      color: var(--cp-text);
+      cursor: pointer;
+      display: inline-flex;
+      font: inherit;
+      font-size: .9rem;
+      font-weight: 700;
+      gap: 8px;
+      justify-content: center;
+      min-height: 44px;
+      padding: 10px 16px;
+      text-decoration: none;
+    }
+    button:hover, .button:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+    .button.primary { background: var(--cp-accent); border-color: var(--cp-accent); color: var(--cp-accent-fg); }
+    .button.primary:hover { background: var(--cp-accent-hover); color: var(--cp-accent-fg); }
+    button:focus-visible, a:focus-visible, summary:focus-visible {
+      outline: 3px solid var(--cp-accent);
+      outline-offset: 3px;
+    }
+    code {
+      background: var(--cp-surface-soft);
+      border: 1px solid var(--cp-border);
+      border-radius: .375rem;
+      font-family: Consolas, "Courier New", Courier, monospace;
+      font-size: .86em;
+      padding: 2px 5px;
+    }
+    .wrap { margin: 0 auto; max-width: 1240px; padding: 0 28px; }
+    .nav {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      min-height: 76px;
+    }
+    .wordmark { align-items: center; color: var(--cp-text); display: flex; font-weight: 800; gap: 12px; text-decoration: none; }
+    .mark {
+      align-items: center;
+      background: var(--cp-accent);
+      border-radius: .625rem;
+      color: var(--cp-accent-fg);
+      display: inline-flex;
+      font-family: Consolas, "Courier New", Courier, monospace;
+      height: 38px;
+      justify-content: center;
+      letter-spacing: -.08em;
+      width: 38px;
+    }
+    .nav-links { align-items: center; display: flex; gap: 22px; }
+    .nav-links > a:not(.button) { color: var(--cp-text-muted); font-size: .88rem; font-weight: 650; text-decoration: none; }
+    .nav-links > a:not(.button):hover { color: var(--cp-accent); }
+
+    .hero {
+      align-items: center;
+      display: grid;
+      gap: clamp(36px, 6vw, 80px);
+      grid-template-columns: minmax(0, 1.15fr) minmax(360px, .85fr);
+      min-height: 690px;
+      padding: 70px 0 92px;
+    }
+    .kicker {
+      color: var(--cp-accent);
+      font-size: .74rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: clamp(3.4rem, 7vw, 6.9rem);
+      letter-spacing: -.07em;
+      line-height: .88;
+      margin: 24px 0 30px;
+      max-width: 760px;
+    }
+    h1 em { color: var(--cp-accent); font-style: normal; }
+    .hero-copy {
+      color: var(--cp-text-muted);
+      font-size: clamp(1.05rem, 1.8vw, 1.28rem);
+      max-width: 660px;
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
+    .hero-note {
+      border-left: 2px solid var(--cp-accent);
+      color: var(--cp-text-muted);
+      font-size: .82rem;
+      margin-top: 28px;
+      max-width: 590px;
+      padding-left: 14px;
+    }
+    .constellation {
+      aspect-ratio: 1;
+      background: var(--cp-bg-elevated);
+      border: 1px solid var(--cp-border);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+    .constellation::before, .constellation::after {
+      border: 1px solid var(--cp-border);
+      border-radius: 50%;
+      content: "";
+      position: absolute;
+    }
+    .constellation::before { inset: 13%; }
+    .constellation::after { inset: 29%; }
+    .orbit-cross, .orbit-cross::before {
+      background: var(--cp-border);
+      content: "";
+      height: 1px;
+      left: 8%;
+      position: absolute;
+      right: 8%;
+      top: 50%;
+    }
+    .orbit-cross::before {
+      left: 50%;
+      right: auto;
+      top: -170px;
+      transform: rotate(90deg);
+      width: 340px;
+    }
+    .hub {
+      align-items: center;
+      background: var(--cp-accent);
+      border: 7px solid var(--cp-bg-elevated);
+      border-radius: 50%;
+      color: var(--cp-accent-fg);
+      display: flex;
+      flex-direction: column;
+      height: 132px;
+      justify-content: center;
+      position: relative;
+      text-align: center;
+      width: 132px;
+      z-index: 3;
+    }
+    .hub strong { font-size: 1.05rem; }
+    .hub span { font-size: .7rem; opacity: .84; }
+    .satellite {
+      align-items: center;
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 50%;
+      display: flex;
+      font-size: .7rem;
+      font-weight: 800;
+      height: 86px;
+      justify-content: center;
+      position: absolute;
+      text-align: center;
+      width: 86px;
+      z-index: 2;
+    }
+    .satellite.one { left: 6%; top: 40%; }
+    .satellite.two { left: 20%; top: 10%; }
+    .satellite.three { right: 20%; top: 10%; }
+    .satellite.four { right: 6%; top: 40%; }
+    .satellite.five { bottom: 10%; right: 20%; }
+    .satellite.six { bottom: 10%; left: 20%; }
+    .pulse {
+      background: var(--cp-success);
+      border: 3px solid var(--cp-surface);
+      border-radius: 50%;
+      height: 16px;
+      position: absolute;
+      right: 24%;
+      top: 28%;
+      width: 16px;
+      z-index: 4;
+    }
+
+    .thesis {
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      padding: 52px 0;
+    }
+    .thesis-grid {
+      align-items: center;
+      display: grid;
+      gap: 34px;
+      grid-template-columns: .7fr 2fr;
+    }
+    .thesis-label { font-size: .76rem; font-weight: 800; letter-spacing: .16em; opacity: .8; text-transform: uppercase; }
+    .thesis blockquote {
+      font-size: clamp(1.45rem, 3vw, 2.7rem);
+      font-weight: 720;
+      letter-spacing: -.035em;
+      line-height: 1.15;
+      margin: 0;
+    }
+
+    section { padding: 100px 0; scroll-margin-top: 20px; }
+    .section-intro {
+      display: grid;
+      gap: 30px;
+      grid-template-columns: .7fr 1.3fr;
+      margin-bottom: 52px;
+    }
+    .section-intro h2 {
+      font-size: clamp(2.3rem, 4vw, 4rem);
+      letter-spacing: -.055em;
+      line-height: .98;
+      margin: 12px 0 0;
+    }
+    .section-intro p {
+      color: var(--cp-text-muted);
+      font-size: 1.08rem;
+      margin: 34px 0 0;
+      max-width: 680px;
+    }
+
+    .readiness-story {
+      align-items: stretch;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 1.1fr .9fr;
+    }
+    .readiness-main {
+      background: var(--cp-bg-elevated);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      min-height: 480px;
+      overflow: hidden;
+      padding: clamp(30px, 5vw, 58px);
+      position: relative;
+    }
+    .readiness-main::after {
+      color: var(--cp-accent-soft);
+      content: "READY";
+      font-size: clamp(5rem, 15vw, 12rem);
+      font-weight: 900;
+      letter-spacing: -.09em;
+      line-height: 1;
+      position: absolute;
+      right: -12px;
+      top: 20px;
+      z-index: 0;
+    }
+    .readiness-main > * { position: relative; z-index: 1; }
+    .readiness-main h3 { font-size: clamp(1.8rem, 3vw, 3rem); letter-spacing: -.04em; line-height: 1.05; margin: 84px 0 18px; max-width: 580px; }
+    .readiness-main p { color: var(--cp-text-muted); font-size: 1.03rem; max-width: 600px; }
+    .readiness-flow { display: flex; gap: 0; margin-top: 48px; }
+    .flow-step { flex: 1; position: relative; }
+    .flow-step:not(:last-child)::after {
+      background: var(--cp-border-strong);
+      content: "";
+      height: 1px;
+      left: 40px;
+      position: absolute;
+      right: 6px;
+      top: 15px;
+    }
+    .flow-dot {
+      align-items: center;
+      background: var(--cp-surface);
+      border: 2px solid var(--cp-accent);
+      border-radius: 50%;
+      color: var(--cp-accent);
+      display: flex;
+      font-size: .68rem;
+      font-weight: 800;
+      height: 32px;
+      justify-content: center;
+      margin-bottom: 10px;
+      position: relative;
+      width: 32px;
+      z-index: 1;
+    }
+    .flow-step strong { display: block; font-size: .78rem; }
+    .flow-step span { color: var(--cp-text-soft); display: block; font-size: .7rem; margin-top: 3px; }
+    .story-stack { display: grid; gap: 18px; grid-template-rows: 1fr 1fr; }
+    .story-card {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 30px;
+    }
+    .story-card .ordinal { color: var(--cp-accent); font-family: Consolas, "Courier New", Courier, monospace; font-size: .76rem; font-weight: 800; }
+    .story-card h3 { font-size: 1.45rem; letter-spacing: -.03em; line-height: 1.1; margin: 18px 0 10px; }
+    .story-card p { color: var(--cp-text-muted); margin: 0; }
+    .story-card small { color: var(--cp-text-soft); display: block; margin-top: 18px; }
+
+    .capability-section { background: var(--cp-bg-elevated); }
+    .capability-rail { border-top: 1px solid var(--cp-border-strong); }
+    .capability {
+      align-items: start;
+      border-bottom: 1px solid var(--cp-border);
+      display: grid;
+      gap: 28px;
+      grid-template-columns: 68px .9fr 1.4fr 150px;
+      padding: 30px 0;
+      transition: padding .18s ease;
+    }
+    .capability:hover { padding-left: 12px; }
+    .cap-num { color: var(--cp-accent); font-family: Consolas, "Courier New", Courier, monospace; font-size: .78rem; padding-top: 5px; }
+    .capability h3 { font-size: 1.25rem; letter-spacing: -.02em; margin: 0; }
+    .capability p { color: var(--cp-text-muted); margin: 0; }
+    .capability .evidence { color: var(--cp-text-soft); font-family: Consolas, "Courier New", Courier, monospace; font-size: .72rem; padding-top: 5px; text-align: right; }
+    .featured-capability {
+      align-items: center;
+      background: var(--cp-accent);
+      border-radius: 16px;
+      color: var(--cp-accent-fg);
+      display: grid;
+      gap: 32px;
+      grid-template-columns: 1.2fr .8fr;
+      margin-top: 64px;
+      overflow: hidden;
+      padding: clamp(32px, 5vw, 64px);
+      position: relative;
+    }
+    .featured-capability::after {
+      border: 1px solid var(--cp-accent-fg);
+      border-radius: 50%;
+      content: "";
+      height: 340px;
+      opacity: .25;
+      position: absolute;
+      right: -80px;
+      top: -110px;
+      width: 340px;
+    }
+    .featured-capability h3 { font-size: clamp(2rem, 4vw, 3.7rem); letter-spacing: -.05em; line-height: .98; margin: 12px 0 20px; }
+    .featured-capability p { font-size: 1.06rem; margin: 0; max-width: 650px; opacity: .88; }
+    .rust-lanes { display: grid; gap: 10px; position: relative; z-index: 1; }
+    .rust-lane {
+      align-items: center;
+      border-bottom: 1px solid var(--cp-accent-fg);
+      display: flex;
+      font-size: .78rem;
+      justify-content: space-between;
+      opacity: .9;
+      padding: 10px 0;
+    }
+    .rust-lane strong { font-family: Consolas, "Courier New", Courier, monospace; }
+
+    .proof-section { padding-bottom: 64px; }
+    .proof-strip {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .proof-stat {
+      border-left: 1px solid var(--cp-border);
+      padding: 20px;
+    }
+    .proof-stat:first-child { border-left: 0; padding-left: 0; }
+    .proof-stat strong { display: block; font-size: clamp(1.8rem, 3vw, 2.8rem); letter-spacing: -.05em; line-height: 1; }
+    .proof-stat span { color: var(--cp-text-muted); display: block; font-size: .78rem; margin-top: 10px; }
+    .truth-note {
+      align-items: center;
+      border-bottom: 1px solid var(--cp-border);
+      border-top: 1px solid var(--cp-border);
+      display: grid;
+      gap: 28px;
+      grid-template-columns: 180px 1fr;
+      margin-top: 46px;
+      padding: 24px 0;
+    }
+    .truth-note strong { color: var(--cp-accent); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; }
+    .truth-note p { color: var(--cp-text-muted); margin: 0; }
+
+    .portfolio {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .portfolio-head {
+      align-items: end;
+      background: var(--cp-accent-soft);
+      display: grid;
+      gap: 28px;
+      grid-template-columns: 1fr 1fr;
+      padding: 42px;
+    }
+    .portfolio-head h3 { font-size: clamp(2rem, 4vw, 3.4rem); letter-spacing: -.05em; line-height: 1; margin: 0; }
+    .portfolio-head p { color: var(--cp-text-muted); margin: 0; }
+    .waves { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .wave { border-left: 1px solid var(--cp-border); min-height: 300px; padding: 34px; }
+    .wave:first-child { border-left: 0; }
+    .wave-id { color: var(--cp-accent); font-family: Consolas, "Courier New", Courier, monospace; font-size: .75rem; font-weight: 800; }
+    .wave h4 { font-size: 1.2rem; letter-spacing: -.02em; margin: 20px 0 14px; }
+    .wave p { color: var(--cp-text-muted); font-size: .9rem; margin: 0; }
+    .grade {
+      align-items: center;
+      border-top: 1px solid var(--cp-border);
+      display: grid;
+      gap: 26px;
+      grid-template-columns: 110px 1fr 230px;
+      padding: 24px 34px;
+    }
+    .grade strong { font-size: 1.7rem; letter-spacing: -.04em; }
+    .grade p { color: var(--cp-text-muted); font-size: .85rem; margin: 0; }
+    .grade-bar { background: var(--cp-surface-soft); border: 1px solid var(--cp-border); border-radius: .625rem; display: flex; height: 12px; overflow: hidden; }
+    .grade-a { background: var(--cp-success); width: 80%; }
+    .grade-b { background: var(--cp-warning); width: 20%; }
+    details {
+      border-top: 1px solid var(--cp-border);
+    }
+    summary { cursor: pointer; font-weight: 750; padding: 20px 34px; }
+    .contract-list { color: var(--cp-text-muted); columns: 2; column-gap: 44px; padding: 0 34px 30px; }
+    .contract-list p { break-inside: avoid; font-size: .84rem; margin: 0 0 14px; }
+
+    .next {
+      align-items: stretch;
+      display: grid;
+      gap: 0;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .next-item {
+      border-left: 1px solid var(--cp-border);
+      padding: 14px 34px 20px;
+    }
+    .next-item:first-child { border-left: 0; padding-left: 0; }
+    .next-item:last-child { padding-right: 0; }
+    .next-item .step { color: var(--cp-accent); font-family: Consolas, "Courier New", Courier, monospace; font-size: .72rem; font-weight: 800; }
+    .next-item h3 { font-size: 1.35rem; letter-spacing: -.025em; margin: 24px 0 10px; }
+    .next-item p { color: var(--cp-text-muted); font-size: .9rem; margin: 0; }
+
+    .source-band { background: var(--cp-bg-elevated); border-top: 1px solid var(--cp-border); padding: 42px 0; }
+    .source-row { align-items: center; display: flex; flex-wrap: wrap; gap: 14px 30px; justify-content: space-between; }
+    .source-row p { color: var(--cp-text-muted); font-size: .82rem; margin: 0; }
+    .source-links { display: flex; flex-wrap: wrap; gap: 18px; }
+    .source-links a { font-size: .82rem; font-weight: 700; }
+    footer { color: var(--cp-text-soft); font-size: .76rem; padding: 24px 0 42px; }
+    .footer-row { display: flex; gap: 18px; justify-content: space-between; }
+
+    @media (max-width: 980px) {
+      .hero { grid-template-columns: 1fr; padding-top: 48px; }
+      .constellation { margin: 0 auto; max-width: 520px; width: 100%; }
+      .readiness-story, .featured-capability { grid-template-columns: 1fr; }
+      .proof-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .proof-stat:nth-child(4) { border-left: 0; }
+      .capability { grid-template-columns: 50px 1fr; }
+      .capability p { grid-column: 2; }
+      .capability .evidence { grid-column: 2; text-align: left; }
+    }
+    @media (max-width: 720px) {
+      .wrap { padding: 0 18px; }
+      .nav-links > a:not(.button), .theme-label { display: none; }
+      .hero { min-height: auto; padding-bottom: 64px; }
+      h1 { font-size: clamp(3.2rem, 16vw, 5rem); }
+      .constellation { max-width: 420px; }
+      .satellite { height: 70px; width: 70px; }
+      .thesis-grid, .section-intro, .portfolio-head, .truth-note { grid-template-columns: 1fr; }
+      section { padding: 72px 0; }
+      .readiness-story { grid-template-columns: 1fr; }
+      .readiness-main { min-height: 520px; }
+      .readiness-flow { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+      .flow-step:not(:last-child)::after { display: none; }
+      .capability { gap: 12px; grid-template-columns: 34px 1fr; }
+      .waves, .next { grid-template-columns: 1fr; }
+      .wave, .next-item { border-left: 0; border-top: 1px solid var(--cp-border); min-height: auto; padding: 28px; }
+      .next-item:first-child { border-top: 0; padding-left: 28px; }
+      .next-item:last-child { padding-right: 28px; }
+      .grade { grid-template-columns: 1fr; }
+      .proof-strip { grid-template-columns: 1fr 1fr; }
+      .proof-stat:nth-child(odd) { border-left: 0; padding-left: 0; }
+      .proof-stat:nth-child(4) { border-left: 1px solid var(--cp-border); }
+      .contract-list { columns: 1; }
+      .footer-row { flex-direction: column; }
+    }
+    @media print {
+      .nav-links, #theme-toggle { display: none; }
+      body { background: var(--cp-surface); }
+      .hero { min-height: auto; }
+      .constellation, .readiness-main, .story-card, .featured-capability, .portfolio { break-inside: avoid; }
+      details .contract-list { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <!--StartFragment-->
+  <header class="wrap nav">
+    <a class="wordmark" href="https://github.com/giodl73-repo/openclaw" target="_blank" rel="noreferrer">
+      <span class="mark">EC</span>
+      <span>EnterpriseClaw</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="#readiness">Readiness</a>
+      <a href="#capabilities">Capabilities</a>
+      <a href="#portfolio">Contracts</a>
+      <button id="theme-toggle" type="button" aria-label="Toggle theme"><span class="theme-label">Change theme</span> ◐</button>
+      <a class="button primary" href="https://github.com/giodl73-repo/openclaw" target="_blank" rel="noreferrer">Explore the fork ↗</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="wrap hero">
+      <div>
+        <div class="kicker">Controlled OpenClaw fork · Executive view</div>
+        <h1>Ready is a <em>contract.</em></h1>
+        <p class="hero-copy">
+          EnterpriseClaw keeps OpenClaw's working owners intact, then makes the
+          relationships between readiness, authority, continuity, release,
+          fleet operations, and Rust nodes explicit—and executable.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="https://github.com/giodl73-repo/openclaw/tree/fcadf5ced0ef139fe8e8319e2fbfb08bec8918c2" target="_blank" rel="noreferrer">Browse exact merged head</a>
+          <a class="button" href="#capabilities">See what it carries ↓</a>
+        </div>
+        <p class="hero-note">
+          This is an evidence and adoption surface—not a second product, not a
+          silent enterprise control plane, and not a copy of Lobster's image
+          patch queue.
+        </p>
+      </div>
+
+      <div class="constellation" aria-label="EnterpriseClaw owner relationship model">
+        <div class="orbit-cross"></div>
+        <div class="pulse" title="Owner ready"></div>
+        <div class="satellite one">Authority</div>
+        <div class="satellite two">Readiness</div>
+        <div class="satellite three">Release</div>
+        <div class="satellite four">Fleet</div>
+        <div class="satellite five">Rust nodes</div>
+        <div class="satellite six">Continuity</div>
+        <div class="hub"><strong>OpenClaw</strong><span>owner systems</span></div>
+      </div>
+    </div>
+
+    <div class="thesis">
+      <div class="wrap thesis-grid">
+        <div class="thesis-label">The operating thesis</div>
+        <blockquote>
+          Preserve the owners that work. Make their generations, authority,
+          lifecycle, and evidence impossible to infer incorrectly.
+        </blockquote>
+      </div>
+    </div>
+
+    <section id="readiness">
+      <div class="wrap">
+        <div class="section-intro">
+          <div>
+            <div class="kicker">The first visible outcome</div>
+            <h2>Readiness becomes operational truth.</h2>
+          </div>
+          <p>
+            A process can be alive while its owners are not ready. The fork
+            introduces canonical owner observations and standard hosting
+            profiles so routing, rollout, repair, and operator experience can
+            depend on the same evidence.
+          </p>
+        </div>
+
+        <div class="readiness-story">
+          <article class="readiness-main">
+            <div class="kicker">Canonical owner readiness</div>
+            <h3>From “the port is open” to “the required owners are ready for this generation.”</h3>
+            <p>
+              Readiness remains owner-native. EnterpriseClaw composes it into a
+              stable profile without replacing health collectors, schedulers,
+              state stores, plugins, or channel owners.
+            </p>
+            <div class="readiness-flow" aria-label="Readiness evidence flow">
+              <div class="flow-step"><div class="flow-dot">01</div><strong>Observe</strong><span>owner state</span></div>
+              <div class="flow-step"><div class="flow-dot">02</div><strong>Bind</strong><span>generation</span></div>
+              <div class="flow-step"><div class="flow-dot">03</div><strong>Evaluate</strong><span>profile</span></div>
+              <div class="flow-step"><div class="flow-dot">04</div><strong>Project</strong><span>one result</span></div>
+            </div>
+          </article>
+
+          <div class="story-stack">
+            <article class="story-card">
+              <div>
+                <span class="ordinal">01 / HOSTING</span>
+                <h3>Standard profiles, explicit conditions.</h3>
+                <p>Cataloged hosting profiles make required and optional owner conditions inspectable and fail closed on mismatch.</p>
+              </div>
+              <small>EVID-002 · admitted source PRs #104018, #113421, #113422, #114636</small>
+            </article>
+            <article class="story-card">
+              <div>
+                <span class="ordinal">02 / CONFIGURATION</span>
+                <h3>Managed input without stealing ownership.</h3>
+                <p>Ordered configuration layers and owner-safe write guards preserve current OpenClaw mutation and restart semantics.</p>
+              </div>
+              <small>EVID-001 · admitted source PR #107026</small>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="capability-section" id="capabilities">
+      <div class="wrap">
+        <div class="section-intro">
+          <div>
+            <div class="kicker">What the fork carries</div>
+            <h2>Seven enterprise outcomes. One owner-first model.</h2>
+          </div>
+          <p>
+            The evidence slices are not disconnected demos. Together they
+            describe how OpenClaw can operate safely across attempts, effects,
+            restarts, releases, remote nodes, and fleets without inventing
+            generic success.
+          </p>
+        </div>
+
+        <div class="capability-rail">
+          <article class="capability">
+            <div class="cap-num">01</div>
+            <h3>Usage you can reconcile</h3>
+            <p>Provider candidates, model calls, and per-attempt usage reconcile to immutable run totals across retries.</p>
+            <div class="evidence">EVID-003</div>
+          </article>
+          <article class="capability">
+            <div class="cap-num">02</div>
+            <h3>Capacity that survives restart</h3>
+            <p>Bounded leases preserve allocation, lost acknowledgements, stale-holder fencing, renewal, expiry, and settlement.</p>
+            <div class="evidence">EVID-004</div>
+          </article>
+          <article class="capability">
+            <div class="cap-num">03</div>
+            <h3>Recovery without false assurance</h3>
+            <p>Checkpoint, restore, export, retained-copy, external-copy, and purge outcomes remain owner-specific and explicit.</p>
+            <div class="evidence">EVID-005 · 010 · 013</div>
+          </article>
+          <article class="capability">
+            <div class="cap-num">04</div>
+            <h3>Effects bound to authority</h3>
+            <p>Requester, policy, approval, parameters, idempotency, runtime result, and confirmed external effect stay correlated.</p>
+            <div class="evidence">EVID-006 · 007</div>
+          </article>
+          <article class="capability">
+            <div class="cap-num">05</div>
+            <h3>Releases that refuse before mutation</h3>
+            <p>Immutable candidate identity, compatibility, ordered phases, and candidate-bound readiness make activation recoverable.</p>
+            <div class="evidence">EVID-008 · 011 · 012</div>
+          </article>
+          <article class="capability">
+            <div class="cap-num">06</div>
+            <h3>Repair only what failed</h3>
+            <p>Fleet evidence identifies one failed cell as the sole repair target and never replays already-healthy cells.</p>
+            <div class="evidence">EVID-014</div>
+          </article>
+        </div>
+
+        <article class="featured-capability">
+          <div>
+            <div class="kicker">07 / Cross-language runtime</div>
+            <h3>Rust crosses the real Gateway boundary.</h3>
+            <p>
+              A clean-built Rust node uses the current authenticated protocol,
+              executes bounded side-effect-free work, survives reconnection and
+              restart, observes cancellation, streams ordered progress, and
+              receives bounded input—while Gateway authority remains unchanged.
+            </p>
+          </div>
+          <div class="rust-lanes" aria-label="Rust evidence sequence">
+            <div class="rust-lane"><span>Authenticated admission</span><strong>015</strong></div>
+            <div class="rust-lane"><span>Bounded invocation</span><strong>016</strong></div>
+            <div class="rust-lane"><span>Reconnect continuity</span><strong>017</strong></div>
+            <div class="rust-lane"><span>Cold + unclean restart</span><strong>018–019</strong></div>
+            <div class="rust-lane"><span>Deadline + idle timeout</span><strong>020–021</strong></div>
+            <div class="rust-lane"><span>Streaming input</span><strong>022</strong></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="proof-section" id="proof">
+      <div class="wrap">
+        <div class="section-intro">
+          <div>
+            <div class="kicker">Proof, not posture</div>
+            <h2>The numbers sit behind the concepts.</h2>
+          </div>
+          <p>
+            The fork deliberately admits less than it inventories. Source
+            identity, executable fixtures, and evidence grades prevent a good
+            architectural idea from being mistaken for shipped authority.
+          </p>
+        </div>
+
+        <div class="proof-strip" aria-label="EnterpriseClaw proof metrics">
+          <div class="proof-stat"><strong>25</strong><span>fork-specific commits merged</span></div>
+          <div class="proof-stat"><strong>21+1</strong><span>evidence slices merged + ready</span></div>
+          <div class="proof-stat"><strong>22</strong><span>executable fixture families</span></div>
+          <div class="proof-stat"><strong>5/55</strong><span>source PR generations admitted</span></div>
+          <div class="proof-stat"><strong>35</strong><span>architectural contracts</span></div>
+          <div class="proof-stat"><strong>23</strong><span>filed upstream RFC PRs</span></div>
+        </div>
+
+        <div class="truth-note">
+          <strong>About the commit delta</strong>
+          <p>
+            The exact merged fork head is 13,715 commits beyond signed
+            <code>v2026.6.33</code>: 13,690 are later upstream OpenClaw
+            evolution; 25 are EnterpriseClaw-specific. EVID-022 adds one
+            pending commit in <a href="https://github.com/giodl73-repo/openclaw/pull/229" target="_blank" rel="noreferrer">PR #229</a>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="portfolio">
+      <div class="wrap">
+        <div class="portfolio">
+          <div class="portfolio-head">
+            <div>
+              <div class="kicker">The contract portfolio</div>
+              <h3>35 scopes.<br>Three adoption waves.</h3>
+            </div>
+            <p>
+              The contracts are durable architectural scopes, not claims that
+              every feature is already fork code. Twenty-three have been filed
+              as focused upstream RFC PRs: nine merged, ten open for review, and
+              four drafts as recorded 6 August 2026.
+            </p>
+          </div>
+
+          <div class="waves">
+            <article class="wave">
+              <div class="wave-id">WAVE / 01</div>
+              <h4>Replacement foundations</h4>
+              <p>Configuration, readiness, effects, memory, protocol, streaming, node trust, Rust runtime, and release recovery.</p>
+            </article>
+            <article class="wave">
+              <div class="wave-id">WAVE / 02</div>
+              <h4>Runtime hardening</h4>
+              <p>Credentials, approvals, attempts, providers, usage, capabilities, delivery, artifact trust, and hosting lifecycle.</p>
+            </article>
+            <article class="wave">
+              <div class="wave-id">WAVE / 03</div>
+              <h4>Managed composition</h4>
+              <p>State projection, repair, identity, context, restore, data obligations, resources, fleet, audit, and workspace boundaries.</p>
+            </article>
+          </div>
+
+          <div class="grade">
+            <strong>28 A / 7 B</strong>
+            <p>Grade A means current source is audited with representative proof. Grade B remains source-backed but has an incomplete target proof.</p>
+            <div class="grade-bar" aria-label="28 grade A and 7 grade B contracts"><span class="grade-a"></span><span class="grade-b"></span></div>
+          </div>
+
+          <details>
+            <summary>Explore all 35 contract scopes</summary>
+            <div class="contract-list">
+              <p><strong>Experience</strong><br>EC-001 Owner State Projection<br>EC-002 Diagnostic and Repair Plans</p>
+              <p><strong>Identity & trust</strong><br>EC-003 Credential Runtime Binding<br>EC-004 Authorization and Approval Decisions<br>EC-005 Trust Revocation and Federation</p>
+              <p><strong>Configuration</strong><br>EC-006 Effective Configuration Generations<br>EC-007 Owner Readiness Observations</p>
+              <p><strong>Agent runtime</strong><br>EC-008 Run and Attempt Bindings<br>EC-009 Delegated Execution Lifecycle<br>EC-010 Scheduled Activation Lifecycle</p>
+              <p><strong>Models & actions</strong><br>EC-011 Provider Candidate Attempts<br>EC-012 Usage and Cost Reconciliation<br>EC-013 Capability Surface Negotiation<br>EC-014 Authorized External Effects</p>
+              <p><strong>Messaging</strong><br>EC-015 Conversation Identity<br>EC-016 Delivery Settlement</p>
+              <p><strong>Knowledge & continuity</strong><br>EC-017 Session Continuity and Export<br>EC-018 Context Assembly Contract<br>EC-019 Memory Scope and ACL<br>EC-020 Memory Corpus Lifecycle<br>EC-021 Owner Checkpoints and Restore<br>EC-035 Workspace and Filesystem Boundaries</p>
+              <p><strong>Protocols & nodes</strong><br>EC-022 Protocol Negotiation and Evolution<br>EC-023 Streaming, Cancellation, and Replay<br>EC-024 Node Pairing and Trust<br>EC-025 Remote Node Invocation<br>EC-026 Rust Node Runtime Profile</p>
+              <p><strong>Extensibility & release</strong><br>EC-027 Extension Capability Metadata<br>EC-028 Artifact Trust and Provenance<br>EC-029 Release Activation and Recovery</p>
+              <p><strong>Governance & operations</strong><br>EC-030 Data Lifecycle Obligations<br>EC-031 Resource Admission and Usage<br>EC-032 Hosting Lifecycle and Readiness<br>EC-033 Evidence, Audit, and Attestation<br>EC-034 Fleet Convergence and Containment</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section id="next">
+      <div class="wrap">
+        <div class="section-intro">
+          <div>
+            <div class="kicker">The remaining work</div>
+            <h2>Promote. Adopt. Delete.</h2>
+          </div>
+          <p>
+            EnterpriseClaw has done the broad de-risking work. The next value
+            comes from closing a bounded proof, promoting the downstream image,
+            and replacing patches with supported upstream contracts.
+          </p>
+        </div>
+        <div class="next">
+          <article class="next-item">
+            <span class="step">STEP / 01</span>
+            <h3>Close streaming input</h3>
+            <p>Merge and document EVID-022. Keep the Rust runtime profile at grade B until effects, readiness, durable recovery, and operating authority are proven.</p>
+          </article>
+          <article class="next-item">
+            <span class="step">STEP / 02</span>
+            <h3>Promote 6.33 independently</h3>
+            <p>Use Lobster PR #7055 as the direct 37-patch image route after its required validation gates clear. The queue remains separate by design.</p>
+          </article>
+          <article class="next-item">
+            <span class="step">STEP / 03</span>
+            <h3>Turn proof into deletion</h3>
+            <p>Advance portable readiness, hosting, Cron, node, memory, approval, and lifecycle contracts upstream—then delete downstream carries after release proof.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="source-band">
+    <div class="wrap source-row">
+      <p>Exact snapshot · 11 August 2026 · merged head <code>fcadf5ced0ef</code> · evidence authority <code>none</code></p>
+      <div class="source-links">
+        <a href="https://github.com/giodl73-repo/openclaw" target="_blank" rel="noreferrer">Controlled fork ↗</a>
+        <a href="https://github.com/giodl73-repo/openclaw/pull/229" target="_blank" rel="noreferrer">EVID-022 ↗</a>
+        <a href="https://github.com/giodl_microsoft/claws/tree/main/projects/enterpriseclaw" target="_blank" rel="noreferrer">Architecture ↗</a>
+        <a href="https://github.com/openclaw/rfcs" target="_blank" rel="noreferrer">Upstream RFCs ↗</a>
+        <a href="https://microsoft.ghe.com/bic/lobster/pull/7055" target="_blank" rel="noreferrer">Lobster #7055 ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="wrap">
+    <div class="footer-row">
+      <span>EnterpriseClaw · controlled evidence fork</span>
+      <span>OpenClaw owners remain authoritative</span>
+    </div>
+  </footer>
+  <!--EndFragment-->
+
+  <script>
+    (() => {
+      const root = document.documentElement;
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        root.setAttribute("data-theme", root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+      });
+    })();
+  </script>
+</body>
+</html>
