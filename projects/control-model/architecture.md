@@ -187,7 +187,9 @@ export interface UiArtifact {
     id: string;
     templateUri: string;
     dataVersion: number;
-    data: JsonValue;
+    availability: "inline" | "deferred";
+    data?: JsonValue;
+    recommended?: boolean;
   }>;
   state: "pending" | "ready" | "failed" | "expired";
   source: {
@@ -204,6 +206,12 @@ views over one artifact. `templateUri` is an opaque identifier, not executable
 code and not a trust claim. A host selects a compatible offer and may map it to
 a native component or its existing product view model. Unknown views render
 structured/text output or an explicitly supplied sandboxed fallback.
+
+OpenClaw offers all authorized applicable descriptors, not all computed
+payloads. Cheap bounded views may be inline. Expensive or sensitive views are
+materialized only after the client selects one. Discovery is authorization
+filtered and client renderer advertisement is not exposed verbatim to
+extensions.
 
 V1 uses full immutable artifact revisions. JSON Patch/JSONL streaming can be an
 adopter detail or a later negotiated dialect after real evidence shows it is
@@ -255,10 +263,12 @@ sandboxed fallback behavior when native support is absent.
    selected conversation.
 3. Adapt its snapshot into M's existing `SessionView`.
 4. Render one trusted `clawpilot://widgets/calendar` artifact natively.
-5. Render the same tool result through MCP App fallback when the native
+5. Prove an unselected alternative view was not materialized.
+6. Render the same tool result through MCP App fallback when the native
    registration is absent.
-6. Deny one action server-side and surface the structured denial.
-7. Reconnect mid-stream without duplicating a message or artifact revision.
+7. Deny one action server-side and surface the structured denial.
+8. Reconnect mid-stream without duplicating a message or artifact revision or
+   silently changing the selected view.
 
 The slice fails if it imports Control UI Lit components, parses raw Gateway
 events in a React component, or needs a second M view-model vocabulary.

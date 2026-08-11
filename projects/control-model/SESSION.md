@@ -24,12 +24,17 @@
 
 - Last updated: 2026-08-11.
 - Last agent: GitHub Copilot CLI.
-- Current focus: Team review of the fork-only OpenClaw Control Model RFC and
-  M/Lobster adoption issue before selecting an implementation slice.
+- Current focus: Select the first evidence slice after completing team and
+  `.roles` review of the fork-only RFC and M/Lobster adoption issue.
 - Active branch / PR: fork branch
-  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `585c374`; no
+  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `b964e72`; no
   upstream RFC PR. M design issue
   [gim-home/m#5675](https://github.com/gim-home/m/issues/5675) is open.
+- Review result: OpenClaw enumerates all authorized applicable view
+  descriptors, but materializes only the client-selected deferred payload.
+  Discovery is policy-filtered, renderer advertisement is private by default,
+  and a compatible user selection remains stable across reconnects and
+  artifact revisions.
 - Known dirty state: `claws-hapi` contains unrelated pre-existing project-note
   changes. The dedicated RFC worktree started clean from `openclaw/rfcs`
   `origin/main` at `af708f0`.
@@ -41,7 +46,8 @@
 
 - Run: `git -C C:\src\openclaw-rfcs-control-model status --short --branch`.
 - Verify: fork branch exists and no upstream PR was opened.
-- Review: the role findings and any comments on the M design issue.
+- Review: `review-packet.md`, the role findings, and any comments on the M
+  design issue.
 - Update: this file and add a checkpoint after canonical decisions change.
 
 ## Guardrails
@@ -62,9 +68,10 @@
 - Confirm the first Lobster native component and representative tool result.
 - Decide whether JSON Render is an adopter choice or a future OpenClaw-owned
   artifact dialect; V1 keeps it out of the core contract.
-- Confirm the OpenClaw view-offer discovery carrier; OpenClaw owns all
-  applicable view offers, while each client selects and maps one into its local
-  view model.
+- Confirm the OpenClaw view-offer discovery carrier and deferred
+  materialization command shape; OpenClaw owns authorized applicable
+  descriptors, while each client selects and maps one into its local view
+  model.
 
 ## Session Checkpoints
 
