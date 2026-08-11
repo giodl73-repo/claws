@@ -143,6 +143,7 @@ decision or action.
 | `giodl73-repo/openclaw` | #224 | `lobster/evid-017-rust-reconnect-continuity` | Merged | Prove replacement routing retires old Rust work, refuses its late result, and accepts fresh work only on the new connection. |
 | `giodl73-repo/openclaw` | #225 | `lobster/evid-018-rust-cold-restart-continuity` | Merged | Prove fresh Gateway and Rust processes reuse durable pairing and the persisted node token without renewed approval, then execute fresh bounded work. |
 | `giodl73-repo/openclaw` | #226 | `lobster/evid-019-rust-unclean-restart-fencing` | Merged | Prove an in-flight caller loses transport, a restarted Gateway ignores the old request ID, durable pairing remains stable, and exactly one distinct fresh request settles. |
+| `giodl73-repo/openclaw` | #227 | `lobster/evid-020-rust-deadline-cancellation` | Merged | Prove the Gateway deadline settles a dispatched call, Rust observes the correlated cancel, the late result is ignored, and exactly one distinct fresh request settles. |
 | `openclaw/openclaw` | Current and future implementation | Per worktree | Reference | Test whether implementation remains consistent with the architecture. |
 | `openclaw/rfcs` | Normative proposals | Per RFC | Reference | Express focused contracts without duplicating the architecture notebook. |
 

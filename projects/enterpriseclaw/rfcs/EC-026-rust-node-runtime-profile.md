@@ -30,16 +30,17 @@ baseline. It already provides:
 - presence, wake, pending work, and stale-session cleanup; and
 - command policy, approval, dangerousness, and operator-scope gates.
 
-A fifth merged controlled-fork proof now exists in
-`giodl73-repo/openclaw` PR #226 at
-`a3321330673247fb7184f308c763361f9d798bdd`. Building on PR #222 admission,
-PR #223 invocation, PR #224 replacement fencing, and PR #225 clean restart, it
-kills the Gateway and delayed Rust worker after dispatch. The caller loses
-transport; a fresh Gateway reuses the durable pairing generation, explicitly
-ignores the old request ID, and accepts one distinct fresh request without
-renewed approval. It does not prove a general runtime profile, effects,
-readiness, durable crash recovery, Rust-owned state, migration, or runtime
-authority. The earlier
+A sixth merged controlled-fork proof now exists in
+`giodl73-repo/openclaw` PR #227 at
+`b2d6cc9edfcff2ff737727d35d71b75bf361f099`. Building on PR #222 admission,
+PR #223 invocation, PR #224 replacement fencing, PR #225 clean restart, and
+PR #226 crash fencing, it dispatches side-effect-free work through a
+Gateway-owned hard deadline. The caller receives node `TIMEOUT`, Rust observes
+the correlated cancel, the Gateway ignores Rust's later result, and a distinct
+fresh process settles one fresh request without renewed approval or pairing
+rotation. It does not prove a general runtime profile, cooperative effect
+interruption, readiness, durable crash recovery, Rust-owned state, migration,
+or runtime authority. The earlier
 `C:\src\openclaw-rust-node` protocol-v1 validator is historical evidence only.
 TypeScript remains the authoritative owner.
 
@@ -54,10 +55,10 @@ TypeScript remains the authoritative owner.
   owner, not a Rust node identity or transport dependency.
 - No live OpenClaw issue or PR currently owns a Rust node runtime or
   language-neutral node conformance package.
-- The immediate next proof is owner-driven deadline and cancellation behavior
-  for the same bounded profile: cancel or expire delayed side-effect-free work,
-  require the owner-native terminal outcome, ignore the late Rust result, and
-  settle one fresh invocation. It is not an effect-owning production canary.
+- The immediate next proof is ordered side-effect-free streaming plus idle
+  timeout behavior for the same bounded profile: preserve progress order,
+  observe correlated cancellation, fence late frames, and settle one fresh
+  stream. It is not an effect-owning production canary.
 
 ## Supported Profile
 

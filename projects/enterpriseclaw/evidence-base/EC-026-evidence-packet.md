@@ -17,11 +17,12 @@
   `https://github.com/giodl73-repo/openclaw/pull/223` and
   `https://github.com/giodl73-repo/openclaw/pull/224` and
   `https://github.com/giodl73-repo/openclaw/pull/225` and
-  `https://github.com/giodl73-repo/openclaw/pull/226`.
+  `https://github.com/giodl73-repo/openclaw/pull/226` and
+  `https://github.com/giodl73-repo/openclaw/pull/227`.
 - Latest proof source head:
-  `8a45066fa68b84c034be0fc174a4a22f9cdfde04`.
+  `bee22d62d2d771279c65f6e06ae4a270c0934613`.
 - Latest proof merge commit:
-  `a3321330673247fb7184f308c763361f9d798bdd`.
+  `b2d6cc9edfcff2ff737727d35d71b75bf361f099`.
 - Current Rust slice:
   `experiments/rust-gateway-live-admission/`.
 - Current fixtures:
@@ -29,7 +30,8 @@
   `.lobster/rust-gateway-side-effect-free-invocation-fixture.json` and
   `.lobster/rust-gateway-reconnect-continuity-fixture.json` and
   `.lobster/rust-gateway-cold-restart-continuity-fixture.json` and
-  `.lobster/rust-gateway-unclean-restart-fencing-fixture.json`.
+  `.lobster/rust-gateway-unclean-restart-fencing-fixture.json` and
+  `.lobster/rust-gateway-deadline-cancellation-fixture.json`.
 - Proposal status: EC-026 is a local scoped draft.
 - Rust implementation status: one clean-built fork-only Rust process completes
   current admission and one owner-approved, side-effect-free `system.which`
@@ -40,8 +42,11 @@
   pairing generation without renewed approval, and execute fresh bounded work.
   When the Gateway and worker are killed with a request in flight, the caller
   loses transport, a fresh Gateway ignores the old request ID, and a distinct
-  fresh request settles. It has no effect authority, readiness, durable crash
-  recovery, canary selection, state migration, release, or deletion proof.
+  fresh request settles. For dispatched work that reaches its hard deadline,
+  Rust observes the correlated cancel and the Gateway ignores its later result
+  before accepting fresh work. It has no effect authority, readiness, durable
+  crash recovery, canary selection, state migration, release, or deletion
+  proof.
 - Evidence grade: B.
 
 ## Claim Classification
@@ -56,6 +61,7 @@
 | A replacement Rust connection fences superseded work. | Fork proof | Merged PR #224: old invoke disconnected, late result refused as pairing changed, fresh replacement invoke accepted |
 | Fresh Gateway and Rust processes can reuse durable pairing without renewed approval. | Fork proof | Merged PR #225: original process exit observed, new process IDs, persisted identity/token reloaded, stable pairing generation, and fresh `system.which` accepted |
 | A restarted Gateway fences a pre-crash ordinary invocation from settlement. | Fork proof | Merged PR #226: caller transport closed, old request ID explicitly ignored after restart, stable pairing generation, and one distinct fresh request accepted |
+| A Gateway hard deadline cancels a dispatched Rust invocation and fences its late result. | Fork proof | Merged PR #227: caller receives node `TIMEOUT`, Rust observes the correlated cancel, late result is ignored, and one distinct fresh request succeeds |
 | A bounded Rust process could replace one node profile behind the current protocol. | Target hypothesis | No readiness, authority-selection, migration, or release proof |
 | TypeScript node behavior can be deleted after Rust promotion. | Target hypothesis | Exact deletion inventory and proof absent |
 
@@ -88,7 +94,7 @@ Rust implementation may silently claim to solve.
 | Rust artifact/release | Release owner | Local Cargo artifact only |
 | Local node state generation | Rust node runtime | Unproven |
 | Imported TypeScript state receipt | Migration relationship | Unproven |
-| Rust connection incarnation | Rust node runtime/protocol | Replacement connection, late-result fencing, and clean cold process/Gateway restart proven; crash recovery unproven |
+| Rust connection incarnation | Rust node runtime/protocol | Replacement connection, deadline and late-result fencing, and clean cold process/Gateway restart proven; crash recovery unproven |
 | Supported capability profile | Rust node runtime | Partial: one approved side-effect-free command only |
 | Rust invocation execution | Rust node runtime | One `system.which` invocation proven; general execution unproven |
 | Rust readiness result | Rust activating owner | Unproven |
@@ -146,9 +152,9 @@ external-effect certainty remain governed by their existing contracts.
    test-owned Cargo target with a loopback Gateway.**
 3. Pass one accepted and one structured-failure fixture in every conformance
    area above. **Connect, one bounded invocation/refusal, and live replacement
-   reconnect, clean cold restart, and unclean-restart settlement fencing are
-   complete; streaming, deadlines, cancellation, durable recovery, and update
-   remain.**
+   reconnect, clean cold restart, unclean-restart settlement fencing, and one
+   dispatched hard-deadline/cancel lane are complete; streaming, idle timeout,
+   effect interruption, durable recovery, and update remain.**
 4. Run shadow-safe comparisons without dispatching effects twice.
 5. Canary one node/deployment unit as Rust-authoritative.
 6. Restart, reconnect, update, and exercise downgrade refusal.
@@ -172,7 +178,7 @@ external-effect certainty remain governed by their existing contracts.
 | Target claim | Required proof | Status |
 | --- | --- | --- |
 | A Rust node implementation exists and is installable. | Built artifact and fresh-install record | Partial: clean-built executable crosses live admission; packaging remains |
-| Rust matches TypeScript behavior for the supported profile. | Shared conformance suite | Partial: admission, one `system.which` result/refusal lane, connection replacement, clean cold restart, and unclean-restart settlement fencing only |
+| Rust matches TypeScript behavior for the supported profile. | Shared conformance suite | Partial: admission, one `system.which` result/refusal lane, connection replacement, clean cold restart, unclean-restart settlement fencing, and hard-deadline cancellation only |
 | One implementation owns every effect during migration. | Admission-routing and no-dual-dispatch proof | Blocked |
 | Rust state migration and rollback are safe. | Versioned migration/recovery fixture | Blocked |
 | Operational budgets are acceptable. | Measured canary results | Blocked |
@@ -187,6 +193,8 @@ It also proves replacement routing, old-pending settlement, and late-result
 refusal. Fresh Gateway and Rust processes also reuse durable pairing without
 renewed approval and execute fresh bounded work. After process death, a fresh
 Gateway also ignores the old ordinary invocation ID before accepting a distinct
-request. General execution, effects, readiness, durable crash recovery,
-single-authority canary selection, migration, release, operational, and
-deletion claims remain unproven.
+request. A dispatched hard deadline also settles the caller, emits a correlated
+cancel observed by Rust, and fences the late result before fresh work.
+General execution, effects, readiness, durable crash recovery, single-authority
+canary selection, migration, release, operational, and deletion claims remain
+unproven.

@@ -16,6 +16,7 @@ not implementation plans or normative RFCs.
 | Rust Gateway reconnect continuity | Implemented and merged; replacement connection retires old work, refuses its late result, and alone settles fresh work | `rust-gateway-reconnect-continuity.md` |
 | Rust Gateway cold-restart continuity | Implemented and merged; fresh Gateway and Rust processes reuse durable pairing without renewed approval and execute fresh bounded work | `rust-gateway-cold-restart-continuity.md` |
 | Rust Gateway unclean-restart fencing | Implemented and merged; an in-flight caller loses transport, the restarted Gateway ignores the old request ID, and one distinct fresh request settles | `rust-gateway-unclean-restart-fencing.md` |
+| Rust Gateway deadline cancellation | Implemented and merged; the Gateway deadline settles the caller, Rust observes the correlated cancel, the late result is ignored, and one distinct fresh request settles | `rust-gateway-deadline-cancellation.md` |
 
 Cross-slice result:
 `evidence-header-comparison.md`.

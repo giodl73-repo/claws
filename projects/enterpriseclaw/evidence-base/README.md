@@ -103,13 +103,15 @@ All five moved to A after audited accepted/failure proof.
 
 EC-026 now has merged live cross-language admission, bounded invocation,
 connection replacement, clean cold-restart continuity, and unclean-restart
-settlement-fencing proof. Fresh Gateway and Rust processes reuse durable pairing
-and the persisted owner-issued token without renewed approval. After a crash,
-the caller loses transport, the restarted Gateway explicitly ignores the old
-request ID, and one distinct fresh request settles. It remains B because a
-complete runtime profile, effects, readiness, durable crash recovery,
-single-authority selection, migration, release, operations, and deletion are
-still unproven.
+settlement-fencing proof. It also has a dispatched hard-deadline lane: the
+Gateway settles the caller with node `TIMEOUT`, Rust observes the correlated
+cancel, and its late result is explicitly ignored before fresh work succeeds.
+Fresh Gateway and Rust processes reuse durable pairing and the persisted
+owner-issued token without renewed approval. After a crash, the caller loses
+transport, the restarted Gateway explicitly ignores the old request ID, and
+one distinct fresh request settles. It remains B because a complete runtime
+profile, effects, readiness, durable crash recovery, single-authority
+selection, migration, release, operations, and deletion are still unproven.
 
 The standalone fleet rollout/recovery simulation now proves immutable target
 membership, durable parent/child acceptance, lost-ack reconciliation, targeted
