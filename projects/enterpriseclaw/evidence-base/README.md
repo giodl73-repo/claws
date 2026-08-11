@@ -106,6 +106,10 @@ connection replacement, clean cold-restart continuity, and unclean-restart
 settlement-fencing proof. It also has a dispatched hard-deadline lane: the
 Gateway settles the caller with node `TIMEOUT`, Rust observes the correlated
 cancel, and its late result is explicitly ignored before fresh work succeeds.
+Its ordered-progress lane proves that the Gateway buffers out-of-order Rust
+progress, delivers only the contiguous sequence, owns accepted-progress
+inactivity, settles with `IDLE_TIMEOUT`, emits the correlated cancel, and
+ignores both late progress and the late result before fresh work succeeds.
 Fresh Gateway and Rust processes reuse durable pairing and the persisted
 owner-issued token without renewed approval. After a crash, the caller loses
 transport, the restarted Gateway explicitly ignores the old request ID, and

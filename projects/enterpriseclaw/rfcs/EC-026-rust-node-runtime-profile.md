@@ -30,15 +30,17 @@ baseline. It already provides:
 - presence, wake, pending work, and stale-session cleanup; and
 - command policy, approval, dangerousness, and operator-scope gates.
 
-A sixth merged controlled-fork proof now exists in
-`giodl73-repo/openclaw` PR #227 at
-`b2d6cc9edfcff2ff737727d35d71b75bf361f099`. Building on PR #222 admission,
-PR #223 invocation, PR #224 replacement fencing, PR #225 clean restart, and
-PR #226 crash fencing, it dispatches side-effect-free work through a
-Gateway-owned hard deadline. The caller receives node `TIMEOUT`, Rust observes
-the correlated cancel, the Gateway ignores Rust's later result, and a distinct
-fresh process settles one fresh request without renewed approval or pairing
-rotation. It does not prove a general runtime profile, cooperative effect
+A seventh merged controlled-fork proof now exists in
+`giodl73-repo/openclaw` PR #228 at
+`fcadf5ced0ef139fe8e8319e2fbfb08bec8918c2`. Building on PR #222 admission,
+PR #223 invocation, PR #224 replacement fencing, PR #225 clean restart,
+PR #226 crash fencing, and PR #227 hard-deadline cancellation, it submits Rust
+progress sequence 1 before sequence 0 through the production in-process
+Gateway registry. The Gateway delivers contiguous progress in order, settles
+accepted-progress inactivity with `IDLE_TIMEOUT`, emits a correlated cancel,
+and ignores Rust's later progress and result. A distinct fresh process settles
+one fresh request without renewed approval or pairing rotation. It does not
+prove a general runtime profile, streaming input, cooperative effect
 interruption, readiness, durable crash recovery, Rust-owned state, migration,
 or runtime authority. The earlier
 `C:\src\openclaw-rust-node` protocol-v1 validator is historical evidence only.
@@ -55,10 +57,10 @@ TypeScript remains the authoritative owner.
   owner, not a Rust node identity or transport dependency.
 - No live OpenClaw issue or PR currently owns a Rust node runtime or
   language-neutral node conformance package.
-- The immediate next proof is ordered side-effect-free streaming plus idle
-  timeout behavior for the same bounded profile: preserve progress order,
-  observe correlated cancellation, fence late frames, and settle one fresh
-  stream. It is not an effect-owning production canary.
+- The immediate next step is to re-audit the cheapest remaining bounded
+  profile gap, likely streaming input or artifact/runtime readiness through an
+  existing owner seam. It must not infer cooperative effect interruption from
+  cancel observation or become an effect-owning production canary.
 
 ## Supported Profile
 

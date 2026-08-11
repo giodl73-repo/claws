@@ -26,7 +26,7 @@
 
 ## Current Session
 
-- Last updated: 2026-08-10
+- Last updated: 2026-08-11
 - Last agent: GitHub Copilot CLI
 - Presentation: the authoritative shared Peter/Vincent deck is the 19-slide
   OneDrive presentation `EnterpriseClaw - Peter and Vincent - 2026-08-05.pptx`.
@@ -115,14 +115,16 @@
   settlement, session/memory, approval/authority, Teams identity, and
   version/config families. Its executive framing treats "agent hung" as a
   symptom requiring owner-native state rather than a single model defect.
-- Current focus: advance the controlled-fork evidence series. EVID-020 merged
-  as `giodl73-repo/openclaw` PR #227 at
-  `b2d6cc9edfcff2ff737727d35d71b75bf361f099`: the Gateway hard deadline
-  settled a dispatched Rust invocation with node `TIMEOUT`, Rust observed the
-  correlated cancel, its later result was explicitly ignored, and one distinct
-  fresh `system.which` request settled without renewed approval or pairing
-  rotation. EC-026 remains B; the next bounded proof is side-effect-free
-  ordered streaming with idle-timeout cancellation and late-frame fencing.
+- Current focus: advance the controlled-fork evidence series. EVID-021 merged
+  as `giodl73-repo/openclaw` PR #228 at
+  `fcadf5ced0ef139fe8e8319e2fbfb08bec8918c2`: Rust submitted progress sequence
+  1 before sequence 0, the Gateway delivered contiguous progress in order,
+  settled accepted-progress inactivity with `IDLE_TIMEOUT`, emitted the
+  correlated cancel, and explicitly ignored Rust's late progress and result
+  before one distinct fresh `system.which` request settled without renewed
+  approval or pairing rotation. EC-026 remains B; re-audit the cheapest
+  remaining bounded gap, likely streaming input or artifact/runtime readiness,
+  without claiming effect interruption or Rust authority.
 - Prior release-migration focus: deliver the Peter/Vincent Lobster plugin-and-patch assessment,
   then continue migrating the controlled EnterpriseClaw fork from its
   August-main baseline to signed OpenClaw `v2026.6.33` and rebuilding Lobster's
@@ -635,10 +637,10 @@
   `@clawsweeper re-review` request. It remains non-draft but still
   `CONFLICTING` / `DIRTY` against current `main`, with Gateway-owner/RFC
   decisions still required.
-- EVID-020 worktree:
-  `C:\src\openclaw-evid-020-rust-deadline-cancellation` is clean at source
-  head `bee22d62d2d771279c65f6e06ae4a270c0934613`; PR #227 is merged. Older
-  EVID-015 through EVID-019 and protocol-v1 worktrees are historical evidence.
+- EVID-021 worktree:
+  `C:\src\openclaw-evid-021-rust-stream-idle-timeout` is clean at source head
+  `d40b6c2c2c5a33b690fbfaad382696ef94009523`; PR #228 is merged. Older
+  EVID-015 through EVID-020 and protocol-v1 worktrees are historical evidence.
 - Known dirty state: The wider checkout contains unrelated user changes.
   Preserve them. `projects/openclaw-design/` and this area are coherent
   documentation additions. This session added
@@ -651,9 +653,9 @@
   `C:\src\openclaw-pr100960-command-inventory` worktree was dirtied by a
   failed dependency install under unsupported Node `v24.14.0`; use the clean
   `-clean` worktree for #100960 continuation.
-- EVID-020 blocker: none. The next slice must remain side-effect-free and must
-  not promote cancel delivery to cooperative effect interruption, stop
-  certainty, runtime readiness, or Rust authority.
+- EVID-021 blocker: none. The next slice must be selected by a fresh owner-first
+  audit and must not promote cancel delivery to cooperative effect
+  interruption, stop certainty, runtime readiness, or Rust authority.
 - Broader blocking question: compare the 22-file generated artifact against Lobster PR
   #6839's original 27 inputs, resolve excluded `0014`, `0020`, `0021`, `0023`,
   `0025`, and `0027`, remove stale timeout patcher/scripts, and obtain
