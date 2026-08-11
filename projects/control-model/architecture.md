@@ -213,6 +213,13 @@ materialized only after the client selects one. Discovery is authorization
 filtered and client renderer advertisement is not exposed verbatim to
 extensions.
 
+Artifact identity is independent of presentation placement. Lobster may render
+one stable artifact revision inline in chat, in an expanded panel, or in a
+dedicated artifact surface. Later turns may publish higher revisions of the
+same logical artifact. V1 durability is session-scoped across history reload
+and reconnect; permanent document storage and collaborative editing remain
+separate product capabilities.
+
 V1 uses full immutable artifact revisions. JSON Patch/JSONL streaming can be an
 adopter detail or a later negotiated dialect after real evidence shows it is
 needed. A component catalog is host-owned and never supplied as executable
