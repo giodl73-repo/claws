@@ -20,7 +20,9 @@ review surface:
 - an adapter from the authenticated sidecar into the existing `CommandRuntime`
   and `NodeLifecycle` surfaces; and
 - three language-neutral, byte-exact fixture corpora independently reproduced
-  by the Windows C# adopter.
+  by the Windows C# adopter; plus
+- a separate OS child-process proof that exchanges authenticated frames over
+  real loopback TCP in both directions and exits cleanly.
 
 ## Position in the series
 
@@ -37,9 +39,9 @@ review surface:
    `NodeCapabilityDispatcher` while retaining C# as the production default.
 
 GitHub requires this cross-fork PR to target `main`; it is logically stacked on
-the exact #116450 head `894d125ee76e5c153890e66f58d585bf5f239cb4`.
-After #116050 and #116450 land, the remaining review diff is 12 files with
-4,767 additions and two deletions.
+the exact #116450 head `bfd5c4d14e2730d8e9b2a76a9ad45e52288a3732`.
+After #116050 and #116450 land, their shared ancestry drops out and only this
+logical sidecar slice remains.
 
 ## Ownership boundary
 
@@ -62,10 +64,11 @@ defines an explicit authorization contract.
 
 ## Deliberate exclusions
 
-This PR does not choose named pipes, Unix sockets, inherited pipes, or loopback;
-launch a process; deliver production credentials; select the Rust runtime by
-default; implement product approval UX, MCP/skills, or native handlers; provide
-an audit sink; or claim production sidecar readiness.
+This PR does not choose a product IPC or launcher, deliver production
+credentials, select the Rust runtime by default, implement product approval UX,
+MCP/skills, or native handlers, provide an audit sink, or claim production
+sidecar readiness. Its child-process TCP harness proves the generic
+process/transport contract only.
 
 Full ordered duplex sidecar input/progress/heartbeat transport, verified
 process/bootstrap, Gateway pairing/token proof, crash/resource proof, packaging,
@@ -75,7 +78,7 @@ rollout, and rollback remain adoption gates.
 
 - `cargo fmt --all -- --check`
 - `cargo clippy --workspace --all-targets --all-features -- -D warnings`
-- `cargo test --workspace --all-targets --all-features` — 110 tests passed
+- `cargo test --workspace --all-targets --all-features` — 124 tests passed
 - `cargo doc --workspace --no-deps`
 - `oxfmt 0.60.0 --check` on the protocol document and all three JSON corpora
 - `git diff --check`
@@ -83,7 +86,7 @@ rollout, and rollback remain adoption gates.
   findings resolved; final exact-head passes clean
 
 The cumulative OpenClaw sidecar head is
-`8d0a1b013ea83b1726e284d71791002260eac3c6`. Review fixes cover terminal
+`71c1c8cb23c5647dc07fd4ee1f8663068c92a482`. Review fixes cover terminal
 retirement, bounded serialization, session-specific frame minima, portable
 feature/version negotiation, role and delivery binding, immutable configuration,
 portable JSON numbers, complete-message budgeting, and bounded stable adapter
@@ -97,12 +100,13 @@ an independent product could implement without importing product policy or
 creating a second native execution path.
 
 Real environment tested:
-Windows 11 and Linux Rust companion checkouts at commit
-`8d0a1b013ea83b1726e284d71791002260eac3c6`, Tokio in-memory duplex transport,
-RustCrypto HMAC-SHA-256, OS randomness, and the checked-in language-neutral
-protocol, handshake, and runtime corpora. The independent Windows adopter at
-`3ca913a43a62957b8aca0448667facff3290fbc6` reproduces the same corpora in C#.
-This is source-level contract proof, not a packaged external Rust process.
+Ubuntu 24.04/WSL2 at commit
+`71c1c8cb23c5647dc07fd4ee1f8663068c92a482`, Tokio loopback TCP, a separately
+launched OS child, RustCrypto HMAC-SHA-256, OS randomness, and the checked-in
+language-neutral protocol, handshake, and runtime corpora. The independent
+Windows adopter at `711fe095028a025fa0649c9b8e20f480644a6967` reproduces the
+same corpora in C#. This is process/transport contract proof, not a packaged or
+product-supervised Rust runtime.
 
 Exact steps or command run after this patch:
 
@@ -112,14 +116,17 @@ Exact steps or command run after this patch:
 4. Route an admitted ordinary invocation through product-owned admission and
    native dispatch, including denial, timeout, cancellation, and status paths.
 5. Serialize and parse every message in all three shared fixture corpora.
-6. Run the complete Rust workspace and strict static/documentation gates.
+6. Launch the same integration-test executable as a separate OS child; complete
+   authenticated negotiation, configuration and exact manifest acknowledgement,
+   admission, invocation, and result over real loopback TCP; and verify clean exit.
+7. Run the complete Rust workspace and strict static/documentation gates.
 
 Evidence after fix:
-The Rust workspace passes 110 tests. The independent C# consumer in Windows
-#1068 passes 60 focused sidecar tests, a full Windows build, 3,462 Shared tests
-with 32 existing environment-gated skips, and 2,023 Tray tests. Its built-in
-Codex review and independent correctness, architecture/API, and security panel
-are clean at the exact adopter head.
+The Rust workspace passes 124 tests, including two focused process-boundary
+tests and the complete configured ordinary-command transcript. The rebased
+independent C# consumer in Windows #1068 passes 3,701 Shared
+tests with 32 environment-dependent skips and 22 focused Connection tests; its
+larger prior-head suites remain recorded in RFC #54.
 
 Observed result after fix:
 Both implementations agree byte-for-byte on framing, handshake, configuration,
@@ -129,8 +136,9 @@ portable-number, cancellation, and output-bound violations fail closed before
 native work or further transport use. No production runtime selection changes.
 
 What was not tested:
-No packaged Rust binary was launched through concrete product IPC; no protected
-credential bootstrap, live Gateway pairing/token session, `system.*` command,
-product audit sink, crash/restart circuit breaker, resource measurement,
-packaging, rollout, or rollback was exercised. Those remain explicit adopter
-gates rather than implied capabilities of this PR.
+No packaged Rust binary was launched through product-selected IPC; no protected
+credential bootstrap, artifact verification, product supervisor, live Gateway
+pairing/token session, `system.*` command, product audit sink, crash/restart
+circuit breaker, resource measurement, packaging, rollout, or rollback was
+exercised. Those remain explicit adopter gates rather than implied capabilities
+of this PR.

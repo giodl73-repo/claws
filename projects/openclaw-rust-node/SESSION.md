@@ -33,8 +33,32 @@
 
 ## Current Session
 
-- Last updated: 2026-08-01.
+- Last updated: 2026-08-12.
 - Last agent: Codex.
+- 2026-08-12 stack refresh completed:
+  - cancellation contract #115390 rebased at `3cac3e4a3aa`; current registry,
+    explicit exports, generated Swift model, and live Swift decoding agree on
+    required `{ invokeId, nodeId }`; focused tests and protocol checks pass;
+  - foundation #116050 rebased at `1aaec0c5a56`; 56 Rust tests, strict Clippy,
+    and 12 focused Tauri Gateway tests pass; Gateway challenge signing now uses
+    the server-issued timestamp in both shared-client consumers;
+  - lifecycle #116450 restacked at `bfd5c4d14e2`; 73 Rust tests, strict Clippy,
+    focused TypeScript conformance, and full protocol generation pass; native
+    signing and generated Swift/Kotlin models are current, and their existing
+    nullable-string invocation API is preserved;
+  - sidecar #116863 restacked at `71c1c8cb23c`; 124 Rust tests and strict
+    Clippy pass; a real OS child now completes authenticated configuration,
+    manifest acknowledgement, admission, invocation, and result exchange over
+    loopback TCP and exits cleanly;
+  - Windows adopter #1068 rebased at `711fe095`; the current handshake-
+    authorization gate is preserved through `INodeRuntimeClient`; 63 focused
+    sidecar/dispatcher, 3,701 Shared, and 22 focused Connection tests pass;
+  - RFC #54 is at `9714876`; evidence heads/counts are current, generic
+    process proof is separated from protected product bootstrap/supervision,
+    and the misplaced role review now lives under `rfcs/0028/`.
+- All six live PR bodies were synchronized, remain draft, and received a fresh
+  `@clawsweeper re-review` request. Current hosted checks are green/skipped for
+  the OpenClaw and RFC drafts; Windows #1068 has new-head checks in progress.
 - RFC [#54](https://github.com/openclaw/rfcs/pull/54) is now at `ea6891d` with
   a sixth companion contract for live Gateway connection control through the
   protected sidecar. It keeps immutable capability configuration secret-free

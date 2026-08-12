@@ -90,7 +90,8 @@ with distinct jobs:
 3. [OpenClaw #116863](https://github.com/openclaw/openclaw/pull/116863)
    consolidates reviewed fork evidence #193-#195 into authenticated bounded
    sidecar framing, the independently negotiated handshake, immutable
-   configuration, and the ordinary-command runtime/product-adapter bridge.
+   configuration, the ordinary-command runtime/product-adapter bridge, and a
+   real OS child-process authenticated IPC proof over loopback TCP.
    It is logically stacked on #116450 and preserves the reviewed commits.
 4. [Windows node #1068](https://github.com/openclaw/openclaw-windows-node/pull/1068)
    combines the replaceable runtime boundary, shared Windows capability
@@ -136,24 +137,22 @@ The RFC has also been reviewed through Gateway reliability, sidecar lifecycle,
 enterprise security, and maintainer-correctness lenses. That review added
 explicit fail-closed authority, audit, readiness, crash recovery, reconnect,
 resource, and release gates. Current-head Rust evidence is green at #116050
-`41f4e705887` (56 tests) and #116450 `894d125ee76` (73 tests plus strict static
-gates). The final TypeScript UTF-8 fixture-validator run remains explicitly
-pending after a local package-registry TLS failure; earlier hosted TypeScript
-fixture lanes passed.
+`1aaec0c5a56` (56 tests) and #116450 `bfd5c4d14e2` (73 tests plus strict static
+gates, focused TypeScript conformance, and full protocol-generation checks).
 
-The consolidated sidecar head `8d0a1b013ea` in #116863 has 110 passing Rust workspace
-tests plus strict Clippy, Rustdoc, formatting, and three clean sequential manual
-reviews. It proves the generic protocol/handshake/configuration/ordinary-command
-bridge, not production readiness. Fork evidence now proves anonymous-pipe IPC,
+The consolidated sidecar head `71c1c8cb23c` in #116863 has 124 passing Rust
+workspace tests plus strict Clippy and formatting. It proves the generic
+protocol/handshake/configuration/ordinary-command bridge across a real child
+process and transport, not production readiness. Fork evidence further proves anonymous-pipe IPC,
 protected credential handoff, reparse-safe exact artifact identity through
 launch, and authenticated self-identity. Platform signing and
 packaging, duplex input/progress, product audit, crash supervision, resource
 proof, rollout, and rollback remain explicit adopter gates.
 
-The consolidated Windows #1068 head `3ca913a43a62` reproduces the protocol,
-handshake, and runtime corpora byte-for-byte; passes 60 focused, 3,462 Shared,
-and 2,023 Tray tests; and has clean built-in Codex, correctness, architecture/API,
-and security reviews. It closes the independent-consumer promotion gate for
+The rebased Windows #1068 head `711fe095` reproduces the protocol, handshake,
+and runtime corpora byte-for-byte; passes 63 focused sidecar/dispatcher, 3,701
+Shared, and 22 focused Connection tests; and preserves the incumbent
+pre-credential handshake authorization gate through the runtime seam. It closes the independent-consumer promotion gate for
 the generic #116863 subset. Fork #4 then adds a non-selectable verified launcher;
 the exact pinned aggregate passes 122 shared Rust and 64 focused Windows tests
 plus all three fixture blobs. It does not close platform signing/package delivery,

@@ -43,7 +43,7 @@ fast-forwarded into this branch. The C# runtime remains the production default.
 OpenClaw and `openclaw-windows-node` are separate repositories, so this PR
 cannot be Git-rebased onto #116863. The dependency is contractual: this branch
 pins and reproduces #116863's three fixture corpora at OpenClaw head
-`8d0a1b013ea83b1726e284d71791002260eac3c6`. Production Rust selection remains
+`71c1c8cb23c5647dc07fd4ee1f8663068c92a482`. Production Rust selection remains
 blocked until that contract is accepted and the remaining adoption gates close.
 
 ## Ownership boundary
@@ -74,18 +74,20 @@ packaging, rollout, and rollback.
 
 ## Validation
 
-- `./build.ps1` — all Debug `win-x64` projects built successfully
-- `dotnet test tests/OpenClaw.Shared.Tests/OpenClaw.Shared.Tests.csproj --no-restore --filter "FullyQualifiedName~RustSidecar"` — 60 passed
-- `OPENCLAW_REPO_ROOT=<checkout> dotnet test tests/OpenClaw.Shared.Tests/OpenClaw.Shared.Tests.csproj --no-restore` — 3,462 passed, 32 existing environment-gated skips
-- `dotnet test tests/OpenClaw.Tray.Tests/OpenClaw.Tray.Tests.csproj --no-restore` — 2,023 passed
-- `dotnet test tests/OpenClaw.Connection.Tests/OpenClaw.Connection.Tests.csproj --no-restore` — 519 passed
+- Current rebased head: focused `RustSidecar`/`NodeCapabilityDispatcher` tests — 63/63 passed
+- Current rebased head: full Shared suite — 3,701 passed, 32 environment-dependent skips
+- Current rebased head: focused `NodeConnector` Connection tests — 22/22 passed
+- Prior head: all Debug `win-x64` projects built; 60 focused sidecar, 3,462
+  Shared, 2,023 Tray, and 519 Connection tests passed
 - `./scripts/validate-mxc-e2e.ps1` on the runtime-seam head — 2/2 live Gateway MXC tests passed
 - `git diff --check` — passed
 - built-in Codex review plus independent correctness, architecture/API, and
   security reviews — all findings resolved; exact combined-head passes clean
 
 The combined Windows head is
-`3ca913a43a62957b8aca0448667facff3290fbc6`. The adapter review fixed
+`711fe095028a025fa0649c9b8e20f480644a6967`. The rebase preserves the current
+fail-closed pre-credential handshake authorization gate through the generic
+runtime seam. The adapter review also fixed
 cancellation/registration races, response ordering, admission lifetime,
 handshake role/version binding, result/envelope bounds, serde-compatible typed
 and untyped number handling, and bounded canonicalization across `JsonElement`,
@@ -100,8 +102,8 @@ be consumed independently without bypassing Windows policy or handlers.
 
 Real environment tested:
 Windows 11, .NET SDK 10.0.302, combined head
-`3ca913a43a62957b8aca0448667facff3290fbc6`, OpenClaw sidecar fixtures from
-`8d0a1b013ea83b1726e284d71791002260eac3c6`, and the existing live Gateway/MXC
+`711fe095028a025fa0649c9b8e20f480644a6967`, OpenClaw sidecar fixtures from
+`71c1c8cb23c5647dc07fd4ee1f8663068c92a482`, and the existing live Gateway/MXC
 proof collected on runtime-seam head
 `c0cfa8ba66802e601de23875b07caf941209e554`. The sidecar proof is an in-process
 source harness; it does not launch an external Rust binary.
@@ -120,8 +122,9 @@ Exact steps or command run after this patch:
    for successful contained `system.run` and denied tray-data writes.
 
 Evidence after fix:
-The combined head passes 60 focused sidecar tests, 3,462 Shared tests, and 2,023
-Tray tests. The retained live MXC transcript reports 2/2 passed: contained
+The rebased head passes 63 focused sidecar/dispatcher tests, 3,701 Shared tests,
+and 22 focused Connection tests. Prior-head larger-suite evidence and the
+retained live MXC transcript remain recorded; MXC reports 2/2 passed: contained
 `system.run` returned `OPENCLAW_GATEWAY_SYSTEM_RUN_MXC_OK`, and a write outside
 the sandbox failed with `Access is denied` and `fileExists=False`.
 

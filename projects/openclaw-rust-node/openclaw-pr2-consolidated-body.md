@@ -70,20 +70,25 @@ security/reliability. Review fixes now ensure that:
 
 ## Validation
 
-Logical follow-up head: `894d125ee76`
+Logical follow-up head: `bfd5c4d14e2`
 
 - `cargo +1.93.0 fmt --manifest-path crates/Cargo.toml --all -- --check`
 - `cargo +1.93.0 test --manifest-path crates/Cargo.toml --workspace` — 73 tests
 - `cargo +1.93.0 clippy --manifest-path crates/Cargo.toml --workspace --all-targets -- -D warnings`
 - `RUSTDOCFLAGS='-D warnings' cargo +1.93.0 doc --manifest-path crates/Cargo.toml --workspace --no-deps`
-- `git diff --check 41f4e705887...HEAD`
+- focused TypeScript node-schema tests — 3/3 passed
+- TypeScript integration-contract test — 1/1 passed
+- `pnpm protocol-registry:check` and `pnpm protocol:check` — passed, including
+  regenerated Swift and Kotlin models
+- `git diff --check 1aaec0c5a56...HEAD`
 
-These gates pass on Ubuntu 24.04/WSL2 at the crates' Rust 1.93 MSRV. The same
-Rust tests and strict Clippy pass on Windows 11/Rust 1.95. The new focused
-TypeScript UTF-8 tests could not run locally because registry package fetches
-failed TLS negotiation; the source was reviewed independently and the pushed
-head remains subject to hosted TypeScript CI. Earlier shared-fixture lanes
-passed on Blacksmith Testbox.
+These gates pass on Ubuntu 24.04/WSL2 at the crates' Rust 1.93 MSRV. The rebase
+also carries the Gateway challenge timestamp through both Rust-owned and
+platform-owned signing, and refreshes generated native protocol models for the
+current node invocation contract. A follow-up generator fix preserves the
+established Swift and Kotlin nullable-string API for serialized `paramsJSON`;
+both generator checks pass. The Android unit test could not run locally because
+this WSL image has no Java runtime, so hosted Android CI remains required.
 
 ## Real behavior proof
 
@@ -101,10 +106,11 @@ was used.
 
 Exact steps or command run after this patch:
 
-1. Ran the 73-test Rust workspace at `894d125ee76`.
+1. Ran the 73-test Rust workspace at `bfd5c4d14e2`.
 2. Exercised signing, reconnect, duplex input/progress, admission cancellation,
    overflow failure, manifest retirement, and token fallback over loopback WebSockets.
-3. Ran strict Clippy, rustdoc, formatting, and exact-range diff checks.
+3. Ran strict Clippy, focused TypeScript conformance, full protocol-generation,
+   formatting, and exact-range diff checks.
 
 Evidence after fix:
 
