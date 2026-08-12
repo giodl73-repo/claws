@@ -59,6 +59,13 @@
 - All six live PR bodies were synchronized, remain draft, and received a fresh
   `@clawsweeper re-review` request. Current hosted checks are green/skipped for
   the OpenClaw and RFC drafts; Windows #1068 has new-head checks in progress.
+- Donor snapshot refresh [PR #13](https://github.com/giodl73-repo/openclaw-rust-node/pull/13)
+  is draft and mergeable at `36a27a9cc38`. It copies the exact generic
+  `crates/` tree from OpenClaw #116863 head `71c1c8cb23c`, leaves
+  `integrations/edge-chromium/` unchanged, and records the full configured
+  child-process proof. All 124 locked workspace tests, strict Clippy, docs,
+  format, and diff checks pass locally on Windows Rust 1.95; the identical
+  source passed Rust 1.93 upstream. Six hosted checks are queued.
 - RFC [#54](https://github.com/openclaw/rfcs/pull/54) is now at `ea6891d` with
   a sixth companion contract for live Gateway connection control through the
   protected sidecar. It keeps immutable capability configuration secret-free
