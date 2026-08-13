@@ -11,6 +11,8 @@ tools.
 | ----------------------------------- | ----------------------------------------------------------- |
 | Workspace map                       | `WORKSPACE.md`                                              |
 | Active project areas                | `projects/README.md`                                        |
+| Icelines forecasting                | `projects/icelines/README.md`                               |
+| LIFT management framework           | `projects/lift/README.md`                                   |
 | OpenClaw system design              | `projects/openclaw-design/README.md`                        |
 | EnterpriseClaw architecture         | `projects/enterpriseclaw/README.md`                         |
 | Policy work                         | `projects/policy/README.md`                                 |
@@ -59,6 +61,7 @@ active branch/PR, known dirty state, resume checks, and guardrails.
 
 Common session files:
 
+- `projects/lift/SESSION.md`
 - `projects/openclaw-design/SESSION.md`
 - `projects/enterpriseclaw/SESSION.md`
 - `projects/policy/SESSION.md`

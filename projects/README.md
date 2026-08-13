@@ -8,6 +8,8 @@ be buried in generated wave directories.
 
 | Directory             | Use                                                                                                                                      |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `icelines/`            | ICELINES forecasting, matchup/edge product surfaces, validation, publication, and TRACKER snapshot coordination.                        |
+| `lift/`                | Public management framework: M/S/E scoring, private-source sanitization, evidence policy, roles, and golden-module work.                  |
 | `openclaw-design/`    | Cross-RFC OpenClaw conceptual model, major objects, facility capabilities, ownership boundaries, and contract summaries.                 |
 | `enterpriseclaw/`     | Desired OpenClaw architecture: principles, logical layers, owner domains, trust, control loops, deployment profiles, and evolution rules. |
 | `policy/`             | Policy conformance, evidence files, RFC addenda, and Lobster policy baselines.                                                           |
@@ -56,6 +58,8 @@ agent is assigned to an area, then read the area `README.md`.
 
 | Area                                | Session                         |
 | ----------------------------------- | ------------------------------- |
+| Icelines                            | `icelines/SESSION.md`           |
+| LIFT                                | `lift/SESSION.md`               |
 | OpenClaw system design              | `openclaw-design/SESSION.md`    |
 | EnterpriseClaw architecture         | `enterpriseclaw/SESSION.md`     |
 | Policy                              | `policy/SESSION.md`             |

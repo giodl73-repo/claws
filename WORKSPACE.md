@@ -10,6 +10,8 @@ For agent and harness entry points, start with `CONTEXT.md`.
 
 | Area                                | Home                             | Purpose                                                                                                                                  |
 | ----------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Icelines                            | `projects/icelines/`             | ICELINES forecasting, matchup/edge product surfaces, validation, publication, and TRACKER snapshot coordination.                        |
+| LIFT                                | `projects/lift/`                 | Public management framework: M/S/E scoring, substantial Gravity rewrite, evidence policy, roles, and golden modules.                    |
 | OpenClaw system design              | `projects/openclaw-design/`      | Cross-RFC conceptual model, major objects, facility capabilities, ownership boundaries, and contract summaries.                         |
 | EnterpriseClaw                      | `projects/enterpriseclaw/`       | Desired owner-first OpenClaw architecture: layers, domains, trust, control loops, local/managed profiles, and evolution rules.          |
 | OpenClaw PR work                    | `projects/openclaw/`             | Current OpenClaw branches, PR notes, review loops, proof, and RFC tracking.                                                              |

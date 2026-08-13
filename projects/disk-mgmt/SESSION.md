@@ -30,6 +30,27 @@
 - Free space trajectory: ~5 → ~10 → ~23 → ~40 → ~253 → ~249 → ~239.7 →
   ~291.2 → **51.0 GB free** on `DESKTOP-INBLCCK`; **207.2 GB free** on
   `LAPTOP-2IACVKSU`
+- 2026-08-11 light-laptop cleanup: increased free C: from 31.4 GB to 46.5 GB.
+  Removed the clean checkout for merged `giodl73-repo/awesome-claws` PR #1,
+  applied bounded pnpm/npm/temp/Git reclaim, and removed 83 broken
+  `MAXIM-agent-*` linked-worktree shells totaling 12.75 GB after proving every
+  `.git` pointer targeted the absent `C:\src\maxim` common directory. Retained
+  clean `C:\src\claws-owned` because PR #2 was closed unmerged and its two
+  commits were not proven on a remote branch. Retained all dirty trees,
+  including merged `TRACKER` work, and all detached Squarebit review trees.
+- 2026-08-11 100-GB follow-up: increased free C: from 46.5 GB to 102.2 GB by
+  cleaning only regenerable Squarebit Cargo output: about 41.7 GB from the
+  main dirty `C:\src\squarebit` checkout, 12.0 GB from two clean detached
+  review worktrees under `C:\temp`, and 6.3 GB from clean
+  `C:\src\squarebit-review-55c2c1b`. Preserved all source changes and detached
+  commits. The running `llm_kernel_bakeoff_report.exe` benchmark remained
+  active, leaving about 0.46 GB in the main target directory.
+- 2026-08-11 evening repeat reclaim: free C: had fallen to 68.2 GB. Cleaned
+  24.4 GB of regenerated Cargo output from four clean detached Squarebit review
+  worktrees and most of the main Squarebit target, restoring 101.4 GB free.
+  Preserved the dirty `squarebit-review-692915a` target and left the active
+  `llm_kernel_bakeoff_report.exe` and Apportionment `block_trace.exe` processes
+  running. No source files, commits, or worktrees were removed.
 - 2026-08-07 ICELINES closeout: released the merged ICELINES matchup-edge and
   TRACKER pointer worktrees, pruned their stale registrations, and returned
   the light-profile allocator to 0/3 slots.

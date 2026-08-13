@@ -22,10 +22,10 @@
 
 ## Resume Snapshot
 
-- Last updated: 2026-08-08.
+- Last updated: 2026-08-12.
 - Last agent: GitHub Copilot CLI.
-- Current focus: land the remaining Claws implementation series one PR at a
-  time through the official maintainer workflow.
+- Current focus: land RFC #48, RFC 0031 / PR #52, and RFC #56 in dependency
+  order after merged OpenClaw consent-boundary PR #121327.
 - Completed: OpenClaw PR #115237 merged as
   `60fc2fe64d8ec2988a555a638dc1074d31e5760b` on 2026-08-07T11:04:52Z.
   PR #115962 merged as `7774f9a36c12eb5f63e6ef33b3da2af065b09707`
@@ -36,21 +36,99 @@
   `530d5edb56618814ad3526dc4af494157a389e6e`; its stacked #2 was replaced by
   #3 and merged as `250e41588a54d23ab53b49eef5e7b2eeee83ea03`.
   Awesome Claws #1 merged as
-  `2f2ea9f797d1861713cc100beae9466bf6afe9d5`.
-- Remaining portfolio: RFC #48/#52/#56; OpenClaw #112828/#117037; ClawHub
-  #3328/#3359; Awesome Claws #2. Closed OpenClaw #112808 is superseded as a
+  `2f2ea9f797d1861713cc100beae9466bf6afe9d5`. OpenClaw #117037 merged as
+  `7422222788c4b75581c0370e0614be9e635ec3cd`. ClawHub #3328 merged as
+  `348851eeb9bacb85d99a529f6ec43fb3e9228c46`. ClawHub #3359 merged as
+  `82313c2bb17fb8401c41c8ed2b0144d42b461ae7`. Awesome Claws golden
+  lifecycle #5 merged as `a1a7608ba112700cb4effcd8fc79033e3a218425`.
+  OpenClaw #121327 merged as
+  `1ec4e4582eac80b816d9644c174ab4a2c163f372` on
+  2026-08-12T18:37:05Z. It freezes named tool profiles
+  as literal bounded installed allowlists, keeps deny expansion conservative,
+  versions install provenance at v2, fails legacy v1 Claw-owned profiles closed
+  until explicit update/re-consent, upgrades exact incomplete v1 retries,
+  avoids writable state access during runtime ownership checks, safely
+  normalizes export and update comparison, and rejects hierarchical native
+  `BOOTSTRAP.md` collisions. Focused runtime/provenance proof passed 112 tests,
+  broad Claw consent proof passed 195 tests, final Codex review found no
+  actionable issue, and Blacksmith Testbox-through-Crabbox
+  `tbx_01kzn02yj8nrbsyzes9a679d3k` passed `pnpm check:changed`
+  ([Actions](https://github.com/openclaw/openclaw/actions/runs/31356716222)).
+  The exact head also passes every `check:architecture` subguard locally after
+  adding the required raw-SQLite ownership-probe allowlist marker. Maintainer
+  policy explicitly accepts universal fail-closed behavior when the first
+  provenance-state read is corrupt: every configured named-profile or
+  allowlist candidate is denied until ownership can be verified, including
+  ordinary non-Claw agents. Exact-head coverage codifies that availability
+  tradeoff without mutating corrupt state. Focused migration/runtime proof
+  passes 31 tests, final Codex review found no actionable defect, and hosted
+  exact-head CI passed. ClawSweeper accepted the attributable maintainer
+  decision, found no remaining discrete correctness defect, and rated the
+  patch platinum-hermit / ready for maintainer review. The official
+  `review-pr -> prepare-pr -> merge-pr` flow landed the PR after judging the
+  final behind-main drift unrelated.
+  RFC #48 matches the finalized contract at
+  `c8e10d2ce775c55a27e74453c806cd5f83e6d866`, including literal selector
+  semantics, v1/v2 migration, inherited `alsoAllow`, and derivative legacy
+  export consent. Its final Codex review found no correctness issue.
+  RFC #52 was renumbered from occupied identifier 0027 to RFC 0031 at
+  `59b11e25acf4605771bced523f72083b19a8940f`. RFC #56 remains at
+  `7635e39dcf2b5e1f2d92d01e3df8cc36c2a9420f`; its body now explains that
+  criteria 21-25 become consecutive after RFC #48 lands.
+  The focused `.craft/roles/claws` findings are resolved: global plugins are
+  excluded from bulk cleanup, approved shared requirements precede Claw-owned
+  mutation, RFC 0016 remains draft, #117037 stays owned by RFC #56, and the
+  dependent acceptance criteria no longer collide.
+  RFC #48 and RFC 0031 have fresh `@clawsweeper re-review` requests. The RFC
+  bodies state the required OpenClaw #121327 -> RFC #48 -> RFC 0031 -> RFC #56
+  landing order; the first prerequisite is now complete.
+- Lobster temporary delivery is operationally feasible but should not be a
+  standalone Claws reimplementation. Lobster pins OpenClaw `2026.5.28`, which
+  contains no `src/claws` files, while the merged Claws surface relative to
+  that pin spans 114 focused files and about 35k added lines. A plugin can
+  register a `claws` CLI, but full lifecycle and frozen-authority enforcement
+  depend on core config, mutation, provenance, gateway, and tool-policy seams.
+  Prefer either a read-only authoring/inspection plugin or a Lobster-carried
+  upstream core overlay plus a thin plugin, with deletion when a quarantined
+  OpenClaw release includes Claws.
+- Remaining portfolio: RFC #48/#52/#56 prerequisite rebases and landing;
+  OpenClaw #112828.
+  Closed OpenClaw #112808 is superseded as a
   standalone slice by combined lifecycle PR #112828. Closed standalone #2 is
-  superseded by merged replacement #3.
-- Next: decide whether to split Awesome Claws #2 into a merged-runtime golden
-  proof and a dependency-gated exact build/publish proof. Otherwise retarget
-  OpenClaw #117037 to `main`, advance ClawHub #3359, and keep Awesome #2
-  blocked until those exact-artifact dependencies are real. Restack #112828
-  directly onto `main` before any landing review.
+  superseded by merged replacement #3. Closed Awesome Claws #2 is superseded
+  by merged reconstruction #5.
+- Next: rebase and land RFC #48, then RFC 0031 and RFC #56 one by one.
 - Known dirty state: `claws-hapi` has unrelated user changes outside this
   project session; do not revert or include them.
 - Blocking question: none.
 
 ## Current Session
+
+### 2026-08-09 Awesome Claws golden lifecycle landed
+
+- Reconstructed closed stacked Awesome Claws #2 directly on merged `main` as
+  #5 and merged it as `a1a7608ba112700cb4effcd8fc79033e3a218425`.
+- Exact-head proof at `7a9b4cf4137f595475c039a9f62079c72fcf5d6c`
+  built Travel Concierge twice, published and downloaded identical bytes with
+  SHA-256 `02ab968af17c75d473bcf0a839735a1104dcaf135838651d5af4e59899e2f916`,
+  and passed add, deterministic runtime, status, no-op update, doctor, export,
+  and remove against merged standalone Claws, OpenClaw, and ClawHub heads.
+- Three-model review repaired gateway startup cleanup, elapsed-time readiness,
+  retained gateway evidence, and unsafe shortlist URLs. Restricting the
+  deterministic startup allowlist to OpenAI removed unrelated bundled-plugin
+  reload cost while Claw installation still added and exercised Expedia.
+
+### 2026-08-09 ClawHub exact-artifact publication landed
+
+- Merged ClawHub #3359 as `82313c2bb17fb8401c41c8ed2b0144d42b461ae7`
+  from reviewed source head `62aaaa22889388729e144ebea2a5c17bf7554963`.
+- Accepted artifact-only publication as the intentional contract for
+  experimental Claws. Directory and GitHub-source Claw publication are retired
+  so ClawHub can attest, retry, and serve the exact built `.tgz` bytes.
+- Real local Convex plus the built ClawHub CLI proved publish, staged
+  completion, exact-byte download, and identical retry with one SHA-256 across
+  every boundary. ClawSweeper found no correctness or security issue; known
+  `bun audit` and Vercel failures remained unrelated baseline noise.
 
 ### 2026-08-08 owned Claws stack landed
 
