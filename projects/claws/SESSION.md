@@ -24,8 +24,8 @@
 
 - Last updated: 2026-08-14.
 - Last agent: GitHub Copilot CLI.
-- Current focus: maintainer product-direction review for the four published
-  Claws final-exam PRs.
+- Current focus: maintainer landing decisions for the four published Claws
+  final-exam PRs after closing ClawHub's compatibility transition.
 - Completed: OpenClaw PR #115237 merged as
   `60fc2fe64d8ec2988a555a638dc1074d31e5760b` on 2026-08-07T11:04:52Z.
   PR #115962 merged as `7774f9a36c12eb5f63e6ef33b3da2af065b09707`
@@ -98,8 +98,8 @@
   Prefer either a read-only authoring/inspection plugin or a Lobster-carried
   upstream core overlay plus a thin plugin, with deletion when a quarantined
   OpenClaw release includes Claws.
-- Active heads: OpenClaw `ac079035ea`, RFC `acf99d988d`,
-  ClawHub `94b0158eef`, and Awesome Claws `4895d11592`.
+- Active heads: OpenClaw `d5f50cf244`, RFC `acf99d988d`,
+  ClawHub `0c0517c9c9`, and Awesome Claws `4895d11592`.
 - Proof: OpenClaw now shares one per-server lifecycle lease between ordinary
   MCP mutations and Claw ownership reconciliation, resolving ClawSweeper's
   final P1 race. Its full `src/claws` suite passed 452 tests with 1 skip,
@@ -107,14 +107,24 @@
   actionable defects, and exact-head CI run 31814847607 passed after rerunning
   one unrelated fractional-mtime tooling flake. Exact-head ClawSweeper reports
   no findings, security concerns, or contributor-facing blockers and marks the
-  PR ready for maintainer review. ClawHub was
-  rebased, its full CI passed, and its real pinned-OpenClaw parser job passed.
-  RFC and Awesome checks are green. ClawSweeper reports no findings on the
-  exact OpenClaw, RFC, or ClawHub heads; ClawHub real behavior is verified,
-  proof is sufficient, and it is ready for maintainer review.
-- Next: obtain maintainer product-direction approval for RFC #48 and ClawHub
-  #3463 and human lifecycle-owner review for OpenClaw #123254. The only red
-  status is ClawHub's non-required Vercel authorization check.
+  PR ready for maintainer review. ClawHub now persists
+  `clawProfilePolicyVersion: 1`: new packages and first releases from reserved
+  placeholders use the strict pinned-v1 contract, while already-published
+  pre-policy Claws retain their prior publication behavior. CLI preflight uses
+  authoritative package detail before allowing that compatibility path. At
+  exact head `0c0517c9c9`, full CI run
+  https://github.com/openclaw/clawhub/actions/runs/31837275061 and the pinned
+  OpenClaw parser contract job
+  https://github.com/openclaw/clawhub/actions/runs/31837275061/job/94886486216
+  passed. Final Codex and ClawSweeper reviews found no actionable defects;
+  ClawSweeper marks proof sufficient, Platinum Hermit, and ready for maintainer
+  review. RFC and Awesome checks are green.
+- Next: the ClawHub maintainer explicitly accepts or rejects the
+  strict-new/legacy-compatible pinned-v1 publication policy, then lands #3463
+  through the normal repository workflow. OpenClaw #123254 has advanced to
+  `d5f50cf244` with its required gate green; RFC #48 and Awesome Claws #6
+  follow the governing contract decisions. The only red ClawHub status is its
+  non-required Vercel organization-authorization check.
 - Known dirty state: the published RFC, ClawHub, Awesome Claws, and WSL
   OpenClaw worktrees are clean. OpenClaw is currently 7 commits behind moving
   `main`, but remains mergeable and its exact merge-result CI is green. The
