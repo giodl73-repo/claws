@@ -24,11 +24,12 @@
 
 - Last updated: 2026-08-14.
 - Last agent: GitHub Copilot CLI.
-- Current focus: Lobster LM2 now proves the first native artifact boundary:
-  canonical Control Model artifacts feed one exact, read-only native React table
-  through the existing passive `SessionView`, with durable history association,
-  revision-safe identity, and visible structured fallback. The next bounded
-  layer is a representative live fixture and then LM3 actions/reconnect.
+- Current focus: Lobster LM3 now proves the first native action boundary. One
+  host-owned table `refresh` crosses typed IPC, validates canonical artifact
+  identity/revision/readiness in main, and re-enters OpenClaw through Control
+  Model `conversation.send` and existing Gateway `chat.send`. The next bounded
+  decision is whether ordinary Lobster sends should cut over to the same command
+  path before any action generalization.
 - Active branch / PR: fork branch
   `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `97d6bfc` in
   [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
@@ -53,7 +54,10 @@
   at `696e9f8d39` from `user/giodl/control-model-lm1`, stacked on the L0 branch.
   Lobster LM2 is
   [fork-local draft PR #64](https://microsoft.ghe.com/giodl/lobster/pull/64)
-  at `9ca4b7d6d6` from `user/giodl/control-model-lm2`, stacked on LM1.
+  at `6f55b43ef1` from `user/giodl/control-model-lm2`, stacked on LM1.
+  Lobster LM3 is
+  [fork-local draft PR #65](https://microsoft.ghe.com/giodl/lobster/pull/65)
+  at `7181deee69` from `user/giodl/control-model-lm3`, stacked on LM2.
 - Review result: OpenClaw enumerates all authorized applicable view
   descriptors, but materializes only the client-selected deferred payload.
   Discovery is policy-filtered, renderer advertisement is private by default,
@@ -92,7 +96,23 @@
   high-confidence diff review reported no remaining findings; the final Codex
   helper rerun could not authenticate. A later agent review found and fixed
   numeric epoch timestamps that became invalid renderer dates while preserving
-  synthesized message identity; the post-fix review was clean.
+  synthesized message identity; the post-fix review was clean. A final
+  Gateway-mode fixture now sends a production-shaped artifact through the real
+  model, adapter, IPC, reconciliation, and React registry. Its Electron E2E
+  renders the six expected table cells, preserves the assistant message after
+  the final run transition, and proves no structured fallback was used.
+- Lobster LM3 result: the exact native table registry owns one `refresh`
+  affordance; no tool-authored action descriptor or generic action catalog was
+  added. Renderer-to-main IPC carries the session, artifact id, revision, and
+  exact action. `GatewaySessionBackend` verifies the canonical Control Model
+  artifact is current, ready, and an inline `clawpilot://widgets/table` v1 view
+  before dispatching a fixed host instruction through
+  `ControlModelConversation.send`. Stale revisions are rejected before
+  dispatch, server failures are visible in the table, and a connection-epoch
+  change cannot claim success. The Gateway-mode Electron proof clicks Refresh
+  and observes artifact revision 2 with `Gateway: Verified`. A review-found
+  power-state collision was fixed with an independent per-invocation sleep hold;
+  the final agent review reported no actionable findings.
 - Artifact placement: one stable artifact may render inline, expanded, or in a
   dedicated surface. Later turns may publish higher revisions. V1 persistence
   is session-scoped rather than a permanent document store.
@@ -134,7 +154,8 @@
   dedicated RFC worktree started clean from `openclaw/rfcs` `origin/main` at
   `af708f0`. Lobster LM1 worktree `C:\src\lobster-control-model-lm1` is clean at
   `696e9f8d39`; LM2 worktree `C:\src\lobster-control-model-lm2` is clean at
-  `9ca4b7d6d6`. `claws-hapi` remains heavily dirty with unrelated pre-existing
+  `6f55b43ef1`; LM3 worktree `C:\src\lobster-control-model-lm3` is clean at
+  `7181deee69`. `claws-hapi` remains heavily dirty with unrelated pre-existing
   changes.
 - Blocking question: L0 still lacks Proof of Presence and the required Lobster
   runtime contexts. RFC intake is frozen, so the design remains fork-only until
@@ -150,6 +171,7 @@
 - Run: `git -C C:\src\lobster-control-model-carry status --short --branch`.
 - Run: `git -C C:\src\lobster-control-model-lm1 status --short --branch`.
 - Run: `git -C C:\src\lobster-control-model-lm2 status --short --branch`.
+- Run: `git -C C:\src\lobster-control-model-lm3 status --short --branch`.
 - Verify: fork PRs #8, #230, #231, #232, and #238 remain open and no upstream
   implementation PR remains open.
 - Verify: Lobster PR #8165 remains at `80fe70b13f`; required contexts
@@ -160,7 +182,9 @@
 - Verify: fork-local Lobster PR #63 remains stacked on
   `user/giodl/control-model-carry` at `696e9f8d39`.
 - Verify: fork-local Lobster PR #64 remains stacked on
-  `user/giodl/control-model-lm1` at `9ca4b7d6d6`.
+  `user/giodl/control-model-lm1` at `6f55b43ef1`.
+- Verify: fork-local Lobster PR #65 remains stacked on
+  `user/giodl/control-model-lm2` at `7181deee69`.
 - Review: `review-packet.md`, the role findings, and any comments on the M
   design issue.
 - Update: this file and add a checkpoint after canonical decisions change.
@@ -179,11 +203,10 @@
 
 - Incorporate RFC/OC1/OC2/OC3/OC4 feedback before promoting any surface
   upstream.
-- Add one representative live Gateway table fixture before widening LM2.
 - Decide when the optional Gateway Client model subpaths should publish, after
   two-consumer evidence and duplicate-reducer deletion.
-- Define the smallest LM3 action/reconnect proof without introducing a generic
-  artifact action framework.
+- Decide whether Lobster's ordinary send path should migrate from raw Gateway
+  `chat.send` to Control Model `conversation.send` before expanding actions.
 - Decide whether JSON Render is an adopter choice or a future OpenClaw-owned
   artifact dialect; V1 keeps it out of the core contract.
 - Confirm the OpenClaw view-offer discovery carrier and deferred
