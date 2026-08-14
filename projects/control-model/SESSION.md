@@ -24,11 +24,11 @@
 
 - Last updated: 2026-08-14.
 - Last agent: GitHub Copilot CLI.
-- Current focus: Lobster LM4 removes the duplicate ordinary-send transport
-  implementation. Lobster still owns attachment preprocessing and operational
-  run tracking, while canonical dispatch, idempotency, typed errors, and
-  connection-epoch validation now come from Control Model
-  `conversation.send`. The next bounded command decision is abort migration.
+- Current focus: Lobster LM5 migrates active-run abort dispatch to Control
+  Model `conversation.abort` while preserving synchronous preprocessing
+  cancellation, immediate Lobster turn retirement and idle emission,
+  exec-approval follow-up run ownership, and the raw no-run abort-all recovery
+  path.
 - Active branch / PR: fork branch
   `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `97d6bfc` in
   [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
@@ -60,6 +60,9 @@
   Lobster LM4 is
   [fork-local draft PR #66](https://microsoft.ghe.com/giodl/lobster/pull/66)
   at `66d91dcaa0` from `user/giodl/control-model-lm4`, stacked on LM3.
+  Lobster LM5 is
+  [fork-local draft PR #67](https://microsoft.ghe.com/giodl/lobster/pull/67)
+  at `1a0fe97f7b` from `user/giodl/control-model-lm5`, stacked on LM4.
 - Review result: OpenClaw enumerates all authorized applicable view
   descriptors, but materializes only the client-selected deferred payload.
   Discovery is policy-filtered, renderer advertisement is private by default,
@@ -127,6 +130,14 @@
   tests, reconnect and view-unsubscribe regressions, and the real Electron
   Gateway table/refresh E2E. The final independent review reported no
   significant issues.
+- Lobster LM5 result: active foreground aborts now acquire a shared Control
+  Model conversation lease and call `conversation.abort` with the exact run ID
+  owned by Lobster's turn tracker. Lobster still synchronously cancels
+  attachment preprocessing, retires the logical turn, emits idle, and swallows
+  server failure as before. When no foreground run is owned, Lobster retains
+  the raw `{ sessionKey }` abort-all recovery request because Control Model
+  abort is intentionally run-scoped. Proof is desktop typecheck, type-aware
+  lint, 216 focused Gateway tests, and clean independent and Codex reviews.
 - Artifact placement: one stable artifact may render inline, expanded, or in a
   dedicated surface. Later turns may publish higher revisions. V1 persistence
   is session-scoped rather than a permanent document store.
@@ -170,7 +181,8 @@
   `696e9f8d39`; LM2 worktree `C:\src\lobster-control-model-lm2` is clean at
   `6f55b43ef1`; LM3 worktree `C:\src\lobster-control-model-lm3` is clean at
   `7181deee69`; LM4 worktree `C:\src\lobster-control-model-lm4` is clean at
-  `66d91dcaa0`. `claws-hapi` remains heavily dirty with unrelated pre-existing
+  `66d91dcaa0`; LM5 worktree `C:\src\lobster-control-model-lm5` is clean at
+  `1a0fe97f7b`. `claws-hapi` remains heavily dirty with unrelated pre-existing
   changes.
 - Blocking question: L0 still lacks Proof of Presence and the required Lobster
   runtime contexts. RFC intake is frozen, so the design remains fork-only until
@@ -223,9 +235,8 @@
   upstream.
 - Decide when the optional Gateway Client model subpaths should publish, after
   two-consumer evidence and duplicate-reducer deletion.
-- Decide whether Lobster abort should migrate to Control Model
-  `conversation.abort` while preserving Stop-during-preprocessing and
-  exec-approval follow-up retirement.
+- Decide whether any broader LM6 parity/deletion slice is justified by
+  remaining duplicated behavior.
 - Decide whether JSON Render is an adopter choice or a future OpenClaw-owned
   artifact dialect; V1 keeps it out of the core contract.
 - Confirm the OpenClaw view-offer discovery carrier and deferred
