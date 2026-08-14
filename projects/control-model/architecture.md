@@ -260,8 +260,8 @@ sandboxed fallback behavior when native support is absent.
 | PR | Scope | Proof | Deletion unlocked |
 | --- | --- | --- | --- |
 | LM1: Control Model service adapter | Consume the Gateway Client model behind Lobster's hosted Gateway path and map snapshots into existing M `SessionView` | Existing desktop snapshot fixtures plus hosted Gateway reconnect | Web-specific Gateway chat normalization for the slice |
-| LM2: native artifact registry | Register `clawpilot://widgets/table` data version 1 and render a bounded read-only native React table; preserve inert structured/MCP/Canvas fallback metadata | Accepted table, nested/schema rejection, unknown/deferred offer fallback, artifact-only and reopened history, revision replacement, theming/a11y | One bespoke tool-output component path |
-| LM3: actions and streaming | Bind named host actions, artifact revisions, cancellation, reconnect, and telemetry | Allowed/denied actions, stale revision, mid-stream reconnect, fallback | Direct component-to-transport calls |
+| LM2: native artifact registry | Register `clawpilot://widgets/table` data version 1 and render a bounded read-only native React table; preserve inert structured/MCP/Canvas fallback metadata | Accepted table, nested/schema rejection, unknown/deferred offer fallback, artifact-only and reopened history, revision replacement, theming/a11y, and a production-shaped Gateway-mode Electron E2E | One bespoke tool-output component path |
+| LM3: native refresh action | Bind one host-owned `refresh` affordance for the exact table registry; validate artifact identity/revision/readiness in main and route accepted effects through Control Model `conversation.send` | Exactly one `chat.send`, pre-dispatch stale rejection, visible server denial, connection-epoch invalidation, independent sleep hold, and a Gateway-mode Electron refresh to revision 2 | Direct native component-to-raw-Gateway action calls |
 | LM4: parity and cutover | Expand only after parity; remove superseded Lobster reducer/hosted-Control-UI route where no longer needed | Cohort rollout, rollback, performance, accessibility, production telemetry | Duplicated Lobster/OpenClaw UX and reconciliation |
 
 ## Cheapest evidence slice
@@ -277,8 +277,9 @@ sandboxed fallback behavior when native support is absent.
    position across raw and Control Model message identities.
 7. Replace artifact revisions without invalidating settled turns or hashing
    unchanged artifact payloads on every streamed token.
-8. In LM3, deny one action server-side and reconnect mid-stream without
-   duplicating a message or artifact revision.
+8. In LM3, route one exact native refresh through the Control Model, reject a
+   stale revision before dispatch, surface server denial, and invalidate an
+   in-flight action when the connection epoch changes.
 
 The slice fails if it imports Control UI Lit components, parses raw Gateway
 events in a React component, or needs a second M view-model vocabulary.
