@@ -1,0 +1,546 @@
+{
+  "github:actions/attest": {
+    "license": "MIT",
+    "repository": "https://github.com/actions/attest"
+  },
+  "github:actions/cache": {
+    "license": "MIT",
+    "repository": "https://github.com/actions/cache"
+  },
+  "github:actions/checkout": {
+    "license": "MIT",
+    "repository": "https://github.com/actions/checkout"
+  },
+  "github:actions/create-github-app-token": {
+    "license": "MIT",
+    "repository": "https://github.com/actions/create-github-app-token"
+  },
+  "github:actions/download-artifact": {
+    "license": "MIT",
+    "repository": "https://github.com/actions/download-artifact"
+  },
+  "github:actions/github-script": {
+    "license": "MIT",
+    "repository": "https://github.com/actions/github-script"
+  },
+  "github:actions/setup-go": {
+    "license": "MIT",
+    "repository": "https://github.com/actions/setup-go"
+  },
+  "github:actions/setup-java": {
+    "license": "MIT",
+    "repository": "https://github.com/actions/setup-java"
+  },
+  "github:actions/setup-node": {
+    "license": "MIT",
+    "repository": "https://github.com/actions/setup-node"
+  },
+  "github:actions/setup-python": {
+    "license": "MIT",
+    "repository": "https://github.com/actions/setup-python"
+  },
+  "github:actions/stale": {
+    "license": "MIT",
+    "repository": "https://github.com/actions/stale"
+  },
+  "github:actions/upload-artifact": {
+    "license": "MIT",
+    "repository": "https://github.com/actions/upload-artifact"
+  },
+  "github:docker/build-push-action": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/docker/build-push-action"
+  },
+  "github:docker/login-action": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/docker/login-action"
+  },
+  "github:docker/setup-buildx-action": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/docker/setup-buildx-action"
+  },
+  "github:github/codeql-action": {
+    "license": "MIT",
+    "repository": "https://github.com/github/codeql-action"
+  },
+  "github:lycheeverse/lychee-action": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/lycheeverse/lychee-action"
+  },
+  "github:openai/codex-action": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/openai/codex-action"
+  },
+  "github:openclaw/clawhub": {
+    "license": "MIT",
+    "repository": "https://github.com/openclaw/clawhub"
+  },
+  "github:oven-sh/setup-bun": {
+    "license": "MIT",
+    "repository": "https://github.com/oven-sh/setup-bun"
+  },
+  "github:trufflesecurity/trufflehog": {
+    "license": "AGPL-3.0",
+    "repository": "https://github.com/trufflesecurity/trufflehog"
+  },
+  "github:useblacksmith/begin-testbox": {
+    "license": "NOASSERTION",
+    "repository": "https://github.com/useblacksmith/begin-testbox"
+  },
+  "github:useblacksmith/build-push-action": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/useblacksmith/build-push-action"
+  },
+  "github:useblacksmith/run-testbox": {
+    "license": "NOASSERTION",
+    "repository": "https://github.com/useblacksmith/run-testbox"
+  },
+  "github:useblacksmith/setup-docker-builder": {
+    "license": "Unlicense",
+    "repository": "https://github.com/useblacksmith/setup-docker-builder"
+  },
+  "github:useblacksmith/stickydisk": {
+    "license": "MIT",
+    "repository": "https://github.com/useblacksmith/stickydisk"
+  },
+  "github:useblacksmith/stickydisk-delete": {
+    "license": "Unlicense",
+    "repository": "https://github.com/useblacksmith/stickydisk-delete"
+  },
+  "github:yuin/goldmark": {
+    "license": "MIT",
+    "repository": "https://github.com/yuin/goldmark"
+  },
+  "github:golang/net": {
+    "license": "BSD-3-Clause",
+    "repository": "https://github.com/golang/net"
+  },
+  "github:go-check/check": {
+    "license": "NOASSERTION",
+    "repository": "https://github.com/go-check/check"
+  },
+  "github:go-yaml/yaml": {
+    "license": "NOASSERTION",
+    "repository": "https://github.com/go-yaml/yaml"
+  },
+  "maven:androidx.activity:activity-compose@1.13.0": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/activity/activity-compose/1.13.0/activity-compose-1.13.0.pom"
+  },
+  "maven:androidx.appcompat:appcompat@1.7.1": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/appcompat/appcompat/1.7.1/appcompat-1.7.1.pom"
+  },
+  "maven:androidx.benchmark:benchmark-macro-junit4@1.4.1": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/benchmark/benchmark-macro-junit4/1.4.1/benchmark-macro-junit4-1.4.1.pom"
+  },
+  "maven:androidx.camera:camera-camera2@1.6.1": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/camera/camera-camera2/1.6.1/camera-camera2-1.6.1.pom"
+  },
+  "maven:androidx.camera:camera-core@1.6.1": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/camera/camera-core/1.6.1/camera-core-1.6.1.pom"
+  },
+  "maven:androidx.camera:camera-lifecycle@1.6.1": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/camera/camera-lifecycle/1.6.1/camera-lifecycle-1.6.1.pom"
+  },
+  "maven:androidx.camera:camera-video@1.6.1": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/camera/camera-video/1.6.1/camera-video-1.6.1.pom"
+  },
+  "maven:androidx.camera:camera-view@1.6.1": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/camera/camera-view/1.6.1/camera-view-1.6.1.pom"
+  },
+  "maven:androidx.compose:compose-bom@2026.06.01": {
+    "license": "Apache-2.0",
+    "repository": "",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/compose/compose-bom/2026.06.01/compose-bom-2026.06.01.pom"
+  },
+  "maven:androidx.core:core-ktx@1.19.0": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/core/core-ktx/1.19.0/core-ktx-1.19.0.pom"
+  },
+  "maven:androidx.exifinterface:exifinterface@1.4.2": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/exifinterface/exifinterface/1.4.2/exifinterface-1.4.2.pom"
+  },
+  "maven:androidx.lifecycle:lifecycle-runtime-ktx@2.11.0": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-runtime-ktx/2.11.0/lifecycle-runtime-ktx-2.11.0.pom"
+  },
+  "maven:androidx.lifecycle:lifecycle-viewmodel-ktx@2.11.0": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-viewmodel-ktx/2.11.0/lifecycle-viewmodel-ktx-2.11.0.pom"
+  },
+  "maven:androidx.media3:media3-datasource-okhttp@1.10.1": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/androidx/media",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/media3/media3-datasource-okhttp/1.10.1/media3-datasource-okhttp-1.10.1.pom"
+  },
+  "maven:androidx.media3:media3-exoplayer@1.10.1": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/androidx/media",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/media3/media3-exoplayer/1.10.1/media3-exoplayer-1.10.1.pom"
+  },
+  "maven:androidx.media3:media3-session@1.10.1": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/androidx/media",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/media3/media3-session/1.10.1/media3-session-1.10.1.pom"
+  },
+  "maven:androidx.media3:media3-ui@1.10.1": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/androidx/media",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/media3/media3-ui/1.10.1/media3-ui-1.10.1.pom"
+  },
+  "maven:androidx.room:room-compiler@2.8.4": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/room/room-compiler/2.8.4/room-compiler-2.8.4.pom"
+  },
+  "maven:androidx.room:room-runtime@2.8.4": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/room/room-runtime/2.8.4/room-runtime-2.8.4.pom"
+  },
+  "maven:androidx.security:security-crypto@1.1.0": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/security/security-crypto/1.1.0/security-crypto-1.1.0.pom"
+  },
+  "maven:androidx.test:runner@1.7.0": {
+    "license": "Apache-2.0",
+    "repository": "",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/test/runner/1.7.0/runner-1.7.0.pom"
+  },
+  "maven:androidx.test.ext:junit@1.3.0": {
+    "license": "Apache-2.0",
+    "repository": "",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/test/ext/junit/1.3.0/junit-1.3.0.pom"
+  },
+  "maven:androidx.test.uiautomator:uiautomator@2.4.0": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/test/uiautomator/uiautomator/2.4.0/uiautomator-2.4.0.pom"
+  },
+  "maven:androidx.wear:wear-input@1.2.0": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/wear/wear-input/1.2.0/wear-input-1.2.0.pom"
+  },
+  "maven:androidx.wear.compose:compose-foundation@1.6.2": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/wear/compose/compose-foundation/1.6.2/compose-foundation-1.6.2.pom"
+  },
+  "maven:androidx.wear.compose:compose-material3@1.6.2": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/wear/compose/compose-material3/1.6.2/compose-material3-1.6.2.pom"
+  },
+  "maven:androidx.wear.protolayout:protolayout@1.4.1": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/wear/protolayout/protolayout/1.4.1/protolayout-1.4.1.pom"
+  },
+  "maven:androidx.wear.protolayout:protolayout-material3@1.4.1": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/wear/protolayout/protolayout-material3/1.4.1/protolayout-material3-1.4.1.pom"
+  },
+  "maven:androidx.wear.tiles:tiles@1.6.1": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/wear/tiles/tiles/1.6.1/tiles-1.6.1.pom"
+  },
+  "maven:androidx.webkit:webkit@1.16.0": {
+    "license": "Apache-2.0",
+    "repository": "https://cs.android.com/androidx/platform/frameworks/support",
+    "source": "https://dl.google.com/dl/android/maven2/androidx/webkit/webkit/1.16.0/webkit-1.16.0.pom"
+  },
+  "maven:com.google.android.gms:play-services-wearable@20.0.1": {
+    "license": "Android Software Development Kit License",
+    "repository": "",
+    "source": "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-wearable/20.0.1/play-services-wearable-20.0.1.pom"
+  },
+  "maven:com.google.android.material:material@1.14.0": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/material-components/material-components-android",
+    "source": "https://dl.google.com/dl/android/maven2/com/google/android/material/material/1.14.0/material-1.14.0.pom"
+  },
+  "maven:com.google.mlkit:barcode-scanning@17.3.0": {
+    "license": "ML Kit Terms of Service",
+    "repository": "",
+    "source": "https://dl.google.com/dl/android/maven2/com/google/mlkit/barcode-scanning/17.3.0/barcode-scanning-17.3.0.pom"
+  },
+  "maven:com.squareup.okhttp3:mockwebserver@5.4.0": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/square/okhttp",
+    "source": "https://repo1.maven.org/maven2/com/squareup/okhttp3/mockwebserver/5.4.0/mockwebserver-5.4.0.pom"
+  },
+  "maven:com.squareup.okhttp3:okhttp@5.4.0": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/square/okhttp",
+    "source": "https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp/5.4.0/okhttp-5.4.0.pom"
+  },
+  "maven:dnsjava:dnsjava@3.6.5": {
+    "license": "BSD-3-Clause",
+    "repository": "https://github.com/dnsjava/dnsjava",
+    "source": "https://repo1.maven.org/maven2/dnsjava/dnsjava/3.6.5/dnsjava-3.6.5.pom"
+  },
+  "maven:io.coil-kt.coil3:coil-compose@3.5.0": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/coil-kt/coil",
+    "source": "https://repo1.maven.org/maven2/io/coil-kt/coil3/coil-compose/3.5.0/coil-compose-3.5.0.pom"
+  },
+  "maven:io.coil-kt.coil3:coil-svg@3.5.0": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/coil-kt/coil",
+    "source": "https://repo1.maven.org/maven2/io/coil-kt/coil3/coil-svg/3.5.0/coil-svg-3.5.0.pom"
+  },
+  "maven:io.kotest:kotest-assertions-core-jvm@6.2.3": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/kotest/kotest/",
+    "source": "https://repo1.maven.org/maven2/io/kotest/kotest-assertions-core-jvm/6.2.3/kotest-assertions-core-jvm-6.2.3.pom"
+  },
+  "maven:io.kotest:kotest-runner-junit5-jvm@6.2.3": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/kotest/kotest/",
+    "source": "https://repo1.maven.org/maven2/io/kotest/kotest-runner-junit5-jvm/6.2.3/kotest-runner-junit5-jvm-6.2.3.pom"
+  },
+  "maven:junit:junit@4.13.2": {
+    "license": "Eclipse Public License 1.0",
+    "repository": "https://github.com/junit-team/junit4",
+    "source": "https://repo1.maven.org/maven2/junit/junit/4.13.2/junit-4.13.2.pom"
+  },
+  "maven:org.bouncycastle:bcprov-jdk18on@1.85": {
+    "license": "Bouncy Castle Licence",
+    "repository": "https://github.com/bcgit/bc-java",
+    "source": "https://repo1.maven.org/maven2/org/bouncycastle/bcprov-jdk18on/1.85/bcprov-jdk18on-1.85.pom"
+  },
+  "maven:org.commonmark:commonmark@0.29.0": {
+    "license": "BSD-2-Clause",
+    "repository": "",
+    "source": "https://repo1.maven.org/maven2/org/commonmark/commonmark/0.29.0/commonmark-0.29.0.pom"
+  },
+  "maven:org.commonmark:commonmark-ext-autolink@0.29.0": {
+    "license": "NOASSERTION",
+    "repository": "",
+    "source": "https://repo1.maven.org/maven2/org/commonmark/commonmark-ext-autolink/0.29.0/commonmark-ext-autolink-0.29.0.pom"
+  },
+  "maven:org.commonmark:commonmark-ext-gfm-strikethrough@0.29.0": {
+    "license": "NOASSERTION",
+    "repository": "",
+    "source": "https://repo1.maven.org/maven2/org/commonmark/commonmark-ext-gfm-strikethrough/0.29.0/commonmark-ext-gfm-strikethrough-0.29.0.pom"
+  },
+  "maven:org.commonmark:commonmark-ext-gfm-tables@0.29.0": {
+    "license": "NOASSERTION",
+    "repository": "",
+    "source": "https://repo1.maven.org/maven2/org/commonmark/commonmark-ext-gfm-tables/0.29.0/commonmark-ext-gfm-tables-0.29.0.pom"
+  },
+  "maven:org.commonmark:commonmark-ext-task-list-items@0.29.0": {
+    "license": "NOASSERTION",
+    "repository": "",
+    "source": "https://repo1.maven.org/maven2/org/commonmark/commonmark-ext-task-list-items/0.29.0/commonmark-ext-task-list-items-0.29.0.pom"
+  },
+  "maven:org.jetbrains.kotlinx:kotlinx-coroutines-android@1.11.0": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/Kotlin/kotlinx.coroutines",
+    "source": "https://repo1.maven.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-android/1.11.0/kotlinx-coroutines-android-1.11.0.pom"
+  },
+  "maven:org.jetbrains.kotlinx:kotlinx-coroutines-test@1.11.0": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/Kotlin/kotlinx.coroutines",
+    "source": "https://repo1.maven.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-test/1.11.0/kotlinx-coroutines-test-1.11.0.pom"
+  },
+  "maven:org.jetbrains.kotlinx:kotlinx-serialization-json@1.11.0": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/Kotlin/kotlinx.serialization",
+    "source": "https://repo1.maven.org/maven2/org/jetbrains/kotlinx/kotlinx-serialization-json/1.11.0/kotlinx-serialization-json-1.11.0.pom"
+  },
+  "maven:org.junit.vintage:junit-vintage-engine@6.1.2": {
+    "license": "EPL-2.0",
+    "repository": "https://github.com/junit-team/junit-framework",
+    "source": "https://repo1.maven.org/maven2/org/junit/vintage/junit-vintage-engine/6.1.2/junit-vintage-engine-6.1.2.pom"
+  },
+  "maven:org.robolectric:robolectric@4.16.1": {
+    "license": "MIT",
+    "repository": "https://github.com/robolectric/robolectric",
+    "source": "https://repo1.maven.org/maven2/org/robolectric/robolectric/4.16.1/robolectric-4.16.1.pom"
+  },
+  "github:birchroad/node-jspack": {
+    "license": "BSD-3-Clause",
+    "repository": "https://github.com/birchroad/node-jspack"
+  },
+  "github:vercel/vercel": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/vercel/vercel"
+  },
+  "github:mathiasbynens/base64": {
+    "license": "MIT",
+    "repository": "https://github.com/mathiasbynens/base64"
+  },
+  "github:datalanche/json-bignum": {
+    "license": "MIT",
+    "repository": "https://github.com/datalanche/json-bignum"
+  },
+  "github:jhurliman/node-rate-limiter": {
+    "license": "MIT",
+    "repository": "https://github.com/jhurliman/node-rate-limiter"
+  },
+  "github:": {
+    "license": "NOASSERTION",
+    "repository": "https://github.com/"
+  },
+  "github:element-io/svg-tags": {
+    "license": "MIT",
+    "repository": "https://github.com/element-io/svg-tags"
+  },
+  "github:openclaw/AXorcist": {
+    "license": "MIT",
+    "repository": "https://github.com/openclaw/AXorcist"
+  },
+  "github:steipete/Commander": {
+    "license": "MIT",
+    "repository": "https://github.com/steipete/Commander"
+  },
+  "github:steipete/ElevenLabsKit": {
+    "license": "MIT",
+    "repository": "https://github.com/steipete/ElevenLabsKit"
+  },
+  "github:mattt/EventSource": {
+    "license": "MIT",
+    "repository": "https://github.com/mattt/EventSource"
+  },
+  "github:groue/GRDB.swift": {
+    "license": "MIT",
+    "repository": "https://github.com/groue/GRDB.swift"
+  },
+  "github:sindresorhus/KeyboardShortcuts": {
+    "license": "MIT",
+    "repository": "https://github.com/sindresorhus/KeyboardShortcuts"
+  },
+  "github:orchetect/MenuBarExtraAccess": {
+    "license": "MIT",
+    "repository": "https://github.com/orchetect/MenuBarExtraAccess"
+  },
+  "github:Blaizzy/mlx-audio-swift": {
+    "license": "MIT",
+    "repository": "https://github.com/Blaizzy/mlx-audio-swift"
+  },
+  "github:ml-explore/mlx-swift": {
+    "license": "MIT",
+    "repository": "https://github.com/ml-explore/mlx-swift"
+  },
+  "github:ml-explore/mlx-swift-lm": {
+    "license": "MIT",
+    "repository": "https://github.com/ml-explore/mlx-swift-lm"
+  },
+  "github:steipete/Peekaboo": {
+    "license": "MIT",
+    "repository": "https://github.com/steipete/Peekaboo"
+  },
+  "github:sparkle-project/Sparkle": {
+    "license": "NOASSERTION",
+    "repository": "https://github.com/sparkle-project/Sparkle"
+  },
+  "github:apple/swift-algorithms": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/apple/swift-algorithms"
+  },
+  "github:apple/swift-argument-parser": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/apple/swift-argument-parser"
+  },
+  "github:apple/swift-asn1": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/apple/swift-asn1"
+  },
+  "github:apple/swift-atomics": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/apple/swift-atomics"
+  },
+  "github:swiftlang/swift-cmark": {
+    "license": "NOASSERTION",
+    "repository": "https://github.com/swiftlang/swift-cmark"
+  },
+  "github:apple/swift-collections": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/apple/swift-collections"
+  },
+  "github:pointfreeco/swift-concurrency-extras": {
+    "license": "MIT",
+    "repository": "https://github.com/pointfreeco/swift-concurrency-extras"
+  },
+  "github:apple/swift-crypto": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/apple/swift-crypto"
+  },
+  "github:huggingface/swift-huggingface": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/huggingface/swift-huggingface"
+  },
+  "github:huggingface/swift-jinja": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/huggingface/swift-jinja"
+  },
+  "github:apple/swift-log": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/apple/swift-log"
+  },
+  "github:swiftlang/swift-markdown": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/swiftlang/swift-markdown"
+  },
+  "github:apple/swift-nio": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/apple/swift-nio"
+  },
+  "github:apple/swift-numerics": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/apple/swift-numerics"
+  },
+  "github:swiftlang/swift-subprocess": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/swiftlang/swift-subprocess"
+  },
+  "github:swiftlang/swift-syntax": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/swiftlang/swift-syntax"
+  },
+  "github:apple/swift-system": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/apple/swift-system"
+  },
+  "github:huggingface/swift-transformers": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/huggingface/swift-transformers"
+  },
+  "github:mgriebling/SwiftMath": {
+    "license": "MIT",
+    "repository": "https://github.com/mgriebling/SwiftMath"
+  },
+  "github:ibireme/yyjson": {
+    "license": "MIT",
+    "repository": "https://github.com/ibireme/yyjson"
+  },
+  "github:apple/swift-testing": {
+    "license": "Apache-2.0",
+    "repository": "https://github.com/apple/swift-testing"
+  }
+}

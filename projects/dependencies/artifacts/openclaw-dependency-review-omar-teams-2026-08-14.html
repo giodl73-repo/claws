@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>OpenClaw dependency review update</title>
+</head>
+<body>
+<!--StartFragment-->
+<p><strong>A closer look at OpenClaw dependency management</strong><br>Jeff Teper mentioned dependency management yesterday, so we took a closer look at OpenClaw. Quick question: how many dependencies do you think it has? Turns out: 2,624.</p>
+<p><strong>What we did and learned</strong><br>We built a reproducible inventory, traced direct and transitive use, separated runtime from build/test exposure, and reviewed vulnerability, maintenance, license, provenance, feed admission, and governance evidence. The result: 33 High, 1,707 Moderate, 878 Low, six Unknown, and no Critical findings. Roughly 98.5% are Low or Moderate, so this is a tractable remediation program—not an emergency dependency crisis.</p>
+<p><strong>The foundation is good</strong><br>OpenClaw already has security-owner approval for dependency changes, Dependabot, release-age protection, lock checks, production vulnerability blocking, dependency reports, npm release evidence, and signed container SBOM/provenance. We should strengthen this system rather than add Microsoft-specific process upstream.</p>
+<p><strong>What comes next</strong><br>We will split the highest-confidence package, WebRTC, and image fixes; add focused hardening for ecosystem update coverage, dependency ownership/pins, and governed release-age exclusions; and complete Lobster’s product-exact Component Governance attestation.</p>
+<p><strong>Living analysis and work tracker</strong><br><a href="https://microsoft.ghe.com/bic/lobster/tree/openclaw-dependency-governance-analysis/docs/openclaw-dependency-governance">Full 2,624-dependency analysis</a>&nbsp; · &nbsp;<a href="https://microsoft.ghe.com/bic/lobster/issues/8223">Work tracker #8223</a>&nbsp; · &nbsp;<a href="https://microsoft.ghe.com/bic/lobster/issues/8220">Product attestation #8220</a></p>
+<p><strong>Long-term goal</strong><br>OpenClaw publishes an immutable dependency evidence feed per release—artifact digests, SBOM/lock evidence, dependency changes, policy versions, and withdrawal state—so Lobster can track exactly what it installs and apply Microsoft policy downstream.</p>
+<!--EndFragment-->
+</body>
+</html>

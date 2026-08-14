@@ -1,0 +1,126 @@
+[
+  {
+    "id": "MS-INV-01",
+    "expectation": "Maintain an exact dependency inventory tied to the reviewed commit and artifacts.",
+    "metric": "all-reviewed",
+    "completion_criteria": "Every Inventory row has Review status = Reviewed.",
+    "authority": "Component Governance inventory prerequisite",
+    "owner": "OpenClaw dependency owner",
+    "depends_on": ""
+  },
+  {
+    "id": "MS-CFS-01",
+    "expectation": "Consume npm dependencies only through CFS or an approved Azure Artifacts feed.",
+    "metric": "npm-cfs",
+    "completion_criteria": "Zero npm rows have CFS admission = Unavailable or Exact version unavailable.",
+    "authority": "Central Feed Services / Third Party Software Governance",
+    "owner": "Package and release owners",
+    "depends_on": "MS-INV-01"
+  },
+  {
+    "id": "MS-RISK-01",
+    "expectation": "Do not ship a dependency with an unresolved Critical technical-risk finding.",
+    "metric": "no-critical",
+    "completion_criteria": "Zero Inventory rows have Technical risk = Critical.",
+    "authority": "Security release gate",
+    "owner": "OpenClaw security owner",
+    "depends_on": "MS-INV-01"
+  },
+  {
+    "id": "MS-EVID-01",
+    "expectation": "Resolve missing technical, legal, procurement, and immutable-artifact evidence.",
+    "metric": "no-unknown",
+    "completion_criteria": "Zero Inventory rows have Technical risk = Unknown.",
+    "authority": "Third Party Software Governance and release provenance",
+    "owner": "Dependency, procurement, and release owners",
+    "depends_on": "MS-INV-01"
+  },
+  {
+    "id": "MS-HIGH-01",
+    "expectation": "Record an authoritative remediation, exception, or owner decision for every High-risk dependency.",
+    "metric": "high-decisions",
+    "completion_criteria": "Zero High-risk rows remain Microsoft disposition = Review required.",
+    "authority": "Security owner and governing exception process",
+    "owner": "OpenClaw security and component owners",
+    "depends_on": "MS-CG-01"
+  },
+  {
+    "id": "MS-DISP-01",
+    "expectation": "Replace conservative Review required dispositions with governed-control evidence or an explicit exception.",
+    "metric": "resolved-dispositions",
+    "completion_criteria": "Zero Inventory rows remain Microsoft disposition = Review required.",
+    "authority": "CFS, Component Governance, and applicable exception authority",
+    "owner": "Dependency governance owner",
+    "depends_on": "MS-CFS-01, MS-CG-01, MS-CG-02"
+  },
+  {
+    "id": "MS-CG-01",
+    "expectation": "Ensure Component Governance detects the exact OpenClaw lock/SBOM and built-image dependency inventory.",
+    "status": "Gap",
+    "current_evidence": "The current Lobster source scan does not detect most installed OpenClaw transitives or the built image. Experimental run 176596891 parsed a staged OpenClaw 2026.8.1 lock while Lobster installed 2026.5.28, so it is not valid product control evidence; PR #8174 was closed.",
+    "completion_criteria": "A successful governed run records the reviewed commit and detects the reconciled exact dependency manifest with no unexplained omissions.",
+    "authority": "Component Governance",
+    "owner": "Lobster/OpenClaw governed build owner",
+    "depends_on": "MS-INV-01"
+  },
+  {
+    "id": "MS-CG-02",
+    "expectation": "Make blocking Component Governance alerts fail the governed build.",
+    "status": "Gap",
+    "current_evidence": "Lobster Official.Build.yml currently sets cg.failOnAlert: false.",
+    "completion_criteria": "The governed build enables blocking alerts and succeeds with no unresolved blocking alert.",
+    "authority": "Component Governance pipeline policy",
+    "owner": "Lobster pipeline owner",
+    "depends_on": "MS-CG-01"
+  },
+  {
+    "id": "MS-VULN-01",
+    "expectation": "Resolve authoritative security alerts before attestation.",
+    "status": "Gap",
+    "current_evidence": "Analysis artifact commit 0d39d1f86a8 replaces js-yaml@4.3.0 with 4.3.1. PR #123513 was closed when the work returned to analysis-only scope; the control remains open until a separately authorized governed release detects the exact installed manifest and closes the alert.",
+    "completion_criteria": "The governed manifest no longer contains js-yaml@4.3.0 and the blocking alert is closed.",
+    "authority": "Component Governance alert",
+    "owner": "OpenClaw dependency owner",
+    "depends_on": "MS-CG-01, MS-CG-02"
+  },
+  {
+    "id": "MS-LIC-01",
+    "expectation": "Resolve missing or unacceptable license evidence.",
+    "status": "Gap",
+    "current_evidence": "Analysis artifact commit 0d39d1f86a8 updates werift to 0.24.3 and removes rx.mini from the lock. PR #123513 was closed when the work returned to analysis-only scope; the control remains open until a separately authorized governed release confirms the exact installed manifest excludes rx.mini.",
+    "completion_criteria": "The exact manifest excludes rx.mini or contains authoritative legal evidence permitting the intended use.",
+    "authority": "Component Governance legal review",
+    "owner": "OpenAI extension owner",
+    "depends_on": "MS-CG-01"
+  },
+  {
+    "id": "MS-SVC-01",
+    "expectation": "Establish procurement/GovID/SSPA evidence for third-party hosted services and actions.",
+    "status": "Gap",
+    "current_evidence": "Four Blacksmith Testbox action SHAs have internal usage precedent but no located procurement or exception record.",
+    "completion_criteria": "A durable procurement, GovID, SSPA, or approved exception record covers the exact service usage.",
+    "authority": "Third Party Software Governance",
+    "owner": "Testbox service owner",
+    "depends_on": ""
+  },
+  {
+    "id": "MS-IMG-01",
+    "expectation": "Use immutable exact image identities in promotion and release evidence.",
+    "status": "Gap",
+    "current_evidence": "Analysis artifact commit 39b18ffbe4f pins the live-media runner's Ubuntu base to the repository's existing immutable digest. PR #123513 was closed when the work returned to analysis-only scope. The Cloudflare declaration still contains a promoted-image digest placeholder, and governed image evidence has not confirmed released digests.",
+    "completion_criteria": "Every external shipped image reference resolves to the promoted immutable digest recorded by the governed build.",
+    "authority": "Release provenance and artifact integrity policy",
+    "owner": "OpenClaw release owner",
+    "depends_on": ""
+  },
+  {
+    "id": "MS-ATT-01",
+    "expectation": "Publish a durable dependency-control attestation for the exact OpenClaw commit and released artifact.",
+    "status": "Blocked",
+    "current_evidence": "No single governed record currently ties the reviewed commit, CFS resolution, reconciled CG manifest, alert enforcement, exceptions, and image digests together.",
+    "completion_criteria": "A successful governed run records the commit, lock/SBOM digest, CG correlation and manifest, CFS result, exceptions, image digests, and release identifier.",
+    "authority": "Governed release evidence",
+    "owner": "Lobster/OpenClaw release owner",
+    "depends_on": "MS-CFS-01, MS-EVID-01, MS-HIGH-01, MS-DISP-01, MS-CG-02, MS-VULN-01, MS-LIC-01, MS-SVC-01, MS-IMG-01"
+  }
+]

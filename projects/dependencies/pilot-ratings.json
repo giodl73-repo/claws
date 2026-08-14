@@ -1,0 +1,72 @@
+[
+  {
+    "package": "ws",
+    "version": "8.21.1",
+    "usage": "Core worker, Gateway, and desktop WebSocket runtime",
+    "blast_radius": "R3",
+    "technical_risk": "Moderate",
+    "risk_reason": "Current and actively maintained with no npm-audit or OSV advisory, but it directly processes network traffic across core runtime paths.",
+    "license": "MIT",
+    "security_evidence": "pnpm production audit: 0 advisories; OSV exact-version query: 0",
+    "microsoft_disposition": "Unknown",
+    "workiq_query": "\"ws\" npm WebSocket dependency approval Microsoft component governance",
+    "recommended_action": "Retain; confirm internal disposition and monitor network-facing advisories",
+    "sources": "package.json; pnpm-lock.yaml; npm registry ws@8.21.1; OSV; OpenClaw import trace"
+  },
+  {
+    "package": "@lydell/node-pty",
+    "version": "1.2.0-beta.14",
+    "usage": "PTY process supervision and terminal execution",
+    "blast_radius": "R4",
+    "technical_risk": "High",
+    "risk_reason": "Privileged native process-execution path on a beta fork with one npm maintainer. No current advisory was found, but compromise or native-build failure has high impact.",
+    "license": "MIT",
+    "security_evidence": "pnpm production audit: 0 advisories; OSV exact-version query: 0",
+    "microsoft_disposition": "Unknown",
+    "workiq_query": "\"@lydell/node-pty\" OR \"lydell/node-pty\" dependency approval native PTY",
+    "recommended_action": "Escalate first; validate provenance, internal precedent, binary/build controls, and replacement options",
+    "sources": "package.json; pnpm-lock.yaml; npm registry @lydell/node-pty@1.2.0-beta.14; OSV; OpenClaw PTY adapters"
+  },
+  {
+    "package": "jose",
+    "version": "6.2.4",
+    "usage": "Direct Teams auth test dependency and transitive MCP SDK runtime dependency",
+    "blast_radius": "R3",
+    "technical_risk": "Moderate",
+    "risk_reason": "The direct Teams import is test-only, but the same exact version enters shipped runtime through @modelcontextprotocol/sdk. It is current and advisory-clean but participates in authentication and network-facing flows.",
+    "license": "MIT",
+    "security_evidence": "pnpm production audit: 0 advisories; OSV exact-version query: 0",
+    "microsoft_disposition": "Unknown",
+    "workiq_query": "\"jose\" npm JWT dependency approval Microsoft Teams test",
+    "recommended_action": "Retain; validate runtime Microsoft disposition and keep the direct Teams declaration dev-only",
+    "sources": "extensions/msteams/package.json; auth-coverage.test.ts; @modelcontextprotocol/sdk lock path; npm registry jose@6.2.4; OSV"
+  },
+  {
+    "package": "esbuild",
+    "version": "0.28.1",
+    "usage": "Build tooling for shipped browser/runtime bundles",
+    "blast_radius": "R1",
+    "technical_risk": "Moderate",
+    "risk_reason": "Build-only but executes a postinstall script to select/install a platform binary; one npm maintainer creates concentrated supply-chain ownership.",
+    "license": "MIT",
+    "security_evidence": "OSV exact-version query: 0; development dependency",
+    "microsoft_disposition": "Unknown",
+    "workiq_query": "\"esbuild\" 0.28 dependency approval postinstall binary Microsoft",
+    "recommended_action": "Retain with locked integrity; validate binary provenance and Microsoft disposition",
+    "sources": "package.json; pnpm-lock.yaml; npm registry esbuild@0.28.1; OSV; OpenClaw build scripts"
+  },
+  {
+    "package": "vitest",
+    "version": "4.1.10",
+    "usage": "Direct test runner; also an optional transitive of @copilotkit/aimock",
+    "blast_radius": "R2",
+    "technical_risk": "Moderate",
+    "risk_reason": "Current, multi-maintainer, MIT-licensed tooling with no exact-version advisory, but the lock graph also admits it through an optional plugin-runtime path rather than only devDependencies.",
+    "license": "MIT",
+    "security_evidence": "pnpm production audit: 0 advisories; OSV exact-version query: 0",
+    "microsoft_disposition": "Unknown",
+    "workiq_query": "\"vitest\" dependency approval Microsoft developer tooling",
+    "recommended_action": "Confirm whether the @copilotkit/aimock optional edge can enter shipped artifacts; otherwise retain as dev-only",
+    "sources": "package.json; ui/package.json; @copilotkit/aimock lock path; npm registry vitest@4.1.10; OSV"
+  }
+]
