@@ -27,8 +27,9 @@
 - Active branch / PR: OpenClaw PR #123694 adds Linux Cargo update coverage;
   PR #123695 enforces the existing dependency pin guard in required CI; and
   draft PR #123722 adds Dependabot discovery plus an atomic lock SHA,
-  integrity, and version-pin synchronizer for the trusted ClawHub CLI. All
-  three branches were restacked on current `main`.
+  integrity, and version-pin synchronizer plus secretless command-contract
+  proof for the trusted ClawHub CLI. All three branches were restacked on
+  current `main` again after the 2026-08-14 reboot.
 - Known dirty state: `claws-hapi` has unrelated pre-existing changes; only
   `projects/dependencies/` and surgical index additions belong to this effort
 - Blocking question: none for the analysis. The thirteen exact npm versions
@@ -81,11 +82,13 @@
   - #123690: add Linux Cargo update coverage.
 - PR #123694 implements #123690. PR #123695 implements #123687 with 22 focused
   boundary-check tests passing and zero current pin violations across 616
-  direct specs in 179 manifests. Both were restacked on current `main` on
-  2026-08-14. PR #123695's only post-restack failure was an unrelated
+  direct specs in 179 manifests. Their current heads are `36d4e29ae5d` and
+  `469976ba44a`, respectively. PR #123695's prior post-restack failure was an unrelated
   same-millisecond heartbeat assertion; the exact failed shard passed on
-  rerun. PR #123694's post-restack suite hit an unrelated SQLite
-  `database is locked` failure; its failed shard was rerun.
+  rerun. PR #123694's prior post-restack suite hit an unrelated SQLite
+  `database is locked` failure followed by a canceled lint job. Both branches
+  were restacked again to replace those stale CI runs; new exact-head CI is
+  queued with no current failure.
 - PR #123692 was closed. A generic Dependabot update can change the ClawHub
   package and lock, but `scripts/materialize-clawhub-cli.sh` correctly rejects
   mismatched lock SHA-256, integrity, or version pins. #123689 now tracks an
@@ -98,8 +101,13 @@
   proves `package trusted-publisher set`, `--repository`, and
   `--workflow-filename` before merge. Release and security owners still need to
   approve the trusted update boundary, but no known mechanical proof gap
-  remains. The dedicated `ClawHub CLI Contract` workflow passed on exact head
-  `4cd6672c84fb`.
+  remains. The dedicated `ClawHub CLI Contract` workflow passed on the prior
+  exact head; the current restacked head is `76c2d4acd608`, with 39 focused
+  tests passing locally and new exact-head CI queued.
+- #123688 remains intentionally blocked on a maintainer product/security
+  decision: companion registry shape, permanent/emergency exception semantics,
+  and whether missing or overdue review metadata blocks dependency PRs,
+  release preflight, or only reports evidence.
 - Official run `176596891` is not valid control-closure evidence. It staged an
   OpenClaw `2026.8.1` remediation lock while Lobster installed `2026.5.28`.
   The experimental Lobster pipeline PR #8174 was closed.

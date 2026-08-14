@@ -57,9 +57,11 @@ concentrated and have identifiable owners or remediation paths.
       update discovery, atomic pin synchronization, and required drift
       detection plus a no-secret pre-merge proof of the same trusted-publisher
       command and flags used by the release workflow. Release/security-owner
-      approval remains required.
+      approval remains required. Both PR branches were restacked on current
+      OpenClaw `main` after the 2026-08-14 reboot.
 - [ ] Make existing dependency ownership and pin checks required for relevant
-      changes: OpenClaw #123687 / PR #123695 adds the pin guard to required CI.
+      changes: OpenClaw #123687 / PR #123695 adds the pin guard to required CI
+      and was restacked on current `main`.
 - [ ] Add owner, reason, and review/expiry metadata to minimum-release-age
       exclusions: OpenClaw #123688 awaits maintainer confirmation of the
       repository metadata contract.

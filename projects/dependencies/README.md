@@ -43,6 +43,7 @@ alone is not approval; an authoritative governance record must support an
 | `openclaw/openclaw` | `enterpriseclaw/dependency-governance-remediation` at `39b18ffbe4f` | Analysis artifact; PR #123513 closed | Demonstrates possible ClawHub/Undici, `js-yaml`, AWS core, `werift`, `rx.mini`, and Ubuntu-base remediations; not an active implementation deliverable |
 | `openclaw/openclaw` | `giodl/deps-linux-cargo` | PR #123694 open | Adds automated update coverage for the shipped Linux Cargo graph |
 | `openclaw/openclaw` | `giodl/deps-pin-ci` | PR #123695 open | Runs the existing dependency pin guard in required CI |
+| `openclaw/openclaw` | `giodl/deps-clawhub-refresh` | Draft PR #123722 open | Adds guarded update discovery, atomic identity-pin synchronization, and secretless command-contract proof for the trusted ClawHub CLI |
 | Microsoft internal evidence | Work IQ, CFS, CG, and governed pipeline evidence | Analysis complete | 2 of 13 controls satisfied; ten gaps and the blocked final release attestation are documented for future owners |
 
 The dependency analysis is complete. Lobster PR #8174 and OpenClaw PR #123513
