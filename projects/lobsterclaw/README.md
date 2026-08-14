@@ -18,7 +18,9 @@ immutable generations, and one manifest is the ordered patch ledger.
 | Repo | PR / Issue | Branch | Status | Purpose |
 | ---- | ---------- | ------ | ------ | ------- |
 | `bic/LobsterClaw` | #1 | `lobsterclaw/provenance-v1` | Merged | Add the simple provenance manifest, verifier, and retain/rebuild/remove rule with zero patches imported. |
-| `bic/LobsterClaw` | #2 | `lobsterclaw/2026.6.33-7055-v2` | Open | Import Lobster #7055's 39 exact source-backed patches. |
+| `bic/LobsterClaw` | #2 | `lobsterclaw/2026.6.33-7055-v2` | Merged | Import Lobster #7055's 39 exact source-backed patches. |
+| `bic/LobsterClaw` | #3 | `lobsterclaw/repository-governance-default` | Open | Add BIC `CODEOWNERS` and 1ES repository identity to the unrelated default branch. |
+| `bic/LobsterClaw` | #4 | `lobsterclaw/repository-governance-release-2026.6.33` | Open | Replace upstream owners and add the same repository identity to the active release lineage. |
 | `bic/lobster` | #7055 | `promoteclaw/openclaw-2026.6.33` | Open; runtime checks active | Own the authoritative 6.33 patch queue, including the final compile-contract repair patch. |
 
 ## Related Areas
