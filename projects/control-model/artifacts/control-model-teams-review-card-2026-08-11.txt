@@ -1,0 +1,37 @@
+OpenClaw Control Model is ready for team review
+
+We now have a fork-only OpenClaw proposal for a headless, framework-neutral control layer that lets products such as Lobster render their own UX without reimplementing Gateway behavior.
+
+OpenClaw owns the model; Lobster owns the experience
+
+Canonical behavior
+OpenClaw owns session and conversation state, reconnect reconciliation, typed commands, artifact lifecycle, authorization, and compatibility.
+
+Client-selectable views
+OpenClaw core and installed extensions expose every authorized applicable view descriptor. Lobster chooses a compatible view and maps it into M's existing SessionView vocabulary.
+
+Bounded materialization
+OpenClaw does not eagerly compute every presentation. Cheap views may be inline; expensive or sensitive views materialize only after the client selects one.
+
+Preserved trust boundary
+Native renderers remain host-registered and schema-validated. Actions return through typed model commands and Gateway authorization; third-party executable UI remains sandboxed through MCP Apps.
+
+Review materials
+
+OpenClaw RFC 0029
+Fork-local draft PR with the complete proposal and normative sidecar specifications. It shows four RFC commits and five new files; no upstream PR exists.
+https://github.com/giodl73-repo/rfcs/pull/8
+https://github.com/giodl73-repo/rfcs/tree/user/giodl/rfc-0029-control-model
+
+Lobster adoption design
+https://github.com/gim-home/m/issues/5675
+https://github.com/gim-home/m/issues/2511
+
+Complete review packet
+https://github.com/giodl_microsoft/claws/blob/main/projects/control-model/review-packet.md
+https://github.com/giodl_microsoft/claws/blob/main/projects/control-model/architecture.md
+https://github.com/giodl_microsoft/claws/blob/main/projects/control-model/role-review.md
+
+Review proof: two role passes across Gateway, UX, CISO, founder, and Lobster runtime perspectives; five RFC documents; one synchronized M design issue.
+
+Next action: choose the first native view pair and approve or revise the smallest evidence slice before implementation begins.

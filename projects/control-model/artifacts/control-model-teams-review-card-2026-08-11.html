@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>OpenClaw Control Model team review</title>
+</head>
+<body style="font-family:Segoe UI,Arial,sans-serif;font-size:16px;line-height:1.45;color:#242424;max-width:760px;">
+<!--StartFragment-->
+<h1 style="color:#5b2dab;font-size:26px;">OpenClaw Control Model is ready for team review</h1>
+
+<p>We now have a fork-only OpenClaw proposal for a headless, framework-neutral control layer that lets products such as Lobster render their own UX without reimplementing Gateway behavior.</p>
+
+<h2 style="font-size:20px;">OpenClaw owns the model; Lobster owns the experience</h2>
+
+<p><strong>Canonical behavior</strong><br>OpenClaw owns session and conversation state, reconnect reconciliation, typed commands, artifact lifecycle, authorization, and compatibility.</p>
+
+<p><strong>Client-selectable views</strong><br>OpenClaw core and installed extensions expose every authorized applicable view descriptor. Lobster chooses a compatible view and maps it into M's existing <code>SessionView</code> vocabulary.</p>
+
+<p><strong>Bounded materialization</strong><br>OpenClaw does not eagerly compute every presentation. Cheap views may be inline; expensive or sensitive views materialize only after the client selects one.</p>
+
+<p><strong>Preserved trust boundary</strong><br>Native renderers remain host-registered and schema-validated. Actions return through typed model commands and Gateway authorization; third-party executable UI remains sandboxed through MCP Apps.</p>
+
+<h2 style="font-size:20px;">Review materials</h2>
+
+<p>
+  <strong>OpenClaw RFC 0029</strong>
+  <br>Fork-local draft PR with the complete proposal and normative sidecar specifications. It shows four RFC commits and five new files; no upstream PR exists.
+  <br><a href="https://github.com/giodl73-repo/rfcs/pull/8">Review RFC 0029 diff in PR #8</a>&nbsp; · &nbsp;
+  <a href="https://github.com/giodl73-repo/rfcs/tree/user/giodl/rfc-0029-control-model">Browse RFC branch</a>
+</p>
+
+<p>
+  <strong>Lobster adoption design</strong>
+  <br>The M issue connects this model to the existing hosted Gateway seam and <code>SessionView</code> direction.
+  <br><a href="https://github.com/gim-home/m/issues/5675">M issue #5675</a>&nbsp; · &nbsp;
+  <a href="https://github.com/gim-home/m/issues/2511">GenUX issue #2511</a>
+</p>
+
+<p>
+  <strong>Complete review packet</strong>
+  <br>Architecture, PR series, role findings, security and performance gates, and the proposed evidence slice.
+  <br><a href="https://github.com/giodl_microsoft/claws/blob/main/projects/control-model/review-packet.md">Review packet</a>&nbsp; · &nbsp;
+  <a href="https://github.com/giodl_microsoft/claws/blob/main/projects/control-model/architecture.md">Architecture</a>&nbsp; · &nbsp;
+  <a href="https://github.com/giodl_microsoft/claws/blob/main/projects/control-model/role-review.md">Role review</a>
+</p>
+
+<p><strong>Review proof:</strong> two role passes across Gateway, UX, CISO, founder, and Lobster runtime perspectives; five RFC documents; one synchronized M design issue.</p>
+
+<p><strong>Next action:</strong> choose the first native view pair and approve or revise the smallest evidence slice before implementation begins.</p>
+<!--EndFragment-->
+</body>
+</html>
