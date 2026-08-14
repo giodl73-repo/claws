@@ -17,6 +17,7 @@ tools.
 | Doctor work                         | `projects/doctor/README.md`                                 |
 | Feeds work                          | `projects/feeds/README.md`                                  |
 | Catalog work                        | `projects/catalog/README.md`                                |
+| OpenClaw dependency governance      | `projects/dependencies/README.md`                           |
 | Lobster work                        | `projects/lobster/README.md`                                |
 | UX state work                       | `projects/ux-state/README.md`                               |
 | Admin work                          | `projects/admin/README.md`                                  |
@@ -158,6 +159,8 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
 - Feeds: OpenClaw feed primitives and Lobster Scout feed integration.
 - Catalog: OpenClaw command/tool catalog metadata, lenses, generated docs,
   prompt/audit consumers, and catalog PR/RFC stack coordination.
+- OpenClaw dependency governance: complete dependency inventory, technical and
+  supply-chain risk, Microsoft allowability evidence, and remediation queues.
 - Lobster: Lobster vault/spec refresh PRs, LobsterTank dashboard notes, runtime
   worktree links, and repo-specific PR readiness.
 - UX state: gated Lobster Feeds, Policy, and Context Budget UX previews,

@@ -18,6 +18,7 @@ For agent and harness entry points, start with `CONTEXT.md`.
 | Doctor                              | `projects/doctor/`               | Active doctor health and structured-repair PR stacks.                                                                                    |
 | Feeds                               | `projects/feeds/`                | OpenClaw feed support and Lobster Scout feed PR stacks.                                                                                  |
 | Catalog                             | `projects/catalog/`              | OpenClaw command/tool catalog metadata, generated docs, prompt/audit lenses, and PR/RFC stack notes.                                     |
+| OpenClaw dependency governance      | `projects/dependencies/`         | Complete dependency inventory, technical and supply-chain ratings, Microsoft governance evidence, and remediation priorities.           |
 | UX state                            | `projects/ux-state/`             | Gated Lobster Feeds, Policy, and Context Budget UX previews, flags, and design-review notes.                                             |
 | Admin                               | `projects/admin/`                | Lobster admin spaces, managed policy baselines, and Partner Center notes.                                                                |
 | Config admin UX                     | `projects/config-admin/`         | Shared Lobster/OpenClaw admin-config UX framework: settings descriptors, preview-first validation, governed save, and Scout CLI parity.  |
