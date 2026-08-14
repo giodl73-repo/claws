@@ -24,12 +24,11 @@
 
 - Last updated: 2026-08-14.
 - Last agent: GitHub Copilot CLI.
-- Current focus: Lobster LM3 now proves the first native action boundary. One
-  host-owned table `refresh` crosses typed IPC, validates canonical artifact
-  identity/revision/readiness in main, and re-enters OpenClaw through Control
-  Model `conversation.send` and existing Gateway `chat.send`. The next bounded
-  decision is whether ordinary Lobster sends should cut over to the same command
-  path before any action generalization.
+- Current focus: Lobster LM4 removes the duplicate ordinary-send transport
+  implementation. Lobster still owns attachment preprocessing and operational
+  run tracking, while canonical dispatch, idempotency, typed errors, and
+  connection-epoch validation now come from Control Model
+  `conversation.send`. The next bounded command decision is abort migration.
 - Active branch / PR: fork branch
   `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `97d6bfc` in
   [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
@@ -58,6 +57,9 @@
   Lobster LM3 is
   [fork-local draft PR #65](https://microsoft.ghe.com/giodl/lobster/pull/65)
   at `7181deee69` from `user/giodl/control-model-lm3`, stacked on LM2.
+  Lobster LM4 is
+  [fork-local draft PR #66](https://microsoft.ghe.com/giodl/lobster/pull/66)
+  at `66d91dcaa0` from `user/giodl/control-model-lm4`, stacked on LM3.
 - Review result: OpenClaw enumerates all authorized applicable view
   descriptors, but materializes only the client-selected deferred payload.
   Discovery is policy-filtered, renderer advertisement is private by default,
@@ -113,6 +115,18 @@
   and observes artifact revision 2 with `Gateway: Verified`. A review-found
   power-state collision was fixed with an independent per-invocation sleep hold;
   the final agent review reported no actionable findings.
+- Lobster LM4 result: ordinary Gateway sends no longer call raw
+  `client.request("chat.send")`. The backend preserves attachment validation and
+  encoding, inline additional-context ordering, Stop-during-preprocessing,
+  superseding generations, exec-approval tracking, and raw operational events,
+  then dispatches the assembled message through
+  `ControlModelConversation.send` and binds its returned run ID into the
+  existing turn tracker. Backend-level conversation leases prevent a
+  `SessionView` unsubscribe from disposing an in-flight send or action. Proof is
+  desktop typecheck, type-aware lint, production build, all 220 focused Gateway
+  tests, reconnect and view-unsubscribe regressions, and the real Electron
+  Gateway table/refresh E2E. The final independent review reported no
+  significant issues.
 - Artifact placement: one stable artifact may render inline, expanded, or in a
   dedicated surface. Later turns may publish higher revisions. V1 persistence
   is session-scoped rather than a permanent document store.
@@ -155,7 +169,8 @@
   `af708f0`. Lobster LM1 worktree `C:\src\lobster-control-model-lm1` is clean at
   `696e9f8d39`; LM2 worktree `C:\src\lobster-control-model-lm2` is clean at
   `6f55b43ef1`; LM3 worktree `C:\src\lobster-control-model-lm3` is clean at
-  `7181deee69`. `claws-hapi` remains heavily dirty with unrelated pre-existing
+  `7181deee69`; LM4 worktree `C:\src\lobster-control-model-lm4` is clean at
+  `66d91dcaa0`. `claws-hapi` remains heavily dirty with unrelated pre-existing
   changes.
 - Blocking question: L0 still lacks Proof of Presence and the required Lobster
   runtime contexts. RFC intake is frozen, so the design remains fork-only until
@@ -172,6 +187,7 @@
 - Run: `git -C C:\src\lobster-control-model-lm1 status --short --branch`.
 - Run: `git -C C:\src\lobster-control-model-lm2 status --short --branch`.
 - Run: `git -C C:\src\lobster-control-model-lm3 status --short --branch`.
+- Run: `git -C C:\src\lobster-control-model-lm4 status --short --branch`.
 - Verify: fork PRs #8, #230, #231, #232, and #238 remain open and no upstream
   implementation PR remains open.
 - Verify: Lobster PR #8165 remains at `80fe70b13f`; required contexts
@@ -185,6 +201,8 @@
   `user/giodl/control-model-lm1` at `6f55b43ef1`.
 - Verify: fork-local Lobster PR #65 remains stacked on
   `user/giodl/control-model-lm2` at `7181deee69`.
+- Verify: fork-local Lobster PR #66 remains stacked on
+  `user/giodl/control-model-lm3` at `66d91dcaa0`.
 - Review: `review-packet.md`, the role findings, and any comments on the M
   design issue.
 - Update: this file and add a checkpoint after canonical decisions change.
@@ -205,8 +223,9 @@
   upstream.
 - Decide when the optional Gateway Client model subpaths should publish, after
   two-consumer evidence and duplicate-reducer deletion.
-- Decide whether Lobster's ordinary send path should migrate from raw Gateway
-  `chat.send` to Control Model `conversation.send` before expanding actions.
+- Decide whether Lobster abort should migrate to Control Model
+  `conversation.abort` while preserving Stop-during-preprocessing and
+  exec-approval follow-up retirement.
 - Decide whether JSON Render is an adopter choice or a future OpenClaw-owned
   artifact dialect; V1 keeps it out of the core contract.
 - Confirm the OpenClaw view-offer discovery carrier and deferred
