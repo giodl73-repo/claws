@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>OpenClaw Control Model update</title>
+</head>
+<body>
+<!--StartFragment-->
+<h1>OpenClaw Control Model now has a concrete home and a complete proof stack</h1>
+
+<p>
+  Lobster can now own its React UX without reimplementing OpenClaw's session,
+  conversation, reconnect, command, and artifact behavior.
+</p>
+
+<p>
+  <strong>Architecture:</strong> the model now lives as optional core client
+  infrastructure under <code>@openclaw/gateway-client/model</code>. It is not a
+  plugin or standalone package. OpenClaw owns canonical behavior; Lobster owns
+  product composition, native renderers, theming, and rollout.
+</p>
+
+<h2>Fork proof stack</h2>
+<p>
+  <a href="https://github.com/giodl73-repo/openclaw/pull/230"><strong>OC1 - session foundation</strong></a>
+  &nbsp; · &nbsp;
+  <a href="https://github.com/giodl73-repo/openclaw/pull/231"><strong>OC2 - conversation model</strong></a>
+  &nbsp; · &nbsp;
+  <a href="https://github.com/giodl73-repo/openclaw/pull/232"><strong>OC3 - renderer-neutral artifacts</strong></a>
+  &nbsp; · &nbsp;
+  <a href="https://github.com/giodl73-repo/openclaw/pull/238"><strong>OC4 - Control UI adoption</strong></a>
+</p>
+
+<p>
+  The <a href="https://github.com/giodl73-repo/rfcs/pull/8">fork RFC review</a>
+  and <a href="https://github.com/gim-home/m/issues/5675">Lobster/M design</a>
+  now carry the same ownership story, diagrams, and links to all four drafts.
+</p>
+
+<p>
+  <strong>Proof:</strong> all layers build independently; OC4 passes 141 focused
+  tests, lint, types, UI startup budget, and clean Codex review.
+</p>
+
+<p>
+  <strong>Next:</strong> choose the first native Lobster artifact and build the
+  LM1 adapter into M's existing <code>SessionView</code>.
+</p>
+<!--EndFragment-->
+</body>
+</html>

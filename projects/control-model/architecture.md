@@ -2,8 +2,8 @@
 
 ## Decision
 
-Name the upstream capability **OpenClaw Control Model** and the candidate
-package `@openclaw/control-model`.
+Name the upstream capability **OpenClaw Control Model** and place it in optional
+`@openclaw/gateway-client/model` subpaths.
 
 The Gateway client is transport and wire behavior. The Control Model is the
 framework-neutral state, reconciliation, projection, and command boundary that
@@ -49,9 +49,10 @@ Publish a framework-neutral observable model over the Gateway client:
 ```text
 OpenClaw Gateway
       |
-@openclaw/gateway-client
+@openclaw/gateway-client/browser
+  transport + reconnect
       |
-@openclaw/control-model
+@openclaw/gateway-client/model
   snapshots + commands + UI artifacts
       |
 Lobster adapter -> existing SessionView
@@ -248,18 +249,18 @@ sandboxed fallback behavior when native support is absent.
 
 | PR | Scope | Proof | Deletion unlocked |
 | --- | --- | --- | --- |
-| OC1: package and session snapshots | Add workspace `@openclaw/control-model`, connection/session catalog snapshots, host-supplied Gateway binding, package docs | Node/browser contract tests; no UI imports in package graph | Duplicate consumer session-list reconciliation |
+| OC1: Gateway Client model foundation | Add optional `@openclaw/gateway-client/model` subpaths, connection/session catalog snapshots, host-supplied Gateway binding, and client docs | Node/browser contract tests; no UI imports in the model graph | Duplicate consumer session-list reconciliation |
 | OC2: conversation model | Extract history/live merge, stream/tool lifecycle, typed chat commands, approvals/questions | Shared fixtures for reconnect, duplicate/out-of-order events, cancellation, rejection | Lobster chat reducer and selected Control UI reconciliation |
 | OC3: UI artifact projection | Preserve renderer-neutral artifact metadata through live events and history; adapt MCP App/Canvas projections | Known native URI, unknown URI, malformed data, history reload, fallback, expiry | Tool-specific native rendering hacks |
-| OC4: Control UI adopter | Move one Control UI chat/session slice onto the package without visual changes | Existing Control UI tests plus before/after fixtures | Old internal capability implementation for adopted slice |
-| OC5: package publication | Publish only after two consumers and compatibility evidence | Package acceptance, calendar-version compatibility, examples | Workspace-only consumption |
+| OC4: Control UI adopter | Move one Control UI chat/session slice onto the model without visual changes | Existing Control UI tests plus before/after fixtures | Old internal capability implementation for adopted slice |
+| OC5: model-subpath publication | Publish the optional Gateway Client subpaths only after two consumers and compatibility evidence | Package acceptance, calendar-version compatibility, examples | Fork-only consumption |
 
 ### Lobster and M
 
 | PR | Scope | Proof | Deletion unlocked |
 | --- | --- | --- | --- |
-| LM1: Control Model service adapter | Consume the package behind Lobster's hosted Gateway path and map snapshots into existing M `SessionView` | Existing desktop snapshot fixtures plus hosted Gateway reconnect | Web-specific Gateway chat normalization for the slice |
-| LM2: native artifact registry | Register one first-party URI and render a native React component; preserve text/MCP fallback | Calendar or similarly bounded golden scenario, schema rejection, theming/a11y | One bespoke tool-output component path |
+| LM1: Control Model service adapter | Consume the Gateway Client model behind Lobster's hosted Gateway path and map snapshots into existing M `SessionView` | Existing desktop snapshot fixtures plus hosted Gateway reconnect | Web-specific Gateway chat normalization for the slice |
+| LM2: native artifact registry | Register `clawpilot://widgets/table` data version 1 and render a bounded read-only native React table; preserve inert structured/MCP/Canvas fallback metadata | Accepted table, nested/schema rejection, unknown/deferred offer fallback, artifact-only and reopened history, revision replacement, theming/a11y | One bespoke tool-output component path |
 | LM3: actions and streaming | Bind named host actions, artifact revisions, cancellation, reconnect, and telemetry | Allowed/denied actions, stale revision, mid-stream reconnect, fallback | Direct component-to-transport calls |
 | LM4: parity and cutover | Expand only after parity; remove superseded Lobster reducer/hosted-Control-UI route where no longer needed | Cohort rollout, rollback, performance, accessibility, production telemetry | Duplicated Lobster/OpenClaw UX and reconciliation |
 
@@ -269,13 +270,15 @@ sandboxed fallback behavior when native support is absent.
 2. Instantiate a framework-neutral model with one session catalog and one
    selected conversation.
 3. Adapt its snapshot into M's existing `SessionView`.
-4. Render one trusted `clawpilot://widgets/calendar` artifact natively.
-5. Prove an unselected alternative view was not materialized.
-6. Render the same tool result through MCP App fallback when the native
-   registration is absent.
-7. Deny one action server-side and surface the structured denial.
-8. Reconnect mid-stream without duplicating a message or artifact revision or
-   silently changing the selected view.
+4. Render one trusted `clawpilot://widgets/table` artifact natively.
+5. Reject nested/malformed table data and keep unknown or deferred offers inert
+   behind a visible structured fallback.
+6. Preserve artifact-only and reopened history at the canonical timeline
+   position across raw and Control Model message identities.
+7. Replace artifact revisions without invalidating settled turns or hashing
+   unchanged artifact payloads on every streamed token.
+8. In LM3, deny one action server-side and reconnect mid-stream without
+   duplicating a message or artifact revision.
 
 The slice fails if it imports Control UI Lit components, parses raw Gateway
 events in a React component, or needs a second M view-model vocabulary.

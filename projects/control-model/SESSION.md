@@ -22,40 +22,145 @@
 
 ## Current Session
 
-- Last updated: 2026-08-11.
+- Last updated: 2026-08-14.
 - Last agent: GitHub Copilot CLI.
-- Current focus: Gather team feedback on RFC 0029 and the OC1 implementation
-  draft before extracting conversation or artifact behavior.
+- Current focus: Lobster LM2 now proves the first native artifact boundary:
+  canonical Control Model artifacts feed one exact, read-only native React table
+  through the existing passive `SessionView`, with durable history association,
+  revision-safe identity, and visible structured fallback. The next bounded
+  layer is a representative live fixture and then LM3 actions/reconnect.
 - Active branch / PR: fork branch
-  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `110604c` in
+  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `97d6bfc` in
   [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
   upstream RFC PR. OpenClaw OC1 is
-  [draft PR #122283](https://github.com/openclaw/openclaw/pull/122283) from
-  `user/giodl/control-model-oc1`. M design issue
+  [fork-local draft PR #230](https://github.com/giodl73-repo/openclaw/pull/230)
+  at `68d3165bab` from `user/giodl/control-model-oc1`; upstream draft PR
+  `openclaw/openclaw#122283` is closed. OpenClaw OC2 is
+  [fork-local draft PR #231](https://github.com/giodl73-repo/openclaw/pull/231)
+  at `8654e0f7d1` from `user/giodl/control-model-oc2`, stacked on OC1.
+  OpenClaw OC3 is
+  [fork-local draft PR #232](https://github.com/giodl73-repo/openclaw/pull/232)
+  at `fc07cc0630` from `user/giodl/control-model-oc3`, stacked on OC2.
+  OpenClaw OC4 is
+  [fork-local draft PR #238](https://github.com/giodl73-repo/openclaw/pull/238)
+  at `72206b801f` from `user/giodl/control-model-oc4`, stacked on OC3.
+  M design issue
   [gim-home/m#5675](https://github.com/gim-home/m/issues/5675) remains open.
+  Lobster L0 is
+  [draft PR #8165](https://microsoft.ghe.com/bic/lobster/pull/8165) at
+  `80fe70b13f` from `giodl:user/giodl/control-model-carry`. Lobster LM1 is
+  [fork-local draft PR #63](https://microsoft.ghe.com/giodl/lobster/pull/63)
+  at `696e9f8d39` from `user/giodl/control-model-lm1`, stacked on the L0 branch.
+  Lobster LM2 is
+  [fork-local draft PR #64](https://microsoft.ghe.com/giodl/lobster/pull/64)
+  at `9ca4b7d6d6` from `user/giodl/control-model-lm2`, stacked on LM1.
 - Review result: OpenClaw enumerates all authorized applicable view
   descriptors, but materializes only the client-selected deferred payload.
   Discovery is policy-filtered, renderer advertisement is private by default,
   and a compatible user selection remains stable across reconnects and
   artifact revisions.
+- Messaging result: RFC PR #8, OC1, OC4, and M issue #5675 now include
+  consistent Mermaid diagrams for the Gateway Client model boundary, lazy
+  Control UI adoption, and Lobster `SessionView` flow. RFC PR #8 now links
+  OC1-OC4 plus Lobster L0/LM1/LM2, and M issue #5675 links all three Lobster
+  proofs.
+- Lobster L0 result: a private workspace package exposes the three proposed
+  Gateway Client model subpaths, while patch 0036 safely preserves canonical
+  bounded UI artifacts through the pinned Gateway history projection. Proof is
+  52 model tests, typecheck, type-aware lint, package/protocol builds, the
+  artifact regression, sequential application of all 35 patches to the pinned
+  OpenClaw SHA, and a clean final Codex autoreview.
+- Lobster LM1 result: `GatewaySessionBackend` owns the Control Model transport
+  binding and publishes canonical visual projections separately from raw events.
+  `SessionViewBuilder` remains the sole renderer projection owner; history seeds
+  without replay, live assistant commits deduplicate across reconnect, streaming
+  snapshots retain the 80 ms throttle, and raw token usage plus actionable
+  connection/auth errors survive canonical takeover. Proof is desktop typecheck,
+  type-aware lint, formatting, and 376 focused Electron tests. Autoreview findings
+  were fixed; the final external rerun could not authenticate with any configured
+  reviewer.
+- Lobster LM2 result: canonical artifacts project through `SessionView` into an
+  exact `clawpilot://widgets/table` version-1 registry. The native renderer
+  accepts 1-12 unique columns, at most 100 rows, and primitive cells only;
+  invalid, unknown, deferred, failed, or expired offers remain inert and visibly
+  fall back. Dual canonical/raw IDs plus a durable normalized message position
+  preserve artifact-only and reopened history. Content fingerprints prevent
+  stale reuse across adapter recreation, while metadata caching avoids deep
+  hashing on token updates. Proof is both typechecks, clean type-aware lint and
+  formatting, 76 focused Electron tests, 85 focused UX tests, 35 affected
+  broader unit tests, and three real-Chromium browser fixtures. The final
+  high-confidence diff review reported no remaining findings; the final Codex
+  helper rerun could not authenticate. A later agent review found and fixed
+  numeric epoch timestamps that became invalid renderer dates while preserving
+  synthesized message identity; the post-fix review was clean.
 - Artifact placement: one stable artifact may render inline, expanded, or in a
   dedicated surface. Later turns may publish higher revisions. V1 persistence
   is session-scoped rather than a permanent document store.
-- OC1 result: workspace-only `@openclaw/control-model` implements immutable
-  bounded session snapshots, epoch-safe canonical refresh, typed errors, and
-  subscriber isolation. Conversation and artifact behavior remain excluded.
+- OC1 result: optional `@openclaw/gateway-client/model` infrastructure
+  implements immutable bounded session snapshots, epoch-safe canonical refresh,
+  typed errors, and subscriber isolation. Its host binding explicitly owns
+  `sessions.subscribe`, while Control Model and Control UI share
+  `model/session-event-refresh`. Conversation and artifact behavior remain
+  excluded.
+- OC2 result: stable lazy conversation handles reuse Gateway Client history/live
+  reconciliation and targeted subscription ownership, project bounded messages,
+  runs, tools, approvals, and questions, and expose typed epoch-safe commands.
+  The review pass fixed reconnect retirement/restoration, retained projection
+  bounds, global agent scoping, authoritative interaction removal, abort races,
+  inactive-only retention, and older-history stability. Focused proof is 34
+  tests plus a Gateway Client ESM/declaration build.
+- OC3 result: a bounded Gateway-protocol artifact contract preserves sanitized
+  canonical artifacts through history, adapts existing MCP App/Canvas metadata
+  into inert fallbacks, reconciles revisions across live state and reconnect,
+  and materializes only one exact client-selected deferred view through an
+  optional trusted host binding. Renderer registration and selection remain
+  outside the model. Three-model review hardening now treats provenance as
+  authoritative context rather than artifact content, invalidates stale
+  in-flight materialization, prevents identity-less association, and bounds
+  newest-first history collection. Focused proof is 42 Control Model tests,
+  nine Gateway/Canvas tests, and a neutral ESM/declaration build.
+- OC4 result: Control UI now consumes the lightweight canonical catalog for
+  active rosters and the lazy conversation model for selected-chat history and
+  subscriptions. Archived/all rosters remain Gateway-backed, including
+  event-driven refresh. Lazy-load failures fall back and remain retryable.
+  Proof is 141 focused tests, type-aware lint, production type-check, neutral
+  Gateway Client build, and an 11-request/329,293-byte startup gzip build against the
+  329,309-byte limit. Final Codex review reported no actionable findings.
 - Known dirty state: `claws-hapi` contains unrelated pre-existing project-note
-  changes. The dedicated RFC worktree started clean from `openclaw/rfcs`
-  `origin/main` at `af708f0`.
-- Blocking question: Which one native first-party artifact should anchor the
-  evidence slice? RFC intake is frozen, so the design remains fork-only until
+  changes. The canonical WSL worktree
+  `/root/src/openclaw-control-model-oc4` is clean at `72206b801f`; OC1-OC3 are
+  also clean at their rewritten stacked heads. Backup refs preserve all four
+  pre-restack heads. The
+  dedicated RFC worktree started clean from `openclaw/rfcs` `origin/main` at
+  `af708f0`. Lobster LM1 worktree `C:\src\lobster-control-model-lm1` is clean at
+  `696e9f8d39`; LM2 worktree `C:\src\lobster-control-model-lm2` is clean at
+  `9ca4b7d6d6`. `claws-hapi` remains heavily dirty with unrelated pre-existing
+  changes.
+- Blocking question: L0 still lacks Proof of Presence and the required Lobster
+  runtime contexts. RFC intake is frozen, so the design remains fork-only until
   explicit authorization to submit upstream.
 
 ## Resume Checklist
 
 - Run: `git -C C:\src\openclaw-rfcs-control-model status --short --branch`.
-- Run: `git -C C:\src\openclaw-control-model-oc1 status --short --branch`.
-- Verify: fork branch exists and no upstream PR was opened.
+- Run in WSL: `git -C /root/src/openclaw-control-model-oc1 status --short --branch`.
+- Run in WSL: `git -C /root/src/openclaw-control-model-oc2 status --short --branch`.
+- Run in WSL: `git -C /root/src/openclaw-control-model-oc3 status --short --branch`.
+- Run in WSL: `git -C /root/src/openclaw-control-model-oc4 status --short --branch`.
+- Run: `git -C C:\src\lobster-control-model-carry status --short --branch`.
+- Run: `git -C C:\src\lobster-control-model-lm1 status --short --branch`.
+- Run: `git -C C:\src\lobster-control-model-lm2 status --short --branch`.
+- Verify: fork PRs #8, #230, #231, #232, and #238 remain open and no upstream
+  implementation PR remains open.
+- Verify: Lobster PR #8165 remains at `80fe70b13f`; required contexts
+  `GitOps/GitHubPop`, `Lobster-Runtime-PullRequest`, and
+  `Lobster-Runtime-Build-Validation` are visible and green before readiness.
+  Current state: GitHubPop fails Proof of Presence and both runtime contexts are
+  absent; do not manually queue ADO without an explicit request.
+- Verify: fork-local Lobster PR #63 remains stacked on
+  `user/giodl/control-model-carry` at `696e9f8d39`.
+- Verify: fork-local Lobster PR #64 remains stacked on
+  `user/giodl/control-model-lm1` at `9ca4b7d6d6`.
 - Review: `review-packet.md`, the role findings, and any comments on the M
   design issue.
 - Update: this file and add a checkpoint after canonical decisions change.
@@ -72,10 +177,13 @@
 
 ## Open Threads
 
-- Incorporate review feedback before beginning OC2.
-- Confirm whether `@openclaw/control-model` should publish with the OpenClaw
-  calendar release train or remain a workspace package for its first slice.
-- Confirm the first Lobster native component and representative tool result.
+- Incorporate RFC/OC1/OC2/OC3/OC4 feedback before promoting any surface
+  upstream.
+- Add one representative live Gateway table fixture before widening LM2.
+- Decide when the optional Gateway Client model subpaths should publish, after
+  two-consumer evidence and duplicate-reducer deletion.
+- Define the smallest LM3 action/reconnect proof without introducing a generic
+  artifact action framework.
 - Decide whether JSON Render is an adopter choice or a future OpenClaw-owned
   artifact dialect; V1 keeps it out of the core contract.
 - Confirm the OpenClaw view-offer discovery carrier and deferred

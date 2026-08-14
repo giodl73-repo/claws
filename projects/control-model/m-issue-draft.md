@@ -17,12 +17,12 @@ approval, and compatibility behavior.
 
 ### Possible direction
 
-Use a proposed framework-neutral `@openclaw/control-model` package above
-`@openclaw/gateway-client`. OpenClaw would own immutable session/conversation
-snapshots, typed commands, history/live reconciliation, and renderer-neutral
-UI artifacts. Lobster would adapt those snapshots into the already-selected
-M `SessionView` vocabulary and retain React composition, Fluent/M365 theming,
-tenant integration, telemetry, and rollout.
+Use the proposed framework-neutral `@openclaw/gateway-client/model` layer above
+the existing browser transport subpath. OpenClaw would own immutable
+session/conversation snapshots, typed commands, history/live reconciliation,
+and renderer-neutral UI artifacts. Lobster would adapt those snapshots into the
+already-selected M `SessionView` vocabulary and retain React composition,
+Fluent/M365 theming, tenant integration, telemetry, and rollout.
 
 For GenUX, a tool result can carry structured data plus an opaque template URI.
 The host maps allowlisted first-party URIs to native React components. Unknown
@@ -32,6 +32,18 @@ through typed model commands and OpenClaw server authorization.
 
 This does **not** introduce a second M view model, require JSON Render, or move
 M/Lobster components into OpenClaw.
+
+```mermaid
+flowchart TB
+  gateway["OpenClaw Gateway"]
+  transport["@openclaw/gateway-client/browser<br/>transport, authentication, reconnect"]
+  model["@openclaw/gateway-client/model<br/>sessions, conversations, commands, artifacts"]
+  adapter["Lobster adapter"]
+  sessionView["M SessionView"]
+  react["Lobster React UX<br/>host-owned native renderers"]
+
+  gateway --> transport --> model --> adapter --> sessionView --> react
+```
 
 ### Capability split
 
@@ -49,6 +61,30 @@ installation.
 of every payload. Lobster selects one compatible offer; OpenClaw materializes
 only that deferred view. Discovery must not reveal hidden extensions or tools,
 and extensions do not receive the client's complete renderer inventory.
+
+### Fork implementation evidence
+
+The proposed OpenClaw boundary is available as four stacked fork-only drafts:
+
+1. [OC1: Gateway Client model foundation](https://github.com/giodl73-repo/openclaw/pull/230)
+2. [OC2: conversation model and commands](https://github.com/giodl73-repo/openclaw/pull/231)
+3. [OC3: renderer-neutral UI artifacts](https://github.com/giodl73-repo/openclaw/pull/232)
+4. [OC4: Control UI reference adoption](https://github.com/giodl73-repo/openclaw/pull/238)
+
+```mermaid
+flowchart LR
+  oc1["OC1<br/>session foundation"]
+  oc2["OC2<br/>conversation model"]
+  oc3["OC3<br/>artifact contracts"]
+  oc4["OC4<br/>Control UI proof"]
+  lm1["Lobster LM1<br/>SessionView adapter proof"]
+
+  oc1 --> oc2 --> oc3 --> oc4 --> lm1
+```
+
+The drafts demonstrate that the model can live in Gateway Client core without
+making it a Gateway plugin or importing Control UI. They remain design evidence,
+not accepted upstream surfaces.
 
 ### First slice
 
@@ -80,5 +116,8 @@ and extensions do not receive the client's complete renderer inventory.
 - #5466
 - #5468
 - #5507
-- Fork-only OpenClaw RFC preview:
-  https://github.com/giodl73-repo/rfcs/tree/user/giodl/rfc-0029-control-model
+- [Fork-only OpenClaw RFC review](https://github.com/giodl73-repo/rfcs/pull/8)
+- [OC1](https://github.com/giodl73-repo/openclaw/pull/230)
+- [OC2](https://github.com/giodl73-repo/openclaw/pull/231)
+- [OC3](https://github.com/giodl73-repo/openclaw/pull/232)
+- [OC4](https://github.com/giodl73-repo/openclaw/pull/238)
