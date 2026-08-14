@@ -34,6 +34,23 @@ if ($endMarkerIndex -le $startFragmentChar) {
   throw "CF_HTML fragment markers are empty or out of order."
 }
 
+# Teams commonly strips default paragraph margins. Normalize adjacent paragraph
+# separators to one explicit break so source whitespace or existing <br> tags
+# cannot accumulate into several blank lines after sanitization.
+$fragment = $html.Substring($startFragmentChar, $endMarkerIndex - $startFragmentChar)
+$spacedFragment = [regex]::Replace(
+  $fragment,
+  '</p>(?:\s|<br\s*/?>)*<p(?=[\s>])',
+  '</p><br><p',
+  [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+)
+if ($spacedFragment -ne $fragment) {
+  $html = $html.Substring(0, $startFragmentChar) +
+    $spacedFragment +
+    $html.Substring($endMarkerIndex)
+  $endMarkerIndex = $html.IndexOf($endMarker, $startFragmentChar, [System.StringComparison]::Ordinal)
+}
+
 if ($PlainTextPath) {
   $resolvedTextPath = (Resolve-Path -LiteralPath $PlainTextPath).Path
   $plainText = Get-Content -LiteralPath $resolvedTextPath -Raw

@@ -32,6 +32,11 @@ linked browser artifact, not the Teams paste.
 
 - Use semantic headings and paragraphs: `<h1>`, `<h2>`, `<h3>`, and `<p>`.
 - Use explicit `<br>` elements inside each linked capability.
+- Never rely on default paragraph margins for vertical spacing. Teams commonly
+  strips them and runs adjacent `<p>` blocks together visually. Use adjacent
+  `<p>` blocks without hand-authored separators; the copier normalizes the
+  boundary to one explicit `<br>`. Existing whitespace or `<br>` tags between
+  paragraphs are collapsed rather than accumulated.
 - Put visible separators between adjacent links, for example
   `&nbsp; · &nbsp;`.
 - Never depend on `<div>`, CSS `display`, grid, flex, margins, or tables to
@@ -120,6 +125,8 @@ powershell.exe -NoProfile -STA -ExecutionPolicy Bypass `
 The script:
 
 - validates fragment markers;
+- normalizes adjacent paragraph boundaries to one explicit line break so Teams
+  does not depend on stripped CSS margins or accumulate duplicate blank lines;
 - calculates CF_HTML offsets in UTF-8 bytes, not PowerShell characters;
 - places HTML, Unicode text, and ANSI text on the clipboard;
 - derives readable plain text with line breaks and expanded link URLs when no
@@ -131,13 +138,14 @@ The script:
 1. Render the HTML locally at a narrow width.
 2. Check that it fits roughly one vertical chat screen.
 3. Inspect the fragment with styling mentally removed.
-4. Confirm each item still has:
+4. Confirm adjacent prose sections retain a visible blank line without CSS.
+5. Confirm each item still has:
    - a heading;
    - a description;
    - a line break;
    - visibly separated links.
-5. Run the copier.
-6. Paste into a Teams compose box before sending.
+6. Run the copier.
+7. Paste into a Teams compose box before sending.
 
 If Teams still flattens content, simplify the HTML further. Do not compensate
 with more CSS.
