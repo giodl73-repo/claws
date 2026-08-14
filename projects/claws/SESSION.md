@@ -22,10 +22,10 @@
 
 ## Resume Snapshot
 
-- Last updated: 2026-08-08.
+- Last updated: 2026-08-14.
 - Last agent: GitHub Copilot CLI.
-- Current focus: land the remaining Claws implementation series one PR at a
-  time through the official maintainer workflow.
+- Current focus: maintainer product-direction review for the four published
+  Claws final-exam PRs.
 - Completed: OpenClaw PR #115237 merged as
   `60fc2fe64d8ec2988a555a638dc1074d31e5760b` on 2026-08-07T11:04:52Z.
   PR #115962 merged as `7774f9a36c12eb5f63e6ef33b3da2af065b09707`
@@ -37,17 +37,36 @@
   #3 and merged as `250e41588a54d23ab53b49eef5e7b2eeee83ea03`.
   Awesome Claws #1 merged as
   `2f2ea9f797d1861713cc100beae9466bf6afe9d5`.
-- Remaining portfolio: RFC #48/#52/#56; OpenClaw #112828/#117037; ClawHub
-  #3328/#3359; Awesome Claws #2. Closed OpenClaw #112808 is superseded as a
-  standalone slice by combined lifecycle PR #112828. Closed standalone #2 is
-  superseded by merged replacement #3.
-- Next: decide whether to split Awesome Claws #2 into a merged-runtime golden
-  proof and a dependency-gated exact build/publish proof. Otherwise retarget
-  OpenClaw #117037 to `main`, advance ClawHub #3359, and keep Awesome #2
-  blocked until those exact-artifact dependencies are real. Restack #112828
-  directly onto `main` before any landing review.
-- Known dirty state: `claws-hapi` has unrelated user changes outside this
-  project session; do not revert or include them.
+- Final-exam closure: the canonical review is
+  `projects/claws/reviews/2026-08-12-final-exam.md`. Its source fixes are now
+  consolidated into four published PRs: OpenClaw #123254, RFC #48, ClawHub
+  #3463, and Awesome Claws #6. RFC #48 was force-with-lease updated as the
+  single draft RFC 0016 contract; RFC #52 and #56 were closed as superseded.
+  Final-head follow-up review by GPT-5.6 Sol, GPT-5.6 Terra, and Claude Opus 5
+  is complete, and all accepted actionable findings were remediated.
+- Active heads: OpenClaw `ac079035ea`, RFC `acf99d988d`,
+  ClawHub `94b0158eef`, and Awesome Claws `4895d11592`.
+- Proof: OpenClaw now shares one per-server lifecycle lease between ordinary
+  MCP mutations and Claw ownership reconciliation, resolving ClawSweeper's
+  final P1 race. Its full `src/claws` suite passed 452 tests with 1 skip,
+  focused MCP ownership proof passed 36 tests, final Codex review found no
+  actionable defects, and exact-head CI run 31814847607 passed after rerunning
+  one unrelated fractional-mtime tooling flake. Exact-head ClawSweeper reports
+  no findings, security concerns, or contributor-facing blockers and marks the
+  PR ready for maintainer review. ClawHub was
+  rebased, its full CI passed, and its real pinned-OpenClaw parser job passed.
+  RFC and Awesome checks are green. ClawSweeper reports no findings on the
+  exact OpenClaw, RFC, or ClawHub heads; ClawHub real behavior is verified,
+  proof is sufficient, and it is ready for maintainer review.
+- Next: obtain maintainer product-direction approval for RFC #48 and ClawHub
+  #3463 and human lifecycle-owner review for OpenClaw #123254. The only red
+  status is ClawHub's non-required Vercel authorization check.
+- Known dirty state: the published RFC, ClawHub, Awesome Claws, and WSL
+  OpenClaw worktrees are clean. OpenClaw is currently 7 commits behind moving
+  `main`, but remains mergeable and its exact merge-result CI is green. The
+  earlier detached Windows OpenClaw review
+  worktree remains dirty as an archival pre-rebase copy; `claws-hapi` has
+  unrelated user changes outside this project session.
 - Blocking question: none.
 
 ## Current Session
