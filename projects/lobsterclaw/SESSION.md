@@ -21,34 +21,36 @@
 
 - Last updated: 2026-08-14
 - Last agent: GitHub Copilot CLI
-- Current focus: validate and review generation `2026.6.33-lobster-7055`.
+- Current focus: land provenance PR #1, then open the repaired 39-patch
+  generation.
 - Active branches:
-  - `lobsterclaw/provenance-v1`, LobsterClaw PR #1.
-  - `lobsterclaw/2026.6.33-7055`, generation checkpoint at
-    `919c306318b748eb0c3aaedfe874a0d2bb6b127f`.
-- Generation worktree: `/root/src/lobsterclaw-2026.6.33-7055`
-- Generation state: 38 ordered patch commits plus one final manifest commit.
-  The verifier reports patch count 38 and status `valid`. Full build, lint,
-  type-check, regression, and reconstructed-tree validation have not run on
-  this committed branch yet.
+  - `lobsterclaw/provenance-v1`, LobsterClaw PR #1 at `3bdfd42af8c`.
+  - `lobsterclaw/2026.6.33-7055-v2`, repaired generation at
+    `3f38843bef3`.
+- Generation worktree: `/root/src/lobsterclaw-2026.6.33-7055-v2`
+- Generation state: 39 ordered patch commits plus one final manifest commit.
+  The verifier reports patch count 39 and status `valid`; independent replay
+  matches source tree `d05c8821480b5e24817ea792057423f8b577ae95`.
+  Frozen install, full build, 23 provenance/reconstruction tests, and 41
+  focused repair tests pass.
+- Source PR: `bic/lobster#7055`. Patches 0000-0039 are pinned to
+  `8ebc4d84e89e`; repair patch 0040 is pinned to `4fb3a5a7630d`. The live PR
+  head advanced to `6ca8346a835d` without patch-bundle drift.
 - Known dirty state: `claws-hapi` has unrelated user changes. The separate
-  patch scratch worktree remains uncommitted.
-- Blocking question: PR #1 still needs human GitHubPop presence and merge
-  before the generation branch can be restacked for its final PR.
+  replay worktrees are scratch proof surfaces.
+- Blocking question: PR #1 still needs human GitHubPop presence and merge.
+  Lobster PR #7055 is also `CHANGES_REQUESTED` with fresh runtime checks queued.
 
 ## Resume Checklist
 
 - Check PR #1 and merge it after human GitHubPop presence.
-- In the generation worktree, confirm commit
-  `919c306318b748eb0c3aaedfe874a0d2bb6b127f` and run
-  `node .lobsterclaw/verify.mjs`.
-- Validate that all 38 patch commits retain exact patch bytes, source commit,
-  digest, and commit trailers.
-- Compare generated source to the known reconstructed tree, then run the
-  contract suites, frozen install, build, lint, type checks, and patch-owned
-  regressions.
-- After PR #1 lands, restack the generation without changing patch content,
-  rerun validation, and open the follow-up PR.
+- Check Lobster PR #7055 exact-head runtime results and address only
+  branch-owned failures.
+- Confirm generation head `3f38843bef3`, run `node .lobsterclaw/verify`, and
+  preserve source tree `d05c8821480b5e24817ea792057423f8b577ae95`.
+- After PR #1 lands, open the v2 generation PR without changing patch content.
+- Treat the `v2026.6.33` `zalouser` shrinkwrap drift as an upstream-base
+  exception: both files are byte-identical to the signed base.
 
 ## Guardrails
 
@@ -62,9 +64,11 @@
 ## Open Threads
 
 - Review and merge `bic/LobsterClaw#1`.
-- Finish validation and open generation `2026.6.33-lobster-7055` as a
-  follow-up PR.
-- Keep the patch import linked to exact Lobster head `6bb4b88ee4`.
+- Drive `bic/lobster#7055` exact-head runtime checks to green.
+- Open generation `2026.6.33-lobster-7055-4fb3a5a7` from
+  `lobsterclaw/2026.6.33-7055-v2` after PR #1 lands.
+- Keep the older `lobsterclaw/2026.6.33-7055` branch as historical evidence;
+  do not use it as the final candidate.
 
 ## Session Checkpoints
 
