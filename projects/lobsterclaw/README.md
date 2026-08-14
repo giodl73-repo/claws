@@ -17,8 +17,8 @@ immutable generations, and one manifest is the ordered patch ledger.
 
 | Repo | PR / Issue | Branch | Status | Purpose |
 | ---- | ---------- | ------ | ------ | ------- |
-| `bic/LobsterClaw` | #1 | `lobsterclaw/provenance-v1` | Open; GitHubPop blocked | Add the simple provenance manifest, verifier, and retain/rebuild/remove rule with zero patches imported. |
-| `bic/LobsterClaw` | Follow-up | `lobsterclaw/2026.6.33-7055-v2` | Pushed and validated | Import Lobster #7055's 39 exact source-backed patches after provenance v1 lands. |
+| `bic/LobsterClaw` | #1 | `lobsterclaw/provenance-v1` | Merged | Add the simple provenance manifest, verifier, and retain/rebuild/remove rule with zero patches imported. |
+| `bic/LobsterClaw` | #2 | `lobsterclaw/2026.6.33-7055-v2` | Open | Import Lobster #7055's 39 exact source-backed patches. |
 | `bic/lobster` | #7055 | `promoteclaw/openclaw-2026.6.33` | Open; runtime checks active | Own the authoritative 6.33 patch queue, including the final compile-contract repair patch. |
 
 ## Related Areas

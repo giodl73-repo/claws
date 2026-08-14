@@ -21,12 +21,11 @@
 
 - Last updated: 2026-08-14
 - Last agent: GitHub Copilot CLI
-- Current focus: land provenance PR #1, then open the repaired 39-patch
-  generation.
+- Current focus: land the repaired 39-patch generation in LobsterClaw PR #2.
 - Active branches:
-  - `lobsterclaw/provenance-v1`, LobsterClaw PR #1 at `3bdfd42af8c`.
+  - `lobsterclaw/provenance-v1`, merged by LobsterClaw PR #1 at `3bdfd42af8c`.
   - `lobsterclaw/2026.6.33-7055-v2`, repaired generation at
-    `3f38843bef3`.
+    `3f38843bef3`, open as LobsterClaw PR #2.
 - Generation worktree: `/root/src/lobsterclaw-2026.6.33-7055-v2`
 - Generation state: 39 ordered patch commits plus one final manifest commit.
   The verifier reports patch count 39 and status `valid`; independent replay
@@ -35,20 +34,21 @@
   focused repair tests pass.
 - Source PR: `bic/lobster#7055`. Patches 0000-0039 are pinned to
   `8ebc4d84e89e`; repair patch 0040 is pinned to `4fb3a5a7630d`. The live PR
-  head advanced to `6ca8346a835d` without patch-bundle drift.
+  head advanced to `b7ae449d0a3f` without patch-bundle drift; the only change
+  since `6ca8346a835d` is the Teams trust-boundary oracle.
 - Known dirty state: `claws-hapi` has unrelated user changes. The separate
   replay worktrees are scratch proof surfaces.
-- Blocking question: PR #1 still needs human GitHubPop presence and merge.
+- Blocking question: LobsterClaw PR #2 needs its gates and human presence.
   Lobster PR #7055 is also `CHANGES_REQUESTED` with fresh runtime checks queued.
 
 ## Resume Checklist
 
-- Check PR #1 and merge it after human GitHubPop presence.
+- Check LobsterClaw PR #2 gates and merge readiness.
 - Check Lobster PR #7055 exact-head runtime results and address only
   branch-owned failures.
 - Confirm generation head `3f38843bef3`, run `node .lobsterclaw/verify`, and
   preserve source tree `d05c8821480b5e24817ea792057423f8b577ae95`.
-- After PR #1 lands, open the v2 generation PR without changing patch content.
+- Preserve PR #2 patch content while its gates run.
 - Treat the `v2026.6.33` `zalouser` shrinkwrap drift as an upstream-base
   exception: both files are byte-identical to the signed base.
 
@@ -63,10 +63,10 @@
 
 ## Open Threads
 
-- Review and merge `bic/LobsterClaw#1`.
+- Review and merge `bic/LobsterClaw#2`.
 - Drive `bic/lobster#7055` exact-head runtime checks to green.
-- Open generation `2026.6.33-lobster-7055-4fb3a5a7` from
-  `lobsterclaw/2026.6.33-7055-v2` after PR #1 lands.
+- Land generation `2026.6.33-lobster-7055-4fb3a5a7` from
+  `lobsterclaw/2026.6.33-7055-v2`.
 - Keep the older `lobsterclaw/2026.6.33-7055` branch as historical evidence;
   do not use it as the final candidate.
 
