@@ -33,7 +33,9 @@
   clean fork-only evidence: Board Model extraction `c0111f9a8d` and Lobster
   Config LC1 through `6d4513379e`, including real Electron visual proof. Release
   ancestry shows no stable board-capable tag; `v2026.8.1-beta.2` is the first
-  fully compatible tag and passes the extraction proof. Settings writes still
+  fully compatible tag and passes the extraction proof. Lobster Board LB1 now
+  completes the fork-only second-host proof in React without admitting that
+  beta or changing the 2026.6.33 support statement. Settings writes still
   require Managed Configuration.
 - Active branch / PR: fork branch
   `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `61e00db` in
@@ -72,6 +74,11 @@
   Lobster LM6 is
   [fork-local draft PR #68](https://microsoft.ghe.com/giodl/lobster/pull/68)
   at `0bf31b9f57` from `user/giodl/control-model-lm6`, stacked on LM5.
+  Lobster Config LC1 is
+  [fork-local draft PR #69](https://microsoft.ghe.com/giodl/lobster/pull/69)
+  at `6d4513379e`, stacked on LM6. Lobster Board LB1 is
+  [fork-local draft PR #70](https://microsoft.ghe.com/giodl/lobster/pull/70)
+  at `f988457486`, stacked on Config LC1.
 - Review result: OpenClaw enumerates all authorized applicable view
   descriptors, but materializes only the client-selected deferred payload.
   Discovery is policy-filtered, renderer advertisement is private by default,
@@ -222,8 +229,9 @@
   `0e60930621`; LM4 worktree `C:\src\lobster-control-model-lm4` is clean at
   `8d16952671`; LM5 worktree `C:\src\lobster-control-model-lm5` is clean at
   `a7f73e5b08`; LM6 worktree `C:\src\lobster-control-model-lm6` is clean at
-  `0bf31b9f57`. `claws-hapi` remains heavily dirty with unrelated pre-existing
-  changes.
+  `0bf31b9f57`. Board LB1 worktree `C:\src\lobster-board-model-lb1` is clean at
+  `f988457486` with its dependency junction removed. `claws-hapi` remains
+  heavily dirty with unrelated pre-existing changes.
 - Blocking question: L0 still lacks Proof of Presence and the required Lobster
   runtime contexts. RFC intake is frozen, so the design remains fork-only until
   explicit authorization to submit upstream. Native dashboards must either
