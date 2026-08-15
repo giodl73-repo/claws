@@ -17,7 +17,7 @@ activation status.
 | Repo | Branch | Status | Purpose |
 | ---- | ------ | ------ | ------- |
 | `bic/LobsterClaw` local generation branch | `user/giodl/config-model-proof` at `a03889e2eb` | Fork-only proof | Add optional `@openclaw/gateway-client/model/config` read-only snapshots and schema lookup against the pinned 2026.6.33 runtime. |
-| `gim-home/m` local Lobster branch | `user/giodl/config-model-lc1` at `cb71803d68` | Fork-only adopter; review clean | Carry the Config Model through Electron-owned Gateway transport and render one native read-only OpenClaw settings category. |
+| `gim-home/m` Lobster fork | [`user/giodl/config-model-lc1` PR #69](https://microsoft.ghe.com/giodl/lobster/pull/69) at `cb71803d68` | Fork-only adopter draft; review clean | Carry the Config Model through Electron-owned Gateway transport and render one native read-only OpenClaw settings category. |
 | `openclaw/openclaw` | Managed Configuration stack | Separate prerequisite | Add source authority, provenance, candidate preview, conflicts, and transactional activation before governed native writes. |
 
 ## First Slice

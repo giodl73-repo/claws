@@ -35,7 +35,7 @@
   board-capable OpenClaw generation; settings writes still require Managed
   Configuration.
 - Active branch / PR: fork branch
-  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `1d17154` in
+  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `61e00db` in
   [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
   upstream RFC PR. OpenClaw OC1 is
   [fork-local draft PR #230](https://github.com/giodl73-repo/openclaw/pull/230)

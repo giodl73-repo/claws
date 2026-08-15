@@ -21,7 +21,10 @@
 - Last agent: GitHub Copilot CLI.
 - Current focus: first Gateway Client Board Model evidence slice completed,
   committed, and reviewed clean; next step is a second-host adapter.
-- Active branch / PR: local fork-only branch; no PR.
+- Active branch / PR: fork-only draft
+  [giodl73-repo/openclaw#240](https://github.com/giodl73-repo/openclaw/pull/240)
+  from `user/giodl/board-model-proof` at `c0111f9a8d`, based on the fork-local
+  `user/giodl/board-model-base`.
 - Known dirty state: proof worktree is clean and one commit ahead of
   `origin/main`. `claws-hapi` contains unrelated pre-existing changes.
 - Blocking question: LobsterClaw 2026.6.33 predates the board protocol. Choose

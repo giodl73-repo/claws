@@ -21,8 +21,9 @@
 - Last agent: GitHub Copilot CLI.
 - Current focus: adopt the read-only Config Model in one native Lobster
   settings category without moving Gateway authority into React.
-- Active branch / PR: `user/giodl/config-model-lc1` at `cb71803d68`; local
-  fork-only branch, no PR.
+- Active branch / PR: fork-only draft
+  [giodl/lobster#69](https://microsoft.ghe.com/giodl/lobster/pull/69) from
+  `user/giodl/config-model-lc1` at `cb71803d68`, stacked on LM6.
 - Result: carried `@openclaw/gateway-client/model/config`, added a main-process
   presentation-safe adapter and typed IPC/service port, and rendered default
   model, agent workspace, and gateway mode with schema help and reload impact.

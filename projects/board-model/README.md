@@ -19,7 +19,7 @@ The missing capability is a reusable client projection outside Control UI.
 
 | Repo | Branch | Status | Purpose |
 | ---- | ------ | ------ | ------- |
-| `openclaw/openclaw` fork | `user/giodl/board-model-proof` at `c0111f9a8d` | Fork-only proof; review clean | Extracted the existing Gateway board provider into `@openclaw/gateway-client/model/board` and kept Control UI as the reference adopter. |
+| `openclaw/openclaw` fork | [`user/giodl/board-model-proof` PR #240](https://github.com/giodl73-repo/openclaw/pull/240) at `c0111f9a8d` | Fork-only draft; review clean | Extracted the existing Gateway board provider into `@openclaw/gateway-client/model/board` and kept Control UI as the reference adopter. |
 | `bic/LobsterClaw` | `release/2026.6.33` | Version gap | The pinned generation predates the board protocol. Do not claim hosted dashboard support or backport the full dashboard stack without an admission decision. |
 
 ## First Slice
