@@ -50,19 +50,19 @@
   [draft PR #8165](https://microsoft.ghe.com/bic/lobster/pull/8165) at
   `80fe70b13f` from `giodl:user/giodl/control-model-carry`. Lobster LM1 is
   [fork-local draft PR #63](https://microsoft.ghe.com/giodl/lobster/pull/63)
-  at `696e9f8d39` from `user/giodl/control-model-lm1`, stacked on the L0 branch.
+  at `b7686177d0` from `user/giodl/control-model-lm1`, stacked on the L0 branch.
   Lobster LM2 is
   [fork-local draft PR #64](https://microsoft.ghe.com/giodl/lobster/pull/64)
-  at `6f55b43ef1` from `user/giodl/control-model-lm2`, stacked on LM1.
+  at `24641f575e` from `user/giodl/control-model-lm2`, stacked on LM1.
   Lobster LM3 is
   [fork-local draft PR #65](https://microsoft.ghe.com/giodl/lobster/pull/65)
-  at `7181deee69` from `user/giodl/control-model-lm3`, stacked on LM2.
+  at `0e60930621` from `user/giodl/control-model-lm3`, stacked on LM2.
   Lobster LM4 is
   [fork-local draft PR #66](https://microsoft.ghe.com/giodl/lobster/pull/66)
-  at `66d91dcaa0` from `user/giodl/control-model-lm4`, stacked on LM3.
+  at `8d16952671` from `user/giodl/control-model-lm4`, stacked on LM3.
   Lobster LM5 is
   [fork-local draft PR #67](https://microsoft.ghe.com/giodl/lobster/pull/67)
-  at `1a0fe97f7b` from `user/giodl/control-model-lm5`, stacked on LM4.
+  at `a7f73e5b08` from `user/giodl/control-model-lm5`, stacked on LM4.
 - Review result: OpenClaw enumerates all authorized applicable view
   descriptors, but materializes only the client-selected deferred payload.
   Discovery is policy-filtered, renderer advertisement is private by default,
@@ -85,9 +85,9 @@
   without replay, live assistant commits deduplicate across reconnect, streaming
   snapshots retain the 80 ms throttle, and raw token usage plus actionable
   connection/auth errors survive canonical takeover. Proof is desktop typecheck,
-  type-aware lint, formatting, and 376 focused Electron tests. Autoreview findings
-  were fixed; the final external rerun could not authenticate with any configured
-  reviewer.
+  type-aware lint, formatting, and 376 focused Electron tests. The final stack
+  review additionally fixed raw assistant-stream fallback during empty canonical
+  projections and allowed synthetic idle to quiesce canonical views.
 - Lobster LM2 result: canonical artifacts project through `SessionView` into an
   exact `clawpilot://widgets/table` version-1 registry. The native renderer
   accepts 1-12 unique columns, at most 100 rows, and primitive cells only;
@@ -105,7 +105,10 @@
   Gateway-mode fixture now sends a production-shaped artifact through the real
   model, adapter, IPC, reconciliation, and React registry. Its Electron E2E
   renders the six expected table cells, preserves the assistant message after
-  the final run transition, and proves no structured fallback was used.
+  the final run transition, and proves no structured fallback was used. The
+  final stack review also preserved top-level history IDs and associated
+  tool-only artifacts with their owning run message, including incremental
+  cache invalidation when the message arrives later.
 - Lobster LM3 result: the exact native table registry owns one `refresh`
   affordance; no tool-authored action descriptor or generic action catalog was
   added. Renderer-to-main IPC carries the session, artifact id, revision, and
@@ -128,8 +131,9 @@
   `SessionView` unsubscribe from disposing an in-flight send or action. Proof is
   desktop typecheck, type-aware lint, production build, all 220 focused Gateway
   tests, reconnect and view-unsubscribe regressions, and the real Electron
-  Gateway table/refresh E2E. The final independent review reported no
-  significant issues.
+  Gateway table/refresh E2E. The final stack review also invalidated retained
+  conversation leases and attachment preprocessing across sign-out so work
+  from one identity cannot dispatch or remain visible under the next identity.
 - Lobster LM5 result: active foreground aborts now acquire a shared Control
   Model conversation lease and call `conversation.abort` with the exact run ID
   owned by Lobster's turn tracker. Lobster still synchronously cancels
@@ -138,6 +142,15 @@
   the raw `{ sessionKey }` abort-all recovery request because Control Model
   abort is intentionally run-scoped. Proof is desktop typecheck, type-aware
   lint, 216 focused Gateway tests, and clean independent and Codex reviews.
+- Final Lobster stack review: fresh agent review covered PRs #63-#67 at their
+  current heads. Accepted findings were fixed in LM1, LM2, and LM4; the stack
+  was restacked and passed desktop typecheck, type-aware lint, and 319 focused
+  tests. LM3's generic prompt-targeting and run-duration sleep-hold suggestions
+  were rejected because V1 intentionally proves a conversation-level host
+  action, not a structured artifact-target command or action-run lifecycle.
+  LM1's remote-user-message suggestion was deferred because Lobster currently
+  owns optimistic user bubbles and lacks a stable correlation identifier for
+  safe cross-client deduplication.
 - Artifact placement: one stable artifact may render inline, expanded, or in a
   dedicated surface. Later turns may publish higher revisions. V1 persistence
   is session-scoped rather than a permanent document store.
@@ -178,11 +191,11 @@
   pre-restack heads. The
   dedicated RFC worktree started clean from `openclaw/rfcs` `origin/main` at
   `af708f0`. Lobster LM1 worktree `C:\src\lobster-control-model-lm1` is clean at
-  `696e9f8d39`; LM2 worktree `C:\src\lobster-control-model-lm2` is clean at
-  `6f55b43ef1`; LM3 worktree `C:\src\lobster-control-model-lm3` is clean at
-  `7181deee69`; LM4 worktree `C:\src\lobster-control-model-lm4` is clean at
-  `66d91dcaa0`; LM5 worktree `C:\src\lobster-control-model-lm5` is clean at
-  `1a0fe97f7b`. `claws-hapi` remains heavily dirty with unrelated pre-existing
+  `b7686177d0`; LM2 worktree `C:\src\lobster-control-model-lm2` is clean at
+  `24641f575e`; LM3 worktree `C:\src\lobster-control-model-lm3` is clean at
+  `0e60930621`; LM4 worktree `C:\src\lobster-control-model-lm4` is clean at
+  `8d16952671`; LM5 worktree `C:\src\lobster-control-model-lm5` is clean at
+  `a7f73e5b08`. `claws-hapi` remains heavily dirty with unrelated pre-existing
   changes.
 - Blocking question: L0 still lacks Proof of Presence and the required Lobster
   runtime contexts. RFC intake is frozen, so the design remains fork-only until
@@ -208,13 +221,13 @@
   Current state: GitHubPop fails Proof of Presence and both runtime contexts are
   absent; do not manually queue ADO without an explicit request.
 - Verify: fork-local Lobster PR #63 remains stacked on
-  `user/giodl/control-model-carry` at `696e9f8d39`.
+  `user/giodl/control-model-carry` at `b7686177d0`.
 - Verify: fork-local Lobster PR #64 remains stacked on
-  `user/giodl/control-model-lm1` at `6f55b43ef1`.
+  `user/giodl/control-model-lm1` at `24641f575e`.
 - Verify: fork-local Lobster PR #65 remains stacked on
-  `user/giodl/control-model-lm2` at `7181deee69`.
+  `user/giodl/control-model-lm2` at `0e60930621`.
 - Verify: fork-local Lobster PR #66 remains stacked on
-  `user/giodl/control-model-lm3` at `66d91dcaa0`.
+  `user/giodl/control-model-lm3` at `8d16952671`.
 - Review: `review-packet.md`, the role findings, and any comments on the M
   design issue.
 - Update: this file and add a checkpoint after canonical decisions change.
