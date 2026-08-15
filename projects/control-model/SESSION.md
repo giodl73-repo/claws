@@ -29,9 +29,13 @@
   compatibility review, a released Gateway Client model surface, Lobster CI
   and rollout, live hosted-Gateway proof, and shareable UX evidence. Existing
   dashboards and settings are hosted first; native board and configuration
-  projections remain separate owner-first surfaces.
+  projections remain separate owner-first surfaces. Those follow-ups now have
+  clean fork-only evidence: Board Model extraction `c0111f9a8d` and Lobster
+  Config LC1 through `cb71803d68`. Native board adoption still requires a
+  board-capable OpenClaw generation; settings writes still require Managed
+  Configuration.
 - Active branch / PR: fork branch
-  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `b64f7ee` in
+  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `1d17154` in
   [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
   upstream RFC PR. OpenClaw OC1 is
   [fork-local draft PR #230](https://github.com/giodl73-repo/openclaw/pull/230)
