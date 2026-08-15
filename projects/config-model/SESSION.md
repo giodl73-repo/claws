@@ -19,22 +19,24 @@
 
 - Last updated: 2026-08-15.
 - Last agent: GitHub Copilot CLI.
-- Current focus: prove a read-only framework-neutral Config Model on the
-  current LobsterClaw 2026.6.33 generation.
-- Active branch / PR: local fork-only branch; no PR.
-- Result: added `@openclaw/gateway-client/model/config` with immutable
-  snapshots, explicit refresh, read-scoped schema lookup, malformed-response
-  rejection, disposal fencing, four focused tests, and package build proof.
-- Known dirty state: proof worktree is clean at `a03889e2eb`. `claws-hapi`
-  contains unrelated pre-existing changes.
+- Current focus: adopt the read-only Config Model in one native Lobster
+  settings category without moving Gateway authority into React.
+- Active branch / PR: `user/giodl/config-model-lc1` at `5080c8f0ea`; local
+  fork-only branch, no PR.
+- Result: carried `@openclaw/gateway-client/model/config`, added a main-process
+  presentation-safe adapter and typed IPC/service port, and rendered default
+  model, agent workspace, and gateway mode with schema help and reload impact.
+- Known dirty state: the committed adopter is complete. Dependency restoration
+  left uncommitted formatting-only agent-file and lockfile churn outside the
+  commit. `claws-hapi` contains unrelated pre-existing changes.
 - Blocking question: governed writes require Managed Configuration authority,
   provenance, preview, generation, and transactional activation contracts.
 
 ## Resume Checklist
 
-- Review the read-only model API and naming.
-- Add package acceptance/import proof.
-- Decide whether Control UI or a small Lobster adapter is the first adopter.
+- Review the LC1 native settings evidence and naming.
+- Add package acceptance/import proof if this slice is promoted.
+- Keep the current native surface read-only.
 - Do not add `config.set`, `config.patch`, or `config.apply` commands until the
   writable-source and preview contract exists.
 - Rebase or reconstruct the proof as an ordered LobsterClaw patch only after
@@ -55,6 +57,4 @@
 - Add source provenance and lock reasons from Managed Configuration.
 - Define candidate preview, findings, diff, conflict, generation, commit, and
   activation status.
-- Pick the first native Lobster settings page after the read-only contract is
-  reviewed.
-
+- Decide which additional presentation-safe fields belong in the native page.
