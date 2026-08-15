@@ -159,6 +159,10 @@ prove a real OpenClaw dry-run through the packed binary. That optional lane
 uses disposable home, state, and config paths and does not read or migrate the
 operator's normal OpenClaw state.
 
+CI runs the OpenClaw lane against the same immutable consumer commit pinned by
+ClawHub's schema-v1 conformance suite. Advancing that pin is an explicit
+cross-repository contract update, not an ambient compatibility claim.
+
 The development artifact requires Node.js 22.22.3 or newer and an OpenClaw build
 that provides the experimental `openclaw claws add --json` contract. A
 configured OpenClaw entry runs with the CLI's Node executable, which must also
