@@ -22,13 +22,12 @@
 
 ## Current Session
 
-- Last updated: 2026-08-14.
+- Last updated: 2026-08-15.
 - Last agent: GitHub Copilot CLI.
-- Current focus: Lobster LM5 migrates active-run abort dispatch to Control
-  Model `conversation.abort` while preserving synchronous preprocessing
-  cancellation, immediate Lobster turn retirement and idle emission,
-  exec-approval follow-up run ownership, and the raw no-run abort-all recovery
-  path.
+- Current focus: Lobster LM6 deletes duplicate selected-session raw history
+  hydration by explicitly refreshing a Control Model conversation and
+  projecting its canonical snapshot, while preserving bounded history and
+  host-specific operational/security lanes.
 - Active branch / PR: fork branch
   `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `97d6bfc` in
   [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
@@ -63,6 +62,9 @@
   Lobster LM5 is
   [fork-local draft PR #67](https://microsoft.ghe.com/giodl/lobster/pull/67)
   at `a7f73e5b08` from `user/giodl/control-model-lm5`, stacked on LM4.
+  Lobster LM6 is
+  [fork-local draft PR #68](https://microsoft.ghe.com/giodl/lobster/pull/68)
+  at `0bf31b9f57` from `user/giodl/control-model-lm6`, stacked on LM5.
 - Review result: OpenClaw enumerates all authorized applicable view
   descriptors, but materializes only the client-selected deferred payload.
   Discovery is policy-filtered, renderer advertisement is private by default,
@@ -142,6 +144,16 @@
   the raw `{ sessionKey }` abort-all recovery request because Control Model
   abort is intentionally run-scoped. Proof is desktop typecheck, type-aware
   lint, 216 focused Gateway tests, and clean independent and Codex reviews.
+- Lobster LM6 result: selected-session hydration no longer performs a separate
+  raw `chat.history` normalization pass. The backend explicitly refreshes a
+  leased Control Model conversation, projects committed canonical messages,
+  preserves the 1,000-message limit, treats authoritative legacy and
+  idempotency-only rows as non-optimistic, and rejects malformed responses
+  instead of silently presenting an empty transcript. Automatic history loading
+  is disabled in this host so refresh ownership is explicit and cannot hang on
+  subscription setup or sign-out. Proof is 35 focused Control Model tests, 226
+  focused desktop tests, both package and desktop typechecks/lints, and clean
+  independent and Codex reviews.
 - Final Lobster stack review: fresh agent review covered PRs #63-#67 at their
   current heads. Accepted findings were fixed in LM1, LM2, and LM4; the stack
   was restacked and passed desktop typecheck, type-aware lint, and 319 focused
@@ -195,7 +207,8 @@
   `24641f575e`; LM3 worktree `C:\src\lobster-control-model-lm3` is clean at
   `0e60930621`; LM4 worktree `C:\src\lobster-control-model-lm4` is clean at
   `8d16952671`; LM5 worktree `C:\src\lobster-control-model-lm5` is clean at
-  `a7f73e5b08`. `claws-hapi` remains heavily dirty with unrelated pre-existing
+  `a7f73e5b08`; LM6 worktree `C:\src\lobster-control-model-lm6` is clean at
+  `0bf31b9f57`. `claws-hapi` remains heavily dirty with unrelated pre-existing
   changes.
 - Blocking question: L0 still lacks Proof of Presence and the required Lobster
   runtime contexts. RFC intake is frozen, so the design remains fork-only until
@@ -248,8 +261,8 @@
   upstream.
 - Decide when the optional Gateway Client model subpaths should publish, after
   two-consumer evidence and duplicate-reducer deletion.
-- Decide whether any broader LM6 parity/deletion slice is justified by
-  remaining duplicated behavior.
+- Decide whether cross-client user-message correlation warrants a separate
+  follow-up; no broader parity refactor is justified by the current audit.
 - Decide whether JSON Render is an adopter choice or a future OpenClaw-owned
   artifact dialect; V1 keeps it out of the core contract.
 - Confirm the OpenClaw view-offer discovery carrier and deferred
