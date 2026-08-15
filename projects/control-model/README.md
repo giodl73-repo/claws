@@ -33,7 +33,7 @@ The durable name is **OpenClaw Control Model**. `Gateway` names the transport;
 | `giodl/lobster` fork | [Draft PR #65](https://microsoft.ghe.com/giodl/lobster/pull/65) | `user/giodl/control-model-lm3` at `0e60930621` stacked on LM2 | Fork-local stacked review | Adds one host-owned native table refresh action, validates canonical artifact identity/revision in main, routes accepted effects through Control Model `chat.send`, and visibly rejects stale, denied, or reconnected actions. |
 | `giodl/lobster` fork | [Draft PR #66](https://microsoft.ghe.com/giodl/lobster/pull/66) | `user/giodl/control-model-lm4` at `8d16952671` stacked on LM3 | Fork-local stacked review | Deletes Lobster's duplicate raw ordinary-send request by routing assembled prompts and image attachments through `ControlModelConversation.send`, while retaining Lobster preprocessing and operational run tracking. |
 | `giodl/lobster` fork | [Draft PR #67](https://microsoft.ghe.com/giodl/lobster/pull/67) | `user/giodl/control-model-lm5` at `a7f73e5b08` stacked on LM4 | Fork-local stacked review | Routes active foreground aborts through `ControlModelConversation.abort` while preserving synchronous preprocessing cancellation, immediate turn retirement/idle, exec-approval follow-up ownership, and raw no-run abort-all recovery. |
-| `giodl/lobster` fork | [Draft PR #68](https://microsoft.ghe.com/giodl/lobster/pull/68) | `user/giodl/control-model-lm6` at `0bf31b9f57` stacked on LM5 | Fork-local stacked review | Deletes Lobster's duplicate selected-session history hydration by projecting an explicitly refreshed Control Model conversation snapshot, while preserving the 1,000-message bound and rejecting malformed history. |
+| `giodl/lobster` fork | [Draft PR #68](https://microsoft.ghe.com/giodl/lobster/pull/68) | `user/giodl/control-model-lm6` at `0bf31b9f57` stacked on LM5 | Final fork-local Lobster slice | Deletes Lobster's duplicate selected-session history hydration by projecting an explicitly refreshed Control Model conversation snapshot, while preserving the 1,000-message bound and rejecting malformed history. The Lobster evidence series stops here. |
 | `gim-home/m` | [#5675](https://github.com/gim-home/m/issues/5675) | n/a | Open design issue | Consume the Control Model through Lobster's hosted Gateway seam, adapt into `SessionView`, and render trusted native artifacts. |
 | `gim-home/m` | [#2511](https://github.com/gim-home/m/issues/2511) | n/a | Related open direction | Native React/JSON-render GenUX direction and swappable renderer discussion. |
 | `gim-home/m` | [#5427](https://github.com/gim-home/m/issues/5427) | n/a | Existing architecture map | One Scout UX package and SuperApp integration decisions. |
@@ -57,6 +57,13 @@ compatibility ownership. Lobster retains product composition, React
 components, theming, tenant integration, and rollout. M's existing
 `SessionView` remains its UX vocabulary; a Lobster adapter maps the OpenClaw
 Control Model into that shape.
+
+The bounded Lobster evidence series ends at LM6. Remaining raw paths are
+host-owned operational/security protocols, session-management operations, or
+compatibility consumers rather than duplicate Control Model behavior.
+Cross-client user-message delivery remains a possible separate contract slice:
+it must align Lobster `clientMessageId`, Control Model idempotency, retries, and
+canonical user-message identity before the adapter can safely emit user commits.
 
 ## Related Areas
 

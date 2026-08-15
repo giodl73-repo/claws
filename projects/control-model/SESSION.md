@@ -24,10 +24,10 @@
 
 - Last updated: 2026-08-15.
 - Last agent: GitHub Copilot CLI.
-- Current focus: Lobster LM6 deletes duplicate selected-session raw history
-  hydration by explicitly refreshing a Control Model conversation and
-  projecting its canonical snapshot, while preserving bounded history and
-  host-specific operational/security lanes.
+- Current focus: close the bounded Lobster evidence series at LM6. The adopted
+  Control Model now owns canonical selected-session state, artifacts, native
+  actions, ordinary sends, active-run aborts, and history hydration; remaining
+  raw paths are host-owned operational/security or compatibility lanes.
 - Active branch / PR: fork branch
   `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `97d6bfc` in
   [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
@@ -154,6 +154,12 @@
   subscription setup or sign-out. Proof is 35 focused Control Model tests, 226
   focused desktop tests, both package and desktop typechecks/lints, and clean
   independent and Codex reviews.
+- Lobster series decision: stop at LM6. Runtime-owner, Lobster-host, and
+  skeptical-maintainer reviews all classified cross-client user-message
+  correlation as a separate identity/retry contract expansion rather than a
+  narrow parity/deletion slice. A future proposal must align
+  `clientMessageId`, Control Model idempotency, retry/reconnect behavior,
+  non-renderer callers, canonical user identity, and renderer deduplication.
 - Final Lobster stack review: fresh agent review covered PRs #63-#67 at their
   current heads. Accepted findings were fixed in LM1, LM2, and LM4; the stack
   was restacked and passed desktop typecheck, type-aware lint, and 319 focused
@@ -261,8 +267,9 @@
   upstream.
 - Decide when the optional Gateway Client model subpaths should publish, after
   two-consumer evidence and duplicate-reducer deletion.
-- Decide whether cross-client user-message correlation warrants a separate
-  follow-up; no broader parity refactor is justified by the current audit.
+- If cross-client user-message delivery becomes a product requirement, define
+  it as a separate contract slice with retry and non-renderer proof; do not add
+  it to the LM1-LM6 stack.
 - Decide whether JSON Render is an adopter choice or a future OpenClaw-owned
   artifact dialect; V1 keeps it out of the core contract.
 - Confirm the OpenClaw view-offer discovery carrier and deferred

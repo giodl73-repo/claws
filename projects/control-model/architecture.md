@@ -266,6 +266,17 @@ sandboxed fallback behavior when native support is absent.
 | LM5: active abort command cutover | Route owned active-run aborts through Control Model `conversation.abort`; retain Lobster preprocessing cancellation, immediate tracker retirement/idle, exec-approval follow-up run selection, and raw no-run abort-all recovery | Exact active run ID, pending conversation lease, fire-and-forget failure, Stop during preprocessing, follow-up late-final fencing | Duplicate raw active-run `chat.abort` dispatch |
 | LM6: history hydration cutover | Route selected-session hydration through an explicitly refreshed Control Model conversation snapshot; preserve the 1,000-message bound and authoritative legacy/idempotency-only rows | Single history request, malformed-response rejection, sign-out-safe explicit refresh, 35 model tests, 226 focused desktop tests, typecheck, lint, and clean independent/Codex reviews | Duplicate raw Lobster `chat.history` normalization for selected-session hydration |
 
+LM6 is the stop point for the bounded Lobster series. The remaining raw lanes
+are not equivalent Control Model duplicates: they own operator/security
+approvals, no-run abort-all recovery, session catalog and mutation, memory,
+automation compatibility, or Lobster's local preprocessing and run lifecycle.
+
+Cross-client user-message correlation is a separate future contract, not LM7
+parity cleanup. It would need to carry Lobster `clientMessageId` through
+`SendPayload` into Control Model send idempotency, preserve that identity across
+retry/reconnect and non-renderer callers, and project canonical user commits
+without duplicating optimistic local bubbles.
+
 ## Cheapest evidence slice
 
 1. Use the existing hosted Gateway route and authentication seam.
