@@ -12,18 +12,18 @@
 - Area: OpenClaw Board Model.
 - Owner repo: `openclaw/openclaw`.
 - Proof worktree: `C:\src\openclaw-board-model-proof`.
-- Branch: `user/giodl/board-model-proof` at `9663cc7edc`.
+- Branch: `user/giodl/board-model-proof` at `c0111f9a8d`.
 - Delivery consumer: Lobster through a future LobsterClaw generation.
 
 ## Current Session
 
 - Last updated: 2026-08-15.
 - Last agent: GitHub Copilot CLI.
-- Current focus: extract the existing framework-light Gateway board provider
-  from Control UI into a reusable board client model.
+- Current focus: first Gateway Client Board Model evidence slice completed,
+  committed, and reviewed clean; next step is a second-host adapter.
 - Active branch / PR: local fork-only branch; no PR.
-- Known dirty state: proof worktree is clean. `claws-hapi` contains unrelated
-  pre-existing changes.
+- Known dirty state: proof worktree is clean and one commit ahead of
+  `origin/main`. `claws-hapi` contains unrelated pre-existing changes.
 - Blocking question: LobsterClaw 2026.6.33 predates the board protocol. Choose
   a newer generation or explicitly approve a large coordinated backport before
   Lobster dashboard shipment claims.
@@ -48,9 +48,7 @@
 
 ## Open Threads
 
-- Finalize the package subpath: `@openclaw/gateway-client/board` versus
-  `@openclaw/gateway-client/model/board`.
+- Treat `@openclaw/gateway-client/model/board` as the selected proof subpath.
 - Separate public board state from short-lived sandbox/view-ticket material.
 - Define the Lobster native adapter only after Control UI adopts the shared
   model.
-
