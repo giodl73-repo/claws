@@ -19,4 +19,38 @@ jobs:
           node-version: 24.15.0
       - run: npm install --global pnpm@10.33.2
       - run: pnpm install --frozen-lockfile
-      - run: pnpm check
+      - run: pnpm proof:private
+
+  openclaw-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      OPENCLAW_CONTRACT_REPOSITORY: openclaw/openclaw
+      OPENCLAW_CONTRACT_SHA: f8c0e1b8325b1fc36e039cf357a2c4602f76d5aa
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24.15.0
+      - run: npm install --global pnpm@10.33.2
+      - run: pnpm install --frozen-lockfile
+
+      - name: Check out the pinned OpenClaw contract source
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          repository: ${{ env.OPENCLAW_CONTRACT_REPOSITORY }}
+          ref: ${{ env.OPENCLAW_CONTRACT_SHA }}
+          path: .artifacts/openclaw-contract
+
+      - name: Build the pinned OpenClaw contract source
+        working-directory: .artifacts/openclaw-contract
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+          pnpm build
+
+      - name: Prove the packed CLI delegates to OpenClaw
+        env:
+          OPENCLAW_CLI_ENTRY: ${{ github.workspace }}/.artifacts/openclaw-contract/openclaw.mjs
+        run: pnpm proof:pack
