@@ -1,0 +1,29 @@
+OpenClaw primitives can now power a Lobster-owned native UX
+
+WHY THIS EXISTS
+We want Lobster/M to own the React experience without importing or forking OpenClaw's Lit Control UI. OpenClaw remains authoritative for sessions, conversation behavior, boards, configuration semantics, authorization, and persistence; Lobster owns product composition, Fluent UX, tenant integration, telemetry, and rollout.
+
+Mission: expose framework-neutral OpenClaw client models so multiple hosts can render their own UX without independently rebuilding raw Gateway reconciliation.
+
+WHERE WE ARE
+
+Chat and sessions - demonstrated end to end
+Lobster consumes canonical session and conversation snapshots for native rendering, streaming, tools, artifacts, actions, send, abort, reconnect, and selected-session history. React remains passive and does not parse raw Gateway events.
+RFC 0029: https://github.com/giodl73-repo/rfcs/pull/8
+Control UI proof OC4: https://github.com/giodl73-repo/openclaw/pull/238
+Lobster proof LM6: https://microsoft.ghe.com/giodl/lobster/pull/68
+
+Settings - native read-only proof complete
+A Lobster settings category now reads selected OpenClaw-authored values and schema/reload metadata through Electron-owned transport. Raw config and write authority never enter React. Governed writes remain blocked on Managed Configuration provenance, locking, preview, generation, and activation.
+M design issue #5675: https://github.com/gim-home/m/issues/5675
+Updated RFC evidence: https://github.com/giodl73-repo/rfcs/pull/8
+
+Dashboards and widgets - reusable model proven
+OpenClaw's existing board reconciliation is now extracted into an optional Gateway Client model while Control UI remains the reference adopter. Lobster should consume this model rather than reconstruct dashboards from chat artifacts. Native adoption waits for a board-capable OpenClaw/LobsterClaw generation because the pinned 2026.6.33 stack predates the board protocol.
+Board Model design and evidence: https://github.com/giodl73-repo/rfcs/pull/8
+M adoption plan: https://github.com/gim-home/m/issues/5675
+
+Proof: the bounded OC1-OC4 and Lobster L0/LM1-LM6 series, plus the Board Model and Config Model follow-ups, are implemented as review-clean fork-only evidence. This demonstrates the architecture; it does not yet represent released or shipped package support.
+
+NEXT ACTION
+Review package ownership and compatibility gates, replace temporary carries with released dependencies, complete live rollout evidence, and select a board-capable OpenClaw generation before beginning the native Lobster dashboard adapter.
