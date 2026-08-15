@@ -22,7 +22,7 @@ The durable name is **OpenClaw Control Model**. `Gateway` names the transport;
 
 | Repo | PR / Issue | Branch | Status | Purpose |
 | --- | --- | --- | --- | --- |
-| `openclaw/rfcs` fork | [Draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8) | `user/giodl/rfc-0029-control-model` at `97d6bfc` | Fork-local review | Define the Gateway Client Control Model, client-selectable views, inline/durable artifact identity, the four OpenClaw PRs, and Lobster L0/LM1/LM2/LM3/LM4 evidence. |
+| `openclaw/rfcs` fork | [Draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8) | `user/giodl/rfc-0029-control-model` | Fork-local review | Define the Gateway Client Control Model, client-selectable views, inline/durable artifact identity, OC1-OC4, completed Lobster L0/LM1-LM6 evidence, and the publication/productization plan. |
 | `openclaw/openclaw` fork | [Draft PR #230](https://github.com/giodl73-repo/openclaw/pull/230) | `user/giodl/control-model-oc1` at `68d3165bab` | Fork-local review | OC1 adds the optional Gateway Client model foundation with immutable session snapshots and the shared Control UI event-refresh policy. |
 | `openclaw/openclaw` fork | [Draft PR #231](https://github.com/giodl73-repo/openclaw/pull/231) | `user/giodl/control-model-oc2` at `8654e0f7d1` | Fork-local stacked review | OC2 adds lazy conversations, bounded history/live projections, tools and interactions, targeted subscriptions, typed commands, and review-hardened reconnect/retention behavior. |
 | `openclaw/openclaw` fork | [Draft PR #232](https://github.com/giodl73-repo/openclaw/pull/232) | `user/giodl/control-model-oc3` at `fc07cc0630` | Fork-local stacked review | OC3 adds bounded renderer-neutral artifacts, sanitized history, MCP App/Canvas fallback, and selected-only deferred materialization. |
@@ -64,6 +64,14 @@ compatibility consumers rather than duplicate Control Model behavior.
 Cross-client user-message delivery remains a possible separate contract slice:
 it must align Lobster `clientMessageId`, Control Model idempotency, retries, and
 canonical user-message identity before the adapter can safely emit user commits.
+
+The next phase is publication and productization rather than another parity
+slice: owner review, package and compatibility gates, released dependency,
+Lobster CI/rollout, live hosted-Gateway proof, telemetry, UX quality, and
+shareable evidence. Existing OpenClaw dashboards and settings should be hosted
+first. Native dashboards require a separate projection of OpenClaw's board
+model; native settings require a sibling provenance- and authority-aware Config
+Model backed by Managed Configuration.
 
 ## Related Areas
 

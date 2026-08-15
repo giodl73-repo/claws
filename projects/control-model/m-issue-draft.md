@@ -86,14 +86,58 @@ The drafts demonstrate that the model can live in Gateway Client core without
 making it a Gateway plugin or importing Control UI. They remain design evidence,
 not accepted upstream surfaces.
 
-### First slice
+### Progress to date
 
-- Connect through Lobster's existing hosted Gateway seam.
-- Project one session list and selected conversation into `SessionView`.
-- Render one trusted first-party artifact natively, such as calendar.
-- Prove the same tool result falls back safely when no native renderer exists.
-- Prove a denied action remains denied server-side.
-- Reconnect mid-stream without duplicating messages or artifact revisions.
+The bounded evidence series is now complete in fork-local drafts:
+
+1. [L0](https://microsoft.ghe.com/bic/lobster/pull/8165) temporarily carries
+   the Control Model into Lobster.
+2. [LM1](https://microsoft.ghe.com/giodl/lobster/pull/63) adapts canonical
+   conversation snapshots into the existing `SessionView`.
+3. [LM2](https://microsoft.ghe.com/giodl/lobster/pull/64) renders one exact
+   allowlisted native table artifact with bounded schema and visible fallback.
+4. [LM3](https://microsoft.ghe.com/giodl/lobster/pull/65) routes a native
+   Refresh action through the Control Model and rejects stale or denied actions.
+5. [LM4](https://microsoft.ghe.com/giodl/lobster/pull/66) routes ordinary sends
+   through `ControlModelConversation.send`.
+6. [LM5](https://microsoft.ghe.com/giodl/lobster/pull/67) routes active-run
+   aborts through `ControlModelConversation.abort`.
+7. [LM6](https://microsoft.ghe.com/giodl/lobster/pull/68) hydrates selected
+   history through an explicitly refreshed canonical conversation snapshot.
+
+This demonstrates state, streaming, tools, artifacts, native actions, send,
+abort, reconnect, and history while deleting equivalent Lobster Gateway
+behavior. The series stops at LM6. Remaining raw lanes are host-owned
+operational/security, session administration, memory, or compatibility paths,
+not equivalent Control Model reducers.
+
+### Boundary corrections
+
+- OpenClaw already owns dashboards, board identity, registered widget
+  providers, layout, persistence, focus/docking, and the `show_widget` and
+  `dashboard` tools. Lobster should host those dashboard routes first; a future
+  native surface should project the existing board model rather than rebuild
+  dashboards from generic artifacts.
+- Canvas and MCP Apps remain explicit sandboxed fallbacks.
+- Settings are governed control-plane state, not conversation artifacts.
+  Lobster should host OpenClaw settings first, read-only where it lacks secure
+  write authority, then consume a separate descriptor/provenance-aware Config
+  Model backed by Managed Configuration.
+
+### Next steps
+
+1. Review the fork RFC and OC1-OC4 evidence with the OpenClaw owners; keep it
+   fork-only while RFC intake is frozen.
+2. Define publication ownership, compatibility, package acceptance, and
+   security gates for the optional Gateway Client model subpaths.
+3. Replace Lobster's temporary source carry with a released dependency, resolve
+   required CI, and land LM1-LM6 behind a runtime flag with rollback.
+4. Run a live hosted-Gateway proof and add safe telemetry, Fluent/a11y/localized
+   quality, and shareable screenshots or recordings.
+5. Use hosted OpenClaw dashboards and settings immediately. Treat native
+   dashboard projection and the Config Model as separate owner-first slices.
+6. Defer cross-client user-message correlation until it is a concrete product
+   requirement with one identity/retry contract.
 
 ### Acceptance sketch
 
@@ -106,8 +150,8 @@ not accepted upstream surfaces.
 - Extension presence and client renderer support are tested independently.
 - Unselected deferred views are not materialized or charged to the request.
 - Third-party executable UI remains sandboxed.
-- At least one duplicate Lobster Gateway reducer/projection path is identified
-  for deletion after parity.
+- Duplicate raw ordinary-send, active-run abort, and selected-session history
+  paths are deleted in the evidence stack.
 
 ### Related
 

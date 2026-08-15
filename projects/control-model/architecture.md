@@ -277,6 +277,37 @@ parity cleanup. It would need to carry Lobster `clientMessageId` through
 retry/reconnect and non-renderer callers, and project canonical user commits
 without duplicating optimistic local bubbles.
 
+## Current conclusion and next steps
+
+The bounded evidence phase is complete. OC1-OC4 prove the OpenClaw owner
+surface, and LM1-LM6 prove an independent native React host can consume it
+through `SessionView` while deleting duplicate send, active-abort, and history
+paths. Do not add an LM7 solely to remove remaining raw Gateway calls.
+
+The next phase is publication and productization:
+
+1. review the fork RFC and implementation stack with OpenClaw owners while RFC
+   intake remains frozen;
+2. define package ownership, compatibility, conformance, security, and release
+   gates for the optional Gateway Client subpaths;
+3. replace Lobster's temporary source carry with a released dependency and land
+   the bounded adopter stack behind a feature flag and rollback;
+4. run live hosted-Gateway proof and add safe telemetry, Fluent quality,
+   accessibility, localization, and shareable demo evidence; and
+5. preserve separate owner models for adjacent surfaces.
+
+For dashboards/widgets, OpenClaw already owns board identity, widget provider
+registration, layout, persistence, focus/docking, and agent tool semantics.
+Host the current dashboard routes first. A future native dashboard must project
+that board model rather than reinterpret generic artifacts.
+
+For settings, host OpenClaw settings first and default to read-only when the
+host lacks secure write authority. A future native settings experience should
+consume a sibling Config Model backed by Managed Configuration: descriptors,
+effective values, provenance, owner, writability and lock reason, findings,
+candidate diff, generation, and transactional activation status. It does not
+belong in the conversation Control Model.
+
 ## Cheapest evidence slice
 
 1. Use the existing hosted Gateway route and authentication seam.

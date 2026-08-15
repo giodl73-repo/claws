@@ -52,13 +52,18 @@ No upstream RFC issue or pull request exists.
    second shared view-model vocabulary?
 5. Are native renderer registration, schema validation, action correlation,
    and MCP App fallback boundaries strong enough?
-6. Which exact first view pair should prove selection: calendar/list,
-   table/summary, or another bounded scenario?
-7. Which existing Lobster and Control UI reducers become deletable after the
-   evidence slice?
+6. Are the completed LM1-LM6 deletion proofs sufficient to move from evidence
+   into package publication and product rollout?
+7. Which maintainers own model compatibility, conformance, security review,
+   and release support?
+8. Should future native dashboard and configuration projections be optional
+   Gateway Client subpaths or separate clients while preserving their existing
+   OpenClaw owner models?
 
 ## Proposed review outcome
 
-Approve, revise, or reject the smallest evidence slice. Do not decide package
-publication, JSON Patch streaming, a generic component marketplace, or upstream
-RFC submission in this review.
+Approve, revise, or reject promotion from fork-only evidence into an owned
+package and productization plan. Keep JSON Patch streaming, a generic component
+marketplace, cross-client user-message identity, native dashboard projection,
+and the Config Model as separately justified follow-ups. Do not submit the RFC
+upstream while intake remains frozen.

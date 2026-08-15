@@ -24,12 +24,14 @@
 
 - Last updated: 2026-08-15.
 - Last agent: GitHub Copilot CLI.
-- Current focus: close the bounded Lobster evidence series at LM6. The adopted
-  Control Model now owns canonical selected-session state, artifacts, native
-  actions, ordinary sends, active-run aborts, and history hydration; remaining
-  raw paths are host-owned operational/security or compatibility lanes.
+- Current focus: move from the completed LM1-LM6 evidence series into
+  publication and productization. The next gates are OpenClaw ownership and
+  compatibility review, a released Gateway Client model surface, Lobster CI
+  and rollout, live hosted-Gateway proof, and shareable UX evidence. Existing
+  dashboards and settings are hosted first; native board and configuration
+  projections remain separate owner-first surfaces.
 - Active branch / PR: fork branch
-  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `97d6bfc` in
+  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `b64f7ee` in
   [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
   upstream RFC PR. OpenClaw OC1 is
   [fork-local draft PR #230](https://github.com/giodl73-repo/openclaw/pull/230)
@@ -73,8 +75,9 @@
 - Messaging result: RFC PR #8, OC1, OC4, and M issue #5675 now include
   consistent Mermaid diagrams for the Gateway Client model boundary, lazy
   Control UI adoption, and Lobster `SessionView` flow. RFC PR #8 now links
-  OC1-OC4 plus Lobster L0/LM1/LM2, and M issue #5675 links all three Lobster
-  proofs.
+  OC1-OC4 plus Lobster L0/LM1-LM6. M issue #5675 now records the completed
+  adopter evidence, the LM6 stop decision, dashboard/settings boundary
+  corrections, and the publication/productization next steps.
 - Lobster L0 result: a private workspace package exposes the three proposed
   Gateway Client model subpaths, while patch 0036 safely preserves canonical
   bounded UI artifacts through the pinned Gateway history projection. Proof is
@@ -265,8 +268,12 @@
 
 - Incorporate RFC/OC1/OC2/OC3/OC4 feedback before promoting any surface
   upstream.
-- Decide when the optional Gateway Client model subpaths should publish, after
-  two-consumer evidence and duplicate-reducer deletion.
+- Assign owners and gates for optional Gateway Client model publication,
+  compatibility, conformance, security, and release support.
+- Replace Lobster's source carry with a released dependency, resolve required
+  CI, and run the live hosted-Gateway rollout/rollback proof.
+- Produce safe telemetry, Fluent/a11y/localization quality, and shareable
+  screenshots or recordings for team review.
 - If cross-client user-message delivery becomes a product requirement, define
   it as a separate contract slice with retry and non-renderer proof; do not add
   it to the LM1-LM6 stack.
@@ -276,6 +283,9 @@
   materialization command shape; OpenClaw owns authorized applicable
   descriptors, while each client selects and maps one into its local view
   model.
+- Use hosted OpenClaw dashboards/settings as the immediate path. Evaluate a
+  native board projection and a Managed Configuration-backed Config Model as
+  separate projects rather than additions to conversation snapshots.
 
 ## Session Checkpoints
 
