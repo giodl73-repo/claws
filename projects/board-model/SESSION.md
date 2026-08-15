@@ -25,7 +25,8 @@
 - Active branch / PR: fork-only draft
   [giodl73-repo/openclaw#240](https://github.com/giodl73-repo/openclaw/pull/240)
   from `user/giodl/board-model-proof` at `c0111f9a8d`, based on the fork-local
-  `user/giodl/board-model-base`.
+  `user/giodl/board-model-base`. Exact-tag qualification branch
+  `user/giodl/board-model-beta2` is published at `2c6bdc41a12`.
 - Known dirty state: proof worktree is clean and one commit ahead of
   `origin/main`. WSL proof worktree `/root/src/openclaw-board-model-beta2` is
   clean at local commit `2c6bdc41a12`; its 55 focused tests and Gateway Client
