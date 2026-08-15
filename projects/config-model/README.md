@@ -17,7 +17,7 @@ activation status.
 | Repo | Branch | Status | Purpose |
 | ---- | ------ | ------ | ------- |
 | `bic/LobsterClaw` local generation branch | `user/giodl/config-model-proof` at `a03889e2eb` | Fork-only proof | Add optional `@openclaw/gateway-client/model/config` read-only snapshots and schema lookup against the pinned 2026.6.33 runtime. |
-| `gim-home/m` local Lobster branch | `user/giodl/config-model-lc1` at `5080c8f0ea` | Fork-only adopter | Carry the Config Model through Electron-owned Gateway transport and render one native read-only OpenClaw settings category. |
+| `gim-home/m` local Lobster branch | `user/giodl/config-model-lc1` at `cb71803d68` | Fork-only adopter; review clean | Carry the Config Model through Electron-owned Gateway transport and render one native read-only OpenClaw settings category. |
 | `openclaw/openclaw` | Managed Configuration stack | Separate prerequisite | Add source authority, provenance, candidate preview, conflicts, and transactional activation before governed native writes. |
 
 ## First Slice
@@ -41,10 +41,14 @@ LC1 proves that Lobster can render OpenClaw-owned settings without browser
 hosting or raw Gateway access in React:
 
 - Electron reads `config.get` and `config.schema.lookup`;
-- IPC returns only three presentation-safe effective values;
+- IPC returns only three presentation-safe configured values;
 - the native page shows schema help and restart impact;
 - unavailable and error states remain structured; and
 - the UI states explicitly that OpenClaw owns governed changes.
+
+The renderer cache is scoped to the signed-in Gateway principal and discarded
+when that scope is no longer observed. The page labels absent authored values
+as inherited or unconfigured rather than claiming to show resolved defaults.
 
 ## Related Areas
 
