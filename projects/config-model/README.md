@@ -17,7 +17,7 @@ activation status.
 | Repo | Branch | Status | Purpose |
 | ---- | ------ | ------ | ------- |
 | `bic/LobsterClaw` local generation branch | `user/giodl/config-model-proof` at `a03889e2eb` | Fork-only proof | Add optional `@openclaw/gateway-client/model/config` read-only snapshots and schema lookup against the pinned 2026.6.33 runtime. |
-| `gim-home/m` Lobster fork | [`user/giodl/config-model-lc1` PR #69](https://microsoft.ghe.com/giodl/lobster/pull/69) at `cb71803d68` | Fork-only adopter draft; review clean | Carry the Config Model through Electron-owned Gateway transport and render one native read-only OpenClaw settings category. |
+| `gim-home/m` Lobster fork | [`user/giodl/config-model-lc1` PR #69](https://microsoft.ghe.com/giodl/lobster/pull/69) at `6d4513379e` | Fork-only adopter draft; review and real Electron proof clean | Carry the Config Model through Electron-owned Gateway transport and render one native read-only OpenClaw settings category. |
 | `openclaw/openclaw` | Managed Configuration stack | Separate prerequisite | Add source authority, provenance, candidate preview, conflicts, and transactional activation before governed native writes. |
 
 ## First Slice
@@ -49,6 +49,9 @@ hosting or raw Gateway access in React:
 The renderer cache is scoped to the signed-in Gateway principal and discarded
 when that scope is no longer observed. The page labels absent authored values
 as inherited or unconfigured rather than claiming to show resolved defaults.
+The real Electron Gateway fixture exercises the production adapter and captures
+the populated native page with authored values, read-only copy, and restart
+guidance in PR #69.
 
 ## Related Areas
 

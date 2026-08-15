@@ -23,13 +23,14 @@
   settings category without moving Gateway authority into React.
 - Active branch / PR: fork-only draft
   [giodl/lobster#69](https://microsoft.ghe.com/giodl/lobster/pull/69) from
-  `user/giodl/config-model-lc1` at `cb71803d68`, stacked on LM6.
+  `user/giodl/config-model-lc1` at `6d4513379e`, stacked on LM6.
 - Result: carried `@openclaw/gateway-client/model/config`, added a main-process
   presentation-safe adapter and typed IPC/service port, and rendered default
   model, agent workspace, and gateway mode with schema help and reload impact.
   Final review fixes use the union-safe model descriptor path, label authored
   versus inherited values accurately, and scope renderer caching by Gateway
-  principal. Final code review is clean.
+  principal. A real Electron Gateway E2E now renders the populated native page
+  and captures shareable proof on PR #69. Final code review is clean.
 - Known dirty state: the committed adopter is complete. Dependency restoration
   left uncommitted formatting-only agent-file and lockfile churn outside the
   commit. `claws-hapi` contains unrelated pre-existing changes.

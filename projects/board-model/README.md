@@ -21,6 +21,7 @@ The missing capability is a reusable client projection outside Control UI.
 | ---- | ------ | ------ | ------- |
 | `openclaw/openclaw` fork | [`user/giodl/board-model-proof` PR #240](https://github.com/giodl73-repo/openclaw/pull/240) at `c0111f9a8d` | Fork-only draft; review clean | Extracted the existing Gateway board provider into `@openclaw/gateway-client/model/board` and kept Control UI as the reference adopter. |
 | `bic/LobsterClaw` | `release/2026.6.33` | Version gap | The pinned generation predates the board protocol. Do not claim hosted dashboard support or backport the full dashboard stack without an admission decision. |
+| `openclaw/openclaw` beta | `v2026.8.1-beta.2` plus local extraction commit `2c6bdc41a12` | First compatible tag; local proof clean | The extraction cherry-picks without conflict; 55 focused tests and the Gateway Client ESM/declaration build pass. No stable tag currently contains the coordinated board stack. |
 
 ## First Slice
 
@@ -40,9 +41,11 @@ Control UI's UI-local Gateway board provider, not OpenClaw board semantics.
 
 The board domain arrived after the pinned 2026.6.33 generation as a coordinated
 series beginning with OpenClaw PRs #110960 and #111218. Prefer qualifying a
-newer OpenClaw release that already contains the complete board stack. A 6.33
-backport requires an explicit product urgency decision and complete dependency,
-security, persistence, and sandbox proof.
+newer OpenClaw release that already contains the complete board stack.
+`v2026.8.1-beta.2` is the first tag containing the implementation plus later
+ownership and UI hardening, but it is a beta rather than a stable release. A
+6.33 backport requires an explicit product urgency decision and complete
+dependency, security, persistence, and sandbox proof.
 
 ## Related Areas
 

@@ -299,14 +299,17 @@ The next phase is publication and productization:
 For dashboards/widgets, OpenClaw already owns board identity, widget provider
 registration, layout, persistence, focus/docking, and agent tool semantics.
 Host the current dashboard routes first. A future native dashboard must project
-that board model rather than reinterpret generic artifacts.
+that board model rather than reinterpret generic artifacts. No stable tag
+currently contains the coordinated board stack; `v2026.8.1-beta.2` is the
+first fully compatible tag and passes the Board Model extraction proof.
 
 For settings, host OpenClaw settings first and default to read-only when the
 host lacks secure write authority. A future native settings experience should
 consume a sibling Config Model backed by Managed Configuration: descriptors,
 effective values, provenance, owner, writability and lock reason, findings,
 candidate diff, generation, and transactional activation status. It does not
-belong in the conversation Control Model.
+belong in the conversation Control Model. The LC1 fork proof now includes a
+real Electron screenshot of the populated read-only native page.
 
 ## Cheapest evidence slice
 

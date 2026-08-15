@@ -31,9 +31,10 @@
   dashboards and settings are hosted first; native board and configuration
   projections remain separate owner-first surfaces. Those follow-ups now have
   clean fork-only evidence: Board Model extraction `c0111f9a8d` and Lobster
-  Config LC1 through `cb71803d68`. Native board adoption still requires a
-  board-capable OpenClaw generation; settings writes still require Managed
-  Configuration.
+  Config LC1 through `6d4513379e`, including real Electron visual proof. Release
+  ancestry shows no stable board-capable tag; `v2026.8.1-beta.2` is the first
+  fully compatible tag and passes the extraction proof. Settings writes still
+  require Managed Configuration.
 - Active branch / PR: fork branch
   `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `61e00db` in
   [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
@@ -225,7 +226,9 @@
   changes.
 - Blocking question: L0 still lacks Proof of Presence and the required Lobster
   runtime contexts. RFC intake is frozen, so the design remains fork-only until
-  explicit authorization to submit upstream.
+  explicit authorization to submit upstream. Native dashboards must either
+  wait for a stable board-capable release or receive an explicit beta-admission
+  decision.
 
 ## Resume Checklist
 
