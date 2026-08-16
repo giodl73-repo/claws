@@ -48,8 +48,18 @@
   assignment, finite thresholds, shared conformance, compatibility canaries,
   and live hosted-product evidence remain publication or shipment gates rather
   than RFC filing blockers.
+- OC5 first-slice result: fork-local draft
+  [OpenClaw PR #241](https://github.com/giodl73-repo/openclaw/pull/241) at
+  `5a1f999fbb` is stacked on OC4. It centralizes and documents finite defaults,
+  adds one reusable authoritative/malformed catalog conformance pair, and
+  installs packed Gateway Protocol and Gateway Client artifacts into a clean
+  consumer for Node imports, declarations, and browser bundling. The package
+  proof exposed and fixed a real broken `browser` timeout re-export. OC5 is not
+  complete: broader history/live/reconnect and authorization fixtures,
+  measured performance/memory thresholds, compatibility canaries, security
+  review, and support-owner assignment remain open.
 - Active branch / PR: fork branch
-  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `af57756` in
+  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `ea3836e` in
   [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
   upstream RFC PR. OpenClaw OC1 is
   [fork-local draft PR #230](https://github.com/giodl73-repo/openclaw/pull/230)
@@ -63,6 +73,9 @@
   OpenClaw OC4 is
   [fork-local draft PR #238](https://github.com/giodl73-repo/openclaw/pull/238)
   at `72206b801f` from `user/giodl/control-model-oc4`, stacked on OC3.
+  OpenClaw OC5 is
+  [fork-local draft PR #241](https://github.com/giodl73-repo/openclaw/pull/241)
+  at `5a1f999fbb` from `user/giodl/control-model-oc5`, stacked on OC4.
   M design issue
   [gim-home/m#5675](https://github.com/gim-home/m/issues/5675) remains open.
   Lobster L0 is

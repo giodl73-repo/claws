@@ -291,8 +291,10 @@ sequence:
 
 1. review the fork RFC and implementation stack with OpenClaw owners while RFC
    intake remains frozen;
-2. prepare OC5 shared conformance and package hardening only after owner
-   acceptance;
+2. review the first fork-only OC5 package/defaults/conformance slice, then
+   complete shared history/live/reconnect and authorization fixtures,
+   performance/memory thresholds, compatibility canaries, and owner assignment
+   only after owner acceptance;
 3. use OC6 for supported publication and OC7 for later incumbent cleanup;
 4. replace Lobster's temporary source carry with a released dependency and land
    the bounded adopter stack behind a feature flag and rollback;

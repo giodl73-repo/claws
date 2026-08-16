@@ -112,9 +112,10 @@ maintainer review.
 ### Publication blockers
 
 - Named package, protocol, Control UI, security, and release support owners.
-- Finite default bounds and measurable performance thresholds.
-- Shared conformance promoted from fork evidence.
-- Packed-artifact install/import proof in clean browser and Node consumers.
+- Measurable performance and retained-memory thresholds for the now-documented
+  finite defaults.
+- Shared history/live/reconnect and authorization conformance promoted from the
+  first OC5 catalog fixture slice.
 - Compatibility canaries for the supported release, promised predecessor, and
   `main`.
 - Live hosted-Gateway proof, Lobster CI, telemetry, rollout, and rollback before

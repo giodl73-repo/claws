@@ -27,6 +27,7 @@ The durable name is **OpenClaw Control Model**. `Gateway` names the transport;
 | `openclaw/openclaw` fork | [Draft PR #231](https://github.com/giodl73-repo/openclaw/pull/231) | `user/giodl/control-model-oc2` at `8654e0f7d1` | Fork-local stacked review | OC2 adds lazy conversations, bounded history/live projections, tools and interactions, targeted subscriptions, typed commands, and review-hardened reconnect/retention behavior. |
 | `openclaw/openclaw` fork | [Draft PR #232](https://github.com/giodl73-repo/openclaw/pull/232) | `user/giodl/control-model-oc3` at `fc07cc0630` | Fork-local stacked review | OC3 adds bounded renderer-neutral artifacts, sanitized history, MCP App/Canvas fallback, and selected-only deferred materialization. |
 | `openclaw/openclaw` fork | [Draft PR #238](https://github.com/giodl73-repo/openclaw/pull/238) | `user/giodl/control-model-oc4` at `72206b801f` | Fork-local stacked review | OC4 proves Control UI can adopt canonical active-session and selected-chat state without visual changes or startup-budget regression. |
+| `openclaw/openclaw` fork | [Draft PR #241](https://github.com/giodl73-repo/openclaw/pull/241) | `user/giodl/control-model-oc5` at `5a1f999fbb` | First fork-local OC5 slice | Centralizes finite defaults, adds reusable accepted/malformed catalog fixtures, proves packed Node/declaration/browser consumption, and fixes the package-only browser timeout-export failure found by that proof. |
 | `bic/lobster` | [Draft PR #8165](https://microsoft.ghe.com/bic/lobster/pull/8165) | `user/giodl/control-model-carry` at `80fe70b13f` | Draft L0; Proof of Presence failing and required runtime contexts absent | Carries OC1-OC3 as a temporary source-resolved Gateway Client package and patches the pinned OpenClaw runtime to preserve sanitized UI artifacts. |
 | `giodl/lobster` fork | [Draft PR #63](https://microsoft.ghe.com/giodl/lobster/pull/63) | `user/giodl/control-model-lm1` at `b7686177d0` stacked on L0 | Fork-local stacked review | Adapts canonical Control Model conversation snapshots into Lobster's existing main-process `SessionView` while preserving raw-event operational lanes and passive React. |
 | `giodl/lobster` fork | [Draft PR #64](https://microsoft.ghe.com/giodl/lobster/pull/64) | `user/giodl/control-model-lm2` at `24641f575e` stacked on LM1 | Fork-local stacked review | Renders one exact allowlisted read-only table artifact in Lobster React, with durable history association, revision-safe identity, visible structured fallback, and a real Gateway-mode Electron proof. |
@@ -79,5 +80,7 @@ Model backed by Managed Configuration.
   approach and reusable hosting/auth evidence.
 - `projects/hosted-integration/README.md` for host-runtime boundaries.
 - `projects/config-admin/README.md` for managed settings UX.
+- `projects/config-model/README.md` for the settings projection follow-up.
+- `projects/board-model/README.md` for the dashboard/widget projection follow-up.
 - `projects/lobster/README.md` for Lobster worktrees and PR operations.
 - `projects/clawpilot/README.md` for `gim-home/m` issue-loop work.
