@@ -298,7 +298,7 @@ sequence:
    the bounded adopter stack behind a feature flag and rollback;
 5. run live hosted-Gateway proof and add safe telemetry, Fluent quality,
    accessibility, localization, and shareable demo evidence; and
-6. preserve BM2, CM1, and CM2 as separate adjacent proposals.
+6. preserve BM2, CFG1, and CFG2 as separate adjacent proposals.
 
 For dashboards/widgets, OpenClaw already owns board identity, widget provider
 registration, layout, persistence, focus/docking, and agent tool semantics.
@@ -315,8 +315,8 @@ consume a sibling Config Model backed by Managed Configuration: descriptors,
 effective values, provenance, owner, writability and lock reason, findings,
 candidate diff, generation, and transactional activation status. It does not
 belong in the conversation Control Model. The LC1 fork proof now includes a
-real Electron screenshot of the populated read-only native page. CM1 may
-upstream only that read projection; CM2 remains Managed Configuration work.
+real Electron screenshot of the populated read-only native page. CFG1 may
+upstream only that read projection; CFG2 remains Managed Configuration work.
 
 ## Cheapest evidence slice
 

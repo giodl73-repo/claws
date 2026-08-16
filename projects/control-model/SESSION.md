@@ -22,13 +22,13 @@
 
 ## Current Session
 
-- Last updated: 2026-08-15.
+- Last updated: 2026-08-16.
 - Last agent: GitHub Copilot CLI.
 - Current focus: prepare RFC 0029 for filing while keeping all implementation
   and future proposal work fork-only. The RFC now narrows acceptance to Control
   Model v1, records completed chat/settings/dashboard evidence, and proposes
   OC5 shared conformance, OC6 publication, OC7 cleanup, plus separate
-  BM2/CM1/CM2 adjacent gates. The later product gates remain OpenClaw ownership
+  BM2/CFG1/CFG2 adjacent gates. The later product gates remain OpenClaw ownership
   and compatibility review, a released Gateway Client model surface, Lobster
   CI and rollout, live hosted-Gateway proof, and shareable UX evidence. Existing
   dashboards and settings are hosted first; native board and configuration
@@ -40,8 +40,16 @@
   completes the fork-only second-host proof in React without admitting that
   beta or changing the 2026.6.33 support statement. Settings writes still
   require Managed Configuration.
+- Filing-readiness review result: no architectural contradiction remains that
+  should block filing. Required v1 conformance no longer includes session
+  administration; the generic Gateway binding is construction-only; Config
+  candidates are named CFG1/CFG2; and OC6 now requires clean browser and Node
+  install/import proof from the packed release artifact. Support-owner
+  assignment, finite thresholds, shared conformance, compatibility canaries,
+  and live hosted-product evidence remain publication or shipment gates rather
+  than RFC filing blockers.
 - Active branch / PR: fork branch
-  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `a3e8945` in
+  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `af57756` in
   [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
   upstream RFC PR. OpenClaw OC1 is
   [fork-local draft PR #230](https://github.com/giodl73-repo/openclaw/pull/230)
