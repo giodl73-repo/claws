@@ -253,7 +253,9 @@ sandboxed fallback behavior when native support is absent.
 | OC2: conversation model | Extract history/live merge, stream/tool lifecycle, typed chat commands, approvals/questions | Shared fixtures for reconnect, duplicate/out-of-order events, cancellation, rejection | Lobster chat reducer and selected Control UI reconciliation |
 | OC3: UI artifact projection | Preserve renderer-neutral artifact metadata through live events and history; adapt MCP App/Canvas projections | Known native URI, unknown URI, malformed data, history reload, fallback, expiry | Tool-specific native rendering hacks |
 | OC4: Control UI adopter | Move one Control UI chat/session slice onto the model without visual changes | Existing Control UI tests plus before/after fixtures | Old internal capability implementation for adopted slice |
-| OC5: model-subpath publication | Publish the optional Gateway Client subpaths only after two consumers and compatibility evidence | Package acceptance, calendar-version compatibility, examples | Fork-only consumption |
+| OC5: shared conformance and package hardening | Promote shared fixtures, finite defaults, browser/Node package acceptance, compatibility canaries, performance bounds, and malformed-data/security coverage | Two-consumer fixtures plus package, compatibility, performance, and security gates | Publication uncertainty |
+| OC6: supported model subpaths | Publish optional subpaths with compatibility window, migration policy, quickstart, release notes, and support ownership | OC5 on supported release, promised predecessor, and `main` | Fork-only consumption |
+| OC7: incumbent-path cleanup | Delete only superseded Control UI paths after a release observation window and rollback proof | Stable model-backed Control UI plus exact deletion ledger | Old internal capability implementation for adopted slice |
 
 ### Lobster and M
 
@@ -284,17 +286,19 @@ surface, and LM1-LM6 prove an independent native React host can consume it
 through `SessionView` while deleting duplicate send, active-abort, and history
 paths. Do not add an LM7 solely to remove remaining raw Gateway calls.
 
-The next phase is publication and productization:
+The next phase is RFC review followed by the proposed fork-only OC5-OC7
+sequence:
 
 1. review the fork RFC and implementation stack with OpenClaw owners while RFC
    intake remains frozen;
-2. define package ownership, compatibility, conformance, security, and release
-   gates for the optional Gateway Client subpaths;
-3. replace Lobster's temporary source carry with a released dependency and land
+2. prepare OC5 shared conformance and package hardening only after owner
+   acceptance;
+3. use OC6 for supported publication and OC7 for later incumbent cleanup;
+4. replace Lobster's temporary source carry with a released dependency and land
    the bounded adopter stack behind a feature flag and rollback;
-4. run live hosted-Gateway proof and add safe telemetry, Fluent quality,
+5. run live hosted-Gateway proof and add safe telemetry, Fluent quality,
    accessibility, localization, and shareable demo evidence; and
-5. preserve separate owner models for adjacent surfaces.
+6. preserve BM2, CM1, and CM2 as separate adjacent proposals.
 
 For dashboards/widgets, OpenClaw already owns board identity, widget provider
 registration, layout, persistence, focus/docking, and agent tool semantics.
@@ -302,6 +306,8 @@ Host the current dashboard routes first. A future native dashboard must project
 that board model rather than reinterpret generic artifacts. No stable tag
 currently contains the coordinated board stack; `v2026.8.1-beta.2` is the
 first fully compatible tag and passes the Board Model extraction proof.
+Lobster Board LB1 proves the native-host boundary with a mocked beta protocol,
+but BM2 must reconstruct it against an admitted release before support.
 
 For settings, host OpenClaw settings first and default to read-only when the
 host lacks secure write authority. A future native settings experience should
@@ -309,7 +315,8 @@ consume a sibling Config Model backed by Managed Configuration: descriptors,
 effective values, provenance, owner, writability and lock reason, findings,
 candidate diff, generation, and transactional activation status. It does not
 belong in the conversation Control Model. The LC1 fork proof now includes a
-real Electron screenshot of the populated read-only native page.
+real Electron screenshot of the populated read-only native page. CM1 may
+upstream only that read projection; CM2 remains Managed Configuration work.
 
 ## Cheapest evidence slice
 

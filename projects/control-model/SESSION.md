@@ -24,10 +24,13 @@
 
 - Last updated: 2026-08-15.
 - Last agent: GitHub Copilot CLI.
-- Current focus: move from the completed LM1-LM6 evidence series into
-  publication and productization. The next gates are OpenClaw ownership and
-  compatibility review, a released Gateway Client model surface, Lobster CI
-  and rollout, live hosted-Gateway proof, and shareable UX evidence. Existing
+- Current focus: prepare RFC 0029 for filing while keeping all implementation
+  and future proposal work fork-only. The RFC now narrows acceptance to Control
+  Model v1, records completed chat/settings/dashboard evidence, and proposes
+  OC5 shared conformance, OC6 publication, OC7 cleanup, plus separate
+  BM2/CM1/CM2 adjacent gates. The later product gates remain OpenClaw ownership
+  and compatibility review, a released Gateway Client model surface, Lobster
+  CI and rollout, live hosted-Gateway proof, and shareable UX evidence. Existing
   dashboards and settings are hosted first; native board and configuration
   projections remain separate owner-first surfaces. Those follow-ups now have
   clean fork-only evidence: Board Model extraction `c0111f9a8d` and Lobster
@@ -38,7 +41,7 @@
   beta or changing the 2026.6.33 support statement. Settings writes still
   require Managed Configuration.
 - Active branch / PR: fork branch
-  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `61e00db` in
+  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `a3e8945` in
   [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
   upstream RFC PR. OpenClaw OC1 is
   [fork-local draft PR #230](https://github.com/giodl73-repo/openclaw/pull/230)
