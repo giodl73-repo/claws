@@ -22,10 +22,11 @@
 
 ## Resume Snapshot
 
-- Last updated: 2026-08-14.
+- Last updated: 2026-08-17.
 - Last agent: GitHub Copilot CLI.
-- Current focus: maintainer landing decisions for the four published Claws
-  final-exam PRs after closing ClawHub's compatibility transition.
+- Current focus: execute the Awesome Claws trust and lifecycle plan, beginning
+  with a representative real N-1-to-N upgrade proof, while closing the
+  remaining RFC acceptance and release-shipping gates.
 - Completed: OpenClaw PR #115237 merged as
   `60fc2fe64d8ec2988a555a638dc1074d31e5760b` on 2026-08-07T11:04:52Z.
   PR #115962 merged as `7774f9a36c12eb5f63e6ef33b3da2af065b09707`
@@ -98,8 +99,9 @@
   Prefer either a read-only authoring/inspection plugin or a Lobster-carried
   upstream core overlay plus a thin plugin, with deletion when a quarantined
   OpenClaw release includes Claws.
-- Active heads: OpenClaw `d5f50cf244`, RFC `acf99d988d`,
-  ClawHub `0c0517c9c9`, and Awesome Claws `4895d11592`.
+- Active heads: merged OpenClaw `103e1a4cc9`, open RFC `acf99d988d`,
+  merged ClawHub `4117154eca`, merged Awesome Claws `444669fc07`, and
+  merged Awesome Claws #18 at `1b41fea56e`.
 - Proof: OpenClaw now shares one per-server lifecycle lease between ordinary
   MCP mutations and Claw ownership reconciliation, resolving ClawSweeper's
   final P1 race. Its full `src/claws` suite passed 452 tests with 1 skip,
@@ -119,16 +121,75 @@
   passed. Final Codex and ClawSweeper reviews found no actionable defects;
   ClawSweeper marks proof sufficient, Platinum Hermit, and ready for maintainer
   review. RFC and Awesome checks are green.
-- Next: the ClawHub maintainer explicitly accepts or rejects the
-  strict-new/legacy-compatible pinned-v1 publication policy, then lands #3463
-  through the normal repository workflow. OpenClaw #123254 has advanced to
-  `d5f50cf244` with its required gate green; RFC #48 and Awesome Claws #6
-  follow the governing contract decisions. The only red ClawHub status is its
-  non-required Vercel organization-authorization check.
+- Awesome Claws follow-up: #7 merged as `a4b9f5a53e`. It corrects the
+  superseded RFC link, removes the AJV/fast-uri advisories, and runs the full
+  50-package catalog contract on Ubuntu, macOS, and Windows. All three hosted
+  lanes passed.
+- Release Coordinator deepening: Awesome Claws #8 merged as `266f9e7302`. It
+  adds a schema-backed readiness evidence ledger, bounded OpenClaw profile,
+  inline visual and Markdown fallback, real Control UI screenshots, and X4
+  experience coverage. Catalog validation passed 37 tests across all 50
+  Claws, visual proof passed 32/32 desktop/mobile renders, all three hosted OS
+  lanes passed, and final Codex review found no correctness findings.
+- Data Governance Steward: Awesome Claws #9 merged as `d8e7060ee5`. It adds a
+  new bounded governance starter with domain and data-product ownership,
+  critical data elements, dated evidence states, remediation ownership, a
+  strict schema, inline visual, and real Control UI screenshot. The corpus now
+  contains 51 Claws; 41 tests, 34/34 visual renders, three-OS CI, and final
+  Codex review passed without actionable findings.
+- Compliance Reviewer deepening: Awesome Claws #10 merged as `e48ac4baa8`. It
+  replaces the generic-only handoff with a requirement-to-control matrix that
+  distinguishes supported, unsupported, stale, conflicting, and
+  compensating-control evidence. It retains legal and independent-assurance
+  boundaries, adds a bounded profile and real Control UI visual, and passed 46
+  tests, 36/36 renders, three-OS CI, and final Codex review.
+- Security Analyst deepening: Awesome Claws #11 merged as `d1310e8a5f`. It
+  adds a bounded threat-and-evidence schema with assets, trust boundaries,
+  attack scenarios, exploit preconditions, evidence provenance, confidence,
+  severity, and remediation ownership. Every assessment now requires an
+  authorization reference, active-testing records require stop conditions,
+  and the starter has no scanning or exploitation tools. It passed 52 tests,
+  38/38 renders, three-OS CI, and final Codex review.
+- Awesome Claws 25-visual milestone: all ten upgrades are merged. Incident
+  Response #12 (`1027bc792c`), Data Analyst #13 (`4b55251956`), Project
+  Manager #14 (`7d01893259`), Product Manager #15 (`1d1ecd24e2`), Customer
+  Support #16 (`a26101a76d`), and Research Briefing #17 (`444669fc07`) add
+  strict domain schemas, bounded minimal profiles, Markdown fallbacks, real
+  Control UI screenshots, and owner-controlled decision states. Final
+  `origin/main` contains 51 Claws with X5=7, X4=18, and X3=26. All 82 tests,
+  catalog materialization and validation, 50/50 desktop/mobile visual renders,
+  final Codex reviews, and every Ubuntu/macOS/Windows PR lane passed.
+- Awesome Claws role review: the cross-tension `.craft/roles/claws` panel is
+  recorded in `reviews/2026-08-17-awesome-claws-role-review.md`. It found two
+  P1 proof gaps: 23 of 25 visual Claws do not instruct the installed agent how
+  to produce or present their visual, and rendering/Control UI proof is not a
+  required CI gate. P2 follow-ups cover semantic reference integrity and the
+  Research Briefing source-access promise.
+- Awesome Claws #18 merged as `1b41fea56e` and remediates every accepted
+  role-review finding: all 25
+  visual Claws now carry installed production/presentation contracts, visual
+  and representative installed `show_widget` proof are required PR gates,
+  structured outputs receive semantic reference validation, Research Briefing
+  is supplied-source-only, and 202 embedded resources moved to readable
+  per-Claw source files. Exact-head Control UI Proof run 32040210719 and
+  Validate run 32040210725 passed; the final GPT-5.6 Terra review found no
+  remaining significant issue.
+- Release containment: public npm currently points `latest` to `2026.7.1-2`,
+  `extended-stable` to `2026.6.34`, and `beta` to `2026.8.1-beta.2`.
+  OpenClaw PR #123254 merged as `103e1a4cc9` on 2026-08-15T03:52:46Z, after
+  the beta tag commit `8f382a202f`; git ancestry confirms beta.2 does not
+  contain the repair while current `origin/main` does. No published OpenClaw
+  channel yet proves the final Claws runtime repair.
+- Next: implement the representative real-upgrade fixture defined in
+  `awesome-claws-trust-lifecycle-plan.md`. In parallel, obtain explicit
+  maintainer acceptance for draft RFC #48 and prove the first OpenClaw release
+  after `2026.8.1-beta.2` that contains `103e1a4cc9` before calling the
+  portfolio shipped.
 - Known dirty state: the published RFC, ClawHub, Awesome Claws, and WSL
-  OpenClaw worktrees are clean. OpenClaw is currently 7 commits behind moving
-  `main`, but remains mergeable and its exact merge-result CI is green. The
-  earlier detached Windows OpenClaw review
+  OpenClaw worktrees are clean; the Awesome Claws #18 worktree remains clean
+  at its merged branch head `a790ebc46f`. OpenClaw is currently 7 commits behind
+  moving `main`, but remains mergeable and its exact merge-result CI is green.
+  The earlier detached Windows OpenClaw review
   worktree remains dirty as an archival pre-rebase copy; `claws-hapi` has
   unrelated user changes outside this project session.
 - Blocking question: none.
