@@ -26,6 +26,7 @@ Claws are not feeds and not raw workspace templates:
 | Standalone Claws CLI PR plan             | `portable-standard-pr-plan.md`         |
 | End-to-end application framework design  | `e2e-application-framework-design.md`  |
 | End-to-end application framework PR plan | `e2e-application-framework-pr-plan.md` |
+| Awesome Claws trust and lifecycle plan    | `awesome-claws-trust-lifecycle-plan.md` |
 
 ## M5 Rendezvous Commitment
 
