@@ -390,9 +390,10 @@
   tests (55), typecheck, build, format, the full patch/parity gate, and Codex
   branch review pass.
 - PR #9248 exact-head native validation is green: PullRequest build `177118907`
-  and Build Validation `177124659`. The PR is mergeable but blocked on renewed
-  `dspektor` approval. After approval, complete exact-head POP, merge, close
-  superseded #8165, and record the merge commit. RFC intake remains frozen.
+  and Build Validation `177124659`. Exact-head approval and POP passed, and PR
+  #9248 merged on 2026-08-18 as
+  `9816ac7cdba0fb8da2238e6b107297362ef385ad`. Superseded private-fork PR #8165
+  is closed. RFC intake remains frozen.
 
 ## Resume Checklist
 
@@ -412,9 +413,8 @@
 - Verify: Lobster PR #9248 remains at `d8acc9034d`; required contexts
   `GitOps/GitHubPop`, `Lobster-Runtime-PullRequest`, and
   `Lobster-Runtime-Build-Validation` are visible and green before readiness.
-  Current state: PullRequest `177118907` and Build Validation `177124659` are
-  green; the PR is mergeable and awaits renewed `dspektor` approval. Wait for
-  approval before proving presence. After merge, close #8165 as superseded.
+  Final state: all three required contexts passed and PR #9248 merged as
+  `9816ac7cdba0fb8da2238e6b107297362ef385ad`; #8165 is closed as superseded.
 - Verify: fork-local Lobster PR #63 remains stacked on
   `user/giodl/control-model-carry` at `b7686177d0`.
 - Verify: fork-local Lobster PR #64 remains stacked on
