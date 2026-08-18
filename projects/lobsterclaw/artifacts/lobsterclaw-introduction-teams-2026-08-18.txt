@@ -1,0 +1,39 @@
+LobsterClaw gives Lobster an immutable, testable OpenClaw release boundary
+
+WHY THIS EXISTS
+Lobster currently carries Microsoft-required OpenClaw changes as a patch queue. Replaying that queue only while building a container made the source identity, patch provenance, release qualification, rollback, and retirement lifecycle too tightly coupled to one Docker build. It was difficult to answer a basic operational question with one durable artifact: exactly which OpenClaw source are we shipping?
+
+THE MISSION
+LobsterClaw is the private distribution and control plane for that answer: one signed OpenClaw base, one ordered ledger of byte-identical Lobster patches, and one immutable generated source tree that CI, image builds, support policy, and rollback can all reference.
+
+IMMUTABLE GENERATIONS, NOT A LONG-LIVED FORK
+Each Git commit and generation tag is a permanent release identity. The manifest records every patch's source commit, SHA-256, owner, reason, validation, repair lineage, and deletion condition. Patches are retained, rebuilt, or removed deliberately as OpenClaw evolves; published tags never move.
+
+INDEPENDENT RELEASE ROLES
+LobsterClaw lets Lobster validate more than one supported OpenClaw line without conflating them. Today that means a 2026.5.28 fallback/Active lineage and a strict-parity 2026.6.33 Candidate lineage, each independently reconstructable and eligible for controlled promotion or rollback.
+
+QUALIFICATION OF THE SOURCE WE WILL ACTUALLY SHIP
+The generated tree is materialized without LobsterClaw metadata and run through OpenClaw's release-relevant checks: Linux checks, build/package, full tests, Node 22 compatibility, and Windows. Patch-focused acceptance and dependency evidence remain separate, explicit proof layers.
+
+NO GOVERNANCE HAND-WAVE
+Lobster still owns image construction, live provider and channel validation, deployment assignment, and rollback. LobsterClaw does not automatically promote a release; it supplies the immutable source and evidence that Lobster's deployment process consumes.
+
+WHAT IS ALREADY TANGIBLE
+LobsterClaw repository: https://microsoft.ghe.com/bic/LobsterClaw
+Strict-parity generation #21: https://microsoft.ghe.com/bic/LobsterClaw/pull/21
+Support admission #22: https://microsoft.ghe.com/bic/LobsterClaw/pull/22
+Release lifecycle rehearsal #20: https://microsoft.ghe.com/bic/LobsterClaw/pull/20
+
+WHAT PR #9364 UNLOCKS
+It makes OpenClaw's own generated-release gate pass against the exact patched 6.33 source: deterministic npm shrinkwrap checks through Microsoft's mirror, reviewed config and Plugin SDK baselines and budgets, and sensitive handling for custom web-fetch headers.
+https://microsoft.ghe.com/bic/lobster/pull/9364
+
+HOW WE SWITCH AFTER IT MERGES
+We will import patches 0044 and 0045 byte-for-byte, publish a new immutable 6.33 v4 generation, rerun all five qualification lanes, and make qualification blocking only after every lane is green. Then Lobster consumer PR #8363 will be repinned to that qualified generation so image builds consume the pre-generated source instead of replaying patches during Docker build. Candidate promotion remains an explicit Lobster decision, with the 5.28 generation preserved for rollback.
+https://microsoft.ghe.com/bic/lobster/pull/8363
+
+CURRENT PROOF
+Strict parity through patch 0043 is published and admitted; patch 0045's focused OpenClaw tests and native generated-artifact checks pass locally; PR #9364 still needs its hosted gates and approval.
+
+NEXT ACTION
+Fix the failing #9364 PullRequest run, obtain approval and GitHubPop, publish and qualify v4, then complete the consumer repin and controlled Candidate cutover.

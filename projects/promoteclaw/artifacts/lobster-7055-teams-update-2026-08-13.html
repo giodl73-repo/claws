@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Lobster PR #7055 update</title>
+</head>
+<body>
+<!--StartFragment-->
+<h2>Quick update on PR #7055</h2>
+
+<p>
+  We had several issues in the DoltLite integration that OpenClaw 6.33 exposed, and we have fixed them.
+  <br><br>
+  <strong>A Git-workspace test was enforcing the wrong contract.</strong> It was checking flighted DoltLite persistence in the generic SPO lane. We separated the base Git-workspace smoke from the dedicated flight-enabled persistence proof.
+  <br><br>
+  <strong>The Playwright recovery path was not actually retrying cleanly.</strong> Same-document navigation returned no HTTP response, and outer retries could run past the pooled-user lease. Retries now reset through <code>about:blank</code> and use bounded cold-worker attempts inside the lease.
+  <br><br>
+  <strong>Merging current main created a Teams lifecycle conflict.</strong> We re-derived the newer Teams delivery behavior against the 6.33 patch stack while preserving exact reply correlation, ProxyPipe telemetry, and failed-worker retirement.
+  <br><br>
+  The last Runtime run passed 54 checks. The one remaining failure is now narrowed to a specific restored Git workspace, not the 6.33 image generally. Another pooled user starts successfully on the same image. For the failing user, Lobster starts the worker and restores the SPO-backed workspace, but the OpenClaw Gateway exits before ready. Every replacement worker fails against that same restored state.
+  <br><br>
+  We have instrumented the lane to preserve and redact the ephemeral worker log before lease cleanup removes the container. Build <strong>176483560</strong> is running with that instrumentation now. It should identify the exact file, config field, or plugin state that 6.33 cannot load. We can then reproduce it locally and add a version-aware migration that preserves the user's data rather than resetting the workspace.
+  <br><br>
+  <a href="https://microsoft.ghe.com/bic/lobster/pull/7055">PR #7055</a>
+</p>
+<!--EndFragment-->
+</body>
+</html>

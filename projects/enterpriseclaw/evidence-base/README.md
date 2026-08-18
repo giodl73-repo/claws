@@ -110,12 +110,41 @@ Its ordered-progress lane proves that the Gateway buffers out-of-order Rust
 progress, delivers only the contiguous sequence, owns accepted-progress
 inactivity, settles with `IDLE_TIMEOUT`, emits the correlated cancel, and
 ignores both late progress and the late result before fresh work succeeds.
+Its bounded-input lane proves that oversized input is rejected before sequence
+assignment, Rust receives exactly ordered sequences 0 and 1, and the Gateway
+refuses additional input after terminal settlement.
+Its artifact-readiness lane builds one exact Rust executable, copies it into a
+fresh candidate install, verifies its SHA-256 digest and bounded
+`system.which` profile before launch, and binds a successful probe receipt to
+that digest, profile, protocol, connection generation, and pairing generation.
+A one-byte mutation is rejected before process launch or Gateway connection.
+Its bounded selector lane assigns one deployment unit and selection generation
+to exactly one ready Rust candidate, invokes the artifact-bound live proof once,
+and leaves the TypeScript baseline at zero dispatches. Ambiguous TypeScript and
+Rust eligibility is rejected before either dispatcher runs.
+Its durable-selection lane writes an atomic SHA-256-bound selection receipt,
+then uses separate fresh reader processes to reject a stale expected generation
+at zero TypeScript and zero Rust dispatches and to reload the current generation
+at zero TypeScript and exactly one Rust dispatch. The accepted reader completes
+the exact artifact-bound live Gateway proof.
+Its corruption-recovery lane mutates the persisted runtime ID without updating
+the receipt digest. A fresh process rejects the receipt at zero TypeScript and
+zero Rust dispatches without selecting a fallback. A distinct recovery writer
+must explicitly repeat owner selection and atomically advance the receipt to a
+new generation before another fresh process may complete the exact
+artifact-bound Rust proof at zero TypeScript and exactly one Rust dispatch.
+Its activation/rollback lane requires an integrity-bound activation transition
+before Rust dispatches at zero TypeScript and one Rust call. A rollback against
+a valid newer generation fails before mutation at zero dispatches. Accepted
+rollback serializes compare-and-replace and atomically publishes the TypeScript
+selection plus rollback transition in one receipt before a fresh process
+dispatches at one TypeScript and zero Rust calls.
 Fresh Gateway and Rust processes reuse durable pairing and the persisted
 owner-issued token without renewed approval. After a crash, the caller loses
 transport, the restarted Gateway explicitly ignores the old request ID, and
 one distinct fresh request settles. It remains B because a complete runtime
-profile, effects, readiness, durable crash recovery, single-authority
-selection, migration, release, operations, and deletion are still unproven.
+profile, effects, general readiness, production canary authority, state
+migration, release, operations, and deletion are still unproven.
 
 The standalone fleet rollout/recovery simulation now proves immutable target
 membership, durable parent/child acceptance, lost-ack reconciliation, targeted

@@ -34,19 +34,23 @@ if ($endMarkerIndex -le $startFragmentChar) {
   throw "CF_HTML fragment markers are empty or out of order."
 }
 
-# Teams commonly strips default paragraph margins. Normalize adjacent paragraph
-# separators to one explicit break so source whitespace or existing <br> tags
-# cannot accumulate into several blank lines after sanitization.
+# Teams can preserve source whitespace while stripping the surrounding
+# structure. Require each paragraph to be one physical source line, then remove
+# whitespace between tags without injecting separator breaks.
 $fragment = $html.Substring($startFragmentChar, $endMarkerIndex - $startFragmentChar)
-$spacedFragment = [regex]::Replace(
+$multilineParagraph = [regex]::Match(
   $fragment,
-  '</p>(?:\s|<br\s*/?>)*<p(?=[\s>])',
-  '</p><br><p',
-  [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+  '<p\b[^>]*>.*?(?:\r\n|\r|\n).*?</p>',
+  [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor
+    [System.Text.RegularExpressions.RegexOptions]::Singleline
 )
-if ($spacedFragment -ne $fragment) {
+if ($multilineParagraph.Success) {
+  throw "Each <p>...</p> must occupy one physical source line."
+}
+$compactFragment = [regex]::Replace($fragment, '>\s+<', '><')
+if ($compactFragment -ne $fragment) {
   $html = $html.Substring(0, $startFragmentChar) +
-    $spacedFragment +
+    $compactFragment +
     $html.Substring($endMarkerIndex)
   $endMarkerIndex = $html.IndexOf($endMarker, $startFragmentChar, [System.StringComparison]::Ordinal)
 }

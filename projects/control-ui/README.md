@@ -19,8 +19,8 @@ generic config ownership work.
 
 | Repo                | PR / Issue                                                    | Branch                                   | Status                      | Purpose                                                                                                                                                                                                                                                                             |
 | ------------------- | ------------------------------------------------------------- | ---------------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bic/lobster`       | [#6060](https://microsoft.ghe.com/bic/lobster/pull/6060)      | `user/giodl/control-ui-hosting-design`   | Review/CI active            | Host the OpenClaw Control UI in Lobster with Lobster-owned auth, rollout, and enforced settings lockdown.                                                                                                                                                                           |
-| `bic/lobster`       | [#6121](https://microsoft.ghe.com/bic/lobster/pull/6121)      | `user/giodl/control-ui-surgical-routes`  | Draft all-in-one preview PR | Hosted `/openclaw`, Control UI staging, runtime host policy bootstrap, hosted Gateway route, default-off ECS rollout/replacement gates for `/chat`, `/sessions`, and `/settings`, and Lobster image patch `0019-hosted-control-ui-policy.patch`. Supersedes closed #6088 and #6113. |
+| `bic/lobster`       | [#6060](https://microsoft.ghe.com/bic/lobster/pull/6060)      | `user/giodl/control-ui-hosting-design`   | Merged                      | Host the OpenClaw Control UI in Lobster with Lobster-owned auth, rollout, and enforced settings lockdown.                                                                                                                                                                           |
+| `bic/lobster`       | [#6121](https://microsoft.ghe.com/bic/lobster/pull/6121)      | `user/giodl/control-ui-surgical-routes`  | Merged                      | Hosted `/openclaw`, Control UI staging, runtime host policy bootstrap, hosted Gateway route, default-off ECS rollout/replacement gates for `/chat`, `/sessions`, and `/settings`, and Lobster image patch `0019-hosted-control-ui-policy.patch`. Supersedes closed #6088 and #6113. |
 | `bic/lobster`       | [#6116](https://microsoft.ghe.com/bic/lobster/pull/6116)      | `user/giodl/control-ui-root-cutover`     | Separate draft follow-up    | Separate process-scope ECS gate for redirecting `/` to `/openclaw/`, preserving `/web/` rollback and `/?health=1`.                                                                                                                                                                  |
 | `openclaw/openclaw` | [#115423](https://github.com/openclaw/openclaw/issues/115423) | n/a                                      | Open umbrella issue         | Host-controlled Control UI surface for embedded and managed deployments.                                                                                                                                                                                                            |
 | `openclaw/openclaw` | [#115408](https://github.com/openclaw/openclaw/pull/115408)   | `user/giodl/control-ui-host-policy-main` | Draft main PR               | Canonical generic opt-in host Control UI policy.                                                                                                                                                                                                                                    |
@@ -40,6 +40,10 @@ Remaining proof steps:
 4. Load chat and one read-only settings page.
 5. Deny a direct forbidden mutation server-side.
 6. Flip the ECS flag off and return to the current Lobster SPA.
+
+The route and fallback substrate has landed. Settings can use it immediately in
+read-only mode. Dashboard routes require a board-capable OpenClaw generation;
+the current LobsterClaw 2026.6.33 release predates the board protocol.
 
 After the proof, keep the PR stack small:
 
@@ -66,6 +70,8 @@ After the proof, keep the PR stack small:
 - `projects/control-model/README.md` for the successor headless-model approach
   used when Lobster owns the React experience instead of hosting OpenClaw's
   shipped Lit application.
+- `projects/board-model/README.md` for reusable dashboard/widget state.
+- `projects/config-model/README.md` for reusable settings state.
 - `projects/config-admin/README.md` for shared admin/config UX framing.
 - `projects/hosted-integration/README.md` for host-runtime boundary contracts.
 - `projects/managed-config/README.md` for deployment-owned config authority.

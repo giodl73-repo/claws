@@ -46,10 +46,11 @@
 
 ## Current Session
 
-- Last updated: 2026-08-11.
+- Last updated: 2026-08-15.
 - Last agent: GitHub Copilot CLI.
-- Current focus: Preserve the hosted Control UI as fallback/evidence while the
-  successor OpenClaw Control Model and Lobster-owned React UX are reviewed.
+- Current focus: use the merged hosted Control UI as immediate fallback and
+  read-only settings surface while Board Model and Config Model follow-ups
+  become reusable native seams.
 - Active branch / PR: Lobster design PR
   [bic/lobster#6060](https://microsoft.ghe.com/bic/lobster/pull/6060),
   `user/giodl/control-ui-hosting-design` at

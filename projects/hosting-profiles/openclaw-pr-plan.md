@@ -25,7 +25,7 @@ RFC: [openclaw/rfcs#33](https://github.com/openclaw/rfcs/pull/33), files
 
 Primary framework implementation:
 [openclaw/openclaw#104018](https://github.com/openclaw/openclaw/pull/104018),
-head `28ad0cf76fa9`. It contains eighteen readiness-only commits and no Hosting
+head `abbdfa0876f`. It contains the readiness-only framework and no Hosting
 Profile implementation.
 
 The compatibility boundary is the presence of `gateway.readiness`:
@@ -58,8 +58,8 @@ CLI, and subjects.
 
 The owner adoption is one upstream follow-on merge unit:
 [openclaw/openclaw#113421](https://github.com/openclaw/openclaw/pull/113421),
-branch `user/giodl/readiness-core-owner-adoption`, head `debd3a56a098`, based
-exactly on PR 104018 head `28ad0cf76fa9`.
+branch `user/giodl/readiness-core-owner-adoption`, head `a7e0df75ff2`, based
+exactly on PR 104018 head `abbdfa0876f`.
 
 | Owner area           | Selectable conditions                                                                                 | Review slice                                                |
 | -------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
@@ -98,7 +98,7 @@ RFC: [openclaw/rfcs#37](https://github.com/openclaw/rfcs/pull/37), files
 Primary implementation:
 [openclaw/openclaw#113422](https://github.com/openclaw/openclaw/pull/113422),
 branch `user/giodl/standard-hosting-profiles-owner-adoption`, exact head
-`812d61a2b473`. It is stacked on core-condition head `debd3a56a098`.
+`7cb458dd24d`. It is stacked on core-condition head `a7e0df75ff2`.
 [Fork PR 157](https://github.com/giodl73-repo/openclaw/pull/157) is the exact
 profile-only comparison: 44 files, 2,015 insertions, and 56 deletions.
 
@@ -128,6 +128,43 @@ No profile is selected by default. Unprofiled operation remains on the legacy
 readiness path. Operator-required selectors cannot be demoted by a profile.
 Optional MCP, sandbox, and harness capabilities satisfy readiness when they are
 intentionally not configured.
+
+## Health Status Follow-up
+
+The existing surfaces have different compatibility contracts:
+
+- `/health` and `/healthz` are shallow liveness aliases. They are served before
+  config loading and must not invoke condition providers.
+- `/ready` and `/readyz` reduce required selected conditions into traffic
+  admission.
+- Gateway `health` and `status` already carry the canonical readiness result,
+  including required and advisory conditions.
+
+A health-status projection should therefore derive from the same canonical
+result rather than introduce a second evaluator. The useful aggregate is over
+the selected condition set: passing when all conditions are true, degraded when
+only advisory conditions are non-passing, failing when a required condition is
+false, and unknown when required evidence is unknown without a known failure.
+The payload must identify that selected-condition scope.
+
+The first compatible slice is to add that derived aggregate to existing
+authenticated Gateway health/status output. If an HTTP-native operational
+surface is needed, add a distinct local-or-authenticated status endpoint such
+as `/statusz`; do not change `/healthz` evaluation or status-code behavior.
+
+[OpenClaw PR 121355](https://github.com/openclaw/openclaw/pull/121355) at exact
+head `8cb054a8f47` is the final projection-only PR on #114636 head
+`0a9851b6fa0`. The temporary stack position preserves the four rebased branches;
+the implementation itself remains profile-independent. It owns:
+
+- a pure readiness projection helper and focused reduction tests;
+- Gateway health/status summary types and their shared live-readiness wrapper;
+- HTTP route classification plus `/statusz` local/auth detail redaction;
+- probe tests proving `/healthz` remains pre-config and shallow and `/readyz`
+  keeps traffic-admission status codes;
+- Gateway health/status tests for canonical reason, message, and subject reuse;
+- Plugin SDK API baseline regeneration only if the exported health summary type
+  changes.
 
 ## Validation State
 
@@ -167,7 +204,7 @@ intentionally not configured.
    for smaller source-area comparisons.
 3. Decide RFC 0023's four-profile support catalog.
 4. Refresh package-installed Docker proof for exact profile head
-   `812d61a2b473`.
+   `7cb458dd24d`.
 5. Land PR 113422 after both readiness dependencies.
 
 ## Contract Rules

@@ -29,14 +29,15 @@
 
 ## Current Session
 
-- Last updated: 2026-07-27
-- Last agent: Codex
+- Last updated: 2026-08-09
+- Last agent: Copilot
 - Current focus: exact package-installed proof is complete for RFC 0018
   readiness identity and RFC 0023 Standard Hosting Profiles. The release
   conformance facility is fork PR 176: it runs the packaged validator through
   13 states and retains one versioned, independently checked artifact. Upstream
   PR 114636 combines catalog inspection, live validation, and release evidence
-  as one ordered RFC 0023 review unit.
+  as one ordered RFC 0023 review unit. Final PR 121355 derives condition health
+  and adds `/statusz` without changing `/healthz` or readiness evaluation.
   Semantic transition watching is published as fork PR 167, and the second runtime
   facility, active criterion catalog list/inspect, is fork PR 169 stacked on it.
   The third facility, bounded `openclaw ready --wait`, is fork PR 171 stacked
@@ -49,23 +50,24 @@
   fixed missing Gateway RPC readiness wiring in foundational PR 104018, then
   the complete profile stack was restacked over the repaired head.
 - Published heads: RFC 0018
-  [PR 33](https://github.com/openclaw/rfcs/pull/33) at `fae4ea1`;
+  [PR 33](https://github.com/openclaw/rfcs/pull/33) at `ca4cace`;
   readiness [PR 104018](https://github.com/openclaw/openclaw/pull/104018) at
-  `2f131c6e220`; core-owner
+  `abbdfa0876f`; core-owner
   [PR 113421](https://github.com/openclaw/openclaw/pull/113421) at
-  `c1d7f394f86`; RFC 0023
+  `a7e0df75ff2`; RFC 0023
   [PR 37](https://github.com/openclaw/rfcs/pull/37) at `e931e8d`; and
   profiles [PR 113422](https://github.com/openclaw/openclaw/pull/113422) at
-  `18c42a7f26a`; and profile tooling
+  `7cb458dd24d`; and profile tooling
   [PR 114636](https://github.com/openclaw/openclaw/pull/114636) at
-  `123bae7b876`. Fork [PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
-  is the exact profile-only comparison. All six upstream review surfaces are
+  `0a9851b6fa0`; and condition health
+  [PR 121355](https://github.com/openclaw/openclaw/pull/121355) at
+  `8cb054a8f47`. Fork [PR 157](https://github.com/giodl73-repo/openclaw/pull/157)
+  is the exact profile-only comparison. All seven upstream review surfaces are
   non-draft.
 - Known dirty state: unrelated project edits remain in `claws-hapi`; only the
   hosting-profiles project files from this session should be committed. Both
-  RFC branches are clean at pushed heads. All four upstream implementation PRs
-  currently conflict with the latest `main` and require a coordinated restack
-  before merge review.
+  RFC branches are clean at pushed heads. The four upstream implementation PRs
+  were dependency-order rebased and force-pushed on 2026-08-09.
 - Validation: [GitHub Actions run 30289122192](https://github.com/giodl73-repo/openclaw/actions/runs/30289122192)
   passes the exact PR 176 head over profile head `18c42a7f26a`. It builds the
   package/image, exercises 13 states, independently validates every canonical
@@ -83,6 +85,30 @@
 - Provider attribution: proof ran on GitHub-hosted Actions. Direct AWS Crabbox
   returned `401`; Blacksmith Testbox did not allocate a provider ID because of
   organization/login access. Do not describe this run as Crabbox or Testbox.
+
+- Health projection finding: `/healthz` and `/health` are existing shallow
+  liveness aliases served before configuration loading. They must remain cheap
+  and must not invoke readiness providers. Gateway `health` and `status`
+  already attach the canonical readiness result, including required and
+  advisory conditions. A follow-up may derive `healthy` / `degraded` /
+  `unhealthy` from that same observed condition set and expose it through an
+  authenticated or local detailed status surface. It must not create another
+  evaluator or change `/healthz` status-code semantics.
+
+- Rebase CI: all current-head check rollups completed without failures:
+  #104018 and #113421 each have 8 success / 8 skipped; #113422 has 9 success,
+  4 skipped, and 1 neutral; #114636 has 8 success / 4 skipped.
+
+- 2026-08-09 condition-health amendment: RFC 0018 PR 33 at `ca4cace` defines
+  a generic `passing` / `degraded` / `failing` / `unknown` projection over the
+  already selected canonical conditions. Detailed output reuses canonical
+  reason, redacted message, and subject identity. `/healthz` remains shallow;
+  optional `/statusz` is diagnostic and does not use readiness status codes.
+  Final projection-only implementation
+  [PR 121355](https://github.com/openclaw/openclaw/pull/121355) is stacked on
+  #114636 head `0a9851b6fa0` at exact head `8cb054a8f47`. It adds no second
+  evaluator: `/statusz` uses canonical selected-provider bounds and never runs
+  deeper active channel probes. RFC 0018 links it at head `247d952`.
 
 - RFC 0023 catalog facility: [fork PR 173](https://github.com/giodl73-repo/openclaw/pull/173)
   at `f9e6b219418` adds inert `openclaw hosting profiles list|inspect` with
@@ -130,6 +156,10 @@
 
 ## Open Threads
 
+- Obtain explicit maintainer confirmation for PR 121355's three compatibility
+  surfaces: `/statusz`, the `conditionHealth` Gateway field, and canonical
+  failing/unknown `openclaw health` exit behavior. Its upstream mergeability
+  follows the four-PR parent stack.
 - Review and promote fork PRs 167 and 169 after the RFC 0018 foundation shape
   is accepted. They add transition-aware `openclaw ready --watch` and inert
   criterion catalog list/inspect while preserving one-shot behavior and profile

@@ -77,6 +77,14 @@ src\flows\doctor-health-contributions.test.ts`. Commit `eccd735f3e` was
   force-pushed to `giodl73-repo:user/giodl/doctor-model-ref-lint`. Live PR
   state after fresh checks: draft, mergeStateStatus `CLEAN`, Real behavior
   proof passed, and all non-skipped checks reported by `gh pr checks` passed.
+  2026-08-09 closeout: #83991 was closed unmerged at `3df494680c6d` after live
+  Vertex proof showed the sanitizer-only patch did not fix #38327. The issue
+  remains open for the reproduced ADC `node-fetch` / `@nolyfill/domexception`
+  root cause. #90708 closed unmerged at `6c770202967` because its test-only
+  stabilization batch crossed changed wrapper/test architecture; re-derive
+  only failures that still reproduce. #99619 closed unmerged at `12b3f07565d`
+  because its linked requirement is not planned and its duplicated model-policy
+  matcher produced false positives and missed canonical entries.
   Open bug PR sweep on 2026-07-03: #90708 is clean/proof-sufficient/ready for
   maintainer review; #87471 is clean/proof-sufficient but still
   draft/canonical-fix gated; #90062 is now proof-sufficient/ready but still
@@ -95,13 +103,10 @@ src\flows\doctor-health-contributions.test.ts`. Commit `eccd735f3e` was
   #87471, and #90062 are clean/reviewable within their draft/proof constraints.
   #94187 remains blocked on PR-body real behavior proof and disabled maintainer
   edits.
-- Active branch / PR: openclaw/openclaw#86627, #90708, #87471, #90062,
-  #83991, #86285, #94187, and draft #99619 for #84212.
+- Active branch / PR: openclaw/openclaw#87471 and #90062.
 - Known dirty state: `claws-hapi` already had unrelated local admin/context
   edits before this session; do not revert them.
-- Blocking question: #83991 needs live Vertex/Gemini proof or maintainer
-  acceptance; CI is green.
-  #86285 needs live Twilio/OpenAI outbound-call proof or maintainer acceptance,
+- Blocking question: #86285 needs live Twilio/OpenAI outbound-call proof or maintainer acceptance,
   though source/local proof and live CI are now clean. #90062 is now
   proof-sufficient/ready but remains draft. #94187 is closed. #90708 is clean
   after removing the Slack timeout behavior change; live 2026-07-03 state has

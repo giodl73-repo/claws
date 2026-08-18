@@ -47,4 +47,6 @@ design/.proof/
 .local/
 /.rp.ts
 /.rp.test.ts
-
+/.qualification-scratch-*/
+/diff.txt
+/diff_files.patch

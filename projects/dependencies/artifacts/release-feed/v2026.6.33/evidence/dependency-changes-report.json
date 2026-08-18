@@ -1,0 +1,1090 @@
+{
+  "generatedAt": "2026-07-21T09:27:03.266Z",
+  "baseLabel": "v2026.6.11",
+  "headLabel": "pnpm-lock.yaml",
+  "summary": {
+    "basePackages": 1239,
+    "headPackages": 1239,
+    "addedPackages": 0,
+    "removedPackages": 0,
+    "changedPackages": 5,
+    "dependencyFileChanges": 206
+  },
+  "dependencyFileChanges": [
+    {
+      "status": "M",
+      "path": "extensions/acpx/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/acpx/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/admin-http-rpc/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/alibaba/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/amazon-bedrock-mantle/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/amazon-bedrock-mantle/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/amazon-bedrock/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/amazon-bedrock/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/anthropic-vertex/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/anthropic-vertex/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/anthropic/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/arcee/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/arcee/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/azure-speech/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/bonjour/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/brave/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/brave/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/browser/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/byteplus/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/canvas/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/cerebras/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/cerebras/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/chutes/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/chutes/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/clickclack/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/clickclack/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/cloudflare-ai-gateway/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/cloudflare-ai-gateway/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/codex-supervisor/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/codex/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/codex/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/cohere/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/cohere/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/comfy/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/copilot-proxy/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/copilot/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/copilot/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/deepgram/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/deepinfra/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/deepinfra/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/deepseek/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/deepseek/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/diagnostics-otel/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/diagnostics-otel/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/diagnostics-prometheus/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/diagnostics-prometheus/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/diffs-language-pack/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/diffs-language-pack/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/diffs/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/diffs/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/discord/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/discord/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/document-extract/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/duckduckgo/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/elevenlabs/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/exa/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/exa/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/fal/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/feishu/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/feishu/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/file-transfer/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/firecrawl/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/firecrawl/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/fireworks/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/fireworks/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/github-copilot/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/gmi/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/gmi/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/google-meet/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/google-meet/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/google/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/googlechat/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/googlechat/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/gradium/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/gradium/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/groq/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/groq/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/huggingface/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/image-generation-core/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/imessage/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/inworld/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/inworld/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/irc/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/irc/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/kilocode/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/kilocode/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/kimi-coding/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/kimi-coding/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/line/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/line/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/litellm/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/llama-cpp/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/llama-cpp/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/llm-task/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/lmstudio/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/lobster/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/lobster/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/matrix/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/matrix/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/mattermost/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/mattermost/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/media-understanding-core/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/memory-core/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/memory-lancedb/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/memory-lancedb/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/memory-wiki/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/microsoft-foundry/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/microsoft/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/migrate-claude/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/migrate-hermes/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/minimax/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/mistral/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/moonshot/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/moonshot/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/msteams/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/msteams/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/nextcloud-talk/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/nextcloud-talk/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/nostr/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/nostr/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/novita/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/nvidia/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/oc-path/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/ollama/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/open-prose/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/openai/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/opencode-go/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/opencode/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/openrouter/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/openshell/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/openshell/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/parallel/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/parallel/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/perplexity/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/perplexity/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/pixverse/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/pixverse/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/policy/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/qa-channel/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/qa-lab/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/qa-matrix/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/qianfan/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/qianfan/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/qqbot/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/qqbot/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/qwen/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/qwen/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/raft/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/raft/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/runway/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/searxng/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/searxng/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/senseaudio/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/sglang/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/signal/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/signal/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/slack/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/slack/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/sms/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/sms/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/stepfun/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/stepfun/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/synology-chat/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/synology-chat/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/synthetic/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/tavily/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/tavily/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/telegram/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/tencent/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/tencent/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/tlon/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/tlon/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/together/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/tokenjuice/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/tokenjuice/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/tts-local-cli/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/twitch/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/twitch/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/venice/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/venice/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/vercel-ai-gateway/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/vercel-ai-gateway/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/video-generation-core/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/vllm/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/voice-call/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/voice-call/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/volcengine/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/voyage/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/vydra/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/web-readability/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/webhooks/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/whatsapp/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/whatsapp/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/workboard/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/xai/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/xiaomi/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/zai/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/zai/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/zalo/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/zalo/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/zalouser/npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "extensions/zalouser/package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "npm-shrinkwrap.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "package.json",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "pnpm-lock.yaml",
+      "oldPath": null
+    },
+    {
+      "status": "M",
+      "path": "pnpm-workspace.yaml",
+      "oldPath": null
+    }
+  ],
+  "addedPackages": [],
+  "removedPackages": [],
+  "changedPackages": [
+    {
+      "packageName": "agent-base",
+      "addedVersions": [
+        "6.0.2"
+      ],
+      "removedVersions": []
+    },
+    {
+      "packageName": "axios",
+      "addedVersions": [
+        "1.18.0"
+      ],
+      "removedVersions": [
+        "1.16.0"
+      ]
+    },
+    {
+      "packageName": "brace-expansion",
+      "addedVersions": [
+        "5.0.7"
+      ],
+      "removedVersions": [
+        "5.0.6"
+      ]
+    },
+    {
+      "packageName": "https-proxy-agent",
+      "addedVersions": [
+        "5.0.1"
+      ],
+      "removedVersions": []
+    },
+    {
+      "packageName": "tar",
+      "addedVersions": [
+        "7.5.20"
+      ],
+      "removedVersions": [
+        "7.5.16"
+      ]
+    }
+  ]
+}

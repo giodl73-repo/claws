@@ -1,0 +1,528 @@
+# Dependency Ownership and Install Surface Report
+
+Generated: 2026-07-21T09:27:02.940Z
+
+## Target
+
+- Package: openclaw@2026.6.33
+- Git branch:
+- Git commit: 7af0cfc9c5488e03c4e2f528bdc7ac9f7778b35e
+- Lockfile: pnpm-lock.yaml
+- Ownership metadata: scripts/lib/dependency-ownership.json
+
+## Scope
+
+This report summarizes the dependency ownership and install-time surface represented by the current workspace lockfile. It uses the root package dependencies, workspace package entries from pnpm-lock.yaml, dependency ownership metadata, and lockfile package metadata such as build requirements, binaries, and platform restrictions.
+
+It is report-only. It does not query npm advisories and does not inspect published package manifests.
+
+## Summary
+
+- Workspace package entries in lockfile: 156
+- Packages in lockfile: 1355
+- Root direct dependencies: 55
+- Packages reachable from root dependencies: 304
+- Packages with install-time or platform-specific behavior: 278
+- Root dependency ownership records: 56
+
+## Dependency Ownership Mismatches
+
+- `linkedom`: plugin-owned dependency is still imported by core-owned source; source sections: extensions, src
+
+## Root Dependencies By Resolved Transitive Package Count
+
+- `@google/genai`: 132 resolved transitive packages; owner=provider:google; class=default-runtime-initially
+- `@modelcontextprotocol/sdk`: 92 resolved transitive packages; owner=core:mcp; class=core-runtime
+- `express`: 66 resolved transitive packages; owner=capability:http-route-host; class=default-runtime-initially
+- `qrcode`: 29 resolved transitive packages; owner=core:qr-setup; class=default-runtime-initially
+- `node-edge-tts`: 22 resolved transitive packages; owner=plugin:microsoft; class=plugin-runtime
+- `@openclaw/fs-safe`: 20 resolved transitive packages; owner=core:filesystem-safety; class=core-runtime
+- `web-push`: 17 resolved transitive packages; owner=core:web-push; class=core-runtime
+- `linkedom`: 15 resolved transitive packages; owner=plugin:web-readability; class=plugin-runtime
+- `jszip`: 13 resolved transitive packages; owner=core:archive-handling; class=core-runtime
+- `@grammyjs/transformer-throttler`: 12 resolved transitive packages; owner=plugin:telegram; class=plugin-runtime
+- `@grammyjs/runner`: 11 resolved transitive packages; owner=plugin:telegram; class=plugin-runtime
+- `file-type`: 10 resolved transitive packages; owner=core:media-admission; class=core-runtime
+- `grammy`: 10 resolved transitive packages; owner=plugin:telegram; class=plugin-runtime
+- `@anthropic-ai/sdk`: 8 resolved transitive packages; owner=provider:anthropic; class=default-runtime-initially
+- `@homebridge/ciao`: 8 resolved transitive packages; owner=plugin:bonjour; class=plugin-runtime
+- `@lydell/node-pty`: 7 resolved transitive packages; owner=core:tui-terminal; class=core-runtime
+- `glob`: 7 resolved transitive packages; owner=core:package-manager; class=core-runtime
+- `@clack/prompts`: 6 resolved transitive packages; owner=core:cli; class=core-runtime
+- `sqlite-vec`: 6 resolved transitive packages; owner=capability:memory-sqlite-vec; class=default-runtime-initially
+- `tar`: 6 resolved transitive packages; owner=core:archive-handling; class=core-runtime
+- `@clack/core`: 5 resolved transitive packages; owner=core:cli; class=core-runtime
+- `@mistralai/mistralai`: 4 resolved transitive packages; owner=provider:mistral; class=default-runtime-initially
+- `proper-lockfile`: 4 resolved transitive packages; owner=core:session-storage; class=core-runtime
+- `@earendil-works/pi-tui`: 3 resolved transitive packages; owner=capability:tui-pi; class=tui-runtime
+- `minimatch`: 3 resolved transitive packages; owner=core:pattern-matching; class=core-runtime
+- `openai`: 3 resolved transitive packages; owner=provider:openai; class=default-runtime-initially
+- `tree-sitter-bash`: 3 resolved transitive packages; owner=core:command-explainer; class=core-runtime
+- `@agentclientprotocol/sdk`: 2 resolved transitive packages; owner=core:mcp-acp; class=core-runtime
+- `@openclaw/proxyline`: 2 resolved transitive packages; owner=core:proxy; class=core-runtime
+- `chokidar`: 2 resolved transitive packages; owner=core:watch-mode; class=core-runtime
+- `hosted-git-info`: 2 resolved transitive packages; owner=core:git-utils; class=core-runtime
+- `rastermill`: 2 resolved transitive packages; owner=core:media; class=core-runtime
+- `@mozilla/readability`: 1 resolved transitive package; owner=plugin:web-readability; class=plugin-runtime
+- `chalk`: 1 resolved transitive package; owner=core:cli; class=core-runtime
+- `clawpdf`: 1 resolved transitive package; owner=plugin:document-extract; class=plugin-runtime
+- `commander`: 1 resolved transitive package; owner=core:cli; class=core-runtime
+- `croner`: 1 resolved transitive package; owner=core:scheduler; class=core-runtime
+- `diff`: 1 resolved transitive package; owner=core:agent-editing; class=core-runtime
+- `dotenv`: 1 resolved transitive package; owner=core:config; class=core-runtime
+- `highlight.js`: 1 resolved transitive package; owner=core:syntax-highlighting; class=core-runtime
+- `ignore`: 1 resolved transitive package; owner=core:gitignore-matching; class=core-runtime
+- `jiti`: 1 resolved transitive package; owner=core:plugin-loader; class=core-runtime
+- `json5`: 1 resolved transitive package; owner=core:config; class=core-runtime
+- `kysely`: 1 resolved transitive package; owner=core:sqlite-storage; class=core-runtime
+- `partial-json`: 1 resolved transitive package; owner=core:llm-json-parsing; class=core-runtime
+- `playwright-core`: 1 resolved transitive package; owner=core:browser; class=core-runtime
+- `quickjs-wasi`: 1 resolved transitive package; owner=core:code-mode; class=core-runtime
+- `tslog`: 1 resolved transitive package; owner=core:logging; class=core-runtime
+- `typebox`: 1 resolved transitive package; owner=core:json-schema-contracts; class=core-runtime
+- `typescript`: 1 resolved transitive package; owner=core:typescript-analysis; class=core-runtime
+- `undici`: 1 resolved transitive package; owner=core:http-client; class=core-runtime
+- `web-tree-sitter`: 1 resolved transitive package; owner=core:command-explainer; class=core-runtime
+- `ws`: 1 resolved transitive package; owner=core:gateway-websocket; class=core-runtime
+- `yaml`: 1 resolved transitive package; owner=core:config-and-tooling; class=core-runtime
+- `zod`: 1 resolved transitive package; owner=core:config-and-plugin-sdk-validation; class=core-runtime
+
+## Workspace Packages With The Most Dependencies
+
+- `.`: 304 packages; 55 direct dependencies
+- `extensions/qa-lab`: 273 packages; 5 direct dependencies
+- `extensions/acpx`: 169 packages; 4 direct dependencies
+- `extensions/msteams`: 143 packages; 5 direct dependencies
+- `extensions/google`: 133 packages; 2 direct dependencies
+- `extensions/llama-cpp`: 131 packages; 1 direct dependency
+- `extensions/slack`: 128 packages; 6 direct dependencies
+- `extensions/browser`: 96 packages; 6 direct dependencies
+- `extensions/codex-supervisor`: 94 packages; 4 direct dependencies
+- `extensions/whatsapp`: 83 packages; 3 direct dependencies
+- `extensions/diagnostics-otel`: 72 packages; 11 direct dependencies
+- `ui`: 65 packages; 11 direct dependencies
+- `extensions/diffs`: 57 packages; 6 direct dependencies
+- `extensions/amazon-bedrock-mantle`: 56 packages; 2 direct dependencies
+- `extensions/feishu`: 56 packages; 3 direct dependencies
+- `extensions/tlon`: 56 packages; 5 direct dependencies
+- `extensions/amazon-bedrock`: 45 packages; 6 direct dependencies
+- `extensions/matrix`: 45 packages; 8 direct dependencies
+- `extensions/zalouser`: 38 packages; 3 direct dependencies
+- `extensions/memory-lancedb`: 37 packages; 4 direct dependencies
+- `extensions/anthropic-vertex`: 33 packages; 1 direct dependency
+- `extensions/discord`: 31 packages; 6 direct dependencies
+- `extensions/twitch`: 26 packages; 4 direct dependencies
+- `extensions/googlechat`: 25 packages; 3 direct dependencies
+- `extensions/microsoft`: 22 packages; 1 direct dependency
+- `extensions/canvas`: 20 packages; 6 direct dependencies
+- `extensions/web-readability`: 16 packages; 2 direct dependencies
+- `extensions/telegram`: 15 packages; 5 direct dependencies
+- `extensions/copilot`: 13 packages; 1 direct dependency
+- `extensions/codex`: 10 packages; 4 direct dependencies
+- `extensions/nostr`: 10 packages; 2 direct dependencies
+- `extensions/oc-path`: 10 packages; 4 direct dependencies
+- `packages/media-core`: 10 packages; 2 direct dependencies
+- `extensions/qqbot`: 9 packages; 5 direct dependencies
+- `extensions/bonjour`: 8 packages; 1 direct dependency
+- `extensions/lobster`: 8 packages; 2 direct dependencies
+- `packages/markdown-core`: 8 packages; 2 direct dependencies
+- `packages/terminal-core`: 7 packages; 2 direct dependencies
+- `extensions/github-copilot`: 6 packages; 1 direct dependency
+- `extensions/file-transfer`: 4 packages; 2 direct dependencies
+- `extensions/line`: 4 packages; 2 direct dependencies
+- `extensions/memory-core`: 4 packages; 3 direct dependencies
+- `extensions/voice-call`: 4 packages; 4 direct dependencies
+- `extensions/memory-wiki`: 3 packages; 3 direct dependencies
+- `extensions/clickclack`: 2 packages; 2 direct dependencies
+- `extensions/google-meet`: 2 packages; 2 direct dependencies
+- `extensions/mattermost`: 2 packages; 2 direct dependencies
+- `extensions/qa-channel`: 2 packages; 2 direct dependencies
+- `packages/gateway-client`: 2 packages; 3 direct dependencies
+- `extensions/document-extract`: 1 package; 1 direct dependency
+- `extensions/firecrawl`: 1 package; 1 direct dependency
+- `extensions/irc`: 1 package; 1 direct dependency
+- `extensions/llm-task`: 1 package; 1 direct dependency
+- `extensions/migrate-hermes`: 1 package; 1 direct dependency
+- `extensions/nextcloud-talk`: 1 package; 1 direct dependency
+- `extensions/ollama`: 1 package; 1 direct dependency
+- `extensions/openai`: 1 package; 1 direct dependency
+- `extensions/openshell`: 1 package; 1 direct dependency
+- `extensions/policy`: 1 package; 1 direct dependency
+- `extensions/qa-matrix`: 1 package; 1 direct dependency
+- `extensions/raft`: 1 package; 1 direct dependency
+- `extensions/signal`: 1 package; 1 direct dependency
+- `extensions/sms`: 1 package; 1 direct dependency
+- `extensions/synology-chat`: 1 package; 1 direct dependency
+- `extensions/tavily`: 1 package; 1 direct dependency
+- `extensions/tokenjuice`: 1 package; 1 direct dependency
+- `extensions/webhooks`: 1 package; 1 direct dependency
+- `extensions/workboard`: 1 package; 1 direct dependency
+- `extensions/xai`: 1 package; 1 direct dependency
+- `extensions/zalo`: 1 package; 1 direct dependency
+- `packages/agent-core`: 1 package; 2 direct dependencies
+- `packages/gateway-protocol`: 1 package; 1 direct dependency
+- `packages/llm-core`: 1 package; 1 direct dependency
+- `packages/net-policy`: 1 package; 1 direct dependency
+- `extensions/admin-http-rpc`: 0 packages; 0 direct dependencies
+- `extensions/alibaba`: 0 packages; 0 direct dependencies
+- `extensions/anthropic`: 0 packages; 0 direct dependencies
+- `extensions/arcee`: 0 packages; 0 direct dependencies
+- `extensions/azure-speech`: 0 packages; 0 direct dependencies
+- `extensions/brave`: 0 packages; 0 direct dependencies
+- `extensions/byteplus`: 0 packages; 0 direct dependencies
+- `extensions/cerebras`: 0 packages; 0 direct dependencies
+- `extensions/chutes`: 0 packages; 0 direct dependencies
+- `extensions/cloudflare-ai-gateway`: 0 packages; 0 direct dependencies
+- `extensions/cohere`: 0 packages; 0 direct dependencies
+- `extensions/comfy`: 0 packages; 0 direct dependencies
+- `extensions/copilot-proxy`: 0 packages; 0 direct dependencies
+- `extensions/deepgram`: 0 packages; 0 direct dependencies
+- `extensions/deepinfra`: 0 packages; 0 direct dependencies
+- `extensions/deepseek`: 0 packages; 0 direct dependencies
+- `extensions/diagnostics-prometheus`: 0 packages; 0 direct dependencies
+- `extensions/diffs-language-pack`: 0 packages; 0 direct dependencies
+- `extensions/duckduckgo`: 0 packages; 0 direct dependencies
+- `extensions/elevenlabs`: 0 packages; 0 direct dependencies
+- `extensions/exa`: 0 packages; 0 direct dependencies
+- `extensions/fal`: 0 packages; 0 direct dependencies
+- `extensions/fireworks`: 0 packages; 0 direct dependencies
+- `extensions/gmi`: 0 packages; 0 direct dependencies
+- `extensions/gradium`: 0 packages; 0 direct dependencies
+- `extensions/groq`: 0 packages; 0 direct dependencies
+- `extensions/huggingface`: 0 packages; 0 direct dependencies
+- `extensions/image-generation-core`: 0 packages; 0 direct dependencies
+- `extensions/imessage`: 0 packages; 0 direct dependencies
+- `extensions/inworld`: 0 packages; 0 direct dependencies
+- `extensions/kilocode`: 0 packages; 0 direct dependencies
+- `extensions/kimi-coding`: 0 packages; 0 direct dependencies
+- `extensions/litellm`: 0 packages; 0 direct dependencies
+- `extensions/lmstudio`: 0 packages; 0 direct dependencies
+- `extensions/media-understanding-core`: 0 packages; 0 direct dependencies
+- `extensions/microsoft-foundry`: 0 packages; 0 direct dependencies
+- `extensions/migrate-claude`: 0 packages; 0 direct dependencies
+- `extensions/minimax`: 0 packages; 0 direct dependencies
+- `extensions/mistral`: 0 packages; 0 direct dependencies
+- `extensions/moonshot`: 0 packages; 0 direct dependencies
+- `extensions/novita`: 0 packages; 0 direct dependencies
+- `extensions/nvidia`: 0 packages; 0 direct dependencies
+- `extensions/open-prose`: 0 packages; 0 direct dependencies
+- `extensions/opencode`: 0 packages; 0 direct dependencies
+- `extensions/opencode-go`: 0 packages; 0 direct dependencies
+- `extensions/openrouter`: 0 packages; 0 direct dependencies
+- `extensions/parallel`: 0 packages; 0 direct dependencies
+- `extensions/perplexity`: 0 packages; 0 direct dependencies
+- `extensions/pixverse`: 0 packages; 0 direct dependencies
+- `extensions/qianfan`: 0 packages; 0 direct dependencies
+- `extensions/qwen`: 0 packages; 0 direct dependencies
+- `extensions/runway`: 0 packages; 0 direct dependencies
+- `extensions/searxng`: 0 packages; 0 direct dependencies
+- `extensions/senseaudio`: 0 packages; 0 direct dependencies
+- `extensions/sglang`: 0 packages; 0 direct dependencies
+- `extensions/stepfun`: 0 packages; 0 direct dependencies
+- `extensions/synthetic`: 0 packages; 0 direct dependencies
+- `extensions/tencent`: 0 packages; 0 direct dependencies
+- `extensions/together`: 0 packages; 0 direct dependencies
+- `extensions/tts-local-cli`: 0 packages; 0 direct dependencies
+- `extensions/venice`: 0 packages; 0 direct dependencies
+- `extensions/vercel-ai-gateway`: 0 packages; 0 direct dependencies
+- `extensions/video-generation-core`: 0 packages; 0 direct dependencies
+- `extensions/vllm`: 0 packages; 0 direct dependencies
+- `extensions/volcengine`: 0 packages; 0 direct dependencies
+- `extensions/voyage`: 0 packages; 0 direct dependencies
+- `extensions/vydra`: 0 packages; 0 direct dependencies
+- `extensions/xiaomi`: 0 packages; 0 direct dependencies
+- `extensions/zai`: 0 packages; 0 direct dependencies
+- `packages/acp-core`: 0 packages; 1 direct dependency
+- `packages/llm-runtime`: 0 packages; 1 direct dependency
+- `packages/media-generation-core`: 0 packages; 0 direct dependencies
+- `packages/media-understanding-common`: 0 packages; 0 direct dependencies
+- `packages/memory-host-sdk`: 0 packages; 0 direct dependencies
+- `packages/model-catalog-core`: 0 packages; 0 direct dependencies
+- `packages/normalization-core`: 0 packages; 0 direct dependencies
+- `packages/plugin-package-contract`: 0 packages; 0 direct dependencies
+- `packages/plugin-sdk`: 0 packages; 0 direct dependencies
+- `packages/sdk`: 0 packages; 1 direct dependency
+- `packages/speech-core`: 0 packages; 1 direct dependency
+- `packages/tool-call-repair`: 0 packages; 0 direct dependencies
+- `packages/web-content-core`: 0 packages; 0 direct dependencies
+
+## Packages With Install-Time Or Platform-Specific Behavior
+
+- `@agentclientprotocol/claude-agent-acp@0.39.0`: has binary
+- `@anthropic-ai/claude-agent-sdk-darwin-arm64@0.3.156`: platform-specific
+- `@anthropic-ai/claude-agent-sdk-darwin-x64@0.3.156`: platform-specific
+- `@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.3.156`: platform-specific
+- `@anthropic-ai/claude-agent-sdk-linux-arm64@0.3.156`: platform-specific
+- `@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.3.156`: platform-specific
+- `@anthropic-ai/claude-agent-sdk-linux-x64@0.3.156`: platform-specific
+- `@anthropic-ai/claude-agent-sdk-win32-arm64@0.3.156`: platform-specific
+- `@anthropic-ai/claude-agent-sdk-win32-x64@0.3.156`: platform-specific
+- `@anthropic-ai/sdk@0.100.1`: has binary
+- `@babel/parser@7.29.7`: has binary
+- `@babel/parser@8.0.0-rc.6`: has binary
+- `@bramus/specificity@2.4.2`: has binary
+- `@clawdbot/lobster@2026.5.22`: has binary
+- `@copilotkit/aimock@1.27.3`: has binary
+- `@esbuild/aix-ppc64@0.28.1`: platform-specific
+- `@esbuild/android-arm@0.28.1`: platform-specific
+- `@esbuild/android-arm64@0.28.1`: platform-specific
+- `@esbuild/android-x64@0.28.1`: platform-specific
+- `@esbuild/darwin-arm64@0.28.1`: platform-specific
+- `@esbuild/darwin-x64@0.28.1`: platform-specific
+- `@esbuild/freebsd-arm64@0.28.1`: platform-specific
+- `@esbuild/freebsd-x64@0.28.1`: platform-specific
+- `@esbuild/linux-arm@0.28.1`: platform-specific
+- `@esbuild/linux-arm64@0.28.1`: platform-specific
+- `@esbuild/linux-ia32@0.28.1`: platform-specific
+- `@esbuild/linux-loong64@0.28.1`: platform-specific
+- `@esbuild/linux-mips64el@0.28.1`: platform-specific
+- `@esbuild/linux-ppc64@0.28.1`: platform-specific
+- `@esbuild/linux-riscv64@0.28.1`: platform-specific
+- `@esbuild/linux-s390x@0.28.1`: platform-specific
+- `@esbuild/linux-x64@0.28.1`: platform-specific
+- `@esbuild/netbsd-arm64@0.28.1`: platform-specific
+- `@esbuild/netbsd-x64@0.28.1`: platform-specific
+- `@esbuild/openbsd-arm64@0.28.1`: platform-specific
+- `@esbuild/openbsd-x64@0.28.1`: platform-specific
+- `@esbuild/openharmony-arm64@0.28.1`: platform-specific
+- `@esbuild/sunos-x64@0.28.1`: platform-specific
+- `@esbuild/win32-arm64@0.28.1`: platform-specific
+- `@esbuild/win32-ia32@0.28.1`: platform-specific
+- `@esbuild/win32-x64@0.28.1`: platform-specific
+- `@github/copilot-darwin-arm64@1.0.55`: has binary, platform-specific
+- `@github/copilot-darwin-x64@1.0.55`: has binary, platform-specific
+- `@github/copilot-linux-arm64@1.0.55`: has binary, platform-specific
+- `@github/copilot-linux-x64@1.0.55`: has binary, platform-specific
+- `@github/copilot-linuxmusl-arm64@1.0.55`: has binary, platform-specific
+- `@github/copilot-linuxmusl-x64@1.0.55`: has binary, platform-specific
+- `@github/copilot-win32-arm64@1.0.55`: has binary, platform-specific
+- `@github/copilot-win32-x64@1.0.55`: has binary, platform-specific
+- `@github/copilot@1.0.55`: has binary
+- `@grpc/proto-loader@0.8.1`: has binary
+- `@homebridge/ciao@1.3.9`: has binary
+- `@lancedb/lancedb-darwin-arm64@0.30.0`: platform-specific
+- `@lancedb/lancedb-linux-arm64-gnu@0.30.0`: platform-specific
+- `@lancedb/lancedb-linux-arm64-musl@0.30.0`: platform-specific
+- `@lancedb/lancedb-linux-x64-gnu@0.30.0`: platform-specific
+- `@lancedb/lancedb-linux-x64-musl@0.30.0`: platform-specific
+- `@lancedb/lancedb-win32-arm64-msvc@0.30.0`: platform-specific
+- `@lancedb/lancedb-win32-x64-msvc@0.30.0`: platform-specific
+- `@lancedb/lancedb@0.30.0`: platform-specific
+- `@lydell/node-pty-darwin-arm64@1.2.0-beta.12`: platform-specific
+- `@lydell/node-pty-darwin-x64@1.2.0-beta.12`: platform-specific
+- `@lydell/node-pty-linux-arm64@1.2.0-beta.12`: platform-specific
+- `@lydell/node-pty-linux-x64@1.2.0-beta.12`: platform-specific
+- `@lydell/node-pty-win32-arm64@1.2.0-beta.12`: platform-specific
+- `@lydell/node-pty-win32-x64@1.2.0-beta.12`: platform-specific
+- `@node-llama-cpp/linux-arm64@3.18.1`: platform-specific
+- `@node-llama-cpp/linux-armv7l@3.18.1`: platform-specific
+- `@node-llama-cpp/linux-x64-cuda-ext@3.18.1`: platform-specific
+- `@node-llama-cpp/linux-x64-cuda@3.18.1`: platform-specific
+- `@node-llama-cpp/linux-x64-vulkan@3.18.1`: platform-specific
+- `@node-llama-cpp/linux-x64@3.18.1`: platform-specific
+- `@node-llama-cpp/mac-arm64-metal@3.18.1`: platform-specific
+- `@node-llama-cpp/mac-x64@3.18.1`: platform-specific
+- `@node-llama-cpp/win-arm64@3.18.1`: platform-specific
+- `@node-llama-cpp/win-x64-cuda-ext@3.18.1`: platform-specific
+- `@node-llama-cpp/win-x64-cuda@3.18.1`: platform-specific
+- `@node-llama-cpp/win-x64-vulkan@3.18.1`: platform-specific
+- `@node-llama-cpp/win-x64@3.18.1`: platform-specific
+- `@openai/codex@0.139.0`: has binary
+- `@openai/codex@0.139.0-darwin-arm64`: platform-specific
+- `@openai/codex@0.139.0-darwin-x64`: platform-specific
+- `@openai/codex@0.139.0-linux-arm64`: platform-specific
+- `@openai/codex@0.139.0-linux-x64`: platform-specific
+- `@openai/codex@0.139.0-win32-arm64`: platform-specific
+- `@openai/codex@0.139.0-win32-x64`: platform-specific
+- `@openclaw/crabline@0.1.6`: has binary
+- `@oxfmt/binding-android-arm-eabi@0.52.0`: platform-specific
+- `@oxfmt/binding-android-arm64@0.52.0`: platform-specific
+- `@oxfmt/binding-darwin-arm64@0.52.0`: platform-specific
+- `@oxfmt/binding-darwin-x64@0.52.0`: platform-specific
+- `@oxfmt/binding-freebsd-x64@0.52.0`: platform-specific
+- `@oxfmt/binding-linux-arm-gnueabihf@0.52.0`: platform-specific
+- `@oxfmt/binding-linux-arm-musleabihf@0.52.0`: platform-specific
+- `@oxfmt/binding-linux-arm64-gnu@0.52.0`: platform-specific
+- `@oxfmt/binding-linux-arm64-musl@0.52.0`: platform-specific
+- `@oxfmt/binding-linux-ppc64-gnu@0.52.0`: platform-specific
+- `@oxfmt/binding-linux-riscv64-gnu@0.52.0`: platform-specific
+- `@oxfmt/binding-linux-riscv64-musl@0.52.0`: platform-specific
+- `@oxfmt/binding-linux-s390x-gnu@0.52.0`: platform-specific
+- `@oxfmt/binding-linux-x64-gnu@0.52.0`: platform-specific
+- `@oxfmt/binding-linux-x64-musl@0.52.0`: platform-specific
+- `@oxfmt/binding-openharmony-arm64@0.52.0`: platform-specific
+- `@oxfmt/binding-win32-arm64-msvc@0.52.0`: platform-specific
+- `@oxfmt/binding-win32-ia32-msvc@0.52.0`: platform-specific
+- `@oxfmt/binding-win32-x64-msvc@0.52.0`: platform-specific
+- `@oxlint-tsgolint/darwin-arm64@0.23.0`: platform-specific
+- `@oxlint-tsgolint/darwin-x64@0.23.0`: platform-specific
+- `@oxlint-tsgolint/linux-arm64@0.23.0`: platform-specific
+- `@oxlint-tsgolint/linux-x64@0.23.0`: platform-specific
+- `@oxlint-tsgolint/win32-arm64@0.23.0`: platform-specific
+- `@oxlint-tsgolint/win32-x64@0.23.0`: platform-specific
+- `@oxlint/binding-android-arm-eabi@1.67.0`: platform-specific
+- `@oxlint/binding-android-arm64@1.67.0`: platform-specific
+- `@oxlint/binding-darwin-arm64@1.67.0`: platform-specific
+- `@oxlint/binding-darwin-x64@1.67.0`: platform-specific
+- `@oxlint/binding-freebsd-x64@1.67.0`: platform-specific
+- `@oxlint/binding-linux-arm-gnueabihf@1.67.0`: platform-specific
+- `@oxlint/binding-linux-arm-musleabihf@1.67.0`: platform-specific
+- `@oxlint/binding-linux-arm64-gnu@1.67.0`: platform-specific
+- `@oxlint/binding-linux-arm64-musl@1.67.0`: platform-specific
+- `@oxlint/binding-linux-ppc64-gnu@1.67.0`: platform-specific
+- `@oxlint/binding-linux-riscv64-gnu@1.67.0`: platform-specific
+- `@oxlint/binding-linux-riscv64-musl@1.67.0`: platform-specific
+- `@oxlint/binding-linux-s390x-gnu@1.67.0`: platform-specific
+- `@oxlint/binding-linux-x64-gnu@1.67.0`: platform-specific
+- `@oxlint/binding-linux-x64-musl@1.67.0`: platform-specific
+- `@oxlint/binding-openharmony-arm64@1.67.0`: platform-specific
+- `@oxlint/binding-win32-arm64-msvc@1.67.0`: platform-specific
+- `@oxlint/binding-win32-ia32-msvc@1.67.0`: platform-specific
+- `@oxlint/binding-win32-x64-msvc@1.67.0`: platform-specific
+- `@reflink/reflink-darwin-arm64@0.1.19`: platform-specific
+- `@reflink/reflink-darwin-x64@0.1.19`: platform-specific
+- `@reflink/reflink-linux-arm64-gnu@0.1.19`: platform-specific
+- `@reflink/reflink-linux-arm64-musl@0.1.19`: platform-specific
+- `@reflink/reflink-linux-x64-gnu@0.1.19`: platform-specific
+- `@reflink/reflink-linux-x64-musl@0.1.19`: platform-specific
+- `@reflink/reflink-win32-arm64-msvc@0.1.19`: platform-specific
+- `@reflink/reflink-win32-x64-msvc@0.1.19`: platform-specific
+- `@rolldown/binding-android-arm64@1.0.3`: platform-specific
+- `@rolldown/binding-android-arm64@1.1.0`: platform-specific
+- `@rolldown/binding-darwin-arm64@1.0.3`: platform-specific
+- `@rolldown/binding-darwin-arm64@1.1.0`: platform-specific
+- `@rolldown/binding-darwin-x64@1.0.3`: platform-specific
+- `@rolldown/binding-darwin-x64@1.1.0`: platform-specific
+- `@rolldown/binding-freebsd-x64@1.0.3`: platform-specific
+- `@rolldown/binding-freebsd-x64@1.1.0`: platform-specific
+- `@rolldown/binding-linux-arm-gnueabihf@1.0.3`: platform-specific
+- `@rolldown/binding-linux-arm-gnueabihf@1.1.0`: platform-specific
+- `@rolldown/binding-linux-arm64-gnu@1.0.3`: platform-specific
+- `@rolldown/binding-linux-arm64-gnu@1.1.0`: platform-specific
+- `@rolldown/binding-linux-arm64-musl@1.0.3`: platform-specific
+- `@rolldown/binding-linux-arm64-musl@1.1.0`: platform-specific
+- `@rolldown/binding-linux-ppc64-gnu@1.0.3`: platform-specific
+- `@rolldown/binding-linux-ppc64-gnu@1.1.0`: platform-specific
+- `@rolldown/binding-linux-s390x-gnu@1.0.3`: platform-specific
+- `@rolldown/binding-linux-s390x-gnu@1.1.0`: platform-specific
+- `@rolldown/binding-linux-x64-gnu@1.0.3`: platform-specific
+- `@rolldown/binding-linux-x64-gnu@1.1.0`: platform-specific
+- `@rolldown/binding-linux-x64-musl@1.0.3`: platform-specific
+- `@rolldown/binding-linux-x64-musl@1.1.0`: platform-specific
+- `@rolldown/binding-openharmony-arm64@1.0.3`: platform-specific
+- `@rolldown/binding-openharmony-arm64@1.1.0`: platform-specific
+- `@rolldown/binding-wasm32-wasi@1.0.3`: platform-specific
+- `@rolldown/binding-wasm32-wasi@1.1.0`: platform-specific
+- `@rolldown/binding-win32-arm64-msvc@1.0.3`: platform-specific
+- `@rolldown/binding-win32-arm64-msvc@1.1.0`: platform-specific
+- `@rolldown/binding-win32-x64-msvc@1.0.3`: platform-specific
+- `@rolldown/binding-win32-x64-msvc@1.1.0`: platform-specific
+- `@snazzah/davey-android-arm-eabi@0.1.11`: platform-specific
+- `@snazzah/davey-android-arm64@0.1.11`: platform-specific
+- `@snazzah/davey-darwin-arm64@0.1.11`: platform-specific
+- `@snazzah/davey-darwin-x64@0.1.11`: platform-specific
+- `@snazzah/davey-freebsd-x64@0.1.11`: platform-specific
+- `@snazzah/davey-linux-arm-gnueabihf@0.1.11`: platform-specific
+- `@snazzah/davey-linux-arm64-gnu@0.1.11`: platform-specific
+- `@snazzah/davey-linux-arm64-musl@0.1.11`: platform-specific
+- `@snazzah/davey-linux-x64-gnu@0.1.11`: platform-specific
+- `@snazzah/davey-linux-x64-musl@0.1.11`: platform-specific
+- `@snazzah/davey-wasm32-wasi@0.1.11`: platform-specific
+- `@snazzah/davey-win32-arm64-msvc@0.1.11`: platform-specific
+- `@snazzah/davey-win32-ia32-msvc@0.1.11`: platform-specific
+- `@snazzah/davey-win32-x64-msvc@0.1.11`: platform-specific
+- `@tloncorp/tlon-skill-darwin-arm64@0.4.0`: has binary, platform-specific
+- `@tloncorp/tlon-skill-darwin-x64@0.4.0`: has binary, platform-specific
+- `@tloncorp/tlon-skill-linux-arm64@0.4.0`: has binary, platform-specific
+- `@tloncorp/tlon-skill-linux-x64@0.4.0`: has binary, platform-specific
+- `@tloncorp/tlon-skill@0.4.0`: has binary
+- `@typescript/native-preview-darwin-arm64@7.0.0-dev.20260527.2`: platform-specific
+- `@typescript/native-preview-darwin-x64@7.0.0-dev.20260527.2`: platform-specific
+- `@typescript/native-preview-linux-arm@7.0.0-dev.20260527.2`: platform-specific
+- `@typescript/native-preview-linux-arm64@7.0.0-dev.20260527.2`: platform-specific
+- `@typescript/native-preview-linux-x64@7.0.0-dev.20260527.2`: platform-specific
+- `@typescript/native-preview-win32-arm64@7.0.0-dev.20260527.2`: platform-specific
+- `@typescript/native-preview-win32-x64@7.0.0-dev.20260527.2`: platform-specific
+- `@typescript/native-preview@7.0.0-dev.20260527.2`: has binary
+- `@zed-industries/codex-acp-darwin-arm64@0.15.0`: has binary, platform-specific
+- `@zed-industries/codex-acp-darwin-x64@0.15.0`: has binary, platform-specific
+- `@zed-industries/codex-acp-linux-arm64@0.15.0`: has binary, platform-specific
+- `@zed-industries/codex-acp-linux-x64@0.15.0`: has binary, platform-specific
+- `@zed-industries/codex-acp-win32-arm64@0.15.0`: has binary, platform-specific
+- `@zed-industries/codex-acp-win32-x64@0.15.0`: has binary, platform-specific
+- `@zed-industries/codex-acp@0.15.0`: has binary
+- `acorn@7.4.1`: has binary
+- `acorn@8.16.0`: has binary
+- `acpx@0.11.2`: has binary
+- `apache-arrow@21.1.0`: has binary
+- `astring@1.9.0`: has binary
+- `clawpdf@0.3.0`: has binary
+- `cmake-js@8.0.0`: has binary
+- `esbuild@0.28.1`: has binary
+- `fast-xml-parser@5.7.0`: has binary
+- `fsevents@2.3.2`: platform-specific
+- `fsevents@2.3.3`: platform-specific
+- `ipull@3.9.5`: has binary
+- `is-docker@3.0.0`: has binary
+- `is-inside-container@1.0.0`: has binary
+- `jiti@2.7.0`: has binary
+- `jscpd@4.2.4`: has binary
+- `jsesc@3.1.0`: has binary
+- `json5@2.2.3`: has binary
+- `lightningcss-android-arm64@1.32.0`: platform-specific
+- `lightningcss-darwin-arm64@1.32.0`: platform-specific
+- `lightningcss-darwin-x64@1.32.0`: platform-specific
+- `lightningcss-freebsd-x64@1.32.0`: platform-specific
+- `lightningcss-linux-arm-gnueabihf@1.32.0`: platform-specific
+- `lightningcss-linux-arm64-gnu@1.32.0`: platform-specific
+- `lightningcss-linux-arm64-musl@1.32.0`: platform-specific
+- `lightningcss-linux-x64-gnu@1.32.0`: platform-specific
+- `lightningcss-linux-x64-musl@1.32.0`: platform-specific
+- `lightningcss-win32-arm64-msvc@1.32.0`: platform-specific
+- `lightningcss-win32-x64-msvc@1.32.0`: platform-specific
+- `markdown-it@14.2.0`: has binary
+- `marked@15.0.12`: has binary
+- `marked@18.0.4`: has binary
+- `nanoid@3.3.12`: has binary
+- `nanoid@5.1.11`: has binary
+- `node-downloader-helper@2.1.11`: has binary
+- `node-edge-tts@1.2.10`: has binary
+- `node-gyp-build@4.8.4`: has binary
+- `node-llama-cpp@3.18.1`: has binary
+- `openai@6.39.1`: has binary
+- `oxfmt@0.52.0`: has binary
+- `oxlint-tsgolint@0.23.0`: has binary
+- `oxlint@1.67.0`: has binary
+- `pino@9.14.0`: has binary
+- `playwright-core@1.60.0`: has binary
+- `playwright@1.60.0`: has binary
+- `qrcode-terminal@0.12.0`: has binary
+- `qrcode@1.5.4`: has binary
+- `rc@1.2.8`: has binary
+- `resolve@1.22.12`: has binary
+- `rolldown@1.0.3`: has binary
+- `rolldown@1.1.0`: has binary
+- `sdp-transform@3.0.0`: has binary
+- `semver@7.8.2`: has binary
+- `semver@7.8.4`: has binary
+- `skillflag@0.2.0`: has binary
+- `sqlite-vec-darwin-arm64@0.1.9`: platform-specific
+- `sqlite-vec-darwin-x64@0.1.9`: platform-specific
+- `sqlite-vec-linux-arm64@0.1.9`: platform-specific
+- `sqlite-vec-linux-x64@0.1.9`: platform-specific
+- `sqlite-vec-windows-x64@0.1.9`: platform-specific
+- `tokenjuice@0.8.1`: has binary
+- `tree-kill@1.2.2`: has binary
+- `tsdown@0.22.1`: has binary
+- `tsx@4.22.3`: has binary
+- `tsx@4.22.4`: has binary
+- `typescript@6.0.3`: has binary
+- `unrun@0.3.0`: has binary
+- `uuid@14.0.0`: has binary
+- `vite@8.0.16`: has binary
+- `vitest@4.1.8`: has binary
+- `web-push@3.6.7`: has binary
+- `which@2.0.2`: has binary
+- `which@6.0.1`: has binary
+- `why-is-node-running@2.3.0`: has binary
+- `yaml@2.9.0`: has binary

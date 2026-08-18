@@ -24,12 +24,13 @@
 
 ## Current Session
 
-- Last updated: 2026-07-28.
-- Last agent: Copilot CLI.
-- Current focus: Evaluate making OpenClaw Control UI the primary Lobster UI, with Lobster-owned hosting/auth and secure lockdown of operator settings.
-- Active branch / PR: Lobster draft PR
-  [bic/lobster#6041](https://microsoft.ghe.com/bic/lobster/pull/6041),
-  `user/giodl/control-ui-hosting-design` at `1613e3d7be`.
+- Last updated: 2026-08-15.
+- Last agent: GitHub Copilot CLI.
+- Current focus: adopt a framework-neutral Config Model for native Lobster
+  settings while preserving OpenClaw and Managed Configuration authority.
+- Active branch / PR: local LobsterClaw proof branch
+  `user/giodl/config-model-proof` at `a03889e2eb`; no PR. The first slice adds
+  read-only config snapshots and read-scoped schema lookup only.
 - Known dirty state: `claws-hapi` has this new project area and index updates; `C:\src\lobster` was already on unrelated dirty branch `user/giodl/openclaw-copilot-dev-validation`.
 - Blocking question: none.
 
@@ -93,7 +94,11 @@
 - Decide the operator experience for unavailable pages: hide only irrelevant
   surfaces; show governed settings read-only with lock owner and reason.
 - Decide whether the first Lobster slice starts from Policy UX control registry or a shared admin settings package.
+- Review and adopt `projects/config-model/` as the shared read-only settings
+  seam before adding another Lobster-local descriptor registry.
 - Define the descriptor contract: setting id, section, scope, OpenClaw policy/config path, generated value/state, doctor/check id, exposure, apply mode, owner surface, and save contract.
 - Decide how much OpenClaw schema metadata Lobster should consume directly versus snapshot into a Lobster registry.
 - Shape a common findings model for validation errors, strictness failures, repair previews, and blocked saves.
+- Add provenance, lock reasons, candidate preview, generation, and activation
+  status through Managed Configuration before enabling native writes.
 - Align hosted Scout mutations with CLI-style `--dry-run`, `--json`, and `verify` semantics.

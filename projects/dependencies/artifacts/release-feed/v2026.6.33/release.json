@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "release": {
+    "version": "2026.6.33",
+    "tag": "v2026.6.33",
+    "status": "active",
+    "sourceCommit": "7af0cfc9c5488e03c4e2f528bdc7ac9f7778b35e",
+    "tagObject": "95a0c2bd0c58a9c1246a2a1d408ac78312243b14",
+    "taggedAt": "2026-07-21T09:07:29Z",
+    "npmPublishedAt": "2026-07-21T11:25:55.513Z",
+    "githubReleasePublishedAt": "2026-08-08T07:16:21Z",
+    "releaseUrl": "https://github.com/openclaw/openclaw/releases/tag/v2026.6.33"
+  },
+  "artifacts": {
+    "npm": {
+      "package": "openclaw@2026.6.33",
+      "tarball": "https://registry.npmjs.org/openclaw/-/openclaw-2026.6.33.tgz",
+      "sha1": "b10e18afacd59228c4238dced6419da0e901211c",
+      "sha256": "96880d5a9fe3ef6b3d2ec0ac016e48f99fff7b1af4e22b7c814db6357c163952",
+      "sha512Integrity": "sha512-53MCYfnMEzQmrh/mFNpqfUcQunZASPZ2qYOmqn6wq3K4gZPzV0QOMwjxOCU2C+VmQ5FqzVU8exy7j7pyL3EBzQ==",
+      "unpackedSize": 86557604,
+      "fileCount": 8945,
+      "attestationsUrl": "https://registry.npmjs.org/-/npm/v1/attestations/openclaw@2026.6.33",
+      "attestationsFile": {
+        "path": "npm-attestations.json",
+        "sha256": "60068b5020fd037979cbeb1987f0cb1d7ee7cdd38f63158264918f98a7a5dc9a"
+      },
+      "slsaProvenance": {
+        "path": "npm-slsa-provenance.json",
+        "sha256": "ced7430fcea06383f79a287fb2981df0d3b06df706f1ceec683a25c7dcdadfff",
+        "publishWorkflowRun": "https://github.com/openclaw/openclaw/actions/runs/29825660318"
+      }
+    },
+    "githubRelease": {
+      "assetCount": 0
+    },
+    "containers": []
+  },
+  "dependencyEvidence": {
+    "releaseTimeReports": {
+      "generatedAt": "2026-07-21T09:26:02.801Z",
+      "workflowRun": "https://github.com/openclaw/openclaw/actions/runs/29817136995",
+      "artifactName": "openclaw-release-dependency-evidence-v2026.6.33",
+      "upstreamExpiresAt": "2026-10-19T09:09:37Z",
+      "sourceCommit": "7af0cfc9c5488e03c4e2f528bdc7ac9f7778b35e",
+      "summary": {
+        "vulnerabilityBlockers": 0,
+        "vulnerabilityFindings": 2,
+        "transitiveRiskSignals": 2031,
+        "transitiveMetadataFailures": 2,
+        "lockfilePackagesInspected": 1355,
+        "buildRiskPackages": 278,
+        "dependencyChangeBase": "v2026.6.11",
+        "dependencyFileChanges": 206,
+        "resolvedPackageChanges": {
+          "added": 0,
+          "removed": 0,
+          "changed": 5
+        }
+      },
+      "manifest": {
+        "path": "evidence/dependency-evidence-manifest.json",
+        "sha256": "6405c84ded9f9e8e6a6cbfb46646b1041c29638d9a8f3030f437d07726c5329d"
+      }
+    },
+    "sourceInventory": {
+      "evidenceClass": "reconstructed-from-immutable-tag",
+      "recordCount": 1481,
+      "directCount": 254,
+      "byEcosystem": {
+        "container": 8,
+        "github-action": 31,
+        "go": 4,
+        "gradle": 33,
+        "gradle-plugin": 5,
+        "npm": 1362,
+        "swiftpm": 28,
+        "swiftpm-declaration": 10
+      },
+      "json": {
+        "path": "dependencies.json",
+        "sha256": "d1b55301bd7782f5bd336045096f5578bcef6dac369f632310448c260d25b435"
+      },
+      "csv": {
+        "path": "dependencies.csv",
+        "sha256": "2c7620c8c054f6497f61695991d918da6c3a0fdfbbf299641ac54144ce983f03"
+      }
+    },
+    "npmInstalledGraph": {
+      "evidenceClass": "post-release-reconstruction-not-historical-proof",
+      "resolvedAt": "2026-08-14T23:11:54.0018831Z",
+      "packageCount": 306,
+      "scriptsRun": false,
+      "lock": {
+        "path": "npm-install-reconstruction-lock.json",
+        "sha256": "626d14be5725217e188752ceebee1a4af4a62c35103e18503f8c8d14555546b7"
+      },
+      "csv": {
+        "path": "npm-install-reconstruction.csv",
+        "sha256": "33d1a6c6c882e2eff198cc5d2d5c1cdd434497e5cb10f91f261a77fec847f33f"
+      }
+    }
+  },
+  "dependencyInputs": [
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "d25bc4ce588950f69253fe9e8f4fc93b9dd84db93db19147efa2a3a51231d23a"
+    },
+    {
+      "path": "apps/android/gradle/libs.versions.toml",
+      "sha256": "7d653260ceabf1efb9d419a7403745c6b2dafdfe807c876f8522a1de32c5959c"
+    },
+    {
+      "path": "apps/macos-mlx-tts/Package.resolved",
+      "sha256": "b1b5acb83f3d30d9a06aaaa085e9e360c41eecf292e16eac27829adaac05acf3"
+    },
+    {
+      "path": "apps/macos/Package.resolved",
+      "sha256": "4cfb58a44534b85814c179b3e81a90801ccf735147f45d09c8631007de8403f7"
+    },
+    {
+      "path": "apps/swabble/Package.resolved",
+      "sha256": "8db1bfc0cd61b0a2c479806004dc67ec0385d8f50c53b16edbd2df251149d7e1"
+    },
+    {
+      "path": "scripts/docs-i18n/go.sum",
+      "sha256": "4b890e7a8039ca7532fab95689a1d415afed6e7d8ab2cb61b1581644ff94583d"
+    },
+    {
+      "path": "skills/pyproject.toml",
+      "sha256": "a87491ef1dd0865c37ee2c10fa57b0af6025119bcc638630236f3001d1b2f5c6"
+    }
+  ],
+  "assurance": {
+    "artifactProvenance": "npm SLSA provenance binds the package digest to the source commit and publish workflow",
+    "releasePolicyEvidence": "Original preflight reports preserved and hash-addressed",
+    "fullSourceInventory": "Reproducible from the immutable release tag",
+    "exactHistoricalInstalledGraph": false,
+    "singleSignedEvidenceIndex": false
+  },
+  "gaps": [
+    "Generate an npm installed-graph SPDX or CycloneDX SBOM during release preflight.",
+    "Bind the SBOM and policy-report digests directly into a signed release evidence index.",
+    "Publish the index and evidence beside the GitHub release or another durable append-only endpoint.",
+    "Add container image digests, SBOMs, and provenance when containers are released.",
+    "Add explicit supersession and withdrawal records to the feed."
+  ]
+}

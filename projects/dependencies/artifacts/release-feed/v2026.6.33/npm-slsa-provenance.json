@@ -1,0 +1,47 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [
+    {
+      "name": "pkg:npm/openclaw@2026.6.33",
+      "digest": {
+        "sha512": "e7730261f9cc133426ae1fe614da6a7d4710ba764048f676a983a6aa7eb0ab72b88193f357440e3308f13825360be56643916acd553c7b1cbb8fba722f7101cd"
+      }
+    }
+  ],
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
+      "externalParameters": {
+        "workflow": {
+          "ref": "refs/heads/extended-stable/2026.6.33",
+          "repository": "https://github.com/openclaw/openclaw",
+          "path": ".github/workflows/openclaw-npm-release.yml"
+        }
+      },
+      "internalParameters": {
+        "github": {
+          "event_name": "workflow_dispatch",
+          "repository_id": "1103012935",
+          "repository_owner_id": "252820863"
+        }
+      },
+      "resolvedDependencies": [
+        {
+          "uri": "git+https://github.com/openclaw/openclaw@refs/heads/extended-stable/2026.6.33",
+          "digest": {
+            "gitCommit": "7af0cfc9c5488e03c4e2f528bdc7ac9f7778b35e"
+          }
+        }
+      ]
+    },
+    "runDetails": {
+      "builder": {
+        "id": "https://github.com/actions/runner/github-hosted"
+      },
+      "metadata": {
+        "invocationId": "https://github.com/openclaw/openclaw/actions/runs/29825660318/attempts/1"
+      }
+    }
+  }
+}

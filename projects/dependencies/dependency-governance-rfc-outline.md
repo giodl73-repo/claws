@@ -55,6 +55,29 @@ release they actually install, apply their own policy, and track drift as
 OpenClaw publishes new releases. The feed reports facts and upstream policy
 results; it does not declare Microsoft approval.
 
+## v2026.6.33 Emulation
+
+The prototype under `artifacts/release-feed/` demonstrates the contract with
+real release evidence:
+
+- npm provenance binds `openclaw@2026.6.33` to source commit
+  `7af0cfc9c5488e03c4e2f528bdc7ac9f7778b35e`;
+- the original release workflow reports cover 1,355 npm lockfile packages,
+  dependency changes, vulnerability policy, transitive risks, and
+  ownership/install surfaces;
+- an exact-tag reconstruction inventories 1,481 identities across npm, SwiftPM,
+  Gradle, Go, GitHub Actions, containers, and Python declarations; and
+- a current production npm install resolves 306 packages.
+
+The last number is illustrative rather than historical proof. The npm package
+does not carry the repository lock, so transitive versions may resolve
+differently after publication. A production feed must therefore generate an
+installed-graph SBOM during release preflight and bind its digest to the exact
+tarball. The prototype also confirms that the existing Actions evidence
+artifact is temporary and that v2026.6.33 has no GitHub release assets or
+container references. Durable publication and one signed cross-artifact index
+remain the substantive gaps.
+
 ## Small Upstream Gaps
 
 ### 1. Complete ecosystem update coverage

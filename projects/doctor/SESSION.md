@@ -50,8 +50,15 @@
   `43a7fd3839`; #98406 merged from `39f003931f` as `6011c9e16d`; #99211 merged
   from `9ca7491f8c` as `219f27a5ec6b6ed058c95653ac604bc2a25a26d2`; #99238
   merged from `7b50c63d8665` as `a1063aa4c83fc5469a677f992a4335604c3727bc`;
-  #98869 is parked at `9c44766ab5` with an empty diff until core structured
-  repair has a supported dry-run entry point. #100093 merged on 2026-07-05 from
+  #98869 closed unmerged on 2026-08-09 at `9c44766ab5`; the accepted
+  reachability finding had left a zero-file placeholder. #99255 also closed
+  unmerged at `3adfe2f2a1` because its injected dry-run state was unreachable
+  and targeted the pre-refactor config writer. Future versions must start from
+  the supported shared Doctor repair/dry-run surface and current split config
+  runner. #84472 closed unmerged at `b3563d3f34` because the public dry-run
+  implementation could still write legacy state or trigger Gateway update and
+  restart paths; re-derive only with a strict no-mutation contract. #100093
+  merged on 2026-07-05 from
   prepared head `c1a0a58b2b31df8b5a54207030f061ee33d238fe` as
   `b1f3986b84f7ffd793bd24b019ebb7e9dfd9195d` for default-disabled Doctor
   write-config blocker lint findings, noted in the PR body as the 44th of 44

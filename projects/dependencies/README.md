@@ -27,6 +27,7 @@ alone is not approval; an authoritative governance record must support an
 | Microsoft expectations and check-off ledger | `microsoft-controls.json`; workbook `Microsoft Controls` sheet |
 | Current upstream remediation sequence | `remediation-plan-2026-08-13.md` |
 | Long-term upstream governance direction | `dependency-governance-rfc-outline.md` |
+| Emulated append-only release feed | `artifacts/release-feed/feed.json`; `artifacts/release-feed/README.md` |
 | Lobster product-exact attestation issue #8220 | `lobster-dependency-attestation-issue.md` |
 | Living Microsoft-facing tracker #8223 | `lobster-dependency-governance-tracker.md` |
 | Versioned detailed analysis publication | `https://microsoft.ghe.com/bic/lobster/tree/openclaw-dependency-governance-analysis/docs/openclaw-dependency-governance` |

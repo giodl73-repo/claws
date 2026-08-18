@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-14T23:11:54.0848253Z",
+  "entries": [
+    {
+      "version": "2026.6.33",
+      "tag": "v2026.6.33",
+      "status": "active",
+      "publishedAt": "2026-07-21T11:25:55.513Z",
+      "sourceCommit": "7af0cfc9c5488e03c4e2f528bdc7ac9f7778b35e",
+      "entry": "v2026.6.33/release.json",
+      "entrySha256": "2630380ed327d10d6e3282a1419ef7c0ec4ce3b0cbaeabd6766ffc7fe575a28e",
+      "checksums": "v2026.6.33/SHA256SUMS",
+      "checksumsSha256": "b68e558431cefbf38e1afd44419d83cb6312390af6dc450cabb52abebf7d0a1b",
+      "sourceDependencyCount": 1481,
+      "npmInstallReconstructionCount": 306,
+      "exactHistoricalInstalledGraph": false
+    }
+  ]
+}

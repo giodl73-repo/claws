@@ -1,0 +1,4941 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-21T09:27:02.940Z",
+  "target": {
+    "packageName": "openclaw",
+    "packageVersion": "2026.6.33",
+    "gitBranch": "",
+    "gitCommit": "7af0cfc9c5488e03c4e2f528bdc7ac9f7778b35e",
+    "lockfile": "pnpm-lock.yaml",
+    "ownershipMetadata": "scripts/lib/dependency-ownership.json"
+  },
+  "summary": {
+    "importerCount": 156,
+    "lockfilePackageCount": 1355,
+    "rootDirectDependencyCount": 55,
+    "rootClosurePackageCount": 304,
+    "rootOwnershipRecordCount": 56,
+    "buildRiskPackageCount": 278
+  },
+  "ownershipGaps": [],
+  "staleOwnershipRecords": [],
+  "ownershipWarnings": [
+    {
+      "name": "linkedom",
+      "owner": "plugin:web-readability",
+      "sourceSections": [
+        "extensions",
+        "src"
+      ],
+      "message": "plugin-owned dependency is still imported by core-owned source"
+    }
+  ],
+  "buildRiskPackages": [
+    {
+      "name": "@agentclientprotocol/claude-agent-acp",
+      "lockKey": "@agentclientprotocol/claude-agent-acp@0.39.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "@anthropic-ai/claude-agent-sdk-darwin-arm64",
+      "lockKey": "@anthropic-ai/claude-agent-sdk-darwin-arm64@0.3.156",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@anthropic-ai/claude-agent-sdk-darwin-x64",
+      "lockKey": "@anthropic-ai/claude-agent-sdk-darwin-x64@0.3.156",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@anthropic-ai/claude-agent-sdk-linux-arm64-musl",
+      "lockKey": "@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.3.156",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@anthropic-ai/claude-agent-sdk-linux-arm64",
+      "lockKey": "@anthropic-ai/claude-agent-sdk-linux-arm64@0.3.156",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@anthropic-ai/claude-agent-sdk-linux-x64-musl",
+      "lockKey": "@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.3.156",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@anthropic-ai/claude-agent-sdk-linux-x64",
+      "lockKey": "@anthropic-ai/claude-agent-sdk-linux-x64@0.3.156",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@anthropic-ai/claude-agent-sdk-win32-arm64",
+      "lockKey": "@anthropic-ai/claude-agent-sdk-win32-arm64@0.3.156",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@anthropic-ai/claude-agent-sdk-win32-x64",
+      "lockKey": "@anthropic-ai/claude-agent-sdk-win32-x64@0.3.156",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@anthropic-ai/sdk",
+      "lockKey": "@anthropic-ai/sdk@0.100.1",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "@babel/parser",
+      "lockKey": "@babel/parser@7.29.7",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "@babel/parser",
+      "lockKey": "@babel/parser@8.0.0-rc.6",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "@bramus/specificity",
+      "lockKey": "@bramus/specificity@2.4.2",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "@clawdbot/lobster",
+      "lockKey": "@clawdbot/lobster@2026.5.22",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "@copilotkit/aimock",
+      "lockKey": "@copilotkit/aimock@1.27.3",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "@esbuild/aix-ppc64",
+      "lockKey": "@esbuild/aix-ppc64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/android-arm",
+      "lockKey": "@esbuild/android-arm@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/android-arm64",
+      "lockKey": "@esbuild/android-arm64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/android-x64",
+      "lockKey": "@esbuild/android-x64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/darwin-arm64",
+      "lockKey": "@esbuild/darwin-arm64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/darwin-x64",
+      "lockKey": "@esbuild/darwin-x64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/freebsd-arm64",
+      "lockKey": "@esbuild/freebsd-arm64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/freebsd-x64",
+      "lockKey": "@esbuild/freebsd-x64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/linux-arm",
+      "lockKey": "@esbuild/linux-arm@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/linux-arm64",
+      "lockKey": "@esbuild/linux-arm64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/linux-ia32",
+      "lockKey": "@esbuild/linux-ia32@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/linux-loong64",
+      "lockKey": "@esbuild/linux-loong64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/linux-mips64el",
+      "lockKey": "@esbuild/linux-mips64el@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/linux-ppc64",
+      "lockKey": "@esbuild/linux-ppc64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/linux-riscv64",
+      "lockKey": "@esbuild/linux-riscv64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/linux-s390x",
+      "lockKey": "@esbuild/linux-s390x@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/linux-x64",
+      "lockKey": "@esbuild/linux-x64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/netbsd-arm64",
+      "lockKey": "@esbuild/netbsd-arm64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/netbsd-x64",
+      "lockKey": "@esbuild/netbsd-x64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/openbsd-arm64",
+      "lockKey": "@esbuild/openbsd-arm64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/openbsd-x64",
+      "lockKey": "@esbuild/openbsd-x64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/openharmony-arm64",
+      "lockKey": "@esbuild/openharmony-arm64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/sunos-x64",
+      "lockKey": "@esbuild/sunos-x64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/win32-arm64",
+      "lockKey": "@esbuild/win32-arm64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/win32-ia32",
+      "lockKey": "@esbuild/win32-ia32@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@esbuild/win32-x64",
+      "lockKey": "@esbuild/win32-x64@0.28.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@github/copilot-darwin-arm64",
+      "lockKey": "@github/copilot-darwin-arm64@1.0.55",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@github/copilot-darwin-x64",
+      "lockKey": "@github/copilot-darwin-x64@1.0.55",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@github/copilot-linux-arm64",
+      "lockKey": "@github/copilot-linux-arm64@1.0.55",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@github/copilot-linux-x64",
+      "lockKey": "@github/copilot-linux-x64@1.0.55",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@github/copilot-linuxmusl-arm64",
+      "lockKey": "@github/copilot-linuxmusl-arm64@1.0.55",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@github/copilot-linuxmusl-x64",
+      "lockKey": "@github/copilot-linuxmusl-x64@1.0.55",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@github/copilot-win32-arm64",
+      "lockKey": "@github/copilot-win32-arm64@1.0.55",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@github/copilot-win32-x64",
+      "lockKey": "@github/copilot-win32-x64@1.0.55",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@github/copilot",
+      "lockKey": "@github/copilot@1.0.55",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "@grpc/proto-loader",
+      "lockKey": "@grpc/proto-loader@0.8.1",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "@homebridge/ciao",
+      "lockKey": "@homebridge/ciao@1.3.9",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "@lancedb/lancedb-darwin-arm64",
+      "lockKey": "@lancedb/lancedb-darwin-arm64@0.30.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@lancedb/lancedb-linux-arm64-gnu",
+      "lockKey": "@lancedb/lancedb-linux-arm64-gnu@0.30.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@lancedb/lancedb-linux-arm64-musl",
+      "lockKey": "@lancedb/lancedb-linux-arm64-musl@0.30.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@lancedb/lancedb-linux-x64-gnu",
+      "lockKey": "@lancedb/lancedb-linux-x64-gnu@0.30.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@lancedb/lancedb-linux-x64-musl",
+      "lockKey": "@lancedb/lancedb-linux-x64-musl@0.30.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@lancedb/lancedb-win32-arm64-msvc",
+      "lockKey": "@lancedb/lancedb-win32-arm64-msvc@0.30.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@lancedb/lancedb-win32-x64-msvc",
+      "lockKey": "@lancedb/lancedb-win32-x64-msvc@0.30.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@lancedb/lancedb",
+      "lockKey": "@lancedb/lancedb@0.30.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@lydell/node-pty-darwin-arm64",
+      "lockKey": "@lydell/node-pty-darwin-arm64@1.2.0-beta.12",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@lydell/node-pty-darwin-x64",
+      "lockKey": "@lydell/node-pty-darwin-x64@1.2.0-beta.12",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@lydell/node-pty-linux-arm64",
+      "lockKey": "@lydell/node-pty-linux-arm64@1.2.0-beta.12",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@lydell/node-pty-linux-x64",
+      "lockKey": "@lydell/node-pty-linux-x64@1.2.0-beta.12",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@lydell/node-pty-win32-arm64",
+      "lockKey": "@lydell/node-pty-win32-arm64@1.2.0-beta.12",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@lydell/node-pty-win32-x64",
+      "lockKey": "@lydell/node-pty-win32-x64@1.2.0-beta.12",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@node-llama-cpp/linux-arm64",
+      "lockKey": "@node-llama-cpp/linux-arm64@3.18.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@node-llama-cpp/linux-armv7l",
+      "lockKey": "@node-llama-cpp/linux-armv7l@3.18.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@node-llama-cpp/linux-x64-cuda-ext",
+      "lockKey": "@node-llama-cpp/linux-x64-cuda-ext@3.18.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@node-llama-cpp/linux-x64-cuda",
+      "lockKey": "@node-llama-cpp/linux-x64-cuda@3.18.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@node-llama-cpp/linux-x64-vulkan",
+      "lockKey": "@node-llama-cpp/linux-x64-vulkan@3.18.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@node-llama-cpp/linux-x64",
+      "lockKey": "@node-llama-cpp/linux-x64@3.18.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@node-llama-cpp/mac-arm64-metal",
+      "lockKey": "@node-llama-cpp/mac-arm64-metal@3.18.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@node-llama-cpp/mac-x64",
+      "lockKey": "@node-llama-cpp/mac-x64@3.18.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@node-llama-cpp/win-arm64",
+      "lockKey": "@node-llama-cpp/win-arm64@3.18.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@node-llama-cpp/win-x64-cuda-ext",
+      "lockKey": "@node-llama-cpp/win-x64-cuda-ext@3.18.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@node-llama-cpp/win-x64-cuda",
+      "lockKey": "@node-llama-cpp/win-x64-cuda@3.18.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@node-llama-cpp/win-x64-vulkan",
+      "lockKey": "@node-llama-cpp/win-x64-vulkan@3.18.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@node-llama-cpp/win-x64",
+      "lockKey": "@node-llama-cpp/win-x64@3.18.1",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@openai/codex",
+      "lockKey": "@openai/codex@0.139.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "@openai/codex",
+      "lockKey": "@openai/codex@0.139.0-darwin-arm64",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@openai/codex",
+      "lockKey": "@openai/codex@0.139.0-darwin-x64",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@openai/codex",
+      "lockKey": "@openai/codex@0.139.0-linux-arm64",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@openai/codex",
+      "lockKey": "@openai/codex@0.139.0-linux-x64",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@openai/codex",
+      "lockKey": "@openai/codex@0.139.0-win32-arm64",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@openai/codex",
+      "lockKey": "@openai/codex@0.139.0-win32-x64",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@openclaw/crabline",
+      "lockKey": "@openclaw/crabline@0.1.6",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "@oxfmt/binding-android-arm-eabi",
+      "lockKey": "@oxfmt/binding-android-arm-eabi@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-android-arm64",
+      "lockKey": "@oxfmt/binding-android-arm64@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-darwin-arm64",
+      "lockKey": "@oxfmt/binding-darwin-arm64@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-darwin-x64",
+      "lockKey": "@oxfmt/binding-darwin-x64@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-freebsd-x64",
+      "lockKey": "@oxfmt/binding-freebsd-x64@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-linux-arm-gnueabihf",
+      "lockKey": "@oxfmt/binding-linux-arm-gnueabihf@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-linux-arm-musleabihf",
+      "lockKey": "@oxfmt/binding-linux-arm-musleabihf@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-linux-arm64-gnu",
+      "lockKey": "@oxfmt/binding-linux-arm64-gnu@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-linux-arm64-musl",
+      "lockKey": "@oxfmt/binding-linux-arm64-musl@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-linux-ppc64-gnu",
+      "lockKey": "@oxfmt/binding-linux-ppc64-gnu@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-linux-riscv64-gnu",
+      "lockKey": "@oxfmt/binding-linux-riscv64-gnu@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-linux-riscv64-musl",
+      "lockKey": "@oxfmt/binding-linux-riscv64-musl@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-linux-s390x-gnu",
+      "lockKey": "@oxfmt/binding-linux-s390x-gnu@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-linux-x64-gnu",
+      "lockKey": "@oxfmt/binding-linux-x64-gnu@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-linux-x64-musl",
+      "lockKey": "@oxfmt/binding-linux-x64-musl@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-openharmony-arm64",
+      "lockKey": "@oxfmt/binding-openharmony-arm64@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-win32-arm64-msvc",
+      "lockKey": "@oxfmt/binding-win32-arm64-msvc@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-win32-ia32-msvc",
+      "lockKey": "@oxfmt/binding-win32-ia32-msvc@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxfmt/binding-win32-x64-msvc",
+      "lockKey": "@oxfmt/binding-win32-x64-msvc@0.52.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint-tsgolint/darwin-arm64",
+      "lockKey": "@oxlint-tsgolint/darwin-arm64@0.23.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint-tsgolint/darwin-x64",
+      "lockKey": "@oxlint-tsgolint/darwin-x64@0.23.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint-tsgolint/linux-arm64",
+      "lockKey": "@oxlint-tsgolint/linux-arm64@0.23.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint-tsgolint/linux-x64",
+      "lockKey": "@oxlint-tsgolint/linux-x64@0.23.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint-tsgolint/win32-arm64",
+      "lockKey": "@oxlint-tsgolint/win32-arm64@0.23.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint-tsgolint/win32-x64",
+      "lockKey": "@oxlint-tsgolint/win32-x64@0.23.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-android-arm-eabi",
+      "lockKey": "@oxlint/binding-android-arm-eabi@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-android-arm64",
+      "lockKey": "@oxlint/binding-android-arm64@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-darwin-arm64",
+      "lockKey": "@oxlint/binding-darwin-arm64@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-darwin-x64",
+      "lockKey": "@oxlint/binding-darwin-x64@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-freebsd-x64",
+      "lockKey": "@oxlint/binding-freebsd-x64@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-linux-arm-gnueabihf",
+      "lockKey": "@oxlint/binding-linux-arm-gnueabihf@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-linux-arm-musleabihf",
+      "lockKey": "@oxlint/binding-linux-arm-musleabihf@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-linux-arm64-gnu",
+      "lockKey": "@oxlint/binding-linux-arm64-gnu@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-linux-arm64-musl",
+      "lockKey": "@oxlint/binding-linux-arm64-musl@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-linux-ppc64-gnu",
+      "lockKey": "@oxlint/binding-linux-ppc64-gnu@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-linux-riscv64-gnu",
+      "lockKey": "@oxlint/binding-linux-riscv64-gnu@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-linux-riscv64-musl",
+      "lockKey": "@oxlint/binding-linux-riscv64-musl@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-linux-s390x-gnu",
+      "lockKey": "@oxlint/binding-linux-s390x-gnu@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-linux-x64-gnu",
+      "lockKey": "@oxlint/binding-linux-x64-gnu@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-linux-x64-musl",
+      "lockKey": "@oxlint/binding-linux-x64-musl@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-openharmony-arm64",
+      "lockKey": "@oxlint/binding-openharmony-arm64@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-win32-arm64-msvc",
+      "lockKey": "@oxlint/binding-win32-arm64-msvc@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-win32-ia32-msvc",
+      "lockKey": "@oxlint/binding-win32-ia32-msvc@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@oxlint/binding-win32-x64-msvc",
+      "lockKey": "@oxlint/binding-win32-x64-msvc@1.67.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@reflink/reflink-darwin-arm64",
+      "lockKey": "@reflink/reflink-darwin-arm64@0.1.19",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@reflink/reflink-darwin-x64",
+      "lockKey": "@reflink/reflink-darwin-x64@0.1.19",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@reflink/reflink-linux-arm64-gnu",
+      "lockKey": "@reflink/reflink-linux-arm64-gnu@0.1.19",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@reflink/reflink-linux-arm64-musl",
+      "lockKey": "@reflink/reflink-linux-arm64-musl@0.1.19",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@reflink/reflink-linux-x64-gnu",
+      "lockKey": "@reflink/reflink-linux-x64-gnu@0.1.19",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@reflink/reflink-linux-x64-musl",
+      "lockKey": "@reflink/reflink-linux-x64-musl@0.1.19",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@reflink/reflink-win32-arm64-msvc",
+      "lockKey": "@reflink/reflink-win32-arm64-msvc@0.1.19",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@reflink/reflink-win32-x64-msvc",
+      "lockKey": "@reflink/reflink-win32-x64-msvc@0.1.19",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-android-arm64",
+      "lockKey": "@rolldown/binding-android-arm64@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-android-arm64",
+      "lockKey": "@rolldown/binding-android-arm64@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-darwin-arm64",
+      "lockKey": "@rolldown/binding-darwin-arm64@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-darwin-arm64",
+      "lockKey": "@rolldown/binding-darwin-arm64@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-darwin-x64",
+      "lockKey": "@rolldown/binding-darwin-x64@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-darwin-x64",
+      "lockKey": "@rolldown/binding-darwin-x64@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-freebsd-x64",
+      "lockKey": "@rolldown/binding-freebsd-x64@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-freebsd-x64",
+      "lockKey": "@rolldown/binding-freebsd-x64@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-linux-arm-gnueabihf",
+      "lockKey": "@rolldown/binding-linux-arm-gnueabihf@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-linux-arm-gnueabihf",
+      "lockKey": "@rolldown/binding-linux-arm-gnueabihf@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-linux-arm64-gnu",
+      "lockKey": "@rolldown/binding-linux-arm64-gnu@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-linux-arm64-gnu",
+      "lockKey": "@rolldown/binding-linux-arm64-gnu@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-linux-arm64-musl",
+      "lockKey": "@rolldown/binding-linux-arm64-musl@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-linux-arm64-musl",
+      "lockKey": "@rolldown/binding-linux-arm64-musl@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-linux-ppc64-gnu",
+      "lockKey": "@rolldown/binding-linux-ppc64-gnu@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-linux-ppc64-gnu",
+      "lockKey": "@rolldown/binding-linux-ppc64-gnu@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-linux-s390x-gnu",
+      "lockKey": "@rolldown/binding-linux-s390x-gnu@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-linux-s390x-gnu",
+      "lockKey": "@rolldown/binding-linux-s390x-gnu@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-linux-x64-gnu",
+      "lockKey": "@rolldown/binding-linux-x64-gnu@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-linux-x64-gnu",
+      "lockKey": "@rolldown/binding-linux-x64-gnu@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-linux-x64-musl",
+      "lockKey": "@rolldown/binding-linux-x64-musl@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-linux-x64-musl",
+      "lockKey": "@rolldown/binding-linux-x64-musl@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-openharmony-arm64",
+      "lockKey": "@rolldown/binding-openharmony-arm64@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-openharmony-arm64",
+      "lockKey": "@rolldown/binding-openharmony-arm64@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-wasm32-wasi",
+      "lockKey": "@rolldown/binding-wasm32-wasi@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-wasm32-wasi",
+      "lockKey": "@rolldown/binding-wasm32-wasi@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-win32-arm64-msvc",
+      "lockKey": "@rolldown/binding-win32-arm64-msvc@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-win32-arm64-msvc",
+      "lockKey": "@rolldown/binding-win32-arm64-msvc@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-win32-x64-msvc",
+      "lockKey": "@rolldown/binding-win32-x64-msvc@1.0.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@rolldown/binding-win32-x64-msvc",
+      "lockKey": "@rolldown/binding-win32-x64-msvc@1.1.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@snazzah/davey-android-arm-eabi",
+      "lockKey": "@snazzah/davey-android-arm-eabi@0.1.11",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@snazzah/davey-android-arm64",
+      "lockKey": "@snazzah/davey-android-arm64@0.1.11",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@snazzah/davey-darwin-arm64",
+      "lockKey": "@snazzah/davey-darwin-arm64@0.1.11",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@snazzah/davey-darwin-x64",
+      "lockKey": "@snazzah/davey-darwin-x64@0.1.11",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@snazzah/davey-freebsd-x64",
+      "lockKey": "@snazzah/davey-freebsd-x64@0.1.11",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@snazzah/davey-linux-arm-gnueabihf",
+      "lockKey": "@snazzah/davey-linux-arm-gnueabihf@0.1.11",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@snazzah/davey-linux-arm64-gnu",
+      "lockKey": "@snazzah/davey-linux-arm64-gnu@0.1.11",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@snazzah/davey-linux-arm64-musl",
+      "lockKey": "@snazzah/davey-linux-arm64-musl@0.1.11",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@snazzah/davey-linux-x64-gnu",
+      "lockKey": "@snazzah/davey-linux-x64-gnu@0.1.11",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@snazzah/davey-linux-x64-musl",
+      "lockKey": "@snazzah/davey-linux-x64-musl@0.1.11",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@snazzah/davey-wasm32-wasi",
+      "lockKey": "@snazzah/davey-wasm32-wasi@0.1.11",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@snazzah/davey-win32-arm64-msvc",
+      "lockKey": "@snazzah/davey-win32-arm64-msvc@0.1.11",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@snazzah/davey-win32-ia32-msvc",
+      "lockKey": "@snazzah/davey-win32-ia32-msvc@0.1.11",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@snazzah/davey-win32-x64-msvc",
+      "lockKey": "@snazzah/davey-win32-x64-msvc@0.1.11",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@tloncorp/tlon-skill-darwin-arm64",
+      "lockKey": "@tloncorp/tlon-skill-darwin-arm64@0.4.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@tloncorp/tlon-skill-darwin-x64",
+      "lockKey": "@tloncorp/tlon-skill-darwin-x64@0.4.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@tloncorp/tlon-skill-linux-arm64",
+      "lockKey": "@tloncorp/tlon-skill-linux-arm64@0.4.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@tloncorp/tlon-skill-linux-x64",
+      "lockKey": "@tloncorp/tlon-skill-linux-x64@0.4.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@tloncorp/tlon-skill",
+      "lockKey": "@tloncorp/tlon-skill@0.4.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "@typescript/native-preview-darwin-arm64",
+      "lockKey": "@typescript/native-preview-darwin-arm64@7.0.0-dev.20260527.2",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@typescript/native-preview-darwin-x64",
+      "lockKey": "@typescript/native-preview-darwin-x64@7.0.0-dev.20260527.2",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@typescript/native-preview-linux-arm",
+      "lockKey": "@typescript/native-preview-linux-arm@7.0.0-dev.20260527.2",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@typescript/native-preview-linux-arm64",
+      "lockKey": "@typescript/native-preview-linux-arm64@7.0.0-dev.20260527.2",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@typescript/native-preview-linux-x64",
+      "lockKey": "@typescript/native-preview-linux-x64@7.0.0-dev.20260527.2",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@typescript/native-preview-win32-arm64",
+      "lockKey": "@typescript/native-preview-win32-arm64@7.0.0-dev.20260527.2",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@typescript/native-preview-win32-x64",
+      "lockKey": "@typescript/native-preview-win32-x64@7.0.0-dev.20260527.2",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "@typescript/native-preview",
+      "lockKey": "@typescript/native-preview@7.0.0-dev.20260527.2",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "@zed-industries/codex-acp-darwin-arm64",
+      "lockKey": "@zed-industries/codex-acp-darwin-arm64@0.15.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@zed-industries/codex-acp-darwin-x64",
+      "lockKey": "@zed-industries/codex-acp-darwin-x64@0.15.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@zed-industries/codex-acp-linux-arm64",
+      "lockKey": "@zed-industries/codex-acp-linux-arm64@0.15.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@zed-industries/codex-acp-linux-x64",
+      "lockKey": "@zed-industries/codex-acp-linux-x64@0.15.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@zed-industries/codex-acp-win32-arm64",
+      "lockKey": "@zed-industries/codex-acp-win32-arm64@0.15.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@zed-industries/codex-acp-win32-x64",
+      "lockKey": "@zed-industries/codex-acp-win32-x64@0.15.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": true
+    },
+    {
+      "name": "@zed-industries/codex-acp",
+      "lockKey": "@zed-industries/codex-acp@0.15.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "acorn",
+      "lockKey": "acorn@7.4.1",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "acorn",
+      "lockKey": "acorn@8.16.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "acpx",
+      "lockKey": "acpx@0.11.2",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "apache-arrow",
+      "lockKey": "apache-arrow@21.1.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "astring",
+      "lockKey": "astring@1.9.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "clawpdf",
+      "lockKey": "clawpdf@0.3.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "cmake-js",
+      "lockKey": "cmake-js@8.0.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "esbuild",
+      "lockKey": "esbuild@0.28.1",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "fast-xml-parser",
+      "lockKey": "fast-xml-parser@5.7.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "fsevents",
+      "lockKey": "fsevents@2.3.2",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "fsevents",
+      "lockKey": "fsevents@2.3.3",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "ipull",
+      "lockKey": "ipull@3.9.5",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "is-docker",
+      "lockKey": "is-docker@3.0.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "is-inside-container",
+      "lockKey": "is-inside-container@1.0.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "jiti",
+      "lockKey": "jiti@2.7.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "jscpd",
+      "lockKey": "jscpd@4.2.4",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "jsesc",
+      "lockKey": "jsesc@3.1.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "json5",
+      "lockKey": "json5@2.2.3",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "lightningcss-android-arm64",
+      "lockKey": "lightningcss-android-arm64@1.32.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "lightningcss-darwin-arm64",
+      "lockKey": "lightningcss-darwin-arm64@1.32.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "lightningcss-darwin-x64",
+      "lockKey": "lightningcss-darwin-x64@1.32.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "lightningcss-freebsd-x64",
+      "lockKey": "lightningcss-freebsd-x64@1.32.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "lightningcss-linux-arm-gnueabihf",
+      "lockKey": "lightningcss-linux-arm-gnueabihf@1.32.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "lightningcss-linux-arm64-gnu",
+      "lockKey": "lightningcss-linux-arm64-gnu@1.32.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "lightningcss-linux-arm64-musl",
+      "lockKey": "lightningcss-linux-arm64-musl@1.32.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "lightningcss-linux-x64-gnu",
+      "lockKey": "lightningcss-linux-x64-gnu@1.32.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "lightningcss-linux-x64-musl",
+      "lockKey": "lightningcss-linux-x64-musl@1.32.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "lightningcss-win32-arm64-msvc",
+      "lockKey": "lightningcss-win32-arm64-msvc@1.32.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "lightningcss-win32-x64-msvc",
+      "lockKey": "lightningcss-win32-x64-msvc@1.32.0",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "markdown-it",
+      "lockKey": "markdown-it@14.2.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "marked",
+      "lockKey": "marked@15.0.12",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "marked",
+      "lockKey": "marked@18.0.4",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "nanoid",
+      "lockKey": "nanoid@3.3.12",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "nanoid",
+      "lockKey": "nanoid@5.1.11",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "node-downloader-helper",
+      "lockKey": "node-downloader-helper@2.1.11",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "node-edge-tts",
+      "lockKey": "node-edge-tts@1.2.10",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "node-gyp-build",
+      "lockKey": "node-gyp-build@4.8.4",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "node-llama-cpp",
+      "lockKey": "node-llama-cpp@3.18.1",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "openai",
+      "lockKey": "openai@6.39.1",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "oxfmt",
+      "lockKey": "oxfmt@0.52.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "oxlint-tsgolint",
+      "lockKey": "oxlint-tsgolint@0.23.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "oxlint",
+      "lockKey": "oxlint@1.67.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "pino",
+      "lockKey": "pino@9.14.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "playwright-core",
+      "lockKey": "playwright-core@1.60.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "playwright",
+      "lockKey": "playwright@1.60.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "qrcode-terminal",
+      "lockKey": "qrcode-terminal@0.12.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "qrcode",
+      "lockKey": "qrcode@1.5.4",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "rc",
+      "lockKey": "rc@1.2.8",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "resolve",
+      "lockKey": "resolve@1.22.12",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "rolldown",
+      "lockKey": "rolldown@1.0.3",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "rolldown",
+      "lockKey": "rolldown@1.1.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "sdp-transform",
+      "lockKey": "sdp-transform@3.0.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "semver",
+      "lockKey": "semver@7.8.2",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "semver",
+      "lockKey": "semver@7.8.4",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "skillflag",
+      "lockKey": "skillflag@0.2.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "sqlite-vec-darwin-arm64",
+      "lockKey": "sqlite-vec-darwin-arm64@0.1.9",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "sqlite-vec-darwin-x64",
+      "lockKey": "sqlite-vec-darwin-x64@0.1.9",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "sqlite-vec-linux-arm64",
+      "lockKey": "sqlite-vec-linux-arm64@0.1.9",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "sqlite-vec-linux-x64",
+      "lockKey": "sqlite-vec-linux-x64@0.1.9",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "sqlite-vec-windows-x64",
+      "lockKey": "sqlite-vec-windows-x64@0.1.9",
+      "requiresBuild": false,
+      "hasBin": false,
+      "platformRestricted": true
+    },
+    {
+      "name": "tokenjuice",
+      "lockKey": "tokenjuice@0.8.1",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "tree-kill",
+      "lockKey": "tree-kill@1.2.2",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "tsdown",
+      "lockKey": "tsdown@0.22.1",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "tsx",
+      "lockKey": "tsx@4.22.3",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "tsx",
+      "lockKey": "tsx@4.22.4",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "typescript",
+      "lockKey": "typescript@6.0.3",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "unrun",
+      "lockKey": "unrun@0.3.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "uuid",
+      "lockKey": "uuid@14.0.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "vite",
+      "lockKey": "vite@8.0.16",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "vitest",
+      "lockKey": "vitest@4.1.8",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "web-push",
+      "lockKey": "web-push@3.6.7",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "which",
+      "lockKey": "which@2.0.2",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "which",
+      "lockKey": "which@6.0.1",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "why-is-node-running",
+      "lockKey": "why-is-node-running@2.3.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    },
+    {
+      "name": "yaml",
+      "lockKey": "yaml@2.9.0",
+      "requiresBuild": false,
+      "hasBin": true,
+      "platformRestricted": false
+    }
+  ],
+  "topRootDependencyCones": [
+    {
+      "name": "@google/genai",
+      "specifier": "2.7.0",
+      "section": "dependencies",
+      "resolved": "2.7.0(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))",
+      "owner": "provider:google",
+      "class": "default-runtime-initially",
+      "risk": [
+        "provider-sdk",
+        "network",
+        "realtime"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 8,
+      "closureSize": 132,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@modelcontextprotocol/sdk",
+      "specifier": "1.29.0",
+      "section": "dependencies",
+      "resolved": "1.29.0(zod@4.4.3)",
+      "owner": "core:mcp",
+      "class": "core-runtime",
+      "risk": [
+        "protocol-client",
+        "network"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 29,
+      "closureSize": 92,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "express",
+      "specifier": "5.2.1",
+      "section": "dependencies",
+      "resolved": "5.2.1",
+      "owner": "capability:http-route-host",
+      "class": "default-runtime-initially",
+      "risk": [
+        "http-server",
+        "large-transitive-cone"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions"
+      ],
+      "sourceFileCount": 8,
+      "closureSize": 66,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "qrcode",
+      "specifier": "1.5.4",
+      "section": "dependencies",
+      "resolved": "1.5.4",
+      "owner": "core:qr-setup",
+      "class": "default-runtime-initially",
+      "risk": [
+        "terminal-rendering",
+        "png-encoding"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 29,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "node-edge-tts",
+      "specifier": "1.2.10",
+      "section": "dependencies",
+      "resolved": "1.2.10",
+      "owner": "plugin:microsoft",
+      "class": "plugin-runtime",
+      "risk": [
+        "tts",
+        "network"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 22,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@openclaw/fs-safe",
+      "specifier": "0.3.0",
+      "section": "dependencies",
+      "resolved": "0.3.0",
+      "owner": "core:filesystem-safety",
+      "class": "core-runtime",
+      "risk": [
+        "filesystem",
+        "path-safety"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "packages",
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 32,
+      "closureSize": 20,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "web-push",
+      "specifier": "3.6.7",
+      "section": "dependencies",
+      "resolved": "3.6.7",
+      "owner": "core:web-push",
+      "class": "core-runtime",
+      "risk": [
+        "network",
+        "push-notifications",
+        "crypto"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 17,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "linkedom",
+      "specifier": "0.18.12",
+      "section": "dependencies",
+      "resolved": "0.18.12",
+      "owner": "plugin:web-readability",
+      "class": "plugin-runtime",
+      "risk": [
+        "parser",
+        "untrusted-html"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "src"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 15,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "jszip",
+      "specifier": "3.10.1",
+      "section": "dependencies",
+      "resolved": "3.10.1",
+      "owner": "core:archive-handling",
+      "class": "core-runtime",
+      "risk": [
+        "archive-parser",
+        "untrusted-files"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "packages",
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 15,
+      "closureSize": 13,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@grammyjs/transformer-throttler",
+      "specifier": "1.2.1",
+      "section": "dependencies",
+      "resolved": "1.2.1(grammy@1.43.0)",
+      "owner": "plugin:telegram",
+      "class": "plugin-runtime",
+      "risk": [
+        "telegram-bot-api",
+        "rate-limiting"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 12,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@grammyjs/runner",
+      "specifier": "2.0.3",
+      "section": "dependencies",
+      "resolved": "2.0.3(grammy@1.43.0)",
+      "owner": "plugin:telegram",
+      "class": "plugin-runtime",
+      "risk": [
+        "telegram-bot-api",
+        "polling"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions"
+      ],
+      "sourceFileCount": 3,
+      "closureSize": 11,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "file-type",
+      "specifier": "22.0.1",
+      "section": "dependencies",
+      "resolved": "22.0.1",
+      "owner": "core:media-admission",
+      "class": "core-runtime",
+      "risk": [
+        "file-sniffing",
+        "untrusted-files"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "packages"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 10,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "grammy",
+      "specifier": "1.43.0",
+      "section": "dependencies",
+      "resolved": "1.43.0",
+      "owner": "plugin:telegram",
+      "class": "plugin-runtime",
+      "risk": [
+        "telegram-bot-api",
+        "network"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions"
+      ],
+      "sourceFileCount": 42,
+      "closureSize": 10,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@anthropic-ai/sdk",
+      "specifier": "0.100.1",
+      "section": "dependencies",
+      "resolved": "0.100.1(zod@4.4.3)",
+      "owner": "provider:anthropic",
+      "class": "default-runtime-initially",
+      "risk": [
+        "provider-sdk",
+        "network"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "src"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 8,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@homebridge/ciao",
+      "specifier": "1.3.9",
+      "section": "dependencies",
+      "resolved": "1.3.9",
+      "owner": "plugin:bonjour",
+      "class": "plugin-runtime",
+      "risk": [
+        "mdns",
+        "network"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions",
+        "test"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 8,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@lydell/node-pty",
+      "specifier": "1.2.0-beta.12",
+      "section": "dependencies",
+      "resolved": "1.2.0-beta.12",
+      "owner": "core:tui-terminal",
+      "class": "core-runtime",
+      "risk": [
+        "native",
+        "terminal"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 4,
+      "closureSize": 7,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "glob",
+      "specifier": "13.0.6",
+      "section": "dependencies",
+      "resolved": "13.0.6",
+      "owner": "core:package-manager",
+      "class": "core-runtime",
+      "risk": [
+        "filesystem-glob"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 7,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@clack/prompts",
+      "specifier": "1.4.0",
+      "section": "dependencies",
+      "resolved": "1.4.0",
+      "owner": "core:cli",
+      "class": "core-runtime",
+      "risk": [
+        "interactive-cli"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "packages",
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 24,
+      "closureSize": 6,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "sqlite-vec",
+      "specifier": "0.1.9",
+      "section": "optionalDependencies",
+      "resolved": "0.1.9",
+      "owner": "capability:memory-sqlite-vec",
+      "class": "default-runtime-initially",
+      "risk": [
+        "native",
+        "database-extension"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "packages",
+        "scripts",
+        "test"
+      ],
+      "sourceFileCount": 3,
+      "closureSize": 6,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "tar",
+      "specifier": "7.5.20",
+      "section": "dependencies",
+      "resolved": "7.5.20",
+      "owner": "core:archive-handling",
+      "class": "core-runtime",
+      "risk": [
+        "archive-parser",
+        "untrusted-files"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 9,
+      "closureSize": 6,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@clack/core",
+      "specifier": "1.3.1",
+      "section": "dependencies",
+      "resolved": "1.3.1",
+      "owner": "core:cli",
+      "class": "core-runtime",
+      "risk": [
+        "interactive-cli"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 5,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@mistralai/mistralai",
+      "specifier": "2.2.5",
+      "section": "dependencies",
+      "resolved": "2.2.5",
+      "owner": "provider:mistral",
+      "class": "default-runtime-initially",
+      "risk": [
+        "provider-sdk",
+        "network"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 4,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "proper-lockfile",
+      "specifier": "4.1.2",
+      "section": "dependencies",
+      "resolved": "4.1.2",
+      "owner": "core:session-storage",
+      "class": "core-runtime",
+      "risk": [
+        "filesystem-locking"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 4,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@earendil-works/pi-tui",
+      "specifier": "0.78.0",
+      "section": "dependencies",
+      "resolved": "0.78.0",
+      "owner": "capability:tui-pi",
+      "class": "tui-runtime",
+      "risk": [
+        "tui-runtime"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 35,
+      "closureSize": 3,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "minimatch",
+      "specifier": "10.2.5",
+      "section": "dependencies",
+      "resolved": "10.2.5",
+      "owner": "core:pattern-matching",
+      "class": "core-runtime",
+      "risk": [
+        "pattern-matching"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "src"
+      ],
+      "sourceFileCount": 3,
+      "closureSize": 3,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "openai",
+      "specifier": "6.39.1",
+      "section": "dependencies",
+      "resolved": "6.39.1(ws@8.21.0)(zod@4.4.3)",
+      "owner": "provider:openai",
+      "class": "default-runtime-initially",
+      "risk": [
+        "provider-sdk",
+        "network"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "src"
+      ],
+      "sourceFileCount": 21,
+      "closureSize": 3,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "tree-sitter-bash",
+      "specifier": "0.25.1",
+      "section": "dependencies",
+      "resolved": "0.25.1",
+      "owner": "core:command-explainer",
+      "class": "core-runtime",
+      "risk": [
+        "wasm",
+        "parser",
+        "untrusted-shell"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 3,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@agentclientprotocol/sdk",
+      "specifier": "0.22.1",
+      "section": "dependencies",
+      "resolved": "0.22.1(zod@4.4.3)",
+      "owner": "core:mcp-acp",
+      "class": "core-runtime",
+      "risk": [
+        "protocol-client"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 23,
+      "closureSize": 2,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@openclaw/proxyline",
+      "specifier": "0.3.3",
+      "section": "dependencies",
+      "resolved": "0.3.3(undici@8.5.0)",
+      "owner": "core:proxy",
+      "class": "core-runtime",
+      "risk": [
+        "network",
+        "proxy"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 5,
+      "closureSize": 2,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "chokidar",
+      "specifier": "5.0.0",
+      "section": "dependencies",
+      "resolved": "5.0.0",
+      "owner": "core:watch-mode",
+      "class": "core-runtime",
+      "risk": [
+        "filesystem-watch"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 9,
+      "closureSize": 2,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "hosted-git-info",
+      "specifier": "10.1.1",
+      "section": "dependencies",
+      "resolved": "10.1.1",
+      "owner": "core:git-utils",
+      "class": "core-runtime",
+      "risk": [
+        "git-metadata-parser"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 2,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "rastermill",
+      "specifier": "0.3.1",
+      "section": "dependencies",
+      "resolved": "0.3.1",
+      "owner": "core:media",
+      "class": "core-runtime",
+      "risk": [
+        "wasm",
+        "parser",
+        "untrusted-files",
+        "native-tool-fallback"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 2,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@mozilla/readability",
+      "specifier": "0.6.0",
+      "section": "dependencies",
+      "resolved": "0.6.0",
+      "owner": "plugin:web-readability",
+      "class": "plugin-runtime",
+      "risk": [
+        "parser",
+        "untrusted-html"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions",
+        "test"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "chalk",
+      "specifier": "5.6.2",
+      "section": "dependencies",
+      "resolved": "5.6.2",
+      "owner": "core:cli",
+      "class": "core-runtime",
+      "risk": [
+        "formatting"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "packages",
+        "src"
+      ],
+      "sourceFileCount": 11,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "clawpdf",
+      "specifier": "0.3.0",
+      "section": "dependencies",
+      "resolved": "0.3.0",
+      "owner": "plugin:document-extract",
+      "class": "plugin-runtime",
+      "risk": [
+        "wasm",
+        "parser",
+        "untrusted-files"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions",
+        "test"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "commander",
+      "specifier": "14.0.3",
+      "section": "dependencies",
+      "resolved": "14.0.3",
+      "owner": "core:cli",
+      "class": "core-runtime",
+      "risk": [
+        "cli-parser"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 229,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "croner",
+      "specifier": "10.0.1",
+      "section": "dependencies",
+      "resolved": "10.0.1",
+      "owner": "core:scheduler",
+      "class": "core-runtime",
+      "risk": [
+        "scheduler"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "diff",
+      "specifier": "9.0.0",
+      "section": "dependencies",
+      "resolved": "9.0.0",
+      "owner": "core:agent-editing",
+      "class": "core-runtime",
+      "risk": [
+        "diff"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "dotenv",
+      "specifier": "17.4.2",
+      "section": "dependencies",
+      "resolved": "17.4.2",
+      "owner": "core:config",
+      "class": "core-runtime",
+      "risk": [
+        "env-loading"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "highlight.js",
+      "specifier": "11.11.1",
+      "section": "dependencies",
+      "resolved": "11.11.1",
+      "owner": "core:syntax-highlighting",
+      "class": "core-runtime",
+      "risk": [
+        "syntax-highlighting"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src",
+        "ui"
+      ],
+      "sourceFileCount": 3,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "ignore",
+      "specifier": "7.0.5",
+      "section": "dependencies",
+      "resolved": "7.0.5",
+      "owner": "core:gitignore-matching",
+      "class": "core-runtime",
+      "risk": [
+        "pattern-matching"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 3,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "jiti",
+      "specifier": "2.7.0",
+      "section": "dependencies",
+      "resolved": "2.7.0",
+      "owner": "core:plugin-loader",
+      "class": "core-runtime",
+      "risk": [
+        "dynamic-code-loading"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 7,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "json5",
+      "specifier": "2.2.3",
+      "section": "dependencies",
+      "resolved": "2.2.3",
+      "owner": "core:config",
+      "class": "core-runtime",
+      "risk": [
+        "config-parser"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "packages",
+        "scripts",
+        "src",
+        "test",
+        "ui"
+      ],
+      "sourceFileCount": 30,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "kysely",
+      "specifier": "0.29.2",
+      "section": "dependencies",
+      "resolved": "0.29.2",
+      "owner": "core:sqlite-storage",
+      "class": "core-runtime",
+      "risk": [
+        "database-query-builder"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 15,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "partial-json",
+      "specifier": "0.1.7",
+      "section": "dependencies",
+      "resolved": "0.1.7",
+      "owner": "core:llm-json-parsing",
+      "class": "core-runtime",
+      "risk": [
+        "streaming-json-parser"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "playwright-core",
+      "specifier": "1.60.0",
+      "section": "dependencies",
+      "resolved": "1.60.0",
+      "owner": "core:browser",
+      "class": "core-runtime",
+      "risk": [
+        "browser-automation",
+        "cdp"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions",
+        "test"
+      ],
+      "sourceFileCount": 18,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "quickjs-wasi",
+      "specifier": "3.0.0",
+      "section": "dependencies",
+      "resolved": "3.0.0",
+      "owner": "core:code-mode",
+      "class": "core-runtime",
+      "risk": [
+        "wasm",
+        "sandboxed-js"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "tslog",
+      "specifier": "4.10.2",
+      "section": "dependencies",
+      "resolved": "4.10.2",
+      "owner": "core:logging",
+      "class": "core-runtime",
+      "risk": [
+        "logging"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 3,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "typebox",
+      "specifier": "1.1.39",
+      "section": "dependencies",
+      "resolved": "1.1.39",
+      "owner": "core:json-schema-contracts",
+      "class": "core-runtime",
+      "risk": [
+        "schema-generation"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "packages",
+        "scripts",
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 169,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "typescript",
+      "specifier": "6.0.3",
+      "section": "dependencies",
+      "resolved": "6.0.3",
+      "owner": "core:typescript-analysis",
+      "class": "core-runtime",
+      "risk": [
+        "compiler-api"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 37,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "undici",
+      "specifier": "8.5.0",
+      "section": "dependencies",
+      "resolved": "8.5.0",
+      "owner": "core:http-client",
+      "class": "core-runtime",
+      "risk": [
+        "network"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 24,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "web-tree-sitter",
+      "specifier": "0.26.9",
+      "section": "dependencies",
+      "resolved": "0.26.9",
+      "owner": "core:command-explainer",
+      "class": "core-runtime",
+      "risk": [
+        "wasm",
+        "parser",
+        "untrusted-shell"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 3,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "ws",
+      "specifier": "8.21.0",
+      "section": "dependencies",
+      "resolved": "8.21.0",
+      "owner": "core:gateway-websocket",
+      "class": "core-runtime",
+      "risk": [
+        "network",
+        "websocket"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "packages",
+        "scripts",
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 93,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "yaml",
+      "specifier": "2.9.0",
+      "section": "dependencies",
+      "resolved": "2.9.0",
+      "owner": "core:config-and-tooling",
+      "class": "core-runtime",
+      "risk": [
+        "parser"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "packages",
+        "scripts",
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 42,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "zod",
+      "specifier": "4.4.3",
+      "section": "dependencies",
+      "resolved": "4.4.3",
+      "owner": "core:config-and-plugin-sdk-validation",
+      "class": "core-runtime",
+      "risk": [
+        "schema-validation"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src",
+        "test",
+        "ui"
+      ],
+      "sourceFileCount": 96,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    }
+  ],
+  "rootDependencies": [
+    {
+      "name": "@agentclientprotocol/sdk",
+      "specifier": "0.22.1",
+      "section": "dependencies",
+      "resolved": "0.22.1(zod@4.4.3)",
+      "owner": "core:mcp-acp",
+      "class": "core-runtime",
+      "risk": [
+        "protocol-client"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 23,
+      "closureSize": 2,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@anthropic-ai/sdk",
+      "specifier": "0.100.1",
+      "section": "dependencies",
+      "resolved": "0.100.1(zod@4.4.3)",
+      "owner": "provider:anthropic",
+      "class": "default-runtime-initially",
+      "risk": [
+        "provider-sdk",
+        "network"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "src"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 8,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@clack/core",
+      "specifier": "1.3.1",
+      "section": "dependencies",
+      "resolved": "1.3.1",
+      "owner": "core:cli",
+      "class": "core-runtime",
+      "risk": [
+        "interactive-cli"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 5,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@clack/prompts",
+      "specifier": "1.4.0",
+      "section": "dependencies",
+      "resolved": "1.4.0",
+      "owner": "core:cli",
+      "class": "core-runtime",
+      "risk": [
+        "interactive-cli"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "packages",
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 24,
+      "closureSize": 6,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@earendil-works/pi-tui",
+      "specifier": "0.78.0",
+      "section": "dependencies",
+      "resolved": "0.78.0",
+      "owner": "capability:tui-pi",
+      "class": "tui-runtime",
+      "risk": [
+        "tui-runtime"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 35,
+      "closureSize": 3,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@google/genai",
+      "specifier": "2.7.0",
+      "section": "dependencies",
+      "resolved": "2.7.0(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))",
+      "owner": "provider:google",
+      "class": "default-runtime-initially",
+      "risk": [
+        "provider-sdk",
+        "network",
+        "realtime"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 8,
+      "closureSize": 132,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@grammyjs/runner",
+      "specifier": "2.0.3",
+      "section": "dependencies",
+      "resolved": "2.0.3(grammy@1.43.0)",
+      "owner": "plugin:telegram",
+      "class": "plugin-runtime",
+      "risk": [
+        "telegram-bot-api",
+        "polling"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions"
+      ],
+      "sourceFileCount": 3,
+      "closureSize": 11,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@grammyjs/transformer-throttler",
+      "specifier": "1.2.1",
+      "section": "dependencies",
+      "resolved": "1.2.1(grammy@1.43.0)",
+      "owner": "plugin:telegram",
+      "class": "plugin-runtime",
+      "risk": [
+        "telegram-bot-api",
+        "rate-limiting"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 12,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@homebridge/ciao",
+      "specifier": "1.3.9",
+      "section": "dependencies",
+      "resolved": "1.3.9",
+      "owner": "plugin:bonjour",
+      "class": "plugin-runtime",
+      "risk": [
+        "mdns",
+        "network"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions",
+        "test"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 8,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@lydell/node-pty",
+      "specifier": "1.2.0-beta.12",
+      "section": "dependencies",
+      "resolved": "1.2.0-beta.12",
+      "owner": "core:tui-terminal",
+      "class": "core-runtime",
+      "risk": [
+        "native",
+        "terminal"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 4,
+      "closureSize": 7,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@mistralai/mistralai",
+      "specifier": "2.2.5",
+      "section": "dependencies",
+      "resolved": "2.2.5",
+      "owner": "provider:mistral",
+      "class": "default-runtime-initially",
+      "risk": [
+        "provider-sdk",
+        "network"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 4,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@modelcontextprotocol/sdk",
+      "specifier": "1.29.0",
+      "section": "dependencies",
+      "resolved": "1.29.0(zod@4.4.3)",
+      "owner": "core:mcp",
+      "class": "core-runtime",
+      "risk": [
+        "protocol-client",
+        "network"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 29,
+      "closureSize": 92,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@mozilla/readability",
+      "specifier": "0.6.0",
+      "section": "dependencies",
+      "resolved": "0.6.0",
+      "owner": "plugin:web-readability",
+      "class": "plugin-runtime",
+      "risk": [
+        "parser",
+        "untrusted-html"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions",
+        "test"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@openclaw/fs-safe",
+      "specifier": "0.3.0",
+      "section": "dependencies",
+      "resolved": "0.3.0",
+      "owner": "core:filesystem-safety",
+      "class": "core-runtime",
+      "risk": [
+        "filesystem",
+        "path-safety"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "packages",
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 32,
+      "closureSize": 20,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "@openclaw/proxyline",
+      "specifier": "0.3.3",
+      "section": "dependencies",
+      "resolved": "0.3.3(undici@8.5.0)",
+      "owner": "core:proxy",
+      "class": "core-runtime",
+      "risk": [
+        "network",
+        "proxy"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 5,
+      "closureSize": 2,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "chalk",
+      "specifier": "5.6.2",
+      "section": "dependencies",
+      "resolved": "5.6.2",
+      "owner": "core:cli",
+      "class": "core-runtime",
+      "risk": [
+        "formatting"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "packages",
+        "src"
+      ],
+      "sourceFileCount": 11,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "chokidar",
+      "specifier": "5.0.0",
+      "section": "dependencies",
+      "resolved": "5.0.0",
+      "owner": "core:watch-mode",
+      "class": "core-runtime",
+      "risk": [
+        "filesystem-watch"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 9,
+      "closureSize": 2,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "clawpdf",
+      "specifier": "0.3.0",
+      "section": "dependencies",
+      "resolved": "0.3.0",
+      "owner": "plugin:document-extract",
+      "class": "plugin-runtime",
+      "risk": [
+        "wasm",
+        "parser",
+        "untrusted-files"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions",
+        "test"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "commander",
+      "specifier": "14.0.3",
+      "section": "dependencies",
+      "resolved": "14.0.3",
+      "owner": "core:cli",
+      "class": "core-runtime",
+      "risk": [
+        "cli-parser"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 229,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "croner",
+      "specifier": "10.0.1",
+      "section": "dependencies",
+      "resolved": "10.0.1",
+      "owner": "core:scheduler",
+      "class": "core-runtime",
+      "risk": [
+        "scheduler"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "diff",
+      "specifier": "9.0.0",
+      "section": "dependencies",
+      "resolved": "9.0.0",
+      "owner": "core:agent-editing",
+      "class": "core-runtime",
+      "risk": [
+        "diff"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "dotenv",
+      "specifier": "17.4.2",
+      "section": "dependencies",
+      "resolved": "17.4.2",
+      "owner": "core:config",
+      "class": "core-runtime",
+      "risk": [
+        "env-loading"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "express",
+      "specifier": "5.2.1",
+      "section": "dependencies",
+      "resolved": "5.2.1",
+      "owner": "capability:http-route-host",
+      "class": "default-runtime-initially",
+      "risk": [
+        "http-server",
+        "large-transitive-cone"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions"
+      ],
+      "sourceFileCount": 8,
+      "closureSize": 66,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "file-type",
+      "specifier": "22.0.1",
+      "section": "dependencies",
+      "resolved": "22.0.1",
+      "owner": "core:media-admission",
+      "class": "core-runtime",
+      "risk": [
+        "file-sniffing",
+        "untrusted-files"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "packages"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 10,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "glob",
+      "specifier": "13.0.6",
+      "section": "dependencies",
+      "resolved": "13.0.6",
+      "owner": "core:package-manager",
+      "class": "core-runtime",
+      "risk": [
+        "filesystem-glob"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 7,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "grammy",
+      "specifier": "1.43.0",
+      "section": "dependencies",
+      "resolved": "1.43.0",
+      "owner": "plugin:telegram",
+      "class": "plugin-runtime",
+      "risk": [
+        "telegram-bot-api",
+        "network"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions"
+      ],
+      "sourceFileCount": 42,
+      "closureSize": 10,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "highlight.js",
+      "specifier": "11.11.1",
+      "section": "dependencies",
+      "resolved": "11.11.1",
+      "owner": "core:syntax-highlighting",
+      "class": "core-runtime",
+      "risk": [
+        "syntax-highlighting"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src",
+        "ui"
+      ],
+      "sourceFileCount": 3,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "hosted-git-info",
+      "specifier": "10.1.1",
+      "section": "dependencies",
+      "resolved": "10.1.1",
+      "owner": "core:git-utils",
+      "class": "core-runtime",
+      "risk": [
+        "git-metadata-parser"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 2,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "ignore",
+      "specifier": "7.0.5",
+      "section": "dependencies",
+      "resolved": "7.0.5",
+      "owner": "core:gitignore-matching",
+      "class": "core-runtime",
+      "risk": [
+        "pattern-matching"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 3,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "jiti",
+      "specifier": "2.7.0",
+      "section": "dependencies",
+      "resolved": "2.7.0",
+      "owner": "core:plugin-loader",
+      "class": "core-runtime",
+      "risk": [
+        "dynamic-code-loading"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 7,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "json5",
+      "specifier": "2.2.3",
+      "section": "dependencies",
+      "resolved": "2.2.3",
+      "owner": "core:config",
+      "class": "core-runtime",
+      "risk": [
+        "config-parser"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "packages",
+        "scripts",
+        "src",
+        "test",
+        "ui"
+      ],
+      "sourceFileCount": 30,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "jszip",
+      "specifier": "3.10.1",
+      "section": "dependencies",
+      "resolved": "3.10.1",
+      "owner": "core:archive-handling",
+      "class": "core-runtime",
+      "risk": [
+        "archive-parser",
+        "untrusted-files"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "packages",
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 15,
+      "closureSize": 13,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "kysely",
+      "specifier": "0.29.2",
+      "section": "dependencies",
+      "resolved": "0.29.2",
+      "owner": "core:sqlite-storage",
+      "class": "core-runtime",
+      "risk": [
+        "database-query-builder"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 15,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "linkedom",
+      "specifier": "0.18.12",
+      "section": "dependencies",
+      "resolved": "0.18.12",
+      "owner": "plugin:web-readability",
+      "class": "plugin-runtime",
+      "risk": [
+        "parser",
+        "untrusted-html"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "src"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 15,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "minimatch",
+      "specifier": "10.2.5",
+      "section": "dependencies",
+      "resolved": "10.2.5",
+      "owner": "core:pattern-matching",
+      "class": "core-runtime",
+      "risk": [
+        "pattern-matching"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "src"
+      ],
+      "sourceFileCount": 3,
+      "closureSize": 3,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "node-edge-tts",
+      "specifier": "1.2.10",
+      "section": "dependencies",
+      "resolved": "1.2.10",
+      "owner": "plugin:microsoft",
+      "class": "plugin-runtime",
+      "risk": [
+        "tts",
+        "network"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 22,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "openai",
+      "specifier": "6.39.1",
+      "section": "dependencies",
+      "resolved": "6.39.1(ws@8.21.0)(zod@4.4.3)",
+      "owner": "provider:openai",
+      "class": "default-runtime-initially",
+      "risk": [
+        "provider-sdk",
+        "network"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "src"
+      ],
+      "sourceFileCount": 21,
+      "closureSize": 3,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "partial-json",
+      "specifier": "0.1.7",
+      "section": "dependencies",
+      "resolved": "0.1.7",
+      "owner": "core:llm-json-parsing",
+      "class": "core-runtime",
+      "risk": [
+        "streaming-json-parser"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "playwright-core",
+      "specifier": "1.60.0",
+      "section": "dependencies",
+      "resolved": "1.60.0",
+      "owner": "core:browser",
+      "class": "core-runtime",
+      "risk": [
+        "browser-automation",
+        "cdp"
+      ],
+      "sourceCategory": "root_owned_extension_runtime",
+      "sourceSections": [
+        "extensions",
+        "test"
+      ],
+      "sourceFileCount": 18,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "proper-lockfile",
+      "specifier": "4.1.2",
+      "section": "dependencies",
+      "resolved": "4.1.2",
+      "owner": "core:session-storage",
+      "class": "core-runtime",
+      "risk": [
+        "filesystem-locking"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 4,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "qrcode",
+      "specifier": "1.5.4",
+      "section": "dependencies",
+      "resolved": "1.5.4",
+      "owner": "core:qr-setup",
+      "class": "default-runtime-initially",
+      "risk": [
+        "terminal-rendering",
+        "png-encoding"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 29,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "quickjs-wasi",
+      "specifier": "3.0.0",
+      "section": "dependencies",
+      "resolved": "3.0.0",
+      "owner": "core:code-mode",
+      "class": "core-runtime",
+      "risk": [
+        "wasm",
+        "sandboxed-js"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "rastermill",
+      "specifier": "0.3.1",
+      "section": "dependencies",
+      "resolved": "0.3.1",
+      "owner": "core:media",
+      "class": "core-runtime",
+      "risk": [
+        "wasm",
+        "parser",
+        "untrusted-files",
+        "native-tool-fallback"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 1,
+      "closureSize": 2,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "sqlite-vec",
+      "specifier": "0.1.9",
+      "section": "optionalDependencies",
+      "resolved": "0.1.9",
+      "owner": "capability:memory-sqlite-vec",
+      "class": "default-runtime-initially",
+      "risk": [
+        "native",
+        "database-extension"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "packages",
+        "scripts",
+        "test"
+      ],
+      "sourceFileCount": 3,
+      "closureSize": 6,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "tar",
+      "specifier": "7.5.20",
+      "section": "dependencies",
+      "resolved": "7.5.20",
+      "owner": "core:archive-handling",
+      "class": "core-runtime",
+      "risk": [
+        "archive-parser",
+        "untrusted-files"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 9,
+      "closureSize": 6,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "tree-sitter-bash",
+      "specifier": "0.25.1",
+      "section": "dependencies",
+      "resolved": "0.25.1",
+      "owner": "core:command-explainer",
+      "class": "core-runtime",
+      "risk": [
+        "wasm",
+        "parser",
+        "untrusted-shell"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 3,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "tslog",
+      "specifier": "4.10.2",
+      "section": "dependencies",
+      "resolved": "4.10.2",
+      "owner": "core:logging",
+      "class": "core-runtime",
+      "risk": [
+        "logging"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 3,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "typebox",
+      "specifier": "1.1.39",
+      "section": "dependencies",
+      "resolved": "1.1.39",
+      "owner": "core:json-schema-contracts",
+      "class": "core-runtime",
+      "risk": [
+        "schema-generation"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "packages",
+        "scripts",
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 169,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "typescript",
+      "specifier": "6.0.3",
+      "section": "dependencies",
+      "resolved": "6.0.3",
+      "owner": "core:typescript-analysis",
+      "class": "core-runtime",
+      "risk": [
+        "compiler-api"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 37,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "undici",
+      "specifier": "8.5.0",
+      "section": "dependencies",
+      "resolved": "8.5.0",
+      "owner": "core:http-client",
+      "class": "core-runtime",
+      "risk": [
+        "network"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src"
+      ],
+      "sourceFileCount": 24,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "web-push",
+      "specifier": "3.6.7",
+      "section": "dependencies",
+      "resolved": "3.6.7",
+      "owner": "core:web-push",
+      "class": "core-runtime",
+      "risk": [
+        "network",
+        "push-notifications",
+        "crypto"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 2,
+      "closureSize": 17,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "web-tree-sitter",
+      "specifier": "0.26.9",
+      "section": "dependencies",
+      "resolved": "0.26.9",
+      "owner": "core:command-explainer",
+      "class": "core-runtime",
+      "risk": [
+        "wasm",
+        "parser",
+        "untrusted-shell"
+      ],
+      "sourceCategory": "core_runtime",
+      "sourceSections": [
+        "src"
+      ],
+      "sourceFileCount": 3,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "ws",
+      "specifier": "8.21.0",
+      "section": "dependencies",
+      "resolved": "8.21.0",
+      "owner": "core:gateway-websocket",
+      "class": "core-runtime",
+      "risk": [
+        "network",
+        "websocket"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "packages",
+        "scripts",
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 93,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "yaml",
+      "specifier": "2.9.0",
+      "section": "dependencies",
+      "resolved": "2.9.0",
+      "owner": "core:config-and-tooling",
+      "class": "core-runtime",
+      "risk": [
+        "parser"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "packages",
+        "scripts",
+        "src",
+        "test"
+      ],
+      "sourceFileCount": 42,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    },
+    {
+      "name": "zod",
+      "specifier": "4.4.3",
+      "section": "dependencies",
+      "resolved": "4.4.3",
+      "owner": "core:config-and-plugin-sdk-validation",
+      "class": "core-runtime",
+      "risk": [
+        "schema-validation"
+      ],
+      "sourceCategory": "shared_core_and_extension",
+      "sourceSections": [
+        "extensions",
+        "scripts",
+        "src",
+        "test",
+        "ui"
+      ],
+      "sourceFileCount": 96,
+      "closureSize": 1,
+      "missingSnapshotKeys": []
+    }
+  ],
+  "importerClosures": [
+    {
+      "importer": ".",
+      "directDependencyCount": 55,
+      "closureSize": 304
+    },
+    {
+      "importer": "extensions/qa-lab",
+      "directDependencyCount": 5,
+      "closureSize": 273
+    },
+    {
+      "importer": "extensions/acpx",
+      "directDependencyCount": 4,
+      "closureSize": 169
+    },
+    {
+      "importer": "extensions/msteams",
+      "directDependencyCount": 5,
+      "closureSize": 143
+    },
+    {
+      "importer": "extensions/google",
+      "directDependencyCount": 2,
+      "closureSize": 133
+    },
+    {
+      "importer": "extensions/llama-cpp",
+      "directDependencyCount": 1,
+      "closureSize": 131
+    },
+    {
+      "importer": "extensions/slack",
+      "directDependencyCount": 6,
+      "closureSize": 128
+    },
+    {
+      "importer": "extensions/browser",
+      "directDependencyCount": 6,
+      "closureSize": 96
+    },
+    {
+      "importer": "extensions/codex-supervisor",
+      "directDependencyCount": 4,
+      "closureSize": 94
+    },
+    {
+      "importer": "extensions/whatsapp",
+      "directDependencyCount": 3,
+      "closureSize": 83
+    },
+    {
+      "importer": "extensions/diagnostics-otel",
+      "directDependencyCount": 11,
+      "closureSize": 72
+    },
+    {
+      "importer": "ui",
+      "directDependencyCount": 11,
+      "closureSize": 65
+    },
+    {
+      "importer": "extensions/diffs",
+      "directDependencyCount": 6,
+      "closureSize": 57
+    },
+    {
+      "importer": "extensions/amazon-bedrock-mantle",
+      "directDependencyCount": 2,
+      "closureSize": 56
+    },
+    {
+      "importer": "extensions/feishu",
+      "directDependencyCount": 3,
+      "closureSize": 56
+    },
+    {
+      "importer": "extensions/tlon",
+      "directDependencyCount": 5,
+      "closureSize": 56
+    },
+    {
+      "importer": "extensions/amazon-bedrock",
+      "directDependencyCount": 6,
+      "closureSize": 45
+    },
+    {
+      "importer": "extensions/matrix",
+      "directDependencyCount": 8,
+      "closureSize": 45
+    },
+    {
+      "importer": "extensions/zalouser",
+      "directDependencyCount": 3,
+      "closureSize": 38
+    },
+    {
+      "importer": "extensions/memory-lancedb",
+      "directDependencyCount": 4,
+      "closureSize": 37
+    },
+    {
+      "importer": "extensions/anthropic-vertex",
+      "directDependencyCount": 1,
+      "closureSize": 33
+    },
+    {
+      "importer": "extensions/discord",
+      "directDependencyCount": 6,
+      "closureSize": 31
+    },
+    {
+      "importer": "extensions/twitch",
+      "directDependencyCount": 4,
+      "closureSize": 26
+    },
+    {
+      "importer": "extensions/googlechat",
+      "directDependencyCount": 3,
+      "closureSize": 25
+    },
+    {
+      "importer": "extensions/microsoft",
+      "directDependencyCount": 1,
+      "closureSize": 22
+    },
+    {
+      "importer": "extensions/canvas",
+      "directDependencyCount": 6,
+      "closureSize": 20
+    },
+    {
+      "importer": "extensions/web-readability",
+      "directDependencyCount": 2,
+      "closureSize": 16
+    },
+    {
+      "importer": "extensions/telegram",
+      "directDependencyCount": 5,
+      "closureSize": 15
+    },
+    {
+      "importer": "extensions/copilot",
+      "directDependencyCount": 1,
+      "closureSize": 13
+    },
+    {
+      "importer": "extensions/codex",
+      "directDependencyCount": 4,
+      "closureSize": 10
+    },
+    {
+      "importer": "extensions/nostr",
+      "directDependencyCount": 2,
+      "closureSize": 10
+    },
+    {
+      "importer": "extensions/oc-path",
+      "directDependencyCount": 4,
+      "closureSize": 10
+    },
+    {
+      "importer": "packages/media-core",
+      "directDependencyCount": 2,
+      "closureSize": 10
+    },
+    {
+      "importer": "extensions/qqbot",
+      "directDependencyCount": 5,
+      "closureSize": 9
+    },
+    {
+      "importer": "extensions/bonjour",
+      "directDependencyCount": 1,
+      "closureSize": 8
+    },
+    {
+      "importer": "extensions/lobster",
+      "directDependencyCount": 2,
+      "closureSize": 8
+    },
+    {
+      "importer": "packages/markdown-core",
+      "directDependencyCount": 2,
+      "closureSize": 8
+    },
+    {
+      "importer": "packages/terminal-core",
+      "directDependencyCount": 2,
+      "closureSize": 7
+    },
+    {
+      "importer": "extensions/github-copilot",
+      "directDependencyCount": 1,
+      "closureSize": 6
+    },
+    {
+      "importer": "extensions/file-transfer",
+      "directDependencyCount": 2,
+      "closureSize": 4
+    },
+    {
+      "importer": "extensions/line",
+      "directDependencyCount": 2,
+      "closureSize": 4
+    },
+    {
+      "importer": "extensions/memory-core",
+      "directDependencyCount": 3,
+      "closureSize": 4
+    },
+    {
+      "importer": "extensions/voice-call",
+      "directDependencyCount": 4,
+      "closureSize": 4
+    },
+    {
+      "importer": "extensions/memory-wiki",
+      "directDependencyCount": 3,
+      "closureSize": 3
+    },
+    {
+      "importer": "extensions/clickclack",
+      "directDependencyCount": 2,
+      "closureSize": 2
+    },
+    {
+      "importer": "extensions/google-meet",
+      "directDependencyCount": 2,
+      "closureSize": 2
+    },
+    {
+      "importer": "extensions/mattermost",
+      "directDependencyCount": 2,
+      "closureSize": 2
+    },
+    {
+      "importer": "extensions/qa-channel",
+      "directDependencyCount": 2,
+      "closureSize": 2
+    },
+    {
+      "importer": "packages/gateway-client",
+      "directDependencyCount": 3,
+      "closureSize": 2
+    },
+    {
+      "importer": "extensions/document-extract",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/firecrawl",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/irc",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/llm-task",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/migrate-hermes",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/nextcloud-talk",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/ollama",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/openai",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/openshell",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/policy",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/qa-matrix",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/raft",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/signal",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/sms",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/synology-chat",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/tavily",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/tokenjuice",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/webhooks",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/workboard",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/xai",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/zalo",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "packages/agent-core",
+      "directDependencyCount": 2,
+      "closureSize": 1
+    },
+    {
+      "importer": "packages/gateway-protocol",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "packages/llm-core",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "packages/net-policy",
+      "directDependencyCount": 1,
+      "closureSize": 1
+    },
+    {
+      "importer": "extensions/admin-http-rpc",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/alibaba",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/anthropic",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/arcee",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/azure-speech",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/brave",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/byteplus",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/cerebras",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/chutes",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/cloudflare-ai-gateway",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/cohere",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/comfy",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/copilot-proxy",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/deepgram",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/deepinfra",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/deepseek",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/diagnostics-prometheus",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/diffs-language-pack",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/duckduckgo",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/elevenlabs",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/exa",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/fal",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/fireworks",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/gmi",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/gradium",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/groq",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/huggingface",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/image-generation-core",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/imessage",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/inworld",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/kilocode",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/kimi-coding",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/litellm",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/lmstudio",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/media-understanding-core",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/microsoft-foundry",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/migrate-claude",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/minimax",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/mistral",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/moonshot",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/novita",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/nvidia",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/open-prose",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/opencode",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/opencode-go",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/openrouter",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/parallel",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/perplexity",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/pixverse",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/qianfan",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/qwen",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/runway",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/searxng",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/senseaudio",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/sglang",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/stepfun",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/synthetic",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/tencent",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/together",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/tts-local-cli",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/venice",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/vercel-ai-gateway",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/video-generation-core",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/vllm",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/volcengine",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/voyage",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/vydra",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/xiaomi",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "extensions/zai",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "packages/acp-core",
+      "directDependencyCount": 1,
+      "closureSize": 0
+    },
+    {
+      "importer": "packages/llm-runtime",
+      "directDependencyCount": 1,
+      "closureSize": 0
+    },
+    {
+      "importer": "packages/media-generation-core",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "packages/media-understanding-common",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "packages/memory-host-sdk",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "packages/model-catalog-core",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "packages/normalization-core",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "packages/plugin-package-contract",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "packages/plugin-sdk",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "packages/sdk",
+      "directDependencyCount": 1,
+      "closureSize": 0
+    },
+    {
+      "importer": "packages/speech-core",
+      "directDependencyCount": 1,
+      "closureSize": 0
+    },
+    {
+      "importer": "packages/tool-call-repair",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    },
+    {
+      "importer": "packages/web-content-core",
+      "directDependencyCount": 0,
+      "closureSize": 0
+    }
+  ]
+}

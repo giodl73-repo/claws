@@ -1,0 +1,1613 @@
+# Transitive Manifest Risk Report
+
+Generated: 2026-07-21T09:26:04.303Z
+
+## Scope
+
+This report inspects published package manifests for resolved packages in the lockfile. It looks for supply-chain risk signals such as floating dependency specs, lifecycle scripts, exotic sources, recently published versions, and missing publish time metadata. It is report-only.
+
+## Summary
+
+- Resolved package versions inspected: 1355
+- Reported risk signals: 2031
+- Signals covered by workspace policy exclusions: 0
+- Metadata failures: 2
+
+## Reported Risk Signals By Type
+
+- floating-transitive-spec: 1921
+- lifecycle-script: 110
+
+## Complete Evidence
+
+The complete reported signal list is available in the JSON report, including every package, version, dependency, and specifier. Recently published versions covered by pnpm workspace release-age exclusions are listed separately under workspaceExcludedFindings. The sections below summarize the same data by package, dependency target, and finding class for human review.
+
+## Published Package Manifests With Risk Findings
+
+- `node-llama-cpp@3.18.1`: 30 manifest findings (floating-transitive-spec: 28, lifecycle-script: 2)
+- `express@5.2.1`: 28 manifest findings (floating-transitive-spec: 28)
+- `@mdx-js/mdx@3.1.1`: 25 manifest findings (floating-transitive-spec: 25)
+- `jsdom@29.1.1`: 22 manifest findings (floating-transitive-spec: 21, lifecycle-script: 1)
+- `ipull@3.9.5`: 20 manifest findings (floating-transitive-spec: 20)
+- `@modelcontextprotocol/sdk@1.29.0`: 17 manifest findings (floating-transitive-spec: 17)
+- `micromark@4.0.2`: 17 manifest findings (floating-transitive-spec: 17)
+- `@aws-sdk/credential-providers@3.1063.0`: 16 manifest findings (floating-transitive-spec: 16)
+- `hast-util-to-estree@3.1.3`: 16 manifest findings (floating-transitive-spec: 16)
+- `micromark-core-commonmark@2.0.3`: 16 manifest findings (floating-transitive-spec: 16)
+- `@aws-sdk/client-s3@3.1056.0`: 15 manifest findings (floating-transitive-spec: 15)
+- `hast-util-to-jsx-runtime@2.3.6`: 15 manifest findings (floating-transitive-spec: 15)
+- `tsdown@0.22.1`: 15 manifest findings (floating-transitive-spec: 15)
+- `@aws-sdk/credential-provider-ini@3.972.50`: 13 manifest findings (floating-transitive-spec: 13)
+- `matrix-js-sdk@41.6.0`: 13 manifest findings (floating-transitive-spec: 12, lifecycle-script: 1)
+- `protobufjs@7.6.3`: 13 manifest findings (floating-transitive-spec: 12, lifecycle-script: 1)
+- `vitest@4.1.8`: 13 manifest findings (floating-transitive-spec: 13)
+- `baileys@7.0.0-rc13`: 12 manifest findings (floating-transitive-spec: 10, lifecycle-script: 2)
+- `make-fetch-happen@15.0.6`: 12 manifest findings (floating-transitive-spec: 12)
+- `mdast-util-from-markdown@2.0.3`: 12 manifest findings (floating-transitive-spec: 12)
+- `mdast-util-mdx-jsx@3.2.0`: 12 manifest findings (floating-transitive-spec: 12)
+- `yargs@15.4.1`: 12 manifest findings (floating-transitive-spec: 11, lifecycle-script: 1)
+- `@aws-sdk/client-bedrock-runtime@3.1056.0`: 11 manifest findings (floating-transitive-spec: 11)
+- `@aws-sdk/credential-provider-node@3.972.52`: 11 manifest findings (floating-transitive-spec: 11)
+- `@azure/identity@4.13.1`: 11 manifest findings (floating-transitive-spec: 11)
+- `@slack/bolt@4.7.3`: 11 manifest findings (floating-transitive-spec: 10, lifecycle-script: 1)
+- `hast-util-to-html@9.0.5`: 11 manifest findings (floating-transitive-spec: 11)
+- `pino@9.14.0`: 11 manifest findings (floating-transitive-spec: 11)
+- `send@1.2.1`: 11 manifest findings (floating-transitive-spec: 11)
+- `@slack/web-api@7.16.0`: 10 manifest findings (floating-transitive-spec: 10)
+- `cacache@20.0.4`: 10 manifest findings (floating-transitive-spec: 10)
+- `get-intrinsic@1.3.0`: 10 manifest findings (floating-transitive-spec: 10)
+- `jsonwebtoken@9.0.3`: 10 manifest findings (floating-transitive-spec: 10)
+- `micromark-extension-mdx-jsx@3.0.2`: 10 manifest findings (floating-transitive-spec: 10)
+- `music-metadata@11.12.3`: 10 manifest findings (floating-transitive-spec: 10)
+- `@aws/bedrock-token-generator@1.1.0`: 9 manifest findings (floating-transitive-spec: 9)
+- `@vitest/coverage-v8@4.1.8`: 9 manifest findings (floating-transitive-spec: 9)
+- `apache-arrow@21.1.0`: 9 manifest findings (floating-transitive-spec: 9)
+- `body-parser@2.2.2`: 9 manifest findings (floating-transitive-spec: 9)
+- `execa@4.1.0`: 9 manifest findings (floating-transitive-spec: 9)
+- `mdast-util-to-hast@13.2.1`: 9 manifest findings (floating-transitive-spec: 9)
+- `mdast-util-to-markdown@2.1.2`: 9 manifest findings (floating-transitive-spec: 9)
+- `micromark-extension-mdxjs-esm@3.0.0`: 9 manifest findings (floating-transitive-spec: 9)
+- `micromark-factory-mdx-expression@2.0.3`: 9 manifest findings (floating-transitive-spec: 9)
+- `zca-js@2.1.2`: 9 manifest findings (floating-transitive-spec: 8, lifecycle-script: 1)
+- `@aws-sdk/client-bedrock@3.1056.0`: 8 manifest findings (floating-transitive-spec: 8)
+- `@aws-sdk/client-cognito-identity@3.1063.0`: 8 manifest findings (floating-transitive-spec: 8)
+- `@aws-sdk/core@3.974.13`: 8 manifest findings (floating-transitive-spec: 8)
+- `@aws-sdk/nested-clients@3.997.17`: 8 manifest findings (floating-transitive-spec: 8)
+- `@d-fischer/connection@10.0.1`: 8 manifest findings (floating-transitive-spec: 8)
+- `@jscpd/finder@4.2.4`: 8 manifest findings (floating-transitive-spec: 8)
+- `@twurple/api@8.1.4`: 8 manifest findings (floating-transitive-spec: 8)
+- `@twurple/chat@8.1.4`: 8 manifest findings (floating-transitive-spec: 8)
+- `audio-decode@2.2.3`: 8 manifest findings (floating-transitive-spec: 8)
+- `cmake-js@8.0.0`: 8 manifest findings (floating-transitive-spec: 8)
+- `micromark-extension-mdx-expression@3.0.1`: 8 manifest findings (floating-transitive-spec: 8)
+- `micromark-extension-mdxjs@3.0.0`: 8 manifest findings (floating-transitive-spec: 8)
+- `ora@9.4.0`: 8 manifest findings (floating-transitive-spec: 8)
+- `pug-code-gen@3.0.4`: 8 manifest findings (floating-transitive-spec: 8)
+- `pug@3.0.4`: 8 manifest findings (floating-transitive-spec: 8)
+- `yargs@17.7.2`: 8 manifest findings (floating-transitive-spec: 7, lifecycle-script: 1)
+- `@aws-crypto/sha256-browser@5.2.0`: 7 manifest findings (floating-transitive-spec: 7)
+- `@aws-sdk/credential-provider-http@3.972.46`: 7 manifest findings (floating-transitive-spec: 7)
+- `@aws-sdk/middleware-websocket@3.972.26`: 7 manifest findings (floating-transitive-spec: 7)
+- `@azure/core-client@1.10.2`: 7 manifest findings (floating-transitive-spec: 7)
+- `@azure/core-rest-pipeline@1.24.0`: 7 manifest findings (floating-transitive-spec: 7)
+- `@larksuiteoapi/node-sdk@1.66.0`: 7 manifest findings (floating-transitive-spec: 7)
+- `@microsoft/teams.apps@2.0.12`: 7 manifest findings (floating-transitive-spec: 7)
+- `@openclaw/crabline@0.1.6`: 7 manifest findings (floating-transitive-spec: 6, lifecycle-script: 1)
+- `google-auth-library@9.15.1`: 7 manifest findings (floating-transitive-spec: 6, lifecycle-script: 1)
+- `ircv3@0.33.1`: 7 manifest findings (floating-transitive-spec: 7)
+- `micromark-util-events-to-acorn@2.0.3`: 7 manifest findings (floating-transitive-spec: 7)
+- `parse-entities@4.0.2`: 7 manifest findings (floating-transitive-spec: 7)
+- `readable-stream@2.3.8`: 7 manifest findings (floating-transitive-spec: 7)
+- `unified@11.0.5`: 7 manifest findings (floating-transitive-spec: 7)
+- `@a2ui/lit@0.10.0`: 6 manifest findings (floating-transitive-spec: 6)
+- `@aws-crypto/sha1-browser@5.2.0`: 6 manifest findings (floating-transitive-spec: 6)
+- `@aws-sdk/credential-provider-login@3.972.49`: 6 manifest findings (floating-transitive-spec: 6)
+- `@aws-sdk/credential-provider-sso@3.972.49`: 6 manifest findings (floating-transitive-spec: 6)
+- `@aws-sdk/credential-provider-web-identity@3.972.49`: 6 manifest findings (floating-transitive-spec: 6)
+- `@aws-sdk/middleware-sdk-s3@3.972.48`: 6 manifest findings (floating-transitive-spec: 6)
+- `@aws-sdk/s3-request-presigner@3.1056.0`: 6 manifest findings (floating-transitive-spec: 6)
+- `@aws-sdk/token-providers@3.1056.0`: 6 manifest findings (floating-transitive-spec: 6)
+- `@aws-sdk/token-providers@3.1063.0`: 6 manifest findings (floating-transitive-spec: 6)
+- `@babel/generator@8.0.0-rc.6`: 6 manifest findings (floating-transitive-spec: 6)
+- `@discordjs/voice@0.19.2`: 6 manifest findings (floating-transitive-spec: 6)
+- `@google/genai@2.7.0`: 6 manifest findings (floating-transitive-spec: 4, lifecycle-script: 2)
+- `@sigstore/sign@4.1.1`: 6 manifest findings (floating-transitive-spec: 6)
+- `@slack/socket-mode@2.0.7`: 6 manifest findings (floating-transitive-spec: 6)
+- `acpx@0.11.2`: 6 manifest findings (floating-transitive-spec: 5, lifecycle-script: 1)
+- `css-select@5.2.2`: 6 manifest findings (floating-transitive-spec: 5, lifecycle-script: 1)
+- `finalhandler@2.1.1`: 6 manifest findings (floating-transitive-spec: 6)
+- `form-data@2.5.6`: 6 manifest findings (floating-transitive-spec: 6)
+- `gaxios@6.7.1`: 6 manifest findings (floating-transitive-spec: 5, lifecycle-script: 1)
+- `markdown-it@14.2.0`: 6 manifest findings (floating-transitive-spec: 6)
+- `mdast-util-mdx-expression@2.0.1`: 6 manifest findings (floating-transitive-spec: 6)
+- `mdast-util-mdxjs-esm@2.0.1`: 6 manifest findings (floating-transitive-spec: 6)
+- `sigstore@4.1.1`: 6 manifest findings (floating-transitive-spec: 6)
+- `tar@7.5.20`: 6 manifest findings (floating-transitive-spec: 5, lifecycle-script: 1)
+- `@asamuzakjp/css-color@5.1.11`: 5 manifest findings (floating-transitive-spec: 5)
+- `@asamuzakjp/dom-selector@7.1.1`: 5 manifest findings (floating-transitive-spec: 5)
+- `@aws-sdk/checksums@3.1000.2`: 5 manifest findings (floating-transitive-spec: 5)
+- `@aws-sdk/credential-provider-cognito-identity@3.972.42`: 5 manifest findings (floating-transitive-spec: 5)
+- `@aws-sdk/credential-provider-env@3.972.44`: 5 manifest findings (floating-transitive-spec: 5)
+- `@aws-sdk/credential-provider-process@3.972.44`: 5 manifest findings (floating-transitive-spec: 5)
+- `@grpc/proto-loader@0.8.1`: 5 manifest findings (floating-transitive-spec: 4, lifecycle-script: 1)
+- `@npmcli/agent@4.0.2`: 5 manifest findings (floating-transitive-spec: 5)
+- `@slack/oauth@3.0.5`: 5 manifest findings (floating-transitive-spec: 5)
+- `@vitest/browser@4.1.8`: 5 manifest findings (floating-transitive-spec: 5)
+- `axios@1.18.0`: 5 manifest findings (floating-transitive-spec: 4, lifecycle-script: 1)
+- `bare-fs@4.7.2`: 5 manifest findings (floating-transitive-spec: 5)
+- `cacheable@2.3.5`: 5 manifest findings (floating-transitive-spec: 5)
+- `fast-glob@3.3.3`: 5 manifest findings (floating-transitive-spec: 5)
+- `google-auth-library@10.6.2`: 5 manifest findings (floating-transitive-spec: 4, lifecycle-script: 1)
+- `google-auth-library@10.7.0`: 5 manifest findings (floating-transitive-spec: 4, lifecycle-script: 1)
+- `htmlparser2@10.1.0`: 5 manifest findings (floating-transitive-spec: 4, lifecycle-script: 1)
+- `http-errors@2.0.1`: 5 manifest findings (floating-transitive-spec: 5)
+- `jwks-rsa@3.2.2`: 5 manifest findings (floating-transitive-spec: 5)
+- `linkedom@0.18.12`: 5 manifest findings (floating-transitive-spec: 5)
+- `mdast-util-mdx@3.0.0`: 5 manifest findings (floating-transitive-spec: 5)
+- `recma-jsx@1.0.1`: 5 manifest findings (floating-transitive-spec: 5)
+- `remark-rehype@11.1.2`: 5 manifest findings (floating-transitive-spec: 5)
+- `router@2.2.0`: 5 manifest findings (floating-transitive-spec: 5)
+- `side-channel-weakmap@1.0.2`: 5 manifest findings (floating-transitive-spec: 5)
+- `side-channel@1.1.0`: 5 manifest findings (floating-transitive-spec: 5)
+- `simple-git@3.36.0`: 5 manifest findings (floating-transitive-spec: 5)
+- `stdout-update@4.0.1`: 5 manifest findings (floating-transitive-spec: 4, lifecycle-script: 1)
+- `@a2ui/web_core@0.10.0`: 4 manifest findings (floating-transitive-spec: 4)
+- `@aws-sdk/eventstream-handler-node@3.972.20`: 4 manifest findings (floating-transitive-spec: 4)
+- `@aws-sdk/middleware-eventstream@3.972.16`: 4 manifest findings (floating-transitive-spec: 4)
+- `@aws-sdk/signature-v4-multi-region@3.996.32`: 4 manifest findings (floating-transitive-spec: 4)
+- `@cacheable/memory@2.0.9`: 4 manifest findings (floating-transitive-spec: 4)
+- `@homebridge/ciao@1.3.9`: 4 manifest findings (floating-transitive-spec: 4)
+- `@twurple/auth@8.1.4`: 4 manifest findings (floating-transitive-spec: 4)
+- `@types/express-serve-static-core@5.1.1`: 4 manifest findings (floating-transitive-spec: 4)
+- `@vitest/expect@4.1.8`: 4 manifest findings (floating-transitive-spec: 4)
+- `ajv@8.20.0`: 4 manifest findings (floating-transitive-spec: 4)
+- `asn1.js@5.4.1`: 4 manifest findings (floating-transitive-spec: 4)
+- `cliui@8.0.1`: 4 manifest findings (floating-transitive-spec: 3, lifecycle-script: 1)
+- `command-line-args@6.0.2`: 4 manifest findings (floating-transitive-spec: 4)
+- `command-line-usage@7.0.4`: 4 manifest findings (floating-transitive-spec: 4)
+- `dom-serializer@2.0.0`: 4 manifest findings (floating-transitive-spec: 3, lifecycle-script: 1)
+- `domutils@3.2.2`: 4 manifest findings (floating-transitive-spec: 3, lifecycle-script: 1)
+- `es-set-tostringtag@2.1.0`: 4 manifest findings (floating-transitive-spec: 4)
+- `esast-util-from-estree@2.0.0`: 4 manifest findings (floating-transitive-spec: 4)
+- `esast-util-from-js@2.0.1`: 4 manifest findings (floating-transitive-spec: 4)
+- `estree-util-build-jsx@3.0.1`: 4 manifest findings (floating-transitive-spec: 4)
+- `fast-xml-parser@5.7.0`: 4 manifest findings (floating-transitive-spec: 4)
+- `file-type@22.0.1`: 4 manifest findings (floating-transitive-spec: 4)
+- `gaxios@7.1.4`: 4 manifest findings (floating-transitive-spec: 3, lifecycle-script: 1)
+- `gaxios@7.1.5`: 4 manifest findings (floating-transitive-spec: 3, lifecycle-script: 1)
+- `gcp-metadata@6.1.1`: 4 manifest findings (floating-transitive-spec: 3, lifecycle-script: 1)
+- `gcp-metadata@8.1.2`: 4 manifest findings (floating-transitive-spec: 3, lifecycle-script: 1)
+- `glob@13.0.6`: 4 manifest findings (floating-transitive-spec: 3, lifecycle-script: 1)
+- `grammy@1.43.0`: 4 manifest findings (floating-transitive-spec: 3, lifecycle-script: 1)
+- `import-in-the-middle@3.0.1`: 4 manifest findings (floating-transitive-spec: 4)
+- `is-regex@1.2.1`: 4 manifest findings (floating-transitive-spec: 4)
+- `jszip@3.10.1`: 4 manifest findings (floating-transitive-spec: 4)
+- `micromark-factory-label@2.0.1`: 4 manifest findings (floating-transitive-spec: 4)
+- `micromark-factory-title@2.0.1`: 4 manifest findings (floating-transitive-spec: 4)
+- `micromark-factory-whitespace@2.0.1`: 4 manifest findings (floating-transitive-spec: 4)
+- `micromark-util-decode-string@2.0.1`: 4 manifest findings (floating-transitive-spec: 4)
+- `micromark-util-subtokenize@2.1.0`: 4 manifest findings (floating-transitive-spec: 4)
+- `minipass-fetch@5.0.2`: 4 manifest findings (floating-transitive-spec: 4)
+- `open@10.2.0`: 4 manifest findings (floating-transitive-spec: 4)
+- `pug-filters@4.0.0`: 4 manifest findings (floating-transitive-spec: 4)
+- `raw-body@3.0.2`: 4 manifest findings (floating-transitive-spec: 4)
+- `rc@1.2.8`: 4 manifest findings (floating-transitive-spec: 4)
+- `recma-parse@1.0.0`: 4 manifest findings (floating-transitive-spec: 4)
+- `recma-stringify@1.0.0`: 4 manifest findings (floating-transitive-spec: 4)
+- `remark-parse@11.0.0`: 4 manifest findings (floating-transitive-spec: 4)
+- `resolve@1.22.12`: 4 manifest findings (floating-transitive-spec: 4)
+- `rolldown-plugin-dts@0.25.2`: 4 manifest findings (floating-transitive-spec: 4)
+- `serve-static@2.2.1`: 4 manifest findings (floating-transitive-spec: 4)
+- `side-channel-map@1.0.1`: 4 manifest findings (floating-transitive-spec: 4)
+- `tar-stream@3.2.0`: 4 manifest findings (floating-transitive-spec: 4)
+- `tough-cookie@4.1.3`: 4 manifest findings (floating-transitive-spec: 4)
+- `web-push@3.6.7`: 4 manifest findings (floating-transitive-spec: 4)
+- `whatwg-url@16.0.1`: 4 manifest findings (floating-transitive-spec: 3, lifecycle-script: 1)
+- `@aws-crypto/crc32@5.2.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `@aws-crypto/crc32c@5.2.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `@aws-crypto/sha256-js@5.2.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `@aws-crypto/util@5.2.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `@azure/core-auth@1.10.1`: 3 manifest findings (floating-transitive-spec: 3)
+- `@azure/core-util@1.13.1`: 3 manifest findings (floating-transitive-spec: 3)
+- `@cacheable/node-cache@1.7.6`: 3 manifest findings (floating-transitive-spec: 3)
+- `@clack/prompts@1.4.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `@d-fischer/logger@4.2.4`: 3 manifest findings (floating-transitive-spec: 3)
+- `@d-fischer/rate-limiter@1.1.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `@github/copilot-sdk@1.0.0-beta.9`: 3 manifest findings (floating-transitive-spec: 3)
+- `@grpc/grpc-js@1.14.4`: 3 manifest findings (floating-transitive-spec: 2, lifecycle-script: 1)
+- `@jscpd/badge-reporter@4.2.4`: 3 manifest findings (floating-transitive-spec: 3)
+- `@matrix-org/matrix-sdk-crypto-nodejs@0.6.0`: 3 manifest findings (floating-transitive-spec: 2, lifecycle-script: 1)
+- `@mistralai/mistralai@2.2.5`: 3 manifest findings (floating-transitive-spec: 3)
+- `@shikijs/core@3.23.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `@shikijs/core@4.1.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `@sigstore/verify@3.1.1`: 3 manifest findings (floating-transitive-spec: 3)
+- `@smithy/credential-provider-imds@4.3.8`: 3 manifest findings (floating-transitive-spec: 3)
+- `@smithy/fetch-http-handler@5.4.6`: 3 manifest findings (floating-transitive-spec: 3)
+- `@smithy/node-http-handler@4.7.7`: 3 manifest findings (floating-transitive-spec: 3)
+- `@smithy/signature-v4@5.4.6`: 3 manifest findings (floating-transitive-spec: 3)
+- `@twurple/common@8.1.4`: 3 manifest findings (floating-transitive-spec: 3)
+- `@types/express@5.0.6`: 3 manifest findings (floating-transitive-spec: 3)
+- `@typespec/ts-http-runtime@0.3.6`: 3 manifest findings (floating-transitive-spec: 3)
+- `ast-kit@3.0.0-beta.1`: 3 manifest findings (floating-transitive-spec: 3)
+- `ast-v8-to-istanbul@1.0.3`: 3 manifest findings (floating-transitive-spec: 3)
+- `cliui@6.0.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `cross-spawn@7.0.6`: 3 manifest findings (floating-transitive-spec: 3)
+- `dunder-proto@1.0.1`: 3 manifest findings (floating-transitive-spec: 3)
+- `estree-util-to-js@2.0.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `fs-extra@11.3.5`: 3 manifest findings (floating-transitive-spec: 3)
+- `gtoken@7.1.0`: 3 manifest findings (floating-transitive-spec: 2, lifecycle-script: 1)
+- `istanbul-lib-report@3.0.1`: 3 manifest findings (floating-transitive-spec: 3)
+- `istanbul-reports@3.2.0`: 3 manifest findings (floating-transitive-spec: 2, lifecycle-script: 1)
+- `jscpd-sarif-reporter@4.2.4`: 3 manifest findings (floating-transitive-spec: 3)
+- `jscpd@4.2.4`: 3 manifest findings (floating-transitive-spec: 3)
+- `lit-element@4.2.2`: 3 manifest findings (floating-transitive-spec: 3)
+- `lit@3.3.3`: 3 manifest findings (floating-transitive-spec: 3)
+- `magicast@0.5.3`: 3 manifest findings (floating-transitive-spec: 3)
+- `micromark-factory-destination@2.0.1`: 3 manifest findings (floating-transitive-spec: 3)
+- `micromark-util-classify-character@2.0.1`: 3 manifest findings (floating-transitive-spec: 3)
+- `micromark-util-sanitize-uri@2.0.1`: 3 manifest findings (floating-transitive-spec: 3)
+- `node-edge-tts@1.2.10`: 3 manifest findings (floating-transitive-spec: 3)
+- `node-fetch@3.3.2`: 3 manifest findings (floating-transitive-spec: 3)
+- `oniguruma-to-es@4.3.6`: 3 manifest findings (floating-transitive-spec: 3)
+- `path-scurry@2.0.2`: 3 manifest findings (floating-transitive-spec: 2, lifecycle-script: 1)
+- `postcss@8.5.15`: 3 manifest findings (floating-transitive-spec: 3)
+- `proper-lockfile@4.1.2`: 3 manifest findings (floating-transitive-spec: 3)
+- `pug-attrs@3.0.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `pug-lexer@5.0.1`: 3 manifest findings (floating-transitive-spec: 3)
+- `qrcode@1.5.4`: 3 manifest findings (floating-transitive-spec: 3)
+- `recma-build-jsx@1.0.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `rehype-recma@1.0.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `sirv@3.0.2`: 3 manifest findings (floating-transitive-spec: 3)
+- `skillflag@0.2.0`: 3 manifest findings (floating-transitive-spec: 2, lifecycle-script: 1)
+- `socks-proxy-agent@8.0.5`: 3 manifest findings (floating-transitive-spec: 3)
+- `standardwebhooks@1.0.0`: 3 manifest findings (floating-transitive-spec: 2, lifecycle-script: 1)
+- `streamx@2.27.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `string-width@4.2.3`: 3 manifest findings (floating-transitive-spec: 3)
+- `string-width@7.2.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `token-types@6.1.2`: 3 manifest findings (floating-transitive-spec: 3)
+- `tree-sitter-bash@0.25.1`: 3 manifest findings (floating-transitive-spec: 2, lifecycle-script: 1)
+- `type-is@2.1.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `unist-util-visit@5.1.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `with@7.0.2`: 3 manifest findings (floating-transitive-spec: 3)
+- `wrap-ansi@6.2.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `wrap-ansi@7.0.0`: 3 manifest findings (floating-transitive-spec: 3)
+- `@anthropic-ai/sdk@0.100.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `@anthropic-ai/vertex-sdk@0.16.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `@aws-sdk/middleware-bucket-endpoint@3.972.21`: 2 manifest findings (floating-transitive-spec: 2)
+- `@aws-sdk/middleware-expect-continue@3.972.17`: 2 manifest findings (floating-transitive-spec: 2)
+- `@aws-sdk/middleware-flexible-checksums@3.974.27`: 2 manifest findings (floating-transitive-spec: 2)
+- `@aws-sdk/middleware-location-constraint@3.972.14`: 2 manifest findings (floating-transitive-spec: 2)
+- `@aws-sdk/middleware-ssec@3.972.14`: 2 manifest findings (floating-transitive-spec: 2)
+- `@aws-sdk/types@3.973.11`: 2 manifest findings (floating-transitive-spec: 2)
+- `@aws-sdk/util-format-url@3.972.20`: 2 manifest findings (floating-transitive-spec: 2)
+- `@aws-sdk/xml-builder@3.972.25`: 2 manifest findings (floating-transitive-spec: 2)
+- `@azure/logger@1.3.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `@azure/msal-node@3.8.10`: 2 manifest findings (floating-transitive-spec: 2)
+- `@babel/types@7.29.7`: 2 manifest findings (floating-transitive-spec: 2)
+- `@babel/types@8.0.0-rc.6`: 2 manifest findings (floating-transitive-spec: 2)
+- `@cacheable/utils@2.4.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `@clack/core@1.3.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `@clawdbot/lobster@2026.5.22`: 2 manifest findings (floating-transitive-spec: 2)
+- `@csstools/css-color-parser@4.1.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `@d-fischer/cache-decorators@4.0.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `@grammyjs/runner@2.0.3`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `@isaacs/fs-minipass@4.0.1`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `@jridgewell/gen-mapping@0.3.13`: 2 manifest findings (floating-transitive-spec: 2)
+- `@jridgewell/trace-mapping@0.3.31`: 2 manifest findings (floating-transitive-spec: 2)
+- `@jscpd/html-reporter@4.2.4`: 2 manifest findings (floating-transitive-spec: 2)
+- `@keyv/bigmap@1.3.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `@lit-labs/signals@0.1.3`: 2 manifest findings (floating-transitive-spec: 2)
+- `@lit-labs/signals@0.3.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `@microsoft/teams.api@2.0.12`: 2 manifest findings (floating-transitive-spec: 2)
+- `@opentelemetry/instrumentation@0.219.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `@pierre/diffs@1.2.4`: 2 manifest findings (floating-transitive-spec: 2)
+- `@shikijs/engine-javascript@3.23.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `@shikijs/engine-javascript@4.1.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `@shikijs/primitive@4.1.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `@shikijs/types@3.23.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `@shikijs/types@4.1.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `@sigstore/tuf@4.0.2`: 2 manifest findings (floating-transitive-spec: 2)
+- `@smithy/config-resolver@4.5.6`: 2 manifest findings (floating-transitive-spec: 2)
+- `@smithy/core@3.24.6`: 2 manifest findings (floating-transitive-spec: 2)
+- `@smithy/hash-node@4.3.6`: 2 manifest findings (floating-transitive-spec: 2)
+- `@smithy/invalid-dependency@4.3.6`: 2 manifest findings (floating-transitive-spec: 2)
+- `@smithy/node-config-provider@4.4.6`: 2 manifest findings (floating-transitive-spec: 2)
+- `@smithy/protocol-http@5.4.6`: 2 manifest findings (floating-transitive-spec: 2)
+- `@smithy/shared-ini-file-loader@4.5.5`: 2 manifest findings (floating-transitive-spec: 2)
+- `@smithy/util-buffer-from@2.2.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `@smithy/util-utf8@2.3.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `@tokenizer/inflate@0.4.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `@twurple/api-call@8.1.4`: 2 manifest findings (floating-transitive-spec: 2)
+- `@tybys/wasm-util@0.10.2`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `@types/body-parser@1.19.6`: 2 manifest findings (floating-transitive-spec: 2)
+- `@types/chai@5.2.3`: 2 manifest findings (floating-transitive-spec: 2)
+- `@types/jsonwebtoken@9.0.10`: 2 manifest findings (floating-transitive-spec: 2)
+- `@types/markdown-it@14.1.2`: 2 manifest findings (floating-transitive-spec: 2)
+- `@types/serve-static@2.2.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `@vitest/mocker@4.1.8`: 2 manifest findings (floating-transitive-spec: 2)
+- `@vitest/snapshot@4.1.8`: 2 manifest findings (floating-transitive-spec: 2)
+- `@vitest/utils@4.1.8`: 2 manifest findings (floating-transitive-spec: 2)
+- `accepts@2.0.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `bare-stream@2.13.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `blamer@1.0.7`: 2 manifest findings (floating-transitive-spec: 2)
+- `brace-expansion@5.0.7`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `call-bind-apply-helpers@1.0.2`: 2 manifest findings (floating-transitive-spec: 2)
+- `call-bound@1.0.4`: 2 manifest findings (floating-transitive-spec: 2)
+- `chalk@4.1.2`: 2 manifest findings (floating-transitive-spec: 2)
+- `constantinople@4.0.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `cors@2.8.6`: 2 manifest findings (floating-transitive-spec: 2)
+- `data-urls@7.0.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `default-browser@5.5.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `domhandler@5.0.3`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `dompurify@3.4.11`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `estree-util-scope@1.0.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `estree-util-visit@2.0.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `eventsource@3.0.7`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `express-rate-limit@8.5.2`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `fast-xml-builder@1.2.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `fetch-blob@3.2.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `find-up@4.1.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `get-proto@1.0.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `hashery@1.5.1`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `http-proxy-agent@7.0.2`: 2 manifest findings (floating-transitive-spec: 2)
+- `https-proxy-agent@5.0.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `https-proxy-agent@7.0.6`: 2 manifest findings (floating-transitive-spec: 2)
+- `is-alphanumerical@2.0.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `is-expression@4.0.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `json-schema-to-ts@3.1.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `jsonfile@6.2.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `jstransformer@1.0.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `jwa@2.0.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `jws@4.0.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `libsignal@6.0.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `lightningcss@1.32.0`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `log-symbols@7.0.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `lowdb@7.0.1`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `lru-memoizer@2.3.0`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `matrix-widget-api@1.17.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `mdast-util-phrasing@4.1.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `micromark-factory-space@2.0.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `micromark-util-character@2.1.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `micromark-util-combine-extensions@2.0.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `micromatch@4.0.8`: 2 manifest findings (floating-transitive-spec: 2)
+- `minimatch@10.2.5`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `minipass-sized@2.0.0`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `minizlib@3.1.0`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `node-fetch@2.7.0`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `node-sarif-builder@3.4.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `nth-check@2.1.1`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `oidc-client-ts@3.5.0`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `p-queue@6.6.2`: 2 manifest findings (floating-transitive-spec: 2)
+- `p-queue@9.3.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `pino-abstract-transport@2.0.0`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `pug-linker@4.0.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `pug-load@3.0.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `pump@3.0.4`: 2 manifest findings (floating-transitive-spec: 2)
+- `remark-mdx@3.1.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `require-in-the-middle@8.0.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `restore-cursor@5.1.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `rolldown@1.0.3`: 2 manifest findings (floating-transitive-spec: 2)
+- `rolldown@1.1.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `shiki@3.23.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `shiki@4.1.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `side-channel-list@1.0.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `slice-ansi@7.1.2`: 2 manifest findings (floating-transitive-spec: 2)
+- `slice-ansi@8.0.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `socks@2.8.9`: 2 manifest findings (floating-transitive-spec: 2)
+- `source-map-support@0.5.21`: 2 manifest findings (floating-transitive-spec: 2)
+- `string-width@8.2.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `stringify-entities@4.0.4`: 2 manifest findings (floating-transitive-spec: 2)
+- `table-layout@4.1.1`: 2 manifest findings (floating-transitive-spec: 2)
+- `thread-stream@3.2.0`: 2 manifest findings (floating-transitive-spec: 1, lifecycle-script: 1)
+- `tinyglobby@0.2.17`: 2 manifest findings (floating-transitive-spec: 2)
+- `tsx@4.22.3`: 2 manifest findings (floating-transitive-spec: 2)
+- `tsx@4.22.4`: 2 manifest findings (floating-transitive-spec: 2)
+- `tuf-js@4.1.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `unconfig-core@7.5.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `unist-util-visit-parents@6.0.2`: 2 manifest findings (floating-transitive-spec: 2)
+- `url-parse@1.5.10`: 2 manifest findings (floating-transitive-spec: 2)
+- `vfile-message@4.0.3`: 2 manifest findings (floating-transitive-spec: 2)
+- `vfile@6.0.3`: 2 manifest findings (floating-transitive-spec: 2)
+- `whatwg-url@5.0.0`: 2 manifest findings (floating-transitive-spec: 2)
+- `yargs-parser@18.1.3`: 2 manifest findings (floating-transitive-spec: 2)
+- `@agentclientprotocol/claude-agent-acp@0.39.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@aws-crypto/supports-web-crypto@5.2.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@aws-sdk/util-locate-window@3.965.6`: 1 manifest finding (floating-transitive-spec: 1)
+- `@azure/abort-controller@2.1.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `@azure/core-tracing@1.3.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `@azure/msal-node@5.2.3`: 1 manifest finding (floating-transitive-spec: 1)
+- `@babel/parser@7.29.7`: 1 manifest finding (floating-transitive-spec: 1)
+- `@babel/parser@8.0.0-rc.6`: 1 manifest finding (floating-transitive-spec: 1)
+- `@bramus/specificity@2.4.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `@copilotkit/aimock@1.27.3`: 1 manifest finding (lifecycle-script: 1)
+- `@d-fischer/shared-utils@3.6.4`: 1 manifest finding (floating-transitive-spec: 1)
+- `@d-fischer/typed-event-emitter@3.3.3`: 1 manifest finding (floating-transitive-spec: 1)
+- `@emnapi/core@1.10.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@emnapi/runtime@1.10.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@emnapi/wasi-threads@1.2.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `@eshaz/web-worker@1.2.2`: 1 manifest finding (lifecycle-script: 1)
+- `@github/copilot@1.0.55`: 1 manifest finding (floating-transitive-spec: 1)
+- `@grammyjs/transformer-throttler@1.2.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `@grammyjs/types@3.27.3`: 1 manifest finding (lifecycle-script: 1)
+- `@hapi/boom@9.1.4`: 1 manifest finding (floating-transitive-spec: 1)
+- `@jscpd/core@4.2.4`: 1 manifest finding (floating-transitive-spec: 1)
+- `@jscpd/tokenizer@4.2.4`: 1 manifest finding (floating-transitive-spec: 1)
+- `@kwsites/file-exists@1.1.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `@lancedb/lancedb@0.30.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@line/bot-sdk@11.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `@lit/context@1.1.6`: 1 manifest finding (floating-transitive-spec: 1)
+- `@lit/reactive-element@2.1.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `@microsoft/teams.common@2.0.12`: 1 manifest finding (floating-transitive-spec: 1)
+- `@microsoft/teams.graph@2.0.12`: 1 manifest finding (floating-transitive-spec: 1)
+- `@napi-rs/wasm-runtime@1.1.4`: 1 manifest finding (floating-transitive-spec: 1)
+- `@nodelib/fs.scandir@2.1.5`: 1 manifest finding (floating-transitive-spec: 1)
+- `@nodelib/fs.walk@1.2.8`: 1 manifest finding (floating-transitive-spec: 1)
+- `@npmcli/fs@5.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@openclaw/fs-safe@0.3.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@openclaw/proxyline@0.3.3`: 1 manifest finding (lifecycle-script: 1)
+- `@opentelemetry/api-logs@0.219.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@opentelemetry/configuration@0.219.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@opentelemetry/core@2.8.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@opentelemetry/exporter-logs-otlp-grpc@0.219.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@opentelemetry/exporter-metrics-otlp-grpc@0.219.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@opentelemetry/exporter-prometheus@0.219.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@opentelemetry/exporter-trace-otlp-grpc@0.219.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@opentelemetry/exporter-zipkin@2.8.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@opentelemetry/otlp-grpc-exporter-base@0.219.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@opentelemetry/resources@2.8.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@opentelemetry/sdk-logs@0.219.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@opentelemetry/sdk-node@0.219.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@opentelemetry/sdk-trace-base@2.8.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@protobufjs/fetch@1.1.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `@quansync/fs@1.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@rolldown/binding-wasm32-wasi@1.0.3`: 1 manifest finding (floating-transitive-spec: 1)
+- `@rolldown/binding-wasm32-wasi@1.1.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@shikijs/engine-oniguruma@3.23.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@shikijs/engine-oniguruma@4.1.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@sigstore/bundle@4.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@simple-git/argv-parser@1.1.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `@slack/logger@4.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `@smithy/is-array-buffer@2.2.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@smithy/types@4.14.3`: 1 manifest finding (floating-transitive-spec: 1)
+- `@snazzah/davey-wasm32-wasi@0.1.11`: 1 manifest finding (floating-transitive-spec: 1)
+- `@swc/helpers@0.5.23`: 1 manifest finding (floating-transitive-spec: 1)
+- `@tencent-connect/qqbot-connector@1.1.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@thi.ng/bitstream@2.4.53`: 1 manifest finding (floating-transitive-spec: 1)
+- `@tloncorp/tlon-skill@0.4.0`: 1 manifest finding (lifecycle-script: 1)
+- `@tufjs/models@4.1.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `@types/connect@3.4.38`: 1 manifest finding (floating-transitive-spec: 1)
+- `@types/debug@4.1.13`: 1 manifest finding (floating-transitive-spec: 1)
+- `@types/estree-jsx@1.0.5`: 1 manifest finding (floating-transitive-spec: 1)
+- `@types/hast@3.0.4`: 1 manifest finding (floating-transitive-spec: 1)
+- `@types/mdast@4.0.4`: 1 manifest finding (floating-transitive-spec: 1)
+- `@types/node@20.19.42`: 1 manifest finding (floating-transitive-spec: 1)
+- `@types/node@24.13.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `@types/node@25.9.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `@types/node@25.9.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `@types/proper-lockfile@4.1.4`: 1 manifest finding (floating-transitive-spec: 1)
+- `@types/send@1.2.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `@types/ws@8.18.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `@urbit/aura@3.0.0`: 1 manifest finding (lifecycle-script: 1)
+- `@vitest/browser-playwright@4.1.8`: 1 manifest finding (floating-transitive-spec: 1)
+- `@vitest/pretty-format@4.1.8`: 1 manifest finding (floating-transitive-spec: 1)
+- `@vitest/runner@4.1.8`: 1 manifest finding (floating-transitive-spec: 1)
+- `@wasm-audio-decoders/common@9.0.7`: 1 manifest finding (floating-transitive-spec: 1)
+- `abort-controller@3.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `acorn@7.4.1`: 1 manifest finding (lifecycle-script: 1)
+- `acorn@8.16.0`: 1 manifest finding (lifecycle-script: 1)
+- `agent-base@6.0.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `ajv-formats@3.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `ansi-styles@4.3.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `astring@1.9.0`: 1 manifest finding (lifecycle-script: 1)
+- `async-mutex@0.5.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `babel-walk@3.0.0-canary-5`: 1 manifest finding (floating-transitive-spec: 1)
+- `balanced-match@4.0.4`: 1 manifest finding (lifecycle-script: 1)
+- `bare-path@3.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `bare-url@2.4.5`: 1 manifest finding (floating-transitive-spec: 1)
+- `bidi-js@1.0.3`: 1 manifest finding (floating-transitive-spec: 1)
+- `braces@3.0.3`: 1 manifest finding (floating-transitive-spec: 1)
+- `bs58@6.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `bundle-name@4.1.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `chalk-template@0.4.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `character-parser@2.2.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `chokidar@5.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `chownr@3.0.0`: 1 manifest finding (lifecycle-script: 1)
+- `ci-info@4.4.0`: 1 manifest finding (lifecycle-script: 1)
+- `cli-cursor@5.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `cli-table3@0.6.5`: 1 manifest finding (floating-transitive-spec: 1)
+- `color-convert@2.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `combined-stream@1.0.8`: 1 manifest finding (floating-transitive-spec: 1)
+- `content-type@2.0.0`: 1 manifest finding (lifecycle-script: 1)
+- `css-tree@3.2.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `css-what@6.2.2`: 1 manifest finding (lifecycle-script: 1)
+- `debug@4.4.3`: 1 manifest finding (floating-transitive-spec: 1)
+- `decode-named-character-reference@1.3.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `devlop@1.1.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `domelementtype@2.3.0`: 1 manifest finding (lifecycle-script: 1)
+- `ecdsa-sig-formatter@1.0.11`: 1 manifest finding (floating-transitive-spec: 1)
+- `end-of-stream@1.4.5`: 1 manifest finding (floating-transitive-spec: 1)
+- `entities@4.5.0`: 1 manifest finding (lifecycle-script: 1)
+- `es-object-atoms@1.1.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `esbuild@0.28.1`: 1 manifest finding (lifecycle-script: 1)
+- `estree-util-attach-comments@3.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `estree-walker@3.0.3`: 1 manifest finding (floating-transitive-spec: 1)
+- `events-universal@1.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `fake-indexeddb@6.2.5`: 1 manifest finding (lifecycle-script: 1)
+- `fast-string-width@3.0.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `fast-wrap-ansi@0.2.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `fastq@1.20.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `filenamify@6.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `fill-range@7.1.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `formdata-polyfill@4.0.10`: 1 manifest finding (floating-transitive-spec: 1)
+- `fs-minipass@3.0.3`: 1 manifest finding (floating-transitive-spec: 1)
+- `fsevents@2.3.2`: 1 manifest finding (lifecycle-script: 1)
+- `fsevents@2.3.3`: 1 manifest finding (lifecycle-script: 1)
+- `get-caller-file@2.0.5`: 1 manifest finding (lifecycle-script: 1)
+- `get-stream@5.2.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `get-tsconfig@5.0.0-beta.5`: 1 manifest finding (floating-transitive-spec: 1)
+- `glob-parent@5.1.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `google-logging-utils@0.0.2`: 1 manifest finding (lifecycle-script: 1)
+- `google-logging-utils@1.1.3`: 1 manifest finding (lifecycle-script: 1)
+- `has-tostringtag@1.0.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `hasown@2.0.4`: 1 manifest finding (floating-transitive-spec: 1)
+- `hast-util-whitespace@3.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `hookified@1.15.1`: 1 manifest finding (lifecycle-script: 1)
+- `hosted-git-info@10.1.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `html-encoding-sniffer@6.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `iconv-lite@0.7.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `inline-style-parser@0.2.7`: 1 manifest finding (lifecycle-script: 1)
+- `is-core-module@2.16.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `is-fullwidth-code-point@5.1.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `is-glob@4.0.3`: 1 manifest finding (floating-transitive-spec: 1)
+- `is-inside-container@1.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `is-wsl@3.1.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `isexe@4.0.0`: 1 manifest finding (lifecycle-script: 1)
+- `json-bigint@1.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `jwt-decode@4.0.0`: 1 manifest finding (lifecycle-script: 1)
+- `keyv@5.6.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `lie@3.3.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `lifecycle-utils@2.1.0`: 1 manifest finding (lifecycle-script: 1)
+- `lifecycle-utils@3.1.1`: 1 manifest finding (lifecycle-script: 1)
+- `linkify-it@5.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `lit-html@3.3.3`: 1 manifest finding (floating-transitive-spec: 1)
+- `locate-path@5.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `lru-cache@11.5.1`: 1 manifest finding (lifecycle-script: 1)
+- `lru-cache@6.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `magic-string@0.30.21`: 1 manifest finding (floating-transitive-spec: 1)
+- `make-dir@4.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `markdown-table@2.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `mdast-util-to-string@4.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `micromark-extension-mdx-md@2.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `micromark-util-chunked@2.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `micromark-util-decode-numeric-character-reference@2.0.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `micromark-util-normalize-identifier@2.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `micromark-util-resolve-all@2.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `mime-types@3.0.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `minipass-collect@2.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `minipass-flush@1.0.7`: 1 manifest finding (floating-transitive-spec: 1)
+- `minipass-pipeline@1.2.4`: 1 manifest finding (floating-transitive-spec: 1)
+- `minipass@3.3.6`: 1 manifest finding (floating-transitive-spec: 1)
+- `minipass@7.1.3`: 1 manifest finding (lifecycle-script: 1)
+- `npm-run-path@4.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `once@1.4.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `onetime@5.1.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `onetime@7.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `p-limit@2.3.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `p-locate@4.1.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `p-retry@4.6.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `p-retry@8.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `p-timeout@3.2.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `parse5@8.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `path-to-regexp@8.4.0`: 1 manifest finding (lifecycle-script: 1)
+- `pretty-ms@8.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `pretty-ms@9.3.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `promise@7.3.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `psl@1.15.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `pug-parser@6.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `pug-strip-comments@2.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `qified@0.10.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `qoa-format@1.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `qs@6.15.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `rastermill@0.3.1`: 1 manifest finding (lifecycle-script: 1)
+- `react-dom@19.2.4`: 1 manifest finding (floating-transitive-spec: 1)
+- `regex-recursion@6.0.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `regex-utilities@2.3.0`: 1 manifest finding (lifecycle-script: 1)
+- `regex@6.1.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `run-parallel@1.2.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `saxes@6.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `shebang-command@2.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `signal-exit@4.1.0`: 1 manifest finding (lifecycle-script: 1)
+- `sonic-boom@4.2.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `ssri@13.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `steno@4.0.2`: 1 manifest finding (lifecycle-script: 1)
+- `string_decoder@1.1.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `strip-ansi@6.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `strip-ansi@7.2.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `strtok3@10.3.5`: 1 manifest finding (floating-transitive-spec: 1)
+- `style-to-js@1.1.21`: 1 manifest finding (lifecycle-script: 1)
+- `style-to-object@1.0.14`: 1 manifest finding (lifecycle-script: 1)
+- `supports-color@7.2.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `teex@1.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `text-decoder@1.2.7`: 1 manifest finding (floating-transitive-spec: 1)
+- `tinyexec@1.2.4`: 1 manifest finding (lifecycle-script: 1)
+- `to-regex-range@5.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `tokenjuice@0.8.1`: 1 manifest finding (lifecycle-script: 1)
+- `tr46@6.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `undici@7.28.0`: 1 manifest finding (lifecycle-script: 1)
+- `undici@8.5.0`: 1 manifest finding (lifecycle-script: 1)
+- `unist-util-is@6.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `unist-util-position-from-estree@2.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `unist-util-position@5.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `unist-util-stringify-position@4.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `unrun@0.3.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `uuid@14.0.0`: 1 manifest finding (lifecycle-script: 1)
+- `w3c-xmlserializer@5.0.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `web-streams-polyfill@3.3.3`: 1 manifest finding (lifecycle-script: 1)
+- `which@2.0.2`: 1 manifest finding (floating-transitive-spec: 1)
+- `which@6.0.1`: 1 manifest finding (floating-transitive-spec: 1)
+- `why-is-node-running@2.3.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `wsl-utils@0.1.0`: 1 manifest finding (floating-transitive-spec: 1)
+- `y18n@5.0.8`: 1 manifest finding (lifecycle-script: 1)
+- `yallist@5.0.0`: 1 manifest finding (lifecycle-script: 1)
+- `yargs-parser@21.1.1`: 1 manifest finding (lifecycle-script: 1)
+
+## Floating Dependency Targets
+
+- `tslib`: 86 declarations from 86 resolved packages; specifiers: ^2.6.2: 67, ^2.4.0: 6, ^2.0.3: 5, ^2.4.1: 3, ^2.8.1: 2, ^2.2.0: 1, ^2.5.0: 1, ^2.8.0: 1
+- `@smithy/core`: 34 declarations from 34 resolved packages; specifiers: ^3.24.6: 27, ^3.24.5: 6, ^3.24.3: 1
+- `@smithy/types`: 33 declarations from 33 resolved packages; specifiers: ^4.14.3: 25, ^4.14.2: 7, >=2.11.0: 1
+- `@aws-sdk/types`: 31 declarations from 31 resolved packages; specifiers: ^3.973.11: 19, ^3.222.0: 6, ^3.973.9: 6
+- `debug`: 21 declarations from 21 resolved packages; specifiers: ^4.4.3: 8, ^4.4.0: 4, ^4.3.4: 3, 4: 3, ^4.0.0: 1, ^4.1.1: 1, ^4.3.5: 1
+- `devlop`: 21 declarations from 21 resolved packages; specifiers: ^1.0.0: 20, ^1.1.0: 1
+- `micromark-util-types`: 21 declarations from 21 resolved packages; specifiers: ^2.0.0: 21
+- `@aws-sdk/core`: 20 declarations from 20 resolved packages; specifiers: ^3.974.18: 15, ^3.974.15: 5
+- `micromark-util-symbol`: 20 declarations from 20 resolved packages; specifiers: ^2.0.0: 20
+- `@types/unist`: 19 declarations from 19 resolved packages; specifiers: ^3.0.0: 16, *: 2, ^2.0.0: 1
+- `@types/hast`: 18 declarations from 18 resolved packages; specifiers: ^3.0.0: 11, ^3.0.4: 7
+- `@types/estree`: 16 declarations from 16 resolved packages; specifiers: ^1.0.0: 15, *: 1
+- `@types/node`: 15 declarations from 15 resolved packages; specifiers: *: 7, >=18: 4, ^20.19.37: 1, ^24.0.0: 1, ^24.0.3: 1, >=13.7.0: 1
+- `micromark-util-character`: 14 declarations from 14 resolved packages; specifiers: ^2.0.0: 14
+- `minipass`: 14 declarations from 14 resolved packages; specifiers: ^7.0.3: 5, ^7.1.2: 4, ^3.0.0: 2, ^7.0.2: 1, ^7.0.4: 1, ^7.1.3: 1
+- `@shikijs/vscode-textmate`: 11 declarations from 11 resolved packages; specifiers: ^10.0.2: 11
+- `ws`: 11 declarations from 11 resolved packages; specifiers: ^8.18.0: 3, ^8.19.0: 3, ^8.13.0: 2, ^8: 1, ^8.11.0: 1, ^8.21.0: 1
+- `@d-fischer/shared-utils`: 10 declarations from 10 resolved packages; specifiers: ^3.6.1: 6, ^3.5.0: 2, ^3.6.3: 2
+- `@types/estree-jsx`: 10 declarations from 10 resolved packages; specifiers: ^1.0.0: 10
+- `@types/mdast`: 10 declarations from 10 resolved packages; specifiers: ^4.0.0: 10
+- `es-errors`: 10 declarations from 10 resolved packages; specifiers: ^1.3.0: 10
+- `strip-ansi`: 10 declarations from 10 resolved packages; specifiers: ^6.0.0: 3, ^7.1.0: 3, ^6.0.1: 2, ^7.1.2: 1, ^7.2.0: 1
+- `fs-extra`: 9 declarations from 9 resolved packages; specifiers: ^11.2.0: 5, ^11.1.1: 2, ^11.3.3: 1, ^11.3.4: 1
+- `https-proxy-agent`: 9 declarations from 9 resolved packages; specifiers: ^7.0.1: 5, ^7.0.0: 2, ^5.0.1: 1, ^7.0.5: 1
+- `string-width`: 9 declarations from 9 resolved packages; specifiers: ^4.2.0: 4, ^4.1.0: 2, ^4.2.3: 1, ^7.1.0: 1, ^8.1.0: 1
+- `@aws-sdk/nested-clients`: 8 declarations from 8 resolved packages; specifiers: ^3.997.17: 7, ^3.997.13: 1
+- `vfile-message`: 8 declarations from 8 resolved packages; specifiers: ^4.0.0: 8
+- `zod`: 8 declarations from 8 resolved packages; specifiers: ^3.25.0 || ^4.0.0: 2, ^3.25.76: 2, ^4.4.3: 2, ^3.25 || ^4.0: 1, ^4.3.6: 1
+- `@babel/types`: 7 declarations from 7 resolved packages; specifiers: ^7.9.6: 2, ^8.0.0-rc.6: 2, ^7.29.0: 1, ^7.29.7: 1, ^7.6.1: 1
+- `@opentelemetry/semantic-conventions`: 7 declarations from 7 resolved packages; specifiers: ^1.29.0: 7
+- `@smithy/fetch-http-handler`: 7 declarations from 7 resolved packages; specifiers: ^5.4.6: 4, ^5.4.5: 3
+- `micromark-factory-space`: 7 declarations from 7 resolved packages; specifiers: ^2.0.0: 7
+- `semver`: 7 declarations from 7 resolved packages; specifiers: ^7.3.5: 1, ^7.5.3: 1, ^7.5.4: 1, ^7.6.3: 1, ^7.7.1: 1, ^7.7.3: 1, ^7.8.0: 1
+- `tinyrainbow`: 7 declarations from 7 resolved packages; specifiers: ^3.1.0: 7
+- `vfile`: 7 declarations from 7 resolved packages; specifiers: ^6.0.0: 7
+- `@d-fischer/logger`: 6 declarations from 6 resolved packages; specifiers: ^4.2.1: 5, ^4.2.3: 1
+- `@smithy/node-http-handler`: 6 declarations from 6 resolved packages; specifiers: ^4.7.5: 3, ^4.7.6: 3
+- `ansi-styles`: 6 declarations from 6 resolved packages; specifiers: ^4.0.0: 2, ^6.2.1: 2, ^4.1.0: 1, ^6.2.3: 1
+- `content-type`: 6 declarations from 6 resolved packages; specifiers: ^1.0.5: 4, ^1.0.4: 1, ^2.0.0: 1
+- `eventemitter3`: 6 declarations from 6 resolved packages; specifiers: ^5.0.1: 3, ^4.0.4: 1, ^5: 1, ^5.0.4: 1
+- `gaxios`: 6 declarations from 6 resolved packages; specifiers: ^6.1.1: 2, ^7.1.4: 2, ^6.0.0: 1, ^7.0.0: 1
+- `hookified`: 6 declarations from 6 resolved packages; specifiers: ^1.15.0: 3, ^1.14.0: 1, ^1.15.1: 1, ^2.1.1: 1
+- `jws`: 6 declarations from 6 resolved packages; specifiers: ^4.0.0: 5, ^4.0.1: 1
+- `lru-cache`: 6 declarations from 6 resolved packages; specifiers: ^11.1.0: 3, ^11.0.0: 1, ^11.2.1: 1, ^11.3.5: 1
+- `pug-error`: 6 declarations from 6 resolved packages; specifiers: ^2.0.0: 5, ^2.1.0: 1
+- `safe-buffer`: 6 declarations from 6 resolved packages; specifiers: ^5.0.1: 3, ^5.2.1: 1, ~5.1.0: 1, ~5.1.1: 1
+- `unified`: 6 declarations from 6 resolved packages; specifiers: ^11.0.0: 6
+- `@aws-crypto/util`: 5 declarations from 5 resolved packages; specifiers: ^5.2.0: 5
+- `@aws-sdk/credential-provider-node`: 5 declarations from 5 resolved packages; specifiers: ^3.972.46: 3, ^3.972.52: 2
+- `@aws-sdk/middleware-sdk-s3`: 5 declarations from 5 resolved packages; specifiers: ^3.972.48: 4, ^3.972.44: 1
+- `@azure/abort-controller`: 5 declarations from 5 resolved packages; specifiers: ^2.1.2: 4, ^2.0.0: 1
+- `@babel/parser`: 5 declarations from 5 resolved packages; specifiers: ^7.29.3: 1, ^7.6.0: 1, ^7.9.6: 1, ^8.0.0-beta.4: 1, ^8.0.0-rc.6: 1
+- `@d-fischer/typed-event-emitter`: 5 declarations from 5 resolved packages; specifiers: ^3.3.3: 3, ^3.3.0: 2
+- `@sigstore/protobuf-specs`: 5 declarations from 5 resolved packages; specifiers: ^0.5.0: 5
+- `acorn`: 5 declarations from 5 resolved packages; specifiers: ^8.0.0: 3, ^7.1.1: 1, ^8.15.0: 1
+- `agent-base`: 5 declarations from 5 resolved packages; specifiers: ^7.1.0: 2, ^7.1.2: 2, 6: 1
+- `axios`: 5 declarations from 5 resolved packages; specifiers: ^1.15.2: 2, ^1.12.0: 1, ^1.16.0: 1, ~1.13.3: 1
+- `decode-named-character-reference`: 5 declarations from 5 resolved packages; specifiers: ^1.0.0: 5
+- `estree-util-is-identifier-name`: 5 declarations from 5 resolved packages; specifiers: ^3.0.0: 5
+- `estree-walker`: 5 declarations from 5 resolved packages; specifiers: ^3.0.3: 3, ^3.0.0: 2
+- `hasown`: 5 declarations from 5 resolved packages; specifiers: ^2.0.2: 3, ^2.0.3: 1, ^2.0.4: 1
+- `mdast-util-from-markdown`: 5 declarations from 5 resolved packages; specifiers: ^2.0.0: 5
+- `mime-types`: 5 declarations from 5 resolved packages; specifiers: ^3.0.0: 3, ^2.1.35: 1, ^3.0.2: 1
+- `protobufjs`: 5 declarations from 5 resolved packages; specifiers: ^7.5.5: 2, ^7.2.6: 1, ^7.5.4: 1, ^7.5.6: 1
+- `qs`: 5 declarations from 5 resolved packages; specifiers: ^6.15.2: 2, ^6.14.0: 1, ^6.14.1: 1, ^6.14.2: 1
+- `yargs`: 5 declarations from 5 resolved packages; specifiers: ^17.7.2: 4, ^15.3.1: 1
+- `@aws-sdk/signature-v4-multi-region`: 4 declarations from 4 resolved packages; specifiers: ^3.996.30: 2, ^3.996.32: 2
+- `@azure/core-util`: 4 declarations from 4 resolved packages; specifiers: ^1.13.0: 3, ^1.11.0: 1
+- `@grpc/grpc-js`: 4 declarations from 4 resolved packages; specifiers: ^1.14.3: 4
+- `@slack/logger`: 4 declarations from 4 resolved packages; specifiers: ^4.0.1: 4
+- `@smithy/signature-v4`: 4 declarations from 4 resolved packages; specifiers: ^5.4.6: 2, ^5.4.2: 1, >=2.1.3: 1
+- `bytes`: 4 declarations from 4 resolved packages; specifiers: ^3.1.2: 3, ~3.1.2: 1
+- `chalk`: 4 declarations from 4 resolved packages; specifiers: ^5.6.2: 2, ^4.1.2: 1, ^5.3.0: 1
+- `colors`: 4 declarations from 4 resolved packages; specifiers: ^1.4.0: 4
+- `commander`: 4 declarations from 4 resolved packages; specifiers: ^15.0.0: 2, ^10.0.0: 1, ^5.0.0: 1
+- `domelementtype`: 4 declarations from 4 resolved packages; specifiers: ^2.3.0: 4
+- `domhandler`: 4 declarations from 4 resolved packages; specifiers: ^5.0.2: 2, ^5.0.3: 2
+- `encodeurl`: 4 declarations from 4 resolved packages; specifiers: ^2.0.0: 4
+- `entities`: 4 declarations from 4 resolved packages; specifiers: ^4.2.0: 1, ^4.4.0: 1, ^7.0.1: 1, ^8.0.0: 1
+- `escape-html`: 4 declarations from 4 resolved packages; specifiers: ^1.0.3: 4
+- `extend`: 4 declarations from 4 resolved packages; specifiers: ^3.0.2: 3, ^3.0.0: 1
+- `get-intrinsic`: 4 declarations from 4 resolved packages; specifiers: ^1.2.5: 2, ^1.2.6: 1, ^1.3.0: 1
+- `http-errors`: 4 declarations from 4 resolved packages; specifiers: ^2.0.0: 2, ^2.0.1: 1, ~2.0.1: 1
+- `is-unicode-supported`: 4 declarations from 4 resolved packages; specifiers: ^2.0.0: 2, ^2.1.0: 2
+- `jsonwebtoken`: 4 declarations from 4 resolved packages; specifiers: ^9.0.0: 2, ^9: 1, ^9.0.2: 1
+- `keyv`: 4 declarations from 4 resolved packages; specifiers: ^5.6.0: 3, ^5.5.5: 1
+- `magic-string`: 4 declarations from 4 resolved packages; specifiers: ^0.30.21: 4
+- `mdast-util-to-markdown`: 4 declarations from 4 resolved packages; specifiers: ^2.0.0: 4
+- `micromark-util-chunked`: 4 declarations from 4 resolved packages; specifiers: ^2.0.0: 4
+- `micromark-util-events-to-acorn`: 4 declarations from 4 resolved packages; specifiers: ^2.0.0: 4
+- `node-fetch`: 4 declarations from 4 resolved packages; specifiers: ^3.3.2: 2, ^2.6.9: 1, ^2.7.0: 1
+- `object-inspect`: 4 declarations from 4 resolved packages; specifiers: ^1.13.3: 3, ^1.13.4: 1
+- `obug`: 4 declarations from 4 resolved packages; specifiers: ^2.1.1: 4
+- `on-finished`: 4 declarations from 4 resolved packages; specifiers: ^2.4.1: 4
+- `parseurl`: 4 declarations from 4 resolved packages; specifiers: ^1.3.3: 4
+- `pathe`: 4 declarations from 4 resolved packages; specifiers: ^2.0.3: 4
+- `picomatch`: 4 declarations from 4 resolved packages; specifiers: ^4.0.4: 2, ^2.3.1: 1, ^4.0.3: 1
+- `retry`: 4 declarations from 4 resolved packages; specifiers: ^0.13.1: 3, ^0.12.0: 1
+- `statuses`: 4 declarations from 4 resolved packages; specifiers: ^2.0.1: 2, ^2.0.2: 1, ~2.0.2: 1
+- `undici-types`: 4 declarations from 4 resolved packages; specifiers: >=7.24.0 <7.24.7: 2, ~6.21.0: 1, ~7.18.0: 1
+- `unist-util-position-from-estree`: 4 declarations from 4 resolved packages; specifiers: ^2.0.0: 4
+- `unist-util-stringify-position`: 4 declarations from 4 resolved packages; specifiers: ^4.0.0: 4
+- `which`: 4 declarations from 4 resolved packages; specifiers: ^2.0.1: 1, ^2.0.2: 1, ^6.0.0: 1, ^6.0.1: 1
+- `@aws-sdk/credential-provider-env`: 3 declarations from 3 resolved packages; specifiers: ^3.972.44: 3
+- `@aws-sdk/credential-provider-http`: 3 declarations from 3 resolved packages; specifiers: ^3.972.46: 3
+- `@aws-sdk/credential-provider-process`: 3 declarations from 3 resolved packages; specifiers: ^3.972.44: 3
+- `@aws-sdk/credential-provider-sso`: 3 declarations from 3 resolved packages; specifiers: ^3.972.49: 3
+- `@aws-sdk/credential-provider-web-identity`: 3 declarations from 3 resolved packages; specifiers: ^3.972.49: 3
+- `@azure/core-auth`: 3 declarations from 3 resolved packages; specifiers: ^1.10.0: 2, ^1.9.0: 1
+- `@azure/core-tracing`: 3 declarations from 3 resolved packages; specifiers: ^1.3.0: 2, ^1.0.0: 1
+- `@azure/logger`: 3 declarations from 3 resolved packages; specifiers: ^1.3.0: 2, ^1.0.0: 1
+- `@exodus/bytes`: 3 declarations from 3 resolved packages; specifiers: ^1.11.0: 1, ^1.15.0: 1, ^1.6.0: 1
+- `@jridgewell/sourcemap-codec`: 3 declarations from 3 resolved packages; specifiers: ^1.4.14: 1, ^1.5.0: 1, ^1.5.5: 1
+- `@jridgewell/trace-mapping`: 3 declarations from 3 resolved packages; specifiers: ^0.3.24: 1, ^0.3.28: 1, ^0.3.31: 1
+- `@lit/reactive-element`: 3 declarations from 3 resolved packages; specifiers: ^2.1.0: 2, ^1.6.2 || ^2.1.0: 1
+- `@napi-rs/wasm-runtime`: 3 declarations from 3 resolved packages; specifiers: ^1.1.4: 2, ^1.1.2: 1
+- `@sigstore/bundle`: 3 declarations from 3 resolved packages; specifiers: ^4.0.0: 3
+- `@sigstore/core`: 3 declarations from 3 resolved packages; specifiers: ^3.2.1: 2, ^3.2.0: 1
+- `@slack/web-api`: 3 declarations from 3 resolved packages; specifiers: ^7.15.0: 2, ^7.16.0: 1
+- `@smithy/credential-provider-imds`: 3 declarations from 3 resolved packages; specifiers: ^4.3.7: 3
+- `@smithy/util-utf8`: 3 declarations from 3 resolved packages; specifiers: ^2.0.0: 3
+- `@tokenizer/token`: 3 declarations from 3 resolved packages; specifiers: ^0.3.0: 3
+- `@types/ws`: 3 declarations from 3 resolved packages; specifiers: ^8: 1, ^8.18.1: 1, ^8.5.4: 1
+- `@typespec/ts-http-runtime`: 3 declarations from 3 resolved packages; specifiers: ^0.3.0: 2, ^0.3.4: 1
+- `ajv`: 3 declarations from 3 resolved packages; specifiers: ^8.0.0: 1, ^8.17.1: 1, ^8.20.0: 1
+- `array-back`: 3 declarations from 3 resolved packages; specifiers: ^6.2.2: 2, ^6.2.3: 1
+- `base64-js`: 3 declarations from 3 resolved packages; specifiers: ^1.3.0: 3
+- `call-bind-apply-helpers`: 3 declarations from 3 resolved packages; specifiers: ^1.0.2: 2, ^1.0.1: 1
+- `call-bound`: 3 declarations from 3 resolved packages; specifiers: ^1.0.2: 3
+- `comma-separated-tokens`: 3 declarations from 3 resolved packages; specifiers: ^2.0.0: 3
+- `constantinople`: 3 declarations from 3 resolved packages; specifiers: ^4.0.1: 3
+- `cross-spawn`: 3 declarations from 3 resolved packages; specifiers: ^7.0.0: 1, ^7.0.5: 1, ^7.0.6: 1
+- `css-tree`: 3 declarations from 3 resolved packages; specifiers: ^3.2.1: 2, ^3.0.0: 1
+- `depd`: 3 declarations from 3 resolved packages; specifiers: ^2.0.0: 2, ~2.0.0: 1
+- `ecdsa-sig-formatter`: 3 declarations from 3 resolved packages; specifiers: ^1.0.11: 3
+- `express`: 3 declarations from 3 resolved packages; specifiers: ^5.0.0: 2, ^5.2.1: 1
+- `fast-fifo`: 3 declarations from 3 resolved packages; specifiers: ^1.3.2: 2, ^1.2.0: 1
+- `form-data`: 3 declarations from 3 resolved packages; specifiers: ^4.0.4: 2, ^4.0.5: 1
+- `function-bind`: 3 declarations from 3 resolved packages; specifiers: ^1.1.2: 3
+- `get-east-asian-width`: 3 declarations from 3 resolved packages; specifiers: ^1.0.0: 1, ^1.3.1: 1, ^1.5.0: 1
+- `gopd`: 3 declarations from 3 resolved packages; specifiers: ^1.2.0: 3
+- `graceful-fs`: 3 declarations from 3 resolved packages; specifiers: ^4.1.6: 1, ^4.2.0: 1, ^4.2.4: 1
+- `hast-util-whitespace`: 3 declarations from 3 resolved packages; specifiers: ^3.0.0: 3
+- `iconv-lite`: 3 declarations from 3 resolved packages; specifiers: ^0.7.0: 1, ^0.7.2: 1, ~0.7.0: 1
+- `inherits`: 3 declarations from 3 resolved packages; specifiers: ^2.0.1: 1, ~2.0.3: 1, ~2.0.4: 1
+- `is-fullwidth-code-point`: 3 declarations from 3 resolved packages; specifiers: ^3.0.0: 1, ^5.0.0: 1, ^5.1.0: 1
+- `is-stream`: 3 declarations from 3 resolved packages; specifiers: ^2.0.0: 2, ^2: 1
+- `json-bigint`: 3 declarations from 3 resolved packages; specifiers: ^1.0.0: 3
+- `jwt-decode`: 3 declarations from 3 resolved packages; specifiers: ^4.0.0: 3
+- `lit`: 3 declarations from 3 resolved packages; specifiers: ^2.0.0 || ^3.0.0: 2, ^3.3.1: 1
+- `mdast-util-mdx-expression`: 3 declarations from 3 resolved packages; specifiers: ^2.0.0: 3
+- `mdast-util-mdx-jsx`: 3 declarations from 3 resolved packages; specifiers: ^3.0.0: 3
+- `mdast-util-mdxjs-esm`: 3 declarations from 3 resolved packages; specifiers: ^2.0.0: 3
+- `micromark-util-decode-numeric-character-reference`: 3 declarations from 3 resolved packages; specifiers: ^2.0.0: 3
+- `micromark-util-normalize-identifier`: 3 declarations from 3 resolved packages; specifiers: ^2.0.0: 3
+- `ms`: 3 declarations from 3 resolved packages; specifiers: ^2.1.3: 2, ^2.1.1: 1
+- `object-assign`: 3 declarations from 3 resolved packages; specifiers: ^4.1.1: 2, ^4: 1
+- `once`: 3 declarations from 3 resolved packages; specifiers: ^1.4.0: 2, ^1.3.1: 1
+- `p-retry`: 3 declarations from 3 resolved packages; specifiers: ^4: 1, ^4.6.2: 1, 8: 1
+- `property-information`: 3 declarations from 3 resolved packages; specifiers: ^7.0.0: 3
+- `pug-runtime`: 3 declarations from 3 resolved packages; specifiers: ^3.0.1: 2, ^3.0.0: 1
+- `pug-walk`: 3 declarations from 3 resolved packages; specifiers: ^2.0.0: 3
+- `punycode`: 3 declarations from 3 resolved packages; specifiers: ^2.3.1: 2, ^2.1.1: 1
+- `raw-body`: 3 declarations from 3 resolved packages; specifiers: ^3: 1, ^3.0.0: 1, ^3.0.1: 1
+- `signal-exit`: 3 declarations from 3 resolved packages; specifiers: ^3.0.2: 2, ^4.1.0: 1
+- `source-map`: 3 declarations from 3 resolved packages; specifiers: ^0.7.0: 2, ^0.6.0: 1
+- `source-map-js`: 3 declarations from 3 resolved packages; specifiers: ^1.2.1: 3
+- `space-separated-tokens`: 3 declarations from 3 resolved packages; specifiers: ^2.0.0: 3
+- `streamx`: 3 declarations from 3 resolved packages; specifiers: ^2.12.5: 1, ^2.15.0: 1, ^2.25.0: 1
+- `token-types`: 3 declarations from 3 resolved packages; specifiers: ^6.1.2: 2, ^6.1.1: 1
+- `unist-util-is`: 3 declarations from 3 resolved packages; specifiers: ^6.0.0: 3
+- `unist-util-position`: 3 declarations from 3 resolved packages; specifiers: ^5.0.0: 3
+- `unist-util-visit`: 3 declarations from 3 resolved packages; specifiers: ^5.0.0: 3
+- `universalify`: 3 declarations from 3 resolved packages; specifiers: ^2.0.0: 2, ^0.2.0: 1
+- `webidl-conversions`: 3 declarations from 3 resolved packages; specifiers: ^8.0.1: 2, ^3.0.0: 1
+- `whatwg-url`: 3 declarations from 3 resolved packages; specifiers: ^16.0.0: 1, ^16.0.1: 1, ^5.0.0: 1
+- `yallist`: 3 declarations from 3 resolved packages; specifiers: ^4.0.0: 2, ^5.0.0: 1
+- `yaml`: 3 declarations from 3 resolved packages; specifiers: ^2.0.0: 1, ^2.8.4: 1, ^2.9.0: 1
+- `zod-to-json-schema`: 3 declarations from 3 resolved packages; specifiers: ^3.25.1: 2, ^3.25.0: 1
+- `zwitch`: 3 declarations from 3 resolved packages; specifiers: ^2.0.0: 2, ^2.0.4: 1
+- `@asamuzakjp/generational-cache`: 2 declarations from 2 resolved packages; specifiers: ^1.0.1: 2
+- `@aws-crypto/supports-web-crypto`: 2 declarations from 2 resolved packages; specifiers: ^5.2.0: 2
+- `@aws-sdk/credential-provider-ini`: 2 declarations from 2 resolved packages; specifiers: ^3.972.50: 2
+- `@aws-sdk/credential-provider-login`: 2 declarations from 2 resolved packages; specifiers: ^3.972.49: 2
+- `@aws-sdk/util-locate-window`: 2 declarations from 2 resolved packages; specifiers: ^3.0.0: 2
+- `@azure/core-rest-pipeline`: 2 declarations from 2 resolved packages; specifiers: ^1.17.0: 1, ^1.22.0: 1
+- `@azure/msal-node`: 2 declarations from 2 resolved packages; specifiers: ^3.8.1: 1, ^5.1.0: 1
+- `@babel/helper-string-parser`: 2 declarations from 2 resolved packages; specifiers: ^7.29.7: 1, ^8.0.0-rc.6: 1
+- `@babel/helper-validator-identifier`: 2 declarations from 2 resolved packages; specifiers: ^7.29.7: 1, ^8.0.0-rc.6: 1
+- `@babel/runtime`: 2 declarations from 2 resolved packages; specifiers: ^7.12.5: 1, ^7.18.3: 1
+- `@borewit/text-codec`: 2 declarations from 2 resolved packages; specifiers: ^0.2.1: 1, ^0.2.2: 1
+- `@cacheable/utils`: 2 declarations from 2 resolved packages; specifiers: ^2.4.1: 2
+- `@csstools/css-calc`: 2 declarations from 2 resolved packages; specifiers: ^3.2.0: 1, ^3.2.1: 1
+- `@d-fischer/cache-decorators`: 2 declarations from 2 resolved packages; specifiers: ^4.0.0: 2
+- `@d-fischer/detect-node`: 2 declarations from 2 resolved packages; specifiers: ^3.0.1: 2
+- `@d-fischer/rate-limiter`: 2 declarations from 2 resolved packages; specifiers: ^1.1.0: 2
+- `@gar/promise-retry`: 2 declarations from 2 resolved packages; specifiers: ^1.0.0: 1, ^1.0.2: 1
+- `@lit-labs/ssr-dom-shim`: 2 declarations from 2 resolved packages; specifiers: ^1.5.0: 2
+- `@oxc-project/types`: 2 declarations from 2 resolved packages; specifiers: =0.133.0: 1, =0.134.0: 1
+- `@protobufjs/aspromise`: 2 declarations from 2 resolved packages; specifiers: ^1.1.1: 1, ^1.1.2: 1
+- `@rolldown/pluginutils`: 2 declarations from 2 resolved packages; specifiers: ^1.0.0: 2
+- `@simple-git/args-pathspec`: 2 declarations from 2 resolved packages; specifiers: ^1.0.3: 2
+- `@slack/types`: 2 declarations from 2 resolved packages; specifiers: ^2.21.0: 1, ^2.21.1: 1
+- `@types/jsonwebtoken`: 2 declarations from 2 resolved packages; specifiers: ^9: 1, ^9.0.4: 1
+- `@types/ms`: 2 declarations from 2 resolved packages; specifiers: *: 2
+- `@types/trusted-types`: 2 declarations from 2 resolved packages; specifiers: ^2.0.2: 1, ^2.0.7: 1
+- `abort-controller`: 2 declarations from 2 resolved packages; specifiers: ^3.0.0: 2
+- `acorn-jsx`: 2 declarations from 2 resolved packages; specifiers: ^5.0.0: 2
+- `ansi-regex`: 2 declarations from 2 resolved packages; specifiers: ^5.0.1: 1, ^6.2.2: 1
+- `async-retry`: 2 declarations from 2 resolved packages; specifiers: ^1.3.3: 2
+- `atomic-sleep`: 2 declarations from 2 resolved packages; specifiers: ^1.0.0: 2
+- `b4a`: 2 declarations from 2 resolved packages; specifiers: ^1.6.4: 2
+- `bare-events`: 2 declarations from 2 resolved packages; specifiers: ^2.5.4: 1, ^2.7.0: 1
+- `bare-path`: 2 declarations from 2 resolved packages; specifiers: ^3.0.0: 2
+- `boolbase`: 2 declarations from 2 resolved packages; specifiers: ^1.0.0: 2
+- `ccount`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 2
+- `character-entities-legacy`: 2 declarations from 2 resolved packages; specifiers: ^3.0.0: 2
+- `cli-spinners`: 2 declarations from 2 resolved packages; specifiers: ^2.9.2: 1, ^3.2.0: 1
+- `cliui`: 2 declarations from 2 resolved packages; specifiers: ^6.0.0: 1, ^8.0.1: 1
+- `cors`: 2 declarations from 2 resolved packages; specifiers: ^2.8.5: 2
+- `curve25519-js`: 2 declarations from 2 resolved packages; specifiers: ^0.0.4: 2
+- `decamelize`: 2 declarations from 2 resolved packages; specifiers: ^1.2.0: 2
+- `detect-libc`: 2 declarations from 2 resolved packages; specifiers: ^2.0.3: 1, ^2.1.2: 1
+- `domutils`: 2 declarations from 2 resolved packages; specifiers: ^3.0.1: 1, ^3.2.2: 1
+- `emoji-regex`: 2 declarations from 2 resolved packages; specifiers: ^10.3.0: 1, ^8.0.0: 1
+- `es-object-atoms`: 2 declarations from 2 resolved packages; specifiers: ^1.0.0: 1, ^1.1.1: 1
+- `esbuild`: 2 declarations from 2 resolved packages; specifiers: ~0.28.0: 2
+- `estree-util-to-js`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 2
+- `estree-util-visit`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 2
+- `etag`: 2 declarations from 2 resolved packages; specifiers: ^1.8.1: 2
+- `eventsource-parser`: 2 declarations from 2 resolved packages; specifiers: ^3.0.0: 1, ^3.0.1: 1
+- `fast-deep-equal`: 2 declarations from 2 resolved packages; specifiers: ^3.1.3: 2
+- `fast-string-width`: 2 declarations from 2 resolved packages; specifiers: ^3.0.2: 2
+- `fast-wrap-ansi`: 2 declarations from 2 resolved packages; specifiers: ^0.2.0: 2
+- `fetch-blob`: 2 declarations from 2 resolved packages; specifiers: ^3.1.2: 1, ^3.1.4: 1
+- `filenamify`: 2 declarations from 2 resolved packages; specifiers: ^6.0.0: 2
+- `fresh`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 2
+- `fsevents`: 2 declarations from 2 resolved packages; specifiers: ~2.3.3: 2
+- `get-caller-file`: 2 declarations from 2 resolved packages; specifiers: ^2.0.1: 1, ^2.0.5: 1
+- `google-auth-library`: 2 declarations from 2 resolved packages; specifiers: ^10.3.0: 1, ^9.4.2: 1
+- `google-logging-utils`: 2 declarations from 2 resolved packages; specifiers: ^0.0.2: 1, ^1.0.0: 1
+- `has-symbols`: 2 declarations from 2 resolved packages; specifiers: ^1.0.3: 1, ^1.1.0: 1
+- `has-tostringtag`: 2 declarations from 2 resolved packages; specifiers: ^1.0.2: 2
+- `hashery`: 2 declarations from 2 resolved packages; specifiers: ^1.4.0: 1, ^1.5.1: 1
+- `hast-util-to-html`: 2 declarations from 2 resolved packages; specifiers: ^9.0.5: 2
+- `html-escaper`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 1, ^3.0.3: 1
+- `http-proxy-agent`: 2 declarations from 2 resolved packages; specifiers: ^7.0.0: 2
+- `ip-address`: 2 declarations from 2 resolved packages; specifiers: ^10.1.1: 1, ^10.2.0: 1
+- `is-decimal`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 2
+- `is-inside-container`: 2 declarations from 2 resolved packages; specifiers: ^1.0.0: 2
+- `is-potential-custom-element-name`: 2 declarations from 2 resolved packages; specifiers: ^1.0.1: 2
+- `is-promise`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 1, ^4.0.0: 1
+- `isexe`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 1, ^4.0.0: 1
+- `istanbul-lib-coverage`: 2 declarations from 2 resolved packages; specifiers: ^3.0.0: 1, ^3.2.2: 1
+- `istanbul-lib-report`: 2 declarations from 2 resolved packages; specifiers: ^3.0.0: 1, ^3.0.1: 1
+- `jose`: 2 declarations from 2 resolved packages; specifiers: ^4.15.4: 1, ^6.1.3: 1
+- `js-stringify`: 2 declarations from 2 resolved packages; specifiers: ^1.0.2: 2
+- `klona`: 2 declarations from 2 resolved packages; specifiers: ^2.0.4: 1, ^2.0.5: 1
+- `lifecycle-utils`: 2 declarations from 2 resolved packages; specifiers: ^2.0.1: 1, ^3.1.1: 1
+- `lit-html`: 2 declarations from 2 resolved packages; specifiers: ^3.3.0: 2
+- `lodash.camelcase`: 2 declarations from 2 resolved packages; specifiers: ^4.3.0: 2
+- `log-symbols`: 2 declarations from 2 resolved packages; specifiers: ^7.0.1: 2
+- `long`: 2 declarations from 2 resolved packages; specifiers: ^5.0.0: 1, ^5.3.2: 1
+- `make-fetch-happen`: 2 declarations from 2 resolved packages; specifiers: ^15.0.1: 1, ^15.0.4: 1
+- `mdast-util-to-hast`: 2 declarations from 2 resolved packages; specifiers: ^13.0.0: 2
+- `mdast-util-to-string`: 2 declarations from 2 resolved packages; specifiers: ^4.0.0: 2
+- `media-typer`: 2 declarations from 2 resolved packages; specifiers: ^1.1.0: 2
+- `micromark-core-commonmark`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 2
+- `micromark-factory-mdx-expression`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 2
+- `micromark-util-classify-character`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 2
+- `micromark-util-combine-extensions`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 2
+- `micromark-util-decode-string`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 2
+- `micromark-util-encode`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 2
+- `micromark-util-resolve-all`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 2
+- `micromark-util-sanitize-uri`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 2
+- `micromark-util-subtokenize`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 2
+- `minimatch`: 2 declarations from 2 resolved packages; specifiers: ^10.1.1: 1, ^10.2.2: 1
+- `minimist`: 2 declarations from 2 resolved packages; specifiers: ^1.2.0: 1, ^1.2.5: 1
+- `minipass-flush`: 2 declarations from 2 resolved packages; specifiers: ^1.0.5: 2
+- `minipass-pipeline`: 2 declarations from 2 resolved packages; specifiers: ^1.2.4: 2
+- `minizlib`: 2 declarations from 2 resolved packages; specifiers: ^3.0.1: 1, ^3.1.0: 1
+- `module-details-from-path`: 2 declarations from 2 resolved packages; specifiers: ^1.0.3: 1, ^1.0.4: 1
+- `nanoid`: 2 declarations from 2 resolved packages; specifiers: ^3.3.12: 1, ^5.1.6: 1
+- `negotiator`: 2 declarations from 2 resolved packages; specifiers: ^1.0.0: 2
+- `node-addon-api`: 2 declarations from 2 resolved packages; specifiers: ^8.2.1: 1, ^8.6.0: 1
+- `onetime`: 2 declarations from 2 resolved packages; specifiers: ^5.1.0: 1, ^7.0.0: 1
+- `oniguruma-to-es`: 2 declarations from 2 resolved packages; specifiers: ^4.3.4: 1, ^4.3.6: 1
+- `p-queue`: 2 declarations from 2 resolved packages; specifiers: ^6: 1, ^9.0.0: 1
+- `p-timeout`: 2 declarations from 2 resolved packages; specifiers: ^3.2.0: 1, ^7.0.0: 1
+- `pako`: 2 declarations from 2 resolved packages; specifiers: ^2.1.0: 1, ~1.0.2: 1
+- `parse-ms`: 2 declarations from 2 resolved packages; specifiers: ^3.0.0: 1, ^4.0.0: 1
+- `path-expression-matcher`: 2 declarations from 2 resolved packages; specifiers: ^1.5.0: 2
+- `path-key`: 2 declarations from 2 resolved packages; specifiers: ^3.0.0: 1, ^3.1.0: 1
+- `path-to-regexp`: 2 declarations from 2 resolved packages; specifiers: ^8.0.0: 1, ^8.1.0: 1
+- `picocolors`: 2 declarations from 2 resolved packages; specifiers: ^1.1.1: 2
+- `pngjs`: 2 declarations from 2 resolved packages; specifiers: ^5.0.0: 1, ^7.0.0: 1
+- `pretty-ms`: 2 declarations from 2 resolved packages; specifiers: ^8.0.0: 1, ^9.3.0: 1
+- `proc-log`: 2 declarations from 2 resolved packages; specifiers: ^6.0.0: 1, ^6.1.0: 1
+- `pug`: 2 declarations from 2 resolved packages; specifiers: ^3.0.3: 2
+- `quansync`: 2 declarations from 2 resolved packages; specifiers: ^1.0.0: 2
+- `range-parser`: 2 declarations from 2 resolved packages; specifiers: ^1.2.1: 2
+- `real-require`: 2 declarations from 2 resolved packages; specifiers: ^0.2.0: 2
+- `recma-stringify`: 2 declarations from 2 resolved packages; specifiers: ^1.0.0: 2
+- `reflect-metadata`: 2 declarations from 2 resolved packages; specifiers: ^0.2.2: 2
+- `regex-utilities`: 2 declarations from 2 resolved packages; specifiers: ^2.3.0: 2
+- `require-directory`: 2 declarations from 2 resolved packages; specifiers: ^2.1.1: 2
+- `require-from-string`: 2 declarations from 2 resolved packages; specifiers: ^2.0.2: 2
+- `rolldown`: 2 declarations from 2 resolved packages; specifiers: ^1.0.0: 1, ^1.0.2: 1
+- `safer-buffer`: 2 declarations from 2 resolved packages; specifiers: ^2.1.0: 1, >= 2.1.2 < 3.0.0: 1
+- `send`: 2 declarations from 2 resolved packages; specifiers: ^1.1.0: 1, ^1.2.0: 1
+- `side-channel-map`: 2 declarations from 2 resolved packages; specifiers: ^1.0.1: 2
+- `signal-polyfill`: 2 declarations from 2 resolved packages; specifiers: ^0.2.0: 1, ^0.2.2: 1
+- `sisteransi`: 2 declarations from 2 resolved packages; specifiers: ^1.0.5: 2
+- `slice-ansi`: 2 declarations from 2 resolved packages; specifiers: ^7.1.0: 1, ^8.0.0: 1
+- `spark-md5`: 2 declarations from 2 resolved packages; specifiers: ^3.0.2: 2
+- `ssri`: 2 declarations from 2 resolved packages; specifiers: ^13.0.0: 2
+- `std-env`: 2 declarations from 2 resolved packages; specifiers: ^4.0.0-rc.1: 2
+- `stdout-update`: 2 declarations from 2 resolved packages; specifiers: ^4.0.1: 2
+- `stringify-entities`: 2 declarations from 2 resolved packages; specifiers: ^4.0.0: 2
+- `strtok3`: 2 declarations from 2 resolved packages; specifiers: ^10.3.4: 1, ^10.3.5: 1
+- `style-to-js`: 2 declarations from 2 resolved packages; specifiers: ^1.0.0: 2
+- `supports-color`: 2 declarations from 2 resolved packages; specifiers: ^7.1.0: 2
+- `tinyexec`: 2 declarations from 2 resolved packages; specifiers: ^1.0.2: 1, ^1.1.2: 1
+- `tinyglobby`: 2 declarations from 2 resolved packages; specifiers: ^0.2.15: 1, ^0.2.16: 1
+- `tough-cookie`: 2 declarations from 2 resolved packages; specifiers: ^5.0.0: 1, ^6.0.1: 1
+- `tr46`: 2 declarations from 2 resolved packages; specifiers: ^6.0.0: 1, ~0.0.3: 1
+- `type-is`: 2 declarations from 2 resolved packages; specifiers: ^2.0.1: 2
+- `typical`: 2 declarations from 2 resolved packages; specifiers: ^7.3.0: 2
+- `uc.micro`: 2 declarations from 2 resolved packages; specifiers: ^2.0.0: 1, ^2.1.0: 1
+- `uint8array-extras`: 2 declarations from 2 resolved packages; specifiers: ^1.5.0: 2
+- `uuid`: 2 declarations from 2 resolved packages; specifiers: ^8.3.0: 1, ^9.0.1: 1
+- `vary`: 2 declarations from 2 resolved packages; specifiers: ^1: 1, ^1.1.2: 1
+- `whatwg-mimetype`: 2 declarations from 2 resolved packages; specifiers: ^5.0.0: 2
+- `wrap-ansi`: 2 declarations from 2 resolved packages; specifiers: ^6.2.0: 1, ^7.0.0: 1
+- `xml-name-validator`: 2 declarations from 2 resolved packages; specifiers: ^5.0.0: 2
+- `y18n`: 2 declarations from 2 resolved packages; specifiers: ^4.0.0: 1, ^5.0.5: 1
+- `yargs-parser`: 2 declarations from 2 resolved packages; specifiers: ^18.1.2: 1, ^21.1.1: 1
+- `@a2ui/web_core`: 1 declarations from 1 resolved packages; specifiers: ^0.10.0: 1
+- `@agentclientprotocol/sdk`: 1 declarations from 1 resolved packages; specifiers: ^0.28.1: 1
+- `@anthropic-ai/sdk`: 1 declarations from 1 resolved packages; specifiers: >=0.50.3 <1: 1
+- `@asamuzakjp/css-color`: 1 declarations from 1 resolved packages; specifiers: ^5.1.11: 1
+- `@asamuzakjp/dom-selector`: 1 declarations from 1 resolved packages; specifiers: ^7.1.1: 1
+- `@asamuzakjp/nwsapi`: 1 declarations from 1 resolved packages; specifiers: ^2.3.9: 1
+- `@aws-crypto/sha256-js`: 1 declarations from 1 resolved packages; specifiers: ^5.2.0: 1
+- `@aws-sdk/checksums`: 1 declarations from 1 resolved packages; specifiers: ^3.1000.2: 1
+- `@aws-sdk/credential-provider-cognito-identity`: 1 declarations from 1 resolved packages; specifiers: ^3.972.42: 1
+- `@aws-sdk/credential-providers`: 1 declarations from 1 resolved packages; specifiers: ^3.525.0: 1
+- `@aws-sdk/eventstream-handler-node`: 1 declarations from 1 resolved packages; specifiers: ^3.972.18: 1
+- `@aws-sdk/middleware-bucket-endpoint`: 1 declarations from 1 resolved packages; specifiers: ^3.972.17: 1
+- `@aws-sdk/middleware-eventstream`: 1 declarations from 1 resolved packages; specifiers: ^3.972.14: 1
+- `@aws-sdk/middleware-expect-continue`: 1 declarations from 1 resolved packages; specifiers: ^3.972.14: 1
+- `@aws-sdk/middleware-flexible-checksums`: 1 declarations from 1 resolved packages; specifiers: ^3.974.23: 1
+- `@aws-sdk/middleware-location-constraint`: 1 declarations from 1 resolved packages; specifiers: ^3.972.11: 1
+- `@aws-sdk/middleware-ssec`: 1 declarations from 1 resolved packages; specifiers: ^3.972.11: 1
+- `@aws-sdk/middleware-websocket`: 1 declarations from 1 resolved packages; specifiers: ^3.972.23: 1
+- `@aws-sdk/util-format-url`: 1 declarations from 1 resolved packages; specifiers: >=3.525.0: 1
+- `@aws-sdk/xml-builder`: 1 declarations from 1 resolved packages; specifiers: ^3.972.25: 1
+- `@aws/lambda-invoke-store`: 1 declarations from 1 resolved packages; specifiers: ^0.2.2: 1
+- `@azure/core-client`: 1 declarations from 1 resolved packages; specifiers: ^1.9.2: 1
+- `@azure/msal-browser`: 1 declarations from 1 resolved packages; specifiers: ^5.5.0: 1
+- `@bcoe/v8-coverage`: 1 declarations from 1 resolved packages; specifiers: ^1.0.2: 1
+- `@bramus/specificity`: 1 declarations from 1 resolved packages; specifiers: ^2.4.2: 1
+- `@cacheable/memory`: 1 declarations from 1 resolved packages; specifiers: ^2.0.8: 1
+- `@cacheable/node-cache`: 1 declarations from 1 resolved packages; specifiers: ^1.4.0: 1
+- `@clack/prompts`: 1 declarations from 1 resolved packages; specifiers: ^1.0.1: 1
+- `@csstools/color-helpers`: 1 declarations from 1 resolved packages; specifiers: ^6.0.2: 1
+- `@csstools/css-color-parser`: 1 declarations from 1 resolved packages; specifiers: ^4.1.0: 1
+- `@csstools/css-parser-algorithms`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `@csstools/css-syntax-patches-for-csstree`: 1 declarations from 1 resolved packages; specifiers: ^1.1.3: 1
+- `@csstools/css-tokenizer`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `@d-fischer/connection`: 1 declarations from 1 resolved packages; specifiers: ^10.0.1: 1
+- `@d-fischer/deprecate`: 1 declarations from 1 resolved packages; specifiers: ^2.0.2: 1
+- `@d-fischer/escape-string-regexp`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `@d-fischer/isomorphic-ws`: 1 declarations from 1 resolved packages; specifiers: ^7.0.0: 1
+- `@github/copilot`: 1 declarations from 1 resolved packages; specifiers: ^1.0.55-5: 1
+- `@grpc/proto-loader`: 1 declarations from 1 resolved packages; specifiers: ^0.8.0: 1
+- `@hapi/boom`: 1 declarations from 1 resolved packages; specifiers: ^9.1.3: 1
+- `@hapi/hoek`: 1 declarations from 1 resolved packages; specifiers: 9.x.x: 1
+- `@hono/node-server`: 1 declarations from 1 resolved packages; specifiers: ^1.19.9: 1
+- `@huggingface/jinja`: 1 declarations from 1 resolved packages; specifiers: ^0.5.6: 1
+- `@isaacs/fs-minipass`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `@jridgewell/gen-mapping`: 1 declarations from 1 resolved packages; specifiers: ^0.3.12: 1
+- `@jridgewell/resolve-uri`: 1 declarations from 1 resolved packages; specifiers: ^3.1.0: 1
+- `@js-sdsl/ordered-map`: 1 declarations from 1 resolved packages; specifiers: ^4.4.2: 1
+- `@keyv/bigmap`: 1 declarations from 1 resolved packages; specifiers: ^1.3.1: 1
+- `@keyv/serialize`: 1 declarations from 1 resolved packages; specifiers: ^1.1.1: 1
+- `@kwsites/file-exists`: 1 declarations from 1 resolved packages; specifiers: ^1.1.1: 1
+- `@kwsites/promise-deferred`: 1 declarations from 1 resolved packages; specifiers: ^1.1.1: 1
+- `@lit-labs/signals`: 1 declarations from 1 resolved packages; specifiers: ^0.1.3: 1
+- `@lit/context`: 1 declarations from 1 resolved packages; specifiers: ^1.1.4: 1
+- `@matrix-org/matrix-sdk-crypto-wasm`: 1 declarations from 1 resolved packages; specifiers: ^18.2.0: 1
+- `@nodable/entities`: 1 declarations from 1 resolved packages; specifiers: ^2.1.0: 1
+- `@nodelib/fs.stat`: 1 declarations from 1 resolved packages; specifiers: ^2.0.2: 1
+- `@nodelib/fs.walk`: 1 declarations from 1 resolved packages; specifiers: ^1.2.3: 1
+- `@npmcli/agent`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `@npmcli/fs`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `@npmcli/redact`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `@opentelemetry/api`: 1 declarations from 1 resolved packages; specifiers: ^1.3.0: 1
+- `@pinojs/redact`: 1 declarations from 1 resolved packages; specifiers: ^0.4.0: 1
+- `@polka/url`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0-next.24: 1
+- `@preact/signals-core`: 1 declarations from 1 resolved packages; specifiers: ^1.13.0: 1
+- `@protobufjs/base64`: 1 declarations from 1 resolved packages; specifiers: ^1.1.2: 1
+- `@protobufjs/codegen`: 1 declarations from 1 resolved packages; specifiers: ^2.0.5: 1
+- `@protobufjs/eventemitter`: 1 declarations from 1 resolved packages; specifiers: ^1.1.1: 1
+- `@protobufjs/fetch`: 1 declarations from 1 resolved packages; specifiers: ^1.1.1: 1
+- `@protobufjs/float`: 1 declarations from 1 resolved packages; specifiers: ^1.0.2: 1
+- `@protobufjs/inquire`: 1 declarations from 1 resolved packages; specifiers: ^1.1.2: 1
+- `@protobufjs/path`: 1 declarations from 1 resolved packages; specifiers: ^1.1.2: 1
+- `@protobufjs/pool`: 1 declarations from 1 resolved packages; specifiers: ^1.1.0: 1
+- `@protobufjs/utf8`: 1 declarations from 1 resolved packages; specifiers: ^1.1.1: 1
+- `@quansync/fs`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `@reflink/reflink`: 1 declarations from 1 resolved packages; specifiers: ^0.1.16: 1
+- `@shikijs/transformers`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `@sigstore/sign`: 1 declarations from 1 resolved packages; specifiers: ^4.1.1: 1
+- `@sigstore/tuf`: 1 declarations from 1 resolved packages; specifiers: ^4.0.2: 1
+- `@sigstore/verify`: 1 declarations from 1 resolved packages; specifiers: ^3.1.1: 1
+- `@simple-git/argv-parser`: 1 declarations from 1 resolved packages; specifiers: ^1.1.0: 1
+- `@slack/oauth`: 1 declarations from 1 resolved packages; specifiers: ^3.0.5: 1
+- `@slack/socket-mode`: 1 declarations from 1 resolved packages; specifiers: ^2.0.7: 1
+- `@smithy/config-resolver`: 1 declarations from 1 resolved packages; specifiers: ^4.1.4: 1
+- `@smithy/hash-node`: 1 declarations from 1 resolved packages; specifiers: >=2.1.3: 1
+- `@smithy/invalid-dependency`: 1 declarations from 1 resolved packages; specifiers: ^4.0.4: 1
+- `@smithy/is-array-buffer`: 1 declarations from 1 resolved packages; specifiers: ^2.2.0: 1
+- `@smithy/node-config-provider`: 1 declarations from 1 resolved packages; specifiers: ^4.1.3: 1
+- `@smithy/protocol-http`: 1 declarations from 1 resolved packages; specifiers: >=3.2.1: 1
+- `@smithy/util-buffer-from`: 1 declarations from 1 resolved packages; specifiers: ^2.2.0: 1
+- `@snazzah/davey`: 1 declarations from 1 resolved packages; specifiers: ^0.1.9: 1
+- `@stablelib/base64`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `@standard-schema/spec`: 1 declarations from 1 resolved packages; specifiers: ^1.1.0: 1
+- `@swc/helpers`: 1 declarations from 1 resolved packages; specifiers: ^0.5.11: 1
+- `@thi.ng/bitstream`: 1 declarations from 1 resolved packages; specifiers: ^2.2.12: 1
+- `@thi.ng/errors`: 1 declarations from 1 resolved packages; specifiers: ^2.6.15: 1
+- `@tinyhttp/content-disposition`: 1 declarations from 1 resolved packages; specifiers: ^2.2.0: 1
+- `@tokenizer/inflate`: 1 declarations from 1 resolved packages; specifiers: ^0.4.1: 1
+- `@tybys/wasm-util`: 1 declarations from 1 resolved packages; specifiers: ^0.10.1: 1
+- `@types/body-parser`: 1 declarations from 1 resolved packages; specifiers: *: 1
+- `@types/chai`: 1 declarations from 1 resolved packages; specifiers: ^5.2.2: 1
+- `@types/command-line-args`: 1 declarations from 1 resolved packages; specifiers: ^5.2.3: 1
+- `@types/command-line-usage`: 1 declarations from 1 resolved packages; specifiers: ^5.0.4: 1
+- `@types/connect`: 1 declarations from 1 resolved packages; specifiers: *: 1
+- `@types/debug`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `@types/deep-eql`: 1 declarations from 1 resolved packages; specifiers: *: 1
+- `@types/events`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `@types/express-serve-static-core`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `@types/http-errors`: 1 declarations from 1 resolved packages; specifiers: *: 1
+- `@types/jsesc`: 1 declarations from 1 resolved packages; specifiers: ^2.5.0: 1
+- `@types/linkify-it`: 1 declarations from 1 resolved packages; specifiers: ^5: 1
+- `@types/mdurl`: 1 declarations from 1 resolved packages; specifiers: ^2: 1
+- `@types/mdx`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `@types/qs`: 1 declarations from 1 resolved packages; specifiers: *: 1
+- `@types/range-parser`: 1 declarations from 1 resolved packages; specifiers: *: 1
+- `@types/retry`: 1 declarations from 1 resolved packages; specifiers: *: 1
+- `@types/sarif`: 1 declarations from 1 resolved packages; specifiers: ^2.1.7: 1
+- `@types/send`: 1 declarations from 1 resolved packages; specifiers: *: 1
+- `@types/serve-static`: 1 declarations from 1 resolved packages; specifiers: ^2: 1
+- `@ungap/structured-clone`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `@wasm-audio-decoders/flac`: 1 declarations from 1 resolved packages; specifiers: ^0.2.4: 1
+- `@wasm-audio-decoders/ogg-vorbis`: 1 declarations from 1 resolved packages; specifiers: ^0.1.15: 1
+- `accepts`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `acorn-import-attributes`: 1 declarations from 1 resolved packages; specifiers: ^1.9.5: 1
+- `ajv-formats`: 1 declarations from 1 resolved packages; specifiers: ^3.0.1: 1
+- `another-json`: 1 declarations from 1 resolved packages; specifiers: ^0.2.0: 1
+- `ansi-escapes`: 1 declarations from 1 resolved packages; specifiers: ^6.2.0: 1
+- `ansis`: 1 declarations from 1 resolved packages; specifiers: ^4.3.0: 1
+- `argparse`: 1 declarations from 1 resolved packages; specifiers: ^2.0.1: 1
+- `asap`: 1 declarations from 1 resolved packages; specifiers: ~2.0.3: 1
+- `asn1.js`: 1 declarations from 1 resolved packages; specifiers: ^5.3.0: 1
+- `assert-never`: 1 declarations from 1 resolved packages; specifiers: ^1.2.1: 1
+- `assertion-error`: 1 declarations from 1 resolved packages; specifiers: ^2.0.1: 1
+- `ast-kit`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0-beta.1: 1
+- `ast-v8-to-istanbul`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `astring`: 1 declarations from 1 resolved packages; specifiers: ^1.8.0: 1
+- `async-mutex`: 1 declarations from 1 resolved packages; specifiers: ^0.5.0: 1
+- `asynckit`: 1 declarations from 1 resolved packages; specifiers: ^0.4.0: 1
+- `audio-buffer`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `audio-type`: 1 declarations from 1 resolved packages; specifiers: ^2.2.1: 1
+- `badgen`: 1 declarations from 1 resolved packages; specifiers: ^3.2.3: 1
+- `bail`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `balanced-match`: 1 declarations from 1 resolved packages; specifiers: ^4.0.2: 1
+- `bare-fs`: 1 declarations from 1 resolved packages; specifiers: ^4.5.5: 1
+- `bare-os`: 1 declarations from 1 resolved packages; specifiers: ^3.0.1: 1
+- `bare-stream`: 1 declarations from 1 resolved packages; specifiers: ^2.6.4: 1
+- `bare-url`: 1 declarations from 1 resolved packages; specifiers: ^2.2.2: 1
+- `base-x`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `bidi-js`: 1 declarations from 1 resolved packages; specifiers: ^1.0.3: 1
+- `bignumber.js`: 1 declarations from 1 resolved packages; specifiers: ^9.0.0: 1
+- `birpc`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `blamer`: 1 declarations from 1 resolved packages; specifiers: ^1.0.6: 1
+- `bn.js`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `body-parser`: 1 declarations from 1 resolved packages; specifiers: ^2.2.1: 1
+- `bottleneck`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `bowser`: 1 declarations from 1 resolved packages; specifiers: ^2.11.0: 1
+- `brace-expansion`: 1 declarations from 1 resolved packages; specifiers: ^5.0.5: 1
+- `braces`: 1 declarations from 1 resolved packages; specifiers: ^3.0.3: 1
+- `bs58`: 1 declarations from 1 resolved packages; specifiers: ^6.0.0: 1
+- `buffer-equal-constant-time`: 1 declarations from 1 resolved packages; specifiers: ^1.0.1: 1
+- `buffer-from`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `bundle-name`: 1 declarations from 1 resolved packages; specifiers: ^4.1.0: 1
+- `cac`: 1 declarations from 1 resolved packages; specifiers: ^7.0.0: 1
+- `cacache`: 1 declarations from 1 resolved packages; specifiers: ^20.0.1: 1
+- `cacheable`: 1 declarations from 1 resolved packages; specifiers: ^2.3.1: 1
+- `camelcase`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `chai`: 1 declarations from 1 resolved packages; specifiers: ^6.2.2: 1
+- `chalk-template`: 1 declarations from 1 resolved packages; specifiers: ^0.4.0: 1
+- `character-entities`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `character-entities-html4`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `character-parser`: 1 declarations from 1 resolved packages; specifiers: ^2.2.0: 1
+- `character-reference-invalid`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `chmodrp`: 1 declarations from 1 resolved packages; specifiers: ^1.0.2: 1
+- `chownr`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `ci-info`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `cjs-module-lexer`: 1 declarations from 1 resolved packages; specifiers: ^2.2.0: 1
+- `cli-cursor`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `cli-table3`: 1 declarations from 1 resolved packages; specifiers: ^0.6.5: 1
+- `cmake-js`: 1 declarations from 1 resolved packages; specifiers: ^8.0.0: 1
+- `collapse-white-space`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `color-convert`: 1 declarations from 1 resolved packages; specifiers: ^2.0.1: 1
+- `color-name`: 1 declarations from 1 resolved packages; specifiers: ~1.1.4: 1
+- `combined-stream`: 1 declarations from 1 resolved packages; specifiers: ^1.0.8: 1
+- `command-line-args`: 1 declarations from 1 resolved packages; specifiers: ^6.0.1: 1
+- `command-line-usage`: 1 declarations from 1 resolved packages; specifiers: ^7.0.1: 1
+- `content-disposition`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `convert-source-map`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `cookie`: 1 declarations from 1 resolved packages; specifiers: ^0.7.1: 1
+- `cookie-signature`: 1 declarations from 1 resolved packages; specifiers: ^1.2.1: 1
+- `core-util-is`: 1 declarations from 1 resolved packages; specifiers: ~1.0.0: 1
+- `crypto-js`: 1 declarations from 1 resolved packages; specifiers: ^4.2.0: 1
+- `css-select`: 1 declarations from 1 resolved packages; specifiers: ^5.1.0: 1
+- `css-what`: 1 declarations from 1 resolved packages; specifiers: ^6.1.0: 1
+- `cssom`: 1 declarations from 1 resolved packages; specifiers: ^0.5.0: 1
+- `data-uri-to-buffer`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `data-urls`: 1 declarations from 1 resolved packages; specifiers: ^7.0.0: 1
+- `date-fns`: 1 declarations from 1 resolved packages; specifiers: ^4.1.0: 1
+- `decimal.js`: 1 declarations from 1 resolved packages; specifiers: ^10.6.0: 1
+- `deep-extend`: 1 declarations from 1 resolved packages; specifiers: ^0.6.0: 1
+- `default-browser`: 1 declarations from 1 resolved packages; specifiers: ^5.2.1: 1
+- `default-browser-id`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `define-lazy-prop`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `defu`: 1 declarations from 1 resolved packages; specifiers: ^6.1.7: 1
+- `delayed-stream`: 1 declarations from 1 resolved packages; specifiers: ~1.0.0: 1
+- `dequal`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `dijkstrajs`: 1 declarations from 1 resolved packages; specifiers: ^1.0.1: 1
+- `discord-api-types`: 1 declarations from 1 resolved packages; specifiers: ^0.38.41: 1
+- `doctypes`: 1 declarations from 1 resolved packages; specifiers: ^1.1.0: 1
+- `dom-serializer`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `dts-resolver`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `dunder-proto`: 1 declarations from 1 resolved packages; specifiers: ^1.0.1: 1
+- `empathic`: 1 declarations from 1 resolved packages; specifiers: ^2.0.1: 1
+- `end-of-stream`: 1 declarations from 1 resolved packages; specifiers: ^1.1.0: 1
+- `env-var`: 1 declarations from 1 resolved packages; specifiers: ^7.5.0: 1
+- `es-define-property`: 1 declarations from 1 resolved packages; specifiers: ^1.0.1: 1
+- `es-module-lexer`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `es-set-tostringtag`: 1 declarations from 1 resolved packages; specifiers: ^2.1.0: 1
+- `esast-util-from-estree`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `esast-util-from-js`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `escalade`: 1 declarations from 1 resolved packages; specifiers: ^3.1.1: 1
+- `estree-util-attach-comments`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `estree-util-build-jsx`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `estree-util-scope`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `event-target-shim`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `events`: 1 declarations from 1 resolved packages; specifiers: ^3.2.0: 1
+- `events-universal`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `eventsource`: 1 declarations from 1 resolved packages; specifiers: ^3.0.2: 1
+- `execa`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `expect-type`: 1 declarations from 1 resolved packages; specifiers: ^1.3.0: 1
+- `express-rate-limit`: 1 declarations from 1 resolved packages; specifiers: ^8.2.1: 1
+- `fast-glob`: 1 declarations from 1 resolved packages; specifiers: ^3.3.2: 1
+- `fast-sha256`: 1 declarations from 1 resolved packages; specifiers: ^1.3.0: 1
+- `fast-string-truncated-width`: 1 declarations from 1 resolved packages; specifiers: ^3.0.2: 1
+- `fast-uri`: 1 declarations from 1 resolved packages; specifiers: ^3.0.1: 1
+- `fast-xml-builder`: 1 declarations from 1 resolved packages; specifiers: ^1.1.5: 1
+- `fastq`: 1 declarations from 1 resolved packages; specifiers: ^1.6.0: 1
+- `fdir`: 1 declarations from 1 resolved packages; specifiers: ^6.5.0: 1
+- `file-type`: 1 declarations from 1 resolved packages; specifiers: ^21.3.1: 1
+- `filename-reserved-regex`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `fill-range`: 1 declarations from 1 resolved packages; specifiers: ^7.1.1: 1
+- `finalhandler`: 1 declarations from 1 resolved packages; specifiers: ^2.1.0: 1
+- `find-replace`: 1 declarations from 1 resolved packages; specifiers: ^5.0.2: 1
+- `find-up`: 1 declarations from 1 resolved packages; specifiers: ^4.1.0: 1
+- `flatbuffers`: 1 declarations from 1 resolved packages; specifiers: ^25.1.24: 1
+- `follow-redirects`: 1 declarations from 1 resolved packages; specifiers: ^1.16.0: 1
+- `formdata-polyfill`: 1 declarations from 1 resolved packages; specifiers: ^4.0.10: 1
+- `fs-minipass`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `gcp-metadata`: 1 declarations from 1 resolved packages; specifiers: ^6.1.0: 1
+- `get-proto`: 1 declarations from 1 resolved packages; specifiers: ^1.0.1: 1
+- `get-stream`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `glob`: 1 declarations from 1 resolved packages; specifiers: ^13.0.0: 1
+- `glob-parent`: 1 declarations from 1 resolved packages; specifiers: ^5.1.2: 1
+- `gtoken`: 1 declarations from 1 resolved packages; specifiers: ^7.0.0: 1
+- `has-flag`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `hast-util-to-estree`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `hast-util-to-jsx-runtime`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `hono`: 1 declarations from 1 resolved packages; specifiers: ^4.11.4: 1
+- `hookable`: 1 declarations from 1 resolved packages; specifiers: ^6.1.1: 1
+- `html-encoding-sniffer`: 1 declarations from 1 resolved packages; specifiers: ^6.0.0: 1
+- `html-void-elements`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `htmlparser2`: 1 declarations from 1 resolved packages; specifiers: ^10.0.0: 1
+- `http-cache-semantics`: 1 declarations from 1 resolved packages; specifiers: ^4.1.1: 1
+- `human-signals`: 1 declarations from 1 resolved packages; specifiers: ^1.1.1: 1
+- `ieee754`: 1 declarations from 1 resolved packages; specifiers: ^1.2.1: 1
+- `ignore`: 1 declarations from 1 resolved packages; specifiers: ^7.0.4: 1
+- `immediate`: 1 declarations from 1 resolved packages; specifiers: ~3.0.5: 1
+- `import-in-the-middle`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `import-without-cache`: 1 declarations from 1 resolved packages; specifiers: ^0.4.0: 1
+- `ini`: 1 declarations from 1 resolved packages; specifiers: ~1.3.0: 1
+- `ipull`: 1 declarations from 1 resolved packages; specifiers: ^3.9.5: 1
+- `ircv3`: 1 declarations from 1 resolved packages; specifiers: ^0.33.0: 1
+- `is-alphabetical`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `is-alphanumerical`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `is-core-module`: 1 declarations from 1 resolved packages; specifiers: ^2.16.1: 1
+- `is-docker`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `is-expression`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `is-extglob`: 1 declarations from 1 resolved packages; specifiers: ^2.1.1: 1
+- `is-glob`: 1 declarations from 1 resolved packages; specifiers: ^4.0.1: 1
+- `is-hexadecimal`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `is-interactive`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `is-network-error`: 1 declarations from 1 resolved packages; specifiers: ^1.3.0: 1
+- `is-number`: 1 declarations from 1 resolved packages; specifiers: ^7.0.0: 1
+- `is-plain-obj`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `is-regex`: 1 declarations from 1 resolved packages; specifiers: ^1.0.3: 1
+- `is-wsl`: 1 declarations from 1 resolved packages; specifiers: ^3.1.0: 1
+- `isarray`: 1 declarations from 1 resolved packages; specifiers: ~1.0.0: 1
+- `istanbul-reports`: 1 declarations from 1 resolved packages; specifiers: ^3.2.0: 1
+- `js-tokens`: 1 declarations from 1 resolved packages; specifiers: ^10.0.0: 1
+- `jsesc`: 1 declarations from 1 resolved packages; specifiers: ^3.0.2: 1
+- `json-bignum`: 1 declarations from 1 resolved packages; specifiers: ^0.0.3: 1
+- `json-schema-to-ts`: 1 declarations from 1 resolved packages; specifiers: ^3.1.1: 1
+- `json-schema-traverse`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `json-schema-typed`: 1 declarations from 1 resolved packages; specifiers: ^8.0.2: 1
+- `jsonfile`: 1 declarations from 1 resolved packages; specifiers: ^6.0.1: 1
+- `jszip`: 1 declarations from 1 resolved packages; specifiers: ^3.10.1: 1
+- `jwa`: 1 declarations from 1 resolved packages; specifiers: ^2.0.1: 1
+- `jwks-rsa`: 1 declarations from 1 resolved packages; specifiers: ^3.2.0: 1
+- `libsignal`: 1 declarations from 1 resolved packages; specifiers: ^6.0.0: 1
+- `lie`: 1 declarations from 1 resolved packages; specifiers: ~3.3.0: 1
+- `limiter`: 1 declarations from 1 resolved packages; specifiers: ^1.1.5: 1
+- `linkify-it`: 1 declarations from 1 resolved packages; specifiers: ^5.0.1: 1
+- `lit-element`: 1 declarations from 1 resolved packages; specifiers: ^4.2.0: 1
+- `locate-path`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `lodash.clonedeep`: 1 declarations from 1 resolved packages; specifiers: ^4.5.0: 1
+- `lodash.debounce`: 1 declarations from 1 resolved packages; specifiers: ^4.0.8: 1
+- `lodash.identity`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `lodash.includes`: 1 declarations from 1 resolved packages; specifiers: ^4.3.0: 1
+- `lodash.isboolean`: 1 declarations from 1 resolved packages; specifiers: ^3.0.3: 1
+- `lodash.isinteger`: 1 declarations from 1 resolved packages; specifiers: ^4.0.4: 1
+- `lodash.isnumber`: 1 declarations from 1 resolved packages; specifiers: ^3.0.3: 1
+- `lodash.isplainobject`: 1 declarations from 1 resolved packages; specifiers: ^4.0.6: 1
+- `lodash.isstring`: 1 declarations from 1 resolved packages; specifiers: ^4.0.1: 1
+- `lodash.merge`: 1 declarations from 1 resolved packages; specifiers: ^4.6.2: 1
+- `lodash.once`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `lodash.pickby`: 1 declarations from 1 resolved packages; specifiers: ^4.6.0: 1
+- `loglevel`: 1 declarations from 1 resolved packages; specifiers: ^1.9.2: 1
+- `longest-streak`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `lowdb`: 1 declarations from 1 resolved packages; specifiers: ^7.0.1: 1
+- `lru-memoizer`: 1 declarations from 1 resolved packages; specifiers: ^2.2.0: 1
+- `magicast`: 1 declarations from 1 resolved packages; specifiers: ^0.5.2: 1
+- `make-dir`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `markdown-extensions`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `markdown-table`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `math-intrinsics`: 1 declarations from 1 resolved packages; specifiers: ^1.1.0: 1
+- `matrix-widget-api`: 1 declarations from 1 resolved packages; specifiers: ^1.16.1: 1
+- `mdast-util-mdx`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `mdast-util-phrasing`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `mdurl`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `merge-descriptors`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `merge-stream`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `merge2`: 1 declarations from 1 resolved packages; specifiers: ^1.3.0: 1
+- `micromark`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `micromark-extension-mdx-expression`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `micromark-extension-mdx-jsx`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `micromark-extension-mdx-md`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `micromark-extension-mdxjs`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `micromark-extension-mdxjs-esm`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `micromark-factory-destination`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `micromark-factory-label`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `micromark-factory-title`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `micromark-factory-whitespace`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `micromark-util-html-tag-name`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `micromatch`: 1 declarations from 1 resolved packages; specifiers: ^4.0.8: 1
+- `mime-db`: 1 declarations from 1 resolved packages; specifiers: ^1.54.0: 1
+- `mimic-fn`: 1 declarations from 1 resolved packages; specifiers: ^2.1.0: 1
+- `mimic-function`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `minimalistic-assert`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `minipass-collect`: 1 declarations from 1 resolved packages; specifiers: ^2.0.1: 1
+- `minipass-fetch`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `minipass-sized`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `mpg123-decoder`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `mrmime`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `music-metadata`: 1 declarations from 1 resolved packages; specifiers: ^11.12.3: 1
+- `node-api-headers`: 1 declarations from 1 resolved packages; specifiers: ^1.8.0: 1
+- `node-domexception`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `node-downloader-helper`: 1 declarations from 1 resolved packages; specifiers: ^2.1.9: 1
+- `node-gyp-build`: 1 declarations from 1 resolved packages; specifiers: ^4.8.2: 1
+- `node-sarif-builder`: 1 declarations from 1 resolved packages; specifiers: ^3.4.0: 1
+- `node-wav`: 1 declarations from 1 resolved packages; specifiers: ^0.0.2: 1
+- `npm-run-path`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `nth-check`: 1 declarations from 1 resolved packages; specifiers: ^2.0.1: 1
+- `ogg-opus-decoder`: 1 declarations from 1 resolved packages; specifiers: ^1.6.12: 1
+- `oidc-client-ts`: 1 declarations from 1 resolved packages; specifiers: ^3.0.1: 1
+- `on-exit-leak-free`: 1 declarations from 1 resolved packages; specifiers: ^2.1.0: 1
+- `oniguruma-parser`: 1 declarations from 1 resolved packages; specifiers: ^0.12.2: 1
+- `open`: 1 declarations from 1 resolved packages; specifiers: ^10.1.0: 1
+- `ora`: 1 declarations from 1 resolved packages; specifiers: ^9.3.0: 1
+- `p-finally`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `p-limit`: 1 declarations from 1 resolved packages; specifiers: ^2.2.0: 1
+- `p-locate`: 1 declarations from 1 resolved packages; specifiers: ^4.1.0: 1
+- `p-map`: 1 declarations from 1 resolved packages; specifiers: ^7.0.2: 1
+- `p-try`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `parse-entities`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `parse5`: 1 declarations from 1 resolved packages; specifiers: ^8.0.1: 1
+- `path-exists`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `path-parse`: 1 declarations from 1 resolved packages; specifiers: ^1.0.7: 1
+- `path-scurry`: 1 declarations from 1 resolved packages; specifiers: ^2.0.2: 1
+- `pino`: 1 declarations from 1 resolved packages; specifiers: ^9.6: 1
+- `pino-abstract-transport`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `pino-std-serializers`: 1 declarations from 1 resolved packages; specifiers: ^7.0.0: 1
+- `pkce-challenge`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `pretty-bytes`: 1 declarations from 1 resolved packages; specifiers: ^6.1.0: 1
+- `prism-media`: 1 declarations from 1 resolved packages; specifiers: ^1.3.5: 1
+- `process-nextick-args`: 1 declarations from 1 resolved packages; specifiers: ~2.0.0: 1
+- `process-warning`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `promise`: 1 declarations from 1 resolved packages; specifiers: ^7.0.1: 1
+- `proper-lockfile`: 1 declarations from 1 resolved packages; specifiers: ^4.1.2: 1
+- `proxy-addr`: 1 declarations from 1 resolved packages; specifiers: ^2.0.7: 1
+- `proxy-from-env`: 1 declarations from 1 resolved packages; specifiers: ^2.1.0: 1
+- `psl`: 1 declarations from 1 resolved packages; specifiers: ^1.1.33: 1
+- `pug-attrs`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `pug-code-gen`: 1 declarations from 1 resolved packages; specifiers: ^3.0.4: 1
+- `pug-filters`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `pug-lexer`: 1 declarations from 1 resolved packages; specifiers: ^5.0.1: 1
+- `pug-linker`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `pug-load`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `pug-parser`: 1 declarations from 1 resolved packages; specifiers: ^6.0.0: 1
+- `pug-strip-comments`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `pump`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `punycode.js`: 1 declarations from 1 resolved packages; specifiers: ^2.3.1: 1
+- `qified`: 1 declarations from 1 resolved packages; specifiers: ^0.10.1: 1
+- `qoa-format`: 1 declarations from 1 resolved packages; specifiers: ^1.0.1: 1
+- `qrcode-terminal`: 1 declarations from 1 resolved packages; specifiers: ^0.12: 1
+- `querystringify`: 1 declarations from 1 resolved packages; specifiers: ^2.1.1: 1
+- `queue-microtask`: 1 declarations from 1 resolved packages; specifiers: ^1.2.2: 1
+- `quick-format-unescaped`: 1 declarations from 1 resolved packages; specifiers: ^4.0.3: 1
+- `readable-stream`: 1 declarations from 1 resolved packages; specifiers: ~2.3.6: 1
+- `readdirp`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `recma-build-jsx`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `recma-jsx`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `recma-parse`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `regex`: 1 declarations from 1 resolved packages; specifiers: ^6.1.0: 1
+- `regex-recursion`: 1 declarations from 1 resolved packages; specifiers: ^6.0.2: 1
+- `rehype-recma`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `remark-mdx`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `remark-parse`: 1 declarations from 1 resolved packages; specifiers: ^11.0.0: 1
+- `remark-rehype`: 1 declarations from 1 resolved packages; specifiers: ^11.0.0: 1
+- `repeat-string`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `require-in-the-middle`: 1 declarations from 1 resolved packages; specifiers: ^8.0.0: 1
+- `require-main-filename`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `requires-port`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `resolve`: 1 declarations from 1 resolved packages; specifiers: ^1.15.1: 1
+- `resolve-pkg-maps`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `restore-cursor`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `reusify`: 1 declarations from 1 resolved packages; specifiers: ^1.0.4: 1
+- `rolldown-plugin-dts`: 1 declarations from 1 resolved packages; specifiers: ^0.25.1: 1
+- `router`: 1 declarations from 1 resolved packages; specifiers: ^2.2.0: 1
+- `run-applescript`: 1 declarations from 1 resolved packages; specifiers: ^7.0.0: 1
+- `run-parallel`: 1 declarations from 1 resolved packages; specifiers: ^1.1.9: 1
+- `safe-stable-stringify`: 1 declarations from 1 resolved packages; specifiers: ^2.3.1: 1
+- `saxes`: 1 declarations from 1 resolved packages; specifiers: ^6.0.0: 1
+- `scheduler`: 1 declarations from 1 resolved packages; specifiers: ^0.27.0: 1
+- `sdp-transform`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `serve-static`: 1 declarations from 1 resolved packages; specifiers: ^2.2.0: 1
+- `set-blocking`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `setimmediate`: 1 declarations from 1 resolved packages; specifiers: ^1.0.5: 1
+- `setprototypeof`: 1 declarations from 1 resolved packages; specifiers: ~1.2.0: 1
+- `shebang-command`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `shebang-regex`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `shiki`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `side-channel`: 1 declarations from 1 resolved packages; specifiers: ^1.1.0: 1
+- `side-channel-list`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `side-channel-weakmap`: 1 declarations from 1 resolved packages; specifiers: ^1.0.2: 1
+- `siginfo`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `signal-utils`: 1 declarations from 1 resolved packages; specifiers: ^0.21.1: 1
+- `simple-git`: 1 declarations from 1 resolved packages; specifiers: ^3.33.0: 1
+- `simple-yenc`: 1 declarations from 1 resolved packages; specifiers: ^1.0.4: 1
+- `sirv`: 1 declarations from 1 resolved packages; specifiers: ^3.0.2: 1
+- `skillflag`: 1 declarations from 1 resolved packages; specifiers: ^0.2.0: 1
+- `sleep-promise`: 1 declarations from 1 resolved packages; specifiers: ^9.1.0: 1
+- `smart-buffer`: 1 declarations from 1 resolved packages; specifiers: ^4.2.0: 1
+- `socks`: 1 declarations from 1 resolved packages; specifiers: ^2.8.3: 1
+- `socks-proxy-agent`: 1 declarations from 1 resolved packages; specifiers: ^8.0.3: 1
+- `sonic-boom`: 1 declarations from 1 resolved packages; specifiers: ^4.0.1: 1
+- `source-map-support`: 1 declarations from 1 resolved packages; specifiers: ^0.5.21: 1
+- `split2`: 1 declarations from 1 resolved packages; specifiers: ^4.0.0: 1
+- `standardwebhooks`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `stdin-discarder`: 1 declarations from 1 resolved packages; specifiers: ^0.3.2: 1
+- `steno`: 1 declarations from 1 resolved packages; specifiers: ^4.0.2: 1
+- `string_decoder`: 1 declarations from 1 resolved packages; specifiers: ~1.1.1: 1
+- `strip-final-newline`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `strip-json-comments`: 1 declarations from 1 resolved packages; specifiers: ~2.0.1: 1
+- `strnum`: 1 declarations from 1 resolved packages; specifiers: ^2.2.3: 1
+- `supports-preserve-symlinks-flag`: 1 declarations from 1 resolved packages; specifiers: ^1.0.0: 1
+- `symbol-tree`: 1 declarations from 1 resolved packages; specifiers: ^3.2.4: 1
+- `table-layout`: 1 declarations from 1 resolved packages; specifiers: ^4.1.1: 1
+- `tar`: 1 declarations from 1 resolved packages; specifiers: ^7.5.6: 1
+- `tar-stream`: 1 declarations from 1 resolved packages; specifiers: ^3.1.7: 1
+- `teex`: 1 declarations from 1 resolved packages; specifiers: ^1.0.1: 1
+- `text-decoder`: 1 declarations from 1 resolved packages; specifiers: ^1.1.0: 1
+- `thread-stream`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `tinybench`: 1 declarations from 1 resolved packages; specifiers: ^2.9.0: 1
+- `to-regex-range`: 1 declarations from 1 resolved packages; specifiers: ^5.0.1: 1
+- `toidentifier`: 1 declarations from 1 resolved packages; specifiers: ~1.0.1: 1
+- `totalist`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `tree-kill`: 1 declarations from 1 resolved packages; specifiers: ^1.2.2: 1
+- `trim-lines`: 1 declarations from 1 resolved packages; specifiers: ^3.0.0: 1
+- `trough`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `ts-algebra`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `tsscmp`: 1 declarations from 1 resolved packages; specifiers: ^1.0.6: 1
+- `tsx`: 1 declarations from 1 resolved packages; specifiers: ^4.22.4: 1
+- `tuf-js`: 1 declarations from 1 resolved packages; specifiers: ^4.1.0: 1
+- `uhyphen`: 1 declarations from 1 resolved packages; specifiers: ^0.2.0: 1
+- `unconfig-core`: 1 declarations from 1 resolved packages; specifiers: ^7.5.0: 1
+- `undici`: 1 declarations from 1 resolved packages; specifiers: ^7.25.0: 1
+- `unhomoglyph`: 1 declarations from 1 resolved packages; specifiers: ^1.0.6: 1
+- `unist-util-visit-parents`: 1 declarations from 1 resolved packages; specifiers: ^6.0.0: 1
+- `unpipe`: 1 declarations from 1 resolved packages; specifiers: ~1.0.0: 1
+- `url-join`: 1 declarations from 1 resolved packages; specifiers: ^4.0.1: 1
+- `url-parse`: 1 declarations from 1 resolved packages; specifiers: ^1.5.3: 1
+- `util-deprecate`: 1 declarations from 1 resolved packages; specifiers: ~1.0.1: 1
+- `validate-npm-package-name`: 1 declarations from 1 resolved packages; specifiers: ^7.0.2: 1
+- `vite`: 1 declarations from 1 resolved packages; specifiers: ^6.0.0 || ^7.0.0 || ^8.0.0: 1
+- `void-elements`: 1 declarations from 1 resolved packages; specifiers: ^3.1.0: 1
+- `vscode-jsonrpc`: 1 declarations from 1 resolved packages; specifiers: ^8.2.1: 1
+- `w3c-xmlserializer`: 1 declarations from 1 resolved packages; specifiers: ^5.0.0: 1
+- `web-streams-polyfill`: 1 declarations from 1 resolved packages; specifiers: ^3.0.3: 1
+- `which-module`: 1 declarations from 1 resolved packages; specifiers: ^2.0.0: 1
+- `why-is-node-running`: 1 declarations from 1 resolved packages; specifiers: ^2.3.0: 1
+- `win-guid`: 1 declarations from 1 resolved packages; specifiers: ^0.2.1: 1
+- `with`: 1 declarations from 1 resolved packages; specifiers: ^7.0.0: 1
+- `wordwrapjs`: 1 declarations from 1 resolved packages; specifiers: ^5.1.0: 1
+- `wrappy`: 1 declarations from 1 resolved packages; specifiers: 1: 1
+- `wsl-utils`: 1 declarations from 1 resolved packages; specifiers: ^0.1.0: 1
+- `xml-naming`: 1 declarations from 1 resolved packages; specifiers: ^0.1.0: 1
+- `xmlchars`: 1 declarations from 1 resolved packages; specifiers: ^2.2.0: 1
+- `yoctocolors`: 1 declarations from 1 resolved packages; specifiers: ^2.1.1: 1
+
+## Lifecycle Script Packages
+
+- `@copilotkit/aimock@1.27.3`: prepare
+- `@eshaz/web-worker@1.2.2`: prepare
+- `@google/genai@2.7.0`: preinstall, prepare
+- `@grammyjs/runner@2.0.3`: prepare
+- `@grammyjs/types@3.27.3`: prepare
+- `@grpc/grpc-js@1.14.4`: prepare
+- `@grpc/proto-loader@0.8.1`: prepare
+- `@isaacs/fs-minipass@4.0.1`: prepare
+- `@matrix-org/matrix-sdk-crypto-nodejs@0.6.0`: postinstall
+- `@openclaw/crabline@0.1.6`: prepare
+- `@openclaw/proxyline@0.3.3`: prepare
+- `@slack/bolt@4.7.3`: prepare
+- `@tloncorp/tlon-skill@0.4.0`: postinstall
+- `@tybys/wasm-util@0.10.2`: prepare
+- `@urbit/aura@3.0.0`: prepare
+- `acorn@7.4.1`: prepare
+- `acorn@8.16.0`: prepare
+- `acpx@0.11.2`: prepare
+- `astring@1.9.0`: prepare
+- `axios@1.18.0`: prepare
+- `baileys@7.0.0-rc13`: preinstall, prepare
+- `balanced-match@4.0.4`: prepare
+- `brace-expansion@5.0.7`: prepare
+- `chownr@3.0.0`: prepare
+- `ci-info@4.4.0`: prepare
+- `cliui@8.0.1`: prepare
+- `content-type@2.0.0`: prepare
+- `css-select@5.2.2`: prepare
+- `css-what@6.2.2`: prepare
+- `dom-serializer@2.0.0`: prepare
+- `domelementtype@2.3.0`: prepare
+- `domhandler@5.0.3`: prepare
+- `dompurify@3.4.11`: prepare
+- `domutils@3.2.2`: prepare
+- `entities@4.5.0`: prepare
+- `esbuild@0.28.1`: postinstall
+- `eventsource@3.0.7`: prepare
+- `express-rate-limit@8.5.2`: prepare
+- `fake-indexeddb@6.2.5`: prepare
+- `fsevents@2.3.2`: install
+- `fsevents@2.3.3`: install
+- `gaxios@6.7.1`: prepare
+- `gaxios@7.1.4`: prepare
+- `gaxios@7.1.5`: prepare
+- `gcp-metadata@6.1.1`: prepare
+- `gcp-metadata@8.1.2`: prepare
+- `get-caller-file@2.0.5`: prepare
+- `glob@13.0.6`: prepare
+- `google-auth-library@10.6.2`: prepare
+- `google-auth-library@10.7.0`: prepare
+- `google-auth-library@9.15.1`: prepare
+- `google-logging-utils@0.0.2`: prepare
+- `google-logging-utils@1.1.3`: prepare
+- `grammy@1.43.0`: prepare
+- `gtoken@7.1.0`: prepare
+- `hashery@1.5.1`: prepare
+- `hookified@1.15.1`: prepare
+- `htmlparser2@10.1.0`: prepare
+- `inline-style-parser@0.2.7`: prepare
+- `isexe@4.0.0`: prepare
+- `istanbul-reports@3.2.0`: prepare
+- `jsdom@29.1.1`: prepare
+- `jwt-decode@4.0.0`: prepare
+- `lifecycle-utils@2.1.0`: prepare
+- `lifecycle-utils@3.1.1`: prepare
+- `lightningcss@1.32.0`: prepare
+- `lowdb@7.0.1`: prepare
+- `lru-cache@11.5.1`: prepare
+- `lru-memoizer@2.3.0`: prepare
+- `matrix-js-sdk@41.6.0`: prepare
+- `minimatch@10.2.5`: prepare
+- `minipass-sized@2.0.0`: prepare
+- `minipass@7.1.3`: prepare
+- `minizlib@3.1.0`: prepare
+- `node-fetch@2.7.0`: prepare
+- `node-llama-cpp@3.18.1`: postinstall, prepare
+- `nth-check@2.1.1`: prepare
+- `oidc-client-ts@3.5.0`: prepare
+- `path-scurry@2.0.2`: prepare
+- `path-to-regexp@8.4.0`: prepare
+- `pino-abstract-transport@2.0.0`: prepare
+- `protobufjs@7.6.3`: postinstall
+- `rastermill@0.3.1`: prepare
+- `regex-utilities@2.3.0`: prepare
+- `signal-exit@4.1.0`: prepare
+- `skillflag@0.2.0`: prepare
+- `standardwebhooks@1.0.0`: prepare
+- `stdout-update@4.0.1`: prepare
+- `steno@4.0.2`: prepare
+- `style-to-js@1.1.21`: prepare
+- `style-to-object@1.0.14`: prepare
+- `tar@7.5.20`: prepare
+- `thread-stream@3.2.0`: prepare
+- `tinyexec@1.2.4`: prepare
+- `tokenjuice@0.8.1`: prepare
+- `tree-sitter-bash@0.25.1`: install
+- `undici@7.28.0`: prepare
+- `undici@8.5.0`: prepare
+- `uuid@14.0.0`: prepare
+- `web-streams-polyfill@3.3.3`: prepare
+- `whatwg-url@16.0.1`: prepare
+- `y18n@5.0.8`: prepare
+- `yallist@5.0.0`: prepare
+- `yargs-parser@21.1.1`: prepare
+- `yargs@15.4.1`: prepare
+- `yargs@17.7.2`: prepare
+- `zca-js@2.1.2`: prepare
+
+## Metadata Failures
+
+- `playwright-core@1.60.0`: npm registry response exceeded 16777216 bytes
+- `vite@8.0.16`: npm registry response exceeded 16777216 bytes

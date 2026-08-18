@@ -21,6 +21,63 @@
 
 ## Current Session
 
+- 2026-08-09 OpenClaw inventory pass:
+  - `giodl73-repo` has 62 open PRs across the OpenClaw organization:
+    `openclaw/openclaw` 40, `openclaw/rfcs` 14, `openclaw/clawhub` 7, and
+    `openclaw/openclaw-windows-node` 1.
+  - No branch was blanket-rebased: #100960 is a reviewed stack parent outside
+    a merge window, and the other stale heads require dependency or owner
+    decisions before history is rewritten.
+  - Human/actionable responses were posted on #115390 (Swift
+    cancellation-contract parity plus owner decision) and #115329 (prefer the
+    released workspace API unless an owner approves a separate memory
+    contract).
+  - RFC #48 and the active Claws stack are excluded because another session
+    owns that work.
+  - Since 2026-08-02, 24 authored PRs closed: 7 self-merged, 11 self-closed,
+    and 6 ClawHub feed PRs auto-closed by `github-actions` for inactivity.
+    No PR was merged or closed by another person. ClawHub #2953 was auto-closed
+    despite carrying `proof: sufficient` and `status: ready for maintainer
+    look`; reopening the six automation closures requires an explicit batch
+    decision.
+  - The initial series review found no unanswered human comments, unresolved
+    review threads, or current-head changes-requested reviews across the 49
+    mainline PRs then in scope. #111541 still shows a stale aggregate
+    `CHANGES_REQUESTED` decision, but Patrick's review targets an older head
+    and the exact-head refresh was already requested.
+  - Twelve remaining mainline PRs have a current ClawSweeper `needs-human`
+    verdict: Feeds #109461, #109584, #110438; Localization #112784, #112801,
+    #113427; Tool Profiles #112473; Memory #115329; Rust node #115390,
+    #116450, #116863; Hosted Control UI #116013.
+    At inventory time, 34 mainline PRs had failing gate contexts, dominated by
+    Real behavior proof/auto-response plus the localization dependency guard.
+  - Closed after current-main review on 2026-08-09: #83991 because live Vertex
+    proof invalidated the sanitizer-only fix; #98869 because the accepted
+    reachability finding left a zero-file parked placeholder; and #99255
+    because its injected dry-run state was unreachable and targeted the
+    pre-refactor config writer.
+  - Closed after the follow-up keep/close decision: #81104 (unsponsored broad
+    runtime governance contract), #84472 (dry-run implementation was not
+    reliably side-effect-free), #87774 (superseded by current Feishu routing),
+    #90708 (stale test-only stabilization batch), #99619 (closed requirement
+    plus false-positive/duplicated policy matching), and #101336 (stale broad
+    Policy repair-preview parent). Preserved open: #87471 for WebChat yield
+    replay, #90062 for fresh agent session ownership, and #101916 for the
+    narrower proof-backed `alsoAllow` preview; #101916 must be re-sliced from
+    its now-closed parent.
+  - The 14 RFC PRs have no failing checks or unresolved review threads. Thirteen
+    are `BLOCKED` on review/ownership and snapshot child #46 is `CLEAN` on
+    parent #20. Explicit ClawSweeper owner decisions remain on hosted feeds
+    #39, Policy #40, and delegated Claws RFC #52. RFC #48's older Omar review
+    is also delegated to the separate Claws session.
+  - The readiness/profile implementation stack was dependency-order rebased
+    and pushed: #104018 `abbdfa0876f`, #113421 `a7e0df75ff2`, #113422
+    `7cb458dd24d`, and #114636 `0a9851b6fa0`. The profile rebase also moved its
+    node evidence reader to current-main's device-backed pairing owner.
+  - Final condition-health PR #121355 at `8cb054a8f47` is stacked on #114636.
+    It keeps `/healthz` shallow, derives health from canonical readiness,
+    exposes `/statusz`, and makes modern `openclaw health` fail for canonical
+    failing/unknown state. RFC 0018 PR #33 links it at `247d952`.
 - Last updated: 2026-07-17.
 - Last agent: Copilot.
 - Current focus: Lobster PR cleanup for Gio-authored front queue in

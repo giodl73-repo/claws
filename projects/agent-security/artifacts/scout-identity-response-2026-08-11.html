@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Scout identity and containment response</title>
+</head>
+<body>
+<!--StartFragment-->
+<p><strong>I think this is directionally right.</strong> The one adjustment I would make is to separate three things that are getting collapsed in the thread:</p>
+
+<p><strong>1. Cloud/resource authorization</strong><br>Cloud Scout is the gateway and uses Entra ID. If the gateway can use OBO for the human user, that may be the right near-term path for user-delegated operations and could let us proceed without waiting for the Agent User/WAM work.</p>
+
+<p><strong>2. Node admission</strong><br>OpenClaw pairing answers whether a node is allowed to connect to the gateway and what capabilities it has. That is necessary, but it is not by itself the identity under which code runs on the device.</p>
+
+<p><strong>3. Local execution and containment</strong><br>Process sandboxing with inherited user identity is one valid initial profile. Session MXC is a stronger and separate profile when we need an isolated execution identity/boundary, clearer attribution, and independent lifecycle or revocation.</p>
+
+<p><strong>So my current read is:</strong><br>
+SuperApp + Scout can use Entra ID at the product boundary and OpenClaw-style pairing for node admission.<br>
+Human-user OBO may cover the near-term cloud authorization path.<br>
+We should not make the generic upstream OpenClaw node responsible for Microsoft product identity policy.<br>
+Session MXC remains important, but we need to be precise about the scenario it unlocks and whether it is an Ignite requirement, a stretch goal, or a post-Ignite dependency.<br>
+Oceana should stay out of this model unless that team identifies a concrete shared contract.</p>
+
+<p><strong>I am meeting with Chris Anderson today</strong> and will use that discussion to connect the identity and containment work: specifically, where OBO is sufficient, where a separate agent/session principal is mandatory, and what delivery assumptions we should make for Agent User/WAM and session MXC. I will bring the outcome back so we can turn this into a small scenario/identity matrix with named owners rather than one overloaded architecture diagram.</p>
+<!--EndFragment-->
+</body>
+</html>

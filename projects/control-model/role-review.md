@@ -127,3 +127,44 @@ RFC 0029 is filing-ready as a bounded proposal. Acceptance should authorize
 OC5 hardening, not imply that the subpaths are already supported or released.
 BM2, CFG1, and CFG2 should remain adjacent fork-only proposals until their own
 owner and release gates are satisfied.
+
+## Round 4: ownership and support
+
+Reviewed 2026-08-16 after the OC5 fixture, performance, compatibility,
+lifecycle, and security gates completed in fork-only PRs #244-#248.
+
+| Tension cluster | Ownership finding | Disposition |
+| --- | --- | --- |
+| Gateway/runtime owner | Publication ownership must not add a runtime committee or move Gateway authority into an adopter. The accountable package/protocol team needs an explicit DRI, deputy, compatibility window, and escalation path. | Nominated the existing `@openclaw/maintainer` team with individual primary and deputy candidates. Kept the Control Model optional and in-process; existing performance and lifecycle thresholds remain release gates. |
+| Release operator | A named maintainer is insufficient unless someone owns exact packed-artifact proof, partial-publication failure, rollback, release notes, and the supported version window. | Nominated the existing release team, required a separate acceptance record, retained clean Node/browser consumers and predecessor/main canaries, and added explicit bad-artifact deprecation or rollback responsibility. |
+| Security | CODEOWNERS presence does not prove incident ownership. Security acceptance must cover trust-boundary changes, private reporting, blocking findings, and replacement when a DRI leaves. | Nominated the existing secops team, required a named DRI and deputy, and made security response and ownership transfer part of recorded acceptance. |
+| Founder/simplicity | Ownership must not become a new governance layer or silently assign permanent support to the RFC author and adopters. | Kept one compact plan over existing teams, made silence non-acceptance, and blocked release rather than defaulting ownership to Lobster or the proposal author. |
+
+### Round 4 verdict
+
+The technical OC5 gate is complete enough to request ownership acceptance.
+OC6 remains blocked until every accountable team accepts or replaces the
+nominees and records the support window, response path, and rollback authority.
+
+## Round 5: whole-series implementation review
+
+Reviewed 2026-08-17 across OC1-OC5 and CU4-CU5 with independent GPT-5.6 Terra,
+Claude Opus 5, and Gemini 3.1 Pro Preview passes, followed by Codex branch
+review.
+
+| Review lens | Accepted findings and disposition |
+| --- | --- |
+| Lifecycle and concurrency | Preserved retryable observer cleanup, prevented models sharing one Gateway client from retiring each other's coordinator, protected reconnect replacement, and coalesced concurrent history work. |
+| Security and compatibility | Rejected prototype-chain run identifiers, bounded metadata DAGs without misclassifying shared references as cycles, fenced canonical session aliases, and made package acceptance self-contained. |
+| Control UI ownership and parity | Preserved direct-Gateway ownership for large rosters, made model promotion atomic and retryable, unified route-agent identity, retained unscoped questions, and filtered scoped prompts by route and agent. |
+
+Final focused proof passed 59 Gateway lifecycle/model tests, 61 integrated
+Control UI tests, 6 prompt tests, packed-package acceptance, type-aware lint,
+and Control UI TSGo. The final Codex branch review reported no accepted or
+actionable findings.
+
+### Round 5 verdict
+
+The fork-only technical series is review-clean. This closes the implementation
+review gate only; it does not claim support-owner consent, authorize
+publication, or begin OC6.

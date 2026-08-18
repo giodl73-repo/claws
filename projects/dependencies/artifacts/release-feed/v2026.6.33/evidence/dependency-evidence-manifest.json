@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-21T09:26:02.801Z",
+  "releaseTag": "v2026.6.33",
+  "releaseRef": "7af0cfc9c5488e03c4e2f528bdc7ac9f7778b35e",
+  "releaseSha": "7af0cfc9c5488e03c4e2f528bdc7ac9f7778b35e",
+  "npmDistTag": "extended-stable",
+  "packageName": "openclaw",
+  "packageVersion": "2026.6.33",
+  "workflowRunId": "29817136995",
+  "workflowRunAttempt": "1",
+  "dependencyChangeBaseRef": "v2026.6.11",
+  "reports": [
+    {
+      "name": "npm advisory vulnerability gate",
+      "command": "pnpm deps:vuln:gate",
+      "policy": "hard-blocking",
+      "json": "dependency-vulnerability-gate.json",
+      "markdown": "dependency-vulnerability-gate.md"
+    },
+    {
+      "name": "Transitive manifest risk report",
+      "command": "pnpm deps:transitive-risk:report",
+      "policy": "report-only",
+      "json": "transitive-manifest-risk-report.json",
+      "markdown": "transitive-manifest-risk-report.md"
+    },
+    {
+      "name": "Dependency ownership and install surface report",
+      "command": "pnpm deps:ownership-surface:report",
+      "policy": "report-only",
+      "json": "dependency-ownership-surface-report.json",
+      "markdown": "dependency-ownership-surface-report.md"
+    },
+    {
+      "name": "Dependency change report",
+      "command": "pnpm deps:changes:report",
+      "policy": "report-only",
+      "json": "dependency-changes-report.json",
+      "markdown": "dependency-changes-report.md"
+    }
+  ]
+}

@@ -27,14 +27,18 @@ be buried in generated wave directories.
 | `hosted-integration/` | Host integration bundles, owner-selected capability bindings, Hosting Profiles, narrow carriers, and ProxyPipe retirement.               |
 | `state-continuity/`   | State inventory, consistency, checkpoint/publication, dirty/synced status, fencing, restore, and persistence deletion.                   |
 | `promoteclaw/`        | Lobster OpenClaw version promotion from quarantine-cleared LTS releases, including patch carry-forward/drop validation.                  |
+| `lobsterclaw/`        | Private release-pinned OpenClaw distribution, simple patch provenance, deterministic reconstruction, and patch lifecycle.               |
 | `typeclaw/`           | OpenClaw TypeScript native / TS7 performance and compatibility evaluation.                                                               |
 | `codeprints/`         | Language-neutral repository factorization, first-language analyzers, owner-led evidence, and native-authority preservation.               |
 | `openclaw-rust-node/` | Rust node client/headless host RFC, node-contract conformance, release ownership, and first Lobster embedding evidence.                  |
+| `agent-security/`     | Scout/OpenClaw identity, gateway authorization, node admission, execution containment, session MXC, and product trust boundaries.       |
 | `memory/`             | Agent memory strategy, OpenClaw memory assessment, and XAI report coordination.                                                          |
 | `mail/`               | OpenClaw mail-channel research, mail plugin options, and Exchange/Microsoft Graph integration framing.                                   |
 | `claws/`              | OpenClaw RFC direction for runnable starter setups across skills, plugins, MCP servers, workspace files, persona files, and automations. |
 | `control-ui/`         | Hosted OpenClaw Control UI in Lobster, with version-matched assets, Lobster auth/routing/rollout, and enforced lockdown.                 |
 | `control-model/`      | Headless OpenClaw state, commands, and renderer-neutral UI artifacts for Lobster-owned React experiences.                              |
+| `board-model/`        | Framework-neutral projection of OpenClaw-owned session dashboards, widgets, layout, grants, and commands.                              |
+| `config-model/`       | Framework-neutral settings snapshots and future governed writes backed by schema, provenance, and Managed Configuration.               |
 | `claws-review-bot/`   | `@bic/claws-review-bot` package notes; primary Lobster PR reviewer lane plus separate ClawPilot issue-classifier experiment.             |
 | `localization/`       | OpenClaw localization architecture, current coverage, runtime message gaps, and bounded evidence slices.                                 |
 | `oc-path/`            | oc-path, workspace destination specs, and related local worktrees.                                                                       |
@@ -77,14 +81,18 @@ agent is assigned to an area, then read the area `README.md`.
 | Hosted Integration                  | `hosted-integration/SESSION.md` |
 | Runtime State Continuity            | `state-continuity/SESSION.md`   |
 | PromoteClaw                         | `promoteclaw/SESSION.md`        |
+| LobsterClaw                         | `lobsterclaw/SESSION.md`        |
 | TypeClaw                            | `typeclaw/SESSION.md`           |
 | Codeprints                          | `codeprints/SESSION.md`         |
 | OpenClaw Rust node                  | `openclaw-rust-node/SESSION.md` |
+| Agent security and identity         | `agent-security/SESSION.md`     |
 | Memory                              | `memory/SESSION.md`             |
 | Mail                                | `mail/SESSION.md`               |
 | Claws                               | `claws/SESSION.md`              |
 | Control UI hosting                  | `control-ui/SESSION.md`         |
 | OpenClaw Control Model              | `control-model/SESSION.md`      |
+| OpenClaw Board Model                | `board-model/SESSION.md`        |
+| OpenClaw Config Model               | `config-model/SESSION.md`       |
 | Claws Review Bot                    | `claws-review-bot/SESSION.md`   |
 | Localization                        | `localization/SESSION.md`       |
 | oc-path                             | `oc-path/SESSION.md`            |

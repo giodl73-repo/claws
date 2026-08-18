@@ -13,20 +13,160 @@
 - Package path: `packages/claws-review-bot`.
 - Azure job: `claws-review-bot-job`.
 - Primary lane: Lobster PR review.
+- Secondary lane: LobsterClaw PR review for non-`giodl` authors through
+  `claws-review-bot-lobsterclaw-job`.
 - Experimental lane: ClawPilot issue classification in `gim-home/m`.
 - Local notes repo: `C:\src\claws-hapi`.
 - Related checkout: `C:\src\clawpilot`.
+- Escalation delivery runtime:
+  `C:\src\lobsterclaw-runtime-2026.6.33`, pinned to LobsterClaw
+  `release/2026.6.33` at `566fd90276b2b468387c012c5981ac30ac1581ea`.
 - Main tracking files: `projects/claws-review-bot/rules.md`,
   `projects/clawpilot/SESSION.md`.
 - Relevant skill: `clawpilot-issue-loop` for live GitHub issue work.
 
 ## Current Session
 
-- Last updated: 2026-07-28.
+- Last updated: 2026-08-18.
 - Last agent: Copilot.
-- Current focus: review guidance now checks that dangerous features have
-  independently operable kill switches and that flighting is exceptional,
-  bounded, and removed after stability.
+- Current focus: operate the Lobster reviewer reliably while reducing
+  low-value repeat reviews and token spend through prioritization, cooldowns,
+  and deduplication; extend the same exact-head review behavior to
+  LobsterClaw PRs filed by other authors, then deliver human-decision
+  escalations through the pinned LobsterClaw OpenClaw runtime and Teams.
+- 2026-08-17 escalation runtime decision:
+  - Use LobsterClaw's immutable `release/2026.6.33` lineage rather than a newer
+    upstream OpenClaw worktree.
+  - Registered clean detached runtime worktree
+    `C:\src\lobsterclaw-runtime-2026.6.33` at exact head `566fd90276`.
+  - The pinned generation reports version `2026.6.33` and contains Microsoft
+    Teams proactive messaging plus cron scheduling.
+  - Restored dependencies with Node `24.19.0` and pnpm `11.2.2`, built the
+    runtime, and built the Teams package-local CJS entrypoints required by the
+    bundled channel loader.
+  - Created isolated state at
+    `C:\Users\giodl\.openclaw-claws-escalation`; config validation, secret
+    audit, and Doctor lint are clean. Its loopback Gateway is live on port
+    `18791`, with authenticated hooks restricted to `claws-escalation`.
+  - Removed the incorrect personal GitHub Copilot model route. The escalation
+    agent now uses corporate Microsoft Foundry deployment
+    `microsoft-foundry/gpt-5.4-mini` from the `lobster-shared` Azure OpenAI
+    resource in tenant `72f988bf-86f1-41af-91ab-2d7cd011db47`.
+  - `giodl@microsoft.com` has management-plane Contributor access but lacks the
+    OpenAI Responses data action for Entra bearer calls, so the runtime uses the
+    corporate resource API key from the restricted state-local secret file.
+    No personal GitHub or personal Azure model credential remains in this
+    isolated runtime.
+  - Direct OpenClaw and authenticated public-hook proofs both completed on
+    `microsoft-foundry/gpt-5.4-mini`; the Gateway and public tunnel are live.
+  - Installed Microsoft Teams CLI `3.1.0-preview.4`; no tenant login exists yet,
+    so app registration, bot credentials, app installation, and the first DM
+    conversation reference remain blocked on interactive Teams authentication.
+  - Installed Microsoft Dev Tunnel CLI, authenticated through the Windows Entra
+    session, and created persistent tunnel `claws-escalation.usw2`. The live
+    endpoints are `https://6618nkpq-18791.usw2.devtunnels.ms` for authenticated
+    OpenClaw hooks and `https://6618nkpq-3978.usw2.devtunnels.ms/api/messages`
+    for the future Teams bot. External health succeeds and unauthenticated hook
+    requests receive HTTP 401.
+  - Added state-local `gateway.ps1`, `tunnel.ps1`, and interactive
+    `complete-setup.ps1` launchers. The completion script refreshes the corporate
+    Foundry key when Azure CLI auth is available, otherwise reuses the restricted
+    state-local credential, probes the model, signs in to Teams, and verifies the
+    existing managed-identity app and cloud endpoint. It no longer attempts to
+    create a secret-backed app. `-ModelOnly` proves the model phase without
+    starting the interactive Teams login.
+  - The isolated plugin allowlist contains only `microsoft-foundry` and
+    `msteams`. Config validation remains clean.
+  - Deployed passwordless Teams delivery to corporate Azure:
+    - Container App `ca-claws-escalation` in `lobster-team`, pinned to image
+      `openclaw-claws-escalation:2026.6.33-566fd90`.
+    - User-assigned identity `id-claws-escalation` is federated to Teams app
+      `55e13c0b-d9e3-45ba-8955-3519b8669bfb`; no client secret or certificate is
+      used.
+    - One public HTTPS hostname routes `/api/messages` to the Teams listener and
+      `/hooks/*` to the authenticated Gateway.
+    - Live SQLite runs on container-local storage because Azure Files SMB locks
+      the OpenClaw state database. A consistent SQLite backup is checkpointed to
+      Azure Files every 15 seconds and restored on restart.
+    - Managed-identity federation uses issuer
+      `https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0`,
+      subject `1f7eb201-c02d-47fd-8b45-e654ea6953af` (the identity principal
+      ID, not client ID), and audience `api://AzureADTokenExchange`.
+    - Revision `ca-claws-escalation--0000002` is healthy. Public health
+      returns 200, unauthenticated hooks and Teams posts return 401, the
+      authenticated hook completed a real `microsoft-foundry/gpt-5.4-mini` turn,
+      and the durable snapshot exists.
+    - Teams app endpoint version `1.0.1` targets the Container App. The personal
+      app install and first DM created destination
+      `user:d2f8c77b-c261-481f-9f38-0fe7b1c674d0`; its stored public-cloud
+      conversation reference uses `https://smba.trafficmanager.net/teams`.
+    - Federation recovery released several old model/tool retries and produced
+      duplicate alerts for the same PR. Root cause: the agent could call the
+      `message` tool while hook fallback delivery was also enabled.
+      `ca-claws-escalation--0000002` removes all agent tools, so only the final
+      hook response is delivered.
+    - Controlled proof
+      `deployment-proof-20260818-managed-teams-v4-single-send` produced exactly
+      one Teams DM at 07:27:13 Pacific; replaying the same candidate deduped.
+  - ACR run `chm` built
+    `claws-review-bot:teams-single-send-20260818` and deployed it to both
+    reviewer jobs. Manual executions `claws-review-bot-job-qwfyqmv` and
+    `claws-review-bot-lobsterclaw-job-u6g2sho` succeeded. Scanning and Teams
+    delivery are active.
+  - Implemented deterministic human-feedback escalation in
+    `C:\src\claws-hapi-review-bot-escalation` on
+    `user/giodl/claws-review-bot-teams-escalation`: trusted-source detection,
+    requested-reviewer detection, Azure Blob dedupe/retry state, and bounded
+    authenticated OpenClaw hook publishing. Package tests pass 22/22; lint,
+    build, diff check, and independent code review pass. Local commit:
+    `b4a9927102431e82082bc297768ce2eda48b4201`.
+- 2026-08-16 LobsterClaw reviewer lane:
+  - Created scheduled Container Apps job
+    `claws-review-bot-lobsterclaw-job` using the same proven image, managed
+    identity, Key Vault secret references, and one-review poll budget as the
+    primary Lobster lane.
+  - It polls `bic/LobsterClaw` at `7,22,37,52 * * * *`, posts review results,
+    and skips PRs authored by `giodl`.
+  - Four initial manual/scheduled executions succeeded, including automatic
+    execution `claws-review-bot-lobsterclaw-job-29781787`.
+- 2026-08-15 operational baseline:
+  - Reliability is healthy: 97 executions and model calls in the last 24
+    hours, 673 executions and 672 model calls in seven days, with zero poll or
+    review-post failures.
+  - The scheduled lane uses essentially its full one-review budget every 15
+    minutes: 96 scheduled reviews per day, plus targeted runs when needed.
+  - Last-24-hour outcomes were 59 blocking reviews, 18 minor-only reviews, four
+    non-finding comments, and 16 formal approvals across 57 PRs. The visible
+    review comments contained zero Critical, 132 Major, and 94 Minor findings.
+  - Of 55 explicit re-evaluations, eight advanced to formal approval and 20
+    more resolved at least one prior finding while retaining open work.
+  - Model usage was 5.23 million tokens over 97 calls in 24 hours and 32.87
+    million over 672 calls in seven days. The next optimization target is
+    suppressing unchanged/redundant reviews without weakening exact-head
+    re-evaluation and approval recovery.
+  - Azure billing period 2026-08-05 through 2026-09-04: usage records through
+    2026-08-15 show $50.89 for the bot ($49.09 model inference and $1.79
+    infrastructure) and $53.68 for the whole subscription. The prior invoice
+    was $0.00, but the Visual Studio Enterprise subscription has its spending
+    limit disabled; at the recent roughly $5/day bot pace, the period projects
+    slightly above the included $150 monthly credit.
+  - Historical billing confirms prior overages:
+    - 2026-05-05 through 2026-06-04: $310.45 subscription usage, including
+      $254.69 for the bot; final invoice was $173.09 including $12.67 tax.
+    - 2026-06-05 through 2026-07-04: $209.78 subscription usage, including
+      $201.12 for the bot; final invoice was $64.49 including $4.72 tax.
+    - 2026-07-05 through 2026-08-04: $148.48 subscription usage, including
+      $139.98 for the bot; final invoice was $0.00 because usage stayed within
+      the monthly Visual Studio credit.
+- 2026-08-15 targeted re-review on Dino's Lobster PR `#8016`:
+  - Initial architect review on `ff8a55e41` raised one blocking rollout
+    decision and three minor factoring findings.
+  - Dino recorded the MEMBER-authoritative decision to reuse
+    `lobster.openclaw_workiq_office_agent_enabled` and fixed all three code
+    findings on `180b4f0d2d`.
+  - Targeted execution `claws-review-bot-job-oxxv98e` succeeded and submitted
+    formal approval `174055901` on the exact current head with no open or new
+    findings.
 - 2026-07-28 targeted review on Galin's Lobster PR `#6036`:
   - Waited for the active scheduled execution to finish, then started targeted
     execution `claws-review-bot-job-uga7swc` with
@@ -193,12 +333,14 @@
   - Early rule: comment when the classifier adds owner routing, related PR/issue
     context, severity normalization, or a concrete next action; skip when it
     would only restate an existing duplicate/validity/claimed-fix thread.
-- Active branch / PR: `claws-hapi` local `main`; no PR recorded for the runtime
-  guidance update.
-- Known dirty state: pre-existing unrelated project notes remain; this update
-  touches only `packages/claws-review-bot/voice/{voice,code,watches}.md`,
-  `packages/claws-review-bot/tests/voice.test.ts`, and this session note.
-- Blocking question: none.
+- Active branch / PR:
+  `user/giodl/claws-review-bot-teams-escalation` in
+  `C:\src\claws-hapi-review-bot-escalation`; no PR or deployment yet.
+- Known dirty state: the implementation worktree is clean at `b4a99271`.
+  `claws-hapi` has extensive pre-existing unrelated changes; preserve them.
+- Blocking question: interactive GitHub Copilot and Microsoft Teams logins are
+  required before the agent can complete a model turn or register/install the
+  Teams bot.
 
 ## Resume Checklist
 

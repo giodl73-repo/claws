@@ -26,7 +26,7 @@
 
 ## Current Session
 
-- Last updated: 2026-08-11
+- Last updated: 2026-08-13
 - Last agent: GitHub Copilot CLI
 - Presentation: the authoritative shared Peter/Vincent deck is the 19-slide
   OneDrive presentation `EnterpriseClaw - Peter and Vincent - 2026-08-05.pptx`.
@@ -115,16 +115,20 @@
   settlement, session/memory, approval/authority, Teams identity, and
   version/config families. Its executive framing treats "agent hung" as a
   symptom requiring owner-native state rather than a single model defect.
-- Current focus: advance the controlled-fork evidence series. EVID-021 merged
-  as `giodl73-repo/openclaw` PR #228 at
-  `fcadf5ced0ef139fe8e8319e2fbfb08bec8918c2`: Rust submitted progress sequence
-  1 before sequence 0, the Gateway delivered contiguous progress in order,
-  settled accepted-progress inactivity with `IDLE_TIMEOUT`, emitted the
-  correlated cancel, and explicitly ignored Rust's late progress and result
-  before one distinct fresh `system.which` request settled without renewed
-  approval or pairing rotation. EC-026 remains B; re-audit the cheapest
-  remaining bounded gap, likely streaming input or artifact/runtime readiness,
-  without claiming effect interruption or Rust authority.
+- Current focus: advance the controlled-fork evidence series. EVID-027 merged
+  as `giodl73-repo/openclaw` PR #237 at
+  `916552368850af0cd8bbe6bee85fadc9dcbb30cc`; its source head is
+  `bd2cfb26dea67abac4f3616c77ebea922f1f2307`. An integrity-bound
+  activation transition is required before Rust dispatches at 0/1. Rollback
+  against a valid newer selection generation is refused before mutation at
+  0/0. Accepted rollback serializes compare-and-replace under one owner lock
+  and atomically publishes the TypeScript selection plus rollback transition
+  in one generation-3 receipt before a fresh process dispatches at 1/0. Local
+  live proof, durable-selection regression, contracts, test types, deadcode,
+  full lint, script declarations, final Codex review, and all branch-owned fork
+  CI passed. Effect authority and production runtime authority remain
+  `none`/false; production routing, effects, state migration, release, and
+  TypeScript deletion remain unproven. EC-026 remains B.
 - Prior release-migration focus: deliver the Peter/Vincent Lobster plugin-and-patch assessment,
   then continue migrating the controlled EnterpriseClaw fork from its
   August-main baseline to signed OpenClaw `v2026.6.33` and rebuilding Lobster's
@@ -637,10 +641,12 @@
   `@clawsweeper re-review` request. It remains non-draft but still
   `CONFLICTING` / `DIRTY` against current `main`, with Gateway-owner/RFC
   decisions still required.
-- EVID-021 worktree:
-  `C:\src\openclaw-evid-021-rust-stream-idle-timeout` is clean at source head
-  `d40b6c2c2c5a33b690fbfaad382696ef94009523`; PR #228 is merged. Older
-  EVID-015 through EVID-020 and protocol-v1 worktrees are historical evidence.
+- EVID-027 worktree:
+  `/root/src/openclaw-evid-027-rust-activation-rollback` is clean at source
+  head `bd2cfb26dea67abac4f3616c77ebea922f1f2307`; PR #237 is merged at
+  `916552368850af0cd8bbe6bee85fadc9dcbb30cc`. EVID-026 is merged at
+  `8884b55ec32c2233a86de79f647f09979f1fb195`. Older EVID-015 through
+  EVID-025 and protocol-v1 worktrees are historical evidence.
 - Known dirty state: The wider checkout contains unrelated user changes.
   Preserve them. `projects/openclaw-design/` and this area are coherent
   documentation additions. This session added
@@ -653,9 +659,12 @@
   `C:\src\openclaw-pr100960-command-inventory` worktree was dirtied by a
   failed dependency install under unsupported Node `v24.14.0`; use the clean
   `-clean` worktree for #100960 continuation.
-- EVID-021 blocker: none. The next slice must be selected by a fresh owner-first
-  audit and must not promote cancel delivery to cooperative effect
-  interruption, stop certainty, runtime readiness, or Rust authority.
+- EVID-027 blocker: none. Four successive
+  Codex reviews found and drove fixes for compare/write serialization,
+  structured newer-generation refusal, atomic rollback receipt publication,
+  and activation-bound Rust dispatch; the final review and all branch-owned CI
+  passed. Final red aggregate CI is inherited fork infrastructure: missing App
+  keys, baseline dependency advisories, and runnerless OpenGrep.
 - Broader blocking question: compare the 22-file generated artifact against Lobster PR
   #6839's original 27 inputs, resolve excluded `0014`, `0020`, `0021`, `0023`,
   `0025`, and `0027`, remove stale timeout patcher/scripts, and obtain

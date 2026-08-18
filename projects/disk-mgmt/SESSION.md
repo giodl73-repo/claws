@@ -18,18 +18,38 @@
 
 ## Current Session
 
-- Last updated: 2026-08-06
-- Last agent: Codex
-- Current focus: track active project worktrees under the laptop-aware allocator;
-  Hosted Integration is paused and its current worktrees have been released
+- Last updated: 2026-08-16
+- Last agent: Copilot
+- Current focus: preserve Windows repair headroom while tracking active project
+  worktrees under the laptop-aware allocator
 - Active branch / PR: local tools on claws-hapi
 - Known dirty state: disk-mgmt allocator tools/docs; local registry gitignored
 - Laptop profile: **light** on `LAPTOP-2IACVKSU` (2 projects + 1 merge;
   claws cap ~30 GB; free target ≥40 GB)
 - Other laptop profile: **heavy** (4–5 projects + merge; claws cap ~50 GB; free target ≥50 GB)
 - Free space trajectory: ~5 → ~10 → ~23 → ~40 → ~253 → ~249 → ~239.7 →
-  ~291.2 → **51.0 GB free** on `DESKTOP-INBLCCK`; **207.2 GB free** on
+  ~291.2 → ~51.0 → **100.5 GB free** on `DESKTOP-INBLCCK`; **207.2 GB free** on
   `LAPTOP-2IACVKSU`
+- 2026-08-16 pressure audit on `DESKTOP-INBLCCK`: C: reached 1,871.2 GB used
+  and 34.3 GB free (98.2%). The principal consumers are 516.8 GB of
+  regenerable top-level Windows Cargo `target/` output, a 456.2 GB Ubuntu WSL
+  VHD containing 443 GB of live files, and a 104.6 GB Docker data VHD. No
+  cleanup was applied during this audit.
+  - Windows Cargo detail: 520.8 GB across 67 top-level target trees; 493.2 GB
+    is spread across 58 Lobster worktrees, led by feeds (29.8 GB), Control UI
+    proof (25.3 GB), state continuity ensure-ready (24.7 GB), and PromoteClaw
+    2026.6.33 (23.7 GB).
+  - WSL detail: `/root/src` is 309.9 GB across 439 checkout directories; 297.1
+    GB is in 398 OpenClaw-named directories and 12.8 GB is non-OpenClaw.
+    Major non-repo WSL consumers include root's pnpm store (68.8 GB) and
+    `/home/giodl` (54.7 GB, including additional package stores, caches, and
+    9.1 GB of checkouts).
+- 2026-08-14 Windows repair headroom cleanup: measured 45.2 GB free and 578.9
+  GB of regenerable Cargo `target/` output across 68 checkouts. Confirmed
+  `C:\src\lobster-pr6839-fix` was clean, pushed, and not allocated, then ran
+  `cargo clean` only in that checkout. Removed 58.1 GiB of build output and
+  reached 100.5 GB free. Preserved all source worktrees and the 22.6 GB
+  downloaded Windows repair/update payload.
 - 2026-08-07 ICELINES closeout: released the merged ICELINES matchup-edge and
   TRACKER pointer worktrees, pruned their stale registrations, and returned
   the light-profile allocator to 0/3 slots.

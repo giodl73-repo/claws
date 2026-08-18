@@ -11,16 +11,33 @@
 
 - Area: OpenClaw localization
 - Primary repo: `openclaw/openclaw`
-- Local worktree: `C:\src\openclaw-localization`
+- Local worktree: `C:\src\openclaw-localization-f01-repair`
 - RFC repo/worktree: `C:\src\openclaw-rfcs-localization`
-- Current branch: `user/giodl/rfc-0024-localization-runtime`
+- Current branch: `user/giodl/localization-bundle-foundation`
 - Main tracking file: `projects/localization/rfc-0024-pitch.md`
 - Skill to use: `faces-development-loop`
 
 ## Current Session
 
-- Last updated: 2026-08-01
+- Last updated: 2026-08-11
 - Last agent: Codex
+- F01 locale-owner repair (2026-08-11): #111541 is pushed at exact head
+  `df4b2f0fa9410327fb5ebf6f1e2ad7ed2ba43faf`. Control UI now delegates
+  browser-locale inference to the shared localization-core matcher while
+  retaining its existing 21-catalog shipped subset and lazy-loader ownership;
+  `sv-SE` therefore still falls back to English against the 22-locale product
+  target. The same head preserves the established valid Chinese-script contract:
+  canonical `zh-Hans-*` and `zh-Hant-*` tags select their shipped Chinese
+  catalogs, while unsupported scripts such as `zh-Latn-US` remain rejected. All
+  42 UI registry tests, direct runtime
+  proof, authenticated Codex review, direct current Oxc lint, formatting, and a
+  2,786-module production UI build pass. The PR body now contains a current-head
+  source transcript for `zh-Hans-US`, `zh-Hant-US`, and rejected `zh-Latn-US`;
+  proof follow-up `5261916488` requested a new exact-head ClawSweeper pass. All
+  146 hosted checks are complete, with Dependency Guard the sole failure. Its
+  exact-head authorization and Patrick's replacement correctness review remain
+  outstanding. ClawSweeper generation run `31560129744` completed successfully,
+  but its durable review publication had not updated at the last checkpoint.
 - Next-slice authoring checkpoint (2026-08-01): three clean fork branches are
   pushed after the exact updater head `00f37e291db8`, without modifying the
   existing merge branches. `user/giodl/localization-cli-shell-validation`
@@ -50,7 +67,12 @@
   stale GitHub changes-requested state; both were requested at comment
   5149583221, and exact-head ClawSweeper re-review is queued. Do not restack
   F03 until F01 actually lands.
-- Current focus: RFC 0024 is accepted and merged. Patrick Erichsen
+- Current focus: F01 #111541 is published at `df4b2f0fa9` with the shared
+  locale-matcher/Control UI ownership ambiguity and explicit Chinese-locale
+  compatibility finding resolved. Fresh hosted CI and
+  ClawSweeper re-review are running; Patrick's fresh correctness review and
+  Vince's exact-head dependency authorization remain required. Do not restack
+  F03 until F01 lands. RFC 0024 is accepted and merged. Patrick Erichsen
   (`Patrick-Erichsen`) remains the primary reviewer for the correctness-clean
   implementation stack. Vince and Peter remain requested only on their narrower
   Gateway/Control UI and trusted-automation decision surfaces. Land the
@@ -800,6 +822,76 @@
   before F01 lands would not clear Dependency Guard because their fork PRs are
   still compared with upstream `main`; restack them mechanically after each
   prerequisite lands.
+
+## 2026-08-11 Merge-stack refresh
+
+- Rebased the complete open localization stack onto upstream `main`
+  `edb7a1692e58d78ff7e196db39ea8eff297b2e19` and restored the intended graph:
+  F01 -> F03 -> catalog authoring -> surface adoption, with updater, TUI,
+  Gateway/Control UI, and wizard as independent adoption children. All eight
+  worktrees are clean and pass `git diff --check`. Published heads: F01
+  `ec3201d80a9b7534e155089453bd55650b9b402b`; F03
+  `7b8c3431625cae858da1d4dbbfb183faca643528`; authoring
+  `8cb3caea1f9d8bdcc607e2c8017a8bbb8e4abed1`; adoption
+  `e50fc71e5787f452a0ec0fd10da8703b490a8841`; updater
+  `42178527b5e9e65d417865414140c0dade9aa016`; TUI
+  `cba19dd7a0cc901084606194e3a9a5bb8c0a16c1`; Gateway
+  `ecc5f78ce64071805bd759b01b1d2c6b2c5fdcb3`; wizard
+  `c984e85239691d2a9cd7116a518ea7fc92a74b79`.
+- The authoring slice now emits one registry-driven `run_localization`
+  preflight decision. It runs for shared localization machinery, registries,
+  and paths under currently enrolled catalog/adapter roots; unrelated source
+  changes skip the localization job, missing diff data fails safe, and an
+  exact empty diff is a no-op. Adoption retains the existing docs-only push
+  exclusion instead of activating main CI globally. Each owner slice expands
+  the same shared decision only by registering its root; direct checks prove
+  enrolled=true and unrelated=false for updater, TUI, Control UI, and wizard.
+- Trusted refresh is now bounded by exact comparison base and head revisions.
+  It selects only changed catalog areas, publishes only their owner-local
+  generated targets, rejects cross-owner target redirection and catalog-area
+  removal, and applies atomic limits before provider calls (5 stale areas, 110
+  targets, 500 messages/area, 4,000 characters/message, 100,000 source
+  characters/area, and 2,000,000 source-character translations/run). The
+  workflow summary exposes the selected-area manifest before publication.
+- The refresh exposed one real cross-slice defect: catalog automation still
+  imported the discarded `OPENCLAW_LOCALES` name after F01 standardized the
+  contract on `SUPPORTED_LOCALES`. Fixed and committed in the owning authoring
+  slice as `fix(localization): use supported locale registry`, then replayed
+  through adoption and all four owner slices.
+- Focused local proof is green: F01 91 tests; authoring 178 focused assertions
+  plus scripts lint; adoption 44 exact
+  catalog/surface integration tests; updater 245 tests; TUI 249 tests; Gateway
+  71 tests; wizard
+  17 tests. `tsgo:scripts` currently reaches unrelated upstream errors in
+  terminal-core, sandbox path safety, config includes, Gateway, hooks, and
+  skills loading. Earlier full F01 build and check passed before this final
+  mainline replay; do not claim a fresh full remote gate yet.
+- Dependency report relative to current upstream main is exactly 4 added, 0
+  removed, 0 changed resolved packages and 2 dependency-file changes:
+  `intl-messageformat@11.2.12`, `@formatjs/fast-memoize@3.1.7`,
+  `@formatjs/icu-messageformat-parser@3.5.15`, and
+  `@formatjs/icu-skeleton-parser@2.1.11`. Direct installed-package inspection
+  found BSD/MIT licenses and no process, network, environment, or dynamic-eval
+  behavior.
+- All eight heads were pushed with explicit force-with-lease protection and
+  verified against the fork remotes. F01's hosted docs, guards, security, and
+  initial check shards are green; the expected Dependency Guard failure needs
+  Vince's current-head `/allow-dependencies-change`, and the remaining hosted
+  matrix is still running. Patrick and ClawSweeper were requested on the exact
+  F01 head; the wizard child remains draft.
+- Exact-head review found and fixed one authoring defect: the trusted workflow
+  declared provider-specific model variables while the translation engine
+  reads `OPENCLAW_CONTROL_UI_I18N_MODEL`. The workflow and provenance now use
+  the same selected provider/model contract, and the fix was replayed through
+  adoption and every owner child. A successful Codex review also reported a
+  Linux dynamic-locale concern, but the named files are absent from
+  `upstream/main...HEAD` and no branch-only commit touches them, so it was
+  rejected as unrelated upstream review noise. The final Codex review then
+  found two valid F01 issues: missing runtime-platform locale documentation and
+  unbounded pre-parse catalog activation. Both are fixed; catalog activation
+  now bounds locale catalogs, entries, aggregate characters, keys, and messages
+  before ICU parsing. Post-fix Codex reviews at F01 and cumulative authoring
+  report no actionable findings, and the exact-head wizard transcript passes.
 
 ## Resume Checklist
 

@@ -67,6 +67,18 @@
 - OpenClaw's existing Dependency Guard, vulnerability gate, release evidence,
   and container attestations are strong. The long-term upstream work is
   incremental and documented in `dependency-governance-rfc-outline.md`.
+- A concrete append-only feed prototype now exists under
+  `artifacts/release-feed/` for v2026.6.33. It preserves the original preflight
+  evidence, npm SLSA provenance, a 1,481-identity exact-tag source inventory,
+  and a clearly labeled 306-package post-release npm install reconstruction.
+  The exercise proves the remaining upstream gap is a release-time installed
+  npm SBOM plus durable, signed publication of the cross-artifact index.
+- The recommended upstream delivery is now split into two bounded PRs. The
+  first extends the existing npm preflight bundle with an exact prepared-
+  tarball install lock and normalized inventory; its draft body is
+  `prs/openclaw-release-install-evidence.md`. A second PR would publish the
+  immutable bundle through GitHub Releases only after release/security owners
+  approve the public schema, retention, and withdrawal contract.
 - Lobster owns the missing product-exact CFS/CG/attestation seam. A problem-led
   issue was filed as bic/lobster#8220 and is mirrored in
   `lobster-dependency-attestation-issue.md`.

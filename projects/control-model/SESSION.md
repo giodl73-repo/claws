@@ -22,45 +22,136 @@
 
 ## Current Session
 
-- Last updated: 2026-08-16.
+- Last updated: 2026-08-17.
 - Last agent: GitHub Copilot CLI.
-- Current focus: prepare RFC 0029 for filing while keeping all implementation
-  and future proposal work fork-only. The RFC now narrows acceptance to Control
-  Model v1, records completed chat/settings/dashboard evidence, and proposes
-  OC5 shared conformance, OC6 publication, OC7 cleanup, plus separate
-  BM2/CFG1/CFG2 adjacent gates. The later product gates remain OpenClaw ownership
-  and compatibility review, a released Gateway Client model surface, Lobster
-  CI and rollout, live hosted-Gateway proof, and shareable UX evidence. Existing
-  dashboards and settings are hosted first; native board and configuration
-  projections remain separate owner-first surfaces. Those follow-ups now have
-  clean fork-only evidence: Board Model extraction `c0111f9a8d` and Lobster
-  Config LC1 through `6d4513379e`, including real Electron visual proof. Release
-  ancestry shows no stable board-capable tag; `v2026.8.1-beta.2` is the first
-  fully compatible tag and passes the extraction proof. Lobster Board LB1 now
-  completes the fork-only second-host proof in React without admitting that
-  beta or changing the 2026.6.33 support statement. Settings writes still
-  require Managed Configuration.
+- Current focus: secure explicit publication ownership while keeping
+  implementation and future proposal work fork-only. CU1-CU3 remain complete
+  in OC4, OC5 now owns
+  the shared catalog, history/live/reconnect, authorization, run, tool,
+  question, artifact, and retained-bounds fixture corpus, and CU4
+  proves selected ordinary sends plus connected exact-run aborts through the
+  same Control Model used by Lobster. CU5 now proves exact selected-session
+  question commands and safe Canvas/MCP artifact adoption. CU6 observation and
+  exact incumbent-path deletion remain. Publication still requires owner review,
+  a released Gateway Client model surface, Lobster CI/rollout, live
+  hosted-Gateway proof, and shareable UX evidence. RFC head `ec85014093e`
+  publishes the ownership/support nomination packet, final review closeout,
+  and owner acceptance record; OC6 remains blocked until
+  each accountable team accepts or replaces its DRI/deputy and records its
+  support window, response path, and rollback authority. Board and Config
+  remain separate owner-first models; settings writes still require Managed
+  Configuration. Lobster L0 now consumes the immutable LobsterClaw 6.33
+  Candidate instead of copied source or Docker-time patch replay. LM1-LM5 are
+  restacked and published; LM6 is app-only and gated on three history fixes
+  entering the Candidate generation.
 - Filing-readiness review result: no architectural contradiction remains that
   should block filing. Required v1 conformance no longer includes session
   administration; the generic Gateway binding is construction-only; Config
   candidates are named CFG1/CFG2; and OC6 now requires clean browser and Node
   install/import proof from the packed release artifact. Support-owner
-  assignment, finite thresholds, shared conformance, compatibility canaries,
-  and live hosted-product evidence remain publication or shipment gates rather
-  than RFC filing blockers.
-- OC5 first-slice result: fork-local draft
+  acceptance and live hosted-product evidence remain publication or shipment
+  gates rather than RFC filing blockers. Finite thresholds, shared
+  conformance, compatibility canaries, lifecycle performance, and the security
+  review are now complete in fork-only evidence.
+- Whole-series review result: independent GPT-5.6 Terra, Claude Opus 5, and
+  Gemini 3.1 Pro Preview reviews covered OC1-OC5 and CU4-CU5, followed by a
+  clean Codex branch review against
+  `42a4d0a9b8b3da55123217b8aa1ac495238d4ffd`. Accepted lifecycle, shared
+  observer ownership, canonical-session alias, metadata graph, history
+  coalescing, large-roster, model-promotion, route-agent, and question-state
+  defects were fixed on the owning branches. Final proof passed 59 Gateway
+  lifecycle/model tests, 61 integrated Control UI tests, 6 prompt tests,
+  packed-package acceptance, type-aware lint, and Control UI TSGo. The core
+  and UI heads are published only in `giodl73-repo/openclaw`; both corresponding
+  upstream branch refs are absent.
+- Owner acceptance packet result: RFC head `ec85014093e` records the final
+  OC1-OC5 and CU4-CU5 review in the normative RFC and companion plans, and adds
+  `rfcs/0029/owner-acceptance-record.md`. The record requires explicit
+  per-surface decisions plus the release vehicle, compatibility window,
+  blocking gates, response paths, rollback authority, and observation window.
+  It remains a template rather than an assignment or implied consent.
+  The fork PR update is
+  https://github.com/giodl73-repo/rfcs/pull/8#issuecomment-5310783624.
+- OC5 result: fork-local draft
   [OpenClaw PR #241](https://github.com/giodl73-repo/openclaw/pull/241) at
-  `5a1f999fbb` is stacked on OC4. It centralizes and documents finite defaults,
-  adds one reusable authoritative/malformed catalog conformance pair, and
-  installs packed Gateway Protocol and Gateway Client artifacts into a clean
-  consumer for Node imports, declarations, and browser bundling. The package
-  proof exposed and fixed a real broken `browser` timeout re-export. OC5 is not
-  complete: broader history/live/reconnect and authorization fixtures,
-  measured performance/memory thresholds, compatibility canaries, security
-  review, and support-owner assignment remain open.
+  `bb6da3c58d` is stacked on OC4. It centralizes finite defaults, shares the
+  existing conversation harness, promotes catalog/history/live/reconnect and
+  approval authorization fixtures, and proves packed Gateway Protocol and
+  Gateway Client Node/declaration/browser consumption.
+- OC5 fixture continuation: fork-local test-only draft
+  [OpenClaw PR #244](https://github.com/giodl73-repo/openclaw/pull/244) at
+  `0b55290e90` is stacked on PR #241. It adds reusable run, tool, question,
+  artifact, and retained-bounds cases, including exact non-active abort
+  targeting, executable artifact metadata stripping, selected-only
+  materialization, and progress-update limits. Focused proof is 10 tests,
+  type-aware lint/format, and a clean Codex review. Production LOC delta is
+  zero.
+- OC5 performance continuation: fork-local test-only draft
+  [OpenClaw PR #245](https://github.com/giodl73-repo/openclaw/pull/245) at
+  `df12d64d3c` is stacked on PR #244. It adds an asserted artifact-heavy
+  projection benchmark for p95 latency, retained heap growth/slope, and exact
+  finite snapshot bounds. Blacksmith Testbox
+  `tbx_01m05mrxhzajxpdqb6ggdzx4y1` passed 24,000 measured events at 2,211.45 ms
+  p95 per 4,000 events, 52,272 bytes retained growth, and 8,482.51 bytes/batch
+  retained slope.
+- OC5 compatibility continuation: fork-local test-only draft
+  [OpenClaw PR #246](https://github.com/giodl73-repo/openclaw/pull/246) at
+  `409459025c` is stacked on PR #245. It adds an asserted wire matrix for the
+  candidate protocol, published predecessor `2026.7.2-beta.7`, and current
+  OpenClaw main. Blacksmith Testbox `tbx_01m05spdcyy97ht168pfy3tqv1` passed
+  against `main@63401b730b`; baseline model requests/events remain compatible,
+  while predecessor run-fenced send is explicitly unsupported.
+- OC5 lifecycle-performance continuation: fork-local test-only draft
+  [OpenClaw PR #247](https://github.com/giodl73-repo/openclaw/pull/247) at
+  `57a7859574e` is stacked on PR #246. It asserts initial projection, selected
+  deferred-view materialization, bounded inactive-conversation eviction, and
+  authoritative reconnect/resync latency with exact lifecycle invariants.
+  Blacksmith Testbox `tbx_01m05veqewr76wd05191gt6sb8` passed at 14.32 ms,
+  0.58 ms, 26.23 ms, and 8.07 ms p95 respectively.
+- OC5 security continuation: fork-local draft
+  [OpenClaw PR #248](https://github.com/giodl73-repo/openclaw/pull/248) at
+  `a158436f085` is stacked on PR #247. The full-stack review found one
+  medium-severity authority-boundary flaw: materialized deferred-view payloads
+  survived disconnect or connection-epoch replacement. The remediation clears
+  them on both transitions and requires fresh server materialization under the
+  new epoch. Post-fix security and Codex reviews were clean. Blacksmith Testbox
+  `tbx_01m05yh2krdyggq814g2jzyxf6` passed 55 Gateway Client tests and 46
+  Control UI Gateway-store tests. Named owner nominations are published;
+  explicit team acceptance remains open.
+- Ownership nomination result: RFC commit `574a8e027b` adds
+  `rfcs/0029/ownership-and-support-plan.md`, refreshes the top-level evidence
+  through OC5 PRs #244-#248 and CU5, and records existing team boundaries plus
+  proposed DRIs and deputies without claiming consent. The package, protocol,
+  and Control UI surfaces nominate `@openclaw/maintainer`; security nominates
+  `@openclaw/openclaw-secops`; release nominates
+  `@openclaw/openclaw-release-managers`; RFC acceptance nominates
+  `@openclaw/openclaw-rfc-approvers`. The fork PR comment is
+  https://github.com/giodl73-repo/rfcs/pull/8#issuecomment-5309167974. The PR
+  body now reflects all completed evidence and an explicit owner-review request
+  was sent to the primary/deputy and Control UI reviewer nominees:
+  https://github.com/giodl73-repo/rfcs/pull/8#issuecomment-5309195371.
+- CU4 result: fork-local draft
+  [OpenClaw PR #242](https://github.com/giodl73-repo/openclaw/pull/242) at
+  `07afbfde81` is stacked on OC5. Selected ordinary sends and connected
+  exact-run aborts now use the existing `ControlModelConversation` handle.
+  Session identity, attachments, reply/fencing inputs, retry metadata, and
+  active-leaf recovery details are preserved. Reconnect-resume, steer/inject,
+  background/non-selected, replay, realtime, skill-workshop, and session-wide
+  abort paths remain raw. Focused proof is 70 tests, production UI typecheck,
+  targeted lint/format, and clean autoreview.
+- CU5 result: fork-local draft
+  [OpenClaw PR #243](https://github.com/giodl73-repo/openclaw/pull/243) at
+  `0a8ad4188a6` is stacked on CU4. Exact pending selected-session question
+  answer/cancel commands use the cached conversation route and authoritative
+  agent identity while preserving prompt state, expiry deadlines, publication,
+  and raw fallback. Validated ready artifacts feed only the existing sandboxed
+  Canvas and MCP App adapters; canonical-first source matching and
+  occurrence-aware dedupe handle persisted/live overlap and reused tool IDs.
+  Global/operator approval queues remain raw. Focused proof is 245 tests,
+  production UI typecheck, targeted lint/format, and clean final review.
 - Active branch / PR: fork branch
-  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `ea3836e` in
-  [fork-local draft PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
+  `giodl73-repo/rfcs:user/giodl/rfc-0029-control-model` at `ec85014093e` in
+  [fork-local PR #8](https://github.com/giodl73-repo/rfcs/pull/8); no
   upstream RFC PR. OpenClaw OC1 is
   [fork-local draft PR #230](https://github.com/giodl73-repo/openclaw/pull/230)
   at `68d3165bab` from `user/giodl/control-model-oc1`; upstream draft PR
@@ -75,29 +166,54 @@
   at `72206b801f` from `user/giodl/control-model-oc4`, stacked on OC3.
   OpenClaw OC5 is
   [fork-local draft PR #241](https://github.com/giodl73-repo/openclaw/pull/241)
-  at `5a1f999fbb` from `user/giodl/control-model-oc5`, stacked on OC4.
+  at `bb6da3c58d` from `user/giodl/control-model-oc5`, stacked on OC4.
+  OpenClaw OC5 fixture continuation is
+  [fork-local draft PR #244](https://github.com/giodl73-repo/openclaw/pull/244)
+  at `0b55290e90` from `user/giodl/control-model-oc5-fixtures`, stacked on OC5.
+  OpenClaw OC5 performance continuation is
+  [fork-local draft PR #245](https://github.com/giodl73-repo/openclaw/pull/245)
+  at `df12d64d3c` from `user/giodl/control-model-oc5-performance`, stacked on
+  PR #244.
+  OpenClaw OC5 compatibility continuation is
+  [fork-local draft PR #246](https://github.com/giodl73-repo/openclaw/pull/246)
+  at `409459025c` from `user/giodl/control-model-oc5-compatibility`, stacked on
+  PR #245.
+  OpenClaw OC5 lifecycle-performance continuation is
+  [fork-local draft PR #247](https://github.com/giodl73-repo/openclaw/pull/247)
+  at `57a7859574e` from
+  `user/giodl/control-model-oc5-lifecycle-performance`, stacked on PR #246.
+  OpenClaw OC5 security continuation is
+  [fork-local draft PR #248](https://github.com/giodl73-repo/openclaw/pull/248)
+  at `a158436f085` from `user/giodl/control-model-oc5-security`, stacked on
+  PR #247.
+  OpenClaw CU4 is
+  [fork-local draft PR #242](https://github.com/giodl73-repo/openclaw/pull/242)
+  at `07afbfde81` from `user/giodl/control-model-cu4`, stacked on OC5.
+  OpenClaw CU5 is
+  [fork-local draft PR #243](https://github.com/giodl73-repo/openclaw/pull/243)
+  at `0a8ad4188a6` from `user/giodl/control-model-cu5`, stacked on CU4.
   M design issue
   [gim-home/m#5675](https://github.com/gim-home/m/issues/5675) remains open.
   Lobster L0 is
   [draft PR #8165](https://microsoft.ghe.com/bic/lobster/pull/8165) at
-  `80fe70b13f` from `giodl:user/giodl/control-model-carry`. Lobster LM1 is
+  `bf8b9b2785` from `giodl:user/giodl/control-model-carry`. Lobster LM1 is
   [fork-local draft PR #63](https://microsoft.ghe.com/giodl/lobster/pull/63)
-  at `b7686177d0` from `user/giodl/control-model-lm1`, stacked on the L0 branch.
+  at `f008fa7bc6` from `user/giodl/control-model-lm1`, stacked on the L0 branch.
   Lobster LM2 is
   [fork-local draft PR #64](https://microsoft.ghe.com/giodl/lobster/pull/64)
-  at `24641f575e` from `user/giodl/control-model-lm2`, stacked on LM1.
+  at `73f4cf6e9f` from `user/giodl/control-model-lm2`, stacked on LM1.
   Lobster LM3 is
   [fork-local draft PR #65](https://microsoft.ghe.com/giodl/lobster/pull/65)
-  at `0e60930621` from `user/giodl/control-model-lm3`, stacked on LM2.
+  at `7fdf1f227c` from `user/giodl/control-model-lm3`, stacked on LM2.
   Lobster LM4 is
   [fork-local draft PR #66](https://microsoft.ghe.com/giodl/lobster/pull/66)
-  at `8d16952671` from `user/giodl/control-model-lm4`, stacked on LM3.
+  at `9c27693088` from `user/giodl/control-model-lm4`, stacked on LM3.
   Lobster LM5 is
   [fork-local draft PR #67](https://microsoft.ghe.com/giodl/lobster/pull/67)
-  at `a7f73e5b08` from `user/giodl/control-model-lm5`, stacked on LM4.
+  at `c45e3a714e` from `user/giodl/control-model-lm5`, stacked on LM4.
   Lobster LM6 is
   [fork-local draft PR #68](https://microsoft.ghe.com/giodl/lobster/pull/68)
-  at `0bf31b9f57` from `user/giodl/control-model-lm6`, stacked on LM5.
+  at `c1d4d3ecf2` from `user/giodl/control-model-lm6`, stacked on LM5.
   Lobster Config LC1 is
   [fork-local draft PR #69](https://microsoft.ghe.com/giodl/lobster/pull/69)
   at `6d4513379e`, stacked on LM6. Lobster Board LB1 is
@@ -114,12 +230,12 @@
   OC1-OC4 plus Lobster L0/LM1-LM6. M issue #5675 now records the completed
   adopter evidence, the LM6 stop decision, dashboard/settings boundary
   corrections, and the publication/productization next steps.
-- Lobster L0 result: a private workspace package exposes the three proposed
-  Gateway Client model subpaths, while patch 0036 safely preserves canonical
-  bounded UI artifacts through the pinned Gateway history projection. Proof is
-  52 model tests, typecheck, type-aware lint, package/protocol builds, the
-  artifact regression, sequential application of all 35 patches to the pinned
-  OpenClaw SHA, and a clean final Codex autoreview.
+- Lobster L0 result: PR #8165 now resolves the three Gateway Client model
+  subpaths from #8363's immutable OpenClaw 6.33 LobsterClaw Candidate through
+  `@lobster/source`. The old copied package and patch 0036 replay are absent by
+  reconstruction. The 11-project lock passes Lobster supply-chain policy and
+  offline structural validation. Full local install remains gated on the
+  Lobster feed admitting `typebox@1.1.39` and `ipaddr.js@2.4.0`.
 - Lobster LM1 result: `GatewaySessionBackend` owns the Control Model transport
   binding and publishes canonical visual projections separately from raw events.
   `SessionViewBuilder` remains the sole renderer projection owner; history seeds
@@ -190,9 +306,12 @@
   idempotency-only rows as non-optimistic, and rejects malformed responses
   instead of silently presenting an empty transcript. Automatic history loading
   is disabled in this host so refresh ownership is explicit and cannot hang on
-  subscription setup or sign-out. Proof is 35 focused Control Model tests, 226
-  focused desktop tests, both package and desktop typechecks/lints, and clean
-  independent and Codex reviews.
+  subscription setup or sign-out. The restacked PR is now app-only. Against
+  Candidate `924ba24c1b37`, 214 provider/session-view assertions pass and the
+  three new history assertions fail as expected because the generation lacks
+  malformed-history rejection, authoritative-history pending inference, and
+  authoritative provisional-state fixes preserved in old commit
+  `0bf31b9f579296c814334745da64dbec516ee372`.
 - Lobster series decision: stop at LM6. Runtime-owner, Lobster-host, and
   skeptical-maintainer reviews all classified cross-client user-message
   correlation as a separate identity/retry contract expansion rather than a
@@ -247,20 +366,33 @@
   also clean at their rewritten stacked heads. Backup refs preserve all four
   pre-restack heads. The
   dedicated RFC worktree started clean from `openclaw/rfcs` `origin/main` at
-  `af708f0`. Lobster LM1 worktree `C:\src\lobster-control-model-lm1` is clean at
-  `b7686177d0`; LM2 worktree `C:\src\lobster-control-model-lm2` is clean at
-  `24641f575e`; LM3 worktree `C:\src\lobster-control-model-lm3` is clean at
-  `0e60930621`; LM4 worktree `C:\src\lobster-control-model-lm4` is clean at
-  `8d16952671`; LM5 worktree `C:\src\lobster-control-model-lm5` is clean at
-  `a7f73e5b08`; LM6 worktree `C:\src\lobster-control-model-lm6` is clean at
-  `0bf31b9f57`. Board LB1 worktree `C:\src\lobster-board-model-lb1` is clean at
+  `af708f0` and is clean at `e6abbaa`. The OC5 lifecycle worktree
+  `/root/src/openclaw-control-model-oc5-fixtures` is clean at `a158436f085`.
+  The CU5 worktree `/root/src/openclaw-control-model-cu5` is clean at
+  `0a8ad4188a6`. The integrated review worktree
+  `/root/src/openclaw-control-model-integrated-review` is clean at
+  `cf18df1671d`.
+  Lobster LM1 worktree `C:\src\lobster-control-model-lm1` is clean at
+  `f008fa7bc6`; LM2 worktree `C:\src\lobster-control-model-lm2` is clean at
+  `73f4cf6e9f`; LM3 worktree `C:\src\lobster-control-model-lm3` is clean at
+  `7fdf1f227c`; LM4 worktree `C:\src\lobster-control-model-lm4` is clean at
+  `9c27693088`; LM5 worktree `C:\src\lobster-control-model-lm5` is clean at
+  `c45e3a714e`; LM6 worktree `C:\src\lobster-control-model-lm6` is clean at
+  `c1d4d3ecf2`. Board LB1 worktree `C:\src\lobster-board-model-lb1` is clean at
   `f988457486` with its dependency junction removed. `claws-hapi` remains
   heavily dirty with unrelated pre-existing changes.
-- Blocking question: L0 still lacks Proof of Presence and the required Lobster
-  runtime contexts. RFC intake is frozen, so the design remains fork-only until
-  explicit authorization to submit upstream. Native dashboards must either
-  wait for a stable board-capable release or receive an explicit beta-admission
-  decision.
+- Lobster-first delivery moved from the private-fork PR #8165 to same-repository
+  PR #9248 so required ADO contexts can authenticate checkout. Rebased head
+  `d8acc9034d` is based on current `main` and remains explicitly pinned to
+  OpenClaw `v2026.6.33` / `7af0cfc9c5488e03c4e2f528bdc7ac9f7778b35e`.
+  Current main owns `0044-media-failure-receipt.patch`; Control Model artifact
+  projection moved to `0045`. The stack has 44 actual patches. Gateway Client
+  tests (55), typecheck, build, format, the full patch/parity gate, and Codex
+  branch review pass.
+- PR #9248 exact-head native validation is green: PullRequest build `177118907`
+  and Build Validation `177124659`. The PR is mergeable but blocked on renewed
+  `dspektor` approval. After approval, complete exact-head POP, merge, close
+  superseded #8165, and record the merge commit. RFC intake remains frozen.
 
 ## Resume Checklist
 
@@ -269,6 +401,7 @@
 - Run in WSL: `git -C /root/src/openclaw-control-model-oc2 status --short --branch`.
 - Run in WSL: `git -C /root/src/openclaw-control-model-oc3 status --short --branch`.
 - Run in WSL: `git -C /root/src/openclaw-control-model-oc4 status --short --branch`.
+- Run in WSL: `git -C /root/src/openclaw-control-model-oc5-fixtures status --short --branch`.
 - Run: `git -C C:\src\lobster-control-model-carry status --short --branch`.
 - Run: `git -C C:\src\lobster-control-model-lm1 status --short --branch`.
 - Run: `git -C C:\src\lobster-control-model-lm2 status --short --branch`.
@@ -276,11 +409,12 @@
 - Run: `git -C C:\src\lobster-control-model-lm4 status --short --branch`.
 - Verify: fork PRs #8, #230, #231, #232, and #238 remain open and no upstream
   implementation PR remains open.
-- Verify: Lobster PR #8165 remains at `80fe70b13f`; required contexts
+- Verify: Lobster PR #9248 remains at `d8acc9034d`; required contexts
   `GitOps/GitHubPop`, `Lobster-Runtime-PullRequest`, and
   `Lobster-Runtime-Build-Validation` are visible and green before readiness.
-  Current state: GitHubPop fails Proof of Presence and both runtime contexts are
-  absent; do not manually queue ADO without an explicit request.
+  Current state: PullRequest `177118907` and Build Validation `177124659` are
+  green; the PR is mergeable and awaits renewed `dspektor` approval. Wait for
+  approval before proving presence. After merge, close #8165 as superseded.
 - Verify: fork-local Lobster PR #63 remains stacked on
   `user/giodl/control-model-carry` at `b7686177d0`.
 - Verify: fork-local Lobster PR #64 remains stacked on
@@ -305,8 +439,12 @@
 
 ## Open Threads
 
-- Incorporate RFC/OC1/OC2/OC3/OC4 feedback before promoting any surface
-  upstream.
+- Incorporate RFC/OC1/OC2/OC3/OC4/OC5/CU4/CU5 feedback before promoting any
+  surface upstream.
+- Assign named package, protocol, Control UI, security, and release owners as
+  the final OC5 publication-readiness gate.
+- Plan CU6 only as post-publication observation and exact incumbent-path
+  deletion with rollback proof; do not broaden it into new model behavior.
 - Assign owners and gates for optional Gateway Client model publication,
   compatibility, conformance, security, and release support.
 - Replace Lobster's source carry with a released dependency, resolve required

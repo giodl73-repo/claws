@@ -28,6 +28,7 @@ confused with the main Lobster reviewer behavior.
 | Repo          | Scope            | Status      | Purpose                                                                        |
 | ------------- | ---------------- | ----------- | ------------------------------------------------------------------------------ |
 | `bic/lobster` | Lobster PRs      | primary     | Main reviewer lane for PR assessment.                                          |
+| `bic/LobsterClaw` | LobsterClaw PRs | secondary | Review PRs filed by authors other than `giodl` on an offset 15-minute schedule. |
 | `gim-home/m`  | ClawPilot issues | exploratory | Define a narrow issue-classifier lane for issue quality and regression triage. |
 
 ## Related Areas

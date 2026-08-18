@@ -14,6 +14,9 @@ Lobster patches still needed on that release.
 | ------------------------------------------------------- | --------------------------------------------------------- |
 | Session handoff                                         | `SESSION.md`                                              |
 | Feed discovery                                          | `feed-discovery.md`                                       |
+| Candidate exact-user flighting                          | `candidate-flighting-guide.md`                            |
+| Candidate-to-Active promotion                           | `active-promotion-guide.md`                               |
+| Release operator checklist                              | `release-operator-checklist.md`                           |
 | Upstream patch admission, promotion, and deletion rules | `../layering-contracts/upstream-first-release-compact.md` |
 
 ## M5 Rendezvous Role

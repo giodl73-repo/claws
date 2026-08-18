@@ -1,5 +1,160 @@
 # PromoteClaw Session Context
 
+## 2026-08-14 Candidate flight and Active promotion guidebooks
+
+- Added exact operator instructions for staging an immutable Official build in
+  Candidate 301/302, authoring the fail-closed ECS policy, flighting reviewed
+  exact users, stopping the flight, and proving recycle/state compatibility.
+- Added the guarded Candidate-to-Active 301/302 procedure using
+  `scripts/promoteclaw/promote-image.mjs`, including required receipts,
+  convergence checks, and rollback.
+- Added a one-page operator checklist. The guides explicitly preserve the
+  shipped authority boundary: exact-user flighting uses ECS, while Active image
+  promotion uses protected releases and does not rotate the compatibility role
+  map.
+
+## 2026-08-13 OpenClaw 2026.6.33 current-main merge #7055
+
+- Merged current Lobster `main` `613aa1a268` and published exact head
+  `3b203fdbf7`.
+- Resolved the Playwright conflicts by combining main's identity-scoped
+  ProxyPipe admission proof with the exact submitted-user-message reply
+  correlation from `fc0a4885dd`.
+- Main commit `678cba4c37` updated the Teams delivery patch stack against
+  OpenClaw 2026.5.28. Semantically re-derived its prepared/confirmed/ambiguous/
+  known-failed reply-effect contract onto the pinned OpenClaw 2026.6.33 patch
+  text while preserving the branch's newer threading/sendActivities behavior.
+- The full authoritative gate confirms all 38 patches are documented, wired,
+  and apply cleanly to pristine `v2026.6.33`; focused web tests pass 80/80 and
+  Lobster web TypeScript type-check passes.
+- Natural exact-head CI should exercise main's new container start-breaker
+  retirement (`7544f330a6`) against the prior Git-workspace worker-start loop.
+  Do not manually queue ADO.
+
+## 2026-08-12 OpenClaw 2026.6.33 hard-gate stabilization #7055
+
+- Published exact head `fc0a4885dd` after Runtime `176389886` repeated two
+  independent Playwright harness failures.
+- The drain-quiescence spec now correlates the rendered assistant stream to the
+  exact submitted user-message ID. This prevents asynchronously hydrated
+  `warmup-ok` history from satisfying the in-flight race turn.
+- The dedicated Git-workspace Playwright lane now disables outer Playwright
+  retries. Its single hard gate already owns bounded cold-agent and SPO retries;
+  repeating the 23-minute test could exceed the authoritative 50-minute TRIPS
+  workload budget and replace the real assertion with a lease-expiry kill.
+- Focused helper/config tests pass 79/79, changed-file Biome passes, and the
+  Lobster web TypeScript type-check passes. Await natural exact-head CI; do not
+  manually queue ADO.
+
+## 2026-08-12 OpenClaw 2026.6.33 Playwright retry repair #7055
+
+- Published exact head `8527455a87` after tracing Runtime `176329720` attempt 2
+  through its ADO test attachments.
+- The SPA was healthy: the first `/web/#/chat` navigation returned HTTP 200 and
+  rendered the chat page. A cold-agent reachability timeout then entered
+  `driveChatTurn`'s retry path, which reloaded and recursively navigated the same
+  tab to the same hash URL. Playwright returned `null` for that same-document
+  navigation, and the helper falsely reported the chat page as unavailable.
+- Reset retrying pages to `about:blank` before recursively driving the next turn,
+  forcing a real document navigation and response. Updated the focused helper
+  regression test. The bug is also present on current `main`; OpenClaw 6.33 only
+  exposed it by entering the cold-agent retry path.
+- All 68 focused helper tests, changed-file Biome formatting, TypeScript
+  type-check, and diff hygiene pass. Await natural exact-head CI; do not manually
+  queue ADO.
+
+## 2026-08-12 OpenClaw 2026.6.33 Git-workspace smoke repair #7055
+
+- Published exact head `54b7c7298a` after identifying the Graph/SPO failure as
+  a promotion-owned test regression, not an OpenClaw 6.33 hydration failure.
+- The generic `git_workspace_web_chat_e2e` lane intentionally runs with
+  `openclaw_doltlite_persistence_enabled` off and proves only `lobster.repo`
+  workspace I/O. Promotion commit `085386f6dd1` had incorrectly added
+  unconditional cron/database replacement assertions to that lane.
+- Removed those assertions and their single-use helpers. The dedicated
+  flight-enabled minted-token Playwright lane remains the authoritative
+  end-to-end proof for the separate DoltLite database git store.
+- Rust formatting and diff hygiene pass. Local E2E compilation is blocked by
+  the unavailable internal `ecsclient` registry package; natural ADO must prove
+  the exact head. Do not manually queue ADO.
+
+## 2026-08-12 OpenClaw 2026.6.33 engine repair #7055
+
+- Published exact head `e6a3cf50e6945e1fd71f7e0e4cff61b03bef3436`.
+  Natural Runtime `176299240` had reduced the branch-owned failures to two
+  Adapter tests and two persistence E2Es.
+- Staged `write-warmup-config.mjs` and `seed-warmup-plugin-index.mjs` in the
+  Adapter builder. The shared-SQLite cron proof now retains static contract
+  coverage on ADO's Node 20 and runs its dynamic `node:sqlite` proof on capable
+  Node versions.
+- Restored and re-derived `0021-doltlite-sqlite-engine.patch` against signed
+  OpenClaw `v2026.6.33`. Its omission was the shared E2E root cause: the
+  persisted database reported stock `orig`, then the cron row failed to hydrate
+  after container replacement.
+- The authoritative patch gate confirms all 38 patches are documented, wired,
+  and apply cleanly; focused Adapter tests and all-target clippy pass. Updated
+  the PR body from the stale 37-patch ledger to the exact 38-patch head.
+- Natural Runtime `176317685` is pending. GitHubPop still requires human proof
+  of presence, review remains `CHANGES_REQUESTED`, and Build Validation has not
+  attached. No ADO run was manually queued.
+
+## 2026-08-12 OpenClaw 2026.6.33 post-merge repair #7055
+
+- Published exact head `01dc92587ddfc18f42a420c2d28e58dc08f735b1`
+  after Runtime `176230247` exposed three deterministic merge regressions:
+  a shared-SQLite cron test inserted inside `serde_json::json!`, a missing
+  behavior-neutral annotation on the diagnostics state-path update, and a
+  snapshot smoke assertion that contradicted adapter-owned persistence.
+- Focused proof passes: Adapter clippy, shared-SQLite cron reader 1/1, unsafe
+  existing-cron rejection 1/1, snapshot plugin 26/26, kill-switch checker and
+  19 policy tests, active-switch registry, rustfmt, JS syntax, IDE diagnostics,
+  and diff hygiene. Local Docker image proof was blocked by a wedged Docker
+  Desktop Linux API, not by the build.
+- Replaced PR #7055's collapsed/stale description with a structured current
+  ledger: exact head, 37-patch inventory, external trusted-plugin warm-up,
+  current Runtime diagnosis, focused proof, and mandatory acceptance gates.
+- Natural Runtime `176299240` is running with no failures yet. GitHubPop still
+  requires human proof of presence, review remains `CHANGES_REQUESTED`, and
+  Build Validation has not attached. No ADO run was manually queued.
+- Next action: inspect only the first branch-owned failure from Runtime
+  `176299240`; if green, verify Runtime E2E, request exact-head rereview, and
+  confirm all three mandatory contexts.
+
+## 2026-08-11 OpenClaw 2026.6.33 exact-image repair #7055
+
+- Published exact head `eacf9726eb` after natural Runtime builds successively
+  exposed and verified repairs for generalized cron bundle patching, obsolete
+  memory-store config, root-owned official trust for external diagnostics and
+  msteams packages, and the production-image keyed-store fixture.
+- Runtime `176211118` passed image construction and the multiplayer adversarial
+  gate, then seven downstream E2E shards failed from one shared patched-source
+  syntax defect: patch `0014` redeclared OpenClaw 6.33's imported
+  `emitSessionsChanged` helper.
+- Removed the obsolete helper hunk and added a pristine patched-tree contract
+  preventing reintroduction. All 37 patches apply cleanly to exact
+  `v2026.6.33`; the sensitivity-label session/event tests pass against the
+  corrected patched tree.
+- Next action: let the natural exact-head Runtime check attach, inspect only its
+  first real failure if red, then verify all required contexts. GitHubPop and
+  stale requested-change review remain separate human gates.
+
+## 2026-08-09 OpenClaw 2026.6.11 hard-gate repair #6839
+
+- Runtime `175845685` passed every lane except the Git-workspace Graph/SPO
+  hard gate. Exact artifacts proved hard mint, Graph/SPO egress, cron-row
+  hydration, and DoltLite rehydration/restore all succeeded; only a direct
+  post-cron database marker was absent.
+- Root cause was the hard-gate waiter accepting the older in-flight automatic
+  `cron.add` checkpoint, whose snapshot contained the cron row but predated the
+  marker. The proof now waits for that automatic checkpoint before writing the
+  marker, so its explicit baseline/count waiter must observe a newer snapshot.
+  Rust formatting and exact E2E compilation pass.
+- Published exact head `56255e72bb3a03ae0e93540f2b1ecab783654622`,
+  refreshed body/evidence, and retained the dspektor G1 plus Galin/harryf
+  rereview requests. Natural Runtime `175852270` attached; GitHubPop remains
+  red for proof of presence and Build Validation is not yet attached. No ADO
+  run was manually queued and no competing PR was touched.
+
 ## 2026-08-09 OpenClaw 2026.7.1 exact-head repair #5402
 
 - Repaired review/runtime heads through `9002ca84cf`, `d0ea1609ee`, and
@@ -519,28 +674,23 @@
 
 ## Current Session
 
-- Last updated: 2026-07-27.
+- Last updated: 2026-08-14.
 - Last agent: Copilot CLI.
-- Current focus: Let #5402's natural required checks attach on the refreshed
-  exact head, then obtain fresh owner review and image/startup acceptance.
-- Active branch / PR: Lobster #5402
-  `https://microsoft.ghe.com/bic/lobster/pull/5402`, branch
-  `promoteclaw/openclaw-2026.7.1`, head `475061cdf9`, mergeable but blocked by
-  `CHANGES_REQUESTED`; `GitOps/GitHubPop` is failed and natural
-  `Lobster-Runtime-PullRequest` build `174048235` is queued/running.
-  Lobster #4528 remains open at `2026.6.11`, but is superseded as the promotion
-  target and should be used only as a donor for still-relevant patch and CI
-  repairs.
+- Current focus: finish exact-head acceptance for OpenClaw 2026.6.33 in
+  Lobster #7055, then stage the exact successful Official build on Candidate,
+  flight reviewed users, and promote the same digest to Active.
+- Active branch / PR: Lobster #7055
+  `https://microsoft.ghe.com/bic/lobster/pull/7055`, branch
+  `promoteclaw/openclaw-2026.6.33`, exact head `1b22ad178a`.
 - M5 #551 follow-through: after the Claws stack lands upstream, wait for the
   first containing OpenClaw release and its seven-day quarantine, then target
   Lobster pickup in roughly two weeks.
-- Known dirty state: PromoteClaw Lobster worktrees used this session are clean.
-  `C:\src\claws-hapi` has this session note update plus unrelated existing
-  dirty project notes.
-- Blocking question: #5402 needs current-head GitHubPop acceptance, fresh owner
-  review, and the natural runtime image/persisted-home/version-visibility
-  acceptance for the intentional `openclaw@2026.7.1` /
-  `@openclaw/diagnostics-otel@2026.5.28` pair.
+- Known dirty state: both PromoteClaw Lobster worktrees are clean.
+  `C:\src\claws-hapi` has this session update plus unrelated existing project
+  changes.
+- Blocking question: #7055 Runtime build `176632071` has a Repo Validation
+  failure that must be diagnosed. GitHubPop, Build Validation, and fresh
+  exact-head human approval are also still required before merge.
 
 ## Resume Checklist
 

@@ -1,8 +1,8 @@
 # State Continuity Session
 
-**Last updated:** 2026-07-28
+**Last updated:** 2026-08-13
 
-**Last agent:** Codex
+**Last agent:** Copilot
 
 **GitHub body safety:** The canonical formatted body for public umbrella issue
 114145 is `openclaw-scale-to-zero-umbrella-issue-body.md`. Update the live issue
@@ -12,46 +12,37 @@ text to the file and verify nonzero newlines plus rendered headings/lists.
 The canonical RFC PR 46 body is `rfc-pr-46-body.md`; the canonical OpenClaw PR
 112896 body is `openclaw-pr-112896-body.md`. Both follow the same rule.
 
-**Current focus:** Obtain owner review for RFC PR 46, now titled
-"application-consistent recovery for scale-to-zero," and the complete three-PR
-OpenClaw evidence stack: recovery points in PR 112385, final capture in PR
-112865, and restored admission in PR 112896, and the now-complete planned
-Lobster retained-wake evidence stack through fork PR 51. Public umbrella issue
+**Current focus:** Obtain owner review for RFC PR 46 and the refreshed
+three-PR OpenClaw evidence stack: recovery points in PR 112385 at `32809a14fc6`,
+final capture in PR 112865 at `77e09a8f5c9`, and restored admission in PR
+112896 at `53944d3d947`. The lower two PRs remain mergeable. The admission
+branch preserves exact PR 112865 ancestry and is synchronized with upstream
+`main` `4c12c973edc5`; its generated-only merge overlap was resolved by
+regenerating Plugin SDK API baselines. Upstream advanced again to
+`ffb2ed9e8955` immediately after publication, so GitHub again marks only PR
+112896 conflicting; its CI completed with zero failures. Refresh the child in
+the owner/merge window rather than continuously chasing generated-main churn.
+RFC PR 46 is mergeable at
+`2a70d5ce706b` and now opens its scale-to-zero follow-on with the plain-language
+goal, existing Vincent/Peter foundations, and the small remaining host handoff
+before preserving the detailed contracts below. Peter's per-run Cron
+settlement ownership and cold Gateway-backed CLI turns reduce scheduler and
+cold-start risk. Vincent's
+snapshot publication/cleanup campaign and per-owner auth snapshot isolation
+reduce durability and ownership risk. They do not yet provide retained wake,
+accepted-handoff lookup, generation placement, or readiness-gated delivery.
+The remaining RFC decision is whether this material belongs in an optional RFC
+0013 follow-on or a standalone draft RFC; automated review prefers a
+standalone draft. Public umbrella issue
 [openclaw/openclaw#114145](https://github.com/openclaw/openclaw/issues/114145)
-now centralizes the scale-to-zero outcome, operator evidence, competitor
-baseline, Microsoft Scout host boundary, and alternate-solution invitation.
-RFC head `2f290e9` now separates Gateway suspension, source-writer closure,
-capture, durable acceptance, source-compute retirement authority, restore, and
-admission readiness; composes restored admission with opt-in RFC 0018 subjects;
-and makes state-owner inventory plus recovery-journal lifecycle ownership
-normative. PR 112385 head `062f4d9` implements the resulting inventory fix: a
-closed state-owner receipt now binds owner, source runtime generation,
-inventory revision, and exact selected-agent set into recovery-point identity;
-one shared verifier rejects invalid, duplicate, traversal-shaped, and
-non-canonical inventories across the stack.
-The production activation-pinned inventory source remains an explicit
-state-owner integration decision rather than being invented in the private
-composer. The accepted three-model findings
-and the later ClawSweeper JSON-sidecar policy finding are fixed. Durable
-operation intent, result, startup, and readiness records now share one
-operation-scoped SQLite recovery journal. The RFC and all PR bodies carry real
-source-CLI/Gateway proof. No additional OpenClaw implementation PR is needed
-for this merge sequence. Full scale-to-zero still needs the bounded host
-wake/scheduler adapter after the Lobster owner/caller work is ready. RFC 0013,
-RFC PR 46, issue 114145, and `rfc-0013-follow-on-pr-plan.md` now describe three
-deferred evidence slices: an OpenClaw semantic wake receipt, host/Scout wake
-authority and cause coalescing, and readiness-gated retained delivery with
-crash replay. These must not be folded into the current three OpenClaw PRs.
-Vincent and the relevant state owners still need to accept the authoritative
-selected-agent inventory, host closure-evidence trust boundary, recovery-
-journal lifecycle, and core-versus-host restored-admission boundary.
+continues to track the complete outcome and owner decisions.
 
 **Parent project:** [`projects/snapshot`](../snapshot/README.md). RFC 0013,
 OpenClaw PR 105718, and `openclaw backup sqlite` remain authoritative for
 SQLite capture, verification, and fresh-target restore.
 
 **Active RFC work:** [openclaw/rfcs#46](https://github.com/openclaw/rfcs/pull/46), ready for review,
-branch `user/giodl/rfc-0013-continuity-sidecars`, commit `2f290e9`, stacked
+branch `user/giodl/rfc-0013-continuity-sidecars`, commit `2a70d5ce706b`, stacked
 on RFC PR 20. It binds a closed owner-selected component inventory, keeps
 ordinary snapshots host-protected, defines a deterministic logical acceptance
 byte set, and links OpenClaw PRs 112385, 112865, and 112896 as non-normative
@@ -86,7 +77,7 @@ is in `gateway-restore-status-role-review-2026-07-27.md`.
 
 **Implementation work ready for review:** OpenClaw
 [PR 112385](https://github.com/openclaw/openclaw/pull/112385), branch
-`user/giodl/rfc-0013-recovery-points`, commit `062f4d937b3`, contains the first
+`user/giodl/rfc-0013-recovery-points`, commit `32809a14fc6`, contains the first
 private aggregate-recovery-point slice. It composes verified global and agent
 RFC 0013 snapshots against the state owner's exact expected-agent inventory,
 binds the state-owner receipt and exact owner-manifest and artifact identities
@@ -98,7 +89,7 @@ surface.
 
 OpenClaw
 [PR 112865](https://github.com/openclaw/openclaw/pull/112865), branch
-`user/giodl/rfc-0013-final-capture`, commit `50148f20782`, is stacked on PR 112385. Its hidden offline operation durably binds host-supplied closure
+`user/giodl/rfc-0013-final-capture`, commit `77e09a8f5c9`, is stacked on PR 112385. Its hidden offline operation durably binds host-supplied closure
 evidence to real global and selected-agent snapshots, the canonical aggregate,
 and a full acceptance inventory. Intent and committed result are stored in
 OpenClaw's stable operation-scoped SQLite recovery journal rather than under
@@ -110,7 +101,7 @@ portability, or authorize destruction.
 
 OpenClaw
 [PR 112896](https://github.com/openclaw/openclaw/pull/112896), branch
-`user/giodl/rfc-0013-restored-admission`, commit `5dc5e719e7a`, is stacked on
+`user/giodl/rfc-0013-restored-admission`, commit `53944d3d947`, is stacked on
 PR 112865. Its hidden strict-stdin operation verifies the accepted recovery
 point before mutation, restores only into fresh canonical SQLite targets, and
 stores replay, startup, and readiness records in the same operation-scoped
@@ -130,36 +121,21 @@ The restored hold admits only an authenticated local, device-less backend
 probe so a new supervisor can call `gateway.restore.status`; its handshake is
 tracked as root work across restart. Nodes, browsers, enrollment, remote
 clients, ordinary RPCs, generic suspension, and restart drain remain closed.
-GitHub currently marks cumulative child PR 112896 conflicting after `main`
-moved beyond the exact reviewed stack. Rebase all three branches together in
-the next owner-review or merge window; do not churn only the child.
+The child branch is synchronized with upstream `main`
+`4c12c973edc56c5685cffafb4baa5a2b3ecd9ac6` through a merge that preserves the
+exact PR 112865 parent. The only overlap was generated Plugin SDK API baseline
+hashes, which were regenerated from the combined tree. Upstream subsequently
+advanced to `ffb2ed9e8955`; GitHub therefore marks the child conflicting again
+while PRs 112385 and 112865 remain mergeable.
 All three live PR bodies now link issue 114145, cite only the operator issues
 relevant to their slice without claiming to close them, credit the existing
 Vincent/Peter/Josh foundations they compose, and carry the current exact-head
-proof rather than stale pre-review hashes. On the current PR 112896 head, the
-status slice passes its Gateway protocol, server, admission, request-context,
-descriptor, and Admin HTTP RPC coverage; the final handshake/suspension rerun
-passes 51 tests across six projects. Production
-core, core-test, and extension typechecks complete without findings; the
-extension-test typecheck exceeded the local command window without an error,
-so CI is authoritative. The existing private
-`OPENCLAW_RFC0013_RESTORED_ADMISSION_FILE` carrier also makes the changed-file
-gate report 521 `OPENCLAW_*` variables against the 520 budget. Do not raise
-that budget: remove or consolidate the carrier, or get an explicit owner
-decision, before merge. The CI follow-up regenerates the checked-in Swift and
-Kotlin protocol clients and removes two accidental implementation-type
-exports. Its generated diff is stable, targeted Oxfmt and type-aware Oxlint are
-clean, `pnpm tsgo:core` passes, and final `codex review --uncommitted` reports
-no actionable finding.
-Fresh GitHub CI on `b86f135e2a9` cleared the previously failing dependency and
-bundled-protocol gates. The production/test type jobs currently stop in
-unchanged `src/agents/embedded-agent-runner/run/attempt.sessions-yield.ts`
-because the merge-base copy declares unused `originalLength`; PR 112896 does
-not touch that path. Treat this as a moving-main failure, not recovery-code
-evidence, and recheck before any rebase or rerun. Head `5dc5e719e7a` also fixes
-the two branch-owned lint findings (await semantics in the handler test and the
-startup-file line cap); focused tests pass 4/4, targeted type-aware oxlint is
-clean, and the final `codex review --uncommitted` reports no actionable finding.
+proof rather than stale pre-review hashes. On exact PR 112896 head `53944d3d947`, Plugin SDK API, all three dead-code
+gates, the complete docs gate, protocol registry/generation/since checks, and
+31 focused restore/admission tests pass. `gateway.restore.status` is assigned
+to the current `2026.8` train, generated Swift/Kotlin clients and SDK baselines
+are current, and accidental admission-only exports are removed. GitHub CI is
+complete for the published head with zero failures.
 
 Lobster [PR 5481](https://microsoft.ghe.com/bic/lobster/pull/5481), branch
 `user/giodl/rfc-0013-host-acceptance-contract`, commit `c313f37c49e`, is the

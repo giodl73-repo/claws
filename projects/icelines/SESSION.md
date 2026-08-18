@@ -16,11 +16,11 @@
 
 ## Current Session
 
-- Last updated: 2026-08-08
+- Last updated: 2026-08-17
 - Last agent: GitHub Copilot CLI
-- Current focus: Automate the game-morning producer-to-publisher handoff now that dynamic Matchup publication and discovery are merged.
-- Active branch / PR: ICELINES PR #42 merged at `848b6bb3`; TRACKER PR #47 merged at `9f8cb9a8`; no active worktree.
-- Known dirty state: The completed ICELINES publication and TRACKER pointer worktrees were released. The primary `claws-hapi` and TRACKER checkouts retain unrelated user changes and must not be cleaned.
+- Current focus: Resume game-morning producer-to-publisher automation after completing the portfolio maintenance reduction.
+- Active branch / PR: ICELINES `master` includes compact generated season forecasts at `cec088b9`; TRACKER `main` admits them through `b8996264`; no active worktree.
+- Known dirty state: ICELINES is clean and detached at pushed `master`. The primary `claws-hapi` and TRACKER checkouts retain unrelated user changes and must not be cleaned.
 - Blocking question: None.
 
 ## Resume Checklist
@@ -40,6 +40,7 @@
 
 ## Open Threads
 
+- Portfolio maintenance compacted three complete generated season forecasts without changing their JSON data, removing 386,459 formatting lines and 3.69 MiB; `season --json --out` now keeps future artifacts compact.
 - Historical observation harvesting is implemented through sealed prediction joins and `line-matchup-observe`.
 - Dynamic publication is implemented through `line-matchup-publish`, immutable fingerprinted blobs, and an atomic catalog.
 - Web and explicit TUI season/game/team discovery resolve the same published document; the bundled pilot remains only as a missing-publication compatibility fallback.

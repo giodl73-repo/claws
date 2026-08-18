@@ -31,14 +31,18 @@ tools.
 | Hosted Integration                  | `projects/hosted-integration/README.md`                     |
 | Runtime State Continuity            | `projects/state-continuity/README.md`                       |
 | PromoteClaw                         | `projects/promoteclaw/README.md`                            |
+| LobsterClaw                         | `projects/lobsterclaw/README.md`                         |
 | TypeClaw                            | `projects/typeclaw/README.md`                               |
 | Codeprints                          | `projects/codeprints/README.md`                             |
 | OpenClaw Rust node                  | `projects/openclaw-rust-node/README.md`                     |
+| Agent security and identity         | `projects/agent-security/README.md`                         |
 | Memory work                         | `projects/memory/README.md`                                 |
 | Mail work                           | `projects/mail/README.md`                                   |
 | Claws work                          | `projects/claws/README.md`                                  |
 | Control UI hosting                  | `projects/control-ui/README.md`                             |
 | OpenClaw Control Model              | `projects/control-model/README.md`                     |
+| OpenClaw Board Model                | `projects/board-model/README.md`                       |
+| OpenClaw Config Model               | `projects/config-model/README.md`                      |
 | Claws Review Bot                    | `projects/claws-review-bot/README.md`                  |
 | Localization work                   | `projects/localization/README.md`                           |
 | oc-path work                        | `projects/oc-path/README.md`                                |
@@ -188,6 +192,8 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
   dirty/synced status, fencing, restore, and Lobster persistence deletion.
 - PromoteClaw: regular Lobster OpenClaw version promotion from Galin's
   quarantine-cleared LTS feed, including patch carry-forward/drop validation.
+- LobsterClaw: private, release-pinned OpenClaw distribution with a simple
+  ordered Lobster patch ledger and retain/rebuild/remove lifecycle.
 - TypeClaw: OpenClaw TypeScript native / TS7 evaluation, benchmarks,
   compatibility findings, and feedback suitable for OpenClaw or Microsoft TS
   owners.
@@ -196,6 +202,9 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
 - OpenClaw Rust node: experimental Rust node client and headless host,
   language-neutral node-contract publication, two-layer pairing conformance,
   release ownership, and the first bounded Lobster embedding proof.
+- Agent security and identity: Scout/OpenClaw identity, gateway authorization,
+  node admission, execution containment, session MXC, and Microsoft product
+  obligations.
 - Memory: AI agent memory strategy, OpenClaw memory assessment, and XAI
   Harness / Tools / Skills report coordination.
 - Mail: OpenClaw mail-channel research, plugin options, and Exchange/Microsoft
@@ -206,6 +215,10 @@ this file and `WORKSPACE.md` before searching old wave artifacts.
   with Lobster-owned auth/routing/rollout and enforced lockdown.
 - OpenClaw Control Model: framework-neutral OpenClaw state, commands, and UI
   artifact projections for Lobster-owned React experiences.
+- OpenClaw Board Model: framework-neutral projection of OpenClaw-owned session
+  dashboards, widgets, layout, grants, and commands.
+- OpenClaw Config Model: framework-neutral read and governed-write settings
+  projection backed by OpenClaw schema and Managed Configuration authority.
 - Claws Review Bot: `@bic/claws-review-bot` package notes, with Lobster PR
   review as the primary lane and a separate ClawPilot issue-classifier
   experiment.

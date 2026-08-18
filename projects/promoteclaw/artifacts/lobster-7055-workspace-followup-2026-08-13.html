@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Lobster PR #7055 workspace follow-up</title>
+</head>
+<body>
+<!--StartFragment-->
+<h2>One important follow-up on PR #7055</h2>
+
+<p>
+  We have narrowed the remaining failure to the restored Git workspace, not the 6.33 image generally. The same image starts successfully for another pooled user. For the failing user, Lobster starts the worker and restores the SPO-backed workspace, but the OpenClaw Gateway then exits before reaching ready. Every replacement worker fails against that same restored state.
+</p>
+
+<p>
+  We have now instrumented the lane to preserve and redact the ephemeral worker log before lease cleanup removes the container. Build <strong>176483560</strong> is running with that instrumentation now.
+</p>
+
+<p>
+  The next failure should identify the exact file, config field, or plugin state in the workspace that 6.33 cannot load. We can then reproduce it locally and add a version-aware migration that preserves the user's data rather than resetting the workspace.
+</p>
+
+<p><a href="https://microsoft.ghe.com/bic/lobster/pull/7055">PR #7055</a></p>
+<!--EndFragment-->
+</body>
+</html>
