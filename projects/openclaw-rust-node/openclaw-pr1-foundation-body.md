@@ -97,17 +97,18 @@ review surface and is not required to review or use this foundation.
 - Standalone library: `cargo check --manifest-path crates/Cargo.toml -p openclaw-gateway-client --lib --no-default-features`
 - Rust workspace: `cargo test --manifest-path crates/Cargo.toml --workspace`
 - Strict lint: `cargo clippy --manifest-path crates/Cargo.toml --workspace --all-targets -- -D warnings`
-- Linux Tauri: `cargo test --manifest-path apps/linux/src-tauri/Cargo.toml` (98/98)
+- Linux Tauri Gateway-focused tests: 12/12 at the rebased head; the prior full
+  Tauri suite passed 98/98
 - Diff validation: `git diff --check main...HEAD`
 - Completed Codex review passes found and fixed request/cancellation ordering,
   mapped-IPv4 trust, TLS classification, terminal reconnect metadata, and
   final-event delivery issues. The fixes have focused unit or real-socket
   regressions.
-- Current head `41f4e705887` passes 56 Rust workspace tests, strict whole-workspace
-  Clippy, rustdoc with warnings denied, formatting, and diff validation on
-  Windows 11 / Rust 1.95.
-- Final clean-verdict retries of Codex review timed out in the local review
-  service; this PR does not represent those timed-out runs as clean.
+- Current head `1aaec0c5a56` passes 56 Rust workspace tests and strict
+  whole-workspace Clippy on Ubuntu 24.04/WSL2 with Rust 1.93, plus the focused
+  Tauri Gateway suite and diff validation.
+- The rebase also preserves the Gateway-provided challenge timestamp through
+  the shared client so Tauri and node-host sign the same server challenge.
 
 ## Real behavior proof
 
@@ -118,22 +119,22 @@ serves health/readiness, shuts down cleanly, and completes a node
 invocation/result over a real loopback WebSocket Gateway harness.
 
 Real environment tested:
-Ubuntu 24.04 under WSL2, Rust 1.95.0, current head `41f4e705887`, the compiled
+Ubuntu 24.04 under WSL2, Rust 1.95.0, proof head `41f4e705887`, the compiled
 `openclaw-node` binary, real loopback TCP/HTTP/WebSocket sockets, and the
 repository's Gateway protocol integration harness. No external endpoint or
 production credential was used.
 
 Exact steps or command run after this patch:
 
-1. Built `openclaw-node` from current head `41f4e705887` and launched it with a
+1. Built `openclaw-node` from proof head `41f4e705887` and launched it with a
    non-secret config that omitted `healthListen`; test-only identity/auth
    values were supplied through the documented environment indirections.
 2. Read the structured `host.starting` record, requested `/healthz` and
    `/readyz` at the reported address, sent SIGTERM, and read `host.stopped`.
 3. Ran `cargo test --manifest-path crates/Cargo.toml -p openclaw-node-host
    --test node_session node_profile_uses_shared_session_for_invocations -- --exact`.
-4. Ran the complete Rust workspace tests, strict Clippy/Rustdoc, formatting,
-   diff validation, and all Linux Tauri tests listed above.
+4. Re-ran the complete Rust workspace, strict Clippy, focused Tauri Gateway,
+   and diff gates after rebasing to `1aaec0c5a56`.
 
 Evidence after fix:
 
@@ -160,8 +161,9 @@ The kernel selected unused loopback port `43293`, rather than `18790`; the
 binary reported that exact address, returned HTTP 200 for liveness, correctly
 returned HTTP 503 before Gateway readiness, and stopped on SIGTERM. The socket
 harness then completed the challenge-bound node connect, activation,
-invocation, and correlated result path. At the same current head, the complete
-gates pass 56 Rust workspace tests plus doc tests and all 98 Linux Tauri tests.
+invocation, and correlated result path. At the rebased head, 56 Rust workspace
+tests and 12 focused Tauri Gateway tests pass; the earlier full Tauri run
+remains prior-head evidence.
 
 What was not tested:
 A packaged desktop UI build, a production Gateway deployment from the current
