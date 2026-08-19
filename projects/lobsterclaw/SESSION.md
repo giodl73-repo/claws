@@ -19,11 +19,11 @@
 
 ## Current Session
 
-- Last updated: 2026-08-18
+- Last updated: 2026-08-19
 - Last agent: GitHub Copilot CLI
-- Current focus: land LobsterClaw PR #28 so every future PR enters the
-  generated-release artifact policy from `main`, then rerun all five full
-  qualification lanes for strict-parity v5 before making them blocking.
+- Current focus: land LobsterClaw PR #29 so generated-release artifact failures
+  block aggregate CI, then import the latest Lobster patch queue into a new
+  immutable 6.33 generation and rerun all five full qualification lanes.
 - Integration portfolio: branch
   `user/giodl/qualification-parity-2026.6.33-v4` now publishes a CI-validated
   `.lobsterclaw/integration-candidates.json` ledger. Its backward-compatible
@@ -188,11 +188,21 @@
   `user/giodl/integration-portfolio-v2` at `4be4142453`; PR #26 merged at
   `d2035cf1e7`. The generated-artifact gate worktree
   `C:\src\lobsterclaw-generated-release-gate` is clean and pushed at
-  `6661f2dac5` for LobsterClaw PR #27.
-- Blocking question: LobsterClaw PR #28 needs review and CI. PR #27 is merged
-  at `a35cc26747`, so 6.33 generation PRs already run the exact gate. Lobster
-  PR #9364 still has a generated-artifact failure, one known timing-sensitive
-  Rust E2E failure, failed GitHubPop, and a stale changes-requested review.
+  `6661f2dac5` for merged LobsterClaw PR #27. The blocking-gate worktree
+  `C:\src\lobsterclaw-generated-gate-blocking` is clean and pushed at
+  `e32a1ada8a` for PR #29.
+- Blocking question: PR #29's automatic exact-head ADO build `177307769` is
+  running the dedicated required generated-artifact job. Azure definition
+  474401 now has an automatic pull-request trigger, and repository ruleset
+  4166176 requires aggregate `LobsterClaw CI` on `main` and `release/*`.
+  Copilot's default-branch concern was fixed, replied to, and resolved.
+- Latest Lobster patch delta: `origin/main` is `e77e09bfad`, 28 commits ahead of
+  strict-parity v5 source point `9c2c168fe5`, but only two main-line commits
+  changed the OpenClaw patch queue. `5291111c39` rebuilds
+  `0002-msteams-lobster.patch` (+109/-9), and `b5431157ad` adds the 259-line
+  `0046-system-which-live-authorization.patch`. The next immutable generation
+  must retain v5 qualification repairs 0046/0047, import the new 0002 bytes, and
+  assign the colliding new system patch generation ID 0048.
 
 ## Qualification Classification
 
@@ -238,9 +248,11 @@
 
 ## Resume Checklist
 
-- Land LobsterClaw PR #28 so every PR enters the gate job from `main`; generation
-  branches must run OpenClaw's `release:generated:check` against reconstructed
-  source, while policy-only branches validate the fail-closed wiring.
+- Confirm PR #29's automatic exact-head run blocks aggregate CI on the known
+  generated-artifact failure, complete Proof of Presence and review, and merge
+  the correction before importing a new patch queue.
+- Compare the latest clean Lobster `main` patch queue with strict-parity v5's 46
+  entries, then publish changed or new bytes as a new immutable 6.33 generation.
 - Diagnose the exact generated-artifact failure on Lobster PR #9364; treat its
   Rust shard failure separately as the known pre-wake hot-loop timing flake.
 - Rerun Linux checks, build/package, tests, Node 22, and Windows; make
