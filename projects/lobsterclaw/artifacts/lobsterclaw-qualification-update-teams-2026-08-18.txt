@@ -1,0 +1,29 @@
+LobsterClaw is moving toward a qualified 6.33 cutover for Lobster this week
+
+WHY THIS PROJECT EXISTS
+Lobster needs Microsoft-required OpenClaw capabilities before every change is available upstream, but a large patch queue is hard to reproduce, govern, test, and retire safely. LobsterClaw turns that queue into an immutable private distribution: one signed OpenClaw base, byte-identical patches with provenance and exit conditions, and one generated source tree that can be rebuilt exactly for every stable release.
+
+THE OPERATING MODEL
+RFCs and upstream PRs enter a separate candidate ledger first. We decide whether to watch, evaluate, carry, or supersede each item; only explicitly admitted patches enter a release generation. As OpenClaw adopts the behavior, we remove the downstream carry instead of becoming a permanent fork.
+
+WHAT LANDED TODAY
+The strict-parity 2026.6.33 generation and EnterpriseClaw intake ledger are merged on the release line, and transition-parity receipts are merged on main. This gives us an exact release identity plus durable proof that future promotions preserve supported historical transitions.
+Qualified-generation PR #25: https://microsoft.ghe.com/bic/LobsterClaw/pull/25
+Transition-parity PR #24: https://microsoft.ghe.com/bic/LobsterClaw/pull/24
+LobsterClaw repository: https://microsoft.ghe.com/bic/LobsterClaw
+
+WHY THE TESTS ARE TAKING REAL WORK
+We are not hiding incompatibilities or weakening gates. The complete patch composition exposed stale TypeScript fixtures, generated-release drift, strict lint debt, and mirror-sensitive shrinkwrap behavior that individual patches did not reveal alone. Each deterministic failure becomes a provenance-bound repair patch, then the entire immutable tree is replayed and tested again.
+
+CURRENT QUALIFICATION
+Node 22, Windows Node 24, immutable replay, all LobsterClaw contracts, dependency shrinkwrap, and the complete TypeScript project build are green. Linux checks have advanced to a finite strict-lint repair; after that we still require Linux build/package and Linux tests/E2E. No candidate becomes live merely because its PR merged.
+
+THIS WEEK'S CUTOVER PATH
+Finish the lint repair, rerun all Linux gates, then repin Lobster's consumer to the qualified immutable generation and validate the resulting image/runtime path. If those gates remain green, Lobster can switch from replaying patches during image construction to consuming LobsterClaw directly, while retaining the prior generation for rollback.
+Lobster consumer PR #8363: https://microsoft.ghe.com/bic/lobster/pull/8363
+
+PROOF LINE
+46 ordered patches; generation v5; PRs #24 and #25 merged; Windows, Node 22, replay, contracts, shrinkwrap, and typecheck green; Linux lint/build/test completion still required.
+
+NEXT ACTION
+Close the remaining Linux gates, publish the evidence, repin the Lobster consumer, and make the controlled live switch—without trading away rollback or upstream retirement discipline.

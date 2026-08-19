@@ -80,6 +80,8 @@ generation.
 | Area | File |
 | ---- | ---- |
 | Current session and resume state | `SESSION.md` |
+| Integration candidate intake | `.lobsterclaw/integration-candidates.json` in each active LobsterClaw release branch |
+| Definitive RFC and upstream PR portfolio | `integration-portfolio-2026-08-18.md` |
 
 ## Active Work
 
@@ -107,7 +109,10 @@ generation.
 | `bic/LobsterClaw` | #22 | `user/giodl/admit-control-model-generation` | Merged at `67b5350d30` | Admit strict-parity v3 into the release support contract. |
 | `bic/LobsterClaw` | #20 | `lobsterclaw/release-lifecycle-fixture` | Merged at `bb850ee098` | Rehearse import, publication, admission, promotion, rollback, adoption, and tamper rejection. |
 | `bic/LobsterClaw` | #23 | `lobsterclaw/transition-parity` | Merged at `23d0fd3ceb` into its stacked fixture base | Bind the 75-patch legacy-to-LobsterClaw transition receipt; its delta still requires #24 to reach `main`. |
-| `bic/LobsterClaw` | #24 | `lobsterclaw/release-lifecycle-fixture` | Open at `23d0fd3ceb`; mergeable, review required | Publish #23's six-file transition-parity validator, tests, receipts, CI registration, and README alignment onto `main`. |
+| `bic/LobsterClaw` | #24 | `lobsterclaw/release-lifecycle-fixture` | Merged at `9f1747e2ab` | Publish #23's six-file transition-parity validator, tests, receipts, CI registration, and README alignment onto `main`. |
+| `bic/LobsterClaw` | #25 | `user/giodl/qualification-parity-2026.6.33-v4` | Merged at `9fabe287b6` | Publish immutable strict-parity v5 with 46 patches and the repaired qualification harness. |
+| `bic/LobsterClaw` | #26 | `user/giodl/integration-portfolio-v2` | Merged at `d2035cf1e7` | Make LobsterClaw the definitive machine-readable and human-readable RFC, upstream PR, and incubation portfolio. |
+| `bic/LobsterClaw` | #27 | `user/giodl/generated-release-artifact-gate` | Open at `6661f2dac5` | Run OpenClaw's generated-release artifact gate against the exact reconstructed generation on every LobsterClaw PR. |
 | `bic/lobster` | #7055 | `promoteclaw/openclaw-2026.6.33` | Merged at `ed6a864f9a` from `584e8b2080` | Own the authoritative final 6.33 patch queue. The merged queue has 40 patches and differs from the currently published 39-patch LobsterClaw generation. |
 | `bic/lobster` | #8363 | `user/giodl/lobsterclaw-consumer` | Open at `f8d3dfd431`; mergeable but blocked | Builds independent 5.28 Active and strict-parity v3 6.33 Candidate generations without Docker-time replay. The 37-test consumer gate validates 42 current patch bytes, 42 historical source receipts, and 75-patch transition parity. Inspektor approved the exact head; Galin review refresh, GitHubPop, and both required runtime contexts remain. |
 | `bic/lobster` | #9364 | `user/giodl/openclaw-633-qualification-repairs` | Open at `ced2c62702`; mergeable, review required, hosted contexts pending | Runs OpenClaw's native generated release-artifact gate against the exact patched source, adds mirror-safe shrinkwrap normalization, records reviewed config/Plugin SDK baselines and budgets, and protects custom `web_fetch` header values as sensitive. |

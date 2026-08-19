@@ -21,9 +21,23 @@
 
 - Last updated: 2026-08-18
 - Last agent: GitHub Copilot CLI
-- Current focus: land Lobster qualification-repair PR #9364, publish its exact
-  patch queue as a new immutable 6.33 LobsterClaw generation, and rerun all five
-  qualification lanes before making them blocking.
+- Current focus: land LobsterClaw PR #27 so generated-release artifact ownership
+  moves into LobsterClaw, then rerun all five full qualification lanes for the
+  immutable strict-parity v5 generation before making them blocking.
+- Integration portfolio: branch
+  `user/giodl/qualification-parity-2026.6.33-v4` now publishes a CI-validated
+  `.lobsterclaw/integration-candidates.json` ledger. Its backward-compatible
+  schema extension tracks 23 Gio-owned RFC PRs, 23 linked
+  implementation/adopter PRs, direct upstream PR candidates, three
+  fork-incubated proposals, five strategic adjacent RFCs,
+  decisions, admitted manifest patch IDs, and exit conditions without treating
+  a proposal as shipped release behavior. Peter's merged OpenClaw #90431
+  node-hosted plugin tools/MCP/skills work is the first direct upstream PR row.
+  The human-readable definitive view is
+  `integration-portfolio-2026-08-18.md`. The authoritative LobsterClaw copy and
+  backward-compatible schema extension merged in
+  [LobsterClaw PR #26](https://microsoft.ghe.com/bic/LobsterClaw/pull/26) at
+  `d2035cf1e7`. The PR body and diff contain no EnterpriseClaw references.
 - Active branches:
   - `lobsterclaw/provenance-v1`, merged by LobsterClaw PR #1 at `3bdfd42af8c`.
   - `lobsterclaw/2026.6.33-7055-v2`, repaired generation at
@@ -167,12 +181,18 @@
   `C:\src\lobster-lobsterclaw-consumer-fix` is clean and pushed at
   `f8d3dfd431`. Lobster repair worktree
   `C:\src\lobster-633-qualification-repairs` is clean and pushed at
-  `ced2c62702`; LobsterClaw harness worktree
+  `9c2c168fe5`; LobsterClaw harness worktree
   `C:\src\lobsterclaw-633-qualification-green` has one uncommitted
-  qualification environment line pending the new immutable generation.
-- Blocking question: Lobster PR #9364 needs review plus all three required
-  hosted contexts. LobsterClaw PR #24 and Lobster PR #8363 retain their prior
-  review/hosted-gate blockers.
+  qualification environment line pending the new immutable generation. The v4
+  worktree `C:\src\lobsterclaw-633-parity-v4` is clean and pushed on
+  `user/giodl/integration-portfolio-v2` at `4be4142453`; PR #26 merged at
+  `d2035cf1e7`. The generated-artifact gate worktree
+  `C:\src\lobsterclaw-generated-release-gate` is clean and pushed at
+  `6661f2dac5` for LobsterClaw PR #27.
+- Blocking question: LobsterClaw PR #27 needs review and CI. Lobster PR #9364
+  still has a generated-artifact failure, one known timing-sensitive Rust E2E
+  failure, failed GitHubPop, and a stale changes-requested review. Lobster PR
+  #8363 retains its review/hosted-gate blockers.
 
 ## Qualification Classification
 
@@ -218,13 +238,12 @@
 
 ## Resume Checklist
 
-- Land Lobster PR #9364 after review and all required contexts pass.
-- Import exact patch 0045 bytes into a new immutable 6.33 LobsterClaw
-  generation; never move the v3 tag.
-- Restack/publish the bounded-output qualification harness on that generation.
+- Land LobsterClaw PR #27 so every generation PR runs OpenClaw's
+  `release:generated:check` against reconstructed source.
+- Diagnose the exact generated-artifact failure on Lobster PR #9364; treat its
+  Rust shard failure separately as the known pre-wake hot-loop timing flake.
 - Rerun Linux checks, build/package, tests, Node 22, and Windows; make
   qualification blocking only after all five are green.
-- Merge LobsterClaw PR #24 to publish transition parity on `main`.
 - Recheck Galin's review refresh and required contexts on Lobster PR #8363.
 - Keep recursive submodule checkout scoped to OpenClaw context packaging, E2E
   image building, and JS source tests.
