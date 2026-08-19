@@ -21,9 +21,9 @@
 
 - Last updated: 2026-08-18
 - Last agent: GitHub Copilot CLI
-- Current focus: land LobsterClaw PR #27 so generated-release artifact ownership
-  moves into LobsterClaw, then rerun all five full qualification lanes for the
-  immutable strict-parity v5 generation before making them blocking.
+- Current focus: land LobsterClaw PR #28 so every future PR enters the
+  generated-release artifact policy from `main`, then rerun all five full
+  qualification lanes for strict-parity v5 before making them blocking.
 - Integration portfolio: branch
   `user/giodl/qualification-parity-2026.6.33-v4` now publishes a CI-validated
   `.lobsterclaw/integration-candidates.json` ledger. Its backward-compatible
@@ -189,10 +189,10 @@
   `d2035cf1e7`. The generated-artifact gate worktree
   `C:\src\lobsterclaw-generated-release-gate` is clean and pushed at
   `6661f2dac5` for LobsterClaw PR #27.
-- Blocking question: LobsterClaw PR #27 needs review and CI. Lobster PR #9364
-  still has a generated-artifact failure, one known timing-sensitive Rust E2E
-  failure, failed GitHubPop, and a stale changes-requested review. Lobster PR
-  #8363 retains its review/hosted-gate blockers.
+- Blocking question: LobsterClaw PR #28 needs review and CI. PR #27 is merged
+  at `a35cc26747`, so 6.33 generation PRs already run the exact gate. Lobster
+  PR #9364 still has a generated-artifact failure, one known timing-sensitive
+  Rust E2E failure, failed GitHubPop, and a stale changes-requested review.
 
 ## Qualification Classification
 
@@ -238,8 +238,9 @@
 
 ## Resume Checklist
 
-- Land LobsterClaw PR #27 so every generation PR runs OpenClaw's
-  `release:generated:check` against reconstructed source.
+- Land LobsterClaw PR #28 so every PR enters the gate job from `main`; generation
+  branches must run OpenClaw's `release:generated:check` against reconstructed
+  source, while policy-only branches validate the fail-closed wiring.
 - Diagnose the exact generated-artifact failure on Lobster PR #9364; treat its
   Rust shard failure separately as the known pre-wake hot-loop timing flake.
 - Rerun Linux checks, build/package, tests, Node 22, and Windows; make
