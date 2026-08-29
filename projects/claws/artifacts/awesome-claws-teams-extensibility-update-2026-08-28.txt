@@ -1,0 +1,13 @@
+Awesome Claws is now 88 working examples of OpenClaw extensibility
+
+For Omar and the extensibility team: this is becoming a practical catalog of finished agent applications, not just prompt examples. Each Claw shows a repeatable job, packaged resources, visible consent boundaries, and a concrete user outcome.
+
+Value add: the catalog gives us realistic test cases for the OpenClaw app model: everyday assistants, specialist work agents, and manager Claws that coordinate other Claws without taking over user authority.
+
+Examples people immediately understand: Medical Appointment Prep, Document Renewal Tracker, Household Budget Steward, Purchase Researcher, Insurance Policy Organizer, Movie and Streaming Organizer, Music Organizer, Sports Team Watcher, Fantasy Sports Manager, and Home Inventory Binder.
+
+Manager Claws are the bigger story: Household Steward coordinates household specialists like meals, budget, repairs, documents, pets, appliances, and care-circle work. Work Chief of Staff coordinates project, product, release, recruiting, sales, support, procurement, grant, and fundraising artifacts. Care Circle Coordinator coordinates helper/care artifacts while preserving consent and privacy.
+
+Why it helps extensibility: these examples pressure-test installable agent apps across personal life, work operations, research, governance, engineering, and product. They show where OpenClaw needs portable resources, app identity, tool policy, consent previews, Control UI rendering, and ownership boundaries to feel real.
+
+Links: repo https://github.com/giodl73-repo/awesome-claws | explorer https://giodl73-repo.github.io/awesome-claws/ | roadmap https://github.com/giodl73-repo/awesome-claws/blob/main/docs/roadmap.md | Claws RFC https://github.com/openclaw/rfcs/pull/48

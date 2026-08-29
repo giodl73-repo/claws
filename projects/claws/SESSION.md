@@ -22,10 +22,318 @@
 
 ## Resume Snapshot
 
-- Last updated: 2026-08-18.
-- Last agent: GitHub Copilot CLI.
-- Current focus: Awesome Claws lifecycle capstones are landed; monitor adoption
-  and choose future work only from new evidence.
+- Last updated: 2026-08-28.
+- Last agent: Codex.
+- Current focus: consumer advisor-and-scheduler Claws and distinct multi-Claw
+  coordinators. Vehicle Service
+  Coordinator is merged in Awesome Claws #37; Home Repair Coordinator is merged
+  as #38 at `590a649002`; Green Thumb Coordinator is merged as #40 at
+  `bf2c2d3bdf`; Pet Care Coordinator is merged as #42 at `da24f6b981`;
+  Appliance Care Coordinator is merged as #44 at `3f79a9d8eb`; Pond and Water
+  Feature Coordinator is merged as #46 at `74dde9b618`; and Household Steward
+  is merged as #48 at `07f2e52f6b`. Work Chief of Staff proposal #49 advanced
+  through PR #50 and merged as `48d6d1eb10`. Work Chief of Staff is the 63rd
+  Claw and the workplace orchestration capstone; Household Steward remains the
+  consumer-household orchestration capstone. Household Steward's four-principal
+  fixture and parallel worker proof preserve per-member privacy,
+  specialist-Claw ownership, cross-domain conflicts, and exact joint approval.
+  Continue distinct
+  advisor-and-scheduler discovery without duplicating this household operating
+  layer. The two OpenClaw
+  compatibility repairs isolated by the first full-catalog canary remain
+  separate: lifecycle PR #126479 merged as `61842af8c5`, while Plugin SDK PR
+  #126478 is parked because it cannot merge without explicit SDK-owner approval.
+  Active Awesome Claws work has moved to `C:\src\awesome-claws` branch
+  `giodl/care-circle-coordinator`, adding the proposed 64th-66th Claws:
+  Care Circle Coordinator, Stock Portfolio Monitor, and Sports Team Watcher.
+  Care Circle carries recipient consent/privacy scopes, helper commitments, and
+  medical/legal/financial/emergency escalation blockers. Stock Portfolio
+  Monitor carries sourced long-only holdings, quote freshness, allocation drift,
+  issuer events, and no buy/sell/hold/trade/tax/legal authority. Sports Team
+  Watcher carries official-source team facts, scores/standings freshness,
+  roster/watch items, and no betting/ticketing/calendar/messaging authority.
+  All three have real Control UI screenshots, full static/regression proof, and
+  OpenClaw preview proof. Awesome Claws PR #51 merged as
+  `5a5c9a9f2b723c6a784db004f9a2950aa5bc0923` on 2026-08-21 after all hosted
+  gates were green, including Control UI Proof. The heavy installed lane timed
+  out locally for Care Circle in OpenClaw remove cleanup before the hosted proof
+  later passed. Eve portability is captured as a
+  non-normative follow-up proposal in
+  `projects/claws/eve-portability-proposal.md`; draft RFC PR #63 is open at
+  `https://github.com/openclaw/rfcs/pull/63` with RFC
+  `rfcs/0030-claws-eve-portability.md` and concrete sidecar
+  `rfcs/0030/claws-eve-portability-profile-v0.md`. ClawSweeper found no
+  actionable defects on #63 and left it as a maintainer-direction/product-scope
+  decision; RFC #48 is linked at
+  `https://github.com/openclaw/rfcs/pull/48#issuecomment-5375902279`. The next
+  Awesome Claws expansion plan is captured in
+  `projects/claws/personal-life-claws-roadmap.md`, prioritizing Movie and
+  Streaming Organizer, Subscription Manager, Music Organizer, Gift and
+  Relationship Manager, Personal Archive Curator, Restaurant/Venue Scout, Local
+  Events Watcher, School Coordinator, Games Backlog Manager, and Home Inventory
+  Binder. The first roadmap item merged through Awesome Claws PR #52
+  `https://github.com/giodl73-repo/awesome-claws/pull/52` as commit
+  `72ffa59` on 2026-08-22. It adds the 67th Claw, Movie and Streaming
+  Organizer, with a strict X3 movie-streaming schema,
+  source-backed availability and household preference fixture, semantic
+  negative tests, real Control UI screenshot, full `npm run check`, focused
+  prepare/test proof, and installed OpenClaw proof against
+  `C:\src\openclaw-claw-compat-proof\openclaw.mjs`. The second roadmap item is
+  implemented in Awesome Claws PR #53
+  `https://github.com/giodl73-repo/awesome-claws/pull/53` from branch
+  `giodl/subscription-manager` at commit `98753fd`, retargeted directly to
+  `main` after #52 merged. It adds Subscription Manager as the 68th Claw with
+  a strict X3 subscription-ledger schema, source-backed renewal,
+  price-change, usage, overlap, and review-question fixture, semantic negative
+  tests, real Control UI screenshot, full `npm run check`, focused
+  prepare/test proof, and an honest local installed-lane timeout note after the
+  lane reached inspect/preview/add/apply/application-scenario without a package
+  assertion failure. Awesome Claws PR #53 merged as `e916c5f` on 2026-08-22.
+  The third roadmap item is implemented in Awesome Claws PR #54
+  `https://github.com/giodl73-repo/awesome-claws/pull/54` from branch
+  `giodl/music-organizer` at commit `348de5b`. It adds Music Organizer as the
+  69th Claw with a strict X3 music-library schema, source-backed service
+  availability, library/listening-history/rights fixture, semantic negative
+  tests, real Control UI screenshot, full `npm run check`, focused
+  prepare/test proof, and an honest local installed-lane timeout note after the
+  lane entered the installed agent turn. Hosted Validate and Control UI Proof
+  passed, and #54 merged as `76316df` on 2026-08-22. The fourth roadmap item is
+  open as Awesome Claws PR #55
+  `https://github.com/giodl73-repo/awesome-claws/pull/55` from branch
+  `giodl/gift-relationship-manager` at commit `d48f4b6`. It adds Gift and
+  Relationship Manager as the 70th Claw with a strict X3 gift-plan schema,
+  recipient/occasion/preference/source evidence, privacy and surprise-risk
+  blockers, semantic negative tests, public artifact validation, real Control
+  UI screenshot, full `npm run check`, and focused prepare/test proof. Hosted
+  Validate, visual-assets, and Control UI Proof passed, and #55 merged as
+  `cbdaf81` on 2026-08-22. The fifth roadmap item merged through Awesome
+  Claws PR #56 `https://github.com/giodl73-repo/awesome-claws/pull/56` as
+  `43bbfb9` on 2026-08-23. It adds Personal Archive Curator as the 71st Claw
+  with a strict X3 archive-index schema, supplied file/note/link/receipt/photo/
+  warranty/memory source evidence, privacy and retention labels, duplicate
+  review, retrieval cues, blocked delete/move/share/upload/publish/permission/
+  memory-training/face-recognition actions, semantic negative tests, public
+  artifact validation, real Control UI screenshot, full `npm run check`, and
+  focused prepare/test proof. Hosted Validate, visual-assets, and Control UI
+  Proof passed. The sixth roadmap item merged through Awesome Claws PR #57
+  `https://github.com/giodl73-repo/awesome-claws/pull/57` as
+  `e3dd9c9` on 2026-08-23. It adds Restaurant and Venue Scout as the 72nd
+  Claw with a strict X3 venue-shortlist schema, official/menu/review/
+  reservation/map evidence, dietary and accessibility constraints, hours and
+  reservation freshness, price/distance/group preference review, blocked
+  reservation/order/payment/message/calendar/review actions, semantic negative
+  tests, public artifact validation, real Control UI screenshot, full
+  `npm run check`, and focused prepare/test proof. Hosted Validate,
+  visual-assets, and Control UI Proof passed. The seventh roadmap item merged
+  through Awesome Claws PR #58
+  `https://github.com/giodl73-repo/awesome-claws/pull/58` as `7662afc` on
+  2026-08-23. It adds Local Events Watcher as the 73rd Claw with a strict X3
+  event-watchlist schema, official/ticketing/venue/calendar/community evidence,
+  accessibility and age-fit constraints, schedule conflicts, price/location
+  fit, blocked ticket/waitlist/RSVP/contact/ride/payment/calendar/location/
+  posting actions, semantic negative tests, public artifact validation, real
+  Control UI screenshot, full `npm run check`, and focused prepare/test proof.
+  Hosted Validate, visual-assets, and Control UI Proof passed. The eighth
+  roadmap item merged through Awesome Claws PR #59
+  `https://github.com/giodl73-repo/awesome-claws/pull/59` as `5e5b57c` on
+  2026-08-23. It adds School Coordinator as the 74th Claw with a strict X3
+  school-logistics schema, LMS/assignment/teacher-note/calendar/form/
+  supply/accommodation evidence, student-safe privacy labels, guardian-review
+  questions, blocked form/message/school-contact/payment/calendar/enrollment/
+  attendance/disclosure/education/medical/legal/discipline actions, semantic
+  negative tests, public artifact validation, real Control UI screenshot, full
+  `npm run check`, and focused prepare/test proof. Hosted Validate,
+  visual-assets, and Control UI Proof passed. The ninth roadmap item merged
+  through Awesome Claws PR #60
+  `https://github.com/giodl73-repo/awesome-claws/pull/60` as `1427069` at
+  2026-08-24T02:22:28Z. It adds Games Backlog Manager as the 75th Claw with a
+  strict X3 game-backlog schema, library/store/subscription/rating/co-op
+  evidence, platform ownership, play status, co-op/content/session fit, family
+  and privacy constraints, blocked purchase/install/download/launch/multiplayer/
+  message/account/parental-control/review/stream/share actions, semantic
+  negative tests, public artifact validation, real Control UI screenshot, full
+  `npm run check`, and focused prepare/test proof. Hosted Validate,
+  visual-assets, and Control UI Proof passed.
+  The tenth roadmap item merged through Awesome Claws PR #61
+  `https://github.com/giodl73-repo/awesome-claws/pull/61` as `7b779d7` at
+  2026-08-24T03:06:20Z. It adds Home Inventory Binder as the 76th Claw with a
+  strict X3 home-inventory schema, possession/room/category/receipt/photo/
+  warranty/manual/serial/value evidence, condition and duplicate/gap review,
+  privacy labels, blocked claim/advice/upload/share/contact/sell/donate/
+  discard/move/account/disclosure actions, semantic negative tests, public
+  artifact validation, real Control UI screenshot, full `npm run check`, and
+  focused prepare/test proof. Hosted Validate, visual-assets, and Control UI
+  Proof passed. The catalog story pass merged through Awesome Claws PR #62
+  `https://github.com/giodl73-repo/awesome-claws/pull/62` as `101151b` at
+  2026-08-24T14:06:08Z. It updates the README for the completed 76-Claw
+  personal-agent wave, explicitly frames Household Steward, Work Chief of
+  Staff, and Care Circle Coordinator as manager-Claw capstones, fixes stale
+  54-package proof counts, and keeps the structured artifact validator wording
+  current. Local `npm run check` and hosted Validate, visual-assets, and Control
+  UI Proof passed. The next personal-agent gap merged through Awesome Claws PR
+  #63 `https://github.com/giodl73-repo/awesome-claws/pull/63` as `5a58c68` at
+  2026-08-24T16:03:53Z. It adds Meal and Grocery Planner as the 77th Claw with
+  a strict X3 meal-grocery schema, recipe/pantry/fridge/freezer/receipt/store/
+  coupon/owner-note evidence, dietary/allergy/budget/prep/leftover constraints,
+  grocery substitutions, blocked order/cart/delivery/subscription/calendar/
+  message/address/publish/discard/allergen-certainty/medical-diet-advice
+  actions, semantic negative tests, public artifact validation, real Control UI
+  screenshot, full `npm run check`, and focused prepare/test proof. Hosted
+  Validate, visual-assets, and Control UI Proof passed. The next gap merged
+  through Awesome Claws PR #64
+  `https://github.com/giodl73-repo/awesome-claws/pull/64` as `cca7a5a` at
+  2026-08-25T20:09:38Z. It adds Insurance Policy Organizer as the 78th Claw
+  with a strict X3 insurance-policy schema, declarations/policy/endorsement/
+  premium/renewal/receipt/inventory/owner-note evidence, coverage, limit,
+  deductible, premium, renewal, asset, and claim-readiness review, blocked
+  claim/coverage-change/cancel/renew/pay/contact/upload/calendar/disclosure/
+  legal-advice/insurance-advice/claim-value actions, semantic negative tests,
+  public artifact validation, real Control UI screenshot, full `npm run check`,
+  and focused prepare/test proof. Hosted Validate, visual-assets, and Control UI
+  Proof passed after the first Control UI run was cancelled for a long
+  installed-proof stall and the rerun completed successfully. The 78-Claw
+  catalog story pass merged through Awesome Claws PR #65
+  `https://github.com/giodl73-repo/awesome-claws/pull/65` as `6bf97a4` at
+  2026-08-26T12:47:21Z. It updates README framing so Meal and Grocery Planner
+  and Insurance Policy Organizer are part of the practical personal-agent lane,
+  clarifies that the README table is representative while the chooser/explorer
+  are the complete 78-Claw views, and fixes stale 76-package proof counts.
+  Local `npm run check` and hosted Validate, visual-assets, and Control UI Proof
+  passed. The next practical personal-agent gap merged through Awesome Claws PR
+  #66 `https://github.com/giodl73-repo/awesome-claws/pull/66` as `75d96f8` at
+  2026-08-27T01:33:37Z. It adds Tax Document Organizer as the 79th Claw with a
+  strict X3 tax-document schema, tax-source/document/evidence/deadline/
+  missing-item/review-question fixture, semantic validation for source support,
+  document references, handoff readiness, and owner authority, a real Control UI
+  screenshot, README/catalog count updates to 79, full `npm run check`, focused
+  prepare/test proof, public artifact validation, and contribution-neighbor
+  updates for related personal-agent claws. Hosted Validate on Ubuntu, macOS,
+  and Windows, visual-assets, dispatch, and Control UI Proof all passed; Control
+  UI completed in 29m53s. The next shopping-and-ownership gap merged through
+  Awesome Claws PR #67 `https://github.com/giodl73-repo/awesome-claws/pull/67`
+  as `b1b6c1d` at 2026-08-27T02:20:46Z. It adds Purchase Researcher as the
+  80th Claw with a strict X3 purchase-research schema, owner-supplied
+  constraints, product candidates, source quality, prices, availability,
+  warranty, return, shipping, risks, review questions, and blocked purchase/
+  payment/cart/account/credit/seller-contact/return/warranty authority. Local
+  proof passed full `npm run check`, focused prepare/test, public artifact
+  validation, X3 semantic tests, contribution review, and real Control UI
+  screenshot capture. Hosted Validate on Ubuntu, macOS, and Windows,
+  visual-assets, dispatch, and Control UI Proof all passed; Control UI
+  completed in 30m36s. The next spending-hygiene gap merged through Awesome
+  Claws PR #68 `https://github.com/giodl73-repo/awesome-claws/pull/68` as
+  `085add4` at 2026-08-27T11:54:12Z. It adds Household Budget Steward as the
+  81st Claw with a strict X3 household-budget schema, owner-supplied bills,
+  expenses, payroll notes, category targets, variance calculations, source
+  freshness, privacy labels, owner-review questions, bank-feed blockers,
+  inferred-amount blockers, and blocked banking/payment/account/vendor/contact/
+  cancellation/credit/calendar/messaging/tax/legal/financial/investment-advice
+  authority. Local proof passed full `npm run check`, focused prepare/test,
+  public artifact validation, X3 semantic tests, contribution review, and real
+  Control UI screenshot capture. Hosted Validate on Ubuntu, macOS, and Windows,
+  visual-assets, dispatch, and Control UI Proof all passed; Control UI
+  completed in 27m22s. The next personal-memory gap merged through Awesome
+  Claws PR #69 `https://github.com/giodl73-repo/awesome-claws/pull/69` as
+  `e013bbc` at 2026-08-27T12:58:52Z. It adds Life Timeline Keeper as the 82nd
+  Claw with a strict X3 life-timeline schema, owner-reviewed dated events,
+  people/place/source/document-media pointer references, chronology checks,
+  supported-certainty rules, privacy and sharing blockers, no face/person
+  identification or sensitive/legal/medical/genealogical claims, semantic
+  negative tests, contribution distinction review, real Control UI screenshot
+  capture, and README/catalog count updates to 82. Local proof passed full
+  `npm run check`, focused prepare/test, public artifact validation, and X3
+  semantic tests. Hosted Validate on Ubuntu, macOS, and Windows, visual-assets,
+  dispatch, and Control UI Proof all passed; Control UI completed in 31m23s.
+  The next family-logistics gap merged through Awesome Claws PR #70
+  `https://github.com/giodl73-repo/awesome-claws/pull/70` as `777a3df` at
+  2026-08-27T13:38:47Z. It adds Child Activity Manager as the 83rd Claw with a
+  strict X3 activity-logistics schema, child-safe activity rosters, sessions,
+  registration, fee, waiver, equipment, transportation, helper-permission,
+  conflict, and guardian-review evidence, semantic validation for schedule
+  ranges, source support, helper scope, stale-source readiness, dangling
+  references, action overreach, and owner authority. Contribution review
+  reports `likely-extension` against School Coordinator at 40.8%; the PR calls
+  out the distinction between school coursework/LMS/forms and extracurricular
+  registration/waiver/fee/gear/carpool/pickup logistics. Local proof passed
+  full `npm run check`, focused prepare/test, public artifact validation, X3
+  semantic tests, contribution review, and real Control UI screenshot capture.
+  Hosted Validate on Ubuntu, macOS, and Windows, visual-assets, dispatch, and
+  Control UI Proof all passed; Control UI completed in 24m10s. The Awesome
+  Claws catalog reached 83 Claws. The next local-operations gap merged through
+  Awesome Claws PR #71
+  `https://github.com/giodl73-repo/awesome-claws/pull/71` as `a9b0718` at
+  2026-08-27T14:37:18Z. It adds Neighborhood Operations Watcher as the 84th
+  Claw with a strict X3 neighborhood-operations schema, approved public/owner
+  sources for waste calendars, road maps, utility notices, permit pages,
+  meeting agendas, school board items, transit notices, HOA notes, zones,
+  notices, schedules, routine impacts, conflicts, owner-review questions, and
+  blocked complaints, calls, submissions, posting, neighbor messaging,
+  account/payment/calendar/service-request/address-disclosure/legal/emergency/
+  safety-certainty actions. Contribution review reports
+  `needs-distinction-review`, nearest School Coordinator at 30.1%; the PR
+  calls out the distinction between civic/utility/waste/road/permit/meeting
+  operations and optional local events, school logistics, child activity
+  logistics, subscriptions, or household-manager orchestration. Local proof
+  passed full `npm run check`, focused prepare/test, public artifact
+  validation, X3 semantic tests, contribution review, and real Control UI
+  screenshot capture. Hosted Validate on Ubuntu, macOS, and Windows,
+  visual-assets, dispatch, and Control UI Proof all passed; Control UI
+  completed in 30m55s. The Awesome Claws catalog reached 84 Claws. The next
+  personal-ownership gap merged through Awesome Claws PR #72
+  `https://github.com/giodl73-repo/awesome-claws/pull/72` as `600cc0e` at
+  2026-08-27T15:42:17Z. It adds Wardrobe Organizer as the 85th Claw with a
+  strict X3 wardrobe-plan schema, clothing inventory, size/fit evidence,
+  outfit/event planning, packing lists, care and alteration queues, wardrobe
+  gaps, privacy labels, owner-review questions, and blocked purchase, resale,
+  donation, return, photo-sharing, public-posting, messaging, booking, pickup,
+  account-change, body/health inference, and professional-advice authority.
+  Contribution review reports `needs-distinction-review`, nearest Home
+  Inventory Binder at 27.1%; the PR calls out the distinction between general
+  possession inventory and wardrobe-specific fit, care, outfit, packing,
+  alteration, and body-adjacent privacy state. Local proof passed full
+  `npm run check`, focused prepare/test, public artifact validation, X3
+  semantic tests, contribution review, and real Control UI screenshot capture.
+  Hosted Validate on Ubuntu, macOS, and Windows, visual-assets, dispatch, and
+  Control UI Proof all passed; Control UI completed in 29m46s. The Awesome
+  Claws catalog reached 85 Claws. The next official-records gap merged through
+  Awesome Claws PR #73
+  `https://github.com/giodl73-repo/awesome-claws/pull/73` as
+  `e81bc9b6d01d94bdb769aac53c6f956492bbfbf7` at 2026-08-27T16:23:32Z. It adds
+  Document Renewal Tracker as the 86th Claw with a strict X3 document-renewal
+  schema, source-backed official documents, authorities, expiration windows,
+  required materials, source freshness, conflicts, privacy labels, and
+  owner-review questions, while blocking forms, submissions, payments,
+  appointments, agency contact, uploads, account changes, eligibility
+  certification, and legal/immigration/tax/medical/licensing/identity advice.
+  Contribution review reports `needs-distinction-review`, nearest Tax Document
+  Organizer at 34.4%; the PR calls out the distinction between reusable
+  identity/credential/permit/registration/membership renewal state and tax
+  packets, insurance policies, school logistics, subscriptions, travel booking,
+  or archive indexing. Local proof passed full `npm run check`, focused
+  prepare/test, public artifact validation, X3 semantic tests, contribution
+  review, and real Control UI screenshot capture. Hosted Validate on Ubuntu,
+  macOS, and Windows, visual-assets, dispatch, and Control UI Proof all passed;
+  Control UI completed in 20m17s. The Awesome Claws catalog reached 86 Claws.
+  The next care-visit prep gap merged through Awesome Claws PR #74
+  `https://github.com/giodl73-repo/awesome-claws/pull/74` as
+  `5441960b8ce53bfac6147c7de06d4d775e4b11a8` at 2026-08-27T19:42:34Z. It
+  adds Medical Appointment Prep as the 87th Claw with a strict X3
+  medical-appointment schema, owner-supplied appointment reminders, concerns,
+  medication-list freshness, prior instructions, documents,
+  accessibility/logistics notes, caregiver authority, privacy labels, and
+  clinician-review questions, while blocking diagnosis, triage, treatment
+  recommendations, medication changes, dosage advice, urgency decisions,
+  scheduling, provider messaging, portal submissions, uploads, account changes,
+  payments, billing handling, insurance claims, and emergency decisions.
+  Contribution review reports `needs-distinction-review`, nearest Document
+  Renewal Tracker at 33.9%; the PR calls out the distinction between a
+  near-term care-visit packet and document renewals, tax packets, insurance
+  policy/claim review, school logistics, wardrobe care, or archive indexing.
+  Local proof passed full `npm run check`, focused prepare/test, public
+  artifact validation, X3 semantic tests, contribution review, and real Control
+  UI screenshot capture. Hosted Validate on Ubuntu, macOS, and Windows,
+  visual-assets, dispatch, and Control UI Proof all passed; Control UI
+  completed in 30m9s. The Awesome Claws catalog now has 87 Claws.
 - Completed: OpenClaw PR #115237 merged as
   `60fc2fe64d8ec2988a555a638dc1074d31e5760b` on 2026-08-07T11:04:52Z.
   PR #115962 merged as `7774f9a36c12eb5f63e6ef33b3da2af065b09707`
@@ -46,8 +354,43 @@
   Final-head follow-up review by GPT-5.6 Sol, GPT-5.6 Terra, and Claude Opus 5
   is complete, and all accepted actionable findings were remediated.
 - Active heads: merged OpenClaw `103e1a4cc9`, open RFC `acf99d988d`,
-  merged ClawHub `4117154eca`, merged Awesome Claws #24 at `4ea9b35a7a`, and
-  merged Awesome Claws #25 at `663f2a5769`.
+  merged ClawHub `4117154eca`, merged Awesome Claws #31 at `5a7011202c`, and
+  merged Awesome Claws #32 at `baf3ca3a91`, and merged Awesome Claws #34 at
+  `a6947767c9`, merged Vehicle Service #37 at `b89ecbe57f`, and merged Home
+  Repair #38 at `590a649002`, merged Green Thumb #40 at `bf2c2d3bdf`, and
+  merged Pet Care #42 at `da24f6b981`, Household Steward #48 at `07f2e52f6b`,
+  and Work Chief of Staff #50 at `48d6d1eb10`.
+- Consumer-service proof: Vehicle Service Coordinator merged after 164 tests,
+  installed OpenClaw proof, three-OS CI, Control UI proof, and clean independent
+  review. Home Repair Coordinator passes 168 tests across 57 packages, public
+  artifact validation, exact installed lifecycle and deterministic agent proof
+  against standalone Claws `ae541e00a9` and OpenClaw `8904ec690c`, current
+  Control UI capture, and final clean Codex review. Its artifact fails closed on
+  regulated/high-hazard and roof work, missing or unsupported isolation,
+  unbound resident steps, address leakage, unsupported provider evidence, and
+  unapproved or unverifiable booking state. Green Thumb Coordinator passes 172
+  tests across 58 packages, public artifact validation, preparation, installed
+  OpenClaw lifecycle proof, all six hosted gates, and final clean Codex review.
+  Its artifact fails closed on high-risk or contradictory care states, unsafe
+  resident calendar work, unsupported treatment labels, stale monitoring
+  evidence, address leakage, and unapproved or unverifiable booking state.
+  Pet Care Coordinator passes 176 tests across 59 packages, public artifact
+  validation, preparation, installed OpenClaw lifecycle proof, current Control
+  UI capture, all six hosted gates, and final clean Codex review. Its artifact
+  fails closed on understated emergency or urgent risk, delayed emergency
+  scheduling, unsupported preventive or medication evidence, stale outcomes,
+  privacy leakage, and unapproved or unverifiable veterinary booking state.
+- Workplace orchestration proof: Work Chief of Staff proposal #49 and Awesome
+  Claws PR #50 merged as `48d6d1eb10d87f87b567f692d8b23b2eafca5191`.
+  The 63-Claw catalog passes 198 tests and full package, contribution, chooser,
+  regression, public-artifact, installed-lifecycle, and Control UI proof. Its
+  five-capstone runtime proof uses three real parallel workers and accepts only
+  an exact, receipt-bound multi-principal commitment while rejecting broadened
+  worker scope, confidential-view leakage, and single-leader false consensus.
+  Work Chief preserves each specialist Claw's ownership and each leader's
+  evidence-bound decision rights, confidentiality partition, delegation scope,
+  capacity authority, and action-specific approval; it is not a universal
+  executive agent.
 - Proof: OpenClaw now shares one per-server lifecycle lease between ordinary
   MCP mutations and Claw ownership reconciliation, resolving ClawSweeper's
   final P1 race. Its full `src/claws` suite passed 452 tests with 1 skip,
@@ -166,26 +509,151 @@
   Ubuntu, macOS, and Windows; visual proof was cancelled twice while Playwright
   was still installing Chromium at the pre-existing 15-minute job timeout, before
   repository visual proof ran.
+- Awesome Claws #26 merged as `cb982cb847` after all five exact-head checks
+  passed. It adds executable proof for digest-gated workspace mutation and
+  stale-approval rejection, checkpoint continuity across distinct processes,
+  and parallel bounded workers with source/session provenance and visible
+  conflict state. `npm run check` passes 123 tests across all 54 Claws. The
+  visual lane retains Playwright's required Linux dependency setup with a
+  30-minute budget; merged-main run 32172367962 passed all four jobs, including
+  visual proof.
+- Awesome Claws #27 merged as `d02527a8f9`. It adds proposal-first admission,
+  weighted nearest-Claw review, neutral X3 scaffolding, durable post-policy
+  records, frozen grandfathering, full catalog-record equality, screenshot
+  uniqueness, stable unnumbered ids, contributor templates, and an event-only
+  ClawSweeper dispatcher. Three independent role reviews and final rereview
+  found no remaining actionable issue. `npm run check` passes 128 tests across
+  all 54 Claws; merged-main run 32192753280 passed Ubuntu, macOS, Windows, and
+  visual proof. Supporting ClawSweeper PR #1209 was closed unmerged at the
+  maintainer's request; do not reopen or deploy that profile without an explicit
+  request.
+- Awesome Claws #28 merged as `11cb801979`. It adds one exact regression
+  contract per Claw, a shared deterministic reference evaluator for accepted,
+  missing-evidence, and unapproved-authority vectors, complete Experience
+  surface snapshots, canonical capability digests, materialized-instruction and
+  accepted-fixture binding, scaffolder integration, and an explicit reviewed
+  update workflow. The suite passes 136 tests and validates all 54 contracts.
+  Runtime, contributor, policy, and final code reviews were clean after
+  remediation. Exact-head run 32264534962 passed the pinned installed Control UI
+  proof; merged-main run 32267942137 passed Ubuntu, macOS, Windows, and visual
+  proof. The required pull-request proof now pins OpenClaw
+  `14d43ad93cfefed3a76e15d2b8172ff446ec2ab2`, while scheduled proof continues
+  tracking `main`; current OpenClaw `main` independently fails the untouched Data
+  Analyst runtime fixture. The durable record is
+  `reviews/2026-08-19-claw-regression-suite.md`.
+- Contribution admission drill: four complete proposal packets exercised
+  **improve existing**, **variant**, **new Claw**, and **needs product decision**.
+  Only Model Evaluation Adjudicator advanced through isolated scaffolding, and
+  its copied screenshot failed validation as designed. The durable result is
+  `reviews/2026-08-18-contribution-admission-drill.md`; no issue, PR, catalog,
+  or ClawSweeper state was mutated.
+- Competitive review: `reviews/2026-08-19-agent-catalog-competitive-review.md`
+  compares Awesome Claws with Google ADK Recipes, Awesome AI Apps, CrewAI
+  Examples, OpenAI Agents examples, Microsoft Agent Framework, LangGraph,
+  Amazon Bedrock Samples, and AI Agents for Beginners. Awesome Claws is ahead
+  on portable contracts, admission, authority, and proof. The highest-value
+  next gaps are durable ownership/maintenance state, scheduled freshness
+  canaries, a one-command contributor preparation path, filterable per-Claw
+  proof logs, and a generated catalog explorer.
+- Awesome Claws #29 merged as `39f85d66fa`. It
+  records all 54 Claws as active under current owner `@giodl73-repo`, validates
+  maintenance state, owner handles, and reviewed dates, and generates
+  owner-visible chooser views. Its separate scheduled Compatibility Canary runs
+  every Claw's deterministic lifecycle against moving OpenClaw `main`, retains
+  exact revisions, per-Claw JSON/Markdown results and logs, and opens or updates
+  one drift issue after two consecutive scheduled failures. Pinned PR proof is
+  unchanged. Local `npm run check` passed 140 tests; exact-head run 32280228754
+  passed Ubuntu, macOS, Windows, and visual proof, and Control UI run
+  32280228821 passed installed capability, capstone, and presentation proof. The
+  first moving-main full-catalog canary run 32283355652 completed with 52/54
+  compatible and 0 not run against OpenClaw `e474d23e65`. It isolated two
+  upstream lifecycle drifts: Website Evidence Collector's Firecrawl extension
+  imports an unavailable plugin-SDK export, and Public Safety Monitor's update
+  apply rematerializes exact unchanged owned skills and blocks on their existing
+  installation. The gateway ownership warning was non-causal: eight scheduled
+  Claws emitted it and seven passed. The exact record is
+  `reviews/2026-08-19-first-compatibility-canary.md`.
+- Awesome Claws #30 merged as `c0c6ce0214`. It adds
+  `npm run prepare:claw -- <id-or-filter>` and
+  `npm run test:claw -- <id-or-filter>` with exact, substring, comma-list, and
+  all-catalog selection; default materialization and per-Claw deterministic
+  regression; explicit installed, visual, and anonymous dependency-live lanes;
+  and aggregate plus per-Claw logs and summaries. Requested inapplicable lanes
+  fail closed without suppressing other applicable requested proof. The final
+  suite passed 145 tests and all 54 package, chooser, catalog, contribution, and
+  regression validations. Exact-head Ubuntu, macOS, Windows, visual, dispatch,
+  and representative Control UI checks all passed; final rereview found no
+  actionable defects.
+- Awesome Claws #31 merged as `5a7011202c`. It generates a self-contained,
+  responsive catalog explorer from authoritative chooser metadata with
+  searchable, shareable filters for setup, proof tier and lanes, capability
+  classes, authority attention, dependencies, ownership, maintenance, and
+  verification freshness. The suite passes 149 tests and all 54 validations;
+  Ubuntu, macOS, Windows, visual, dispatch, and representative Control UI gates
+  passed. SHA-pinned Pages run 32295615288 deployed successfully after one-time
+  workflow-source activation, and the live 54-entry site plus filtered deep link
+  were verified at https://giodl73-repo.github.io/awesome-claws/.
+- Awesome Claws #32 merged as `baf3ca3a91`. It adds one deliberately bounded,
+  opt-in Customer Support semantic-evaluation pilot covering missing context,
+  unsafe credential handling, and unauthorized commitment pressure. It binds to
+  the deterministic regression contract, requires HTTPS and credentials outside
+  localhost, uses distinct subject/judge model ids, caps exactly six requests,
+  persists no credential, and retains per-case plus aggregate evidence. It is
+  absent from default provider execution and makes no provider-live or universal
+  safety claim. The suite passes 154 tests and all 54 validations; Ubuntu, macOS,
+  Windows, visual, dispatch, and representative Control UI gates passed. The
+  final design and proof record is
+  `reviews/2026-08-19-semantic-eval-pilot.md`.
+- Awesome Claws #34 merged as `a6947767c9`. It adds the first post-policy new
+  contribution, Model Evaluation Adjudicator, with proposal #33, a strict X3
+  artifact contract, explicit sampling coverage, complete-ledger disagreement
+  derivation, anchor calibration, opaque blinding provenance, structured
+  owner-only authority, and a current Control UI capture. `npm run check`
+  passed 161 tests across all 55 Claws; prepare and installed OpenClaw lifecycle
+  proof passed; Ubuntu, macOS, Windows, visual, and representative Control UI
+  gates passed; final independent review found no actionable issue.
+- Compatibility repairs: OpenClaw #126479 merged as
+  `61842af8c5ce27c7dca0c01d64bebba77bde8cde` on 2026-08-21. It makes update
+  apply honor exact unchanged owned-skill classifications while preserving
+  mutation, extension-provenance, and concurrent-disappearance blockers. Its
+  focused package regressions pass 4/4, adjacent schema/update-plan tests pass
+  27/27, and all hosted checks are green. OpenClaw #126478 at `5410556da9`
+  restores
+  one `extension-shared` compatibility export for published
+  `@openclaw/firecrawl-plugin@2026.7.1`; its focused SDK and surface-budget tests
+  pass 12/12 and all hosted checks are green. The PR now records the pinned
+  package hash, exact legacy import, partial portfolio proof, explicit
+  deprecation, and removal policy. Its final current-head ClawSweeper re-review
+  is still running. It must not merge without explicit SDK-owner approval
+  because it expands a public Plugin SDK surface.
 - Release containment: public npm currently points `latest` to `2026.7.1-2`,
   `extended-stable` to `2026.6.34`, and `beta` to `2026.8.1-beta.2`.
   OpenClaw PR #123254 merged as `103e1a4cc9` on 2026-08-15T03:52:46Z, after
   the beta tag commit `8f382a202f`; git ancestry confirms beta.2 does not
   contain the repair while current `origin/main` does. No published OpenClaw
   channel yet proves the final Claws runtime repair.
-- Next: monitor adoption and use new evidence to select any future bounded
-  slice. In
-  parallel, obtain explicit maintainer acceptance for draft RFC #48 and prove
-  the first OpenClaw release after `2026.8.1-beta.2` that contains `103e1a4cc9`
-  before calling the portfolio shipped.
-- Known dirty state: the published RFC, ClawHub, and WSL OpenClaw worktrees are
-  clean; Awesome Claws capstone worktree is clean at merged PR #25 source head
-  `c7a1150bdc`. OpenClaw is currently 7 commits
-  behind moving `main`, but remains mergeable and its exact merge-result CI is green.
-  The earlier detached Windows OpenClaw review
-  worktree remains dirty as an archival pre-rebase copy; `claws-hapi` has
-  unrelated user changes outside this project session.
-- Blocking question: maintainer acceptance of RFC #48's consolidated
-  compatibility and security-boundary contract.
+- Next: keep #126478 unmerged until the SDK owner explicitly accepts the
+  compatibility exception. Rerun the exact two-Claw/full-catalog compatibility
+  proof against OpenClaw main containing merged #126479 in a healthy Linux
+  package-install environment, then proceed with the Care Circle Coordinator
+  distinctness audit.
+- Known dirty state: `C:\src\openclaw-firecrawl-sdk-compat` is clean at pushed
+  head `5410556da9`; `C:\src\openclaw-claw-update-compat` is clean at pushed
+  head `cc2b6ab16022`. `C:\src\awesome-claws-model-evaluation-adjudicator` is
+  clean at merged source commit `53a5a9442e`; its remote feature branch was
+  deleted after merge. The proof-only combined worktree remains local and must
+  not be pushed. `C:\src\awesome-claws-green-thumb-coordinator` is clean at
+  source commit `7ea7796401`; PR #40 squash-merged as `bf2c2d3bdf` and its
+  remote feature branch was deleted. `C:\src\awesome-claws-pet-care-coordinator`
+  is clean at source commit `fbf6adbaac`; PR #42 squash-merged as
+  `da24f6b981` and proposal #41 closed. Awesome Claws' ClawSweeper dispatch
+  gate currently skips because the repository has no configured App private
+  key; do not treat that success-shaped check as review evidence. `claws-hapi`
+  contains unrelated user changes outside this project session. Work Chief of
+  Staff PR #50 is merged; its local source worktree remains clean at
+  `ad27a90ce8`.
+- Blocking question: SDK-owner acceptance or rejection of #126478's temporary
+  public compatibility alias; RFC #48 maintainer acceptance remains separate.
 
 ## Current Session
 
@@ -5890,3 +6358,253 @@ resources`, from signed head `1de1393371163a5e610c8f27cfa6a6689a0fa3fb`.
   follow-ups.
 - Diff hygiene, local links, and final `codex review --uncommitted` are clean.
   ClawSweeper re-review was requested on the new exact head.
+### 2026-08-27 OpenClaw configured-agent adoption draft
+
+- Opened draft OpenClaw PR #131185:
+  `https://github.com/openclaw/openclaw/pull/131185` from
+  `giodl73-repo:giodl/claws-adopt-configured-agent`.
+- The branch is stacked on draft PR #131163
+  `https://github.com/openclaw/openclaw/pull/131163`, which rebases the
+  workspace-only adoption fix onto current `main`. Review #131185 after #131163
+  lands or compare from `giodl/claws-adopt-existing-workspace-rebase`.
+- #131185 ports the configured-agent adoption layer from stale PR #125345 onto
+  the clean branch: `claws add --adopt-existing-agent` can claim an existing
+  exact-match configured agent, preserve its creation provenance, update/remove
+  through canonical roster ownership, and release unclaimed adoption attempts
+  without claiming operator-owned config.
+- Local proof passed in `C:\src\openclaw-adoption-review2`: focused adoption
+  Vitest lane (68 tests), scoped Oxlint over changed Claws/CLI/gateway files,
+  `git diff --check`, and `node scripts/check-docs-mdx.mjs docs/cli/claws.md`.
+
+### 2026-08-27 ClawSweeper repair pass for adoption stack
+
+- Addressed ClawSweeper feedback on draft OpenClaw PR #131163. New head
+  `fbfec7512e` seeds package bootstrap before agent config publication, then
+  reserves the workspace inside the authoritative config transform before
+  workspace-file writes. The config reservation helper lives in
+  `src/claws/add-config.ts`; the new `max-lines` suppression is gone; later
+  workspace-file failures roll back the reservation when safe so failed adds do
+  not leave a routable partial agent.
+- Restacked draft PR #131185 on #131163. New head
+  `37cb1f7cc4` keeps configured-agent exact-match adoption and unclaimed-adoption
+  release behavior on top of the bootstrap-before-config, early
+  reservation/rollback boundary. Docs now describe that exact ordering and the
+  no-consent recovery text remains mode-neutral.
+- Validation in `C:\src\openclaw-adoption-review2`: #131163 focused lane passed
+  94 tests with 3 skipped plus scoped Oxlint and `git diff --check`; #131185
+  focused lane passed 76 tests plus scoped Oxlint, docs MDX for `docs/cli/claws.md`,
+  and `git diff --check`.
+- Posted validation comments and requested `@clawsweeper re-review`:
+  Latest re-review requests:
+  #131163 comment `https://github.com/openclaw/openclaw/pull/131163#issuecomment-5450532595`;
+  #131185 comment `https://github.com/openclaw/openclaw/pull/131185#issuecomment-5450532610`.
+  Last live check: both PRs reported `CLEAN` with no failed or pending checks.
+
+### 2026-08-28 Awesome Claws roadmap PR
+
+- Switched back to `C:\src\awesome-claws`; `main` was clean at `5441960` with
+  87 maintained Claws and no open PRs before the new roadmap branch.
+- Opened and merged Awesome Claws PR #75:
+  `https://github.com/giodl73-repo/awesome-claws/pull/75` from branch
+  `giodl/catalog-roadmap-87`; merged as `8af11a3` on 2026-08-28.
+- The PR adds `docs/roadmap.md` and links it from `README.md`. It documents
+  current category coverage, the manager-Claw composition pattern, add-vs-improve
+  guidance, and next gap candidates including Fantasy Sports Manager, Health
+  Records Binder, Benefits and Open Enrollment Planner, Warranty and Returns
+  Manager, and Travel Loyalty and Points Organizer.
+- Local validation passed `npm run check` and `git diff --check`. Hosted
+  dispatch, representative-control-ui, catalog on Ubuntu/macOS/Windows, and
+  visual-assets all passed before merge. Local `C:\src\awesome-claws` is back on
+  `main` and fast-forwarded to `8af11a3`.
+
+### 2026-08-28 Fantasy Sports Manager draft
+
+- Opened draft Awesome Claws PR #76:
+  `https://github.com/giodl73-repo/awesome-claws/pull/76` from branch
+  `giodl/fantasy-sports-manager` at `8ebfc87`.
+- The PR adds Fantasy Sports Manager as the 88th Claw. It covers fantasy-team
+  rosters, league rules, lineup locks, player availability, projection
+  freshness, waivers, trade ideas, matchup risks, and owner-review questions
+  without submitting lineups, claiming waivers, dropping players, proposing or
+  accepting trades, entering contests, betting, messaging leagues, paying fees,
+  changing settings, or changing accounts.
+- Added a strict X3 artifact contract:
+  `schemas/fantasy-roster.schema.json`,
+  `fixtures/fantasy-roster.example.json`, and
+  `templates/fantasy-roster.md`; registered it in `validate-artifact.mjs` and
+  `x3-decision-artifacts.test.mjs`; added semantic checks in
+  `artifact-semantics.mjs` for source freshness, player/source references,
+  lineup lock state, projection sources, trade deadline state, prohibited action
+  text, and agent-owned authority.
+- Local proof passed `npm run prepare:claw -- fantasy-sports-manager`,
+  `node scripts/test-claw.mjs fantasy-sports-manager`,
+  `node --test scripts/x3-decision-artifacts.test.mjs`,
+  `node scripts/validate-artifact.mjs fantasy-sports-manager claws/fantasy-sports-manager/fixtures/fantasy-roster.example.json`,
+  `node scripts/review-contribution.mjs --id fantasy-sports-manager`,
+  `npm run check`, and `git diff --check`. A real Control UI screenshot was
+  captured with `OPENCLAW_ROOT=C:\src\openclaw-claw-compat-proof`.
+- Initial hosted PR state: `dispatch` passed; representative-control-ui,
+  catalog on Ubuntu/macOS/Windows, and visual-assets were still running with no
+  failures.
+
+### 2026-08-28 Awesome Claws 92-Claw worker expansion
+
+- Merged Awesome Claws PR #79:
+  `https://github.com/giodl73-repo/awesome-claws/pull/79` as
+  `56589820096e4b976c16d3cb977012c0f9723386` at 2026-08-28T15:02:45Z. It adds
+  Warranty and Returns Manager as the 91st Claw with strict X3 warranty/return
+  windows, source freshness, product evidence, issue packet, blocked vendor/
+  carrier/account/refund/repair/advice authority, real Control UI screenshot,
+  full local proof, and green hosted catalog/visual/dispatch/Control UI gates.
+- Merged Awesome Claws PR #80:
+  `https://github.com/giodl73-repo/awesome-claws/pull/80` as
+  `e40f5b92fe9675666ed740971ffeab193548a7d5` at 2026-08-28T16:47:36Z. It adds
+  Job Application Tracker as the 92nd Claw and the next worker Claw for jobs:
+  candidate-side job-search pipeline, postings, resume/cover-letter/portfolio/
+  reference materials, recruiter notes, interview logistics, follow-up drafts,
+  and offer questions without submissions, uploads, messaging, scheduling,
+  credential fabrication, account changes, offer decisions, negotiation, or
+  professional advice.
+- Job Application Tracker includes a strict X3 artifact contract
+  `schemas/job-application.schema.json`,
+  `fixtures/job-application.example.json`, and `templates/job-application.md`;
+  semantic validation covers source freshness, dangling application/source/
+  review refs, stale ready states, supplied-material support, prohibited action
+  text, and agent-owned authority. Benefits Open Enrollment contribution
+  metadata was updated to acknowledge Job Application Tracker as a new nearest
+  analogue.
+- Local proof for #80 passed `npm run prepare:claw -- job-application-tracker`,
+  `node scripts/test-claw.mjs job-application-tracker`, public artifact
+  validation, full X3 test suite, contribution review, real Control UI
+  screenshot capture, full `npm run check`, and `git diff --check`. Hosted
+  dispatch, visual-assets, catalog on Ubuntu/macOS/Windows, and
+  representative-control-ui all passed before merge.
+
+### 2026-08-28 Awesome Claws travel loyalty worker
+
+- Merged Awesome Claws PR #81:
+  `https://github.com/giodl73-repo/awesome-claws/pull/81` as
+  `d5e7b2b1c7c956e6b13cae2170a40ab667ea64f9` at 2026-08-28T17:41:05Z. It adds
+  Travel Loyalty and Points Organizer as the 93rd Claw: an owner-controlled
+  worker for airline miles, hotel points, credit-card rewards, certificates,
+  elite benefits, expiration notices, trip-fit redemption candidates, stale
+  transfer/award evidence, and blocked booking/redemption/transfer/purchase/
+  payment/account/contact/itinerary/advice authority.
+- Local proof passed `npm run prepare:claw -- travel-loyalty-points-organizer`,
+  `node scripts/test-claw.mjs travel-loyalty-points-organizer`, public artifact
+  validation, full X3 test suite, contribution review, real Control UI
+  screenshot capture, full `npm run check`, and `git diff --check`. Hosted
+  dispatch, visual-assets, catalog on Ubuntu/macOS/Windows, and
+  representative-control-ui all passed before merge; Control UI took 32m05s.
+- `C:\src\awesome-claws` is clean on `main` at the 93-Claw catalog baseline.
+  Next high-fit workers toward 100: Professional Networking Follow-up, Resume
+  Portfolio Curator, Certification Renewal Planner, Freelance Client Pipeline,
+  Invoice and Payment Follow-up, Conference Opportunity Scout, and Moving
+  Checklist Coordinator.
+
+### 2026-08-28 Awesome Claws professional networking worker
+
+- Merged Awesome Claws PR #82:
+  `https://github.com/giodl73-repo/awesome-claws/pull/82` as
+  `c398c5095cdcb18c1f6d01d19255dadaa791708b` at 2026-08-28T18:19:02Z. It adds
+  Professional Networking Follow-up as the 94th Claw: an owner-controlled
+  worker for professional contacts, meeting notes, event context, introduction
+  requests, follow-up drafts, relationship reminders, stale context, missing
+  consent, and privacy-sensitive notes.
+- The Claw blocks outbound messages, introductions, meeting scheduling or
+  canceling, scraping, CRM/address-book updates, account changes, referral
+  commitments, recruiting actions, sales outreach, employer/prospect contact,
+  and professional advice. Its X3 artifact contract validates contact evidence,
+  interaction/source freshness, consent-gated introductions, follow-up
+  references, review-question authority, and owner-only handoff.
+- Local proof passed `npm run prepare:claw -- professional-networking-followup`,
+  `node scripts/test-claw.mjs professional-networking-followup`, public artifact
+  validation, full X3 test suite, contribution review, real Control UI
+  screenshot capture, full `npm run check`, and `git diff --check`. Hosted
+  dispatch, visual-assets, catalog on Ubuntu/macOS/Windows, and
+  representative-control-ui all passed before merge; Control UI took 26m10s.
+- `C:\src\awesome-claws` is clean on `main` at the 94-Claw catalog baseline.
+  Next high-fit workers toward 100 remain Resume Portfolio Curator,
+  Certification Renewal Planner, Freelance Client Pipeline, Invoice and Payment
+  Follow-up, Conference Opportunity Scout, and Moving Checklist Coordinator.
+
+### 2026-08-28 Awesome Claws resume portfolio worker
+
+- Merged Awesome Claws PR #83:
+  `https://github.com/giodl73-repo/awesome-claws/pull/83` as
+  `366a60f7ca7b0e4c8740c03d5bd95cd54f676761` at 2026-08-28T18:56:58Z. It adds
+  Resume Portfolio Curator as the 95th Claw: an owner-controlled worker for
+  candidate-owned resumes, portfolio links, project notes, credentials,
+  role-fit drafts, unsupported claims, redaction decisions, stale evidence, and
+  publication-readiness questions.
+- The Claw blocks application submission, file upload, profile/portfolio
+  publication or updates, recruiter/employer contact, account changes,
+  fabricated credentials, invented metrics, altered dates, unsupported degrees,
+  awards, publications, and professional advice. Its X3 artifact contract
+  validates claim-source evidence, current-source owner-ready materials,
+  role-fit support, redaction/gap refs, review-question authority, and
+  owner-only handoff.
+- Local proof passed `npm run prepare:claw -- resume-portfolio-curator`,
+  `node scripts/test-claw.mjs resume-portfolio-curator`, public artifact
+  validation, full X3 test suite, contribution review, real Control UI
+  screenshot capture, full `npm run check`, and `git diff --check`. Hosted
+  dispatch, visual-assets, catalog on Ubuntu/macOS/Windows, and
+  representative-control-ui all passed before merge; Control UI took 25m16s.
+- `C:\src\awesome-claws` is clean on `main` at the 95-Claw catalog baseline.
+  Next high-fit workers toward 100: Certification Renewal Planner, Freelance
+  Client Pipeline, Invoice and Payment Follow-up, Conference Opportunity Scout,
+  and Moving Checklist Coordinator.
+
+### 2026-08-28 Awesome Claws certification renewal worker
+
+- Merged Awesome Claws PR #84:
+  `https://github.com/giodl73-repo/awesome-claws/pull/84` as
+  `5d5c2d6b79b4d8db3b026343b00bac367ea59d6b` at 2026-08-28T19:39:56Z. It adds
+  Certification Renewal Planner as the 96th Claw: an owner-controlled worker
+  for professional certifications, issuer requirements, renewal windows,
+  continuing-education evidence, exam/fee/attestation gaps, deadline risks, and
+  renewal-readiness handoffs.
+- The Claw blocks renewal submission, payment, issuer contact, account changes,
+  exam scheduling, course enrollment, validity/compliance claims, certificate
+  issuance, employer-record changes, and professional advice. Its X3 artifact
+  contract validates issuer/source freshness, credential status, requirement
+  and CE evidence, deadline-risk refs, review-question authority, and owner-only
+  handoff.
+- Local proof passed `npm run prepare:claw -- certification-renewal-planner`,
+  `node scripts/test-claw.mjs certification-renewal-planner`, public artifact
+  validation, full X3 test suite, contribution review, real Control UI
+  screenshot capture, full `npm run check`, and `git diff --check`. Hosted
+  dispatch, visual-assets, catalog on Ubuntu/macOS/Windows, and
+  representative-control-ui all passed before merge; Control UI took 30m16s.
+- `C:\src\awesome-claws` is clean on `main` at the 96-Claw catalog baseline.
+  GitHub API rate-limited remote branch deletion for
+  `giodl/certification-renewal-planner`; the PR is merged and local checkout is
+  clean. Next high-fit workers toward 100: Freelance Client Pipeline, Invoice
+  and Payment Follow-up, Conference Opportunity Scout, and Moving Checklist
+  Coordinator.
+
+### 2026-08-29 Awesome Claws freelance client pipeline worker
+
+- Merged Awesome Claws PR #85:
+  `https://github.com/giodl73-repo/awesome-claws/pull/85` as
+  `f53318e66c981edd53001c7a2d00ce54bed89e15` at 2026-08-29T07:37:28Z. It adds
+  Freelance Client Pipeline as the 97th Claw: an owner-controlled worker for
+  freelance prospects, client notes, scopes, proposal readiness,
+  pricing/availability evidence, follow-up drafts, commitment risks, stale
+  contract context, and owner action gates.
+- The Claw blocks outbound messages, client contact, proposal submission,
+  contract signing, work acceptance, binding quotes, availability promises,
+  invoicing, payment collection, account changes, invented requirements,
+  prices, credentials, case studies, and professional advice. Its X3 artifact
+  contract validates opportunity/source freshness, client and opportunity refs,
+  scope/proposal/follow-up readiness, commitment-risk refs, review-question
+  authority, and owner-only handoff.
+- Local proof passed `npm run prepare:claw -- freelance-client-pipeline`,
+  `node scripts/test-claw.mjs freelance-client-pipeline`, public artifact
+  validation, full X3 test suite, contribution review, real Control UI
+  screenshot capture, full `npm run check`, and `git diff --check`. Hosted
+  dispatch, visual-assets, catalog on Ubuntu/macOS/Windows, and
+  representative-control-ui all passed before merge; Control UI took 26m26s.
+- `C:\src\awesome-claws` is clean on `main` at the 97-Claw catalog baseline.
+  Next high-fit workers toward 100: Invoice and Payment Follow-up, Conference
+  Opportunity Scout, and Moving Checklist Coordinator.
