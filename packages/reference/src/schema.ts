@@ -29,6 +29,13 @@ const agentId = nonEmptyString.regex(
   /^[a-z][a-z0-9_-]{0,63}$/,
   "Agent id must start with a lowercase letter and contain only lowercase letters, digits, underscores, or hyphens.",
 );
+const categoriesSchema = z
+  .array(nonEmptyString.regex(/^[a-z][a-z0-9-]*$/, "Category must be a lowercase slug."))
+  .min(1)
+  .max(3)
+  .refine((categories) => new Set(categories).size === categories.length, {
+    message: "Categories must be unique.",
+  });
 const packageRelativePath = nonEmptyString
   .refine(isSafeClawRelativePath, {
     message: "Path must be package-relative and not contain traversal segments.",
@@ -236,6 +243,7 @@ const manifestSchema = z
   .object({
     schemaVersion: z.literal(CLAW_SCHEMA_VERSION),
     agent: agentSchema,
+    categories: categoriesSchema.optional(),
     metadata: z.record(nonEmptyString, z.string()).optional().default({}),
     workspace: workspaceSchema.optional().default({ bootstrapFiles: {}, files: [] }),
     packages: z.array(packageSchema).optional().default([]),

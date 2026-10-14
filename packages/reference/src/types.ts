@@ -89,6 +89,7 @@ export type ClawCronJob = {
 export type ClawManifest = {
   schemaVersion: typeof CLAW_SCHEMA_VERSION;
   agent: ClawAgent;
+  categories?: string[];
   metadata?: Record<string, string>;
   workspace: ClawWorkspace;
   packages: ClawPackage[];
